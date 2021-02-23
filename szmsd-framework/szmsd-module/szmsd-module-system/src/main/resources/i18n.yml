@@ -1,0 +1,13 @@
+i18n:
+  # 多语言查询表名
+  tableName: center_sys_lanres
+  #语言1 默认中文
+  lang0: zh_CN
+  #语言2 默认英文
+  lang1: en_US
+  #语言3 默认阿拉伯
+  lang2: ar_SAU
+  #语言4 默认中文
+  lang3: zh_CN
+  #语言5 默认中文
+  lang4: zh_CN

@@ -1,0 +1,8 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.szmsd.common.security.service.UserDetailsServiceImpl,\
+  com.szmsd.common.security.handler.MyAccessDeniedHandler,\
+  com.szmsd.common.security.handler.TokenExceptionEntryPoint,\
+  com.szmsd.common.security.config.ResourceServerConfig,\
+  com.szmsd.common.security.handler.MyMetaObjectHandler
+
+

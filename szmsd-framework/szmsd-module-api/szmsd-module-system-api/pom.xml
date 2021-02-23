@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.szmsd</groupId>
+        <artifactId>szmsd-module-api</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>szmsd-module-system-api</artifactId>
+
+    <description>
+        szmsd-module-system-api系统接口模块
+    </description>
+
+    <dependencies>
+
+
+        <!-- szmsd Common Core-->
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>szmsd-common-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>szmsd-common-redis</artifactId>
+        </dependency>
+
+        <!--        <dependency>-->
+        <!--            <groupId>com.alibaba.cloud</groupId>-->
+        <!--            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>-->
+        <!--        </dependency>-->
+
+    </dependencies>
+
+</project>

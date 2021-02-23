@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.system.mapper.SysSiteMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.system.api.domain.SysSite">
+        <id column="id" property="id"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="ancestors" property="ancestors"/>
+        <result column="site_code" property="siteCode"/>
+        <result column="order_num" property="orderNum"/>
+        <result column="site_name_chinese" property="siteNameChinese"/>
+        <result column="keyword_code" property="keywordCode"/>
+        <result column="keyword_name" property="keywordName"/>
+        <result column="site_rank_code" property="siteRankCode"/>
+        <result column="site_rank_name" property="siteRankName"/>
+        <result column="cod_currency" property="codCurrency"/>
+        <result column="leader" property="leader"/>
+        <result column="mobile" property="mobile"/>
+        <result column="phone" property="phone"/>
+        <result column="type_code" property="typeCode"/>
+        <result column="type_Name" property="typeName"/>
+        <result column="email" property="email"/>
+        <result column="send_addr" property="sendAddr"/>
+        <result column="country" property="country"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="area" property="area"/>
+        <result column="region" property="region"/>
+        <result column="street" property="street"/>
+
+        <result column="address" property="address"/>
+        <result column="fin_center_site_code" property="finCenterSiteCode"/>
+        <result column="fin_center_site_name" property="finCenterSiteName"/>
+        <result column="fin_center_flag" property="finCenterFlag"/>
+        <result column="allocate_center_flag" property="allocateCenterFlag"/>
+        <result column="reach_pay_flag" property="reachPayFlag"/>
+        <result column="loan_flag" property="loanFlag"/>
+        <result column="loan_payment_quota" property="loanPaymentQuota"/>
+        <result column="supervisor_mode_code" property="supervisorModeCode"/>
+        <result column="supervisor_mode_name" property="supervisorModeName"/>
+        <result column="delivery_scope" property="deliveryScope"/>
+        <result column="sorting_code" property="sortingCode"/>
+        <result column="status" property="status"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="parent_name" property="parentName"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="selectSiteVo">
+            select      d.remark,
+                       d.create_by_name,
+                      d.create_time,
+                    d.update_by_name,
+                d.update_time,
+            d.id, d.parent_id,d.parent_name,
+        d.ancestors, d.site_code, d.order_num, d.site_name_chinese, d.keyword_code, d.keyword_name,  d.site_rank_code,d.site_rank_name, d.cod_currency, d.leader,d.mobile, d.phone, d.type_code,d.type_name, d.email, d.send_addr, d.country,
+      d.province, d.city,d.area,d.region, d.street,d.address, d.fin_center_site_code,d.fin_center_site_name, d.fin_center_flag, d.allocate_center_flag, d.reach_pay_flag, d.loan_flag, d.loan_payment_quota, d.supervisor_mode_code, d.supervisor_mode_name, d.delivery_scope, d.sorting_code, d.status, d.del_flag, d.create_by, d.update_by
+    from sys_site d
+        </sql>
+
+    <select id="selectSiteList" parameterType="com.szmsd.system.api.domain.SysSite" resultMap="BaseResultMap">
+        <include refid="selectSiteVo"/>
+        where d.del_flag = '0'
+        <if test="parentId != null and parentId != 0">
+            AND d.parent_id = #{parentId}
+        </if>
+        <if test="siteCode != null and siteCode != ''">
+            AND d.site_code = #{siteCode}
+        </if>
+        <if test="siteNameChinese != null and siteNameChinese != ''">
+            AND d.site_name_chinese like concat('%', #{siteNameChinese}, '%')
+        </if>
+        <if test="finCenterFlag != null and finCenterFlag != ''">
+            AND d.fin_center_flag =#{finCenterFlag}
+        </if>
+
+        <!--        <if test="siteNameArabic != null and siteNameArabic != ''">-->
+        <!--            AND d.site_name_arabic like concat('%', #{site_name_arabic}, '%')-->
+        <!--        </if>-->
+        <!--        <if test="siteNameEnglish != null and siteNameEnglish != ''">-->
+        <!--            AND d.site_name_english like concat('%', #{site_name_english}, '%')-->
+        <!--        </if>-->
+        <if test="status != null and status != ''">
+            AND d.status = #{status}
+        </if>
+        <!-- 数据范围过滤 -->
+        -- ${dataScope}
+        order by d.parent_id, d.order_num
+    </select>
+
+
+    <select id="selectSiteListByRoleId" parameterType="Long" resultType="java.lang.Integer">
+		select d.id, d.parent_id
+		from sys_site d
+            left join sys_role_site rd on d.id = rd.site_id
+        where rd.role_id = #{roleId}
+        	and d.id not in (select d.parent_id from sys_site d inner join sys_role_site rd on d.id = rd.dept_id and rd.role_id = #{roleId})
+		order by d.parent_id, d.order_num
+	</select>
+
+    <select id="selectNormalChildrenSiteById" parameterType="Long" resultType="java.lang.Integer">
+		select count(*) from sys_site where status = '0' and del_flag = '0' and find_in_set(#{siteId}, ancestors)
+	</select>
+
+    <select id="selectCountNum" parameterType="Long" resultType="java.lang.Integer">
+        select count(*) from sys_site where status= '0' and del_flag = '0' and id=#{siteId}
+    </select>
+
+    <select id="selectSysSiteBySiteCode"  resultType="com.szmsd.system.api.domain.SysSite">
+        select * from sys_site
+        where status = '0' and del_flag = '0' and site_code = #{siteCode}
+    </select>
+
+    <select id="getSiteSub" resultType="com.szmsd.system.api.domain.SysSite">
+        select ss.site_code
+        from sys_site ss where
+        ss.parent_id in (select id from sys_site
+        <where>
+            <choose>
+                <when test="siteCode != null and siteCode != ''">
+                    and site_code = #{siteCode}
+                </when>
+                <otherwise>and 1=2</otherwise>
+            </choose>
+        </where>
+        )
+    </select>
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.system.mapper.I18nMapper">
+    <resultMap type="com.szmsd.system.api.domain.SysLang" id="SysLangMap">
+        <result column="groupType" property="groupType"/>
+        <result column="STRID" property="strId"/>
+        <result column="code" property="code"/>
+        <result column="LAN1" property="lang1"/>
+        <result column="LAN2" property="lang2"/>
+        <result column="LAN3" property="lang3"/>
+        <result column="VISIBLE" property="visible"/>
+    </resultMap>
+
+    <sql id="tab_mylanres">
+	  sys_lanres
+	</sql>
+
+    <sql id="langColumns">
+        code as code,
+		GROUPTYPE as groupType,
+		STRID as strId, 
+		LAN1 as lang1, 
+		LAN2 as lang2, 
+		LAN3 as lang3, 
+		VISIBLE as visable
+	</sql>
+
+    <select id="get" resultType="com.szmsd.system.api.domain.SysLang" parameterType="map">
+        select
+        <include refid="langColumns"/>
+        from
+        <include refid="tab_mylanres"/>
+        where 1=1
+        <if test="strId != null and strId != ''">
+            and STRID = #{strId}
+        </if>
+
+    </select>
+
+    <select id="getTableData" parameterType="com.szmsd.system.api.domain.dto.SysLangDTO" resultType="com.szmsd.system.api.domain.SysLang">
+        select
+        <include refid="langColumns"/>
+        from
+        <include refid="tab_mylanres"/>
+        where 1=1
+        <if test="strId != null and strId != ''">
+            and STRID like concat(concat('%',#{strId}),'%')
+        </if>
+        <if test="lang1 != null and lang1 != ''">
+            and lan1 like concat(concat('%',#{lang1}),'%')
+        </if>
+        <if test="lang2 != null and lang2 != ''">
+            and lan2 like concat(concat('%',#{lang1}),'%')
+        </if>
+        <if test="groupType != null and groupType != ''">
+            and groupType = #{groupType}
+        </if>
+        <if test="code != null and code != ''">
+            and code like concat(concat('%',#{code}),'%')
+        </if>
+    </select>
+
+
+    <insert id="save" parameterType="com.szmsd.system.api.domain.SysLang">
+        INSERT INTO <include refid="tab_mylanres"/>
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="strId!=null and strId !=''">STRID,</if>
+            <if test="lang1!=null and lang1 !=''">LAN1,</if>
+            <if test="lang2!=null and lang2 !=''">LAN2,</if>
+            <if test="lang3!=null and lang3 !=''">LAN3,</if>
+            VISIBLE,
+            <if test="groupType!=null and groupType !=''">groupType,</if>
+            <if test="code!=null and groupType !=''">code,</if>
+            CREATEDATE
+        </trim>
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            <if test="strId!=null and strId !=''">#{strId},</if>
+            <if test="lang1!=null and lang1 !=''">#{lang1},</if>
+            <if test="lang2!=null and lang2 !=''">#{lang2},</if>
+            <if test="lang3!=null and lang3 !=''">#{lang3},</if>
+            1,
+            <if test="groupType!=null and groupType !=''">#{groupType},</if>
+            <if test="groupType!=null and groupType !=''">#{code},</if>
+            sysdate
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.szmsd.system.api.domain.SysLang">
+        update
+        <include refid="tab_mylanres"/>
+        set
+        <trim suffixOverrides=",">
+            <if test="lang1!=null and lang1 !=''">LAN1=#{lang1},</if>
+            <if test="lang2!=null and lang2 !=''">LAN2=#{lang2},</if>
+            <if test="lang3!=null and lang3 !=''">LAN3=#{lang3},</if>
+            <if test="visable!=null and visable !=''">VISIBLE=#{visable},</if>
+            <if test="groupType!=null and groupType !=''">groupType=#{groupType},</if>
+        </trim>
+        where
+        code = #{code}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        delete from
+        <include refid="tab_mylanres"/>
+        where code = #{code}
+    </delete>
+
+    <!-- 获取一张最新的修改或新增数据的时间 -->
+    <select id="getTableUpdateTime" resultType="String" parameterType="String">
+        SELECT
+            DATE_FORMAT(UPDATE_TIME,'%Y-%m-%d %H:%i:%s')
+        FROM
+            INFORMATION_SCHEMA. TABLES
+        WHERE
+            TABLE_SCHEMA = 'gfs' and TABLES.TABLE_NAME = #{tableName}
+    </select>
+</mapper>

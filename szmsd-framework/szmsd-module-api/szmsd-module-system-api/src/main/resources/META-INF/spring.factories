@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.szmsd.system.api.factory.RemoteUserFallbackFactory,\
+  com.szmsd.system.api.factory.RemoteLogFallbackFactory,\
+  com.szmsd.system.api.factory.RemoteSiteFallbackFactory

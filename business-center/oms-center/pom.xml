@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.szmsd</groupId>
+        <artifactId>business-center</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>oms-service</module>
+        <module>oms-service-api</module>
+    </modules>
+
+    <groupId>com.szmsd.oms</groupId>
+    <artifactId>oms-center</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <description>
+        oms模块
+    </description>
+
+    <properties>
+        <business.version>1.0.0</business.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.szmsd</groupId>
+                <artifactId>szmsd-framework</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
+

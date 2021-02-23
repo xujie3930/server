@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.system.mapper.SysUserMapper">
+
+    <resultMap type="com.szmsd.system.api.domain.SysUser" id="SysUserResult">
+        <id property="userId" column="user_id"/>
+        <result property="siteCode" column="site_code"/>
+        <result property="siteName" column="site_name_chinese"/>
+        <result property="userName" column="user_name"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="userType" column="user_type"/>
+        <result property="openid" column="openid"/>
+        <result property="email" column="email"/>
+        <result property="phonenumber" column="phonenumber"/>
+        <result property="sex" column="sex"/>
+        <result property="avatar" column="avatar"/>
+        <result property="password" column="password"/>
+        <result property="spearPassword" column="spear_password"/>
+        <result property="serviceProduct" column="service_product"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="loginIp" column="login_ip"/>
+        <result property="loginDate" column="login_date"/>
+        <result property="createByName" column="create_by_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateByName" column="update_by_name"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <association property="site" column="site_code" javaType="com.szmsd.system.api.domain.SysSite"
+                     resultMap="siteResult"/>
+        <collection property="roles" javaType="java.util.List" column="user_id" select="queryRoleList"/>
+    </resultMap>
+
+    <resultMap id="siteResult" type="com.szmsd.system.api.domain.SysSite">
+        <id property="siteCode" column="site_code"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="id" column="id"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="siteNameChinese" column="site_name_chinese"/>
+        <result property="status" column="status"/>
+        <result property="typeCode" column="type_code"/>
+        <result property="typeName" column="type_name"/>
+        <result property="finCenterSiteCode" column="fin_center_site_code"/>
+        <result property="finCenterSiteName" column="fin_center_site_name"/>
+        <result property="sortingCode" column="sorting_code"/>
+    </resultMap>
+
+    <resultMap id="RoleResult" type="com.szmsd.system.api.domain.SysRole">
+        <id property="roleId" column="role_id"/>
+        <result property="roleName" column="role_name"/>
+        <result property="roleKey" column="role_key"/>
+        <result property="roleSort" column="role_sort"/>
+        <result property="dataScope" column="data_scope"/>
+        <result property="status" column="role_status"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <sql id="selectUserVo">
+        select u.user_id, u.site_code, u.user_name, u.nick_name,u.user_type,u.openid, u.email, u.avatar, u.phonenumber, u.password,u.spear_password, u.service_product,u.sex, u.status, u.del_flag, u.login_ip, u.login_date, u.create_by,u.create_by_name, u.create_time, u.remark,
+        d.id,d.site_code, d.parent_id, d.site_name_chinese, d.order_num, d.leader, d.status as site_status,d.type_code,d.type_name,d.fin_center_site_code,d.fin_center_site_name, d.id as site_id ,d.sorting_code
+        from sys_user u
+		    left join sys_site d on u.site_code = d.site_code
+    </sql>
+    <select id="querySite" resultType="com.szmsd.system.api.domain.SysSite">
+        select  d.site_code, d.parent_id, d.site_name_chinese, d.order_num, d.leader, d.status as site_status,d.type_code,d.type_name,d.fin_center_site_code,d.fin_center_site_name,
+        d.id as site_id ,d.allocate_center_site_code,d.allocate_center_site_name from sys_site d
+        where d.site_code=#{siteCode}
+    </select>
+    <select id="queryRoleList" resultType="com.szmsd.system.api.domain.SysRole">
+        select r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.status as role_status,r.type
+        from sys_user_role ur
+		    left join sys_role r on r.role_id = ur.role_id
+		    where    ur.user_id=#{userId}
+    </select>
+    <sql id="selectUserListVo">
+        select u.user_id, u.site_code, u.nick_name, u.user_name,u.user_type, u.openid,u.email, u.avatar, u.phonenumber,
+        u.password,u.spear_password, u.service_product, u.sex,
+        u.status, u.del_flag, u.login_ip, u.login_date,u.create_by, u.create_by_name, u.create_time, u.remark, d.site_code, d.parent_id,
+        d.site_name_chinese, d.order_num, d.id, d.status from
+        sys_user u
+        left join sys_site d on u.site_code = d.site_code
+    </sql>
+
+    <select id="selectUserList" parameterType="com.szmsd.system.api.domain.SysUser" resultMap="SysUserResult">
+        <include refid="selectUserVo"/>
+        where u.del_flag = '0'
+        <if test="userId != null and userId != ''">
+            AND u.user_id = #{userId}
+        </if>
+        <if test="siteCode != null and siteCode != ''">
+            AND u.site_code = #{siteCode}
+        </if>
+        <if test="userName != null and userName != ''">
+            AND u.user_name like concat('%', #{userName}, '%')
+        </if>
+        <if test="userType != null and userType != ''">
+            AND u.user_type like concat('%', #{userType}, '%')
+        </if>
+        <if test="openid != null and openid != ''">
+            AND u.openid = #{openid}
+        </if>
+        <if test="status != null and status != ''">
+            AND u.status = #{status}
+        </if>
+        <if test="phonenumber != null and phonenumber != ''">
+            AND u.phonenumber like concat('%', #{phonenumber}, '%')
+        </if>
+        <if test="createBy != null and createBy != ''">
+            AND u.create_by = #{createBy}
+        </if>
+        <if test="beginTime != null and beginTime != ''"><!-- 开始时间检索 -->
+            and date_format(r.create_time,'%y%m%d') &gt;= date_format(#{beginTime},'%y%m%d')
+        </if>
+        <if test="endTime != null and endTime != ''"><!-- 结束时间检索 -->
+            and date_format(r.create_time,'%y%m%d') &lt;= date_format(#{endTime},'%y%m%d')
+        </if>
+    </select>
+
+    <select id="selectUserByUserName" parameterType="String" resultMap="SysUserResult">
+        <include refid="selectUserVo"/>
+        where u.user_name = #{userName}
+        <if test="userType != null and userType != ''">
+            and u.user_type =#{userType}
+        </if>
+
+    </select>
+
+    <select id="selectUserById" parameterType="Long" resultMap="SysUserResult">
+        <include refid="selectUserVo"/>
+        where u.user_id = #{userId}
+    </select>
+
+    <select id="checkUserNameUnique" parameterType="String" resultType="int">
+		select count(1) from sys_user where user_name = #{userName}
+	</select>
+
+    <select id="checkPhoneUnique" parameterType="String" resultMap="SysUserResult">
+		select user_id, phonenumber from sys_user where phonenumber = #{phonenumber}
+	</select>
+
+    <select id="checkEmailUnique" parameterType="String" resultMap="SysUserResult">
+		select user_id, email from sys_user where email = #{email}
+	</select>
+
+    <insert id="insertUser" parameterType="com.szmsd.system.api.domain.SysUser" useGeneratedKeys="true"
+            keyProperty="userId">
+        insert into sys_user(
+        <if test="userId != null and userId != 0">user_id,</if>
+        <if test="siteCode != null and siteCode != 0">site_code,</if>
+        <if test="userName != null and userName != ''">user_name,</if>
+        <if test="nickName != null and nickName != ''">nick_name,</if>
+        <if test="userType != null and userType != ''">user_type,</if>
+        <if test="openid != null and openid != ''">openid,</if>
+        <if test="email != null and email != ''">email,</if>
+        <if test="avatar != null and avatar != ''">avatar,</if>
+        <if test="phonenumber != null and phonenumber != ''">phonenumber,</if>
+        <if test="sex != null and sex != ''">sex,</if>
+        <if test="password != null and password != ''">password,</if>
+        <if test="spearPassword != null and spearPassword != ''">spear_password,</if>
+        <if test="serviceProduct != null and serviceProduct != ''">service_product,</if>
+        <if test="status != null and status != ''">status,</if>
+        <if test="createByName != null and createByName != ''">create_by_name,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        create_time
+        )values(
+        <if test="userId != null and userId != ''">#{userId},</if>
+        <if test="siteCode != null and siteCode != ''">#{site_code},</if>
+        <if test="userName != null and userName != ''">#{userName},</if>
+        <if test="nickName != null and nickName != ''">#{nickName},</if>
+        <if test="userType != null and userType != ''">#{user_type},</if>
+        <if test="openid != null and openid != ''">#{openid},</if>
+        <if test="email != null and email != ''">#{email},</if>
+        <if test="avatar != null and avatar != ''">#{avatar},</if>
+        <if test="phonenumber != null and phonenumber != ''">#{phonenumber},</if>
+        <if test="sex != null and sex != ''">#{sex},</if>
+        <if test="password != null and password != ''">#{password},</if>
+        <if test="spearPassword != null and spearPassword != ''">#{spearPassword},</if>
+        <if test="serviceProduct != null and serviceProduct != ''">#{serviceProduct},</if>
+        <if test="status != null and status != ''">#{status},</if>
+        <if test="createByName != null and createByName != ''">#{createByName},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        sysdate()
+        )
+    </insert>
+
+    <update id="updateUser" parameterType="com.szmsd.system.api.domain.SysUser">
+        update sys_user
+        <set>
+            <if test="siteCode != null and siteCode != 0">site_code = #{siteCode},</if>
+            <if test="userName != null and userName != ''">user_name = #{userName},</if>
+            <if test="nickName != null and nickName != ''">nick_name = #{nickName},</if>
+            <if test="userType != null and userType != ''">user_type= #{userType},</if>
+            <if test="openid != null and openid != ''">openid= #{openid},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="phonenumber != null and phonenumber != ''">phonenumber = #{phonenumber},</if>
+            <if test="sex != null and sex != ''">sex = #{sex},</if>
+            <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="spearPassword != null and spearPassword != ''">spear_password= #{spearPassword},</if>
+            <if test="serviceProduct != null and serviceProduct != ''">service_product= #{serviceProduct},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="loginIp != null and loginIp != ''">login_ip = #{loginIp},</if>
+            <if test="loginDate != null">login_date = #{loginDate},</if>
+            <if test="updateByName != null and updateByName != ''">update_by_name = #{updateByName},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </set>
+        where user_id = #{userId}
+    </update>
+
+    <update id="updateUserStatus" parameterType="com.szmsd.system.api.domain.SysUser">
+ 		update sys_user set status = #{status} where user_id = #{userId}
+	</update>
+
+    <update id="updateUserAvatar" parameterType="com.szmsd.system.api.domain.SysUser">
+ 		update sys_user set avatar = #{avatar} where user_name = #{userName}
+	</update>
+
+    <update id="resetUserPwd" parameterType="com.szmsd.system.api.domain.SysUser">
+ 		update sys_user set password = #{password} where user_name = #{userName}
+	</update>
+
+    <update id="resetAppUserPwd" parameterType="com.szmsd.system.api.domain.SysUser">
+ 		update sys_user set spear_password = #{password} where user_name = #{userName}
+	</update>
+
+    <delete id="deleteUserById" parameterType="Long">
+ 		delete from sys_user where user_id = #{userId}
+ 	</delete>
+
+    <delete id="deleteUserByIds" parameterType="Long">
+        update sys_user set del_flag = '2' where user_id in
+        <foreach collection="array" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </delete>
+
+</mapper> 

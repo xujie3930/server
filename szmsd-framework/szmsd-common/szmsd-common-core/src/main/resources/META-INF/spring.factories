@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.szmsd.common.core.utils.SpringUtils,\
+  com.szmsd.common.core.aspect.CodeToNameAspect
+
+  

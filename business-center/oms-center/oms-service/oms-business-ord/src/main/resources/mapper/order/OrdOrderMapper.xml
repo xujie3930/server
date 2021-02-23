@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.ord.mapper.OrdOrderMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.ord.domain.OrdOrder">
+        <id column="id" property="id"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="waybill_no" property="waybillNo"/>
+        <result column="order_status" property="orderStatus"/>
+        <result column="order_date" property="orderDate"/>
+        <result column="cus_code" property="cusCode"/>
+        <result column="cus_name" property="cusName"/>
+        <result column="cus_order_no" property="cusOrderNo"/>
+        <result column="product_type_code" property="productTypeCode"/>
+        <result column="product_type_name" property="productTypeName"/>
+        <result column="pieces" property="pieces"/>
+        <result column="weight" property="weight"/>
+        <result column="volume_weight" property="volumeWeight"/>
+        <result column="length" property="length"/>
+        <result column="width" property="width"/>
+        <result column="height" property="height"/>
+        <result column="volume_number" property="volumeNumber"/>
+        <result column="cod" property="cod"/>
+        <result column="cod_currency" property="codCurrency"/>
+        <result column="sender_company" property="senderCompany"/>
+        <result column="sender" property="sender"/>
+        <result column="sender_tel" property="senderTel"/>
+        <result column="sender_phone" property="senderPhone"/>
+        <result column="sender_postcode" property="senderPostcode"/>
+        <result column="sender_email" property="senderEmail"/>
+        <result column="sender_country_code" property="senderCountryCode"/>
+        <result column="sender_country" property="senderCountry"/>
+        <result column="sender_country_en" property="senderCountryEn"/>
+        <result column="sender_country_ar" property="senderCountryAr"/>
+
+
+        <result column="sender_province" property="senderProvince"/>
+        <result column="sender_city" property="senderCity"/>
+        <result column="sender_town" property="senderTown"/>
+        <result column="sender_address" property="senderAddress"/>
+        <result column="pick_up_site_code" property="pickUpSiteCode"/>
+        <result column="pick_up_site_name" property="pickUpSiteName"/>
+        <result column="pick_up_employee_code" property="pickUpEmployeeCode"/>
+        <result column="pick_up_employee_name" property="pickUpEmployeeName"/>
+        <result column="receiver_company" property="receiverCompany"/>
+        <result column="receiver" property="receiver"/>
+        <result column="receiver_tel" property="receiverTel"/>
+        <result column="receiver_phone" property="receiverPhone"/>
+        <result column="receiver_postcode" property="receiverPostcode"/>
+        <result column="receiver_email" property="receiverEmail"/>
+        <result column="receiver_country_code" property="receiverCountryCode"/>
+        <result column="receiver_country" property="receiverCountry"/>
+        <result column="receiver_country_en" property="receiverCountryEn"/>
+        <result column="receiver_country_ar" property="receiverCountryAr"/>
+
+        <result column="receiver_province" property="receiverProvince"/>
+        <result column="receiver_city" property="receiverCity"/>
+        <result column="receiver_town" property="receiverTown"/>
+        <result column="receiver_address" property="receiverAddress"/>
+        <result column="dest_site_code" property="destSiteCode"/>
+        <result column="dest_site_name" property="destSiteName"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="deleted_status" property="deletedStatus"/>
+        <result column="parm1" property="parm1"/>
+        <result column="parm2" property="parm2"/>
+        <result column="parm3" property="parm3"/>
+        <result column="parm4" property="parm4"/>
+        <result column="parm5" property="parm5"/>
+        <result column="assign_site_code" property="assignSiteCode"/>
+        <result column="assign_site_name" property="assignSiteName"/>
+        <result column="assigner_id" property="assignerId"/>
+        <result column="assigner_name" property="assignerName"/>
+        <result column="assign_time" property="assignTime"/>
+        <result column="reassign_site_code" property="reassignSiteCode"/>
+        <result column="reassign_site_name" property="reassignSiteName"/>
+        <result column="reassigner_id" property="reassignerId"/>
+        <result column="reassigner_name" property="reassignerName"/>
+        <result column="reassign_time" property="reassignTime"/>
+        <result column="reassign_reason" property="reassignReason"/>
+        <result column="dispatcher_id" property="dispatcherId"/>
+        <result column="dispatcher_name" property="dispatcherName"/>
+        <result column="dispatch_time" property="dispatchTime"/>
+        <result column="pick_up_time" property="pickUpTime"/>
+        <result column="order_source" property="orderSource"/>
+        <result column="order_tasking_date" property="orderTaskingDate"/>
+        <result column="sender_keyword_code" property="senderKeywordCode"/>
+        <result column="sender_keyword_name" property="senderKeywordName"/>
+        <result column="receiver_keyword_code" property="receiverKeywordCode"/>
+        <result column="receiver_keyword_name" property="receiverKeywordName"/>
+        <result column="cod_currency_name" property="codCurrencyName"/>
+        <result column="iden" property="iden"/>
+
+        <result column="destination_name" property="destinationName"/>
+        <result column="destination_code" property="destinationCode"/>
+        <result column="insured_amount" property="insuredAmount"/>
+        <result column="pay_method_code" property="payMethodCode"/>
+        <result column="pay_method_name" property="payMethodName"/>
+        <result column="owner_pob_ox_no" property="ownerPobOxNo"/>
+        <result column="importer_number" property="importerNumber"/>
+        <result column="import_name_eng" property="importNameEng"/>
+        <result column="importer_name_arb" property="importerNameArb"/>
+        <result column="importer_phone_no" property="importerPhoneNo"/>
+        <result column="importer_fax_no" property="importerFaxNo"/>
+        <result column="flight_number" property="flightNumber"/>
+        <result column="flight_departure_date" property="flightDepartureDate"/>
+        <result column="flight_arrival_date" property="flightArrivalDate"/>
+        <result column="unload_date" property="unloadDate"/>
+        <result column="arrived_quantity" property="arrivedQuantity"/>
+        <result column="arrived_weight" property="arrivedWeight"/>
+        <result column="arrived_date" property="arrivedDate"/>
+        <result column="item_seq_no" property="itemSeqNo"/>
+        <result column="package_type_code" property="packageTypeCode"/>
+        <result column="item_quantity" property="itemQuantity"/>
+        <result column="item_weight" property="itemWeight"/>
+        <result column="item_eng_desc" property="itemEngDesc"/>
+        <result column="item_arb_desc" property="itemArbDesc"/>
+        <result column="declared_value" property="declaredValue"/>
+        <result column="item_marks" property="itemMarks"/>
+        <result column="seq_no" property="seqNo"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_quantity" property="warehouseQuantity"/>
+        <result column="owner_arb_name" property="ownerArbName"/>
+        <result column="Item_type" property="itemType"/>
+        <result column="Item_type_code" property="itemTypeCode"/>
+        <result column="net_freight" property="netFreight"/>
+        <result column="total_freight" property="totalFreight"/>
+        <result column="pro_name" property="proName"/>
+        <result column="payment" property="payment"/>
+        <result column="premium" property="premium"/>
+        <result column="billing_weight" property="billingWeight"/>
+        <result column="msg_content" property="msgContent"/>
+        <result column="clear_customer_status_code" property="clearCustomerStatusCode"/>
+        <result column="clear_customer_status_name" property="clearCustomerStatusName"/>
+        <result column="reasons_for_cancellation" property="reasonsForCancellation"/>
+        <result column="reasons_iden" property="reasonsIden"/>
+        <result column="two_iden" property="twoIden"/>
+        <result column="two_cost" property="twoCost"/>
+        <result column="scheduling_status" property="schedulingStatus"/>
+        <result column="can_why" property="canWhy"/>
+        <result column="reasons_people_code" property="reasonsPeopleCode"/>
+        <result column="reasons_people_name" property="reasonsPeopleName"/>
+        <result column="refused_to_time" property="refusedToTime"/>
+        <result column="sub_order_no" property="subOrderNo"/>
+        <result column="bill_of_lading_no" property="billOfLadingNo"/>
+        <result column="print_flag" property="printFlag"/>
+        <result column="update_flag" property="updateFlag"/>
+        <result column="return_flag" property="returnFlag"/>
+        <result column="the_receipt_id" property="theReceiptId"/>
+        <result column="sorting_code" property="sortingCode"/>
+        <result column="route_code" property="routeCode"/>
+        <result column="one_order_on" property="oneOrderOn"/>
+    </resultMap>
+
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BilResultMap" type="com.szmsd.bil.api.domain.BilScan">
+        <id column="id" property="id"/>
+        <result column="create_time" property="createTime"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="record_no" property="recordNo"/>
+        <result column="waybill_no" property="waybillNo"/>
+        <result column="list_number" property="listNumber"/>
+        <result column="sub_waybill_no" property="subWaybillNo"/>
+        <result column="transfer_number" property="transferNumber"/>
+        <result column="package_no" property="packageNo"/>
+        <result column="pre_stop_code" property="preStopCode"/>
+        <result column="pre_stop_name" property="preStopName"/>
+        <result column="next_stop_name" property="nextStopName"/>
+        <result column="next_stop_code" property="nextStopCode"/>
+        <result column="scan_type" property="scanType"/>
+        <result column="pick_up_employee_code" property="pickUpEmployeeCode"/>
+        <result column="pick_up_employee_name" property="pickUpEmployeeName"/>
+        <result column="courier_type_code" property="courierTypeCode"/>
+        <result column="courier_type_name" property="courierTypeName"/>
+        <result column="scan_employee_code" property="scanEmployeeCode"/>
+        <result column="scan_employee_name" property="scanEmployeeName"/>
+        <result column="product_type_code" property="productTypeCode"/>
+        <result column="product_type_name" property="productTypeName"/>
+        <result column="entry_department_code" property="entryDepartmentCode"/>
+        <result column="item_value" property="itemValue"/>
+        <result column="entry_department_name" property="entryDepartmentName"/>
+        <result column="scan_time" property="scanTime"/>
+        <result column="pay_method_name" property="payMethodName"/>
+        <result column="pay_method_code" property="payMethodCode"/>
+        <result column="entry_time" property="entryTime"/>
+        <result column="operation_date" property="operationDate"/>
+        <result column="dispatcher_employee_name" property="dispatcherEmployeeName"/>
+        <result column="dispatcher_employee_code" property="dispatcherEmployeeCode"/>
+        <result column="send_cus_name" property="sendCusName"/>
+        <result column="send_cus_code" property="sendCusCode"/>
+        <result column="shipping_site_code" property="shippingSiteCode"/>
+        <result column="shipping_site_name" property="shippingSiteName"/>
+        <result column="dest_site_code" property="destSiteCode"/>
+        <result column="dest_site_name" property="destSiteName"/>
+        <result column="transit_center_name" property="transitCenterName"/>
+        <result column="transit_center_code" property="transitCenterCode"/>
+        <result column="pieces" property="pieces"/>
+        <result column="weight" property="weight"/>
+        <result column="item_category_name" property="itemCategoryName"/>
+        <result column="item_category_code" property="itemCategoryCode"/>
+        <result column="shift_name" property="shiftName"/>
+        <result column="shift_code" property="shiftCode"/>
+        <result column="problem_type_name" property="problemTypeName"/>
+        <result column="problem_type_code" property="problemTypeCode"/>
+        <result column="leftover_type_code" property="leftoverTypeCode"/>
+        <result column="leftover_type_name" property="leftoverTypeName"/>
+        <result column="other_fees" property="otherFees"/>
+        <result column="network_management_fee" property="networkManagementFee"/>
+        <result column="delivery_fee" property="deliveryFee"/>
+        <result column="reconciliation_id" property="reconciliationId"/>
+        <result column="the_receipt_no" property="theReceiptNo"/>
+        <result column="the_receipt_id" property="theReceiptId"/>
+        <result column="accounting_identity" property="accountingIdentity"/>
+        <result column="return_identity" property="returnIdentity"/>
+        <result column="electronic_scale_identity" property="electronicScaleIdentity"/>
+        <result column="unrecorded_identity" property="unrecordedIdentity"/>
+        <result column="lock_flag" property="lockFlag"/>
+        <result column="write_back_identity" property="writeBackIdentity"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="payment_method" property="paymentMethod"/>
+        <result column="vehicle_number" property="vehicleNumber"/>
+        <result column="licence_plate_number" property="licencePlateNumber"/>
+        <result column="shipping_methods_name" property="shippingMethodsName"/>
+        <result column="shipping_methods_code" property="shippingMethodsCode"/>
+        <result column="deleted" property="deleted"/>
+        <result column="status" property="status"/>
+        <result column="version" property="version"/>
+        <result column="parm1" property="parm1"/>
+        <result column="parm2" property="parm2"/>
+        <result column="parm3" property="parm3"/>
+        <result column="network_management_fees" property="networkManagementFees"/>
+        <result column="goods_value" property="goodsValue"/>
+        <result column="dispatch_site_code" property="dispatchSiteCode"/>
+        <result column="receiver_province" property="receiverProvince"/>
+        <result column="scan_id" property="scanId"/>
+        <result column="scan_site_code" property="scanSiteCode"/>
+        <result column="scan_site_name" property="scanSiteName"/>
+        <result column="upload_time" property="uploadTime"/>
+        <result column="dispatch_site_name" property="dispatchSiteName"/>
+        <result column="batch_number" property="batchNumber"/>
+        <result column="merchant_code" property="merchantCode"/>
+        <result column="merchant_name" property="merchantName"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_name" property="warehouseName"/>
+        <result column="driver" property="driver"/>
+    </resultMap>
+
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+                remark,
+                create_by,
+                create_time,
+                update_by,
+                update_time,
+                can_why,
+                reasons_people_code,
+                reasons_people_name,
+                refused_to_time,
+                sub_order_no,one_order_on,
+                msg_content,scheduling_status,
+                clear_customer_status_code,two_cost,sorting_code,route_code,
+                clear_customer_status_name,two_iden,print_flag,update_flag,return_flag,the_receipt_id,
+                reasons_for_cancellation,reasons_iden,bill_of_lading_no,
+            id, order_no, waybill_no, order_status, order_date, cus_code, cus_name, cus_order_no, product_type_code, product_type_name, pieces, weight, volume_weight, length, width, height, volume_number, cod, cod_currency_name, cod_currency, sender_company, sender, sender_tel, sender_phone, sender_postcode, sender_email, sender_country_code, sender_country, sender_country_en, sender_country_ar, sender_province, sender_city, sender_town, sender_address, pick_up_site_code, pick_up_site_name, pick_up_employee_code, pick_up_employee_name, receiver_company, receiver, receiver_tel, receiver_phone, receiver_postcode, receiver_email, receiver_country_code, receiver_country, receiver_country_en, receiver_country_ar, receiver_province, receiver_city, receiver_town, receiver_address, dest_site_code, dest_site_name, create_by_name, update_by_name, deleted_status, parm1, parm2, parm3, parm4, parm5, assign_site_code, assign_site_name, assigner_id, assigner_name, assign_time, reassign_site_code, reassign_site_name, reassigner_id, reassigner_name, reassign_time, reassign_reason, dispatcher_id, dispatcher_name, dispatch_time, pick_up_time, order_source, order_tasking_date, sender_keyword_code, sender_keyword_name, receiver_keyword_code, receiver_keyword_name, iden, destination_code, destination_name, insured_amount, pay_method_code, pay_method_name, owner_pob_ox_no, importer_number, import_name_eng, importer_name_arb, importer_phone_no, importer_fax_no, flight_number, flight_departure_date, flight_arrival_date, unload_date, arrived_quantity, arrived_weight, arrived_date, item_seq_no, package_type_code, item_quantity, item_weight, item_eng_desc, item_arb_desc, declared_value, item_marks, seq_no, warehouse_code, warehouse_quantity, owner_arb_name, Item_type, Item_type_code, net_freight, total_freight, pro_name, payment, premium, billing_weight
+        </sql>
+
+    <select id="getord" resultMap="BaseResultMap" parameterType="com.szmsd.ord.domain.OrdOrder">
+
+        SELECT
+            <include refid="Base_Column_List"></include>
+        FROM ord_order d
+        WHERE
+        d.assign_time is not null
+        and d.assigner_id is not null
+        and TIMESTAMPDIFF(HOUR,d.assign_time,NOW()) > 8
+        and d.order_status in ('01','04')
+        and d.assign_site_code=#{assignSiteCode}
+
+    </select>
+
+
+    <select id="selectBilScan" resultMap="BilResultMap" resultType="com.szmsd.bil.api.domain.BilScan">
+
+     SELECT
+	     *
+      FROM
+	  bil_scan
+      WHERE
+	  scan_time BETWEEN #{beginTime}
+      AND #{endTime}
+      AND dispatcher_employee_code = #{dispatcherEmployeeCode}
+      And scan_type ='5'
+    </select>
+
+
+    <select id="getOrderWarnList"  resultType="com.szmsd.ord.domain.OrdOrder">
+        select t.* from
+        (select
+        <include refid="Base_Column_List"></include>
+        from ord_order
+        where  assign_time is not null
+            and assigner_id is not null
+            and pick_up_employee_code is not null
+            and order_status in('01','04')
+            and TIMESTAMPDIFF(hour,assign_time,now())>8) t
+        left join bil_warn_info bwi on bwi.waybill_no = t.waybill_no and bwi.warning_type_code = '3' and bwi.common_time = t.assign_time
+        where bwi.waybill_no is null
+    </select>
+
+</mapper>

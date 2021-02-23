@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.dao.BasUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasUser">
+        <id column="id" property="id"/>
+        <result column="create_time" property="createTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="user_code" property="userCode"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="sex" property="sex"/>
+        <result column="phone" property="phone"/>
+        <result column="address" property="address"/>
+        <result column="cus_type" property="cusType"/>
+        <result column="cus_code" property="cusCode"/>
+        <result column="cus_name" property="cusName"/>
+        <result column="we_chat" property="weChat"/>
+        <result column="id_type" property="idType"/>
+        <result column="id_number" property="idNumber"/>
+        <result column="id_name" property="idName"/>
+        <result column="id_province" property="idProvince"/>
+        <result column="id_city" property="idCity"/>
+        <result column="id_area" property="idArea"/>
+        <result column="id_address" property="idAddress"/>
+        <result column="user_type" property="userType"/>
+        <result column="collection_type" property="collectionType"/>
+        <result column="img_url" property="imgUrl"/>
+        <result column="emp_code" property="empCode"/>
+        <result column="emp_name" property="empName"/>
+        <result column="site_code" property="siteCode"/>
+        <result column="site_name" property="siteName"/>
+        <result column="create_name" property="createName"/>
+        <result column="update_name" property="updateName"/>
+        <result column="emps_code" property="empsCode"/>
+        <result column="emps_name" property="empsName"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="adm_iden" property="admIden"/>
+        <result column="enable_iden" property="enableIden"/>
+        <result column="id_country" property="idCountry"/>
+        <result column="user_id" property="userId"/>
+        <result column="premium_rate" property="premiumRate"/>
+        <result column="fee_rate" property="feeRate"/>
+        <result column="premium_quota" property="premiumQuota"/>
+        <result column="fee_quota" property="feeQuota"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+                user_id,
+                create_time,
+                create_by,
+                update_by,
+                update_time,
+                premium_rate,
+                premium_quota,
+                fee_quota,
+                fee_rate,
+            id, user_code, password, id_country , name, sex, phone, address, cus_type, cus_code, cus_name, we_chat, id_type, id_number, id_name, id_province, id_city, id_area, id_address, user_type, collection_type, img_url, emp_code, emp_name, site_code, site_name, create_name, update_name, emps_code, emps_name, nick_name, adm_iden, enable_iden
+        </sql>
+
+
+</mapper>

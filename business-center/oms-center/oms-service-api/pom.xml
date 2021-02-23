@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.szmsd.oms</groupId>
+        <artifactId>oms-center</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <groupId>com.szmsd.oms</groupId>
+    <artifactId>oms-service-api</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>oms-service-api</name>
+    <description>业务模块api</description>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <business.version>1.0.0</business.version>
+    </properties>
+
+    <modules>
+        <module>oms-business-bas-api</module>
+        <module>oms-business-ord-api</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.szmsd.oms</groupId>
+                <artifactId>oms-business-bas-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.oms</groupId>
+                <artifactId>oms-business-ord-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

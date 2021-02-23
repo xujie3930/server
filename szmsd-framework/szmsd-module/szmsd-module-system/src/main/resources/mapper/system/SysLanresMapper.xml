@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.system.mapper.SysLanresMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.system.domain.SysLanres">
+        <id column="ID" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="code" property="code"/>
+        <result column="strid" property="strid"/>
+        <result column="lan1" property="lan1"/>
+        <result column="lan2" property="lan2"/>
+        <result column="lan3" property="lan3"/>
+        <result column="lan4" property="lan4"/>
+        <result column="lan5" property="lan5"/>
+        <result column="VISIBLE" property="visible"/>
+        <result column="GROUPTYPE" property="grouptype"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="deleted_status" property="deletedStatus"/>
+        <result column="parm1" property="parm1"/>
+        <result column="parm2" property="parm2"/>
+        <result column="parm3" property="parm3"/>
+        <result column="parm4" property="parm4"/>
+        <result column="parm5" property="parm5"/>
+        <result column="app" property="app"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+                create_by,
+                create_time,
+                update_by,
+                update_time,app,
+            ID, code, strid, lan1, lan2, lan3, lan4, lan5, VISIBLE, GROUPTYPE, create_by_name, update_by_name, deleted_status, parm1, parm2, parm3, parm4, parm5
+        </sql>
+
+</mapper>
