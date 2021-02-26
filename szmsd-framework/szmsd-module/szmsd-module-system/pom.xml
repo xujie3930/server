@@ -125,11 +125,11 @@
                     <version>1.0.0</version>
                 </dependency>-->
 
-        <dependency>
+        <!--<dependency>
             <groupId>com.szmsd.oms</groupId>
             <artifactId>oms-business-bas-api</artifactId>
             <version>${business.version}</version>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <build>
