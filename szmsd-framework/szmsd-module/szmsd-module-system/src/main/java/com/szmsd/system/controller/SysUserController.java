@@ -1,31 +1,10 @@
 package com.szmsd.system.controller;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-
-import com.szmsd.bas.api.domain.BasUser;
-import com.szmsd.bas.api.feign.BasFeignService;
-import com.szmsd.common.core.enums.ExceptionMessageEnum;
-import com.szmsd.common.core.utils.bean.BeanUtils;
-import com.szmsd.common.redis.service.RedisService;
-import com.szmsd.system.api.domain.dto.SysUserDto;
-import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
-import com.szmsd.system.domain.dto.SysUserEditPsw;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -33,11 +12,29 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.system.api.domain.SysUser;
+import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
+import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.model.UserInfo;
+import com.szmsd.system.domain.dto.SysUserEditPsw;
 import com.szmsd.system.service.ISysPermissionService;
 import com.szmsd.system.service.ISysPostService;
 import com.szmsd.system.service.ISysRoleService;
 import com.szmsd.system.service.ISysUserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 用户信息
@@ -60,8 +57,6 @@ public class SysUserController extends BaseController {
     @Resource
     private ISysPermissionService permissionService;
 
-    @Resource
-    private BasFeignService basFeignService;
 
 
     /**
