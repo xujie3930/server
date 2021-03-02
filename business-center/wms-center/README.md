@@ -22,14 +22,14 @@
  
 # 代码结构  
 ~~~
-com.szmsd.oms
-├── oms-service
-            └── oms-business-bas            // 基础资料
-            └── oms-business-ord            // 订单管理
+com.szmsd.wms
+├── wms-service
+            └── wms-business-bas            // 基础资料
+            └── wms-business-ord            // 订单管理
 
-├── oms-service-api
-            └── oms-business-bas-api
-            └── oms-business-ord-api
+├── wms-service-api
+            └── wms-business-bas-api
+            └── wms-business-ord-api
 ~~~
 
 # API开放管理平台   

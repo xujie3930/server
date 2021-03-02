@@ -4,21 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.szmsd.oms</groupId>
-        <artifactId>oms-center</artifactId>
+        <groupId>com.szmsd.wms</groupId>
+        <artifactId>wms-center</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <groupId>com.szmsd.oms</groupId>
-    <artifactId>oms-service</artifactId>
+    <groupId>com.szmsd.wms</groupId>
+    <artifactId>wms-service</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-    <name>oms-service</name>
+    <name>wms-service</name>
     <description>业务模块</description>
 
     <modules>
-        <module>oms-business-bas</module>
-        <module>oms-business-ord</module>
+        <module>wms-business-bas</module>
+        <module>wms-business-ord</module>
     </modules>
 
     <properties>
@@ -29,13 +29,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.szmsd.oms</groupId>
-                <artifactId>oms-business-bas</artifactId>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-bas</artifactId>
                 <version>${business.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.szmsd.oms</groupId>
-                <artifactId>oms-business-ord</artifactId>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-ord</artifactId>
                 <version>${business.version}</version>
             </dependency>
         </dependencies>

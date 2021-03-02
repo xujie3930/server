@@ -22,10 +22,10 @@
 
     <description>
         基础数据
-        订单平台
+        仓库平台
     </description>
     <modules>
         <module>com-center</module>
-        <module>oms-center</module>
+        <module>wms-center</module>
     </modules>
 </project>

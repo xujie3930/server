@@ -3,13 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.szmsd.oms</groupId>
-        <artifactId>oms-service</artifactId>
+        <groupId>com.szmsd.wms</groupId>
+        <artifactId>wms-service</artifactId>
         <version>1.0.0</version>
     </parent>
-    <artifactId>oms-business-bas</artifactId>
+    <artifactId>wms-business-bas</artifactId>
     <version>1.0.0</version>
-    <name>oms-business-bas</name>
+    <name>wms-business-bas</name>
     <description>基础资料</description>
 
     <properties>
@@ -81,16 +81,20 @@
             <artifactId>szmsd-common-swagger</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.szmsd.oms</groupId>
-            <artifactId>oms-business-bil-api</artifactId>
+     <!--   <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-bil-api</artifactId>
             <version>${business.version}</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
-            <groupId>com.szmsd.oms</groupId>
-            <artifactId>oms-business-ord-api</artifactId>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-ord-api</artifactId>
             <version>${business.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>szmsd-common-security</artifactId>
         </dependency>
 
 

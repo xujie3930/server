@@ -1,12 +1,12 @@
 # Tomcat
 server:
-  port: 7204
+  port: 7201
 
 # Spring
-spring: 
+spring:
   application:
     # 应用名称
-    name: oms-business-ord
+    name: wms-business-bas
   profiles:
     # 环境配置
     active: test
@@ -24,3 +24,4 @@ spring:
         # 共享配置
         shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
         namespace: fd945789-2eb6-4ab5-8e25-8f1e34bef906
+        group: DEFAULT_GROUP

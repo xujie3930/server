@@ -4,15 +4,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.szmsd.oms</groupId>
-        <artifactId>oms-service</artifactId>
+        <groupId>com.szmsd.wms</groupId>
+        <artifactId>wms-service</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <groupId>com.szmsd.oms</groupId>
-    <artifactId>oms-business-ord</artifactId>
-    <name>oms-business-ord</name>
-    <description>订单模块</description>
+    <groupId>com.szmsd.wms</groupId>
+    <artifactId>wms-business-ord</artifactId>
+    <name>wms-business-ord</name>
+    <description>仓库订单模块</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -84,16 +84,16 @@
         </dependency>
 
         <dependency>
-            <groupId>com.szmsd.oms</groupId>
-            <artifactId>oms-business-bas-api</artifactId>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-bas-api</artifactId>
             <version>${business.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.szmsd.oms</groupId>
-            <artifactId>oms-business-bil-api</artifactId>
+       <!-- <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-bil-api</artifactId>
             <version>${business.version}</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>com.szmsd</groupId>

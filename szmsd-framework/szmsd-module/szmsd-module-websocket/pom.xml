@@ -96,12 +96,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
-        <dependency>
+       <!-- <dependency>
             <groupId>com.szmsd.oms</groupId>
             <artifactId>oms-business-bil-api</artifactId>
             <version>1.0.0</version>
             <scope>compile</scope>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
 

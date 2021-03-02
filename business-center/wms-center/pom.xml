@@ -9,17 +9,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <modules>
-        <module>oms-service</module>
-        <module>oms-service-api</module>
+        <module>wms-service</module>
+        <module>wms-service-api</module>
     </modules>
 
-    <groupId>com.szmsd.oms</groupId>
-    <artifactId>oms-center</artifactId>
+    <groupId>com.szmsd.wms</groupId>
+    <artifactId>wms-center</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <description>
-        oms模块
+        wms模块
     </description>
 
     <properties>
