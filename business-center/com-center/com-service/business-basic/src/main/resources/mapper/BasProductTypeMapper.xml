@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.dao.BasProductTypeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasProductType">
+        <id column="id" property="id"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="product_type_code" property="productTypeCode"/>
+        <result column="product_type_name" property="productTypeName"/>
+        <result column="product_type_name_en" property="productTypeNameEn"/>
+        <result column="product_type_name_ar" property="productTypeNameAr"/>
+        <result column="prefix_number" property="prefixNumber"/>
+        <result column="create_id" property="createId"/>
+        <result column="update_id" property="updateId"/>
+        <result column="parm1" property="parm1"/>
+        <result column="parm2" property="parm2"/>
+        <result column="parm3" property="parm3"/>
+        <result column="parm4" property="parm4"/>
+        <result column="parm5" property="parm5"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+                remark,
+                create_by,
+                create_time,
+                update_by,
+                update_time,
+            id, product_type_code, product_type_name, product_type_name_en, product_type_name_ar, prefix_number, create_id, update_id, parm1, parm2, parm3, parm4, parm5, version
+        </sql>
+
+    <select id="selectGenTableColumnListByTableIds" parameterType="com.szmsd.bas.domain.BasProductType"
+            resultMap="BaseResultMap">
+        <include refid="Base_Column_List"/>
+        where id = #{id}
+        order by sort
+    </select>
+</mapper>

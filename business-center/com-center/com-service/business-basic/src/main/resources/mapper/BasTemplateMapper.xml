@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.dao.BasTemplateMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasTemplate">
+        <id column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="template_type" property="templateType"/>
+        <result column="template_type_code" property="templateTypeCode"/>
+        <result column="template_content" property="templateContent"/>
+        <result column="create_id" property="createId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="message" property="message"/>
+    </resultMap>
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+                create_by,
+            id, template_type, template_content, create_id ,create_time , template_type_code ,message
+        </sql>
+
+
+</mapper>

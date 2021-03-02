@@ -120,8 +120,8 @@
             <version>${druid.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.szmsd.wms</groupId>
-            <artifactId>wms-business-bas-api</artifactId>
+            <groupId>com.szmsd</groupId>
+            <artifactId>business-basic-api</artifactId>
             <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>

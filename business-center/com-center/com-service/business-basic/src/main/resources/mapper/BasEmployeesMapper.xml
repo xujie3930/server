@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.dao.BasEmployeesMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasEmployees">
+        <id column="id" property="id"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="emp_code" property="empCode"/>
+        <result column="emp_name" property="empName"/>
+        <result column="emp_name_en" property="empNameEn"/>
+        <result column="emp_name_ar" property="empNameAr"/>
+        <result column="emp_phone" property="empPhone"/>
+        <result column="emp_tel" property="empTel"/>
+        <result column="site_code" property="siteCode"/>
+        <result column="site_name" property="siteName"/>
+        <result column="blong_jobs" property="blongJobs"/>
+        <result column="service_product" property="serviceProduct"/>
+        <result column="emp_state" property="empState"/>
+        <result column="spear_password" property="spearPassword"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_site" property="createSite"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="pram1" property="pram1"/>
+        <result column="pram2" property="pram2"/>
+        <result column="pram3" property="pram3"/>
+        <result column="pram4" property="pram4"/>
+        <result column="pram5" property="pram5"/>
+        <result column="version" property="version"/>
+        <result column="password" property="password"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+                create_time,
+                update_time,
+                password,
+            id, emp_code, emp_name, emp_name_en, emp_name_ar, emp_phone, emp_tel, site_code, site_name, blong_jobs, service_product, emp_state, spear_password, create_by_name, create_site, update_by_name, pram1, pram2, pram3, pram4, pram5, version
+        </sql>
+
+
+</mapper>

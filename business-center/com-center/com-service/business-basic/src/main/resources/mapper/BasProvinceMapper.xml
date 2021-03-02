@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.dao.BasProvinceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasProvince">
+        <id column="id" property="id"/>
+        <result column="province_code" property="provinceCode"/>
+        <result column="province_name" property="provinceName"/>
+        <result column="province_name_en" property="provinceNameEn"/>
+        <result column="province_name_ar" property="provinceNameAr"/>
+        <result column="province_abb" property="provinceAbb"/>
+        <result column="country_code" property="countryCode"/>
+        <result column="country_name" property="countryName"/>
+        <result column="country_name_en" property="countryNameEn"/>
+        <result column="country_name_ar" property="countryNameAr"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+            id, province_code,province_name_ar,province_name_en, province_name, province_abb, country_code, country_name,country_name_en,country_name_ar
+        </sql>
+
+
+</mapper>

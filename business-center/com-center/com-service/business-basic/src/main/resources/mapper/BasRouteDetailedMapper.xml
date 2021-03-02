@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.dao.BasRouteDetailedMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasRouteDetailed">
+                    <id column="id" property="id"/>
+                <result column="create_by" property="createBy"/>
+                <result column="create_time" property="createTime"/>
+                <result column="update_by" property="updateBy"/>
+                    <result column="route_code" property="routeCode"/>
+                    <result column="route_name" property="routeName"/>
+                    <result column="start_station" property="startStation"/>
+                    <result column="end_station" property="endStation"/>
+                    <result column="route_site_code" property="routeSiteCode"/>
+                    <result column="route_site_name" property="routeSiteName"/>
+                    <result column="create_by_name" property="createByName"/>
+                    <result column="create_site_code" property="createSiteCode"/>
+                    <result column="create_site_name" property="createSiteName"/>
+                    <result column="update_by_name" property="updateByName"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="update_site_code" property="updateSiteCode"/>
+                    <result column="update_site_name" property="updateSiteName"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+                create_by,
+                create_time,
+                update_by,
+            id, route_code, route_name, start_station, end_station, route_site_code, route_site_name, create_by_name, create_site_code, create_site_name, update_by_name, update_time, update_site_code, update_site_name
+        </sql>
+
+
+</mapper>
