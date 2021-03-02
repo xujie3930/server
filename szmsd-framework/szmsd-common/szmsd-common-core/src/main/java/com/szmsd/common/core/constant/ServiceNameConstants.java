@@ -23,4 +23,9 @@ public interface ServiceNameConstants
      */
     public static final String  WEBSOCKET_SERVICE = "szmsd-websocket";
 
+    /**
+     * bas服务
+     */
+    public static final String  BAS_SERVICE = "wms-business-bas";
+
 }

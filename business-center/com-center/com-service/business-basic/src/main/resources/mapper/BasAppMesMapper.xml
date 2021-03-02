@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.dao.BasAppMesMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasAppMes">
+        <id column="id" property="id"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="source_id" property="sourceId"/>
+        <result column="parent_type_code" property="parentTypeCode"/>
+        <result column="parent_type_name" property="parentTypeName"/>
+        <result column="sub_type_code" property="subTypeCode"/>
+        <result column="sub_type_name" property="subTypeName"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="waybill_no" property="waybillNo"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="address" property="address"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="img_url" property="imgUrl"/>
+        <result column="business_type" property="businessType"/>
+        <result column="business_remark" property="businessRemark"/>
+        <result column="user_id" property="userId"/>
+        <result column="emp_code" property="empCode"/>
+        <result column="emp_name" property="empName"/>
+        <result column="date_time" property="dateTime"/>
+        <result column="push_flag" property="pushFlag"/>
+        <result column="push_time" property="pushTime"/>
+        <result column="next_push_time" property="nextPushTime"/>
+        <result column="repeat_times" property="repeatTimes"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="del_flag" property="delFlag"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+                create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, source_id, parent_type_code, parent_type_name, sub_type_code, sub_type_name, order_no, waybill_no, name, phone, address, title, content, img_url, business_type, business_remark, user_id, emp_code, emp_name, date_time, push_flag, push_time, next_push_time, repeat_times, create_by, update_by, del_flag
+        </sql>
+
+    <update id="deleteBySourceId">
+        update bas_app_mes set del_flag ='1' where source_id = #{sourceId}
+    </update>
+</mapper>

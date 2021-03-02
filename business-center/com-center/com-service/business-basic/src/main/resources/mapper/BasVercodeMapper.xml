@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.dao.BasVercodeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasVercode">
+        <id column="id" property="id"/>
+        <result column="create_time" property="createTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="phone" property="phone"/>
+        <result column="mes_code" property="mesCode"/>
+        <result column="mse_type" property="mseType"/>
+        <result column="create_id" property="createId"/>
+        <result column="belong_site_code" property="belongSiteCode"/>
+        <result column="belong_site_name" property="belongSiteName"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+                create_time,
+                create_by,
+            id, phone, mes_code, mse_type, create_id, belong_site_code, belong_site_name
+        </sql>
+
+
+</mapper>
