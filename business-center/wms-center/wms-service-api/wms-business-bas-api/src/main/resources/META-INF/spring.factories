@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.szmsd.bas.api.factory.BasFeignServiceFallbackFactory

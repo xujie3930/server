@@ -3,10 +3,8 @@ package com.szmsd.bas;
 import com.szmsd.common.security.annotation.EnableCustomConfig;
 import com.szmsd.common.security.annotation.EnableRyFeignClients;
 import com.szmsd.common.swagger.annotation.EnableCustomSwagger2;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.client.SpringCloudApplication;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableCustomConfig
