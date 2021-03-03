@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.dao.BasAttachmentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasAttachment">
+        <id column="id" property="id"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="business_code" property="businessCode"/>
+        <result column="business_type" property="businessType"/>
+        <result column="business_no" property="businessNo"/>
+        <result column="business_item_no" property="businessItemNo"/>
+        <result column="attachment_type" property="attachmentType"/>
+        <result column="attachment_id" property="attachmentId"/>
+        <result column="attachment_name" property="attachmentName"/>
+        <result column="attachment_path" property="attachmentPath"/>
+        <result column="attachment_size" property="attachmentSize"/>
+        <result column="attachment_url" property="attachmentUrl"/>
+        <result column="attachment_format" property="attachmentFormat"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        t.id,
+        t.create_by,
+        t.create_by_name,
+        t.create_time,
+        t.update_by,
+        t.update_by_name,
+        t.update_time,
+        t.remark,
+        t.business_code,
+        t.business_type,
+        t.business_no,
+        t.business_item_no,
+        t.attachment_type,
+        t.attachment_id,
+        t.attachment_name,
+        t.attachment_path,
+        t.attachment_size,
+        t.attachment_url,
+        t.attachment_format
+    </sql>
+
+    <select id="selectList" parameterType="com.szmsd.bas.domain.dto.BasAttachmentQueryDTO" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM bas_attachment t
+        <where>
+            <if test="businessCode != null and businessCode != ''">AND t.business_code = #{businessCode}</if>
+            <if test="businessNo != null and businessNo != ''">AND t.business_no = #{businessNo}</if>
+            <if test="businessItemNo != null and businessItemNo != ''">AND t.business_item_no = #{businessItemNo}</if>
+            <if test="attachmentType != null and attachmentType != ''">AND t.attachment_type = #{attachmentType}</if>
+        </where>
+    </select>
+
+</mapper>
