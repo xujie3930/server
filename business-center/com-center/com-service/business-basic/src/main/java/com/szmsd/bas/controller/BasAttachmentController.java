@@ -110,11 +110,9 @@ public class BasAttachmentController extends BaseController {
     @PreAuthorize("@ss.hasPermi('bas:attachment:uploadattachment')")
     @ApiOperation(httpMethod = "POST", value = "附件上传 - bas:uploadattachment:uploadattachment - swagger接收不到文件", notes = "附件上传")
     @PostMapping(value = "/uploadAttachment", headers = "content-type=multipart/form-data")
-    @ApiImplicitParams({@ApiImplicitParam(name = "businessCode", value = "业务编码", required = true),
-            @ApiImplicitParam(name = "attachmentType", value = "附件类型", required = true),
+    @ApiImplicitParams({@ApiImplicitParam(name = "attachmentTypeEnum", value = "附件类型", required = true),
             @ApiImplicitParam(name = "businessNo", value = "业务编号 - 编辑功能需要操作附件时传入 - 并同时保存附件表 业务场景：补充附件")})
-    public R<List<BasAttachmentDataDTO>> uploadAttachment(@RequestParam("attachmentUrl") MultipartFile[] myFiles, @RequestParam("businessCode") String businessCode, @RequestParam("attachmentType") String attachmentType, String businessNo) {
-        BasAttachmentTypeEnum basAttachmentTypeEnum = BasAttachmentTypeEnum.getEnum(businessCode, attachmentType);
+    public R<List<BasAttachmentDataDTO>> uploadAttachment(@RequestParam("attachmentUrl") MultipartFile[] myFiles, @RequestParam("attachmentTypeEnum") BasAttachmentTypeEnum attachmentTypeEnum, String businessNo) {
         List<BasAttachmentDataDTO> filesUrl = new ArrayList<>();
         List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
         if (CollectionUtils.isEmpty(multipartFiles)) {
@@ -125,14 +123,14 @@ public class BasAttachmentController extends BaseController {
                     .setUrl(env.getProperty("file.url"))
                     .setMyFile(myFile)
                     .setUploadFolder(env.getProperty("file.uploadFolder"))
-                    .setType(basAttachmentTypeEnum)
+                    .setType(attachmentTypeEnum)
                     .setMainUploadFolder(env.getProperty("file.mainUploadFolder")));
             String url = files.getUrl();
-            filesUrl.add(new BasAttachmentDataDTO().setAttachmentName(files.getFileName()).setAttachmentType(attachmentType).setAttachmentUrl(url));
+            filesUrl.add(new BasAttachmentDataDTO().setAttachmentName(files.getFileName()).setAttachmentType(attachmentTypeEnum.getAttachmentType()).setAttachmentUrl(url));
         });
         if (!"null".equalsIgnoreCase(businessNo) && StringUtils.isNotEmpty(businessNo)) {
             log.info("业务编号不为空 {} - 变更为补充附件 - 保存附件信息", businessNo);
-            basAttachmentService.insert(new BasAttachmentDTO().setBusinessNo(businessNo).setFileList(filesUrl).setAttachmentTypeEnum(basAttachmentTypeEnum));
+            basAttachmentService.insert(new BasAttachmentDTO().setBusinessNo(businessNo).setFileList(filesUrl).setAttachmentTypeEnum(attachmentTypeEnum));
             log.info("业务编号不为空 {} - 变更为补充附件 - 保存完成", businessNo);
             R r = R.ok(filesUrl);
             r.setMsg("附件补充完成，业务编号：" + businessNo);
