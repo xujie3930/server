@@ -19,6 +19,7 @@
     <modules>
         <module>wms-business-bas</module>
         <module>wms-business-ord</module>
+        <module>wms-business-delivery</module>
     </modules>
 
     <properties>
@@ -36,6 +37,11 @@
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-ord</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-delivery-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
         </dependencies>
