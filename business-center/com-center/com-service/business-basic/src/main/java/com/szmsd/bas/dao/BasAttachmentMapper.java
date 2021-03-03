@@ -3,6 +3,7 @@ package com.szmsd.bas.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.bas.domain.BasAttachment;
 import com.szmsd.bas.domain.dto.BasAttachmentQueryDTO;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @author liangchao
  * @since 2020-12-08
  */
+@Mapper
 public interface BasAttachmentMapper extends BaseMapper<BasAttachment> {
 
     List<BasAttachment> selectList(BasAttachmentQueryDTO basAttachmentQueryDTO);
