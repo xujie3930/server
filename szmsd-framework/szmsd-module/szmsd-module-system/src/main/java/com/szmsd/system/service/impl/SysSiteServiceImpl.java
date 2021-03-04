@@ -2,7 +2,6 @@ package com.szmsd.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
@@ -36,8 +35,8 @@ public class SysSiteServiceImpl extends ServiceImpl<SysSiteMapper, SysSite> impl
     private SysSiteMapper sysSiteMapper;
 
 
-    @Resource
-    private BasFeignService basFeignService;
+    // @Resource
+    // private BasFeignService basFeignService;
 
     /**
      * 查询网点管理模块
@@ -305,17 +304,17 @@ public class SysSiteServiceImpl extends ServiceImpl<SysSiteMapper, SysSite> impl
             if (site == null) {
                 return 0;
             }
-            int i = baseMapper.deleteById(id);
-
-            R r = basFeignService.removes(id.toString());
-            if (i == 1 && r != null && r.getCode() == 200) {
-                return 1;
-            }
+            // int i = baseMapper.deleteById(id);
+            //
+            // R r = basFeignService.removes(id.toString());
+            // if (i == 1 && r != null && r.getCode() == 200) {
+            //     return 1;
+            // }
+            return baseMapper.deleteById(id);
         } catch (Exception e) {
             log.error("删除网点 异常 ：", e);
             throw new Exception(e);
         }
-        return 0;
     }
 
 }
