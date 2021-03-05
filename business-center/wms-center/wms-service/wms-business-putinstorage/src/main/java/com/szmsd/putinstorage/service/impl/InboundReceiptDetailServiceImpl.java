@@ -1,7 +1,9 @@
 package com.szmsd.putinstorage.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -13,13 +15,16 @@ import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.mapper.InboundReceiptDetailMapper;
 import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -30,7 +35,14 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
 
     @Override
     public List<InboundReceiptDetailVO> selectList(InboundReceiptDetailQueryDTO queryDto) {
-        return null;
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = baseMapper.selectList(queryDto);
+        inboundReceiptDetailVOS.forEach(inboundReceiptDetailVO -> {
+            List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setBusinessNo(inboundReceiptDetailVO.getWarehouseNo()).setBusinessItemNo(inboundReceiptDetailVO.getId().toString()));
+            if (CollectionUtils.isNotEmpty(attachment)) {
+                inboundReceiptDetailVO.setEditionImage(new AttachmentDataDTO().setId(attachment.get(0).getId()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
+            }
+        });
+        return inboundReceiptDetailVOS;
     }
 
     /**
@@ -41,6 +53,11 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
     @Transactional(rollbackFor = Throwable.class)
     public void saveInboundReceiptDetail(List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS) {
         log.info("保存入库单明细：SIZE={}", inboundReceiptDetailDTOS.size());
+
+        // 是否有重复的sku
+        Map<String, Long> collect = inboundReceiptDetailDTOS.stream().map(InboundReceiptDetailDTO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
+        collect.entrySet().forEach(item -> AssertUtil.isTrue(!(item.getValue() > 1L), "入库单明细存在重复SKU"));
+
         inboundReceiptDetailDTOS.forEach(this::saveInboundReceiptDetail);
         log.info("保存入库单明细：操作成功");
     }

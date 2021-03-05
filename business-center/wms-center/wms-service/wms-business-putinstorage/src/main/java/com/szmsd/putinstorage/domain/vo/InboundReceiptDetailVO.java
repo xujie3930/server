@@ -1,5 +1,7 @@
 package com.szmsd.putinstorage.domain.vo;
 
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
+import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,8 +12,6 @@ import lombok.experimental.Accessors;
 @ApiModel(value = "InboundReceiptDetailVO", description = "InboundReceiptDetailVO入库明细视图")
 public class InboundReceiptDetailVO {
 
-    private static final long serialVersionUID = 1L;
-
     @ApiModelProperty(value = "主键ID")
     private Long id;
 
@@ -19,15 +19,29 @@ public class InboundReceiptDetailVO {
     private String warehouseNo;
 
     @ApiModelProperty(value = "sku")
+    @Excel(name = "SKU")
     private String sku;
 
+    @ApiModelProperty(value = "申报品名")
+    @Excel(name = "申报品名")
+    private String skuName;
+
     @ApiModelProperty(value = "申报数量")
+    @Excel(name = "申报数量")
     private Integer declareQty;
 
     @ApiModelProperty(value = "上架数量")
     private Integer putQty;
 
     @ApiModelProperty(value = "原产品编码")
+    @Excel(name = "原产品编码")
     private String originCode;
+
+    @ApiModelProperty(value = "对版图片")
+    private AttachmentDataDTO editionImage;
+
+    @ApiModelProperty(value = "备注")
+    @Excel(name = "备注")
+    private String remark;
 
 }

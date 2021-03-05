@@ -1,8 +1,10 @@
 package com.szmsd.putinstorage.component;
 
+import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
@@ -14,6 +16,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -75,6 +78,16 @@ public class RemoteComponent {
         String warehouseNo = this.genNo("INBOUND_RECEIPT_NO");
         String substring = warehouseNo.substring(2);
         return cusCode.concat(substring);
+    }
+
+    /**
+     * 查询附件
+     * @param queryDTO
+     * @return
+     */
+    public List<BasAttachment> getAttachment(BasAttachmentQueryDTO queryDTO) {
+        List<BasAttachment> data = ListUtils.emptyIfNull(remoteAttachmentService.list(queryDTO).getData());
+        return data;
     }
 
     /**
