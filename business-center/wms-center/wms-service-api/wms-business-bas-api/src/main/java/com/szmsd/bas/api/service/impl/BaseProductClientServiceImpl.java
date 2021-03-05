@@ -13,7 +13,7 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
     private BaseProductFeignService baseProductFeignService;
 
     @Override
-    public Boolean checkSkuvalidToDelivery(String code){
+    public Boolean checkSkuValidToDelivery(String code){
         BaseProduct baseProduct = new BaseProduct();
         baseProduct.setCode(code);
         baseProduct.setWarehouseAcceptance(false);
