@@ -17,6 +17,7 @@ import static com.szmsd.common.core.web.controller.BaseController.getLen;
 public enum BasAttachmentTypeEnum {
 
     PREFIX_TEMP("PREFIX_TEMP", "临时目录", "临时文件", ""),
+    INBOUND_RECEIPT_DOCUMENTS("INBOUND_RECEIPT", "入库单", "单证信息文件", "documents"),
     ;
 
     /** 业务编码 **/

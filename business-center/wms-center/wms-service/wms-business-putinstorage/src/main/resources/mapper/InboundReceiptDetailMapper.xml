@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.putinstorage.mapper.InboundReceiptDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMapVO" type="com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO">
+        <id column="id" property="id"/>
+        <result column="warehouse_no" property="warehouseNo"/>
+        <result column="sku" property="sku"/>
+        <result column="declare_qty" property="declareQty"/>
+        <result column="put_qty" property="putQty"/>
+        <result column="origin_code" property="originCode"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List_VO">
+        id,
+        warehouse_no,
+        sku,
+        declare_qty,
+        put_qty,
+        origin_code
+    </sql>
+
+
+</mapper>
