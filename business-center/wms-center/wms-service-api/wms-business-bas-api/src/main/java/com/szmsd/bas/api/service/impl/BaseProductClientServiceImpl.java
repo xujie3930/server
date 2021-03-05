@@ -16,7 +16,6 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
     public Boolean checkSkuValidToDelivery(String code){
         BaseProduct baseProduct = new BaseProduct();
         baseProduct.setCode(code);
-        baseProduct.setWarehouseAcceptance(false);
-        return this.baseProductFeignService.checkSkuvalid(baseProduct).getData();
+        return this.baseProductFeignService.checkSkuValidToDelivery(baseProduct).getData();
     }
 }

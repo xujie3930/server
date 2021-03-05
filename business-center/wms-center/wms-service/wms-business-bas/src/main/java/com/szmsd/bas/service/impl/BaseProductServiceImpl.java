@@ -136,8 +136,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         }
 
         @Override
-        public Boolean checkSkuvalid(BaseProduct baseProduct){
-            return false;
+        public R<Boolean> checkSkuValidToDelivery(BaseProduct baseProduct){
+            QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("code",baseProduct.getCode());
+            if(baseProduct.getWarehouseAcceptance()==true)
+            {
+                queryWrapper.eq("warehouse_acceptance",true);
+            }
+            return R.ok();
         }
 
 

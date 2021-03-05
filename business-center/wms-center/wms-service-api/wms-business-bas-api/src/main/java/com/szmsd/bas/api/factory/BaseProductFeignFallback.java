@@ -15,7 +15,7 @@ public class BaseProductFeignFallback implements FallbackFactory<BaseProductFeig
     public BaseProductFeignService create(Throwable throwable) {
         return new BaseProductFeignService() {
             @Override
-            public R<Boolean> checkSkuvalid(@RequestBody BaseProduct baseProduct){
+            public R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct){
                 return R.convertResultJson(throwable);
             }
         };

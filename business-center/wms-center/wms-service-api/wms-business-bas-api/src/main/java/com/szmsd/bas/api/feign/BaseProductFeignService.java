@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(contextId = "FeignClient.BaseProductFeignService", name = BusinessBasInterface.SERVICE_NAME, fallbackFactory = SerialNumberFeignFallback.class)
 public interface BaseProductFeignService {
-    @PostMapping(value = "/base-product/checkSkuvalid")
-    R<Boolean> checkSkuvalid(@RequestBody BaseProduct baseProduct);
+    @PostMapping(value = "/base-product/checkSkuValidToDelivery")
+    R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct);
 }

@@ -110,11 +110,10 @@ public class BaseProductController extends BaseController{
     return toOk(baseProductService.deleteBaseProductByIds(ids));
     }
 
-    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:checkSkuvalid')")
-    @Log(title = "模块", businessType = BusinessType.DELETE)
-    @PostMapping("checkSkuvalid")
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:checkSkuValidToDelivery')")
+    @PostMapping("checkSkuValidToDelivery")
     @ApiOperation(value = "查询sku是否有效",notes = "查询sku是否有效")
-    public R<Boolean> checkSkuvalid(@RequestBody BaseProduct baseProduct){
-        return R.ok(baseProductService.checkSkuvalid(baseProduct));
+    public R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct){
+        return baseProductService.checkSkuValidToDelivery(baseProduct);
     }
 }

@@ -3,6 +3,7 @@ package com.szmsd.bas.service;
 import com.szmsd.bas.domain.BaseProduct;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.dto.BaseProductDto;
+import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletResponse;
@@ -71,7 +72,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
          * @param baseProduct
          * @return
          */
-        Boolean checkSkuvalid(BaseProduct baseProduct);
+        R<Boolean> checkSkuValidToDelivery(BaseProduct baseProduct);
 
 }
 
