@@ -66,11 +66,11 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
     public InboundReceiptDetail saveInboundReceiptDetail(InboundReceiptDetailDTO inboundReceiptDetailDTO) {
         log.info("保存入库单明细：{}", inboundReceiptDetailDTO);
 
-        Object sku = remoteComponent.getSku(inboundReceiptDetailDTO.getSku());
-        AssertUtil.notNull(sku, "SKU[" + sku + "]不存在");
+        // 验证SKU
+        remoteComponent.vailSku(inboundReceiptDetailDTO.getSku());
 
         Integer declareQty = inboundReceiptDetailDTO.getDeclareQty();
-        AssertUtil.isTrue(declareQty > 0, "SKU[" + sku + "]申报数量不能为" + declareQty);
+        AssertUtil.isTrue(declareQty > 0, "SKU[" + inboundReceiptDetailDTO.getSku() + "]申报数量不能为" + declareQty);
 
         InboundReceiptDetail inboundReceiptDetail = BeanMapperUtil.map(inboundReceiptDetailDTO, InboundReceiptDetail.class);
         baseMapper.insert(inboundReceiptDetail);
