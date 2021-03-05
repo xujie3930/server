@@ -111,8 +111,9 @@ public class BasAttachmentController extends BaseController {
     @ApiOperation(httpMethod = "POST", value = "附件上传 - bas:uploadattachment:uploadattachment - swagger接收不到文件", notes = "附件上传")
     @PostMapping(value = "/uploadAttachment", headers = "content-type=multipart/form-data")
     @ApiImplicitParams({@ApiImplicitParam(name = "attachmentTypeEnum", value = "附件类型", required = true),
-            @ApiImplicitParam(name = "businessNo", value = "业务编号 - 编辑功能需要操作附件时传入 - 并同时保存附件表 业务场景：补充附件")})
-    public R<List<BasAttachmentDataDTO>> uploadAttachment(@RequestParam("attachmentUrl") MultipartFile[] myFiles, @RequestParam("attachmentTypeEnum") BasAttachmentTypeEnum attachmentTypeEnum, String businessNo) {
+            @ApiImplicitParam(name = "businessNo", value = "业务编号 - 业务场景：补充附件"),
+            @ApiImplicitParam(name = "businessItemNo", value = "业务明细号 - 业务场景：补充附件"),})
+    public R<List<BasAttachmentDataDTO>> uploadAttachment(@RequestParam("attachmentUrl") MultipartFile[] myFiles, @RequestParam("attachmentTypeEnum") BasAttachmentTypeEnum attachmentTypeEnum, String businessNo, String businessItemNo) {
         List<BasAttachmentDataDTO> filesUrl = new ArrayList<>();
         List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
         if (CollectionUtils.isEmpty(multipartFiles)) {
@@ -130,7 +131,7 @@ public class BasAttachmentController extends BaseController {
         });
         if (!"null".equalsIgnoreCase(businessNo) && StringUtils.isNotEmpty(businessNo)) {
             log.info("业务编号不为空 {} - 变更为补充附件 - 保存附件信息", businessNo);
-            basAttachmentService.insert(new BasAttachmentDTO().setBusinessNo(businessNo).setFileList(filesUrl).setAttachmentTypeEnum(attachmentTypeEnum));
+            basAttachmentService.insert(new BasAttachmentDTO().setBusinessNo(businessNo).setBusinessItemNo(businessItemNo).setFileList(filesUrl).setAttachmentTypeEnum(attachmentTypeEnum));
             log.info("业务编号不为空 {} - 变更为补充附件 - 保存完成", businessNo);
             R r = R.ok(filesUrl);
             r.setMsg("附件补充完成，业务编号：" + businessNo);

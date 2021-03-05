@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.mapper.BaseProductMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BaseProduct">
+                    <id column="id" property="id"/>
+                    <result column="create_by_name" property="createByName"/>
+                    <result column="create_time" property="createTime"/>
+                    <result column="update_by_name" property="updateByName"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="remark" property="remark"/>
+                    <result column="create_by" property="createBy"/>
+                    <result column="update_by" property="updateBy"/>
+                    <result column="del_flag" property="delFlag"/>
+                    <result column="product_name" property="productName"/>
+                    <result column="code" property="code"/>
+                    <result column="init_weight" property="initWeight"/>
+                    <result column="init_length" property="initLength"/>
+                    <result column="init_width" property="initWidth"/>
+                    <result column="init_height" property="initHeight"/>
+                    <result column="is_active" property="isActive"/>
+                    <result column="product_image" property="productImage"/>
+                    <result column="suffix" property="suffix"/>
+                    <result column="init_volume" property="initVolume"/>
+                    <result column="seller_code" property="sellerCode"/>
+                    <result column="product_name_chinese" property="productNameChinese"/>
+                    <result column="declared_value" property="declaredValue"/>
+                    <result column="product_attribute" property="productAttribute"/>
+                    <result column="product_attribute_name" property="productAttributeName"/>
+                    <result column="electrified_mode" property="electrifiedMode"/>
+                    <result column="electrified_mode_name" property="electrifiedModeName"/>
+                    <result column="battery_packaging" property="batteryPackaging"/>
+                    <result column="battery_packaging_name" property="batteryPackagingName"/>
+                    <result column="have_packing_material" property="havePackingMaterial"/>
+                    <result column="bind_code" property="bindCode"/>
+                    <result column="suggest_packing_material" property="suggestPackingMaterial"/>
+                    <result column="suggest_packing_material_name" property="suggestPackingMaterialName"/>
+                    <result column="begin_price" property="beginPrice"/>
+                    <result column="end_price" property="endPrice"/>
+                    <result column="product_description" property="productDescription"/>
+                    <result column="product_introduct_address" property="productIntroductAddress"/>
+                    <result column="category" property="category"/>
+                    <result column="warehouse_acceptance" property="warehouseAcceptance"/>
+                    <result column="attribute1" property="attribute1"/>
+                    <result column="attribute2" property="attribute2"/>
+                    <result column="attribute3" property="attribute3"/>
+                    <result column="attribute4" property="attribute4"/>
+                    <result column="attribute5" property="attribute5"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+                create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, create_by, update_by, del_flag, product_name, code, init_weight, init_length, init_width, init_height, is_active, product_image, suffix, init_volume, seller_code, product_name_chinese, declared_value, product_attribute, product_attribute_name, electrified_mode, electrified_mode_name, battery_packaging, battery_packaging_name, have_packing_material, bind_code, suggest_packing_material, suggest_packing_material_name, begin_price, end_price, product_description, product_introduct_address, type, warehouse_acceptance, attribute1, attribute2, attribute3, attribute4, attribute5
+        </sql>
+
+
+</mapper>
