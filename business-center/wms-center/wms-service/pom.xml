@@ -20,6 +20,7 @@
         <module>wms-business-bas</module>
         <module>wms-business-ord</module>
         <module>wms-business-delivery</module>
+        <module>wms-business-putinstorage</module>
     </modules>
 
     <properties>
