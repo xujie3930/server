@@ -2,6 +2,7 @@ package com.szmsd.common.core.domain;
 
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.com.LogisticsException;
 import com.szmsd.common.core.exception.com.LogisticsExceptionUtil;
 
@@ -28,6 +29,7 @@ public class R<T> implements Serializable {
         LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.SUCCESS, getLen());
         return restResult(null, Constants.SUCCESS, logisticsException.getMessage());
     }
+
     //区分语言 成功返回数据
     public static <T> R<T> ok(T data) {
         LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.SUCCESS, getLen());
@@ -39,6 +41,7 @@ public class R<T> implements Serializable {
         LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.FAIL, getLen());
         return restResult(null, Constants.FAIL, logisticsException.getMessage());
     }
+
     //区分语言默认返回的失败
     public static <T> R<T> onFailed() {
         LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.FAIL, null);
@@ -53,8 +56,8 @@ public class R<T> implements Serializable {
     }
 
     //区分语言返回的失败 自定义错误枚举+动态枚举参数, 在枚举 里用&通配符
-    public static <T> R<T> failed(ExceptionMessageEnum messageEnum,Object... values) {
-        LogisticsException logisticsException = LogisticsExceptionUtil.getException(messageEnum, getLen(),values);
+    public static <T> R<T> failed(ExceptionMessageEnum messageEnum, Object... values) {
+        LogisticsException logisticsException = LogisticsExceptionUtil.getException(messageEnum, getLen(), values);
         return restResult(null, Constants.FAIL, logisticsException.getMessage());
     }
 
@@ -65,19 +68,17 @@ public class R<T> implements Serializable {
     }
 
     //区分语言返回的失败 自定义code+错误枚举+动态枚举参数, 在枚举 里用&通配符
-    public static <T> R<T> failed(Integer code,ExceptionMessageEnum messageEnum,Object... values) {
-        LogisticsException logisticsException = LogisticsExceptionUtil.getException(messageEnum, getLen(),values);
+    public static <T> R<T> failed(Integer code, ExceptionMessageEnum messageEnum, Object... values) {
+        LogisticsException logisticsException = LogisticsExceptionUtil.getException(messageEnum, getLen(), values);
         return restResult(null, code, logisticsException.getMessage());
     }
 
 
-
     //区分语言 失败返回数据+拼接失败单号等
-    public static <T> R<T> failed(ExceptionMessageEnum messageEnum,String msg) {
+    public static <T> R<T> failed(ExceptionMessageEnum messageEnum, String msg) {
         LogisticsException logisticsException = LogisticsExceptionUtil.getException(messageEnum, getLen());
-        return restResult(null, Constants.FAIL, logisticsException.getMessage()+msg);
+        return restResult(null, Constants.FAIL, logisticsException.getMessage() + msg);
     }
-
 
 
     //不区分语言 失败返回数据
@@ -92,7 +93,33 @@ public class R<T> implements Serializable {
 //        return restResult(data, Constants.SUCCESS, "操作成功");
 //    }
 
+    public static <T> R<T> convertResultJson(Throwable throwable) {
+        R<T> r = new R<>();
+        if (null == throwable) {
+            return r;
+        }
+        if (throwable instanceof CommonException) {
+            CommonException commonException = (CommonException) throwable;
+            r.setCode(Constants.FAIL);
+            r.setMsg(commonException.getMessage());
+        } else {
+            r.setCode(Constants.FAIL);
+            r.setMsg(throwable.getMessage());
+        }
+        return r;
+    }
 
+    public static <T> T getDataAndException(R<T> r) {
+        if (null != r) {
+            if (Constants.SUCCESS == r.getCode()) {
+                return r.getData();
+            } else {
+                // 抛出接口返回的异常信息
+                throw new CommonException("" + r.getCode(), r.getMsg());
+            }
+        }
+        return null;
+    }
 
 
     public static <T> R<T> failed(int code, String msg) {

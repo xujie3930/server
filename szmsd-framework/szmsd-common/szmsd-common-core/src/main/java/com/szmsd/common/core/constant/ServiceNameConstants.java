@@ -5,8 +5,7 @@ package com.szmsd.common.core.constant;
  *
  * @author szmsd
  */
-public interface ServiceNameConstants
-{
+public interface ServiceNameConstants {
     /**
      * 认证服务的serviceid
      */
@@ -21,7 +20,17 @@ public interface ServiceNameConstants
     /**
      * 消息推送的服务serviceid
      */
-    public static final String  WEBSOCKET_SERVICE = "szmsd-websocket";
+    public static final String WEBSOCKET_SERVICE = "szmsd-websocket";
+
+    /**
+     * bas服务
+     */
+    public static final String BAS_SERVICE = "wms-business-bas";
+
+    /**
+     * 公共模块的serviceid
+     */
+    String BUSINESS_BAS = "business-basic";
 
     /**
      * bas服务

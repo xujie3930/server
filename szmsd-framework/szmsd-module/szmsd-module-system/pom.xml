@@ -119,6 +119,12 @@
             <artifactId>druid</artifactId>
             <version>${druid.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>business-basic-api</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
         <!--        <dependency>
                     <groupId>com.szmsd</groupId>
                     <artifactId>business-base-api</artifactId>

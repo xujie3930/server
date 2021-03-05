@@ -2,6 +2,7 @@ package com.szmsd.bas.domain;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @author lufei
@@ -10,6 +11,7 @@ import lombok.Data;
  * @Description
  */
 @Data
+@Accessors(chain = true)
 public class BasCodeDto {
 
     @ApiModelProperty(value = "应用编号")

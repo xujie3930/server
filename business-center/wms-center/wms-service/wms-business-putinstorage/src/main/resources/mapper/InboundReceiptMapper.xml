@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.putinstorage.mapper.InboundReceiptMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMapVO" type="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
+        <id column="id" property="id"/>
+        <result column="warehouse_no" property="warehouseNo"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="cus_code" property="cusCode"/>
+        <result column="order_type" property="orderType"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_method_code" property="warehouseMethodCode"/>
+        <result column="warehouse_category_code" property="warehouseCategoryCode"/>
+        <result column="vat" property="vat"/>
+        <result column="delivery_way_code" property="deliveryWayCode"/>
+        <result column="delivery_no" property="deliveryNo"/>
+        <result column="total_declare_qty" property="totalDeclareQty"/>
+        <result column="total_put_qty" property="totalPutQty"/>
+        <result column="goods_source_code" property="goodsSourceCode"/>
+        <result column="tracking_number" property="trackingNumber"/>
+        <result column="status" property="status"/>
+
+        <!-- 多语言字段 -->
+        <result column="cus_name" property="cusName"/>
+        <result column="warehouse_name" property="warehouseName"/>
+        <result column="warehouse_method_name" property="warehouseMethodName"/>
+        <result column="warehouse_category_name" property="warehouseCategoryName"/>
+        <result column="delivery_way_name" property="deliveryWayName"/>
+        <result column="goods_source_name" property="goodsSourceName"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List_VO">
+        t.id,
+        t.warehouse_no,
+        t.order_no,
+        t.cus_code,
+        t.order_type,
+        t.warehouse_code,
+        t.warehouse_method_code,
+        t.warehouse_category_code,
+        t.vat,
+        t.delivery_way_code,
+        t.delivery_no,
+        t.total_declare_qty,
+        t.total_put_qty,
+        t.goods_source_code,
+        t.tracking_number,
+        t.status,
+
+        -- 多语言字段
+        t.cus_code cus_name,
+        t.warehouse_code warehouse_name,
+        t.warehouse_method_code warehouse_method_name,
+        t.warehouse_category_code warehouse_category_name,
+        t.delivery_way_code delivery_way_name,
+        t.goods_source_code goods_source_name
+    </sql>
+    <select id="selectList" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultType="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
+        SELECT <include refid="Base_Column_List_VO"/>
+        FROM inbound_receipt t
+        <where><include refid="selectListWhere"/></where>
+    </select>
+    <sql id="selectListWhere">
+        <if test="warehouseNo != null and warehouseNo != ''">AND t.warehouse_no = #{warehouseNo}</if>
+        <if test="orderNo != null and orderNo != ''">AND t.order_no = #{orderNo}</if>
+        <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
+        <if test="cusCode != null and cusCode != ''">AND t.cus_code = #{cusCode}</if>
+        <if test="status != null and status != ''">AND t.cus_code = #{status}</if>
+        <if test="deliveryWayCode != null and deliveryWayCode != ''">AND t.delivery_way_code = #{deliveryWayCode}</if>
+        <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
+        <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>
+    </sql>
+
+</mapper>
