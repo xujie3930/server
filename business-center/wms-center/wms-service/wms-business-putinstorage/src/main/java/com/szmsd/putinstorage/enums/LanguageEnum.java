@@ -6,5 +6,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum LanguageEnum {
-    nullName, zhName, enName
+    sysName, zhName, enName
 }
