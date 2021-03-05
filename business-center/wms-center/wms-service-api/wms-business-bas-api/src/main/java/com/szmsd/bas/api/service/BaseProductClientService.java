@@ -6,5 +6,5 @@ public interface BaseProductClientService {
      * @param code
      * @return
      */
-    Boolean checkSkuvalid(String code);
+    Boolean checkSkuvalidToDelivery(String code);
 }

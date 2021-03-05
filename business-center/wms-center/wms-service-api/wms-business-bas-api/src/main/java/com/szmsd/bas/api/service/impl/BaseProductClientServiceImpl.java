@@ -13,9 +13,10 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
     private BaseProductFeignService baseProductFeignService;
 
     @Override
-    public Boolean checkSkuvalid(String code){
+    public Boolean checkSkuvalidToDelivery(String code){
         BaseProduct baseProduct = new BaseProduct();
         baseProduct.setCode(code);
+        baseProduct.setWarehouseAcceptance(false);
         return this.baseProductFeignService.checkSkuvalid(baseProduct).getData();
     }
 }
