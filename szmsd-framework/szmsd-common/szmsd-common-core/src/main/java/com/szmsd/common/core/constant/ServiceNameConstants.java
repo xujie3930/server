@@ -32,9 +32,4 @@ public interface ServiceNameConstants {
      */
     String BUSINESS_BAS = "business-basic";
 
-    /**
-     * bas服务
-     */
-    public static final String  BAS_SERVICE = "wms-business-bas";
-
 }
