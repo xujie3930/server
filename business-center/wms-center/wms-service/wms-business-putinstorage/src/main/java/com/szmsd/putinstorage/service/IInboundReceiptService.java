@@ -5,6 +5,7 @@ import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 
 import java.util.List;
@@ -24,6 +25,8 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     void create(CreateInboundReceiptDTO createInboundReceiptDTO);
 
     InboundReceipt saveInboundReceipt(InboundReceiptDTO inboundReceiptDTO);
+
+    InboundReceiptInfoVO queryInfo(String warehouseNo);
 
 }
 

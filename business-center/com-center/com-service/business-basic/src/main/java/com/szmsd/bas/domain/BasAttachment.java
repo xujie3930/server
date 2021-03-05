@@ -1,6 +1,8 @@
 package com.szmsd.bas.domain;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.szmsd.common.core.annotation.Excel;
@@ -78,5 +80,13 @@ public class BasAttachment extends BaseEntity {
     @ApiModelProperty(value = "附件格式")
     @Excel(name = "附件格式")
     private String attachmentFormat;
+
+    @ApiModelProperty(value = "创建ID",hidden = true)
+    @TableField(fill = FieldFill.INSERT)
+    private String createBy;
+
+    @ApiModelProperty(value = "修改者ID",hidden = true)
+    @TableField(fill = FieldFill.UPDATE)
+    private String updateBy;
 
 }

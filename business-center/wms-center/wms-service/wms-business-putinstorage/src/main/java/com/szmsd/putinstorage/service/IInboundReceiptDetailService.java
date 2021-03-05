@@ -23,5 +23,6 @@ public interface IInboundReceiptDetailService extends IService<InboundReceiptDet
     void saveInboundReceiptDetail(List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS);
 
     InboundReceiptDetail saveInboundReceiptDetail(InboundReceiptDetailDTO inboundReceiptDetailDTO);
+
 }
 
