@@ -3,7 +3,21 @@
 <mapper namespace="com.szmsd.putinstorage.mapper.InboundReceiptMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMapVO" type="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
+    <resultMap id="InboundReceiptVO" type="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
+        <id column="id" property="id"/>
+        <result column="warehouse_no" property="warehouseNo"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="status" property="status"/>
+        <result column="status_name" property="statusName"/>
+        <result column="delivery_way_name" property="deliveryWayName"/>
+        <result column="warehouse_name" property="warehouseName"/>
+        <result column="warehouse_method_name" property="warehouseMethodName"/>
+        <result column="total_declare_qty" property="totalDeclareQty"/>
+        <result column="total_put_qty" property="totalPutQty"/>
+        <result column="cus_code" property="cusCode"/>
+    </resultMap>
+
+    <resultMap id="InboundReceiptInfoVO" type="com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO">
         <id column="id" property="id"/>
         <result column="warehouse_no" property="warehouseNo"/>
         <result column="order_no" property="orderNo"/>
@@ -30,8 +44,22 @@
         <result column="goods_source_name" property="goodsSourceName"/>
     </resultMap>
 
-    <!-- 通用查询结果列 -->
-    <sql id="Base_Column_List_VO">
+    <sql id="Column_List_VO">
+        t.id,
+        t.warehouse_no,
+        t.order_no,
+        t.status,
+        t.status status_name,
+        t.delivery_way_code delivery_way_name,
+        t.warehouse_code warehouse_name,
+        t.warehouse_method_code warehouse_method_name,
+        t.total_declare_qty,
+        t.total_put_qty,
+        t.cus_code,
+        t.create_time
+    </sql>
+
+    <sql id="Column_List_INFO_VO">
         t.id,
         t.warehouse_no,
         t.order_no,
@@ -58,10 +86,20 @@
         t.goods_source_code goods_source_name
     </sql>
     <select id="selectList" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultType="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
-        SELECT <include refid="Base_Column_List_VO"/>
+        SELECT <include refid="Column_List_VO"/>
         FROM inbound_receipt t
         <where><include refid="selectListWhere"/></where>
     </select>
+    <select id="selectInfo" resultMap="InboundReceiptInfoVO">
+        SELECT <include refid="Column_List_VO"/>
+        FROM inbound_receipt t
+        <where>
+            <if test="id != null and id != ''">AND t.id = #{id}</if>
+            <if test="warehouseNo != null and warehouseNo != ''">AND t.warehouse_no = #{warehouseNo}</if>
+            <if test="(id == null or id == ''.toString()) and (warehouseNo == null and warehouseNo == ''.toString())"><![CDATA[AND 1 <> 1]]></if>
+        </where>
+    </select>
+
     <sql id="selectListWhere">
         <if test="warehouseNo != null and warehouseNo != ''">AND t.warehouse_no = #{warehouseNo}</if>
         <if test="orderNo != null and orderNo != ''">AND t.order_no = #{orderNo}</if>

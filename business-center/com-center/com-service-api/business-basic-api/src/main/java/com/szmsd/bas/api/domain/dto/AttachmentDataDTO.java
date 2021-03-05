@@ -2,6 +2,7 @@ package com.szmsd.bas.api.domain.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotEmpty;
  * @since 2020-12-14
  */
 @Data
+@Accessors(chain = true)
 public class AttachmentDataDTO {
 
     @ApiModelProperty(value = "主键ID")

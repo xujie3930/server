@@ -16,7 +16,7 @@ import java.util.List;
  * @Date 2020-06-30 14:03
  * @Description
  */
-@FeignClient(contextId = "basFeignService", value = ServiceNameConstants.BAS_SERVICE, fallbackFactory = BasFeignServiceFallbackFactory.class)
+@FeignClient(contextId = "basFeignService", value = ServiceNameConstants.BUSINESS_BAS, fallbackFactory = BasFeignServiceFallbackFactory.class)
 public interface BasFeignService {
 
     /**

@@ -38,6 +38,9 @@ public class InboundReceiptDetail extends BaseEntity {
     @ApiModelProperty(value = "sku")
     private String sku;
 
+    @ApiModelProperty(value = "申报品名")
+    private String skuName;
+
     @ApiModelProperty(value = "申报数量")
     private Integer declareQty;
 

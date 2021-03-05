@@ -18,6 +18,9 @@ public class InboundReceiptDetailDTO {
     @ApiModelProperty(value = "sku")
     private String sku;
 
+    @ApiModelProperty(value = "申报品名")
+    private String skuName;
+
     @ApiModelProperty(value = "申报数量")
     private Integer declareQty;
 
@@ -26,6 +29,9 @@ public class InboundReceiptDetailDTO {
 
     @ApiModelProperty(value = "原产品编码")
     private String originCode;
+
+    @ApiModelProperty(value = "备注")
+    private String remark;
 
     @ApiModelProperty(value = "对版图片")
     private AttachmentDataDTO editionImage;

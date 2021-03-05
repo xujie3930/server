@@ -3,24 +3,36 @@
 <mapper namespace="com.szmsd.putinstorage.mapper.InboundReceiptDetailMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMapVO" type="com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO">
+    <resultMap id="ReceiptDetailVO" type="com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO">
         <id column="id" property="id"/>
         <result column="warehouse_no" property="warehouseNo"/>
         <result column="sku" property="sku"/>
+        <result column="sku_name" property="skuName"/>
         <result column="declare_qty" property="declareQty"/>
         <result column="put_qty" property="putQty"/>
         <result column="origin_code" property="originCode"/>
+        <result column="remark" property="remark"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
-    <sql id="Base_Column_List_VO">
-        id,
-        warehouse_no,
-        sku,
-        declare_qty,
-        put_qty,
-        origin_code
+    <sql id="Column_List_VO">
+        t.id,
+        t.warehouse_no,
+        t.sku,
+        t.sku_name,
+        t.declare_qty,
+        t.put_qty,
+        t.origin_code,
+        t.remark
     </sql>
+    <select id="selectList" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO" resultMap="ReceiptDetailVO">
+        SELECT <include refid="Column_List_VO"/>
+        FROM inbound_receipt_detail t
+        <where>
+            <if test="id != null and id != ''">AND t.id = #{id}</if>
+            <if test="warehouseNo != null and warehouseNo != ''">AND t.warehouse_no = #{warehouseNo}</if>
+        </where>
+    </select>
 
 
 </mapper>

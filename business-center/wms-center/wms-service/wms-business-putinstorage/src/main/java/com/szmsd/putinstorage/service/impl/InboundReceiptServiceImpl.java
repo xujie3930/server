@@ -11,19 +11,22 @@ import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
+import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 import com.szmsd.putinstorage.mapper.InboundReceiptMapper;
 import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -87,7 +90,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         InboundReceipt inboundReceipt = BeanMapperUtil.map(inboundReceiptDTO, InboundReceipt.class);
         // 获取入库单号
-        String warehouseNo = Optional.ofNullable(inboundReceipt.getWarehouseCode()).orElseGet(() -> remoteComponent.getWarehouseNo(inboundReceiptDTO.getCusCode()));
+        String warehouseNo = inboundReceipt.getWarehouseNo();
+        if (StringUtils.isEmpty(warehouseNo)) {
+            warehouseNo = remoteComponent.getWarehouseNo(inboundReceiptDTO.getCusCode());
+        }
         inboundReceipt.setWarehouseNo(warehouseNo);
         baseMapper.insert(inboundReceipt);
 
@@ -96,6 +102,25 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         log.info("保存入库单：操作完成");
         return inboundReceipt;
+    }
+
+    /**
+     * 入库单详情
+     * @param warehouseNo
+     * @return
+     */
+    @Override
+    public InboundReceiptInfoVO queryInfo(String warehouseNo) {
+        log.info("查询入库单详情：warehouseNo={}", warehouseNo);
+        InboundReceiptInfoVO inboundReceiptInfoVO = baseMapper.selectInfo(null, warehouseNo);
+        if (inboundReceiptInfoVO == null) {
+            return null;
+        }
+        // 差明细
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = iInboundReceiptDetailService.selectList(new InboundReceiptDetailQueryDTO().setWarehouseNo(warehouseNo));
+        inboundReceiptInfoVO.setInboundReceiptDetailVOS(inboundReceiptDetailVOS);
+        log.info("查询入库单详情：查询完成{}", inboundReceiptDetailVOS);
+        return inboundReceiptInfoVO;
     }
 
 

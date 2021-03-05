@@ -7,8 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum LocalLanguageTypeEnum {
 
-    /** 无效语言 **/
-    INVALID_LANGUAGE,
+    /** 系统语言 **/
+    SYSTEM_LANGUAGE,
 
     /** 入库单状态 **/
     INBOUND_RECEIPT_STATUS
