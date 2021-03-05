@@ -32,12 +32,12 @@
         <dependencies>
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
-                <artifactId>wms-business-bas</artifactId>
+                <artifactId>wms-business-bas-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
-                <artifactId>wms-business-ord</artifactId>
+                <artifactId>wms-business-ord-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
             <dependency>

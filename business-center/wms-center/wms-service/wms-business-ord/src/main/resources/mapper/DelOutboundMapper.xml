@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.ord.mapper.DelOutboundMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.szmsd.ord.domain.DelOutbound">
+                    <id column="id" property="id"/>
+                    <result column="create_by_name" property="createByName"/>
+                    <result column="create_time" property="createTime"/>
+                    <result column="update_by_name" property="updateByName"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="remark" property="remark"/>
+                    <result column="create_by" property="createBy"/>
+                    <result column="update_by" property="updateBy"/>
+                    <result column="version" property="version"/>
+                    <result column="del_flag" property="delFlag"/>
+                    <result column="trace_id" property="traceId"/>
+                    <result column="order_no" property="orderNo"/>
+                    <result column="warehouse_code" property="warehouseCode"/>
+                    <result column="order_type" property="orderType"/>
+                    <result column="seller_code" property="sellerCode"/>
+                    <result column="tracking_no" property="trackingNo"/>
+                    <result column="shipment_rule" property="shipmentRule"/>
+                    <result column="packing_rule" property="packingRule"/>
+                    <result column="ref_order_no" property="refOrderNo"/>
+                    <result column="packing_by_required" property="packingByRequired"/>
+                    <result column="first" property="first"/>
+                    <result column="new_sku" property="newSku"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+                create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, create_by, update_by, version, del_flag, trace_id, order_no, warehouse_code, order_type, seller_code, tracking_no, shipment_rule, packing_rule, ref_order_no, packing_by_required, first, new_sku
+        </sql>
+
+
+</mapper>
