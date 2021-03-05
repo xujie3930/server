@@ -55,7 +55,7 @@ public class FieldLanguage extends JsonSerializer<String> implements ContextualS
     @Override
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         try {
-            if (jsonI18nLocalLanguage != LocalLanguageTypeEnum.INVALID_LANGUAGE) {
+            if (jsonI18nLocalLanguage != LocalLanguageTypeEnum.SYSTEM_LANGUAGE) {
                 gen.writeString(getLocalLanguage(value));
                 return;
             } else if (StringUtils.isNotEmpty(jsonI18nType)) {
@@ -103,7 +103,7 @@ public class FieldLanguage extends JsonSerializer<String> implements ContextualS
     }
 
     private String getLen() {
-        if (jsonI18nLanguage != LanguageEnum.nullName) {
+        if (jsonI18nLanguage != LanguageEnum.sysName) {
             return jsonI18nLanguage.name();
         }
         String len = ServletUtils.getHeaders("Langr");

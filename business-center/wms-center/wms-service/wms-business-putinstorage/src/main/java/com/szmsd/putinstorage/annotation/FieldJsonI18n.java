@@ -32,15 +32,15 @@ public @interface FieldJsonI18n {
     String value() default "";
 
     /**
-     * 自定义获取语言 LanguageEnum.nullName 为当前系统语言
+     * 自定义获取语言 LanguageEnum.sysName 为当前系统语言
      * @return
      */
-    LanguageEnum language() default LanguageEnum.nullName;
+    LanguageEnum language() default LanguageEnum.sysName;
 
     /**
      * 本地语言类型 LocalLanguageTypeEnum --> LocalLanguageEnum
      * @return
      */
-    LocalLanguageTypeEnum localLanguageType() default LocalLanguageTypeEnum.INVALID_LANGUAGE;
+    LocalLanguageTypeEnum localLanguageType() default LocalLanguageTypeEnum.SYSTEM_LANGUAGE;
 
 }
