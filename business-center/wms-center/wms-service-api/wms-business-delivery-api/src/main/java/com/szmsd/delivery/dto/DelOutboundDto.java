@@ -1,5 +1,6 @@
 package com.szmsd.delivery.dto;
 
+import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -16,6 +17,10 @@ import java.util.List;
 @Data
 @ApiModel(value = "出库单", description = "DelOutboundDto对象")
 public class DelOutboundDto implements Serializable {
+
+    @NotNull(message = "ID不能为空", groups = ValidationUpdateGroup.class)
+    @ApiModelProperty(value = "ID")
+    private Long id;
 
     @NotBlank(message = "仓库代码不能为空")
     @ApiModelProperty(value = "仓库代码")
