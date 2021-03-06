@@ -1,5 +1,7 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.szmsd.bas.api.service.impl.SerialNumberClientServiceImpl,/\
+  com.szmsd.bas.api.feign.SerialNumberFeignService,\
+  com.szmsd.bas.api.feign.BaseProductFeignService,\
+  com.szmsd.bas.api.service.impl.SerialNumberClientServiceImpl,\
   com.szmsd.bas.api.service.impl.BaseProductClientServiceImpl
 
   
