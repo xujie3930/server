@@ -15,6 +15,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,6 +65,13 @@ public class InboundReceiptController extends BaseController {
         return R.ok();
     }
 
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
+    @DeleteMapping("/cancel/{warehouseNo}")
+    @ApiOperation(value = "取消", notes = "入库管理 - 取消")
+    public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
+        inboundReceiptService.cancel(warehouseNo);
+        return R.ok();
+    }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:info')")
     @GetMapping("/info/{warehouseNo}")

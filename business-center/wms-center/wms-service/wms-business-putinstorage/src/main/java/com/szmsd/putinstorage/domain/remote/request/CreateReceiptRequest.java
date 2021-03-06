@@ -47,6 +47,7 @@ public class CreateReceiptRequest implements Serializable {
         this.sellerCode = createInboundReceiptDTO.getCusCode();
         this.trackingNumber = createInboundReceiptDTO.getDeliveryNo();
         this.remark = createInboundReceiptDTO.getRemark();
+        this.refOrderNo = createInboundReceiptDTO.getWarehouseNo();
         this.details = createInboundReceiptDTO.getInboundReceiptDetailDTOS().stream().map(detail -> {
             ReceiptDetailInfo receiptDetailInfo = new ReceiptDetailInfo();
             receiptDetailInfo.setSku(detail.getSku());

@@ -7,7 +7,9 @@ import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasFeignService;
+import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -42,6 +44,9 @@ public class RemoteComponent {
     /** 附件远程服务 **/
     @Resource
     private RemoteAttachmentService remoteAttachmentService;
+
+    @Resource
+    private BaseProductFeignService baseProductFeignService;
 
     /**
      * 获取登录人信息
@@ -112,12 +117,14 @@ public class RemoteComponent {
     }
 
     /**
-     * 获取SKU
+     * 验证sku，验证失抛异常
      * @param sku
      * @return
      */
-    public Object getSku(String sku) {
-        return sku;
+    public void vailSku(String sku) {
+        log.info("验证SKU：SKU={}" + sku);
+        R<Boolean> booleanR = baseProductFeignService.checkSkuValidToDelivery(new BaseProduct().setCode(sku));
+        AssertUtil.isTrue(booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
     }
 
 }
