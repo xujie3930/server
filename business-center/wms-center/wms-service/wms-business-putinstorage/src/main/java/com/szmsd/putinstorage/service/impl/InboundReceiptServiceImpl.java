@@ -13,13 +13,17 @@ import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
+import com.szmsd.putinstorage.domain.remote.request.CancelReceiptRequest;
+import com.szmsd.putinstorage.domain.remote.request.CreateReceiptRequest;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.mapper.InboundReceiptMapper;
 import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +57,20 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     }
 
     /**
+     * 入库单号查询
+     * @param warehouseNo
+     * @return
+     */
+    @Override
+    public InboundReceiptVO selectByWarehouseNo(String warehouseNo) {
+        List<InboundReceiptVO> inboundReceiptVOS = this.selectList(new InboundReceiptQueryDTO().setWarehouseNo(warehouseNo));
+        if (CollectionUtils.isNotEmpty(inboundReceiptVOS)) {
+            return inboundReceiptVOS.get(0);
+        }
+        return null;
+    }
+
+    /**
      * 创建入库单
      * @param createInboundReceiptDTO
      */
@@ -73,8 +91,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         iInboundReceiptDetailService.saveInboundReceiptDetail(inboundReceiptDetailDTOS);
 
         // 第三方接口推送
-//        CreateReceiptRequest createReceiptRequest = new CreateReceiptRequest(createInboundReceiptDTO);
-//        remoteRequest.createInboundReceipt(createReceiptRequest);
+        CreateReceiptRequest createReceiptRequest = new CreateReceiptRequest(createInboundReceiptDTO);
+        remoteRequest.createInboundReceipt(createReceiptRequest);
 
         log.info("创建入库单：操作完成");
     }
@@ -105,6 +123,28 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     }
 
     /**
+     * 取消
+     * @param warehouseNo
+     */
+    @Override
+    public void cancel(String warehouseNo) {
+        log.info("取消入库单：warehouseNo={}", warehouseNo);
+
+        InboundReceiptVO inboundReceiptVO = this.selectByWarehouseNo(warehouseNo);
+        AssertUtil.notNull(inboundReceiptVO, "入库单[" + warehouseNo + "]不存在");
+
+        // 第三方接口推送
+        CancelReceiptRequest cancelReceiptRequest = new CancelReceiptRequest();
+        cancelReceiptRequest.setOrderNo(inboundReceiptVO.getWarehouseNo());
+        cancelReceiptRequest.setWarehouseCode(inboundReceiptVO.getWarehouseMethodName());
+        remoteRequest.cancelInboundReceipt(cancelReceiptRequest);
+
+        // 修改为取消状态
+        this.updateById(new InboundReceipt().setId(inboundReceiptVO.getId()).setStatus(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()));
+        log.info("取消入库单：操作完成");
+    }
+
+    /**
      * 入库单详情
      * @param warehouseNo
      * @return
@@ -116,13 +156,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         if (inboundReceiptInfoVO == null) {
             return null;
         }
-        // 差明细
+        // 查明细
         List<InboundReceiptDetailVO> inboundReceiptDetailVOS = iInboundReceiptDetailService.selectList(new InboundReceiptDetailQueryDTO().setWarehouseNo(warehouseNo));
         inboundReceiptInfoVO.setInboundReceiptDetailVOS(inboundReceiptDetailVOS);
         log.info("查询入库单详情：查询完成{}", inboundReceiptDetailVOS);
         return inboundReceiptInfoVO;
     }
-
 
     /**
      * 异步保存附件

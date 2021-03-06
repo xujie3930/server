@@ -22,11 +22,14 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
 
     List<InboundReceiptVO> selectList(InboundReceiptQueryDTO queryDto);
 
+    InboundReceiptVO selectByWarehouseNo(String warehouseNo);
+
     void create(CreateInboundReceiptDTO createInboundReceiptDTO);
 
     InboundReceipt saveInboundReceipt(InboundReceiptDTO inboundReceiptDTO);
 
-    InboundReceiptInfoVO queryInfo(String warehouseNo);
+    void cancel(String warehouseNo);
 
+    InboundReceiptInfoVO queryInfo(String warehouseNo);
 }
 
