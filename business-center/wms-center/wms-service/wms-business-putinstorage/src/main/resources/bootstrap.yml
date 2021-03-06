@@ -25,3 +25,5 @@ spring:
         shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
         namespace: fd945789-2eb6-4ab5-8e25-8f1e34bef906
         group: DEFAULT_GROUP
+  main:
+    allow-bean-definition-overriding: true

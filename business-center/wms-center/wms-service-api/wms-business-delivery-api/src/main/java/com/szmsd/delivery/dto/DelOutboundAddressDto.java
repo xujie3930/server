@@ -15,6 +15,9 @@ import java.io.Serializable;
 @ApiModel(value = "出库单地址", description = "DelOutboundAddressDto对象")
 public class DelOutboundAddressDto implements Serializable {
 
+    @ApiModelProperty(value = "ID")
+    private Long id;
+
     @NotBlank(message = "收件人不能为空")
     @ApiModelProperty(value = "收件人")
     private String consignee;

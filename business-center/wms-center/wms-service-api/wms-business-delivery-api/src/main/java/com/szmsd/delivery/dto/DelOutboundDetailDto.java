@@ -16,6 +16,9 @@ import java.io.Serializable;
 @ApiModel(value = "出库单明细", description = "DelOutboundDetailDto对象")
 public class DelOutboundDetailDto implements Serializable {
 
+    @ApiModelProperty(value = "ID")
+    private Long id;
+
     @NotBlank(message = "SKU不能为空")
     @ApiModelProperty(value = "SKU")
     private String sku;
