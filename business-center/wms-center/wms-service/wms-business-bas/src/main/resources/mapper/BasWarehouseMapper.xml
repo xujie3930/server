@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.mapper.BasWarehouseMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasWarehouse">
+        <id column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="transaction_id" property="transactionId"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_name_en" property="warehouseNameEn"/>
+        <result column="warehouse_name_cn" property="warehouseNameCn"/>
+        <result column="is_check_vat" property="isCheckVat"/>
+        <result column="country_code" property="countryCode"/>
+        <result column="country_name" property="countryName"/>
+        <result column="country_chinese_name" property="countryChineseName"/>
+        <result column="country_display_name" property="countryDisplayName"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="street1" property="street1"/>
+        <result column="street2" property="street2"/>
+        <result column="postcode" property="postcode"/>
+        <result column="telephone" property="telephone"/>
+        <result column="time_zone" property="timeZone"/>
+        <result column="contact" property="contact"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by,
+        create_by_name,
+        create_time,
+        update_by,
+        update_by_name,
+        update_time,
+        version,
+        remark,
+        id, transaction_id, warehouse_code, warehouse_name_en, warehouse_name_cn, is_check_vat, country_code, country_name, country_chinese_name, country_display_name, province, city, street1, street2, postcode, telephone, time_zone, contact, status
+    </sql>
+
+
+</mapper>
