@@ -104,7 +104,7 @@
         <dependency>
             <groupId>com.szmsd</groupId>
             <artifactId>business-basic-api</artifactId>
-            <version>1.0.0</version>
+            <version>${business.version}</version>
         </dependency>
 
     </dependencies>
