@@ -1,0 +1,12 @@
+# Tomcat
+server:
+  port: 7203
+
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: wms-business-open
+  profiles:
+    # 环境配置
+    active: dev

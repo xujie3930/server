@@ -29,7 +29,7 @@ import java.util.List;
  * @author asd
  * @since 2021-03-05
  */
-@Api(tags = {"出库管理 - 正常出库"})
+@Api(tags = {"出库管理"})
 @ApiSort(100)
 @RestController
 @RequestMapping("/api/outbound")
@@ -39,8 +39,8 @@ public class DelOutboundController extends BaseController {
     private IDelOutboundService delOutboundService;
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
-    @GetMapping("/list")
-    @ApiOperation(value = "查询出库单模块列表", notes = "查询出库单模块列表")
+    @PostMapping("/list")
+    @ApiOperation(value = "出库管理 - 分页列表")
     public TableDataInfo list(DelOutbound delOutbound) {
         startPage();
         List<DelOutbound> list = delOutboundService.selectDelOutboundList(delOutbound);
@@ -59,7 +59,7 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")
     @GetMapping(value = "getInfo/{id}")
-    @ApiOperation(value = "获取出库单模块详细信息", notes = "获取出库单模块详细信息")
+    @ApiOperation(value = "出库管理 - 详情")
     public R getInfo(@PathVariable("id") String id) {
         return R.ok(delOutboundService.selectDelOutboundById(id));
     }
@@ -67,7 +67,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:add')")
     @Log(title = "出库单模块", businessType = BusinessType.INSERT)
     @PostMapping("/shipment")
-    @ApiOperation(value = "出库管理 - 正常出库 - 创建")
+    @ApiOperation(value = "出库管理 - 创建")
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<Integer> add(@RequestBody @Validated DelOutboundDto dto) {
         return R.ok(delOutboundService.insertDelOutbound(dto));
@@ -76,7 +76,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:edit')")
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
     @PutMapping("/shipment")
-    @ApiOperation(value = "出库管理 - 正常出库 - 修改")
+    @ApiOperation(value = "出库管理 - 修改")
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<Integer> edit(@RequestBody @Validated(ValidationUpdateGroup.class) DelOutboundDto dto) {
         return R.ok(delOutboundService.updateDelOutbound(dto));
@@ -85,7 +85,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:remove')")
     @Log(title = "出库单模块", businessType = BusinessType.DELETE)
     @DeleteMapping("/shipment")
-    @ApiOperation(value = "出库管理 - 正常出库 - 删除")
+    @ApiOperation(value = "出库管理 - 删除")
     public R<Integer> remove(@RequestBody List<String> ids) {
         return R.ok(delOutboundService.deleteDelOutboundByIds(ids));
     }

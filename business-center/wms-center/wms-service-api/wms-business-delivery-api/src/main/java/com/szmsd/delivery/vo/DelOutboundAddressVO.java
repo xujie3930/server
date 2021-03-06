@@ -1,10 +1,9 @@
-package com.szmsd.delivery.dto;
+package com.szmsd.delivery.vo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -12,13 +11,12 @@ import java.io.Serializable;
  * @date 2021-03-05 14:23
  */
 @Data
-@ApiModel(value = "DelOutboundAddressDto", description = "DelOutboundAddressDto对象")
-public class DelOutboundAddressDto implements Serializable {
+@ApiModel(value = "DelOutboundAddressVO", description = "DelOutboundAddressVO对象")
+public class DelOutboundAddressVO implements Serializable {
 
     @ApiModelProperty(value = "ID")
     private Long id;
 
-    @NotBlank(message = "收件人不能为空")
     @ApiModelProperty(value = "收件人")
     private String consignee;
 
