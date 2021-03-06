@@ -2,6 +2,7 @@ package com.szmsd.delivery.controller;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
+import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
@@ -12,7 +13,9 @@ import com.szmsd.delivery.service.IDelOutboundService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiSort;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -26,7 +29,8 @@ import java.util.List;
  * @author asd
  * @since 2021-03-05
  */
-@Api(tags = {"出库管理"})
+@Api(tags = {"出库管理 - 正常出库"})
+@ApiSort(100)
 @RestController
 @RequestMapping("/api/outbound")
 public class DelOutboundController extends BaseController {
@@ -63,26 +67,27 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:add')")
     @Log(title = "出库单模块", businessType = BusinessType.INSERT)
     @PostMapping("/shipment")
-    @ApiOperation(value = "出库管理 - 创建出库单")
+    @ApiOperation(value = "出库管理 - 正常出库 - 创建")
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
-    public R<Integer> add(@RequestBody DelOutboundDto dto) {
+    public R<Integer> add(@RequestBody @Validated DelOutboundDto dto) {
         return R.ok(delOutboundService.insertDelOutbound(dto));
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:edit')")
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
-    @PutMapping("edit")
-    @ApiOperation(value = " 修改出库单模块", notes = "修改出库单模块")
-    public R edit(@RequestBody DelOutbound delOutbound) {
-        return toOk(delOutboundService.updateDelOutbound(delOutbound));
+    @PutMapping("/shipment")
+    @ApiOperation(value = "出库管理 - 正常出库 - 修改")
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
+    public R<Integer> edit(@RequestBody @Validated(ValidationUpdateGroup.class) DelOutboundDto dto) {
+        return R.ok(delOutboundService.updateDelOutbound(dto));
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:remove')")
     @Log(title = "出库单模块", businessType = BusinessType.DELETE)
-    @DeleteMapping("remove")
-    @ApiOperation(value = "删除出库单模块", notes = "删除出库单模块")
-    public R remove(@RequestBody List<String> ids) {
-        return toOk(delOutboundService.deleteDelOutboundByIds(ids));
+    @DeleteMapping("/shipment")
+    @ApiOperation(value = "出库管理 - 正常出库 - 删除")
+    public R<Integer> remove(@RequestBody List<String> ids) {
+        return R.ok(delOutboundService.deleteDelOutboundByIds(ids));
     }
 
 }

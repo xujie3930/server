@@ -43,10 +43,10 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     /**
      * 修改出库单模块
      *
-     * @param delOutbound 出库单模块
+     * @param dto 出库单模块
      * @return 结果
      */
-    int updateDelOutbound(DelOutbound delOutbound);
+    int updateDelOutbound(DelOutboundDto dto);
 
     /**
      * 批量删除出库单模块

@@ -78,4 +78,9 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "出库后重新上架的新SKU编码")
     private String newSku;
 
+    @ApiModelProperty(value = "客户代码")
+    private String customCode;
+
+    @ApiModelProperty(value = "单据状态")
+    private String state;
 }
