@@ -41,11 +41,11 @@ public class AuthHandlerInterceptor implements HandlerInterceptor {
         MDC.put("TID", requestId);
         // 从请求头上获取
         String userId = request.getParameter(RequestConstant.USER_ID);
-        if (StringUtils.isNotEmpty(userId)) {
+        if (StringUtils.isEmpty(userId)) {
             userId = request.getHeader(RequestConstant.USER_ID);
         }
         String password = request.getParameter(RequestConstant.PASSWORD);
-        if (StringUtils.isNotEmpty(password)) {
+        if (StringUtils.isEmpty(password)) {
             password = request.getHeader(RequestConstant.PASSWORD);
         }
         // 判断有没有配置

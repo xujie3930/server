@@ -1,6 +1,5 @@
 package com.szmsd.open;
 
-import com.szmsd.common.redis.configure.RedisConfig;
 import com.szmsd.common.security.annotation.EnableCustomConfig;
 import com.szmsd.common.security.annotation.EnableRyFeignClients;
 import com.szmsd.common.swagger.annotation.EnableCustomSwagger2;
@@ -15,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCustomSwagger2
 @EnableRyFeignClients
 @EnableScheduling
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, RedisConfig.class})
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EnableDiscoveryClient
 @EnableCircuitBreaker
 public class BusinessOpenApplication {
