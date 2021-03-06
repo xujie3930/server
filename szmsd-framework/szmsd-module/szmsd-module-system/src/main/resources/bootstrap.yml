@@ -9,21 +9,7 @@ spring:
     name: szmsd-system
   profiles:
     # 环境配置
-    active: test
-  cloud:
-    nacos:
-      discovery:
-        # 服务注册地址
-        server-addr: 183.3.221.136:8848
-        namespace: fd945789-2eb6-4ab5-8e25-8f1e34bef906
-      config:
-        # 配置中心地址
-        server-addr: 183.3.221.136:8848
-        # 配置文件格式
-        file-extension: yml
-        # 共享配置
-        shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-        namespace: fd945789-2eb6-4ab5-8e25-8f1e34bef906
-        group: DEFAULT_GROUP
+    active: dev
+
 i18nStatus: true # 多语言开关，true 是启用，false 是关闭
 logging.level.com.szmsd.system.mapper: debug

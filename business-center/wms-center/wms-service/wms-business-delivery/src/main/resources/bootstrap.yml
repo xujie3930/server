@@ -1,12 +1,12 @@
 # Tomcat
 server:
-  port: 7201
+  port: 7202
 
 # Spring
 spring:
   application:
     # 应用名称
-    name: wms-business-bas
+    name: wms-business-delivery
   profiles:
     # 环境配置
     active: dev
