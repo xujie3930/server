@@ -30,10 +30,10 @@ public class BasTransactionServiceImpl extends ServiceImpl<BasTransactionMapper,
     public Boolean idempotent(String apiCode, String transactionId) {
         boolean idempotent = false;
         BasTransaction basTransaction = baseMapper.selectOne(new QueryWrapper<BasTransaction>().eq("api_code", apiCode).eq("transaction_id", transactionId));
-        if (basTransaction == null) {
+        if (basTransaction != null) {
             idempotent = true;
         }
-        log.info("接口幂等判断：apiCode={}, transactionId={}, idempotent={}", idempotent);
+        log.info("接口幂等判断：apiCode={}, transactionId={}, idempotent={}", apiCode, transactionId, idempotent);
         return idempotent;
     }
 

@@ -9,6 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,10 +31,10 @@ public class BasTransactionController extends BaseController {
         return R.ok();
     }
 
-    @PreAuthorize("@ss.hasPermi('bas:transaction:save')")
+    @PreAuthorize("@ss.hasPermi('bas:transaction:idempotent')")
     @PostMapping("/idempotent")
     @ApiOperation(value = "是否幂等", notes = "判断接口业务主键是否存在")
-    public R<Boolean> idempotent(BasTransactionDTO basTransactionDTO) {
+    public R<Boolean> idempotent(@RequestBody BasTransactionDTO basTransactionDTO) {
         Boolean result = transactionService.idempotent(basTransactionDTO.getApiCode(), basTransactionDTO.getTransactionId());
         return R.ok(result);
     }
