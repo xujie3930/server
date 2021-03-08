@@ -1,5 +1,6 @@
 package com.szmsd.common.swagger.config;
 
+import com.github.xiaoymin.swaggerbootstrapui.annotations.EnableSwaggerBootstrapUI;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @Configuration
 @EnableSwagger2
+@EnableSwaggerBootstrapUI
 @EnableAutoConfiguration
 @ConditionalOnProperty(name = "swagger.enabled", matchIfMissing = true)
 public class SwaggerAutoConfiguration
