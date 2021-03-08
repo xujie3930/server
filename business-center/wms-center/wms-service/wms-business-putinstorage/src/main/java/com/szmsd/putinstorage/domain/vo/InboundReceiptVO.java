@@ -1,10 +1,10 @@
 package com.szmsd.putinstorage.domain.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.szmsd.putinstorage.annotation.FieldJsonI18n;
-import com.szmsd.putinstorage.enums.LanguageEnum;
-import com.szmsd.putinstorage.enums.LocalLanguageTypeEnum;
-import com.szmsd.putinstorage.util.RedisLanguageTable;
+import com.szmsd.common.core.language.annotation.FieldJsonI18n;
+import com.szmsd.common.core.language.constant.RedisLanguageTable;
+import com.szmsd.common.core.language.enums.LanguageEnum;
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

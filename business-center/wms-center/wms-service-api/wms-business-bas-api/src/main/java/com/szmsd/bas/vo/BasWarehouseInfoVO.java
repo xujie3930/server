@@ -1,42 +1,20 @@
-package com.szmsd.bas.domain;
+package com.szmsd.bas.vo;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.szmsd.common.core.web.domain.BaseEntity;
+import com.szmsd.bas.domain.BasWarehouseCus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.List;
 
-/**
- * <p>
- * bas_warehouse - 仓库
- * </p>
- *
- * @author liangchao
- * @since 2021-03-06
- */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value = "bas_warehouse - 仓库", description = "BasWarehouse对象")
-public class BasWarehouse extends BaseEntity {
-
-    private static final long serialVersionUID = 1L;
+@ApiModel(value = "BasWarehouseInfoVO", description = "仓库详情 ")
+public class BasWarehouseInfoVO {
 
     @ApiModelProperty(value = "主键ID")
-    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
-    @ApiModelProperty(value = "操作人姓名")
-    private String operator;
-
-    @ApiModelProperty(value = "操作时间")
-    private String operateOn;
 
     @ApiModelProperty(value = "目的仓库编码")
     private String warehouseCode;
@@ -46,9 +24,6 @@ public class BasWarehouse extends BaseEntity {
 
     @ApiModelProperty(value = "仓库中文名")
     private String warehouseNameCn;
-
-    @ApiModelProperty(value = "是否需要VAT：0不需要，1需要")
-    private String isCheckVat;
 
     @ApiModelProperty(value = "国家代码")
     private String countryCode;
@@ -77,6 +52,9 @@ public class BasWarehouse extends BaseEntity {
     @ApiModelProperty(value = "街道3")
     private String postcode;
 
+    @ApiModelProperty(value = "是否需要VAT：0不需要，1需要")
+    private String isCheckVat;
+
     @ApiModelProperty(value = "电话")
     private String telephone;
 
@@ -89,12 +67,10 @@ public class BasWarehouse extends BaseEntity {
     @ApiModelProperty(value = "状态：0无效，1有效")
     private String status;
 
-    @ApiModelProperty(value = "创建ID",hidden = true)
-    @TableField(fill = FieldFill.INSERT)
-    private String createBy;
+    @ApiModelProperty(value = "白名单")
+    private List<BasWarehouseCus> whiteCusList;
 
-    @ApiModelProperty(value = "修改者ID",hidden = true)
-    @TableField(fill = FieldFill.UPDATE)
-    private String updateBy;
+    @ApiModelProperty(value = "黑名单")
+    private List<BasWarehouseCus> blackCusList;
 
 }

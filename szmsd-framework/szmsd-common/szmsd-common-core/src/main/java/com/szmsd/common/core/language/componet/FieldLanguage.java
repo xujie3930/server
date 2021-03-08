@@ -1,4 +1,4 @@
-package com.szmsd.putinstorage.componet;
+package com.szmsd.common.core.language.componet;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -9,10 +9,10 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.szmsd.common.core.utils.ServletUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.redis.service.RedisService;
-import com.szmsd.putinstorage.annotation.FieldJsonI18n;
-import com.szmsd.putinstorage.enums.LanguageEnum;
-import com.szmsd.putinstorage.enums.LocalLanguageEnum;
-import com.szmsd.putinstorage.enums.LocalLanguageTypeEnum;
+import com.szmsd.common.core.language.annotation.FieldJsonI18n;
+import com.szmsd.common.core.language.enums.LanguageEnum;
+import com.szmsd.common.core.language.enums.LocalLanguageEnum;
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

@@ -1,11 +1,11 @@
-package com.szmsd.putinstorage.enums;
+package com.szmsd.common.core.language.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.stream.Stream;
 
-import static com.szmsd.putinstorage.enums.LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS;
+import static com.szmsd.common.core.language.enums.LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS;
 
 @Getter
 @AllArgsConstructor

@@ -1,36 +1,14 @@
-package com.szmsd.bas.domain;
+package com.szmsd.bas.dto;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-
-/**
- * <p>
- * bas_warehouse - 仓库
- * </p>
- *
- * @author liangchao
- * @since 2021-03-06
- */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value = "bas_warehouse - 仓库", description = "BasWarehouse对象")
-public class BasWarehouse extends BaseEntity {
-
-    private static final long serialVersionUID = 1L;
-
-    @ApiModelProperty(value = "主键ID")
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+@ApiModel(value = "AddWarehouseRequest", description = "创建/更新仓库")
+public class AddWarehouseRequest {
 
     @ApiModelProperty(value = "操作人姓名")
     private String operator;
@@ -88,13 +66,5 @@ public class BasWarehouse extends BaseEntity {
 
     @ApiModelProperty(value = "状态：0无效，1有效")
     private String status;
-
-    @ApiModelProperty(value = "创建ID",hidden = true)
-    @TableField(fill = FieldFill.INSERT)
-    private String createBy;
-
-    @ApiModelProperty(value = "修改者ID",hidden = true)
-    @TableField(fill = FieldFill.UPDATE)
-    private String updateBy;
 
 }

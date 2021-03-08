@@ -91,7 +91,7 @@
         <where><include refid="selectListWhere"/></where>
     </select>
     <select id="selectInfo" resultMap="InboundReceiptInfoVO">
-        SELECT <include refid="Column_List_VO"/>
+        SELECT <include refid="Column_List_INFO_VO"/>
         FROM inbound_receipt t
         <where>
             <if test="id != null and id != ''">AND t.id = #{id}</if>

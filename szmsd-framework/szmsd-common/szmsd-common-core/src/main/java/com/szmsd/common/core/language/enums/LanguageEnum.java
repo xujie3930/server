@@ -1,4 +1,4 @@
-package com.szmsd.putinstorage.enums;
+package com.szmsd.common.core.language.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

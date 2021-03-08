@@ -1,10 +1,10 @@
-package com.szmsd.putinstorage.annotation;
+package com.szmsd.common.core.language.annotation;
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.szmsd.putinstorage.componet.FieldLanguage;
-import com.szmsd.putinstorage.enums.LanguageEnum;
-import com.szmsd.putinstorage.enums.LocalLanguageTypeEnum;
+import com.szmsd.common.core.language.componet.FieldLanguage;
+import com.szmsd.common.core.language.enums.LanguageEnum;
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

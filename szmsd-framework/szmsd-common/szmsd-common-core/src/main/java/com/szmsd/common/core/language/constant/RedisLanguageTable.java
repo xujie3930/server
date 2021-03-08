@@ -1,4 +1,4 @@
-package com.szmsd.putinstorage.util;
+package com.szmsd.common.core.language.constant;
 
 public interface RedisLanguageTable {
 
