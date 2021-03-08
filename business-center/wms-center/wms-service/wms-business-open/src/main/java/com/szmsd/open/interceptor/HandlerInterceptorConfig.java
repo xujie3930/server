@@ -10,15 +10,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @date 2021-03-06 16:50
  */
 @Configuration
-public class AuthAuthHandlerInterceptorConfig implements WebMvcConfigurer {
+public class HandlerInterceptorConfig implements WebMvcConfigurer {
 
     @Autowired
     private AuthHandlerInterceptor authHandlerInterceptor;
+    @Autowired
+    private TransactionHandlerInterceptor transactionHandlerInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 验证
         registry.addInterceptor(authHandlerInterceptor)
-                .addPathPatterns("/**")
+                .addPathPatterns("/api/**")
+                .excludePathPatterns("/*.html", "/webjars/**", "/swagger-resources/**");
+        // 事务验证
+        registry.addInterceptor(transactionHandlerInterceptor)
+                .addPathPatterns("/api/**")
                 .excludePathPatterns("/*.html", "/webjars/**", "/swagger-resources/**");
     }
 }

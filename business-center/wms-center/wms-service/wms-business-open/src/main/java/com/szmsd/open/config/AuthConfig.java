@@ -13,23 +13,23 @@ public class AuthConfig {
 
     static final String CONFIG_PREFIX = "com.szmsd.open";
 
-    private String userId;
+    private String appId;
 
-    private String password;
+    private String sign;
 
-    public String getUserId() {
-        return userId;
+    public String getAppId() {
+        return appId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 
-    public String getPassword() {
-        return password;
+    public String getSign() {
+        return sign;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setSign(String sign) {
+        this.sign = sign;
     }
 }

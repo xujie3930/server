@@ -1,6 +1,7 @@
 package com.szmsd.open.controller;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.dto.DelOutboundDto;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * 出库管理
@@ -36,6 +38,20 @@ public class DelOutboundController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<Integer> add(@RequestBody @Validated DelOutboundDto dto) {
         return R.ok(delOutboundClientService.insertDelOutbound(dto));
+    }
+
+    @PostMapping("/success")
+    @ApiImplicitParam(name = "map", value = "参数", dataType = "TestDto")
+    public R<Integer> success(@RequestBody TestDto map) {
+        return R.ok();
+    }
+
+    @PostMapping("/error")
+    public R<Integer> error() {
+        if (true) {
+            throw new CommonException("999", "error");
+        }
+        return R.ok();
     }
 
 }
