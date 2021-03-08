@@ -3,6 +3,7 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BasTransaction;
+import com.szmsd.bas.dto.BasTransactionDTO;
 
 /**
  * <p>
@@ -14,7 +15,7 @@ import com.szmsd.bas.domain.BasTransaction;
  */
 public interface IBasTransactionService extends IService<BasTransaction> {
 
+    void save(BasTransactionDTO basTransactionDTO);
+
     Boolean idempotent(String apiCode, String transactionId);
-
 }
-
