@@ -1,12 +1,11 @@
-package com.szmsd.delivery.dto;
+package com.szmsd.delivery.vo;
 
-import com.szmsd.common.core.validator.ValidationUpdateGroup;
+import com.szmsd.delivery.dto.DelOutboundAddressDto;
+import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -15,29 +14,24 @@ import java.util.List;
  * @date 2021-03-05 14:21
  */
 @Data
-@ApiModel(value = "DelOutboundDto", description = "DelOutboundDto对象")
-public class DelOutboundDto implements Serializable {
+@ApiModel(value = "DelOutboundVO", description = "DelOutboundVO对象")
+public class DelOutboundVO implements Serializable {
 
-    @NotNull(message = "ID不能为空", groups = ValidationUpdateGroup.class)
     @ApiModelProperty(value = "ID")
     private Long id;
 
-    @NotBlank(message = "仓库代码不能为空")
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
 
-    @NotBlank(message = "出库单类型不能为空")
     @ApiModelProperty(value = "出库订单类型")
     private String orderType;
 
-    @NotBlank(message = "卖家代码不能为空")
     @ApiModelProperty(value = "卖家代码")
     private String sellerCode;
 
     @ApiModelProperty(value = "挂号")
     private String trackingNo;
 
-    @NotBlank(message = "发货规则不能为空")
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
 
@@ -47,7 +41,6 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "备注")
     private String remark;
 
-    @NotBlank(message = "参照单号不能为空")
     @ApiModelProperty(value = "参照单号")
     private String refOrderNo;
 
@@ -60,11 +53,15 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "出库后重新上架的新SKU编码")
     private String newSku;
 
-    @NotNull(message = "地址信息不能为空")
+    @ApiModelProperty(value = "客户代码")
+    private String customCode;
+
+    @ApiModelProperty(value = "单据状态")
+    private String state;
+
     @ApiModelProperty(value = "地址信息")
     private List<DelOutboundAddressDto> address;
 
-    @NotNull(message = "明细信息不能为空")
     @ApiModelProperty(value = "明细信息")
     private List<DelOutboundDetailDto> details;
 }

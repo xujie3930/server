@@ -1,0 +1,17 @@
+# Spring
+spring:
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: 183.3.221.136:8848
+        namespace: bad9ad45-fedc-40fd-a3c8-d3ab498b19a7
+      config:
+        # 配置中心地址
+        server-addr: 183.3.221.136:8848
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+        namespace: bad9ad45-fedc-40fd-a3c8-d3ab498b19a7
+        group: DEFAULT_GROUP
