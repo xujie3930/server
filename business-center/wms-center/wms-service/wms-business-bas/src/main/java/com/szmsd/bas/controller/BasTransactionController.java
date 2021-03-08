@@ -27,7 +27,7 @@ public class BasTransactionController extends BaseController {
     @PostMapping("/save")
     @ApiOperation(value = "保存接口业务主键", notes = "保存接口业务主键")
     public R save(BasTransactionDTO basTransactionDTO) {
-        transactionService.save(new BasTransaction().setApiCode(basTransactionDTO.getApiCode()).setTransactionId(basTransactionDTO.getTransactionId()));
+        transactionService.save(basTransactionDTO);
         return R.ok();
     }
 
