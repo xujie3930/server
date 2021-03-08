@@ -10,15 +10,15 @@ import com.szmsd.common.core.filter.ContextServletOutputStream;
 import com.szmsd.open.domain.OpnRequestLog;
 import com.szmsd.open.event.EventUtil;
 import com.szmsd.open.event.RequestLogEvent;
+import com.szmsd.open.interceptor.RequestConstant;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -40,8 +40,12 @@ public class RequestLogFilter implements Filter {
         Date requestTime = new Date();
 
         String traceId = MDC.get("TID");
+        // 获取transactionId
+        String transactionId = requestWrapper.getHeader(RequestConstant.TRANSACTION_ID);
         RequestBodyObject requestBodyObject = requestParam(requestWrapper);
-        String transactionId = requestBodyObject.getTransactionId();
+        if (StringUtils.isNotEmpty(transactionId)) {
+            transactionId = requestBodyObject.getTransactionId();
+        }
         String requestUri = requestWrapper.getRequestURI();
         RequestLogFilterContext currentContext = RequestLogFilterContext.getCurrentContext();
         currentContext.setRequestId(traceId);
