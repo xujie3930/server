@@ -1,6 +1,8 @@
 package com.szmsd.delivery.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
@@ -11,7 +13,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
-import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
@@ -164,6 +166,45 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return baseMapper.deleteById(id);
     }
 
+    @Transactional
+    @Override
+    public int shipmentOperationType(ShipmentRequestDto dto) {
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
+        updateWrapper.in(DelOutbound::getOrderNo, dto.getShipmentList());
+        updateWrapper.set(DelOutbound::getOperationType, dto.getOperationType());
+        updateWrapper.set(DelOutbound::getOperationTime, dto.getOperationTime());
+        updateWrapper.set(DelOutbound::getRemark, dto.getRemark());
+        return this.baseMapper.update(null, updateWrapper);
+    }
 
+    @Transactional
+    @Override
+    public int shipmentMeasure(PackageMeasureRequestDto dto) {
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
+        updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
+        updateWrapper.set(DelOutbound::getLength, dto.getLength());
+        updateWrapper.set(DelOutbound::getWidth, dto.getWidth());
+        updateWrapper.set(DelOutbound::getHeight, dto.getHeight());
+        updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
+        return this.baseMapper.update(null, updateWrapper);
+    }
+
+    @Transactional
+    @Override
+    public int shipmentPacking(ShipmentPackingMaterialRequestDto dto) {
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
+        updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
+        updateWrapper.set(DelOutbound::getPackingMaterial, dto.getPackingMaterial());
+        return this.baseMapper.update(null, updateWrapper);
+    }
+
+    @Transactional
+    @Override
+    public int shipmentContainers(ShipmentContainersRequestDto dto) {
+        return 0;
+    }
 }
 

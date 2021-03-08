@@ -2,7 +2,7 @@ package com.szmsd.delivery.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.dto.*;
 
 import java.util.List;
 
@@ -64,5 +64,36 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      */
     int deleteDelOutboundById(String id);
 
+    /**
+     * 出库管理 - Open - 接收出库单状态
+     *
+     * @param dto dto
+     * @return int
+     */
+    int shipmentOperationType(ShipmentRequestDto dto);
+
+    /**
+     * 出库管理 - Open - 接收出库包裹测量信息
+     *
+     * @param dto dto
+     * @return int
+     */
+    int shipmentMeasure(PackageMeasureRequestDto dto);
+
+    /**
+     * 出库管理 - Open - 接收出库包裹使用包材
+     *
+     * @param dto dto
+     * @return int
+     */
+    int shipmentPacking(ShipmentPackingMaterialRequestDto dto);
+
+    /**
+     * 出库管理 - Open - 接收批量出库单类型装箱信息
+     *
+     * @param dto dto
+     * @return int
+     */
+    int shipmentContainers(ShipmentContainersRequestDto dto);
 }
 

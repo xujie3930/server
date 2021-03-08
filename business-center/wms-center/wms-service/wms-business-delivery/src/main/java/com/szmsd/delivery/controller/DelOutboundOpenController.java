@@ -40,8 +40,8 @@ public class DelOutboundOpenController extends BaseController {
     @PostMapping("/shipment")
     @ApiOperation(value = "出库管理 - Open - 接收出库单状态")
     @ApiImplicitParam(name = "dto", value = "ShipmentRequestDto", dataType = "ShipmentRequestDto")
-    public R<Integer> shipment(@RequestBody @Validated ShipmentRequestDto dto) {
-        return R.ok();
+    public R<Integer> shipmentOperationType(@RequestBody @Validated ShipmentRequestDto dto) {
+        return R.ok(this.delOutboundService.shipmentOperationType(dto));
     }
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
@@ -49,7 +49,7 @@ public class DelOutboundOpenController extends BaseController {
     @ApiOperation(value = "出库管理 - Open - 接收出库包裹测量信息")
     @ApiImplicitParam(name = "dto", value = "PackageMeasureRequestDto", dataType = "PackageMeasureRequestDto")
     public R<Integer> shipmentMeasure(@RequestBody @Validated PackageMeasureRequestDto dto) {
-        return R.ok();
+        return R.ok(this.delOutboundService.shipmentMeasure(dto));
     }
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
@@ -57,7 +57,7 @@ public class DelOutboundOpenController extends BaseController {
     @ApiOperation(value = "出库管理 - Open - 接收出库包裹使用包材")
     @ApiImplicitParam(name = "dto", value = "ShipmentPackingMaterialRequestDto", dataType = "ShipmentPackingMaterialRequestDto")
     public R<Integer> shipmentPacking(@RequestBody @Validated ShipmentPackingMaterialRequestDto dto) {
-        return R.ok();
+        return R.ok(this.delOutboundService.shipmentPacking(dto));
     }
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
@@ -65,6 +65,6 @@ public class DelOutboundOpenController extends BaseController {
     @ApiOperation(value = "出库管理 - Open - 接收批量出库单类型装箱信息")
     @ApiImplicitParam(name = "dto", value = "ShipmentContainersRequestDto", dataType = "ShipmentContainersRequestDto")
     public R<Integer> shipmentContainers(@RequestBody @Validated ShipmentContainersRequestDto dto) {
-        return R.ok();
+        return R.ok(this.delOutboundService.shipmentContainers(dto));
     }
 }

@@ -32,7 +32,7 @@ public class ShipmentRequestDto implements Serializable {
     private String operationType;
 
     @ApiModelProperty(value = "操作时间")
-    private String operationTime;
+    private Date operationTime;
 
     @ApiModelProperty(value = "备注")
     private String remark;

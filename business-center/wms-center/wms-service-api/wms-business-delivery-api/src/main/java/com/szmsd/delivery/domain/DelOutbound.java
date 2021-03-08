@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 
 /**
  * <p>
@@ -83,4 +85,25 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "单据状态")
     private String state;
+
+    @ApiModelProperty(value = "长 CM")
+    private Double length;
+
+    @ApiModelProperty(value = "宽 CM")
+    private Double width;
+
+    @ApiModelProperty(value = "高 CM")
+    private Double height;
+
+    @ApiModelProperty(value = "重量 g")
+    private Double weight;
+
+    @ApiModelProperty(value = "包材类型")
+    private String packingMaterial;
+
+    @ApiModelProperty(value = "操作类型，开始处理：Processing，已发货：Shipped，已取消：Canceled")
+    private String operationType;
+
+    @ApiModelProperty(value = "操作时间")
+    private Date operationTime;
 }
