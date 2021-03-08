@@ -3,5 +3,6 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.common.core.aspect.CodeToNameAspect,\
   com.szmsd.common.core.web.GlobalApplicationRunner,\
   com.szmsd.common.core.converter.ConverterConfig,\
-  com.szmsd.common.core.filter.ContextFilterConfig
+  com.szmsd.common.core.filter.ContextFilterConfig,\
+  com.szmsd.common.core.feign.FeignExceptionErrorDecoder
   

@@ -1,30 +1,28 @@
 package com.szmsd.common.swagger.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
+import org.springframework.util.CollectionUtils;
 import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.AuthorizationScope;
-import springfox.documentation.service.Contact;
-import springfox.documentation.service.GrantType;
-import springfox.documentation.service.OAuth;
-import springfox.documentation.service.ResourceOwnerPasswordCredentialsGrant;
-import springfox.documentation.service.SecurityReference;
+import springfox.documentation.schema.ModelRef;
+import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableSwagger2
@@ -58,6 +56,22 @@ public class SwaggerAutoConfiguration
         List<Predicate<String>> basePath = new ArrayList<Predicate<String>>();
         swaggerProperties.getBasePath().forEach(path -> basePath.add(PathSelectors.ant(path)));
 
+        List<SwaggerHeaderProperties> headers = swaggerProperties.getHeaders();
+        List<Parameter> pars = null;
+        if (!CollectionUtils.isEmpty(headers)) {
+            pars = new ArrayList<>(headers.size());
+            for (SwaggerHeaderProperties header : headers) {
+                pars.add(new ParameterBuilder()
+                        .name(header.getName())
+                        .description(header.getDescription())
+                        .defaultValue(header.getDefaultValue())
+                        .required(header.getRequired())
+                        .modelRef(new ModelRef("string"))
+                        .parameterType("header")
+                        .build());
+            }
+        }
+
         // exclude-path处理
         if (swaggerProperties.getExcludePath().isEmpty())
         {
@@ -75,7 +89,8 @@ public class SwaggerAutoConfiguration
                 .build()
                 .securitySchemes(Collections.singletonList(securitySchema()))
                 .securityContexts(Collections.singletonList(securityContext()))
-                .pathMapping("/");
+                .pathMapping("/")
+                .globalOperationParameters(pars);
     }
 
      /**

@@ -10,3 +10,16 @@ spring:
   profiles:
     # 环境配置
     active: dev
+
+swagger:
+  headers:
+    - name: appId
+      description: app id
+      defaultValue: 123
+      required: true
+    - name: sign
+      description: sign
+      defaultValue: 123
+      required: true
+    - name: transactionId
+      description: transaction id
