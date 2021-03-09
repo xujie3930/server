@@ -68,7 +68,7 @@ public class RemoteComponent {
     public String genNo(String code) {
         log.info("调用自动生成单号：code={}", code);
         R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId("ck1").setCode(code));
-        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
+        AssertUtil.isTrue(r != null && r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
         String s = r.getData().get(0);
         log.info("调用自动生成单号：调用完成, {}-{}", code, s);
         return s;

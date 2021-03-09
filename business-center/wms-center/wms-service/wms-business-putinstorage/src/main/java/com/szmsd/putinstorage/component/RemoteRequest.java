@@ -1,16 +1,22 @@
 package com.szmsd.putinstorage.component;
 
+import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.putinstorage.domain.remote.request.CancelReceiptRequest;
-import com.szmsd.putinstorage.domain.remote.request.CreateReceiptRequest;
-import com.szmsd.putinstorage.domain.remote.response.BaseOperationResponse;
-import com.szmsd.putinstorage.domain.remote.response.CreateReceiptResponse;
-import com.szmsd.putinstorage.util.RestTemplateUtils;
+import com.szmsd.http.api.feign.HtpInboundFeignService;
+import com.szmsd.http.dto.CancelReceiptRequest;
+import com.szmsd.http.dto.CreateReceiptRequest;
+import com.szmsd.http.dto.ReceiptDetailInfo;
+import com.szmsd.http.vo.CreateReceiptResponse;
+import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
+import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 远程请求
@@ -19,39 +25,53 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RemoteRequest {
 
-    @Value("${inbound.receipt}")
-    private String INBOUND_RECEIPT;
+    @Resource
+    private HtpInboundFeignService htpInboundFeignService;
 
     /**
      * 创建入库单
-     *
-     * @param createReceiptRequest
+     * @param createInboundReceiptDTO
      */
-    public void createInboundReceipt(CreateReceiptRequest createReceiptRequest) {
-        try {
-            ResponseEntity<CreateReceiptResponse> responseEntity = RestTemplateUtils.post(INBOUND_RECEIPT, createReceiptRequest, CreateReceiptResponse.class);
-            CreateReceiptResponse body = responseEntity.getBody();
-            AssertUtil.isTrue(body.getSuccess(), body.getMessage());
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("创建入库单失败：RemoteRequest");
-        }
+    public void createInboundReceipt(CreateInboundReceiptDTO createInboundReceiptDTO) {
+        CreateReceiptRequest createInboundReceipt = new CreateReceiptRequest();
+        createInboundReceipt.setWarehouseCode(createInboundReceiptDTO.getWarehouseCode());
+        createInboundReceipt.setOrderType(InboundReceiptEnum.OrderType.NORMAL.getValue());
+        createInboundReceipt.setSellerCode(createInboundReceiptDTO.getCusCode());
+        createInboundReceipt.setTrackingNumber(createInboundReceiptDTO.getDeliveryNo());
+        createInboundReceipt.setRemark(createInboundReceiptDTO.getRemark());
+        createInboundReceipt.setRefOrderNo(createInboundReceiptDTO.getWarehouseNo());
+        createInboundReceipt.setDetails(createInboundReceiptDTO.getInboundReceiptDetailDTOS().stream().map(detail -> {
+            ReceiptDetailInfo receiptDetailInfo = new ReceiptDetailInfo();
+            receiptDetailInfo.setSku(detail.getSku());
+            receiptDetailInfo.setQty(detail.getDeclareQty());
+            receiptDetailInfo.setOriginCode(detail.getOriginCode());
+            return receiptDetailInfo;
+        }).collect(Collectors.toList()));
+        R<CreateReceiptResponse> createReceiptResponseR = htpInboundFeignService.create(createInboundReceipt);
+        resultAssert(createReceiptResponseR, "创建入库单");
     }
 
     /**
      * 取消入库单
-     *
-     * @param cancelReceiptRequest
+     * @param orderNo
+     * @param warehouseCode
      */
-    public void cancelInboundReceipt(CancelReceiptRequest cancelReceiptRequest) {
-        try {
-            ResponseEntity<BaseOperationResponse> resultEntity = RestTemplateUtils.exchange(INBOUND_RECEIPT, HttpMethod.DELETE, null, BaseOperationResponse.class, cancelReceiptRequest);
-            BaseOperationResponse body = resultEntity.getBody();
-            AssertUtil.isTrue(body.getSuccess(), body.getMessage());
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("取消入库单失败：RemoteRequest");
-        }
+    public void cancelInboundReceipt(String orderNo, String warehouseCode) {
+        CancelReceiptRequest cancelReceiptRequest = new CancelReceiptRequest();
+        cancelReceiptRequest.setOrderNo(orderNo);
+        cancelReceiptRequest.setWarehouseCode(warehouseCode);
+        R<ResponseVO> cancel = htpInboundFeignService.cancel(cancelReceiptRequest);
+        resultAssert(cancel, "取消入库单");
+    }
+
+    public void resultAssert(R<? extends ResponseVO> result, String api) {
+        AssertUtil.isTrue(result.getCode() == HttpStatus.SUCCESS, "RemoteRequest[" + api + "失败:" +  result.getMsg() + "]");
+        ResponseVO data = result.getData();
+        AssertUtil.isTrue(data.getSuccess() != null && data.getSuccess() == true, "RemoteRequest[" + api + "失败:" +  getDefaultStr(data.getMessage()).concat(getDefaultStr(data.getErrors())) + "]");
+    }
+
+    public String getDefaultStr(String str) {
+        return Optional.ofNullable(str).orElse("");
     }
 
 }

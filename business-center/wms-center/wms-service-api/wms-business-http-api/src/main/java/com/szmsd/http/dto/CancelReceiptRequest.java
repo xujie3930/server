@@ -1,4 +1,4 @@
-package com.szmsd.putinstorage.domain.remote.request;
+package com.szmsd.http.dto;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-/**
+/**iInboundReceiptService
  * <p>
  * rec_wareh - 入库 前端控制器
  * </p>
@@ -46,14 +46,14 @@ import java.util.stream.Collectors;
 public class InboundReceiptController extends BaseController {
 
     @Resource
-    private IInboundReceiptService inboundReceiptService;
+    private IInboundReceiptService iInboundReceiptService;
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
     @GetMapping("/page")
     @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
     public TableDataInfo<InboundReceiptVO> page(InboundReceiptQueryDTO queryDTO) {
         startPage();
-        List<InboundReceiptVO> list = inboundReceiptService.selectList(queryDTO);
+        List<InboundReceiptVO> list = iInboundReceiptService.selectList(queryDTO);
         return getDataTable(list);
     }
 
@@ -61,7 +61,7 @@ public class InboundReceiptController extends BaseController {
     @PostMapping("/create")
     @ApiOperation(value = "创建", notes = "入库管理 - 新增 - 提交")
     public R create(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
-        inboundReceiptService.create(createInboundReceiptDTO);
+        iInboundReceiptService.create(createInboundReceiptDTO);
         return R.ok();
     }
 
@@ -69,7 +69,7 @@ public class InboundReceiptController extends BaseController {
     @DeleteMapping("/cancel/{warehouseNo}")
     @ApiOperation(value = "取消", notes = "入库管理 - 取消")
     public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
-        inboundReceiptService.cancel(warehouseNo);
+        iInboundReceiptService.cancel(warehouseNo);
         return R.ok();
     }
 
@@ -77,7 +77,7 @@ public class InboundReceiptController extends BaseController {
     @GetMapping("/info/{warehouseNo}")
     @ApiOperation(value = "详情", notes = "入库管理 - 详情（包含明细）")
     public R<InboundReceiptInfoVO> info(@PathVariable("warehouseNo") String warehouseNo) {
-        InboundReceiptInfoVO inboundReceiptInfoVO = inboundReceiptService.queryInfo(warehouseNo);
+        InboundReceiptInfoVO inboundReceiptInfoVO = iInboundReceiptService.queryInfo(warehouseNo);
         return R.ok(inboundReceiptInfoVO);
     }
 

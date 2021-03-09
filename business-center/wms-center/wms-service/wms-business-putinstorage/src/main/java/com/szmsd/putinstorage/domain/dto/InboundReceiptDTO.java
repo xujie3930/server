@@ -14,7 +14,7 @@ public class InboundReceiptDTO {
     @ApiModelProperty(value = "主键ID")
     private Long id;
 
-    @ApiModelProperty(value = "入库单号")
+    @ApiModelProperty(value = "入库单号", hidden = true)
     private String warehouseNo;
 
     @ApiModelProperty(value = "采购单")
@@ -42,7 +42,7 @@ public class InboundReceiptDTO {
     private String deliveryWayCode;
 
     @ApiModelProperty(value = "送货单号")
-        private String deliveryNo;
+    private String deliveryNo;
 
     @ApiModelProperty(value = "合计申报数量")
     private Integer totalDeclareQty;
