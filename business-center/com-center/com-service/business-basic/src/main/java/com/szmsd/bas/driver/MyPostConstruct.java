@@ -19,11 +19,11 @@ public class MyPostConstruct {
     @Resource
     private BasCommonService commonService;
 
-    /*@PostConstruct
+    @PostConstruct
     public void load() {
         for (CodeToNameEnum e : CodeToNameEnum.values()) {
             commonService.updateRedis(e);
         }
-    }*/
+    }
 
 }

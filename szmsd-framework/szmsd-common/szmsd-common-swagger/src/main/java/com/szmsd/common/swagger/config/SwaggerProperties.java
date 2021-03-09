@@ -1,9 +1,10 @@
 package com.szmsd.common.swagger.config;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @ConfigurationProperties("swagger")
@@ -73,6 +74,11 @@ public class SwaggerProperties
      * 全局统一鉴权配置
      **/
     private Authorization authorization = new Authorization();
+
+    /**
+     * header
+     */
+    private List<SwaggerHeaderProperties> headers;
 
     public Boolean getEnabled()
     {
@@ -341,5 +347,13 @@ public class SwaggerProperties
         {
             this.description = description;
         }
+    }
+
+    public List<SwaggerHeaderProperties> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(List<SwaggerHeaderProperties> headers) {
+        this.headers = headers;
     }
 }

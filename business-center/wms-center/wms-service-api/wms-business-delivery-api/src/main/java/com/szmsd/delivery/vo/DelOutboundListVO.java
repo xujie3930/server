@@ -1,13 +1,12 @@
 package com.szmsd.delivery.vo;
 
-import com.szmsd.delivery.dto.DelOutboundAddressDto;
-import com.szmsd.delivery.dto.DelOutboundDetailDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Date;
 
 /**
  * @author zhangyuyuan
@@ -20,8 +19,11 @@ public class DelOutboundListVO implements Serializable {
     @ApiModelProperty(value = "ID")
     private Long id;
 
-    @ApiModelProperty(value = "单号")
+    @ApiModelProperty(value = "出库单号")
     private String orderNo;
+
+    @ApiModelProperty(value = "采购单号")
+    private String purchaseNo;
 
     @ApiModelProperty(value = "出库订单类型")
     private String orderType;
@@ -47,34 +49,14 @@ public class DelOutboundListVO implements Serializable {
     @ApiModelProperty(value = "挂号")
     private String trackingNo;
 
-    @ApiModelProperty(value = "卖家代码")
-    private String sellerCode;
-
-
-
-
-
-    @ApiModelProperty(value = "装箱规则")
-    private String packingRule;
-
-    @ApiModelProperty(value = "备注")
-    private String remark;
-
-    @ApiModelProperty(value = "参照单号")
-    private String refOrderNo;
-
-    @ApiModelProperty(value = "是否必须按要求装箱")
-    private Boolean packingByRequired;
-
-    @ApiModelProperty(value = "是否优先发货")
-    private Boolean first;
-
-    @ApiModelProperty(value = "出库后重新上架的新SKU编码")
-    private String newSku;
-
     @ApiModelProperty(value = "客户代码")
     private String customCode;
 
+    @ApiModelProperty(value = "创建人")
+    private String createByName;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ApiModelProperty(value = "创建时间")
+    private Date createTime;
 
 }

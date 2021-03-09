@@ -30,10 +30,13 @@ public class BasWarehouse extends BaseEntity {
 
     @ApiModelProperty(value = "主键ID")
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
-    @ApiModelProperty(value = "业务主键，用来做幂等校验")
-    private String transactionId;
+    @ApiModelProperty(value = "操作人姓名")
+    private String operator;
+
+    @ApiModelProperty(value = "操作时间")
+    private String operateOn;
 
     @ApiModelProperty(value = "目的仓库编码")
     private String warehouseCode;
