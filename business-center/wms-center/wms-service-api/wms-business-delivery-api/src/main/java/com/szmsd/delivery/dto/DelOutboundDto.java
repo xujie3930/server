@@ -52,17 +52,17 @@ public class DelOutboundDto implements Serializable {
     private String refOrderNo;
 
     @ApiModelProperty(value = "是否必须按要求装箱")
-    private Boolean packingByRequired;
+    private Boolean isPackingByRequired;
 
     @ApiModelProperty(value = "是否优先发货")
-    private Boolean first;
+    private Boolean isFirst;
 
     @ApiModelProperty(value = "出库后重新上架的新SKU编码")
     private String newSku;
 
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
-    private List<DelOutboundAddressDto> address;
+    private DelOutboundAddressDto address;
 
     @NotNull(message = "明细信息不能为空")
     @ApiModelProperty(value = "明细信息")
