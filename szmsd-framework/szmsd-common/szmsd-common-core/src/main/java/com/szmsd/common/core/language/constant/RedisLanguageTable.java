@@ -23,4 +23,7 @@ public interface RedisLanguageTable {
     /** 城市 **/
     String BAS_CITY = "bas_city";
 
+    /** 仓库信息 **/
+    String BAS_WAREHOUSE = "bas_warehouse";
+
 }

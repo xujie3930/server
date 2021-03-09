@@ -2,7 +2,6 @@ package com.szmsd.common.core.filter;
 
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.util.StringUtil;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,9 +84,6 @@ public class ContextFilter implements Filter {
         // 处理GET请求参数
         if (method.equalsIgnoreCase(METHOD_GET)) {
             body = requestWrapper.getQueryString();
-            if (StringUtil.isNotEmpty(body) && Base64.isBase64(body)) {
-                body = new String(Base64.decodeBase64(body), StandardCharsets.UTF_8);
-            }
         } else {
             // 处理POST请求参数
             int size = requestWrapper.getContentLength();

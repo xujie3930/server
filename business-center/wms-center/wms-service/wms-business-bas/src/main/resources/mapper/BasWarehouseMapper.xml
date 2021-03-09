@@ -6,7 +6,7 @@
     <resultMap id="BasWarehouseVO" type="com.szmsd.bas.vo.BasWarehouseVO">
         <id column="id" property="id"/>
         <result column="warehouse_code" property="warehouseCode"/>
-        <result column="warehouse_name_cn" property="warehouseName"/>
+        <result column="warehouse_name" property="warehouseName"/>
         <result column="address" property="address"/>
         <result column="is_check_vat" property="isCheckVat"/>
         <result column="country_name" property="countryName"/>
@@ -40,7 +40,7 @@
     <sql id="Column_List_VO">
         t.id,
         t.warehouse_code,
-        t.warehouse_name_cn,
+        t.warehouse_code warehouse_name,
         '' address,
         t.is_check_vat,
         t.country_name,
@@ -75,7 +75,7 @@
         FROM bas_warehouse t
         <where>
             <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
-            <if test="warehouseName != null and warehouseName != ''">AND t.warehouse_name_cn = #{warehouseNameCn}</if>
+            <if test="warehouseNameCn != null and warehouseNameCn != ''">AND t.warehouse_name_cn = #{warehouseNameCn}</if>
             <if test="countryCode != null and countryCode != ''">AND t.country_code = #{countryCode}</if>
             <if test="province != null and province != ''">AND t.province = #{province}</if>
             <if test="city != null and city != ''">AND t.city = #{city}</if>
