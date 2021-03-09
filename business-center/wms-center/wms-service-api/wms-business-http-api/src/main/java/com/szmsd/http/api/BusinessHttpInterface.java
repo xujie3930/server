@@ -6,5 +6,5 @@ package com.szmsd.http.api;
  */
 public interface BusinessHttpInterface {
 
-    String SERVICE_NAME = "wms-business-open";
+    String SERVICE_NAME = "wms-business-http";
 }
