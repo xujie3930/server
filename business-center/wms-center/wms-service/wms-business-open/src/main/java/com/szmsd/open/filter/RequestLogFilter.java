@@ -12,25 +12,16 @@ import com.szmsd.open.domain.OpnRequestLog;
 import com.szmsd.open.event.EventUtil;
 import com.szmsd.open.event.RequestLogEvent;
 import com.szmsd.open.interceptor.RequestConstant;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.web.util.WebUtils;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author zhangyuyuan
@@ -97,9 +88,6 @@ public class RequestLogFilter implements Filter {
         // 处理GET请求参数
         if (method.equalsIgnoreCase(METHOD_GET)) {
             String requestBody = requestWrapper.getQueryString();
-            if (StringUtil.isNotEmpty(requestBody) && Base64.isBase64(requestBody)) {
-                requestBody = new String(Base64.decodeBase64(requestBody), StandardCharsets.UTF_8);
-            }
             body.setRequestBody(requestBody);
             body.setTransactionId(requestWrapper.getParameter("transactionId"));
         } else {

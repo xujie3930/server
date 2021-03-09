@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.szmsd.http.api.service.impl.HtpOutboundClientServiceImpl,\
+  com.szmsd.http.api.feign.fallback.HtpOutboundFeignFallback
+
+  
