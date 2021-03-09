@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotBlank;
+
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "AddWarehouseRequest", description = "创建/更新仓库")
@@ -16,15 +18,19 @@ public class AddWarehouseRequest {
     @ApiModelProperty(value = "操作时间")
     private String operateOn;
 
+    @NotBlank(message = "仓库代码不能为空")
     @ApiModelProperty(value = "目的仓库编码")
     private String warehouseCode;
 
+    @NotBlank(message = "仓库英文名不能为空")
     @ApiModelProperty(value = "仓库英文名")
     private String warehouseNameEn;
 
+    @NotBlank(message = "仓库中文名不能为空")
     @ApiModelProperty(value = "仓库中文名")
     private String warehouseNameCn;
 
+    @NotBlank(message = "是否需要VAT不能为空")
     @ApiModelProperty(value = "是否需要VAT：0不需要，1需要")
     private String isCheckVat;
 
@@ -64,7 +70,7 @@ public class AddWarehouseRequest {
     @ApiModelProperty(value = "联系人")
     private String contact;
 
-    @ApiModelProperty(value = "状态：0无效，1有效")
+    @ApiModelProperty(value = "状态：0无效，1有效", hidden = true)
     private String status;
 
 }
