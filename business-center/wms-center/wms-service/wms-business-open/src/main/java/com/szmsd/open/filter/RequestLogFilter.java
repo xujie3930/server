@@ -43,7 +43,7 @@ public class RequestLogFilter implements Filter {
         // 获取transactionId
         String transactionId = requestWrapper.getHeader(RequestConstant.TRANSACTION_ID);
         RequestBodyObject requestBodyObject = requestParam(requestWrapper);
-        if (StringUtils.isNotEmpty(transactionId)) {
+        if (StringUtils.isEmpty(transactionId)) {
             transactionId = requestBodyObject.getTransactionId();
         }
         String requestUri = requestWrapper.getRequestURI();
