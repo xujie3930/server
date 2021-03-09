@@ -25,6 +25,7 @@
         <module>wms-business-ord-api</module>
         <module>wms-business-open-api</module>
         <module>wms-business-delivery-api</module>
+        <module>wms-business-putinstorage-api</module>
     </modules>
 
     <dependencyManagement>
