@@ -1,4 +1,4 @@
-package com.szmsd.common.core.annotation;
+package com.szmsd.common.core.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
