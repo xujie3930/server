@@ -92,10 +92,6 @@
             <artifactId>wms-business-ord-api</artifactId>
             <version>${business.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.szmsd</groupId>
-            <artifactId>szmsd-common-security</artifactId>
-        </dependency>
 
 
     </dependencies>
