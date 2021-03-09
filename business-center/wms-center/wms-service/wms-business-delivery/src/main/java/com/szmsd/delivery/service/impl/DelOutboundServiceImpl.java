@@ -1,13 +1,16 @@
 package com.szmsd.delivery.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -20,6 +23,7 @@ import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.vo.DelOutboundListVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -60,13 +65,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     /**
      * 查询出库单模块列表
      *
-     * @param delOutbound 出库单模块
+     * @param queryDto 出库单模块
      * @return 出库单模块
      */
     @Override
-    public List<DelOutbound> selectDelOutboundList(DelOutbound delOutbound) {
-        QueryWrapper<DelOutbound> where = new QueryWrapper<DelOutbound>();
-        return baseMapper.selectList(where);
+    public List<DelOutboundListVO> selectDelOutboundList(DelOutboundListQueryDto queryDto) {
+        QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "shipment_rule", queryDto.getShipmentRule());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "warehouse_code", queryDto.getWarehouseCode());
+        return baseMapper.pageList(queryWrapper);
     }
 
     /**
@@ -85,7 +92,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (Objects.isNull(loginUser)) {
             throw new CommonException("999", "获取登录用户信息失败");
         }
-
         DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
         // 从登录人信息中获取客户代码
         delOutbound.setCustomCode("");
@@ -96,30 +102,68 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
         // 保存出库单
         int insert = baseMapper.insert(delOutbound);
-
         if (insert == 0) {
             throw new CommonException("999", "保存出库单失败！");
         }
-
         // 保存地址
+        this.saveAddress(dto, delOutbound.getOrderNo());
+        // 保存明细
+        this.saveDetail(dto, delOutbound.getOrderNo());
+        return insert;
+    }
+
+    /**
+     * 保存地址
+     *
+     * @param dto     dto
+     * @param orderNo orderNo
+     */
+    private void saveAddress(DelOutboundDto dto, String orderNo) {
         List<DelOutboundAddress> delOutboundAddressList = BeanMapperUtil.mapList(dto.getAddress(), DelOutboundAddress.class);
         if (CollectionUtils.isNotEmpty(delOutboundAddressList)) {
             for (DelOutboundAddress delOutboundAddress : delOutboundAddressList) {
-                delOutboundAddress.setOrderNo(delOutbound.getOrderNo());
+                delOutboundAddress.setOrderNo(orderNo);
             }
             this.delOutboundAddressService.saveBatch(delOutboundAddressList);
         }
+    }
 
-        // 保存明细
+    /**
+     * 保存明细
+     *
+     * @param dto     dto
+     * @param orderNo orderNo
+     */
+    private void saveDetail(DelOutboundDto dto, String orderNo) {
         List<DelOutboundDetail> delOutboundDetailList = BeanMapperUtil.mapList(dto.getDetails(), DelOutboundDetail.class);
         if (CollectionUtils.isNotEmpty(delOutboundDetailList)) {
             for (DelOutboundDetail delOutboundDetail : delOutboundDetailList) {
-                delOutboundDetail.setOrderNo(delOutbound.getOrderNo());
+                delOutboundDetail.setOrderNo(orderNo);
             }
             this.delOutboundDetailService.saveBatch(delOutboundDetailList);
         }
+    }
 
-        return insert;
+    /**
+     * 删除地址
+     *
+     * @param orderNo orderNo
+     */
+    private void deleteAddress(String orderNo) {
+        LambdaQueryWrapper<DelOutboundAddress> addressLambdaQueryWrapper = Wrappers.lambdaQuery();
+        addressLambdaQueryWrapper.eq(DelOutboundAddress::getOrderNo, orderNo);
+        this.delOutboundAddressService.remove(addressLambdaQueryWrapper);
+    }
+
+    /**
+     * 删除明细
+     *
+     * @param orderNo orderNo
+     */
+    private void deleteDetail(String orderNo) {
+        LambdaQueryWrapper<DelOutboundDetail> detailLambdaQueryWrapper = Wrappers.lambdaQuery();
+        detailLambdaQueryWrapper.eq(DelOutboundDetail::getOrderNo, orderNo);
+        this.delOutboundDetailService.remove(detailLambdaQueryWrapper);
     }
 
     /**
@@ -136,10 +180,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (null == delOutbound) {
             throw new CommonException("999", "单据不存在");
         }
-
         // 先删后增
-
-
+        String orderNo = delOutbound.getOrderNo();
+        this.deleteAddress(orderNo);
+        this.deleteDetail(orderNo);
+        // 保存地址
+        this.saveAddress(dto, orderNo);
+        // 保存明细
+        this.saveDetail(dto, orderNo);
+        // 更新
         return baseMapper.updateById(inputDelOutbound);
     }
 
@@ -152,6 +201,25 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional
     @Override
     public int deleteDelOutboundByIds(List<String> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return 0;
+        }
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.select(DelOutbound::getOrderNo);
+        queryWrapper.in(DelOutbound::getId, ids);
+        List<DelOutbound> list = this.list(queryWrapper);
+        if (CollectionUtils.isEmpty(list)) {
+            return 0;
+        }
+        List<String> orderNos = list.stream().map(DelOutbound::getOrderNo).collect(Collectors.toList());
+        // 删除地址
+        LambdaQueryWrapper<DelOutboundAddress> addressLambdaQueryWrapper = Wrappers.lambdaQuery();
+        addressLambdaQueryWrapper.in(DelOutboundAddress::getOrderNo, orderNos);
+        this.delOutboundAddressService.remove(addressLambdaQueryWrapper);
+        // 删除明细
+        LambdaQueryWrapper<DelOutboundDetail> detailLambdaQueryWrapper = Wrappers.lambdaQuery();
+        detailLambdaQueryWrapper.in(DelOutboundDetail::getOrderNo, orderNos);
+        this.delOutboundDetailService.remove(detailLambdaQueryWrapper);
         return baseMapper.deleteBatchIds(ids);
     }
 
@@ -163,6 +231,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      */
     @Override
     public int deleteDelOutboundById(String id) {
+        DelOutbound delOutbound = this.getById(id);
+        if (null == delOutbound) {
+            throw new CommonException("999", "单据不存在");
+        }
+        // 先删后增
+        String orderNo = delOutbound.getOrderNo();
+        this.deleteAddress(orderNo);
+        this.deleteDetail(orderNo);
         return baseMapper.deleteById(id);
     }
 

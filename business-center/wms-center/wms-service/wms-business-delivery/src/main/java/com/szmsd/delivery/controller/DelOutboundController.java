@@ -1,15 +1,15 @@
 package com.szmsd.delivery.controller;
 
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
-import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.vo.DelOutboundListVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -19,8 +19,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -39,27 +37,16 @@ public class DelOutboundController extends BaseController {
     private IDelOutboundService delOutboundService;
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
-    @PostMapping("/list")
-    @ApiOperation(value = "出库管理 - 分页列表")
-    public TableDataInfo list(DelOutbound delOutbound) {
+    @PostMapping("/page")
+    @ApiOperation(value = "出库管理 - 分页", position = 100)
+    public TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto queryDto) {
         startPage();
-        List<DelOutbound> list = delOutboundService.selectDelOutboundList(delOutbound);
-        return getDataTable(list);
-    }
-
-    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:export')")
-    @Log(title = "出库单模块", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")
-    @ApiOperation(value = "导出出库单模块列表", notes = "导出出库单模块列表")
-    public void export(HttpServletResponse response, DelOutbound delOutbound) throws IOException {
-        List<DelOutbound> list = delOutboundService.selectDelOutboundList(delOutbound);
-        ExcelUtil<DelOutbound> util = new ExcelUtil<DelOutbound>(DelOutbound.class);
-        util.exportExcel(response, list, "DelOutbound");
+        return getDataTable(this.delOutboundService.selectDelOutboundList(queryDto));
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")
     @GetMapping(value = "getInfo/{id}")
-    @ApiOperation(value = "出库管理 - 详情")
+    @ApiOperation(value = "出库管理 - 详情", position = 200)
     public R getInfo(@PathVariable("id") String id) {
         return R.ok(delOutboundService.selectDelOutboundById(id));
     }
@@ -67,7 +54,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:add')")
     @Log(title = "出库单模块", businessType = BusinessType.INSERT)
     @PostMapping("/shipment")
-    @ApiOperation(value = "出库管理 - 创建")
+    @ApiOperation(value = "出库管理 - 创建", position = 300)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<Integer> add(@RequestBody @Validated DelOutboundDto dto) {
         return R.ok(delOutboundService.insertDelOutbound(dto));
@@ -76,7 +63,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:edit')")
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
     @PutMapping("/shipment")
-    @ApiOperation(value = "出库管理 - 修改")
+    @ApiOperation(value = "出库管理 - 修改", position = 400)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<Integer> edit(@RequestBody @Validated(ValidationUpdateGroup.class) DelOutboundDto dto) {
         return R.ok(delOutboundService.updateDelOutbound(dto));
@@ -85,7 +72,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:remove')")
     @Log(title = "出库单模块", businessType = BusinessType.DELETE)
     @DeleteMapping("/shipment")
-    @ApiOperation(value = "出库管理 - 删除")
+    @ApiOperation(value = "出库管理 - 删除", position = 500)
     public R<Integer> remove(@RequestBody List<String> ids) {
         return R.ok(delOutboundService.deleteDelOutboundByIds(ids));
     }

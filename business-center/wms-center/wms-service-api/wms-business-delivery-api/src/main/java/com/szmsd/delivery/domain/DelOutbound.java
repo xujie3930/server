@@ -106,4 +106,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "操作时间")
     private Date operationTime;
+
+    @ApiModelProperty(value = "采购单号")
+    private String purchaseNo;
 }

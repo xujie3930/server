@@ -1,7 +1,14 @@
 package com.szmsd.delivery.mapper;
 
-import com.szmsd.delivery.domain.DelOutbound;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.vo.DelOutboundListVO;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +20,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
 
+    /**
+     * 出库管理 - 分页
+     *
+     * @param queryWrapper queryWrapper
+     * @return DelOutboundListVO
+     */
+    List<DelOutboundListVO> pageList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
 }
