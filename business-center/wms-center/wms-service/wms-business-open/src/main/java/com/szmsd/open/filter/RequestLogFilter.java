@@ -3,6 +3,7 @@ package com.szmsd.open.filter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.util.StringUtil;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.filter.ContextHttpServletRequestWrapper;
 import com.szmsd.common.core.filter.ContextHttpServletResponseWrapper;
 import com.szmsd.common.core.filter.ContextServletInputStream;
@@ -18,10 +19,18 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.web.util.WebUtils;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author zhangyuyuan
@@ -46,6 +55,7 @@ public class RequestLogFilter implements Filter {
         if (StringUtils.isEmpty(transactionId)) {
             transactionId = requestBodyObject.getTransactionId();
         }
+        AssertUtil.isTrue(StringUtils.isNotEmpty(transactionId), "transactionId cannot be null");
         String requestUri = requestWrapper.getRequestURI();
         RequestLogFilterContext currentContext = RequestLogFilterContext.getCurrentContext();
         currentContext.setRequestId(traceId);
