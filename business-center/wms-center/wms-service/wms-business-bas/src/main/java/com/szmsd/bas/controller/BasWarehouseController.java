@@ -7,6 +7,8 @@ import com.szmsd.bas.dto.BasWarehouseStatusChangeDTO;
 import com.szmsd.bas.service.IBasWarehouseService;
 import com.szmsd.bas.vo.BasWarehouseInfoVO;
 import com.szmsd.bas.vo.BasWarehouseVO;
+import com.szmsd.common.core.annotation.RedisCache;
+import com.szmsd.common.core.annotation.RedisLanguageFieldEnum;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -44,6 +46,7 @@ public class BasWarehouseController extends BaseController {
     @PreAuthorize("@ss.hasPermi('bas:warehouse:create')")
     @PostMapping("/saveOrUpdate")
     @ApiOperation(value = "创建/更新仓库", notes = "创建/更新仓库")
+    @RedisCache(redisLanguageFieldEnum = RedisLanguageFieldEnum.ADD_WAREHOUSE_REQUEST)
     public R saveOrUpdate(@RequestBody AddWarehouseRequest addWarehouseRequest) {
         basWarehouseService.saveOrUpdate(addWarehouseRequest);
         return R.ok();
