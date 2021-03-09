@@ -12,7 +12,7 @@ public class InboundReceiptDetailDTO {
     @ApiModelProperty(value = "主键ID")
     private Long id;
 
-    @ApiModelProperty(value = "入库单号")
+    @ApiModelProperty(value = "入库单号", hidden = true)
     private String warehouseNo;
 
     @ApiModelProperty(value = "sku")

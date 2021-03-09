@@ -47,83 +47,81 @@ public class HttpClientHelper {
 
     private static final Logger log = LoggerFactory.getLogger(HttpClientHelper.class);
 
-    private static PoolingHttpClientConnectionManager poolConnManager = null;
+    private final CloseableHttpClient httpClient;
 
-    private static CloseableHttpClient httpClient = null;
+    private HttpClientHelper() {
+        //注册访问协议相关的Socket工厂
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                .register("https", SSLConnectionSocketFactory.getSystemSocketFactory()).build();
+
+        //HttpConnection工厂：皮遏制写请求/解析响应处理器
+        HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> connectionFactory = new
+                ManagedHttpClientConnectionFactory(DefaultHttpRequestWriterFactory.INSTANCE,
+                DefaultHttpResponseParserFactory.INSTANCE);
+        //DNS解析器
+        DnsResolver dnsResolver = SystemDefaultDnsResolver.INSTANCE;
+
+        //创建池化连接管理器
+        PoolingHttpClientConnectionManager poolConnManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry, connectionFactory, dnsResolver);
+        //默认为Socket配置
+        SocketConfig defaultSocketConfig = SocketConfig.custom().setTcpNoDelay(true).build();
+        poolConnManager.setDefaultSocketConfig(defaultSocketConfig);
+
+        // 设置整个连接池的最大连接数
+        poolConnManager.setMaxTotal(1000);
+        // 每个路由的默认最大连接，每个路由实际最大连接默认为DefaultMaxPerRoute控制，maxTotal是整个池子最大数
+        // DefaultMaxPerRoute设置过小无法支持大并发（ConnectPoolTimeoutException: Timeout waiting for connect from pool) 路由是maxTotal的细分
+        //每个路由最大连接数
+        poolConnManager.setDefaultMaxPerRoute(1000);
+        //在从连接池获取连接时，连接不活跃多长时间后需要一次验证，默认2S
+        poolConnManager.setValidateAfterInactivity(5 * 1000);
+
+        //默认请求配置
+        RequestConfig requestConfig = RequestConfig.custom()
+                //设置连接超时时间
+                .setConnectTimeout(2 * 10000)
+                //设置等待数据超时时间
+                .setSocketTimeout(5 * 10000)
+                //设置从连接池获取连接的等待超时时间
+                .setConnectionRequestTimeout(20000)
+                .build();
+
+        HttpClientBuilder httpClientBuilder = HttpClients.custom();
+        httpClientBuilder.setConnectionManager(poolConnManager)
+                //设置连接池不是共享模式
+                .setConnectionManagerShared(false)
+                //定期回调空闲连接
+                .evictIdleConnections(60, TimeUnit.SECONDS)
+                //定期回收过期
+                .evictExpiredConnections()
+                //连接存活时间，如果不设置，根据长连接信息决定
+                .setConnectionTimeToLive(60, TimeUnit.SECONDS)
+                //设置默认请求配置
+                .setDefaultRequestConfig(requestConfig)
+                // 连接重试策略，是否能keepalive
+                .setConnectionReuseStrategy(DefaultConnectionReuseStrategy.INSTANCE)
+                //长连接配置，即获取长连接生产多少时间
+                .setKeepAliveStrategy(DefaultConnectionKeepAliveStrategy.INSTANCE)
+                //设置重试次数，默认是3次，启用重试
+                .setRetryHandler(new DefaultHttpRequestRetryHandler());
+
+        httpClient = httpClientBuilder.build();
+
+        //JVM停止或重启时，关闭连接池释放连接
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    log.info(e.getMessage());
+                }
+            }
+        });
+    }
 
     public static synchronized CloseableHttpClient getHttpClient() {
-        if (null == httpClient) {
-            //注册访问协议相关的Socket工厂
-            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                    .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                    .register("https", SSLConnectionSocketFactory.getSystemSocketFactory()).build();
-
-            //HttpConnection工厂：皮遏制写请求/解析响应处理器
-            HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> connectionFactory = new
-                    ManagedHttpClientConnectionFactory(DefaultHttpRequestWriterFactory.INSTANCE,
-                    DefaultHttpResponseParserFactory.INSTANCE);
-            //DNS解析器
-            DnsResolver dnsResolver = SystemDefaultDnsResolver.INSTANCE;
-
-            //创建池化连接管理器
-            poolConnManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry, connectionFactory, dnsResolver);
-            //默认为Socket配置
-            SocketConfig defaultSocketConfig = SocketConfig.custom().setTcpNoDelay(true).build();
-            poolConnManager.setDefaultSocketConfig(defaultSocketConfig);
-
-            // 设置整个连接池的最大连接数
-            poolConnManager.setMaxTotal(1000);
-            // 每个路由的默认最大连接，每个路由实际最大连接默认为DefaultMaxPerRoute控制，maxTotal是整个池子最大数
-            // DefaultMaxPerRoute设置过小无法支持大并发（ConnectPoolTimeoutException: Timeout waiting for connect from pool) 路由是maxTotal的细分
-            //每个路由最大连接数
-            poolConnManager.setDefaultMaxPerRoute(1000);
-            //在从连接池获取连接时，连接不活跃多长时间后需要一次验证，默认2S
-            poolConnManager.setValidateAfterInactivity(5 * 1000);
-
-            //默认请求配置
-            RequestConfig requestConfig = RequestConfig.custom()
-                    //设置连接超时时间
-                    .setConnectTimeout(2 * 10000)
-                    //设置等待数据超时时间
-                    .setSocketTimeout(5 * 10000)
-                    //设置从连接池获取连接的等待超时时间
-                    .setConnectionRequestTimeout(20000)
-                    .build();
-
-            HttpClientBuilder httpClientBuilder = HttpClients.custom();
-            httpClientBuilder.setConnectionManager(poolConnManager)
-                    //设置连接池不是共享模式
-                    .setConnectionManagerShared(false)
-                    //定期回调空闲连接
-                    .evictIdleConnections(60, TimeUnit.SECONDS)
-                    //定期回收过期
-                    .evictExpiredConnections()
-                    //连接存活时间，如果不设置，根据长连接信息决定
-                    .setConnectionTimeToLive(60, TimeUnit.SECONDS)
-                    //设置默认请求配置
-                    .setDefaultRequestConfig(requestConfig)
-                    // 连接重试策略，是否能keepalive
-                    .setConnectionReuseStrategy(DefaultConnectionReuseStrategy.INSTANCE)
-                    //长连接配置，即获取长连接生产多少时间
-                    .setKeepAliveStrategy(DefaultConnectionKeepAliveStrategy.INSTANCE)
-                    //设置重试次数，默认是3次；当前是禁用
-                    .setRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
-
-            httpClient = httpClientBuilder.build();
-
-            //JVM停止或重启时，关闭连接池释放连接
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                public void run() {
-                    try {
-                        httpClient.close();
-                    } catch (IOException e) {
-                        log.info(e.getMessage());
-                    }
-                }
-            });
-
-        }
-        return httpClient;
+        return HttpClientHelperInstance.INSTANCE.httpClient;
     }
 
     /**
@@ -207,6 +205,10 @@ public class HttpClientHelper {
         ByteArrayEntity byteArrayEntity = new ByteArrayEntity(requestBody.getBytes(StandardCharsets.UTF_8));
         byteArrayEntity.setContentType("application/json;charset=UTF-8");
         httpEntity.setEntity(byteArrayEntity);
+    }
+
+    private static class HttpClientHelperInstance {
+        private static final HttpClientHelper INSTANCE = new HttpClientHelper();
     }
 
     static class HttpDelete extends HttpEntityEnclosingRequestBase {

@@ -8,7 +8,7 @@ import com.szmsd.bas.service.IBasWarehouseService;
 import com.szmsd.bas.vo.BasWarehouseInfoVO;
 import com.szmsd.bas.vo.BasWarehouseVO;
 import com.szmsd.common.core.annotation.RedisCache;
-import com.szmsd.common.core.annotation.RedisLanguageFieldEnum;
+import com.szmsd.common.core.enums.RedisLanguageFieldEnum;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;

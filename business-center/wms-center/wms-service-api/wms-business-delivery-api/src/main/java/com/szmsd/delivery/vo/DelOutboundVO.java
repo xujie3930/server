@@ -45,10 +45,10 @@ public class DelOutboundVO implements Serializable {
     private String refOrderNo;
 
     @ApiModelProperty(value = "是否必须按要求装箱")
-    private Boolean packingByRequired;
+    private Boolean isPackingByRequired;
 
     @ApiModelProperty(value = "是否优先发货")
-    private Boolean first;
+    private Boolean isFirst;
 
     @ApiModelProperty(value = "出库后重新上架的新SKU编码")
     private String newSku;

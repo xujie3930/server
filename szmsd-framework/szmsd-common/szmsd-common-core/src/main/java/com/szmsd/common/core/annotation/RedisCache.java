@@ -1,5 +1,7 @@
 package com.szmsd.common.core.annotation;
 
+import com.szmsd.common.core.enums.RedisLanguageFieldEnum;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
