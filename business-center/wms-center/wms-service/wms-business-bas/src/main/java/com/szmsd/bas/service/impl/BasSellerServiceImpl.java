@@ -3,7 +3,9 @@ package com.szmsd.bas.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.BasSellerDto;
+import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.common.core.constant.HttpStatus;
@@ -117,7 +119,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             }
             //判断是否存在用户名
             QueryWrapper<BasSeller> queryWrapperAccount = new QueryWrapper<>();
-            queryWrapperAccount.eq("account",dto.getUserName());
+            queryWrapperAccount.eq("user_name",dto.getUserName());
             count = super.count(queryWrapperAccount);
             if(count!=0){
                 r.setData(false);
@@ -159,6 +161,17 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             r.setData(true);
             r.setMsg("注册成功");
             return r;
+        }
+
+        @Override
+        public BasSellerInfoDto selectBasSeller(String userName){
+            QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("user_name",userName);
+            BasSeller basSeller = super.getOne(queryWrapper);
+            QueryWrapper<BasSeller> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("cus_no",userName);
+            List<BasSellerCertificate> basSellerCertificateList;
+            return null;
         }
 
     /**

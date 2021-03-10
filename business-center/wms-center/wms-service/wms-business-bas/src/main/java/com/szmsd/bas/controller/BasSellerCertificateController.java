@@ -30,7 +30,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 
 @Api(tags = {""})
 @RestController
-@RequestMapping("/bas-seller-certificate")
+@RequestMapping("/bas/sellerCertificate")
 public class BasSellerCertificateController extends BaseController{
 
      @Resource

@@ -1,5 +1,6 @@
 package com.szmsd.bas.controller;
 import com.szmsd.bas.dto.BasSellerDto;
+import com.szmsd.bas.dto.BasSellerInfoDto;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -68,11 +69,11 @@ public class BasSellerController extends BaseController{
     * 获取模块详细信息
     */
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:query')")
-    @GetMapping(value = "getInfo/{id}")
+    @GetMapping(value = "getInfo")
     @ApiOperation(value = "获取模块详细信息",notes = "获取模块详细信息")
-    public R getInfo(@PathVariable("id") String id)
+    public R<BasSellerInfoDto> getInfo(@PathVariable("userName") String userName)
     {
-    return R.ok(basSellerService.selectBasSellerById(id));
+    return R.ok(basSellerService.selectBasSeller(userName));
     }
 
     /**
@@ -82,7 +83,7 @@ public class BasSellerController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("register")
     @ApiOperation(value = "注册模块",notes = "注册模块")
-    public R<Boolean> register(HttpServletRequest request,@RequestBody BasSellerDto dto)
+    public R<Boolean> register(HttpServletRequest request, @RequestBody BasSellerDto dto)
     {
     return basSellerService.insertBasSeller(request,dto);
     }
