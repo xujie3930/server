@@ -1,5 +1,7 @@
 package com.szmsd.http.config;
 
+import lombok.Data;
+import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,9 @@ public class HttpConfig {
 
     // 根目录
     private String baseUrl;
+
+    // Inbound
+    private InboundConfig inbound;
 
     // Outbound
     private OutboundConfig outbound;
@@ -50,6 +55,15 @@ public class HttpConfig {
         this.baseUrl = baseUrl;
     }
 
+    public InboundConfig getInbound() {
+        return inbound;
+    }
+
+    public HttpConfig setInbound(InboundConfig inbound) {
+        this.inbound = inbound;
+        return this;
+    }
+
     public OutboundConfig getOutbound() {
         return outbound;
     }
@@ -63,6 +77,15 @@ public class HttpConfig {
         map.put("UserId", this.getUserId());
         map.put("Password", this.getPassword());
         return map;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class InboundConfig {
+        // B1 创建入库单
+        private String create;
+        // B2 取消入库单
+        private String cancel;
     }
 
     public static class OutboundConfig {

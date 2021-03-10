@@ -13,8 +13,6 @@ import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
-import com.szmsd.putinstorage.domain.remote.request.CancelReceiptRequest;
-import com.szmsd.putinstorage.domain.remote.request.CreateReceiptRequest;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -84,6 +82,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         // 保存入库单
         InboundReceipt inboundReceipt = this.saveInboundReceipt(createInboundReceiptDTO);
+        createInboundReceiptDTO.setWarehouseNo(inboundReceipt.getWarehouseNo());
 
         // 保存入库单明细
         List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetailDTOS();
@@ -91,8 +90,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         iInboundReceiptDetailService.saveInboundReceiptDetail(inboundReceiptDetailDTOS);
 
         // 第三方接口推送
-        CreateReceiptRequest createReceiptRequest = new CreateReceiptRequest(createInboundReceiptDTO);
-        remoteRequest.createInboundReceipt(createReceiptRequest);
+        remoteRequest.createInboundReceipt(createInboundReceiptDTO);
 
         log.info("创建入库单：操作完成");
     }
@@ -134,10 +132,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         AssertUtil.notNull(inboundReceiptVO, "入库单[" + warehouseNo + "]不存在");
 
         // 第三方接口推送
-        CancelReceiptRequest cancelReceiptRequest = new CancelReceiptRequest();
-        cancelReceiptRequest.setOrderNo(inboundReceiptVO.getWarehouseNo());
-        cancelReceiptRequest.setWarehouseCode(inboundReceiptVO.getWarehouseMethodName());
-        remoteRequest.cancelInboundReceipt(cancelReceiptRequest);
+        remoteRequest.cancelInboundReceipt(inboundReceiptVO.getWarehouseNo(), inboundReceiptVO.getWarehouseName());
 
         // 修改为取消状态
         this.updateById(new InboundReceipt().setId(inboundReceiptVO.getId()).setStatus(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()));

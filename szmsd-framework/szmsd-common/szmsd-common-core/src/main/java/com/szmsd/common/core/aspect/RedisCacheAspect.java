@@ -1,7 +1,7 @@
 package com.szmsd.common.core.aspect;
 
 import com.szmsd.common.core.annotation.RedisCache;
-import com.szmsd.common.core.annotation.RedisLanguageFieldEnum;
+import com.szmsd.common.core.enums.RedisLanguageFieldEnum;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
