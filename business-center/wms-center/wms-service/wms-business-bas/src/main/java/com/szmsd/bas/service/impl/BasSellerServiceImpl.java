@@ -12,6 +12,7 @@ import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
@@ -95,8 +96,10 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             String s = (String) this.redisTemplate.opsForValue().get(userAccountKey);
 
             R r = new R();
+            r.setCode(200);
             //判断验证码是否有效
             if (org.apache.commons.lang.StringUtils.isBlank(s)) {
+
                 r.setData(false);
                 r.setMsg("验证码过期请重新输入");
                 return r;
@@ -134,13 +137,14 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             basSeller.setIsActive(false);
 
             //查询客户经理
-            SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
-            sysUserByTypeAndUserType.setNickName(dto.getServiceManagerName());
-            R result = remoteUserService.getNameByNickName(sysUserByTypeAndUserType);
-            if((Boolean)result.getData()==true){
-                basSeller.setServiceManager(result.getMsg());
+            if(StringUtils.isNotEmpty(dto.getServiceManagerName())){
+                SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
+                sysUserByTypeAndUserType.setNickName(dto.getServiceManagerName());
+                R result = remoteUserService.getNameByNickName(sysUserByTypeAndUserType);
+                if((Boolean)result.getData()==true){
+                    basSeller.setServiceManager(result.getMsg());
+                }
             }
-
             //注册到系统用户表
             // 角色ID  121：认证之前客户角色 122：认证通过之后客户角色
             Long[] roleIds = {121L};
