@@ -2,7 +2,6 @@ package com.szmsd.bas.vo;
 
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
-import com.szmsd.common.core.language.enums.LanguageEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -20,7 +19,7 @@ public class BasWarehouseVO {
     private String warehouseCode;
 
     @ApiModelProperty(value = "仓库名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE, language = LanguageEnum.enName)
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     private String warehouseName;
 
     @ApiModelProperty(value = "国家")
