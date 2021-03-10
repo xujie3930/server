@@ -31,7 +31,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 
 @Api(tags = {""})
 @RestController
-@RequestMapping("/base-packing")
+@RequestMapping("/base/packing")
 public class BasePackingController extends BaseController{
 
      @Resource
@@ -48,6 +48,15 @@ public class BasePackingController extends BaseController{
             List<BasePacking> list = basePackingService.selectBasePackingPage(basePackingQueryDto);
             return getDataTable(list);
       }
+
+    @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:list')")
+    @GetMapping("/listParent")
+    @ApiOperation(value = "查询父类列表",notes = "查询父类列表")
+    public R listParent()
+    {
+        List<BasePacking> list = basePackingService.selectBasePackingParent();
+        return R.ok(list);
+    }
 
     /**
     * 导出模块列表

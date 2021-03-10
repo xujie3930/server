@@ -23,13 +23,28 @@ public class HttpConfig {
     private String password;
 
     // 根目录
+    // https://wms-open-api.dsloco.com/swagger/index.html
     private String baseUrl;
+    // https://pricedproduct-internalapi-external.dsloco.com/swagger/index.html
+    private String pricedProductUrl;
+    // https://carrierservice-api-admin-external.dsloco.com/swagger/index.html
+    private String carrierServiceUrl;
 
+    // ------------------------------------------baseUrl--------------------
+    // WMS业务接口
     // Inbound
     private InboundConfig inbound;
-
     // Outbound
     private OutboundConfig outbound;
+    // ------------------------------------------baseUrl--------------------
+
+    // ------------------------------------------pricedProductUrl--------------------
+    // 计价系统PRC接口
+    // ------------------------------------------pricedProductUrl--------------------
+
+    // ------------------------------------------carrierServiceUrl--------------------
+    // 服务商接口
+    // ------------------------------------------carrierServiceUrl--------------------
 
     public String getUserId() {
         return userId;
@@ -62,6 +77,22 @@ public class HttpConfig {
     public HttpConfig setInbound(InboundConfig inbound) {
         this.inbound = inbound;
         return this;
+    }
+
+    public String getPricedProductUrl() {
+        return pricedProductUrl;
+    }
+
+    public void setPricedProductUrl(String pricedProductUrl) {
+        this.pricedProductUrl = pricedProductUrl;
+    }
+
+    public String getCarrierServiceUrl() {
+        return carrierServiceUrl;
+    }
+
+    public void setCarrierServiceUrl(String carrierServiceUrl) {
+        this.carrierServiceUrl = carrierServiceUrl;
     }
 
     public OutboundConfig getOutbound() {

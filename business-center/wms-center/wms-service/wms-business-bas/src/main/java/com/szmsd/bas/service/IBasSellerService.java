@@ -3,6 +3,7 @@ package com.szmsd.bas.service;
 import com.szmsd.bas.domain.BasSeller;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.dto.BasSellerDto;
+import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.common.core.domain.R;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,10 +44,17 @@ public interface IBasSellerService extends IService<BasSeller> {
         R<Boolean> insertBasSeller(HttpServletRequest request, BasSellerDto dto);
 
         /**
+         * 用户名查询用户信息
+         * @param userName
+         * @return
+         */
+        BasSellerInfoDto selectBasSeller(String userName);
+
+        /**
          * 获取验证码
          * @return
          */
-        String getCheckCode(HttpServletRequest request);
+        R getCheckCode(HttpServletRequest request);
 
         /**
         * 修改模块
