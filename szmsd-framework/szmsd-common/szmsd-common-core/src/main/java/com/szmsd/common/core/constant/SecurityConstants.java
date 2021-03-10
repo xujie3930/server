@@ -45,14 +45,19 @@ public class SecurityConstants {
     public static final String DETAILS_CLIENT_WEB = "web";
 
     /**
+     * client_id 为client
+     */
+    public static final String DETAILS_CLIENT_CLIENT = "client";
+
+    /**
      * userType =内部用户
      */
     public static final String DETAILS_USER_TYPE_SYS = "00";
 
     /**
-     * userType =VIP用户
+     * userType =客户端用户
      */
-    public static final String DETAILS_USER_TYPE_VIP = "01";
+    public static final String DETAILS_USER_TYPE_CLIENT = "01";
 
 
     /**
@@ -63,10 +68,11 @@ public class SecurityConstants {
      * 类型：type= 2-APP
      */
     public static final Integer DETAILS_TYPE_APP = 2;
+
     /**
-     * 类型：type= 3-VIP
+     * 类型：type= 3-CLIENT
      */
-    public static final Integer DETAILS_TYPE_VIP = 3;
+    public static final Integer DETAILS_TYPE_CLIENT = 3;
 
 
     /**

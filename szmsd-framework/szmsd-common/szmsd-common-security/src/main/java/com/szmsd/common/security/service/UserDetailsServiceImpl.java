@@ -47,10 +47,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         String clientId = ServletUtils.getParameter(SecurityConstants.DETAILS_CLIENT_ID, SecurityConstants.DETAILS_CLIENT_WEB);//获取令牌id
         String userType = ServletUtils.getParameter(SecurityConstants.DETAILS_USER_TYPE, SecurityConstants.DETAILS_USER_TYPE_SYS);//获取用户类型 00-内部用户，01-vip用户
         SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
-        if (SecurityConstants.DETAILS_USER_TYPE_VIP.equals(userType) &&
-                SecurityConstants.DETAILS_CLIENT_WEB.equals(clientId)) {//如果是vip用户
-            sysUserByTypeAndUserType.setType(SecurityConstants.DETAILS_TYPE_VIP);
-        } else if (SecurityConstants.DETAILS_USER_TYPE_SYS.equals(userType) &&
+      if (SecurityConstants.DETAILS_USER_TYPE_CLIENT.equals(userType) &&
+                SecurityConstants.DETAILS_CLIENT_CLIENT.equals(clientId)) {//如果是客户端用户
+            sysUserByTypeAndUserType.setType(SecurityConstants.DETAILS_TYPE_CLIENT);
+        }else if (SecurityConstants.DETAILS_USER_TYPE_SYS.equals(userType) &&
                 SecurityConstants.DETAILS_CLIENT_WEB.equals(clientId)) {//如果是E3 web
             sysUserByTypeAndUserType.setType(SecurityConstants.DETAILS_TYPE_PC);
         } else {//E3 app
