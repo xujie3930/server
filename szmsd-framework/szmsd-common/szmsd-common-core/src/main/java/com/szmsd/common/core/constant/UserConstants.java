@@ -45,6 +45,8 @@ public class UserConstants
 
     /** vip大客户用户类型 */
     public final static  String USER_TYPE_VIP="01";
+    /** 客户用户 */
+    public final static  String USER_TYPE_CRS="01";
 
 
     /** E3系统PC角色类型 */

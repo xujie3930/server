@@ -3,16 +3,16 @@ package com.szmsd.bas.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasSeller;
-import com.szmsd.bas.domain.BasSellerInfo;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.mapper.BasSellerMapper;
-import com.szmsd.bas.service.IBasSellerInfoService;
 import com.szmsd.bas.service.IBasSellerService;
-import com.szmsd.bas.util.SecurityUtils;
+import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
+import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.feign.RemoteUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,8 +36,6 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
 
     @Autowired
     private RedisTemplate redisTemplate;
-    @Autowired
-    private IBasSellerInfoService basSellerInfoService;
     @Resource
     private RemoteUserService remoteUserService;
 
@@ -108,7 +106,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             }
             //判断是否存在用户名
             QueryWrapper<BasSeller> queryWrapperAccount = new QueryWrapper<>();
-            queryWrapperAccount.eq("account",dto.getAccount());
+            queryWrapperAccount.eq("account",dto.getUserName());
             count = super.count(queryWrapperAccount);
             if(count!=0){
                 r.setData(false);
@@ -118,11 +116,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             BasSeller basSeller = BeanMapperUtil.map(dto, BasSeller.class);
             basSeller.setState(false);
             basSeller.setIsActive(false);
-            //加密
-            String salt = SecurityUtils.getSalt();
-            String password = basSeller.getPassword();
-            basSeller.setSalt(salt);
-            basSeller.setPassword(SecurityUtils.encryptPassword(password, salt));
+
             //查询客户经理
             SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
             sysUserByTypeAndUserType.setNickName(dto.getServiceManagerName());
@@ -130,11 +124,27 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             if((Boolean)result.getData()==true){
                 basSeller.setServiceManager(result.getMsg());
             }
-            //注册
+
+            //注册到系统用户表
+            // 角色ID  121：认证之前客户角色 122：认证通过之后客户角色
+            Long[] roleIds = {121L};
+            SysUserDto sysUserDto = new SysUserDto();
+            sysUserDto.setEmail(dto.getInitEmail());
+            //账号状态正常
+            sysUserDto.setStatus("0");
+            String encryptPassword = SecurityUtils.encryptPassword(sysUserDto.getPassword());
+            sysUserDto.setPassword(encryptPassword);
+            sysUserDto.setUserName(dto.getUserName());
+            sysUserDto.setUserType(UserConstants.USER_TYPE_CRS);
+            sysUserDto.setRoleIds(roleIds);
+            R sysUserResult = remoteUserService.baseCopyUserAdd(sysUserDto);
+            if(sysUserResult.getCode() == -200){
+                r.setData(false);
+                r.setMsg(sysUserResult.getMsg());
+            }
+            //注册信息到卖家表
             baseMapper.insert(basSeller);
-            //同步数据到用户信息表
-            BasSellerInfo basSellerInfo = BeanMapperUtil.map(basSeller, BasSellerInfo.class);
-            basSellerInfoService.insertBasSellerInfo(basSellerInfo);
+
             r.setData(true);
             r.setMsg("注册成功");
             return r;
@@ -191,8 +201,6 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         {
         return baseMapper.deleteById(id);
         }
-
-
 
     }
 

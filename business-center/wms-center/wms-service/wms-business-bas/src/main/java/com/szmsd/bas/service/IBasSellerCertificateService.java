@@ -1,6 +1,6 @@
 package com.szmsd.bas.service;
 
-import com.szmsd.bas.domain.BasSellerInfo;
+import com.szmsd.bas.domain.BasSellerCertificate;
 import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
@@ -10,9 +10,9 @@ import java.util.List;
     * </p>
 *
 * @author l
-* @since 2021-03-09
+* @since 2021-03-10
 */
-public interface IBasSellerInfoService extends IService<BasSellerInfo> {
+public interface IBasSellerCertificateService extends IService<BasSellerCertificate> {
 
         /**
         * 查询模块
@@ -20,31 +20,31 @@ public interface IBasSellerInfoService extends IService<BasSellerInfo> {
         * @param id 模块ID
         * @return 模块
         */
-        BasSellerInfo selectBasSellerInfoById(String id);
+        BasSellerCertificate selectBasSellerCertificateById(String id);
 
         /**
         * 查询模块列表
         *
-        * @param basSellerInfo 模块
+        * @param basSellerCertificate 模块
         * @return 模块集合
         */
-        List<BasSellerInfo> selectBasSellerInfoList(BasSellerInfo basSellerInfo);
+        List<BasSellerCertificate> selectBasSellerCertificateList(BasSellerCertificate basSellerCertificate);
 
         /**
         * 新增模块
         *
-        * @param basSellerInfo 模块
+        * @param basSellerCertificate 模块
         * @return 结果
         */
-        int insertBasSellerInfo(BasSellerInfo basSellerInfo);
+        int insertBasSellerCertificate(BasSellerCertificate basSellerCertificate);
 
         /**
         * 修改模块
         *
-        * @param basSellerInfo 模块
+        * @param basSellerCertificate 模块
         * @return 结果
         */
-        int updateBasSellerInfo(BasSellerInfo basSellerInfo);
+        int updateBasSellerCertificate(BasSellerCertificate basSellerCertificate);
 
         /**
         * 批量删除模块
@@ -52,7 +52,7 @@ public interface IBasSellerInfoService extends IService<BasSellerInfo> {
         * @param ids 需要删除的模块ID
         * @return 结果
         */
-        int deleteBasSellerInfoByIds(List<String> ids);
+        int deleteBasSellerCertificateByIds(List<String> ids);
 
         /**
         * 删除模块信息
@@ -60,7 +60,7 @@ public interface IBasSellerInfoService extends IService<BasSellerInfo> {
         * @param id 模块ID
         * @return 结果
         */
-        int deleteBasSellerInfoById(String id);
+        int deleteBasSellerCertificateById(String id);
 
 }
 

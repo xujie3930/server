@@ -296,13 +296,13 @@ public class SysUserController extends BaseController {
         BeanUtils.copyBeanProp(user, userDto);
         if (UserConstants.NOT_UNIQUE.equals(userService.checkUserNameUnique(user.getUserName()))) {
             return R.failed("新增用户'" + user.getUserName() + "'失败，登录账号已存在");
-        } else if (UserConstants.NOT_UNIQUE.equals(userService.checkPhoneUnique(user))) {
+        } /*else if (UserConstants.NOT_UNIQUE.equals(userService.checkPhoneUnique(user))) {
             return R.failed("新增用户'" + user.getUserName() + "'失败，手机号码已存在");
-        } else if (UserConstants.NOT_UNIQUE.equals(userService.checkEmailUnique(user))) {
+        } */else if (UserConstants.NOT_UNIQUE.equals(userService.checkEmailUnique(user))) {
             return R.failed("新增用户'" + user.getUserName() + "'失败，邮箱账号已存在");
         }
 
-        user.setCreateByName(userDto.getCreateByName());
+        //user.setCreateByName(userDto.getCreateByName());
 //        user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
 //        user.setSpearPassword(SecurityUtils.encryptPassword(user.getSpearPassword()));
         return userService.insertUser(user);

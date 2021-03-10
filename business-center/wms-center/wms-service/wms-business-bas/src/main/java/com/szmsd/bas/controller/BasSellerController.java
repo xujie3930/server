@@ -80,11 +80,10 @@ public class BasSellerController extends BaseController{
     */
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:add')")
     @Log(title = "模块", businessType = BusinessType.INSERT)
-    @PostMapping("add")
+    @PostMapping("register")
     @ApiOperation(value = "注册模块",notes = "注册模块")
-    public R<Boolean> add(HttpServletRequest request,@RequestBody BasSellerDto dto)
+    public R<Boolean> register(HttpServletRequest request,@RequestBody BasSellerDto dto)
     {
-
     return basSellerService.insertBasSeller(request,dto);
     }
 

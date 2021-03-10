@@ -58,6 +58,14 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
             return super.list(queryWrapper);
         }
 
+        @Override
+        public List<BasePacking> selectBasePackingParent(){
+            QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<BasePacking>();
+            queryWrapper.isNull("p_id");
+            queryWrapper.orderByDesc("name");
+            return super.list(queryWrapper);
+        }
+
         /**
         * 新增模块
         *

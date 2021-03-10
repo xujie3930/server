@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.szmsd.bas.mapper.BasSellerInfoMapper">
+<mapper namespace="com.szmsd.bas.mapper.BasSellerCertificateMapper">
 
         <!-- 通用查询映射结果 -->
-        <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasSellerInfo">
+        <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasSellerCertificate">
                     <id column="id" property="id"/>
                     <result column="create_by_name" property="createByName"/>
                     <result column="create_time" property="createTime"/>
@@ -14,17 +14,15 @@
                     <result column="update_by" property="updateBy"/>
                     <result column="del_flag" property="delFlag"/>
                     <result column="cus_no" property="cusNo"/>
-                    <result column="name" property="name"/>
-                    <result column="email" property="email"/>
-                    <result column="address" property="address"/>
                     <result column="country" property="country"/>
-                    <result column="telephone" property="telephone"/>
-                    <result column="id_card" property="idCard"/>
-                    <result column="ck1_account" property="ck1Account"/>
-                    <result column="service _manager" property="service Manager"/>
-                    <result column="account" property="account"/>
-                    <result column="init_email" property="initEmail"/>
-                    <result column="service _staff" property="service Staff"/>
+                    <result column="vat" property="vat"/>
+                    <result column="eori" property="eori"/>
+                    <result column="cnee_name" property="cneeName"/>
+                    <result column="cnee_address" property="cneeAddress"/>
+                    <result column="attachment" property="attachment"/>
+                    <result column="registration_date" property="registrationDate"/>
+                    <result column="is_active" property="isActive"/>
+                    <result column="vaild" property="vaild"/>
         </resultMap>
 
         <!-- 通用查询结果列 -->
@@ -34,7 +32,7 @@
                 update_by_name,
                 update_time,
                 remark,
-            id, create_by, update_by, del_flag, cus_no, name, email, address, country, telephone, id_card, ck1_account, service _manager, account, init_email, service _staff
+            id, create_by, update_by, del_flag, cus_no, country, vat, eori, cnee_name, cnee_address, attachment, registration_date, is_active, vaild
         </sql>
 
 
