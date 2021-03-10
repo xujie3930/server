@@ -97,6 +97,9 @@
         <if test="userName != null and userName != ''">
             AND u.user_name like concat('%', #{userName}, '%')
         </if>
+        <if test="nickName != null and nickName != ''">
+            AND u.nick_name = #{nickName}
+        </if>
         <if test="userType != null and userType != ''">
             AND u.user_type like concat('%', #{userType}, '%')
         </if>

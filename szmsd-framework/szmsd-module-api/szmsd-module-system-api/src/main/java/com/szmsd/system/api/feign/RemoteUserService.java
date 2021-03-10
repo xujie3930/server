@@ -39,6 +39,15 @@ public interface RemoteUserService {
     R<UserInfo> getUserInfo(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType);
 
     /**
+     * 通过用户昵称查询用户账号
+     *
+     * @param
+     * @return 结果
+     */
+    @PostMapping(value = "/user/getNameByNickName")
+    R<Boolean> getNameByNickName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType);
+
+    /**
      * 新增用户
      */
     @PostMapping(value = "/user/baseCopyUserAdd")

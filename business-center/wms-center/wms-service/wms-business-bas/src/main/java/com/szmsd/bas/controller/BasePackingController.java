@@ -1,11 +1,10 @@
 package com.szmsd.bas.controller;
-import com.szmsd.bas.domain.BaseProduct;
-import com.szmsd.bas.dto.BaseProductDto;
-import com.szmsd.bas.dto.BaseProductQueryDto;
+import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.dto.BasePackingQueryDto;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
-import com.szmsd.bas.service.IBaseProductService;
+import com.szmsd.bas.service.IBasePackingService;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import javax.annotation.Resource;
@@ -26,95 +25,89 @@ import com.szmsd.common.core.web.controller.BaseController;
     * </p>
 *
 * @author l
-* @since 2021-03-04
+* @since 2021-03-06
 */
 
 
 @Api(tags = {""})
 @RestController
-@RequestMapping("/base-product")
-public class BaseProductController extends BaseController{
+@RequestMapping("/base-packing")
+public class BasePackingController extends BaseController{
 
      @Resource
-     private IBaseProductService baseProductService;
+     private IBasePackingService basePackingService;
      /**
        * 查询模块列表
      */
-      @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
+      @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:list')")
       @GetMapping("/list")
       @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
-      public TableDataInfo list(BaseProductQueryDto queryDto)
+      public TableDataInfo list(BasePackingQueryDto basePackingQueryDto)
      {
             startPage();
-            List<BaseProduct> list = baseProductService.selectBaseProductPage(queryDto);
+            List<BasePacking> list = basePackingService.selectBasePackingPage(basePackingQueryDto);
             return getDataTable(list);
       }
 
     /**
     * 导出模块列表
     */
-     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:export')")
+     @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:export')")
      @Log(title = "模块", businessType = BusinessType.EXPORT)
      @GetMapping("/export")
      @ApiOperation(value = "导出模块列表",notes = "导出模块列表")
-     public void export(HttpServletResponse response, BaseProduct baseProduct) throws IOException {
-     List<BaseProduct> list = baseProductService.selectBaseProductList(baseProduct);
-     ExcelUtil<BaseProduct> util = new ExcelUtil<BaseProduct>(BaseProduct.class);
-        util.exportExcel(response,list, "BaseProduct");
+     public void export(HttpServletResponse response, BasePacking basePacking) throws IOException {
+     List<BasePacking> list = basePackingService.selectBasePackingList(basePacking);
+     ExcelUtil<BasePacking> util = new ExcelUtil<BasePacking>(BasePacking.class);
+        util.exportExcel(response,list, "BasePacking");
 
      }
 
     /**
     * 获取模块详细信息
     */
-    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:query')")
+    @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:query')")
     @GetMapping(value = "getInfo/{id}")
     @ApiOperation(value = "获取模块详细信息",notes = "获取模块详细信息")
     public R getInfo(@PathVariable("id") String id)
     {
-    return R.ok(baseProductService.selectBaseProductById(id));
+    return R.ok(basePackingService.selectBasePackingById(id));
     }
 
     /**
     * 新增模块
     */
-    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:add')")
+    @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:add')")
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("add")
-    @ApiOperation(value = "新增产品模块",notes = "新增产品模块")
-    public R add(@RequestBody BaseProductDto baseProductDto)
+    @ApiOperation(value = "新增模块",notes = "新增模块")
+    public R add(@RequestBody BasePacking basePacking)
     {
-    return toOk(baseProductService.insertBaseProduct(baseProductDto));
+    return toOk(basePackingService.insertBasePacking(basePacking));
     }
 
     /**
     * 修改模块
     */
-    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:edit')")
+    @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:edit')")
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块",notes = "修改模块")
-    public R edit(@RequestBody BaseProductDto baseProductDto)
+    public R edit(@RequestBody BasePacking basePacking)
     {
-    return toOk(baseProductService.updateBaseProduct(baseProductDto));
+    return toOk(basePackingService.updateBasePacking(basePacking));
     }
 
     /**
     * 删除模块
     */
-    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:remove')")
+    @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:remove')")
     @Log(title = "模块", businessType = BusinessType.DELETE)
     @DeleteMapping("remove")
     @ApiOperation(value = "删除模块",notes = "删除模块")
     public R remove(@RequestBody List<String> ids)
     {
-    return toOk(baseProductService.deleteBaseProductByIds(ids));
+    return toOk(basePackingService.deleteBasePackingByIds(ids));
     }
 
-    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:checkSkuValidToDelivery')")
-    @PostMapping("checkSkuValidToDelivery")
-    @ApiOperation(value = "查询sku是否有效",notes = "查询sku是否有效")
-    public R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct){
-        return baseProductService.checkSkuValidToDelivery(baseProduct);
-    }
 }
