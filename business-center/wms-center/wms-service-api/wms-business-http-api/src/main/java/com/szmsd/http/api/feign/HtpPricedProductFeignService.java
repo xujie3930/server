@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(contextId = "FeignClient.HtpInboundFeignService", name = BusinessHttpInterface.SERVICE_NAME, fallbackFactory = HtpPricedProductFeignFallback.class)
+@FeignClient(contextId = "FeignClient.HtpPricedProductFeignService", name = BusinessHttpInterface.SERVICE_NAME, fallbackFactory = HtpPricedProductFeignFallback.class)
 public interface HtpPricedProductFeignService {
 
     @PostMapping("/api/products/http/pricedProducts")
