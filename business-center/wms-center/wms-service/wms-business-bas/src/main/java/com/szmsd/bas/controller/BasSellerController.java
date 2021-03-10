@@ -32,7 +32,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 
 @Api(tags = {""})
 @RestController
-@RequestMapping("/bas-seller")
+@RequestMapping("/bas/seller")
 public class BasSellerController extends BaseController{
 
      @Resource
