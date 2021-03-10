@@ -10,7 +10,7 @@ import com.szmsd.http.vo.ResponseVO;
 import org.springframework.stereotype.Service;
 
 @Service
-public class InboundServiceImpl extends AbstractHttpRequest implements IInboundService {
+public class InboundServiceImpl extends AbstractBaseHttpRequest implements IInboundService {
 
     public InboundServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);

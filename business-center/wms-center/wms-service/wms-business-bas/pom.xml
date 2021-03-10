@@ -96,6 +96,10 @@
             <groupId>com.github.penggle</groupId>
             <artifactId>kaptcha</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-http-api</artifactId>
+        </dependency>
 
 
     </dependencies>
