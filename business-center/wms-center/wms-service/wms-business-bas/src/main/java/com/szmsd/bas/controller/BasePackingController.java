@@ -31,7 +31,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 
 @Api(tags = {""})
 @RestController
-@RequestMapping("/base-packing")
+@RequestMapping("/base/packing")
 public class BasePackingController extends BaseController{
 
      @Resource
