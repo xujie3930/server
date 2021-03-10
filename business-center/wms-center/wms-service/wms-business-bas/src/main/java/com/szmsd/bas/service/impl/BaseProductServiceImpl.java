@@ -1,15 +1,18 @@
 package com.szmsd.bas.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductOms;
+import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.mapper.BaseProductMapper;
 import com.szmsd.bas.service.IBaseProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.util.RestTemplateUtils;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -58,6 +61,19 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         return baseMapper.selectList(where);
         }
 
+        @Override
+        public List<BaseProduct> selectBaseProductPage(BaseProductQueryDto queryDto){
+            QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+            QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", queryDto.getCategory());
+            QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
+            QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
+            QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
+            QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
+            queryWrapper.eq("is_active",true);
+            queryWrapper.orderByDesc("create_time");
+            return super.list(queryWrapper);
+        }
+
         /**
         * 新增模块
         *
@@ -73,7 +89,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             //默认仓库没有验收
             baseProductDto.setWarehouseAcceptance(false);
 
-            BaseProduct baseProduct = BeanMapperUtil.map(baseProductDto,BaseProduct.class);
+            BaseProduct baseProduct = BeanMapperUtil.map(baseProductDto, BaseProduct.class);
             //包材不需要仓库测量尺寸
             baseProduct.setWarehouseAcceptance(true);
             //如果是sku就传OMS 包材不传oms
@@ -102,13 +118,13 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         /**
         * 修改模块
         *
-        * @param baseProduct 模块
+        * @param baseProductDto 模块
         * @return 结果
         */
         @Override
-        public int updateBaseProduct(BaseProduct baseProduct)
+        public int updateBaseProduct(BaseProductDto baseProductDto)
         {
-        return baseMapper.updateById(baseProduct);
+        return baseMapper.updateById(baseProductDto);
         }
 
         /**
@@ -120,6 +136,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         @Override
         public int deleteBaseProductByIds(List<String>  ids)
        {
+           //传删除给WMS
             return baseMapper.deleteBatchIds(ids);
        }
 
@@ -139,11 +156,18 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         public R<Boolean> checkSkuValidToDelivery(BaseProduct baseProduct){
             QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("code",baseProduct.getCode());
-            if(baseProduct.getWarehouseAcceptance()==true)
-            {
-                queryWrapper.eq("warehouse_acceptance",true);
+            queryWrapper.eq("category","SKU");
+            //查询是否有SKU
+            int count = super.count(queryWrapper);
+            R r = new R();
+            if(count==1){
+                r.setData(true);
+                r.setMsg("success");
+            }else{
+                r.setData(false);
+                r.setMsg("SKU不存在");
             }
-            return R.ok();
+            return r;
         }
 
 

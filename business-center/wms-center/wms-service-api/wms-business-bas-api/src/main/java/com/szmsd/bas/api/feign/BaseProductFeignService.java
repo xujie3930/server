@@ -2,7 +2,6 @@ package com.szmsd.bas.api.feign;
 
 import com.szmsd.bas.api.BusinessBasInterface;
 import com.szmsd.bas.api.factory.BaseProductFeignFallback;
-import com.szmsd.bas.api.factory.SerialNumberFeignFallback;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.domain.R;
 import org.springframework.cloud.openfeign.FeignClient;

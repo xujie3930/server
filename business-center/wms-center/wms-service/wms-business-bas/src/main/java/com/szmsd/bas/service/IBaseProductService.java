@@ -3,10 +3,9 @@ package com.szmsd.bas.service;
 import com.szmsd.bas.domain.BaseProduct;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.dto.BaseProductDto;
+import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.common.core.domain.R;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -36,6 +35,13 @@ public interface IBaseProductService extends IService<BaseProduct> {
         List<BaseProduct> selectBaseProductList(BaseProduct baseProduct);
 
         /**
+         * 查询模块列表
+         * @param queryDto
+         * @return
+         */
+        List<BaseProduct> selectBaseProductPage(BaseProductQueryDto queryDto);
+
+        /**
         * 新增模块
         *
         * @param baseProductDto 模块
@@ -46,10 +52,10 @@ public interface IBaseProductService extends IService<BaseProduct> {
         /**
         * 修改模块
         *
-        * @param baseProduct 模块
+        * @param baseProductDto 模块
         * @return 结果
         */
-        int updateBaseProduct(BaseProduct baseProduct);
+        int updateBaseProduct(BaseProductDto baseProductDto);
 
         /**
         * 批量删除模块

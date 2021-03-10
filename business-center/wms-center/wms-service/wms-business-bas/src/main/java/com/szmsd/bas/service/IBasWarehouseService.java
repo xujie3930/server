@@ -6,6 +6,7 @@ import com.szmsd.bas.domain.BasWarehouseCus;
 import com.szmsd.bas.dto.AddWarehouseRequest;
 import com.szmsd.bas.dto.BasWarehouseQueryDTO;
 import com.szmsd.bas.dto.BasWarehouseStatusChangeDTO;
+import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.bas.vo.BasWarehouseInfoVO;
 import com.szmsd.bas.vo.BasWarehouseVO;
 
@@ -25,10 +26,15 @@ public interface IBasWarehouseService extends IService<BasWarehouse> {
 
     void saveOrUpdate(AddWarehouseRequest addWarehouseRequest);
 
-    BasWarehouseInfoVO queryInfo(String warehouseNo);
+    BasWarehouseInfoVO queryInfo(String warehouseCode);
 
     void saveWarehouseCus(List<BasWarehouseCus> basWarehouseCusList);
 
     void statusChange(BasWarehouseStatusChangeDTO basWarehouseStatusChangeDTO);
+
+    List<WarehouseKvDTO> selectCusInboundWarehouse();
+
+    boolean vailCusWarehouse(String warehouseCode);
+
 }
 
