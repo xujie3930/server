@@ -190,19 +190,19 @@ public class BaseProduct extends BaseEntity {
 
     @ApiModelProperty(value = "仓库测量重量g")
     @Excel(name = "仓库测量重量g")
-    private Double Weight;
+    private Double weight;
 
     @ApiModelProperty(value = "仓库测量长 cm")
     @Excel(name = "仓库测量长 cm")
-    private Double Length;
+    private Double length;
 
     @ApiModelProperty(value = "仓库测量宽 cm")
     @Excel(name = "仓库测量宽 cm")
-    private Double Width;
+    private Double width;
 
     @ApiModelProperty(value = "仓库测量高 cm")
     @Excel(name = "仓库测量高 cm")
-    private Double Height;
+    private Double height;
 
     @ApiModelProperty(value = "仓库测量体积 cm3")
     @Excel(name = "仓库测量体积 cm3")

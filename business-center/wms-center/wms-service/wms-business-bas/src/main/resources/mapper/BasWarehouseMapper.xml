@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.mapper.BasWarehouseMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BasWarehouseVO" type="com.szmsd.bas.vo.BasWarehouseVO">
+        <id column="id" property="id"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_name" property="warehouseName"/>
+        <result column="address" property="address"/>
+        <result column="is_check_vat" property="isCheckVat"/>
+        <result column="country_name" property="countryName"/>
+        <result column="city" property="city"/>
+        <result column="time_zone" property="timeZone"/>
+        <result column="status" property="status"/>
+    </resultMap>
+    
+    <resultMap id="BasWarehouseInfoVO" type="com.szmsd.bas.vo.BasWarehouseInfoVO">
+        <id column="id" property="id"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_name_en" property="warehouseNameEn"/>
+        <result column="warehouse_name_cn" property="warehouseNameCn"/>
+        <result column="is_check_vat" property="isCheckVat"/>
+        <result column="country_code" property="countryCode"/>
+        <result column="country_name" property="countryName"/>
+        <result column="country_chinese_name" property="countryChineseName"/>
+        <result column="country_display_name" property="countryDisplayName"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="street1" property="street1"/>
+        <result column="street2" property="street2"/>
+        <result column="postcode" property="postcode"/>
+        <result column="telephone" property="telephone"/>
+        <result column="time_zone" property="timeZone"/>
+        <result column="contact" property="contact"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Column_List_VO">
+        t.id,
+        t.warehouse_code,
+        t.warehouse_code warehouse_name,
+        '' address,
+        t.is_check_vat,
+        t.country_name,
+        t.city,
+        t.time_zone,
+        t.status
+    </sql>
+
+    <sql id="Column_List_INFO_VO">
+        t.id,
+        t.warehouse_code,
+        t.warehouse_name_en,
+        t.warehouse_name_cn,
+        t.is_check_vat,
+        t.country_code,
+        t.country_name,
+        t.country_chinese_name,
+        t.country_display_name,
+        t.province,
+        t.city,
+        t.street1,
+        t.street2,
+        t.postcode,
+        t.telephone,
+        t.time_zone,
+        t.contact,
+        t.status
+    </sql>
+
+    <select id="selectList" parameterType="com.szmsd.bas.dto.BasWarehouseQueryDTO" resultMap="BasWarehouseVO">
+        SELECT <include refid="Column_List_VO"/>
+        FROM bas_warehouse t
+        <where>
+            <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
+            <if test="warehouseNameCn != null and warehouseNameCn != ''">AND t.warehouse_name_cn = #{warehouseNameCn}</if>
+            <if test="countryCode != null and countryCode != ''">AND t.country_code = #{countryCode}</if>
+            <if test="province != null and province != ''">AND t.province = #{province}</if>
+            <if test="city != null and city != ''">AND t.city = #{city}</if>
+            <if test="status != null and status != ''">AND t.status = #{status}</if>
+        </where>
+    </select>
+    <select id="selectInfo" resultMap="BasWarehouseInfoVO">
+        SELECT <include refid="Column_List_INFO_VO"/>
+        FROM bas_warehouse t
+        <where>
+            <if test="id != null and id != ''">AND t.id = #{id}</if>
+            <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
+            <if test="(id == null or id == ''.toString()) and (warehouseCode == null and warehouseCode == ''.toString())"><![CDATA[AND 1 <> 1]]></if>
+        </where>
+    </select>
+    <select id="selectWarehouseCus" resultType="com.szmsd.bas.domain.BasWarehouseCus">
+        SELECT t.warehouse_code, t.cus_code, t.cus_code cus_name, t.express
+        FROM bas_warehouse_cus t
+        <where>
+            <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
+            <if test="cusCode != null and cusCode != ''">AND t.cus_code = #{cusCode}</if>
+            <if test="(cusCode == null or cusCode == ''.toString()) and (warehouseCode == null and warehouseCode == ''.toString())"><![CDATA[AND 1 <> 1]]></if>
+        </where>
+    </select>
+    <insert id="insertWarehouseCus" parameterType="com.szmsd.bas.domain.BasWarehouseCus">
+        INSERT INTO bas_warehouse_cus(warehouse_code, cus_code, express, create_by, create_by_name)
+        VALUES(#{warehouseCode}, #{cusCode}, #{express}, #{createBy}, #{createByName})
+    </insert>
+
+
+</mapper>

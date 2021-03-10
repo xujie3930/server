@@ -1,10 +1,11 @@
 package com.szmsd.bas.controller;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
+import com.szmsd.bas.dto.BaseProductQueryDto;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
 import com.szmsd.bas.service.IBaseProductService;
-import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import javax.annotation.Resource;
@@ -42,10 +43,10 @@ public class BaseProductController extends BaseController{
       @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
       @GetMapping("/list")
       @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
-      public TableDataInfo list(BaseProduct baseProduct)
+      public TableDataInfo list(BaseProductQueryDto queryDto)
      {
             startPage();
-            List<BaseProduct> list = baseProductService.selectBaseProductList(baseProduct);
+            List<BaseProduct> list = baseProductService.selectBaseProductPage(queryDto);
             return getDataTable(list);
       }
 
@@ -93,9 +94,9 @@ public class BaseProductController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块",notes = "修改模块")
-    public R edit(@RequestBody BaseProduct baseProduct)
+    public R edit(@RequestBody BaseProductDto baseProductDto)
     {
-    return toOk(baseProductService.updateBaseProduct(baseProduct));
+    return toOk(baseProductService.updateBaseProduct(baseProductDto));
     }
 
     /**

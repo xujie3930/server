@@ -14,6 +14,7 @@ public enum CodeToNameEnum {
     BAS_COUNTRY("bas_country", "国家"),
     BAS_PROVINCE("bas_province", "省份"),
     BAS_CITY("bas_city", "城市"),
+    BAS_WAREHOUSE("bas_warehouse", "仓库信息"),
     ;
     private String type;
     private String value;

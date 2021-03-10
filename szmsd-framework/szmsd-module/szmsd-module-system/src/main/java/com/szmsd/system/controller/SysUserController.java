@@ -1,5 +1,6 @@
 package com.szmsd.system.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
@@ -23,6 +24,7 @@ import com.szmsd.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -167,6 +169,27 @@ public class SysUserController extends BaseController {
         sysUserVo.setRoles(roles);
         sysUserVo.setPermissions(permissions);
         return R.ok(sysUserVo);
+    }
+
+    /**
+     * feign获取当前用户信息
+     */
+    @PostMapping("/getNameByNickName")
+    @ApiOperation(httpMethod = "POST", value = "获取当前用户信息")
+    public R<Boolean> getNameByNickName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType) {
+        SysUser sysUser = new SysUser();
+        sysUser.setNickName(sysUserByTypeAndUserType.getNickName());
+        List<SysUser> list = userService.selectUserList(sysUser);
+        R r = new R();
+        if (CollectionUtils.isNotEmpty(list)&&list.size()==1) {
+            r.setData(true);
+            r.setMsg(list.get(0).getUserName());
+        }else{
+            r.setData(false);
+            r.setMsg("没有查询到");
+        }
+
+        return r;
     }
 
     /**

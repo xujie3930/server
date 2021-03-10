@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @date 2021-03-05 14:23
  */
 @Data
-@ApiModel(value = "出库单明细", description = "DelOutboundDetailDto对象")
+@ApiModel(value = "DelOutboundDetailDto", description = "DelOutboundDetailDto对象")
 public class DelOutboundDetailDto implements Serializable {
 
     @ApiModelProperty(value = "ID")
