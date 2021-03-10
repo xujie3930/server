@@ -1,11 +1,12 @@
 package com.szmsd.open.interceptor;
 
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.common.core.domain.R;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.szmsd.open.event.EventUtil;
 import com.szmsd.open.event.TransactionEvent;
 import com.szmsd.open.filter.RequestLogFilterContext;
 import com.szmsd.open.service.IOpnTransactionService;
+import com.szmsd.open.vo.ResponseVO;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -75,19 +76,19 @@ public class TransactionHandlerInterceptor implements HandlerInterceptor, Ordere
             if (0 == t) {
                 return true;
             } else {
-                R<String> r;
+                ResponseVO r;
                 if (1 == t) {
                     // 返回成功
-                    r = R.ok();
+                    r = ResponseVO.ok();
                 } else {
                     // 返回失败
-                    r = R.failed("执行失败，请重新再试");
+                    r = ResponseVO.failed("执行失败，请重新再试");
                 }
                 response.reset();
                 response.setCharacterEncoding(RequestConstant.ENCODING);
                 response.setContentType(MediaType.TEXT_HTML_VALUE + ";charset=UTF-8");
                 PrintWriter pw = response.getWriter();
-                pw.write(JSONObject.toJSONString(r));
+                pw.write(JSONObject.toJSONString(r, SerializerFeature.PrettyFormat, SerializerFeature.WriteMapNullValue));
                 pw.flush();
                 pw.close();
                 return false;
