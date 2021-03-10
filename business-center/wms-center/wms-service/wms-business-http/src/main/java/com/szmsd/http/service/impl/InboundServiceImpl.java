@@ -23,6 +23,6 @@ public class InboundServiceImpl extends AbstractHttpRequest implements IInboundS
 
     @Override
     public ResponseVO cancel(CancelReceiptRequest cancelReceiptRequestDTO) {
-        return JSON.parseObject(httpDelete(httpConfig.getInbound().getCreate(), cancelReceiptRequestDTO), CreateReceiptResponse.class);
+        return JSON.parseObject(httpDelete(httpConfig.getInbound().getCancel(), cancelReceiptRequestDTO), CreateReceiptResponse.class);
     }
 }
