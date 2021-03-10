@@ -9,6 +9,7 @@ import com.szmsd.bas.domain.BasWarehouseCus;
 import com.szmsd.bas.dto.AddWarehouseRequest;
 import com.szmsd.bas.dto.BasWarehouseQueryDTO;
 import com.szmsd.bas.dto.BasWarehouseStatusChangeDTO;
+import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.bas.mapper.BasWarehouseMapper;
 import com.szmsd.bas.service.IBasWarehouseService;
 import com.szmsd.bas.vo.BasWarehouseInfoVO;
@@ -16,6 +17,7 @@ import com.szmsd.bas.vo.BasWarehouseVO;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -59,18 +61,18 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 仓库详情 【包含黑白名单客户】
-     * @param warehouseNo
+     * @param warehouseCode
      * @return
      */
     @Override
-    public BasWarehouseInfoVO queryInfo(String warehouseNo) {
-        log.info("查询仓库详情：warehouseNo={}", warehouseNo);
-        BasWarehouseInfoVO basWarehouseInfoVO = baseMapper.selectInfo(null, warehouseNo);
+    public BasWarehouseInfoVO queryInfo(String warehouseCode) {
+        log.info("查询仓库详情：warehouseCode={}", warehouseCode);
+        BasWarehouseInfoVO basWarehouseInfoVO = baseMapper.selectInfo(null, warehouseCode);
         if (basWarehouseInfoVO == null) {
             return null;
         }
         // 查询黑白名单客户
-        List<BasWarehouseCus> basWarehouseCusList = baseMapper.selectWarehouseCus(warehouseNo, null);
+        List<BasWarehouseCus> basWarehouseCusList = baseMapper.selectWarehouseCus(warehouseCode, null);
         List<BasWarehouseCus> collect0 = basWarehouseCusList.stream().filter(item -> "0".equals(item.getExpress())).collect(Collectors.toList());
         basWarehouseInfoVO.setBlackCusList(collect0);
         List<BasWarehouseCus> collect1 = basWarehouseCusList.stream().filter(item -> "1".equals(item.getExpress())).collect(Collectors.toList());
@@ -112,6 +114,42 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
         BasWarehouse basWarehouse = new BasWarehouse().setWarehouseCode(basWarehouseStatusChangeDTO.getWarehouseCode()).setStatus(basWarehouseStatusChangeDTO.getStatus());
         baseMapper.update(basWarehouse, new UpdateWrapper<BasWarehouse>().lambda().eq(BasWarehouse::getWarehouseCode, basWarehouse.getWarehouseCode()));
         log.info("仓库状态变更：操作完成");
+    }
+
+    /**
+     * 查询入库单 - 创建 - 目的仓库下拉 【过滤出有效仓库、当前登录人没在黑名单、并且白名单非空或白名单包含当前登录人】
+     * @return
+     */
+    @Override
+    public List<WarehouseKvDTO> selectCusInboundWarehouse() {
+        List<BasWarehouseVO> basWarehouseVOS = this.selectList(new BasWarehouseQueryDTO().setStatus("1"));
+        List<WarehouseKvDTO> collect = basWarehouseVOS.stream().filter(basWarehouseVO -> this.vailCusWarehouse(basWarehouseVO.getWarehouseCode())).map(item -> new WarehouseKvDTO().setKey(item.getWarehouseCode()).setValue(item.getWarehouseCode())).collect(Collectors.toList());
+        return collect;
+    }
+
+    /**
+     * 判断当前登录人是是否能使用这个仓库
+     * @param warehouseCode
+     * @return
+     */
+    @Override
+    public boolean vailCusWarehouse(String warehouseCode) {
+        SysUser user = remoteComponent.getLoginUserInfo();
+        List<BasWarehouseCus> basWarehouseCusList = baseMapper.selectWarehouseCus(warehouseCode, null);
+        // 在黑名单里面 return false
+        List<BasWarehouseCus> collect0 = basWarehouseCusList.stream().filter(item -> "0".equals(item.getExpress()) && item.getCusCode().equals(user.getUserName())).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(collect0)) {
+            return false;
+        }
+        // 白名单不为空的话 判断是否在白名单 如果不在 return false
+        List<BasWarehouseCus> collect1 = basWarehouseCusList.stream().filter(item -> "1".equals(item.getExpress())).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(collect1)) {
+            List<BasWarehouseCus> collect3 = basWarehouseCusList.stream().filter(item -> item.getCusCode().equals(user.getUserName())).collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(collect3)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 
