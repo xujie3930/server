@@ -6,13 +6,14 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import com.szmsd.common.core.utils.ServletUtils;
-import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.redis.service.RedisService;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.enums.LanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
+import com.szmsd.common.core.utils.ServletUtils;
+import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.redis.service.RedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -76,7 +77,7 @@ public class FieldLanguage extends JsonSerializer<String> implements ContextualS
         if (annotation == null) {
             return prov.findNullValueSerializer(property);
         }
-        return new FieldLanguage(annotation.type(), annotation.language(), annotation.value(), annotation.localLanguageType(), redisService);
+        return new FieldLanguage(annotation.type(), annotation.language(), annotation.value(), annotation.localLanguageType(), null == this.redisService ? SpringUtils.getBean("redisService") : this.redisService);
     }
 
     private String getLanguage(String type, String code) {
