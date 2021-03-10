@@ -2,8 +2,8 @@ package com.szmsd.bas.controller;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
-import com.szmsd.bas.service.IBasSellerInfoService;
-import com.szmsd.bas.domain.BasSellerInfo;
+import com.szmsd.bas.service.IBasSellerCertificateService;
+import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import javax.annotation.Resource;
@@ -24,89 +24,89 @@ import com.szmsd.common.core.web.controller.BaseController;
     * </p>
 *
 * @author l
-* @since 2021-03-09
+* @since 2021-03-10
 */
 
 
 @Api(tags = {""})
 @RestController
-@RequestMapping("/bas-seller-info")
-public class BasSellerInfoController extends BaseController{
+@RequestMapping("/bas/sellerCertificate")
+public class BasSellerCertificateController extends BaseController{
 
      @Resource
-     private IBasSellerInfoService basSellerInfoService;
+     private IBasSellerCertificateService basSellerCertificateService;
      /**
        * 查询模块列表
      */
-      @PreAuthorize("@ss.hasPermi('BasSellerInfo:BasSellerInfo:list')")
+      @PreAuthorize("@ss.hasPermi('BasSellerCertificate:BasSellerCertificate:list')")
       @GetMapping("/list")
       @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
-      public TableDataInfo list(BasSellerInfo basSellerInfo)
+      public TableDataInfo list(BasSellerCertificate basSellerCertificate)
      {
             startPage();
-            List<BasSellerInfo> list = basSellerInfoService.selectBasSellerInfoList(basSellerInfo);
+            List<BasSellerCertificate> list = basSellerCertificateService.selectBasSellerCertificateList(basSellerCertificate);
             return getDataTable(list);
       }
 
     /**
     * 导出模块列表
     */
-     @PreAuthorize("@ss.hasPermi('BasSellerInfo:BasSellerInfo:export')")
+     @PreAuthorize("@ss.hasPermi('BasSellerCertificate:BasSellerCertificate:export')")
      @Log(title = "模块", businessType = BusinessType.EXPORT)
      @GetMapping("/export")
      @ApiOperation(value = "导出模块列表",notes = "导出模块列表")
-     public void export(HttpServletResponse response, BasSellerInfo basSellerInfo) throws IOException {
-     List<BasSellerInfo> list = basSellerInfoService.selectBasSellerInfoList(basSellerInfo);
-     ExcelUtil<BasSellerInfo> util = new ExcelUtil<BasSellerInfo>(BasSellerInfo.class);
-        util.exportExcel(response,list, "BasSellerInfo");
+     public void export(HttpServletResponse response, BasSellerCertificate basSellerCertificate) throws IOException {
+     List<BasSellerCertificate> list = basSellerCertificateService.selectBasSellerCertificateList(basSellerCertificate);
+     ExcelUtil<BasSellerCertificate> util = new ExcelUtil<BasSellerCertificate>(BasSellerCertificate.class);
+        util.exportExcel(response,list, "BasSellerCertificate");
 
      }
 
     /**
     * 获取模块详细信息
     */
-    @PreAuthorize("@ss.hasPermi('BasSellerInfo:BasSellerInfo:query')")
+    @PreAuthorize("@ss.hasPermi('BasSellerCertificate:BasSellerCertificate:query')")
     @GetMapping(value = "getInfo/{id}")
     @ApiOperation(value = "获取模块详细信息",notes = "获取模块详细信息")
     public R getInfo(@PathVariable("id") String id)
     {
-    return R.ok(basSellerInfoService.selectBasSellerInfoById(id));
+    return R.ok(basSellerCertificateService.selectBasSellerCertificateById(id));
     }
 
     /**
     * 新增模块
     */
-    @PreAuthorize("@ss.hasPermi('BasSellerInfo:BasSellerInfo:add')")
+    @PreAuthorize("@ss.hasPermi('BasSellerCertificate:BasSellerCertificate:add')")
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("add")
     @ApiOperation(value = "新增模块",notes = "新增模块")
-    public R add(@RequestBody BasSellerInfo basSellerInfo)
+    public R add(@RequestBody BasSellerCertificate basSellerCertificate)
     {
-    return toOk(basSellerInfoService.insertBasSellerInfo(basSellerInfo));
+    return toOk(basSellerCertificateService.insertBasSellerCertificate(basSellerCertificate));
     }
 
     /**
     * 修改模块
     */
-    @PreAuthorize("@ss.hasPermi('BasSellerInfo:BasSellerInfo:edit')")
+    @PreAuthorize("@ss.hasPermi('BasSellerCertificate:BasSellerCertificate:edit')")
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块",notes = "修改模块")
-    public R edit(@RequestBody BasSellerInfo basSellerInfo)
+    public R edit(@RequestBody BasSellerCertificate basSellerCertificate)
     {
-    return toOk(basSellerInfoService.updateBasSellerInfo(basSellerInfo));
+    return toOk(basSellerCertificateService.updateBasSellerCertificate(basSellerCertificate));
     }
 
     /**
     * 删除模块
     */
-    @PreAuthorize("@ss.hasPermi('BasSellerInfo:BasSellerInfo:remove')")
+    @PreAuthorize("@ss.hasPermi('BasSellerCertificate:BasSellerCertificate:remove')")
     @Log(title = "模块", businessType = BusinessType.DELETE)
     @DeleteMapping("remove")
     @ApiOperation(value = "删除模块",notes = "删除模块")
     public R remove(@RequestBody List<String> ids)
     {
-    return toOk(basSellerInfoService.deleteBasSellerInfoByIds(ids));
+    return toOk(basSellerCertificateService.deleteBasSellerCertificateByIds(ids));
     }
 
 }

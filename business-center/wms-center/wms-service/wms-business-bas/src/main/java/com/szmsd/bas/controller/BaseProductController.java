@@ -1,23 +1,33 @@
 package com.szmsd.bas.controller;
+
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
-import org.springframework.security.access.prepost.PreAuthorize;
-import com.szmsd.common.core.domain.R;
-import org.springframework.web.bind.annotation.*;
+import com.szmsd.bas.dto.PricedProductsDTO;
 import com.szmsd.bas.service.IBaseProductService;
-import com.szmsd.common.log.annotation.Log;
-import com.szmsd.common.core.web.page.TableDataInfo;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
+import com.szmsd.bas.vo.PricedProductsVO;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
+import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import io.swagger.annotations.Api;
-import java.util.List;
-import java.io.IOException;
-import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
-import com.szmsd.common.core.web.controller.BaseController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -32,7 +42,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 
 @Api(tags = {""})
 @RestController
-@RequestMapping("/base-product")
+@RequestMapping("/base/product")
 public class BaseProductController extends BaseController{
 
      @Resource
@@ -117,4 +127,13 @@ public class BaseProductController extends BaseController{
     public R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct){
         return baseProductService.checkSkuValidToDelivery(baseProduct);
     }
+
+    @PreAuthorize("@ss.hasPermi('baseproduct:baseproduct:pricedProducts')")
+    @PostMapping("/pricedProducts")
+    @ApiOperation(value = "运费测算",notes = "仓储服务 - 运费测算")
+    public R<PricedProductsVO> pricedProducts(@RequestBody PricedProductsDTO pricedProductsDTO) {
+        PricedProductsVO pricedProductsVO = baseProductService.pricedProducts(pricedProductsDTO);
+        return R.ok(pricedProductsVO);
+    }
+
 }

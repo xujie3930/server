@@ -1,8 +1,8 @@
 package com.szmsd.bas.service.impl;
 
-import com.szmsd.bas.domain.BasSellerInfo;
-import com.szmsd.bas.mapper.BasSellerInfoMapper;
-import com.szmsd.bas.service.IBasSellerInfoService;
+import com.szmsd.bas.domain.BasSellerCertificate;
+import com.szmsd.bas.mapper.BasSellerCertificateMapper;
+import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -15,10 +15,10 @@ import java.util.List;
     * </p>
 *
 * @author l
-* @since 2021-03-09
+* @since 2021-03-10
 */
 @Service
-public class BasSellerInfoServiceImpl extends ServiceImpl<BasSellerInfoMapper, BasSellerInfo> implements IBasSellerInfoService {
+public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertificateMapper, BasSellerCertificate> implements IBasSellerCertificateService {
 
 
         /**
@@ -28,7 +28,7 @@ public class BasSellerInfoServiceImpl extends ServiceImpl<BasSellerInfoMapper, B
         * @return 模块
         */
         @Override
-        public BasSellerInfo selectBasSellerInfoById(String id)
+        public BasSellerCertificate selectBasSellerCertificateById(String id)
         {
         return baseMapper.selectById(id);
         }
@@ -36,38 +36,38 @@ public class BasSellerInfoServiceImpl extends ServiceImpl<BasSellerInfoMapper, B
         /**
         * 查询模块列表
         *
-        * @param basSellerInfo 模块
+        * @param basSellerCertificate 模块
         * @return 模块
         */
         @Override
-        public List<BasSellerInfo> selectBasSellerInfoList(BasSellerInfo basSellerInfo)
+        public List<BasSellerCertificate> selectBasSellerCertificateList(BasSellerCertificate basSellerCertificate)
         {
-        QueryWrapper<BasSellerInfo> where = new QueryWrapper<BasSellerInfo>();
+        QueryWrapper<BasSellerCertificate> where = new QueryWrapper<BasSellerCertificate>();
         return baseMapper.selectList(where);
         }
 
         /**
         * 新增模块
         *
-        * @param basSellerInfo 模块
+        * @param basSellerCertificate 模块
         * @return 结果
         */
         @Override
-        public int insertBasSellerInfo(BasSellerInfo basSellerInfo)
+        public int insertBasSellerCertificate(BasSellerCertificate basSellerCertificate)
         {
-        return baseMapper.insert(basSellerInfo);
+        return baseMapper.insert(basSellerCertificate);
         }
 
         /**
         * 修改模块
         *
-        * @param basSellerInfo 模块
+        * @param basSellerCertificate 模块
         * @return 结果
         */
         @Override
-        public int updateBasSellerInfo(BasSellerInfo basSellerInfo)
+        public int updateBasSellerCertificate(BasSellerCertificate basSellerCertificate)
         {
-        return baseMapper.updateById(basSellerInfo);
+        return baseMapper.updateById(basSellerCertificate);
         }
 
         /**
@@ -77,7 +77,7 @@ public class BasSellerInfoServiceImpl extends ServiceImpl<BasSellerInfoMapper, B
         * @return 结果
         */
         @Override
-        public int deleteBasSellerInfoByIds(List<String>  ids)
+        public int deleteBasSellerCertificateByIds(List<String>  ids)
        {
             return baseMapper.deleteBatchIds(ids);
        }
@@ -89,7 +89,7 @@ public class BasSellerInfoServiceImpl extends ServiceImpl<BasSellerInfoMapper, B
         * @return 结果
         */
         @Override
-        public int deleteBasSellerInfoById(String id)
+        public int deleteBasSellerCertificateById(String id)
         {
         return baseMapper.deleteById(id);
         }

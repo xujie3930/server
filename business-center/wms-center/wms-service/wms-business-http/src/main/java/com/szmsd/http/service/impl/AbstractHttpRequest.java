@@ -23,10 +23,14 @@ public abstract class AbstractHttpRequest {
         this.httpConfig = httpConfig;
     }
 
+    abstract String getUrl();
+
+    abstract Map<String, String> getHeaderMap();
+
     String httpPost(String api, Object object) {
-        String url = httpConfig.getBaseUrl() + api;
+        String url = getUrl() + api;
         String requestBody = JSON.toJSONString(object);
-        Map<String, String> headerMap = httpConfig.getHeaderMap();
+        Map<String, String> headerMap = getHeaderMap();
         Date requestTime = new Date();
         String responseBody = HttpClientHelper.httpPost(url, requestBody, headerMap);
         addLog(url, "POST", headerMap, requestBody, requestTime, responseBody);
@@ -34,9 +38,9 @@ public abstract class AbstractHttpRequest {
     }
 
     String httpPut(String api, Object object) {
-        String url = httpConfig.getBaseUrl() + api;
+        String url = getUrl() + api;
         String requestBody = JSON.toJSONString(object);
-        Map<String, String> headerMap = httpConfig.getHeaderMap();
+        Map<String, String> headerMap = getHeaderMap();
         Date requestTime = new Date();
         String responseBody = HttpClientHelper.httpPut(url, requestBody, headerMap);
         addLog(url, "PUT", headerMap, requestBody, requestTime, responseBody);
@@ -44,9 +48,9 @@ public abstract class AbstractHttpRequest {
     }
 
     String httpDelete(String api, Object object) {
-        String url = httpConfig.getBaseUrl() + api;
+        String url = getUrl() + api;
         String requestBody = JSON.toJSONString(object);
-        Map<String, String> headerMap = httpConfig.getHeaderMap();
+        Map<String, String> headerMap = getHeaderMap();
         Date requestTime = new Date();
         String responseBody = HttpClientHelper.httpDelete(url, requestBody, headerMap);
         addLog(url, "DELETE", headerMap, requestBody, requestTime, responseBody);

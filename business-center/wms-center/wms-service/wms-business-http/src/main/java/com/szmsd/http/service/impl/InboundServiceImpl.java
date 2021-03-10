@@ -10,7 +10,7 @@ import com.szmsd.http.vo.ResponseVO;
 import org.springframework.stereotype.Service;
 
 @Service
-public class InboundServiceImpl extends AbstractHttpRequest implements IInboundService {
+public class InboundServiceImpl extends AbstractBaseHttpRequest implements IInboundService {
 
     public InboundServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);
@@ -23,6 +23,6 @@ public class InboundServiceImpl extends AbstractHttpRequest implements IInboundS
 
     @Override
     public ResponseVO cancel(CancelReceiptRequest cancelReceiptRequestDTO) {
-        return JSON.parseObject(httpDelete(httpConfig.getInbound().getCreate(), cancelReceiptRequestDTO), CreateReceiptResponse.class);
+        return JSON.parseObject(httpDelete(httpConfig.getInbound().getCancel(), cancelReceiptRequestDTO), CreateReceiptResponse.class);
     }
 }

@@ -35,6 +35,12 @@ public interface IBasePackingService extends IService<BasePacking> {
         List<BasePacking> selectBasePackingPage(BasePackingQueryDto basePackingQueryDto);
 
         /**
+         * 查询父类物料
+         * @return
+         */
+        List<BasePacking> selectBasePackingParent();
+
+        /**
         * 新增模块
         *
         * @param basePacking 模块

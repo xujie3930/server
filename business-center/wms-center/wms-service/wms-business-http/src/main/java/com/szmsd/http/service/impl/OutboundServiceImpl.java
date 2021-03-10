@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * @date 2021-03-09 11:23
  */
 @Service
-public class OutboundServiceImpl extends AbstractHttpRequest implements IOutboundService {
+public class OutboundServiceImpl extends AbstractBaseHttpRequest implements IOutboundService {
 
     public OutboundServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);
