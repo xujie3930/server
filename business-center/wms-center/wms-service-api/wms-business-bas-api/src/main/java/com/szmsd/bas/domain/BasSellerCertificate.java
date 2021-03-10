@@ -30,7 +30,7 @@ public class BasSellerCertificate extends BaseEntity {
     @ApiModelProperty(value = "id")
     @Excel(name = "id")
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
     @ApiModelProperty(value = "创建人")
     @Excel(name = "创建人")

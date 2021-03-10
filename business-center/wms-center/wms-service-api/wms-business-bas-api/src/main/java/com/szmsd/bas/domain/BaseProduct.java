@@ -32,7 +32,7 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "id")
     @TableId(value = "id", type = IdType.AUTO)
     @Excel(name = "id")
-    private Integer id;
+    private Long id;
 
     @ApiModelProperty(value = "创建人")
     @Excel(name = "创建人")

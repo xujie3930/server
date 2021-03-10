@@ -152,11 +152,12 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             sysUserDto.setEmail(dto.getInitEmail());
             //账号状态正常
             sysUserDto.setStatus("0");
-            String encryptPassword = SecurityUtils.encryptPassword(sysUserDto.getPassword());
+            String encryptPassword = SecurityUtils.encryptPassword(dto.getPassword());
             sysUserDto.setPassword(encryptPassword);
             sysUserDto.setUserName(dto.getUserName());
             sysUserDto.setUserType(UserConstants.USER_TYPE_CRS);
             sysUserDto.setRoleIds(roleIds);
+            sysUserDto.setNickName(dto.getNickName());
             R sysUserResult = remoteUserService.baseCopyUserAdd(sysUserDto);
             if(sysUserResult.getCode() == -200){
                 r.setData(false);
