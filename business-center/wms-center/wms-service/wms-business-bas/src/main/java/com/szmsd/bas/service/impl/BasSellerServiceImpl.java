@@ -7,6 +7,7 @@ import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.bas.mapper.BasSellerMapper;
+import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
@@ -51,6 +52,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
     private RemoteUserService remoteUserService;
     @Resource
     private Producer producer;
+    @Autowired
+    private IBasSellerCertificateService basSellerCertificateService;
 
         /**
         * 查询模块
@@ -168,10 +171,13 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("user_name",userName);
             BasSeller basSeller = super.getOne(queryWrapper);
-            QueryWrapper<BasSeller> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("cus_no",userName);
-            List<BasSellerCertificate> basSellerCertificateList;
-            return null;
+           //查询用户证件信息
+            QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("cus_no",basSeller.getCusNo());
+            List<BasSellerCertificate> basSellerCertificateList = basSellerCertificateService.list(BasSellerCertificateQueryWrapper);
+            BasSellerInfoDto basSellerInfoDto = new BasSellerInfoDto();
+            basSellerInfoDto.setBasSellerCertificateList(basSellerCertificateList);
+            return basSellerInfoDto;
         }
 
     /**
