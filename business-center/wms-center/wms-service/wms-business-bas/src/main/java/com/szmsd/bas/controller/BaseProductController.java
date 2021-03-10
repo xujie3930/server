@@ -40,7 +40,7 @@ import java.util.List;
 */
 
 
-@Api(tags = {""})
+@Api(tags = {"BaseProduct"})
 @RestController
 @RequestMapping("/base/product")
 public class BaseProductController extends BaseController{
@@ -131,8 +131,8 @@ public class BaseProductController extends BaseController{
     @PreAuthorize("@ss.hasPermi('baseproduct:baseproduct:pricedProducts')")
     @PostMapping("/pricedProducts")
     @ApiOperation(value = "运费测算",notes = "仓储服务 - 运费测算")
-    public R<PricedProductsVO> pricedProducts(@RequestBody PricedProductsDTO pricedProductsDTO) {
-        PricedProductsVO pricedProductsVO = baseProductService.pricedProducts(pricedProductsDTO);
+    public R<List<PricedProductsVO>> pricedProducts(@RequestBody PricedProductsDTO pricedProductsDTO) {
+        List<PricedProductsVO> pricedProductsVO = baseProductService.pricedProducts(pricedProductsDTO);
         return R.ok(pricedProductsVO);
     }
 
