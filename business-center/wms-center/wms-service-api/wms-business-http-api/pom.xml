@@ -24,6 +24,12 @@
             <artifactId>szmsd-common-core</artifactId>
         </dependency>
 
+        <!-- szmsd Common Swagger -->
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>szmsd-common-swagger</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
