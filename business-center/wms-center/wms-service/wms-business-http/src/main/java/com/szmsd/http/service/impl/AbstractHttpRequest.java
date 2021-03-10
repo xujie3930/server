@@ -23,8 +23,10 @@ public abstract class AbstractHttpRequest {
         this.httpConfig = httpConfig;
     }
 
+    abstract String getUrl();
+
     String httpPost(String api, Object object) {
-        String url = httpConfig.getBaseUrl() + api;
+        String url = getUrl() + api;
         String requestBody = JSON.toJSONString(object);
         Map<String, String> headerMap = httpConfig.getHeaderMap();
         Date requestTime = new Date();
@@ -34,7 +36,7 @@ public abstract class AbstractHttpRequest {
     }
 
     String httpPut(String api, Object object) {
-        String url = httpConfig.getBaseUrl() + api;
+        String url = getUrl() + api;
         String requestBody = JSON.toJSONString(object);
         Map<String, String> headerMap = httpConfig.getHeaderMap();
         Date requestTime = new Date();
@@ -44,7 +46,7 @@ public abstract class AbstractHttpRequest {
     }
 
     String httpDelete(String api, Object object) {
-        String url = httpConfig.getBaseUrl() + api;
+        String url = getUrl() + api;
         String requestBody = JSON.toJSONString(object);
         Map<String, String> headerMap = httpConfig.getHeaderMap();
         Date requestTime = new Date();
