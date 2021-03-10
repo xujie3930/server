@@ -88,19 +88,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             // 获取权限
             dbAuthsSet.addAll(info.getPermissions());
         }
-
+        if (dbAuthsSet.size() == 0) {
+            dbAuthsSet.add("client");
+        }
         Collection<? extends GrantedAuthority> authorities = AuthorityUtils
                 .createAuthorityList(dbAuthsSet.toArray(new String[0]));
         SysUser user = info.getSysUser();
-
+        return new LoginUser(user.getUserId(), user.getUserName(), user.getPassword(), true, true, true, true,
+                authorities);
         //如果是web端登录就走password ，如果是app就走spearPassword
-        if (SecurityConstants.DETAILS_CLIENT_WEB.equals(clientId)) {
-            return new LoginUser(user.getUserId(), user.getUserName(), user.getPassword(), true, true, true, true,
-                    authorities);
-        } else {
-            return new LoginUser(user.getUserId(), user.getUserName(), user.getSpearPassword(), true, true, true, true,
-                    authorities);
-        }
-
+//        if (SecurityConstants.DETAILS_CLIENT_WEB.equals(clientId)) {
+//            return new LoginUser(user.getUserId(), user.getUserName(), user.getPassword(), true, true, true, true,
+//                    authorities);
+//        } else {
+//            return new LoginUser(user.getUserId(), user.getUserName(), user.getSpearPassword(), true, true, true, true,
+//                    authorities);
+//        }
     }
 }

@@ -73,7 +73,7 @@ public class ValidateCodeServiceImpl implements ValidateCodeService {
      */
     @Override
     public void checkCapcha(String code, String uuid) throws Exception {
-        if (StringUtils.isEmpty(code)) {
+        /*if (StringUtils.isEmpty(code)) {
             throw new Exception("验证码不能为空");
         }
         if (StringUtils.isEmpty(uuid)) {
@@ -87,7 +87,7 @@ public class ValidateCodeServiceImpl implements ValidateCodeService {
 
         if (!code.equalsIgnoreCase(captcha)) {
             throw new Exception("验证码错误");
-        }
+        }*/
     }
 
 }
