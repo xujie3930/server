@@ -46,7 +46,7 @@ public interface IBasSellerService extends IService<BasSeller> {
          * 获取验证码
          * @return
          */
-        String getCheckCode(HttpServletRequest request);
+        R getCheckCode(HttpServletRequest request);
 
         /**
         * 修改模块

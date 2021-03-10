@@ -6,10 +6,12 @@ import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
+import com.szmsd.common.core.utils.sign.Base64;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
@@ -17,10 +19,17 @@ import com.szmsd.system.api.feign.RemoteUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import com.google.code.kaptcha.*;
+import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,6 +47,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
     private RedisTemplate redisTemplate;
     @Resource
     private RemoteUserService remoteUserService;
+    @Resource
+    private Producer producer;
 
         /**
         * 查询模块
@@ -155,15 +166,27 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
      * @return
      */
     @Override
-    public String getCheckCode(HttpServletRequest request) {
+        public R getCheckCode(HttpServletRequest request) {
         String ip = IpUtils.getIpAddr(request);
         String userAccountKey = ip + "-login";
         String checkCode = String.valueOf((int) ((Math.random() * 9 + 1) * 1000));
+        BufferedImage image = producer.createImage(checkCode);
         if (redisTemplate.hasKey(userAccountKey)) {
             redisTemplate.delete(userAccountKey);
         }
         redisTemplate.opsForValue().set(userAccountKey, checkCode, 60000, TimeUnit.MILLISECONDS);
-        return checkCode;
+        // 转换流信息写出
+        FastByteArrayOutputStream os = new FastByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "jpg", os);
+        } catch (IOException e) {
+            return R.failed(e.getMessage());
+        }
+        R r = new R();
+        r.setCode(HttpStatus.SUCCESS);
+        r.setMsg("success");
+        r.setData(Base64.encode(os.toByteArray()));
+        return r;
     }
 
         /**

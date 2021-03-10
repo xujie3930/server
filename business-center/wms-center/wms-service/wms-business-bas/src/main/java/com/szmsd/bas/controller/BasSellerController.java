@@ -89,8 +89,8 @@ public class BasSellerController extends BaseController{
 
     @ApiOperation("获取验证码")
     @PostMapping("getCheckCode")
-    public R<String> getCheckCode(HttpServletRequest request) {
-        return R.ok(this.basSellerService.getCheckCode(request));
+    public R getCheckCode(HttpServletRequest request) {
+        return this.basSellerService.getCheckCode(request);
     }
 
     /**
