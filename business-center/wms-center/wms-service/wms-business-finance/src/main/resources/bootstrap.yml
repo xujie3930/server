@@ -1,0 +1,13 @@
+# Tomcat
+server:
+  port: 7211
+  servlet:
+    context-path: /fss
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: wms-business-finance
+  profiles:
+    # 环境配置
+    active: dev
