@@ -42,8 +42,6 @@ public class BasSellerCertificate extends BaseEntity {
 
     @ApiModelProperty(value = "删除标识：0未删除 1已删除")
     @Excel(name = "删除标识：0未删除 1已删除")
-    @TableField(value = "del_flag", fill = FieldFill.INSERT)
-    @TableLogic(value = "0", delval = "1")
     private String delFlag;
 
     @ApiModelProperty(value = "客户代码")

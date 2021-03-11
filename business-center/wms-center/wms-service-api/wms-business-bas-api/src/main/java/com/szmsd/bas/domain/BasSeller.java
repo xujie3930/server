@@ -41,8 +41,6 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "删除标识：0未删除 1已删除")
     @Excel(name = "删除标识：0未删除 1已删除")
-    @TableField(value = "del_flag", fill = FieldFill.INSERT)
-    @TableLogic(value = "0", delval = "1")
     private String delFlag;
 
     @ApiModelProperty(value = "用户名")
@@ -65,10 +63,13 @@ public class BasSeller extends BaseEntity {
     @Excel(name = "用户状态 生效 失效")
     private Boolean isActive;
 
-
     @ApiModelProperty(value = "业务经理")
     @Excel(name = "业务经理")
     private String serviceManager;
+
+    @ApiModelProperty(value = "业务经理")
+    @Excel(name = "业务经理")
+    private String serviceManagerName;
 
     @ApiModelProperty(value = "国家")
     @Excel(name = "国家")
@@ -77,6 +78,10 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "客服")
     @Excel(name = "客服")
     private String serviceStaff;
+
+    @ApiModelProperty(value = "客服姓名")
+    @Excel(name = "客服姓名")
+    private String serviceStaffName;
 
     @ApiModelProperty(value = "姓名")
     @Excel(name = "姓名")

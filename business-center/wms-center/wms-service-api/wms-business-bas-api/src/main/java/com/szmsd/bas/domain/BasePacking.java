@@ -42,8 +42,6 @@ public class BasePacking extends BaseEntity {
     private String updateBy;
 
     @ApiModelProperty(value = "删除标识：0未删除 1已删除")
-    @TableField(value = "del_flag", fill = FieldFill.INSERT)
-    @TableLogic(value = "0", delval = "1")
     private String delFlag;
 
     @ApiModelProperty(value = "物料名称")
