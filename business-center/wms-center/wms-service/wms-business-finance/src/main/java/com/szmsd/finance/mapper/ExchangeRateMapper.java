@@ -13,4 +13,6 @@ import java.util.List;
  */
 public interface ExchangeRateMapper extends BaseMapper<FssExchangeRate> {
     List<FssExchangeRate> listPage(@Param(Constants.WRAPPER)LambdaQueryWrapper queryWrapper);
+
+    List<FssExchangeRate> checkExchangeRateIsExists(@Param("exchangeFromId") Long exchangeFromId,@Param("exchangeToId") Long exchangeToId);
 }

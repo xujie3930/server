@@ -35,12 +35,25 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
     @Override
     public R save(FssExchangeRateDTO dto) {
         FssExchangeRate domain= new FssExchangeRate();
+        if(!checkExchangeRateIsExists(dto)){
+            return R.failed("币种为空或者该汇率已维护");
+        }
         BeanUtils.copyProperties(dto,domain);
         int insert = exchangeRateMapper.insert(domain);
         if(insert>0){
             return R.ok();
         }
         return R.failed("保存异常");
+    }
+
+    private boolean checkExchangeRateIsExists(FssExchangeRateDTO dto) {
+        Long exchangeFromId = dto.getExchangeFromId();
+        Long exchangeToId = dto.getExchangeToId();
+        if(exchangeFromId==null||exchangeToId==null){
+            return false;
+        }
+        List<FssExchangeRate> list=exchangeRateMapper.checkExchangeRateIsExists(exchangeFromId,exchangeToId);
+        return list.size()>0;
     }
 
     @Override
