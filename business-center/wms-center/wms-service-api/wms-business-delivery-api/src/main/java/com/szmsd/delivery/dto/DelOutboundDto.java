@@ -47,7 +47,9 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "备注")
     private String remark;
 
-    @NotBlank(message = "参照单号不能为空")
+    @ApiModelProperty(value = "refno")
+    private String refNo;
+
     @ApiModelProperty(value = "参照单号")
     private String refOrderNo;
 

@@ -41,6 +41,9 @@ public class DelOutboundVO implements Serializable {
     @ApiModelProperty(value = "备注")
     private String remark;
 
+    @ApiModelProperty(value = "refno")
+    private String refNo;
+
     @ApiModelProperty(value = "参照单号")
     private String refOrderNo;
 

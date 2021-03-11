@@ -52,13 +52,13 @@ public class HtpTransactionRegister extends BaseEntity {
     @Excel(name = "跟踪ID")
     private String traceId;
 
+    @ApiModelProperty(value = "服务ID")
+    @Excel(name = "服务ID")
+    private String serviceId;
+
     @ApiModelProperty(value = "服务名称")
     @Excel(name = "服务名称")
-    private String applicationName;
-
-    @ApiModelProperty(value = "请求方法")
-    @Excel(name = "请求方法")
-    private String requestMethod;
+    private String serviceName;
 
     @ApiModelProperty(value = "请求路径")
     @Excel(name = "请求路径")

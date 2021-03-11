@@ -1,7 +1,5 @@
 package com.szmsd.http.api.service;
 
-import com.szmsd.common.core.domain.R;
-
 /**
  * @author zhangyuyuan
  * @date 2021-03-10 9:39
@@ -15,7 +13,7 @@ public interface ITransactionHandler<D, C> {
      * @param invoiceType invoiceType
      * @return D
      */
-    R<D> get(String invoiceNo, String invoiceType);
+    D get(String invoiceNo, String invoiceType);
 
     /**
      * 事务执行成功后回调

@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
-import com.szmsd.bas.constant.SerialNumberConstant;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
@@ -94,19 +94,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (Objects.isNull(loginUser)) {
-            throw new CommonException("999", "获取登录用户信息失败");
+            // throw new CommonException("999", "获取登录用户信息失败");
         }
+        AssertUtil.isNull(loginUser, "获取登录用户信息失败");
         DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
         // 从登录人信息中获取客户代码
         delOutbound.setCustomCode("");
         // 生成出库单号
         // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
-        delOutbound.setOrderNo("CK" + delOutbound.getCustomCode() + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
+        // delOutbound.setOrderNo("CK" + delOutbound.getCustomCode() + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
+        delOutbound.setOrderNo("CK" + delOutbound.getCustomCode());
         // 默认状态
         delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
         // 调用WMS创建出库单接口
-        String orderNo = this.delOutboundHttpWrapperService.shipmentCreate(dto, delOutbound.getOrderNo());
-        delOutbound.setRefOrderNo(orderNo);
+        // String orderNo = this.delOutboundHttpWrapperService.shipmentCreate(dto, delOutbound.getOrderNo());
+        // delOutbound.setRefOrderNo(orderNo);
         // 保存出库单
         int insert = baseMapper.insert(delOutbound);
         if (insert == 0) {

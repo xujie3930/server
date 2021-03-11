@@ -4,10 +4,8 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class ContextHttpServletRequestWrapper extends HttpServletRequestWrapper {
-    private final byte[] body;
     // 用于将流保存下来
     private ContextServletInputStream contextServletInputStream;
 
@@ -19,15 +17,17 @@ public class ContextHttpServletRequestWrapper extends HttpServletRequestWrapper 
      */
     public ContextHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
-        body = HttpHelper.getBodyString(request).getBytes(StandardCharsets.UTF_8);
     }
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        return new ContextServletInputStream(body);
+        if (null == contextServletInputStream) {
+            contextServletInputStream = new ContextServletInputStream(super.getInputStream());
+        }
+        return contextServletInputStream;
     }
 
     public ContextServletInputStream getContextServletInputStream() {
-        return new ContextServletInputStream(body);
+        return contextServletInputStream;
     }
 }

@@ -68,6 +68,9 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "装箱规则")
     private String packingRule;
 
+    @ApiModelProperty(value = "refno")
+    private String refNo;
+
     @ApiModelProperty(value = "参照单号")
     private String refOrderNo;
 

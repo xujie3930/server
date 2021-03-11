@@ -74,10 +74,6 @@
             <groupId>com.szmsd</groupId>
             <artifactId>szmsd-common-swagger</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.szmsd</groupId>
-            <artifactId>szmsd-common-swagger</artifactId>
-        </dependency>
 
         <!-- 引入 业务feign -->
         <dependency>

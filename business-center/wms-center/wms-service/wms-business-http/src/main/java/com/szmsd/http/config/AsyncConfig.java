@@ -3,11 +3,20 @@ package com.szmsd.http.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -48,4 +57,23 @@ public class AsyncConfig implements AsyncConfigurer {
         return new BusinessAsyncUncaughtExceptionHandler();
     }
 
+    @Bean("JobClientHttpRequestFactory")
+    public ClientHttpRequestFactory simpleClientHttpRequestFactory() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        // 单位为ms
+        // 3分钟的超时
+        factory.setReadTimeout(3 * 60 * 1000);
+        // 单位为ms
+        // 3分钟的超时
+        factory.setConnectTimeout(3 * 60 * 1000);
+        return factory;
+    }
+
+    @Bean("HttpRestTemplate")
+    @LoadBalanced
+    public RestTemplate restTemplate(@Qualifier("JobClientHttpRequestFactory") ClientHttpRequestFactory factory) {
+        RestTemplate restTemplate = new RestTemplate(factory);
+        restTemplate.getMessageConverters().set(1, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        return restTemplate;
+    }
 }
