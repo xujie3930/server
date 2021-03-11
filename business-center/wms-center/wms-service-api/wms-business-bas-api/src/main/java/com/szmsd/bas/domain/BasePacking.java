@@ -48,10 +48,12 @@ public class BasePacking extends BaseEntity {
 
     @ApiModelProperty(value = "物料名称")
     @Excel(name = "物料名称")
+    @TableField("`name`")
     private String name;
 
     @ApiModelProperty(value = "物料编码")
     @Excel(name = "物料编码")
+    @TableField("`code`")
     private String code;
 
     @ApiModelProperty(value = "客户（卖家）编码")
@@ -76,6 +78,7 @@ public class BasePacking extends BaseEntity {
 
     @ApiModelProperty(value = "描述")
     @Excel(name = "描述")
+    @TableField("`describe`")
     private String describe;
 
     @ApiModelProperty(value = "属性1")

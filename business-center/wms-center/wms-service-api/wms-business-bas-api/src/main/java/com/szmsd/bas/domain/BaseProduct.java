@@ -54,6 +54,7 @@ public class BaseProduct extends BaseEntity {
 
     @ApiModelProperty(value = "产品编码")
     @Excel(name = "产品编码")
+    @TableField("`code`")
     private String code;
 
     @ApiModelProperty(value = "初始重量g")
