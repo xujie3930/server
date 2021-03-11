@@ -42,10 +42,6 @@ public class RequestLogFilter implements Filter {
         String traceId = MDC.get("TID");
         // 获取transactionId
         String transactionId = requestWrapper.getHeader(RequestConstant.TRANSACTION_ID);
-        RequestBodyObject requestBodyObject = requestParam(requestWrapper);
-        if (StringUtils.isEmpty(transactionId)) {
-            transactionId = requestBodyObject.getTransactionId();
-        }
         AssertUtil.isTrue(StringUtils.isNotEmpty(transactionId), "transactionId cannot be null");
         String requestUri = requestWrapper.getRequestURI();
         RequestLogFilterContext currentContext = RequestLogFilterContext.getCurrentContext();
@@ -62,7 +58,7 @@ public class RequestLogFilter implements Filter {
         opnRequestLog.setRequestUri(requestUri);
         opnRequestLog.setRequestMethod(requestWrapper.getMethod());
         opnRequestLog.setRequestHeader(requestHeader(requestWrapper));
-        opnRequestLog.setRequestBody(requestBodyObject.getRequestBody());
+        opnRequestLog.setRequestBody(requestParam(requestWrapper).getRequestBody());
         opnRequestLog.setRequestTime(requestTime);
         opnRequestLog.setResponseHeader(responseHeader(responseWrapper));
         opnRequestLog.setResponseBody(responseParam(responseWrapper));

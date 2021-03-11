@@ -272,6 +272,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional
     @Override
     public int shipmentOperationType(ShipmentRequestDto dto) {
+        if (CollectionUtils.isEmpty(dto.getShipmentList())) {
+            throw new CommonException("999", "出库单集合不能为空");
+        }
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
         updateWrapper.in(DelOutbound::getOrderNo, dto.getShipmentList());
