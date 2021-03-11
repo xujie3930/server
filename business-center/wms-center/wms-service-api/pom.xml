@@ -27,6 +27,7 @@
         <module>wms-business-open-api</module>
         <module>wms-business-delivery-api</module>
         <module>wms-business-putinstorage-api</module>
+        <module>wms-business-finance-api</module>
     </modules>
 
     <dependencyManagement>
@@ -49,6 +50,11 @@
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-delivery-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-finance-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
         </dependencies>
