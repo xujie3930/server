@@ -10,10 +10,6 @@ public class BasSellerDto extends BasSeller {
     @ApiModelProperty("验证码")
     String captcha;
 
-    // @ApiModelProperty(value = "业务经理姓名")
-    // @Excel(name = "业务经理姓名")
-    // private String serviceManagerName;
-
     @ApiModelProperty(value = "确认密码")
     @Excel(name = "确认密码")
     private String confirmPassword;

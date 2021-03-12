@@ -59,10 +59,10 @@ public interface IBasSellerService extends IService<BasSeller> {
         /**
         * 修改模块
         *
-        * @param basSeller 模块
+        * @param basSellerInfoDto 模块
         * @return 结果
         */
-        int updateBasSeller(BasSeller basSeller);
+        int updateBasSeller(BasSellerInfoDto basSellerInfoDto);
 
         /**
         * 批量删除模块

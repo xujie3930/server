@@ -45,6 +45,12 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         return inboundReceiptDetailVOS;
     }
 
+    @Override
+    public InboundReceiptDetailVO selectObject(String warehouseNo, String sku) {
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = this.selectList(new InboundReceiptDetailQueryDTO().setWarehouseNo(warehouseNo).setSku(sku));
+        return CollectionUtils.isNotEmpty(inboundReceiptDetailVOS) ? inboundReceiptDetailVOS.get(0) : null;
+    }
+
     /**
      * 保存入库单明细
      * @param inboundReceiptDetailDTOS
@@ -77,6 +83,22 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         // 保存附件
         asyncAttachment(inboundReceiptDetail.getId(), inboundReceiptDetailDTO);
         return inboundReceiptDetail;
+    }
+
+    /**
+     * #B1 接收入库上架 修改明细上架数量
+     * @param warehouseNo 入库单
+     * @param sku SKU
+     * @param qty 数量
+     */
+    @Override
+    public void receiving(String warehouseNo, String sku, Integer qty) {
+        InboundReceiptDetailVO inboundReceiptDetailVO = this.selectObject(warehouseNo, sku);
+        AssertUtil.notNull(inboundReceiptDetailVO, "入库单[" + warehouseNo + "]，不存在SKU[" + sku + "]明细，请核对");
+        Integer beforeOutQty = inboundReceiptDetailVO.getPutQty();
+        InboundReceiptDetail inboundReceiptDetail = new InboundReceiptDetail().setId(inboundReceiptDetailVO.getId());
+        inboundReceiptDetail.setPutQty(beforeOutQty + qty);
+        this.updateById(inboundReceiptDetail);
     }
 
     /**

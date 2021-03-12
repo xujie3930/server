@@ -24,6 +24,7 @@
         <module>wms-business-open</module>
         <module>wms-business-putinstorage</module>
         <module>wms-business-finance</module>
+        <module>wms-business-inventory</module>
     </modules>
 
     <properties>
@@ -61,6 +62,11 @@
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-finance-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-inventory-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
         </dependencies>

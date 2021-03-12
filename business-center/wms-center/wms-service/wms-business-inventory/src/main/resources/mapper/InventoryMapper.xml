@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.inventory.mapper.InventoryMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.inventory.domain.Inventory">
+        <id column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="sku" property="sku"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="total_inventory" property="totalInventory"/>
+        <result column="available_inventory" property="availableInventory"/>
+        <result column="freeze_inventory" property="freezeInventory"/>
+        <result column="total_inbound" property="totalInbound"/>
+        <result column="total_outbound" property="totalOutbound"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by,
+        create_by_name,
+        create_time,
+        update_by,
+        update_by_name,
+        update_time,
+        version,
+        remark,
+        id, sku, warehouse_code, total_inventory, available_inventory, freeze_inventory, total_inbound, total_outbound
+    </sql>
+
+
+</mapper>

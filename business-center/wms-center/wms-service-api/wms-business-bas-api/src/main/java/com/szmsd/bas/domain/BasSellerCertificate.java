@@ -46,7 +46,7 @@ public class BasSellerCertificate extends BaseEntity {
 
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
-    private String cusNo;
+    private String sellerCode;
 
     @ApiModelProperty(value = "国家")
     @Excel(name = "国家")

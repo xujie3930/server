@@ -159,8 +159,8 @@ public class BaseProduct extends BaseEntity {
     @Excel(name = "产品介绍地址")
     private String productIntroductAddress;
 
-    @ApiModelProperty(value = "sku/包材")
-    @Excel(name = "sku/包材")
+    @ApiModelProperty(value = "sku")
+    @Excel(name = "sku")
     private String category;
 
     @ApiModelProperty(value = "是否仓库验收")

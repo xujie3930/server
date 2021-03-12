@@ -35,5 +35,9 @@
             id, create_by, update_by, del_flag, cus_no, country, vat, eori, cnee_name, cnee_address, attachment, registration_date, is_active, vaild
         </sql>
 
+    <delete id="delBasSellerCertificateByPhysics">
+        delete from bas_seller_certificate where seller_code =#{sellerCode}
+    </delete>
+
 
 </mapper>

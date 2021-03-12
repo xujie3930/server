@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.domain.R;
+
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -20,7 +22,8 @@ import java.util.List;
 @Service
 public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertificateMapper, BasSellerCertificate> implements IBasSellerCertificateService {
 
-
+    @Resource
+    private BasSellerCertificateMapper basSellerCertificateMapper;
         /**
         * 查询模块
         *
@@ -33,6 +36,11 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         return baseMapper.selectById(id);
         }
 
+        @Override
+        public int delBasSellerCertificateByPhysics(String sellerCode)
+        {
+            return basSellerCertificateMapper.delBasSellerCertificateByPhysics(sellerCode);
+        }
         /**
         * 查询模块列表
         *
@@ -56,6 +64,16 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         public int insertBasSellerCertificate(BasSellerCertificate basSellerCertificate)
         {
         return baseMapper.insert(basSellerCertificate);
+        }
+
+    /**
+     * 批量新增
+     * @param basSellerCertificateList
+     * @return
+     */
+    @Override
+        public Boolean insertBasSellerCertificateList(List<BasSellerCertificate> basSellerCertificateList){
+            return super.saveBatch(basSellerCertificateList);
         }
 
         /**

@@ -6,11 +6,7 @@ import com.szmsd.common.core.language.componet.FieldLanguage;
 import com.szmsd.common.core.language.enums.LanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
@@ -42,5 +38,12 @@ public @interface FieldJsonI18n {
      * @return
      */
     LocalLanguageTypeEnum localLanguageType() default LocalLanguageTypeEnum.SYSTEM_LANGUAGE;
+
+    /**
+     * 格式 value&{0},{1}····
+     * 是否是占位符，多个值用 “," 隔开
+     * @return
+     */
+    boolean isPlaceholder() default false;
 
 }

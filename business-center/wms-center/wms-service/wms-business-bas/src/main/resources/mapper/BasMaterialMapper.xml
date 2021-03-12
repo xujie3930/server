@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.mapper.BasMaterialMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasMaterial">
+                    <id column="id" property="id"/>
+                    <result column="create_by_name" property="createByName"/>
+                    <result column="create_time" property="createTime"/>
+                    <result column="update_by_name" property="updateByName"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="remark" property="remark"/>
+                    <result column="create_by" property="createBy"/>
+                    <result column="update_by" property="updateBy"/>
+                    <result column="del_flag" property="delFlag"/>
+                    <result column="product_name" property="productName"/>
+                    <result column="code" property="code"/>
+                    <result column="init_weight" property="initWeight"/>
+                    <result column="init_length" property="initLength"/>
+                    <result column="init_width" property="initWidth"/>
+                    <result column="init_height" property="initHeight"/>
+                    <result column="is_active" property="isActive"/>
+                    <result column="init_volume" property="initVolume"/>
+                    <result column="seller_code" property="sellerCode"/>
+                    <result column="category" property="category"/>
+                    <result column="type" property="type"/>
+                    <result column="typeName" property="typeName"/>
+                    <result column="product_description" property="productDescription"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+                create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, create_by, update_by, del_flag, product_name, code, init_weight, init_length, init_width, init_height, is_active, init_volume, seller_code, category, type, typeName, product_description
+        </sql>
+
+
+</mapper>

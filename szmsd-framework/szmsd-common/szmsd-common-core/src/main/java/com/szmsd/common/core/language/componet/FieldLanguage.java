@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Map;
 
 /**
@@ -42,14 +43,17 @@ public class FieldLanguage extends JsonSerializer<String> implements ContextualS
 
     private LocalLanguageTypeEnum jsonI18nLocalLanguage;
 
+    private boolean jsonI18nIsPlaceholder;
+
     public FieldLanguage() {
     }
 
-    public FieldLanguage(String jsonI18nType, LanguageEnum jsonI18nLanguage, String jsonI18nValue, LocalLanguageTypeEnum jsonI18nLocalLanguage, RedisService redisService) {
+    public FieldLanguage(String jsonI18nType, LanguageEnum jsonI18nLanguage, String jsonI18nValue, LocalLanguageTypeEnum jsonI18nLocalLanguage, boolean jsonI18nIsPlaceholder, RedisService redisService) {
         this.jsonI18nType = jsonI18nType;
         this.jsonI18nLanguage = jsonI18nLanguage;
         this.jsonI18nValue = jsonI18nValue;
         this.jsonI18nLocalLanguage = jsonI18nLocalLanguage;
+        this.jsonI18nIsPlaceholder = jsonI18nIsPlaceholder;
         this.redisService = redisService;
     }
 
@@ -77,7 +81,7 @@ public class FieldLanguage extends JsonSerializer<String> implements ContextualS
         if (annotation == null) {
             return prov.findNullValueSerializer(property);
         }
-        return new FieldLanguage(annotation.type(), annotation.language(), annotation.value(), annotation.localLanguageType(), null == this.redisService ? SpringUtils.getBean("redisService") : this.redisService);
+        return new FieldLanguage(annotation.type(), annotation.language(), annotation.value(), annotation.localLanguageType(), annotation.isPlaceholder(), null == this.redisService ? SpringUtils.getBean("redisService") : this.redisService);
     }
 
     private String getLanguage(String type, String code) {
@@ -91,16 +95,25 @@ public class FieldLanguage extends JsonSerializer<String> implements ContextualS
 
     private String getLocalLanguage(String value) {
         LocalLanguageEnum localLanguageEnum = LocalLanguageEnum.getLocalLanguageEnum(jsonI18nLocalLanguage, value);
+        if (jsonI18nIsPlaceholder && value.contains("&")) {
+            String[] split = value.split("&");
+            localLanguageEnum = LocalLanguageEnum.getLocalLanguageEnum(jsonI18nLocalLanguage, split[0]);
+            value = split[1];
+        }
         if (localLanguageEnum == null) {
             log.error("没有维护[{}]枚举语言[{}]", jsonI18nLocalLanguage, value);
             return "";
         }
+        String language;
         switch (getLen()) {
             case "enName":
-                return localLanguageEnum.getEhName();
+                language = localLanguageEnum.getEhName();
+                break;
             default:
-                return localLanguageEnum.getZhName();
+                language = localLanguageEnum.getZhName();
+            break;
         }
+        return jsonI18nIsPlaceholder ? MessageFormat.format(language, value.split(",")) : language;
     }
 
     private String getLen() {
