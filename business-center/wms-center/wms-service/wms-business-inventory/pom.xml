@@ -10,9 +10,9 @@
     </parent>
 
     <groupId>com.szmsd.wms</groupId>
-    <artifactId>wms-business-putinstorage</artifactId>
-    <name>wms-business-putinstorage</name>
-    <description>入库管理模块</description>
+    <artifactId>wms-business-inventory</artifactId>
+    <name>wms-business-inventory</name>
+    <description>库存管理模块</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -86,17 +86,6 @@
         <dependency>
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-bas-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.szmsd.wms</groupId>
-            <artifactId>wms-business-http-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.szmsd</groupId>
-            <artifactId>business-basic-api</artifactId>
-            <version>${business.version}</version>
         </dependency>
 
     </dependencies>
