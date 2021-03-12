@@ -53,7 +53,7 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
             return false;
         }
         List<FssExchangeRate> list=exchangeRateMapper.checkExchangeRateIsExists(exchangeFromId,exchangeToId);
-        return list.size()>0;
+        return list.size()==0;
     }
 
     @Override

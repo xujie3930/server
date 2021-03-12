@@ -68,7 +68,7 @@ public class ContextFilter implements Filter {
             }
             builder.append("{\"requestBody\":").append(requestBody).append(",");
             builder.append("\"responseBody\":").append(responseBody).append("}");
-            logger.debug(builder.toString());
+            logger.info(builder.toString());
         }
 
         long endTime = System.currentTimeMillis();

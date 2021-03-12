@@ -8,6 +8,9 @@
         </where>
     </select>
 
-    <select id="listPage" resultType="com.szmsd.finance.domain.FssExchangeRate">
+    <select id="checkExchangeRateIsExists" resultType="com.szmsd.finance.domain.FssExchangeRate">
+        select * from fss_exchange_rate
+        where (exchange_from_id=#{exchangeFromId} and exchange_to_id=#{exchangeToId})
+        or (exchange_from_id=#{exchangeToId} and exchange_to_id=#{exchangeFromId})
     </select>
 </mapper>

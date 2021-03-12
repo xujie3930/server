@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.delivery.vo.DelOutboundVO;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param id 出库单模块ID
      * @return 出库单模块
      */
-    DelOutbound selectDelOutboundById(String id);
+    DelOutboundVO selectDelOutboundById(String id);
 
     /**
      * 查询出库单模块列表

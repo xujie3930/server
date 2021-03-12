@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.inventory.mapper.InventoryRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.inventory.domain.InventoryRecord">
+        <id column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="type" property="type"/>
+        <result column="sku" property="sku"/>
+        <result column="cus_code" property="cusCode"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="quantity" property="quantity"/>
+        <result column="before_total_inventory" property="beforeTotalInventory"/>
+        <result column="before_available_inventory" property="beforeAvailableInventory"/>
+        <result column="before_freeze_inventory" property="beforeFreezeInventory"/>
+        <result column="before_total_inbound" property="beforeTotalInbound"/>
+        <result column="before_total_outbound" property="beforeTotalOutbound"/>
+        <result column="after_total_inventory" property="afterTotalInventory"/>
+        <result column="after_available_inventory" property="afterAvailableInventory"/>
+        <result column="after_freeze_inventory" property="afterFreezeInventory"/>
+        <result column="after_total_inbound" property="afterTotalInbound"/>
+        <result column="after_total_outbound" property="afterTotalOutbound"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by,
+        create_by_name,
+        create_time,
+        update_by,
+        update_by_name,
+        update_time,
+        version,
+        remark,
+        id, type, sku, cus_code, warehouse_code, quantity, before_total_inventory, before_available_inventory, before_freeze_inventory, before_total_inbound, before_total_outbound, after_total_inventory, after_available_inventory, after_freeze_inventory, after_total_inbound, after_total_outbound
+    </sql>
+
+
+</mapper>

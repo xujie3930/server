@@ -19,7 +19,10 @@ import org.slf4j.MDC;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -34,8 +37,18 @@ public class RequestLogFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        ContextHttpServletRequestWrapper requestWrapper = (ContextHttpServletRequestWrapper) servletRequest;
-        ContextHttpServletResponseWrapper responseWrapper = (ContextHttpServletResponseWrapper) servletResponse;
+        ContextHttpServletRequestWrapper requestWrapper;
+        if (servletRequest instanceof ContextHttpServletRequestWrapper) {
+            requestWrapper = (ContextHttpServletRequestWrapper) servletRequest;
+        } else {
+            requestWrapper = new ContextHttpServletRequestWrapper((HttpServletRequest) servletRequest);
+        }
+        ContextHttpServletResponseWrapper responseWrapper;
+        if (servletResponse instanceof ContextHttpServletResponseWrapper) {
+            responseWrapper = (ContextHttpServletResponseWrapper) servletResponse;
+        } else {
+            responseWrapper = new ContextHttpServletResponseWrapper((HttpServletResponse) servletResponse);
+        }
 
         Date requestTime = new Date();
 
@@ -144,6 +157,15 @@ public class RequestLogFilter implements Filter {
         if (null != traceOutputStream && StringUtil.isNotEmpty(traceOutputStream.getContent())) {
             return new String(traceOutputStream.getContent().getBytes(), StandardCharsets.UTF_8);
         }
+
+        PrintWriter printWriter = null;
+        try {
+            printWriter = responseWrapper.getWriter();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         return null;
     }
 }
