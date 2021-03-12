@@ -22,6 +22,8 @@ public interface IBasSellerCertificateService extends IService<BasSellerCertific
         */
         BasSellerCertificate selectBasSellerCertificateById(String id);
 
+        int delBasSellerCertificateByPhysics(String sellerCode);
+
         /**
         * 查询模块列表
         *
@@ -38,6 +40,12 @@ public interface IBasSellerCertificateService extends IService<BasSellerCertific
         */
         int insertBasSellerCertificate(BasSellerCertificate basSellerCertificate);
 
+        /**
+         * 批量新增
+         * @param basSellerCertificateList
+         * @return
+         */
+        Boolean insertBasSellerCertificateList(List<BasSellerCertificate> basSellerCertificateList);
         /**
         * 修改模块
         *

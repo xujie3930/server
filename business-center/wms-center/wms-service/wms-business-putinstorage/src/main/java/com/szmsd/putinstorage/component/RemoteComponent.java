@@ -15,6 +15,8 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.inventory.api.feign.InventoryFeignService;
+import com.szmsd.inventory.domain.dto.ReceivingRequest;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +49,10 @@ public class RemoteComponent {
 
     @Resource
     private BaseProductFeignService baseProductFeignService;
+
+    /** 库存远程服务 **/
+    @Resource
+    private InventoryFeignService inventoryFeignService;
 
     /**
      * 获取登录人信息
@@ -122,9 +128,20 @@ public class RemoteComponent {
      * @return
      */
     public void vailSku(String sku) {
-        log.info("验证SKU：SKU={}" + sku);
+        log.info("验证SKU：SKU={}", sku);
         R<Boolean> booleanR = baseProductFeignService.checkSkuValidToDelivery(new BaseProduct().setCode(sku));
         AssertUtil.isTrue(booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
+    }
+
+    /**
+     * 库存 上架入库
+     * @param receivingRequest
+     */
+    public void inboundInventory(ReceivingRequest receivingRequest) {
+        log.info("调用库存上架入库接口：{}", receivingRequest);
+        R inbound = inventoryFeignService.inbound(receivingRequest);
+        AssertUtil.isTrue(inbound != null && inbound.getCode() == HttpStatus.SUCCESS, inbound.getMsg());
+        log.info("调用库存上架入库接口：操作完成");
     }
 
 }

@@ -16,13 +16,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -46,7 +40,7 @@ public class BasWarehouseController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('bas:warehouse:create')")
     @PostMapping("/saveOrUpdate")
-    @ApiOperation(value = "创建/更新仓库", notes = "创建/更新仓库")
+    @ApiOperation(value = "# 创建/更新仓库", notes = "创建/更新仓库")
     @RedisCache(redisLanguageFieldEnum = RedisLanguageFieldEnum.ADD_WAREHOUSE_REQUEST)
     public R saveOrUpdate(@RequestBody AddWarehouseRequest addWarehouseRequest) {
         basWarehouseService.saveOrUpdate(addWarehouseRequest);

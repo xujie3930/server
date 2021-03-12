@@ -98,25 +98,23 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         BaseProduct baseProduct = BeanMapperUtil.map(baseProductDto, BaseProduct.class);
         //包材不需要仓库测量尺寸
         baseProduct.setWarehouseAcceptance(true);
-        //如果是sku就传OMS 包材不传oms
-        if ("SKU".equals(baseProductDto.getCategory())) {
-            //SKU需要仓库测量尺寸
-            baseProduct.setWarehouseAcceptance(false);
-            //传oms修改字段
-            BaseProductOms baseProductOms = BeanMapperUtil.map(baseProductDto, BaseProductOms.class);
-            //base64图片
-            baseProductOms.setProductImage(baseProductDto.getProductImageBase64());
-            //订单建议外包装材料
-            baseProductOms.setSuggestPackingMaterial(baseProductDto.getSuggestPackingMaterialName());
-            Map<String, String> user = new HashMap<>();
-            user.put("UserId", "oms");
-            user.put("Password", "666");
-            ResponseEntity<String> result = RestTemplateUtils.post(AddBasProductUrl, baseProductOms, String.class, user);
-            JSONObject object = JSONObject.parseObject(result.getBody());
-            Boolean success = (Boolean) object.get("success");
-            if (success == false) {
-                throw new BaseException("传wms失败");
-            }
+
+        //SKU需要仓库测量尺寸
+        baseProduct.setWarehouseAcceptance(false);
+        //传oms修改字段
+        BaseProductOms baseProductOms = BeanMapperUtil.map(baseProductDto, BaseProductOms.class);
+        //base64图片
+        baseProductOms.setProductImage(baseProductDto.getProductImageBase64());
+        //订单建议外包装材料
+        baseProductOms.setSuggestPackingMaterial(baseProductDto.getSuggestPackingMaterialName());
+        Map<String, String> user = new HashMap<>();
+        user.put("UserId", "oms");
+        user.put("Password", "666");
+        ResponseEntity<String> result = RestTemplateUtils.post(AddBasProductUrl, baseProductOms, String.class, user);
+        JSONObject object = JSONObject.parseObject(result.getBody());
+        Boolean success = (Boolean) object.get("success");
+        if (success == false) {
+            throw new BaseException("传wms失败");
         }
         return baseMapper.insert(baseProduct);
     }
