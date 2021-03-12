@@ -1,25 +1,30 @@
 package com.szmsd.common.core.filter;
 
-import org.apache.commons.io.IOUtils;
-
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public class ContextServletInputStream extends ServletInputStream {
 
     ServletInputStream servletInputStream;
-    ByteArrayInputStream byteArrayOutputStream;
+    ByteArrayInputStream byteArrayInputStream;
+    ByteArrayOutputStream byteArrayOutputStream;
     private StringBuilder buffer;
 
     public ContextServletInputStream(ServletInputStream servletInputStream) {
         this.servletInputStream = servletInputStream;
         try {
-            byte[] byteArray = IOUtils.toByteArray(this.servletInputStream);
-            this.byteArrayOutputStream = new ByteArrayInputStream(byteArray);
+            // byte[] byteArray = IOUtils.toByteArray(this.servletInputStream);
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int n = 0;
+            while (-1 != (n = servletInputStream.read(buffer))) {
+                byteArrayOutputStream.write(buffer, 0, n);
+            }
+            this.byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -43,14 +48,14 @@ public class ContextServletInputStream extends ServletInputStream {
 
     @Override
     public int read() throws IOException {
-        int data = byteArrayOutputStream.read();
+        int data = byteArrayInputStream.read();
         buffer.append((char) data);
         return data;
     }
 
     @Override
     public int read(byte[] b) throws IOException {
-        int data = byteArrayOutputStream.read(b);
+        int data = byteArrayInputStream.read(b);
         if (data > 0) {
             buffer.append(new String(b));
         }
@@ -59,7 +64,7 @@ public class ContextServletInputStream extends ServletInputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        int data = byteArrayOutputStream.read(b, off, len);
+        int data = byteArrayInputStream.read(b, off, len);
         if (data > 0) {
             buffer.append(new String(b, off, data));
         }
@@ -85,17 +90,9 @@ public class ContextServletInputStream extends ServletInputStream {
     }
 
     public String getContent() {
-        try {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            BufferedReader br = new BufferedReader(new InputStreamReader(byteArrayOutputStream));
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-            return sb.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (null == byteArrayOutputStream) {
+            return "";
         }
-        return "";
+        return new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
     }
 }

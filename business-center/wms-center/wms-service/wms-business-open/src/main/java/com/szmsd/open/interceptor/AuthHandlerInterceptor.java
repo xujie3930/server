@@ -45,7 +45,7 @@ public class AuthHandlerInterceptor implements HandlerInterceptor, Ordered {
                 logger.info("认证失败");
                 response.reset();
                 response.setCharacterEncoding(RequestConstant.ENCODING);
-                response.setContentType(MediaType.TEXT_HTML_VALUE + ";charset=UTF-8");
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
                 PrintWriter pw = response.getWriter();
                 pw.write(JSONObject.toJSONString(R.failed("认证失败")));
                 pw.flush();
