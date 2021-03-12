@@ -3,7 +3,7 @@ package com.szmsd.inventory.api.feign;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.inventory.api.BusinessInventoryInterface;
 import com.szmsd.inventory.api.factory.InventoryFeignFallback;
-import com.szmsd.inventory.domain.dto.ReceivingRequest;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,5 +12,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface InventoryFeignService {
 
     @PostMapping("/inventory/inbound")
-    R inbound(@RequestBody ReceivingRequest receivingRequest);
+    R inbound(@RequestBody InboundInventoryDTO receivingRequest);
 }

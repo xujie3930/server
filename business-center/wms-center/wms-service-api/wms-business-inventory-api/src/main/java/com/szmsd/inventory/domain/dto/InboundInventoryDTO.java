@@ -5,7 +5,7 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-public class ReceivingRequest {
+public class InboundInventoryDTO {
 
     /** 操作人姓名 **/
     private String operator;

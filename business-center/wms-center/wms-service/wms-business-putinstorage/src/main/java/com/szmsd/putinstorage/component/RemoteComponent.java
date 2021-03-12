@@ -2,7 +2,6 @@ package com.szmsd.putinstorage.component;
 
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.BasCodeDto;
-import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
@@ -13,10 +12,13 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
-import com.szmsd.inventory.domain.dto.ReceivingRequest;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
+import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -107,7 +109,7 @@ public class RemoteComponent {
      * @param fileList 附件
      * @param attachmentTypeEnum 附件类型枚举
      */
-    public void saveAttachment(String businessNo, List<AttachmentDataDTO> fileList, AttachmentTypeEnum attachmentTypeEnum) {
+    public void saveAttachment(String businessNo, List<AttachmentFileDTO> fileList, AttachmentTypeEnum attachmentTypeEnum) {
         saveAttachment(businessNo, null, fileList, attachmentTypeEnum);
     }
 
@@ -118,8 +120,9 @@ public class RemoteComponent {
      * @param fileList 附件
      * @param attachmentTypeEnum 附件类型枚举
      */
-    public void saveAttachment(String businessNo, String businessItemNo, List<AttachmentDataDTO> fileList, AttachmentTypeEnum attachmentTypeEnum) {
-        remoteAttachmentService.saveAndUpdate(AttachmentDTO.builder().businessNo(businessNo).businessItemNo(businessItemNo).fileList(fileList).attachmentTypeEnum(attachmentTypeEnum).build());
+    public void saveAttachment(String businessNo, String businessItemNo, List<AttachmentFileDTO> fileList, AttachmentTypeEnum attachmentTypeEnum) {
+        List<AttachmentDataDTO> attachmentDataDTOS = BeanMapperUtil.mapList(fileList, AttachmentDataDTO.class);
+        remoteAttachmentService.saveAndUpdate(com.szmsd.bas.api.domain.dto.AttachmentDTO.builder().businessNo(businessNo).businessItemNo(businessItemNo).fileList(attachmentDataDTOS).attachmentTypeEnum(attachmentTypeEnum).build());
     }
 
     /**
@@ -139,7 +142,8 @@ public class RemoteComponent {
      */
     public void inboundInventory(ReceivingRequest receivingRequest) {
         log.info("调用库存上架入库接口：{}", receivingRequest);
-        R inbound = inventoryFeignService.inbound(receivingRequest);
+        InboundInventoryDTO inboundInventoryDTO = BeanMapperUtil.map(receivingRequest, InboundInventoryDTO.class);
+        R inbound = inventoryFeignService.inbound(inboundInventoryDTO);
         AssertUtil.isTrue(inbound != null && inbound.getCode() == HttpStatus.SUCCESS, inbound.getMsg());
         log.info("调用库存上架入库接口：操作完成");
     }
