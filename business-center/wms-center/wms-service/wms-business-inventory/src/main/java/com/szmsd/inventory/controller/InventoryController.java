@@ -4,7 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO;
-import com.szmsd.inventory.domain.dto.ReceivingRequest;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
 import com.szmsd.inventory.domain.vo.InventoryRecordVO;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
@@ -30,8 +30,8 @@ public class InventoryController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inventory:inbound')")
     @PostMapping("/inbound")
     @ApiOperation(value = "#入库上架", notes = "库存管理 - Inbound - /api/inbound/receiving #B1 接收入库上架 - 修改库存")
-    public R inbound(@RequestBody ReceivingRequest receivingRequest) {
-        inventoryService.inbound(receivingRequest);
+    public R inbound(@RequestBody InboundInventoryDTO inboundInventoryDTO) {
+        inventoryService.inbound(inboundInventoryDTO);
         return R.ok();
     }
 

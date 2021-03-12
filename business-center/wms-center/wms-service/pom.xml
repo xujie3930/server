@@ -69,6 +69,11 @@
                 <artifactId>wms-business-inventory-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-putinstorage-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

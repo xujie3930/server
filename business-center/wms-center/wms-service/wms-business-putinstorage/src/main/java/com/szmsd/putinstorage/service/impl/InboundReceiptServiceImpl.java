@@ -1,11 +1,9 @@
 package com.szmsd.putinstorage.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.inventory.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
 import com.szmsd.putinstorage.domain.InboundReceipt;
@@ -198,7 +196,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      */
     private void asyncAttachment(String warehouseNo, InboundReceiptDTO inboundReceiptDTO) {
         CompletableFuture.runAsync(() -> {
-            AttachmentDataDTO documentsFile = inboundReceiptDTO.getDocumentsFile();
+            AttachmentFileDTO documentsFile = inboundReceiptDTO.getDocumentsFile();
             if (documentsFile != null) {
                 log.info("保存单证信息文件");
                 remoteComponent.saveAttachment(warehouseNo, Arrays.asList(documentsFile), AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);

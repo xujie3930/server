@@ -5,9 +5,9 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.inventory.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
+import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -106,6 +106,5 @@ public class InboundReceiptController extends BaseController {
         iInboundReceiptService.receiving(receivingRequest);
         return R.ok();
     }
-
 
 }

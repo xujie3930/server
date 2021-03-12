@@ -4,12 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.inventory.domain.Inventory;
-import com.szmsd.inventory.domain.dto.ReceivingRequest;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.concurrent.locks.Lock;
@@ -25,20 +26,20 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     /**
      * 上架入库 - Inbound - /api/inbound/receiving #B1 接收入库上架 - 修改库存
      *
-     * @param receivingRequest
+     * @param  inboundInventoryDTO
      */
+    @Transactional(rollbackFor = Throwable.class)
     @Override
-    public void inbound(ReceivingRequest receivingRequest) {
-        log.info("上架入库：{}", receivingRequest);
+    public void inbound(InboundInventoryDTO  inboundInventoryDTO) {
+        log.info("上架入库：{}",  inboundInventoryDTO);
         Lock lock = new ReentrantLock(true);
         try {
             // 获取锁
             lock.lock();
             // 获取库存 仓库代码 + SKU
-            String sku = receivingRequest.getSku();
-            String warehouseCode = receivingRequest.getWarehouseCode();
-            Integer qty = receivingRequest.getQty();
-
+            String sku =  inboundInventoryDTO.getSku();
+            String warehouseCode =  inboundInventoryDTO.getWarehouseCode();
+            Integer qty =  inboundInventoryDTO.getQty();
             // before inventory
             Inventory beforeInventory = baseMapper.selectOne(new QueryWrapper<Inventory>().eq("warehouse_code", warehouseCode).eq("sku", sku));
             if (beforeInventory == null) {
@@ -53,12 +54,8 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             this.saveOrUpdate(afterInventory);
 
             // 记录库存日志
-            String placeholder = receivingRequest.getOperator() + "," + receivingRequest.getOperateOn() + "," + receivingRequest.getOrderNo() + "," + receivingRequest.getQty();
-            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, receivingRequest.getOrderNo(), receivingRequest.getOperator(), receivingRequest.getOperateOn(), qty, placeholder);
-
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw e;
+            String placeholder =  inboundInventoryDTO.getOperator() + "," +  inboundInventoryDTO.getOperateOn() + "," +  inboundInventoryDTO.getOrderNo() + "," +  inboundInventoryDTO.getQty();
+            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory,  inboundInventoryDTO.getOrderNo(),  inboundInventoryDTO.getOperator(),  inboundInventoryDTO.getOperateOn(), qty, placeholder);
         } finally {
             lock.unlock();
         }

@@ -1,6 +1,5 @@
 package com.szmsd.putinstorage.domain.dto;
 
-import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -60,7 +59,7 @@ public class InboundReceiptDTO {
     private String remark;
 
     @ApiModelProperty(value = "单证信息文件")
-    private AttachmentDataDTO documentsFile;
+    private AttachmentFileDTO documentsFile;
 
     @ApiModelProperty(value = "状态0已取消，1待提审，2待收货，3仓库处理中，4已入库")
     private String status;
