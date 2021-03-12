@@ -38,7 +38,7 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
                 return null;
             }
             @Override
-            public R<Boolean> getNameByNickName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType){
+            public R<SysUser> getNameByNickName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType){
                 return null;
             }
 

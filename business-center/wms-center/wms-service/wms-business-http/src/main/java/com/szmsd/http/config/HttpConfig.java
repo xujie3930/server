@@ -41,6 +41,8 @@ public class HttpConfig {
     // Outbound
     private OutboundConfig outbound;
 
+    private Bas bas;
+
     @Data
     @Accessors(chain = true)
     public static class InboundConfig {
@@ -48,6 +50,17 @@ public class HttpConfig {
         private String create;
         // B2 取消入库单
         private String cancel;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class Bas {
+        // sku和包材
+        private String packing;
+        // 物料
+        private String products;
+        //卖家
+        private String seller;
     }
 
     @Data

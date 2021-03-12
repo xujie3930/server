@@ -17,6 +17,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.feign.RemoteUserService;
@@ -141,8 +142,10 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
                 sysUserByTypeAndUserType.setNickName(dto.getServiceManagerName());
                 R result = remoteUserService.getNameByNickName(sysUserByTypeAndUserType);
-                if((Boolean)result.getData()==true){
-                    basSeller.setServiceManager(result.getMsg());
+                if(result.getCode()==200){
+                    SysUser sysUser = (SysUser)result.getData();
+                    basSeller.setServiceManager(sysUser.getUserName());
+                    basSeller.setServiceManagerName(sysUser.getNickName());
                 }
             }
             //注册到系统用户表
@@ -178,7 +181,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             BasSeller basSeller = super.getOne(queryWrapper);
            //查询用户证件信息
             QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("cus_no",basSeller.getCusNo());
+            queryWrapper.eq("seller_code",basSeller.getSellerCode());
             List<BasSellerCertificate> basSellerCertificateList = basSellerCertificateService.list(BasSellerCertificateQueryWrapper);
             BasSellerInfoDto basSellerInfoDto = new BasSellerInfoDto();
             basSellerInfoDto.setBasSellerCertificateList(basSellerCertificateList);
@@ -216,14 +219,18 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         /**
         * 修改模块
         *
-        * @param basSeller 模块
+        * @param basSellerInfoDto 模块
         * @return 结果
         */
         @Override
-        public int updateBasSeller(BasSeller basSeller)
+        public int updateBasSeller(BasSellerInfoDto basSellerInfoDto)
         {
-        return baseMapper.updateById(basSeller);
+            BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
+            basSellerCertificateService.delBasSellerCertificateByPhysics(basSellerInfoDto.getSellerCode());
+            basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
+            return baseMapper.updateById(basSeller);
         }
+
 
         /**
         * 批量删除模块
