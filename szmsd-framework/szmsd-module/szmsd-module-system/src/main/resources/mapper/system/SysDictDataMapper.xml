@@ -119,5 +119,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			sysdate()
  		)
 	</insert>
+
+    <select id="batchList" resultType="com.szmsd.system.domain.SysDictData">
+        <include refid="selectDictDataVo"/>
+        where status = '0' and dict_type in
+        <foreach collection="list" item="dictType" open="(" separator="," close=")">
+            #{dictType}
+        </foreach>
+        order by dict_sort asc
+
+    </select>
 	
 </mapper> 
