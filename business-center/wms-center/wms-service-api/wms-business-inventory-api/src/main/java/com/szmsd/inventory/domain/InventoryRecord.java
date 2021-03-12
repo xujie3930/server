@@ -23,6 +23,9 @@ public class InventoryRecord extends BaseEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
+    @ApiModelProperty(value = "单据号")
+    private String receiptNo;
+
     @ApiModelProperty(value = "类型：1入库、2出库")
     private String type;
 
@@ -67,6 +70,15 @@ public class InventoryRecord extends BaseEntity {
 
     @ApiModelProperty(value = "之后原总出库")
     private Integer afterTotalOutbound;
+
+    @ApiModelProperty(value = "操作人姓名")
+    private String operator;
+
+    @ApiModelProperty(value = "操作时间")
+    private String operateOn;
+
+    @ApiModelProperty(value = "占位符内容，多个值用 “,\" 隔开")
+    private String placeholder;
 
     @ApiModelProperty(value = "创建ID", hidden = true)
     @TableField(fill = FieldFill.INSERT)

@@ -5,14 +5,11 @@ import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.inventory.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
 import com.szmsd.putinstorage.domain.InboundReceipt;
-import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
+import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -156,6 +153,41 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         inboundReceiptInfoVO.setInboundReceiptDetailVOS(inboundReceiptDetailVOS);
         log.info("查询入库单详情：查询完成{}", inboundReceiptDetailVOS);
         return inboundReceiptInfoVO;
+    }
+
+    /**
+     * #B1 接收入库上架 修改上架数量
+     * @param receivingRequest
+     */
+    @Override
+    @Transactional(rollbackFor = Throwable.class)
+    public void receiving(ReceivingRequest receivingRequest) {
+        log.info("#B1 接收入库上架：{}",  receivingRequest);
+
+        Integer qty = receivingRequest.getQty();
+        AssertUtil.isTrue(qty != null && qty > 0, "上架数量不能为" + qty);
+
+        // 修改入库单明细中的上架数量
+        String refOrderNo = receivingRequest.getOrderNo();
+        InboundReceiptVO inboundReceiptVO = selectByWarehouseNo(refOrderNo);
+        AssertUtil.notNull(inboundReceiptVO, "入库单号[" + refOrderNo + "]不存在，请核对");
+        // 之前总上架数量
+        Integer beforeTotalPutQty = inboundReceiptVO.getTotalPutQty();
+        InboundReceipt inboundReceipt = new InboundReceipt().setId(inboundReceiptVO.getId());
+        inboundReceipt.setTotalPutQty(beforeTotalPutQty + qty);
+        // 第一次入库上架 把状态修改为 3仓库处理中
+        if (beforeTotalPutQty == 0) {
+            inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.WAREHOUSE_PROCESSING.getValue());
+        }
+        this.updateById(inboundReceipt);
+
+        // 修改明细上架数量
+        iInboundReceiptDetailService.receiving(receivingRequest.getOrderNo(), receivingRequest.getSku(), receivingRequest.getQty());
+
+        // 库存 上架入库
+        remoteComponent.inboundInventory(receivingRequest);
+
+        log.info("#B1 接收入库上架：操作完成");
     }
 
     /**

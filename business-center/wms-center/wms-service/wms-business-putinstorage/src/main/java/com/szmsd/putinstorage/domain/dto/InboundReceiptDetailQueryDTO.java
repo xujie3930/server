@@ -16,4 +16,7 @@ public class InboundReceiptDetailQueryDTO {
     @ApiModelProperty(value = "入库单号")
     private String warehouseNo;
 
+    @ApiModelProperty(value = "SKU")
+    private String sku;
+
 }
