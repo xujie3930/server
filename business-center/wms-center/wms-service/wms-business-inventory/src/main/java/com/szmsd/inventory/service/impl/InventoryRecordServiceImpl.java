@@ -23,8 +23,14 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
 
     /**
      * 保存入库操作日志
+     * @param type
      * @param beforeInventory
      * @param afterInventory
+     * @param receiptNo
+     * @param operator
+     * @param operateOn
+     * @param quantity
+     * @param placeholder
      */
     @Override
     public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity, String placeholder) {
@@ -48,6 +54,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         inventoryRecord.setRemark(logs);
         inventoryRecord.setOperator(operator);
         inventoryRecord.setOperateOn(operateOn);
+        inventoryRecord.setPlaceholder(placeholder);
         log.info("保存入库操作日志：" + inventoryRecord);
         this.save(inventoryRecord);
         log.info("保存入库操作日志：操作完成");

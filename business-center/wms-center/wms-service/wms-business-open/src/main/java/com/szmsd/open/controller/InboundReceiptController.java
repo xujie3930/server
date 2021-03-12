@@ -1,7 +1,6 @@
 package com.szmsd.open.controller;
 
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.open.vo.ResponseVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
@@ -28,8 +27,8 @@ public class InboundReceiptController extends BaseController {
     @PostMapping("/receiving")
     @ApiOperation(value = "#B1 接收入库上架", notes = "#B1 接收入库上架")
     public ResponseVO receiving(@RequestBody ReceivingRequest receivingRequest) {
-        R receiving = inboundReceiptFeignService.receiving(receivingRequest);
-        return ResponseVO.unknown(receiving);
+        R.getDataAndException(inboundReceiptFeignService.receiving(receivingRequest));
+        return ResponseVO.ok();
     }
     
 }

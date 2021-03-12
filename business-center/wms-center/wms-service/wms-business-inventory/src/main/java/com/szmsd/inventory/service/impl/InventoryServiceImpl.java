@@ -10,6 +10,7 @@ import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.concurrent.locks.Lock;
@@ -27,6 +28,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
      *
      * @param  inboundInventoryDTO
      */
+    @Transactional(rollbackFor = Throwable.class)
     @Override
     public void inbound(InboundInventoryDTO  inboundInventoryDTO) {
         log.info("上架入库：{}",  inboundInventoryDTO);
@@ -38,7 +40,6 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             String sku =  inboundInventoryDTO.getSku();
             String warehouseCode =  inboundInventoryDTO.getWarehouseCode();
             Integer qty =  inboundInventoryDTO.getQty();
-            System.out.println(qty / 0);
             // before inventory
             Inventory beforeInventory = baseMapper.selectOne(new QueryWrapper<Inventory>().eq("warehouse_code", warehouseCode).eq("sku", sku));
             if (beforeInventory == null) {
@@ -55,10 +56,6 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             // 记录库存日志
             String placeholder =  inboundInventoryDTO.getOperator() + "," +  inboundInventoryDTO.getOperateOn() + "," +  inboundInventoryDTO.getOrderNo() + "," +  inboundInventoryDTO.getQty();
             iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory,  inboundInventoryDTO.getOrderNo(),  inboundInventoryDTO.getOperator(),  inboundInventoryDTO.getOperateOn(), qty, placeholder);
-
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw e;
         } finally {
             lock.unlock();
         }
