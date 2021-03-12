@@ -8,6 +8,6 @@ import org.springframework.context.annotation.Configuration;
  * @date 2021-03-10 10:13
  */
 @Configuration
-@ComponentScan(basePackages = {"com.szmsd.http.api.controller"})
+@ComponentScan(basePackages = {"com.szmsd.http.api.controller", "com.szmsd.http.api.feign", "com.szmsd.http.api.service"})
 public class TransactionHandlerConfig {
 }
