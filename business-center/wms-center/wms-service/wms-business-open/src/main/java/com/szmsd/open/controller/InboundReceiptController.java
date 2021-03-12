@@ -2,6 +2,7 @@ package com.szmsd.open.controller;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.open.vo.ResponseVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import io.swagger.annotations.Api;
@@ -26,8 +27,9 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:receiving')")
     @PostMapping("/receiving")
     @ApiOperation(value = "#B1 接收入库上架", notes = "#B1 接收入库上架")
-    public R receiving(@RequestBody ReceivingRequest receivingRequest) {
-        return inboundReceiptFeignService.receiving(receivingRequest);
+    public ResponseVO receiving(@RequestBody ReceivingRequest receivingRequest) {
+        R receiving = inboundReceiptFeignService.receiving(receivingRequest);
+        return ResponseVO.unknown(receiving);
     }
     
 }
