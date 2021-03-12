@@ -105,4 +105,15 @@ public class HttpConfig {
     // ------------------------------------------carrierServiceUrl--------------------
     // 服务商接口 https://carrierservice-api-admin-external.dsloco.com/swagger/index.html
     private String carrierServiceUrl;
+    // CarrierService
+    private CarrierService carrierService;
+
+    @Data
+    @Accessors(chain = true)
+    public static class CarrierService {
+        // 创建承运商物流订单（客户端）
+        private String shipmentOrder;
+        // 取消承运商物流订单（客户端）
+        private String cancellation;
+    }
 }

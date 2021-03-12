@@ -97,5 +97,13 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return int
      */
     int shipmentContainers(ShipmentContainersRequestDto dto);
+
+    /**
+     * 出库管理 - 出库提审
+     *
+     * @param dto dto
+     * @return int
+     */
+    int underReview(DelOutboundUnderReviewDto dto);
 }
 

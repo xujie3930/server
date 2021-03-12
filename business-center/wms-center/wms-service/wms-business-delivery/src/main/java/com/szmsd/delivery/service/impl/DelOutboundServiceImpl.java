@@ -326,5 +326,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public int shipmentContainers(ShipmentContainersRequestDto dto) {
         return 0;
     }
+
+    @Override
+    public int underReview(DelOutboundUnderReviewDto dto) {
+
+        // 验证状态
+
+        // 计算PRC价格，获取供应商
+
+        // 获取挂号，获取标签
+
+        // 调用WMS创建出库单
+
+        // 保存WMS返回的出库单号，更新出库单状态
+
+        return 0;
+    }
 }
 
