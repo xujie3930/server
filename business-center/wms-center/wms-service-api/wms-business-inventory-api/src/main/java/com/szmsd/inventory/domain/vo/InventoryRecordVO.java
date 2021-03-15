@@ -1,7 +1,6 @@
 package com.szmsd.inventory.domain.vo;
 
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
-import com.szmsd.common.core.language.enums.LanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -57,7 +56,7 @@ public class InventoryRecordVO {
     private String logs;
 
     @ApiModelProperty(value = "日志 - 系统语言")
-    @FieldJsonI18n(isPlaceholder = true, localLanguageType = LocalLanguageTypeEnum.INVENTORY_RECORD_LOGS, language = LanguageEnum.enName)
+    @FieldJsonI18n(isPlaceholder = true, localLanguageType = LocalLanguageTypeEnum.INVENTORY_RECORD_LOGS)
     private String logsLanguage;
 
 }

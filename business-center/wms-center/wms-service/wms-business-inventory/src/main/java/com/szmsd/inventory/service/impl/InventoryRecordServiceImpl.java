@@ -54,7 +54,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         inventoryRecord.setRemark(logs);
         inventoryRecord.setOperator(operator);
         inventoryRecord.setOperateOn(operateOn);
-        inventoryRecord.setPlaceholder(placeholder);
+        inventoryRecord.setPlaceholder("".equals(placeholder) ? null : placeholder);
         log.info("保存入库操作日志：" + inventoryRecord);
         this.save(inventoryRecord);
         log.info("保存入库操作日志：操作完成");

@@ -28,6 +28,7 @@
         <module>wms-business-delivery-api</module>
         <module>wms-business-putinstorage-api</module>
         <module>wms-business-finance-api</module>
+        <module>wms-business-inventory-api</module>
     </modules>
 
     <dependencyManagement>
