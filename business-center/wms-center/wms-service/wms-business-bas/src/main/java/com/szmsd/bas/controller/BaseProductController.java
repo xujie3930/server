@@ -5,6 +5,7 @@ import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.dto.PricedProductsDTO;
 import com.szmsd.bas.service.IBaseProductService;
+import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.bas.vo.PricedProductsVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
@@ -63,9 +64,9 @@ public class BaseProductController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/listByCode")
     @ApiOperation(value = "通过code查询列表",notes = "通过code查询列表")
-    public  R<List<BaseProduct>> listByCode(String code)
+    public  R<List<BaseProductVO>> listByCode(String code)
     {
-        List<BaseProduct> list = baseProductService.selectBaseProductByCode(code);
+        List<BaseProductVO> list = baseProductService.selectBaseProductByCode(code);
         return R.ok(list);
     }
 
