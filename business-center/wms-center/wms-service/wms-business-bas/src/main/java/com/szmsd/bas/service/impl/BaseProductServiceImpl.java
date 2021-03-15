@@ -208,9 +208,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         R r = new R();
         if (count == 1) {
             r.setData(true);
+            r.setCode(200);
             r.setMsg("success");
         } else {
             r.setData(false);
+            r.setCode(-200);
             r.setMsg("SKU不存在");
         }
         return r;
