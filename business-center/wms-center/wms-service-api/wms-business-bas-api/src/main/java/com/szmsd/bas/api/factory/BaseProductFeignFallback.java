@@ -5,7 +5,10 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 
 @Component
@@ -16,6 +19,15 @@ public class BaseProductFeignFallback implements FallbackFactory<BaseProductFeig
         return new BaseProductFeignService() {
             @Override
             public R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct){
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<BaseProduct>> listSku(@RequestBody BaseProduct baseProduct){
+                return R.convertResultJson(throwable);
+            }
+            @Override
+            public R<BaseProduct> getSku(@RequestBody BaseProduct baseProduct){
                 return R.convertResultJson(throwable);
             }
         };

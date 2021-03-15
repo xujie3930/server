@@ -33,7 +33,7 @@ public class ResponseVO implements Serializable {
     }
 
     public static ResponseVO failed(String message) {
-        return new ResponseVO(false, message);
+        return new ResponseVO(false, message == null ? null : message.replaceAll("(?s)(运行时异常:)(?=.*\\1)", ""));
     }
 
     public Boolean getSuccess() {

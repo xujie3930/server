@@ -19,4 +19,7 @@ public class WarehouseKvDTO {
     @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     private String value;
 
+    @ApiModelProperty(value = "国家编码")
+    private String country;
+
 }

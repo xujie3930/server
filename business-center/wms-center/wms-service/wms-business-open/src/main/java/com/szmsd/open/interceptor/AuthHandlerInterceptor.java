@@ -49,7 +49,7 @@ public class AuthHandlerInterceptor implements HandlerInterceptor, Ordered {
                 PrintWriter pw = response.getWriter();
                 pw.write(JSONObject.toJSONString(R.failed("认证失败")));
                 pw.flush();
-                pw.close();
+                // pw.close();
                 return false;
             }
         }

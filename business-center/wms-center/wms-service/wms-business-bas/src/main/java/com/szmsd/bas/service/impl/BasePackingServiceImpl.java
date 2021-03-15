@@ -7,9 +7,16 @@ import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingQueryDto;
 import com.szmsd.bas.mapper.BasePackingMapper;
 import com.szmsd.bas.service.IBasePackingService;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.http.api.feign.HtpBasFeignService;
+import com.szmsd.http.dto.PackingRequest;
+import com.szmsd.http.vo.ResponseVO;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -23,7 +30,8 @@ import java.util.List;
 @Service
 public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BasePacking> implements IBasePackingService {
 
-
+    @Resource
+    private HtpBasFeignService htpBasFeignService;
         /**
         * 查询模块
         *
@@ -75,7 +83,12 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
         @Override
         public int insertBasePacking(BasePacking basePacking)
         {
-        return baseMapper.insert(basePacking);
+            PackingRequest packingRequest = BeanMapperUtil.map(basePacking,PackingRequest.class);
+            R<ResponseVO> r = htpBasFeignService.createPacking(packingRequest);
+            if(r.getCode()!=200){
+                throw new BaseException("传wms失败"+r.getMsg());
+            }
+            return baseMapper.insert(basePacking);
         }
 
         /**

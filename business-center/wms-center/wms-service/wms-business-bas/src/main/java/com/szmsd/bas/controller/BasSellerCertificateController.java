@@ -1,4 +1,6 @@
 package com.szmsd.bas.controller;
+import com.szmsd.http.api.feign.HtpBasFeignService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;

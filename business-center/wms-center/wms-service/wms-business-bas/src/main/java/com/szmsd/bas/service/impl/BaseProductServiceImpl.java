@@ -16,6 +16,7 @@ import com.szmsd.bas.util.RestTemplateUtils;
 import com.szmsd.bas.vo.PricedProductsVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.http.vo.DirectServiceFeeData;
@@ -71,7 +72,6 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     public List<BaseProduct> selectBaseProductPage(BaseProductQueryDto queryDto) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", queryDto.getCategory());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
@@ -79,6 +79,38 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         queryWrapper.eq("is_active", true);
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
+    }
+
+    @Override
+    public List<BaseProduct> selectBaseProductByCode(String code){
+        QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code);
+        //queryWrapper.eq("warehouse_acceptance", true);
+        queryWrapper.orderByAsc("code");
+        return super.list(queryWrapper);
+    }
+
+    @Override
+    public List<BaseProduct> listSku(BaseProduct baseProduct){
+        QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", baseProduct.getCode());
+       QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", baseProduct.getProductName());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", baseProduct.getSellerCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", baseProduct.getProductAttribute());
+        queryWrapper.eq("is_active", true);
+        queryWrapper.orderByDesc("create_time");
+        return super.list(queryWrapper);
+    }
+
+    @Override
+    public R<BaseProduct> getSku(BaseProduct baseProduct){
+        QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        if(StringUtils.isNotEmpty(baseProduct.getCode())){
+            queryWrapper.eq("code",baseProduct.getCode());
+        }else {
+           return R.failed("sku编码为空");
+        }
+       return  R.ok(super.getOne(queryWrapper));
     }
 
     /**

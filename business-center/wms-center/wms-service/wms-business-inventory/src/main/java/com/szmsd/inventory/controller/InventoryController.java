@@ -3,9 +3,11 @@ package com.szmsd.inventory.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO;
 import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO;
+import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryRecordVO;
+import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
 import io.swagger.annotations.Api;
@@ -33,6 +35,15 @@ public class InventoryController extends BaseController {
     public R inbound(@RequestBody InboundInventoryDTO inboundInventoryDTO) {
         inventoryService.inbound(inboundInventoryDTO);
         return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('inventory:page')")
+    @GetMapping("/page")
+    @ApiOperation(value = "查询", notes = "库存管理 - 分页查询")
+    public TableDataInfo<InventorySkuVO> page(InventorySkuQueryDTO inventorySkuQueryDTO) {
+        startPage();
+        List<InventorySkuVO> list = inventoryService.selectList(inventorySkuQueryDTO);
+        return getDataTable(list);
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")

@@ -8,8 +8,27 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 @FeignClient(contextId = "FeignClient.BaseProductFeignService", name = BusinessBasInterface.SERVICE_NAME, fallbackFactory = BaseProductFeignFallback.class)
 public interface BaseProductFeignService {
-    @PostMapping(value = "/base-product/checkSkuValidToDelivery")
+
+    @PostMapping(value = "/base/product/checkSkuValidToDelivery")
     R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct);
+
+    /**
+     * 查询sku列表
+     * @param baseProduct
+     * @return
+     */
+    @PostMapping(value = "/base/product/listSku")
+    R<List<BaseProduct>> listSku(@RequestBody BaseProduct baseProduct);
+
+    /**
+     * 查询单条sku
+     * @param baseProduct
+     * @return
+     */
+    @PostMapping(value = "/base/product/getSku")
+    R<BaseProduct> getSku(@RequestBody BaseProduct baseProduct);
 }

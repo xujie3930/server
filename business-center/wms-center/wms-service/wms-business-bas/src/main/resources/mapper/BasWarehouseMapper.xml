@@ -9,7 +9,8 @@
         <result column="warehouse_name" property="warehouseName"/>
         <result column="address" property="address"/>
         <result column="is_check_vat" property="isCheckVat"/>
-        <result column="country_name" property="countryName"/>
+        <result column="country_code" property="countryCode"/>
+        <result column="country_display_name" property="countryDisplayName"/>
         <result column="city" property="city"/>
         <result column="time_zone" property="timeZone"/>
         <result column="status" property="status"/>
@@ -43,7 +44,8 @@
         t.warehouse_code warehouse_name,
         '' address,
         t.is_check_vat,
-        t.country_name,
+        t.country_code,
+        t.country_display_name,
         t.city,
         t.time_zone,
         t.status

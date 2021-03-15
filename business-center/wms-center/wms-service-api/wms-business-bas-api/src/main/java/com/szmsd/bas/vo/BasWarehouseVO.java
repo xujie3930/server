@@ -22,8 +22,11 @@ public class BasWarehouseVO {
     @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     private String warehouseName;
 
-    @ApiModelProperty(value = "国家")
-    private String countryName;
+    @ApiModelProperty(value = "国家代码")
+    private String countryCode;
+
+    @ApiModelProperty(value = "国家显示名称")
+    private String countryDisplayName;
 
     @ApiModelProperty(value = "城市")
     private String city;

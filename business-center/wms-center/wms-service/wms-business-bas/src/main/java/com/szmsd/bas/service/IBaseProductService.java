@@ -7,6 +7,7 @@ import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.dto.PricedProductsDTO;
 import com.szmsd.bas.vo.PricedProductsVO;
 import com.szmsd.common.core.domain.R;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -43,6 +44,27 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @return
      */
     List<BaseProduct> selectBaseProductPage(BaseProductQueryDto queryDto);
+
+    /**
+     * 通过code查询
+     * @param code
+     * @return
+     */
+    List<BaseProduct> selectBaseProductByCode(String code);
+
+    /**
+     * 查询sku信息
+     * @param baseProduct
+     * @return
+     */
+    List<BaseProduct> listSku(BaseProduct baseProduct);
+
+    /**
+     * 获取单条sku
+     * @param baseProduct
+     * @return
+     */
+    R<BaseProduct> getSku(BaseProduct baseProduct);
 
     /**
      * 新增模块

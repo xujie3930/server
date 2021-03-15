@@ -60,6 +60,32 @@ public class BaseProductController extends BaseController{
             return getDataTable(list);
       }
 
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
+    @GetMapping("/listByCode")
+    @ApiOperation(value = "通过code查询列表",notes = "通过code查询列表")
+    public  R<List<BaseProduct>> listByCode(String code)
+    {
+        List<BaseProduct> list = baseProductService.selectBaseProductByCode(code);
+        return R.ok(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
+    @PostMapping("/listSku")
+    @ApiOperation(value = "查询列表",notes = "查询列表")
+    public  R<List<BaseProduct>> listSKU(@RequestBody BaseProduct baseProduct)
+    {
+        List<BaseProduct> list = baseProductService.listSku(baseProduct);
+        return R.ok(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
+    @PostMapping("/getSku")
+    @ApiOperation(value = "查询列表",notes = "查询列表")
+    public R<BaseProduct> getSku(@RequestBody BaseProduct baseProduct)
+    {
+        return baseProductService.getSku(baseProduct);
+    }
+
     /**
     * 导出模块列表
     */
