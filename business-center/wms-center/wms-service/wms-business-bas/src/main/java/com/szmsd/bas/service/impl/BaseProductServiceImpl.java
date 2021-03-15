@@ -84,7 +84,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     public List<BaseProduct> selectBaseProductByCode(String code){
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code);
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code+"%");
         //queryWrapper.eq("warehouse_acceptance", true);
         queryWrapper.orderByAsc("code");
         return super.list(queryWrapper);
