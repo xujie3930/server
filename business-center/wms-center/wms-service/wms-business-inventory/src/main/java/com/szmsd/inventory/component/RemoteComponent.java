@@ -1,4 +1,4 @@
-package com.szmsd.bas.component;
+package com.szmsd.inventory.component;
 
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.domain.BaseProduct;
@@ -40,7 +40,7 @@ public class RemoteComponent {
             return new SysUser();
         }
         SysUser sysUser = remoteUserService.queryGetInfoByUserId(loginUser.getUserId()).getData();
-        return Optional.ofNullable(sysUser).orElseGet(() -> new SysUser());
+        return Optional.ofNullable(sysUser).orElseGet(SysUser::new);
     }
 
     /**

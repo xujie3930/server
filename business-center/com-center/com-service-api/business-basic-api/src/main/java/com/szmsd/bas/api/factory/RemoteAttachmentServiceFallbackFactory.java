@@ -24,24 +24,23 @@ public class RemoteAttachmentServiceFallbackFactory implements FallbackFactory<R
 
     @Override
     public RemoteAttachmentService create(Throwable throwable) {
-        log.error("用户服务调用失败:{}", throwable.getMessage());
         return new RemoteAttachmentService() {
 
             @Override
             public R<List<BasAttachment>> list(BasAttachmentQueryDTO queryDTO) {
-                log.error("查询失败");
+                log.error("附件查询失败, {}", throwable.getMessage());
                 return R.failed(ExceptionMessageEnum.FAIL);
             }
 
             @Override
             public R save(AttachmentDTO attachmentDTO) {
-                log.error("保存失败");
+                log.error("附件保存失败", throwable.getMessage());
                 return R.failed(ExceptionMessageEnum.FAIL);
             }
 
             @Override
             public R saveAndUpdate(AttachmentDTO attachmentDTO) {
-                log.error("保存失败");
+                log.error("附件保存失败", throwable.getMessage());
                 return R.failed(ExceptionMessageEnum.FAIL);
             }
         };
