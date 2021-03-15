@@ -123,7 +123,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
     @Override
     public List<WarehouseKvDTO> selectCusInboundWarehouse() {
         List<BasWarehouseVO> basWarehouseVOS = this.selectList(new BasWarehouseQueryDTO().setStatus("1"));
-        List<WarehouseKvDTO> collect = basWarehouseVOS.stream().filter(basWarehouseVO -> this.vailCusWarehouse(basWarehouseVO.getWarehouseCode())).map(item -> new WarehouseKvDTO().setKey(item.getWarehouseCode()).setValue(item.getWarehouseCode())).collect(Collectors.toList());
+        List<WarehouseKvDTO> collect = basWarehouseVOS.stream().filter(basWarehouseVO -> this.vailCusWarehouse(basWarehouseVO.getWarehouseCode())).map(item -> new WarehouseKvDTO().setKey(item.getWarehouseCode()).setValue(item.getWarehouseCode()).setCountry(item.getCountryCode())).collect(Collectors.toList());
         return collect;
     }
 
