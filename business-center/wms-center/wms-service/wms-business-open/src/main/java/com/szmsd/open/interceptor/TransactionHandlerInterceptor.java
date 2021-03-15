@@ -90,7 +90,7 @@ public class TransactionHandlerInterceptor implements HandlerInterceptor, Ordere
                 PrintWriter pw = response.getWriter();
                 pw.write(JSONObject.toJSONString(r, SerializerFeature.PrettyFormat, SerializerFeature.WriteMapNullValue));
                 pw.flush();
-                pw.close();
+                // pw.close();
                 return false;
             }
         }
