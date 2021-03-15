@@ -35,7 +35,6 @@ public class InventoryController extends BaseController {
         return R.ok();
     }
 
-
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
     @GetMapping("/inventory/record/page")
     @ApiOperation(value = "日志记录", notes = "库存日志")
