@@ -1,5 +1,7 @@
 package com.szmsd.open.vo;
 
+import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.domain.R;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -31,7 +33,7 @@ public class ResponseVO implements Serializable {
     }
 
     public static ResponseVO failed(String message) {
-        return new ResponseVO(false, message);
+        return new ResponseVO(false, message == null ? null : message.replaceAll("(?s)(运行时异常:)(?=.*\\1)", ""));
     }
 
     public Boolean getSuccess() {
@@ -49,4 +51,10 @@ public class ResponseVO implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public static <T> ResponseVO unknown(R<T> r) {
+        boolean flag = r.getCode() == HttpStatus.SUCCESS;
+        return flag ? ok() : failed(r.getMsg());
+    }
+
 }

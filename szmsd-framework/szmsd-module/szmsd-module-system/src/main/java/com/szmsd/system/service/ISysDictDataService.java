@@ -1,8 +1,9 @@
 package com.szmsd.system.service;
 
-import java.util.List;
-
 import com.szmsd.system.domain.SysDictData;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 字典 业务层
@@ -75,4 +76,11 @@ public interface ISysDictDataService
      * @return 结果
      */
     public int updateDictData(SysDictData dictData);
+
+    /**
+     * 批量查询数据字典
+     * @param list list
+     * @return Map
+     */
+    Map<String, List<SysDictData>> batchList(List<String> list);
 }

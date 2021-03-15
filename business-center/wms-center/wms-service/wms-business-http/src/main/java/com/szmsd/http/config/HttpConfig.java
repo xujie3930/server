@@ -41,6 +41,8 @@ public class HttpConfig {
     // Outbound
     private OutboundConfig outbound;
 
+    private Bas bas;
+
     @Data
     @Accessors(chain = true)
     public static class InboundConfig {
@@ -48,6 +50,17 @@ public class HttpConfig {
         private String create;
         // B2 取消入库单
         private String cancel;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class Bas {
+        // sku和包材
+        private String packing;
+        // 物料
+        private String products;
+        //卖家
+        private String seller;
     }
 
     @Data
@@ -92,4 +105,15 @@ public class HttpConfig {
     // ------------------------------------------carrierServiceUrl--------------------
     // 服务商接口 https://carrierservice-api-admin-external.dsloco.com/swagger/index.html
     private String carrierServiceUrl;
+    // CarrierService
+    private CarrierService carrierService;
+
+    @Data
+    @Accessors(chain = true)
+    public static class CarrierService {
+        // 创建承运商物流订单（客户端）
+        private String shipmentOrder;
+        // 取消承运商物流订单（客户端）
+        private String cancellation;
+    }
 }

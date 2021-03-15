@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.inventory.mapper.InventoryMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="InventorySkuVO" type="com.szmsd.inventory.domain.vo.InventorySkuVO">
+        <id column="id" property="id"/>
+        <result column="sku" property="sku"/>
+        <result column="sku_name" property="skuName"/>
+        <result column="sku_category_name" property="skuCategoryName"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_name" property="warehouseName"/>
+        <result column="total_inventory" property="totalInventory"/>
+        <result column="available_inventory" property="availableInventory"/>
+        <result column="freeze_inventory" property="freezeInventory"/>
+        <result column="total_inbound" property="totalInbound"/>
+        <result column="total_outbound" property="totalOutbound"/>
+        <result column="sku_length" property="skuLength"/>
+        <result column="sku_weight" property="skuWeight"/>
+        <result column="sku_height" property="skuHeight"/>
+        <result column="sku_property_name" property="skuPropertyName"/>
+        <result column="sku_declared_value" property="skuDeclaredValue"/>
+        <result column="sku_declared_name" property="skuDeclaredName"/>
+        <result column="remark" property="remark"/>
+        <result column="cus_code" property="cusCode"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Column_List_VO">
+        t.id,
+        t.sku,
+        sku.product_name sku_name,
+        'SKU' sku_category_name,
+        t.warehouse_code,
+        t.warehouse_code warehouse_name,
+        t.total_inventory,
+        t.available_inventory,
+        t.freeze_inventory,
+        t.total_inbound,
+        t.total_outbound,
+        sku.init_length sku_length,
+        sku.init_weight sku_weight,
+        sku.init_height sku_height,
+        sku.product_attribute_name sku_property_name,
+        sku.declared_value sku_declared_value,
+        sku.product_name_chinese sku_declared_name,
+        t.remark,
+        t.cus_code
+    </sql>
+
+    <select id="selectList" parameterType="com.szmsd.inventory.domain.dto.InventorySkuQueryDTO" resultMap="InventorySkuVO">
+        SELECT <include refid="Column_List_VO"/>
+        FROM inventory t LEFT JOIN base_product sku ON t.sku = sku.code
+        <where>
+            <if test="id != null and id != ''">AND t.id = #{id}</if>
+            <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
+            <if test="skuList != null and skuList.size() > 0">
+                AND t.sku IN
+                <foreach collection="skuList" item="sku" open="(" separator="," close=")">
+                    #{sku}
+                </foreach>
+            </if>
+            <if test="cusCode != null and cusCode != ''">AND t.cus_code = #{cusCode}</if>
+            <if test="skuPropertyCode != null and skuPropertyCode != ''">AND sku.product_attribute = #{skuPropertyCode}</if>
+            <if test="skuDeclaredName != null and skuDeclaredName != ''">AND sku.product_name_chinese LIKE CONCAT(#{skuDeclaredName}, '%')</if>
+        </where>
+    </select>
+
+
+</mapper>

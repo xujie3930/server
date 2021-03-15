@@ -176,20 +176,15 @@ public class SysUserController extends BaseController {
      */
     @PostMapping("/getNameByNickName")
     @ApiOperation(httpMethod = "POST", value = "获取当前用户信息")
-    public R<Boolean> getNameByNickName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType) {
+    public R<SysUser> getNameByNickName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType) {
         SysUser sysUser = new SysUser();
         sysUser.setNickName(sysUserByTypeAndUserType.getNickName());
         List<SysUser> list = userService.selectUserList(sysUser);
-        R r = new R();
         if (CollectionUtils.isNotEmpty(list)&&list.size()==1) {
-            r.setData(true);
-            r.setMsg(list.get(0).getUserName());
+            return R.ok(list.get(0));
         }else{
-            r.setData(false);
-            r.setMsg("没有查询到");
+            return R.failed("没有查询到结果");
         }
-
-        return r;
     }
 
     /**

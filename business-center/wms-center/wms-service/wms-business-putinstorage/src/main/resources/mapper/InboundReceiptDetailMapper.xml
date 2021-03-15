@@ -31,6 +31,7 @@
         <where>
             <if test="id != null and id != ''">AND t.id = #{id}</if>
             <if test="warehouseNo != null and warehouseNo != ''">AND t.warehouse_no = #{warehouseNo}</if>
+            <if test="sku != null and sku != ''">AND t.sku = #{sku}</if>
         </where>
     </select>
 

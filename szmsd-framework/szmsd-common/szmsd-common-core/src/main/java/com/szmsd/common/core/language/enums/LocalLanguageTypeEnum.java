@@ -11,6 +11,12 @@ public enum LocalLanguageTypeEnum {
     SYSTEM_LANGUAGE,
 
     /** 入库单状态 **/
-    INBOUND_RECEIPT_STATUS
-    
+    INBOUND_RECEIPT_STATUS,
+
+    /** 库存日志类型 **/
+    INVENTORY_RECORD_TYPE,
+
+    /** 库存日志 **/
+    INVENTORY_RECORD_LOGS
+    ;
 }

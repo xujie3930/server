@@ -53,7 +53,7 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
-    private String cusNo;
+    private String sellerCode;
 
     @ApiModelProperty(value = "认证状态 ")
     @Excel(name = "认证状态 ")
@@ -73,7 +73,11 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "国家")
     @Excel(name = "国家")
-    private String country;
+    private String countryName;
+
+    @ApiModelProperty(value = "国家")
+    @Excel(name = "国家")
+    private String countryCode;
 
     @ApiModelProperty(value = "客服")
     @Excel(name = "客服")
@@ -97,7 +101,7 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "联系电话")
     @Excel(name = "联系电话")
-    private String telephone;
+    private String phoneNumber;
 
     @ApiModelProperty(value = "身份证号码")
     @Excel(name = "身份证号码")
@@ -106,6 +110,18 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "出口易账号")
     @Excel(name = "出口易账号")
     private String ck1Account;
+
+    @ApiModelProperty(value = "中文名")
+    @Excel(name = "中文名")
+    private String nameCn;
+
+    @ApiModelProperty(value = "英文名")
+    @Excel(name = "英文名")
+    private String nameEn;
+
+    @ApiModelProperty(value = "公司")
+    @Excel(name = "公司")
+    private String company;
 
 
 

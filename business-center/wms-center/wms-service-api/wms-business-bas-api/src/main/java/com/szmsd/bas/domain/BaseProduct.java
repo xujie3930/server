@@ -159,8 +159,8 @@ public class BaseProduct extends BaseEntity {
     @Excel(name = "产品介绍地址")
     private String productIntroductAddress;
 
-    @ApiModelProperty(value = "sku/包材")
-    @Excel(name = "sku/包材")
+    @ApiModelProperty(value = "sku")
+    @Excel(name = "sku")
     private String category;
 
     @ApiModelProperty(value = "是否仓库验收")
@@ -219,9 +219,6 @@ public class BaseProduct extends BaseEntity {
     @Excel(name = "仓库编码")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "业务主键，用来做幂等校验")
-    @Excel(name = "业务主键，用来做幂等校验")
-    private String transactionId;
 
     @ApiModelProperty(value = "关联单号")
     @Excel(name = "关联单号")

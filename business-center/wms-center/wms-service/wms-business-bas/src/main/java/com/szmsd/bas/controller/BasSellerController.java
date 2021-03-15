@@ -101,9 +101,9 @@ public class BasSellerController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块",notes = "修改模块")
-    public R edit(@RequestBody BasSeller basSeller)
+    public R edit(@RequestBody BasSellerInfoDto basSellerInfoDto)
     {
-    return toOk(basSellerService.updateBasSeller(basSeller));
+    return toOk(basSellerService.updateBasSeller(basSellerInfoDto));
     }
 
     /**

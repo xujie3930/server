@@ -96,6 +96,10 @@
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-bas-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-putinstorage-api</artifactId>
+        </dependency>
 
     </dependencies>
 

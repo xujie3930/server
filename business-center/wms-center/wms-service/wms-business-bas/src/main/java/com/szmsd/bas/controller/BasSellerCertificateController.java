@@ -1,4 +1,7 @@
 package com.szmsd.bas.controller;
+import com.szmsd.bas.dto.VatQueryDto;
+import com.szmsd.http.api.feign.HtpBasFeignService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +50,15 @@ public class BasSellerCertificateController extends BaseController{
             List<BasSellerCertificate> list = basSellerCertificateService.selectBasSellerCertificateList(basSellerCertificate);
             return getDataTable(list);
       }
+
+    @PreAuthorize("@ss.hasPermi('BasSellerCertificate:BasSellerCertificate:list')")
+    @PostMapping("/listVAT")
+    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    public R<List<BasSellerCertificate>> listVAT(@RequestBody VatQueryDto vatQueryDto)
+    {
+        List<BasSellerCertificate> list = basSellerCertificateService.listVAT(vatQueryDto);
+        return R.ok(list);
+    }
 
     /**
     * 导出模块列表

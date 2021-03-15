@@ -9,7 +9,7 @@ import java.util.Objects;
 public enum DelOutboundStateEnum {
 
     REVIEWED("REVIEWED", "待提审"),
-    UNDER_REVIEW("UNDER_REView", "提审中"),
+    UNDER_REVIEW("UNDER_REVIEW", "提审中"),
     DELIVERED("DELIVERED", "待发货"),
     PROCESSING("PROCESSING", "仓库处理中"),
     AUDIT_FAILED("AUDIT_FAILED", "审核失败"),

@@ -2,13 +2,13 @@ package com.szmsd.putinstorage.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
-import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.domain.InboundReceiptDetail;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
@@ -39,10 +39,16 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         inboundReceiptDetailVOS.forEach(inboundReceiptDetailVO -> {
             List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setBusinessNo(inboundReceiptDetailVO.getWarehouseNo()).setBusinessItemNo(inboundReceiptDetailVO.getId().toString()));
             if (CollectionUtils.isNotEmpty(attachment)) {
-                inboundReceiptDetailVO.setEditionImage(new AttachmentDataDTO().setId(attachment.get(0).getId()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
+                inboundReceiptDetailVO.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
             }
         });
         return inboundReceiptDetailVOS;
+    }
+
+    @Override
+    public InboundReceiptDetailVO selectObject(String warehouseNo, String sku) {
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = this.selectList(new InboundReceiptDetailQueryDTO().setWarehouseNo(warehouseNo).setSku(sku));
+        return CollectionUtils.isNotEmpty(inboundReceiptDetailVOS) ? inboundReceiptDetailVOS.get(0) : null;
     }
 
     /**
@@ -80,6 +86,22 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
     }
 
     /**
+     * #B1 接收入库上架 修改明细上架数量
+     * @param warehouseNo 入库单
+     * @param sku SKU
+     * @param qty 数量
+     */
+    @Override
+    public void receiving(String warehouseNo, String sku, Integer qty) {
+        InboundReceiptDetailVO inboundReceiptDetailVO = this.selectObject(warehouseNo, sku);
+        AssertUtil.notNull(inboundReceiptDetailVO, "入库单[" + warehouseNo + "]，不存在SKU[" + sku + "]明细，请核对");
+        Integer beforeOutQty = inboundReceiptDetailVO.getPutQty();
+        InboundReceiptDetail inboundReceiptDetail = new InboundReceiptDetail().setId(inboundReceiptDetailVO.getId());
+        inboundReceiptDetail.setPutQty(beforeOutQty + qty);
+        this.updateById(inboundReceiptDetail);
+    }
+
+    /**
      * 异步保存附件
      * 空对象不会调用远程接口，空数组会删除所对应的附件
      * @param inboundReceiptDetailId
@@ -87,7 +109,7 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
      */
     private void asyncAttachment(Long inboundReceiptDetailId, InboundReceiptDetailDTO inboundReceiptDetail) {
         CompletableFuture.runAsync(() -> {
-            AttachmentDataDTO editionImage = inboundReceiptDetail.getEditionImage();
+            AttachmentFileDTO editionImage = inboundReceiptDetail.getEditionImage();
             if (editionImage != null) {
                 log.info("保存单证信息文件");
                 remoteComponent.saveAttachment(inboundReceiptDetail.getWarehouseNo(), inboundReceiptDetailId.toString(), Arrays.asList(editionImage), AttachmentTypeEnum.INBOUND_RECEIPT_EDITION_IMAGE);

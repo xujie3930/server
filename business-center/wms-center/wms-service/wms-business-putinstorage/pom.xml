@@ -85,32 +85,32 @@
 
         <dependency>
             <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-putinstorage-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-bas-api</artifactId>
-            <version>${business.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-http-api</artifactId>
-            <version>${business.version}</version>
         </dependency>
-
-        <!-- <dependency>
-             <groupId>com.szmsd.wms</groupId>
-             <artifactId>wms-business-bil-api</artifactId>
-             <version>${business.version}</version>
-         </dependency>-->
 
         <dependency>
-            <groupId>com.szmsd</groupId>
-            <artifactId>szmsd-module-websocket-api</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-inventory-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.szmsd</groupId>
             <artifactId>business-basic-api</artifactId>
             <version>${business.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-inventory-api</artifactId>
         </dependency>
 
     </dependencies>

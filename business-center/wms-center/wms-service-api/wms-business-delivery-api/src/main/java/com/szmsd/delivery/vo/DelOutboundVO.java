@@ -63,7 +63,7 @@ public class DelOutboundVO implements Serializable {
     private String state;
 
     @ApiModelProperty(value = "地址信息")
-    private List<DelOutboundAddressDto> address;
+    private DelOutboundAddressDto address;
 
     @ApiModelProperty(value = "明细信息")
     private List<DelOutboundDetailDto> details;
