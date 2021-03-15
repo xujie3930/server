@@ -27,7 +27,7 @@ public class SpecialOperationDTO implements Serializable {
     private BigDecimal nextPrice;
 
     @ApiModelProperty(value = "计费单位")
-    private String chargeUnit;
+    private String unit;
 
     @ApiModelProperty(value = "备注")
     private String remark;

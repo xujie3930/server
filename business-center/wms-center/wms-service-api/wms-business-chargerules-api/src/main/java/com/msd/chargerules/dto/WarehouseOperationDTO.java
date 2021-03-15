@@ -24,7 +24,7 @@ public class WarehouseOperationDTO implements Serializable {
     private BigDecimal price;
 
     @ApiModelProperty(value = "计费单位")
-    private String chargeUnit;
+    private String unit;
 
     @ApiModelProperty(value = "备注")
     private String remark;
