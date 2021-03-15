@@ -5,21 +5,27 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.component.RemoteRequest;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductOms;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.dto.PricedProductsDTO;
 import com.szmsd.bas.mapper.BaseProductMapper;
+import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.util.RestTemplateUtils;
+import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.bas.vo.PricedProductsVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.vo.DirectServiceFeeData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +50,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
     @Resource
     private RemoteRequest remoteRequest;
+    @Autowired
+    private IBasSellerService basSellerService;
 
 
     /**
@@ -82,19 +90,24 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProduct> selectBaseProductByCode(String code){
+    public List<BaseProductVO> selectBaseProductByCode(String code){
+        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
+        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
+        BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code);
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code+"%");
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basSeller.getSellerCode());
         //queryWrapper.eq("warehouse_acceptance", true);
         queryWrapper.orderByAsc("code");
-        return super.list(queryWrapper);
+        List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper),BaseProductVO.class);
+        return baseProductVOList;
     }
 
     @Override
     public List<BaseProduct> listSku(BaseProduct baseProduct){
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", baseProduct.getCode());
-       QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", baseProduct.getProductName());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", baseProduct.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", baseProduct.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", baseProduct.getProductAttribute());
         queryWrapper.eq("is_active", true);

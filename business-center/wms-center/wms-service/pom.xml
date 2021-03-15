@@ -25,6 +25,7 @@
         <module>wms-business-putinstorage</module>
         <module>wms-business-finance</module>
         <module>wms-business-inventory</module>
+        <module>wms-business-chargerules</module>
     </modules>
 
     <properties>
@@ -72,6 +73,11 @@
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-putinstorage-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-chargerules-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
         </dependencies>

@@ -230,9 +230,14 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         @Override
         public int updateBasSeller(BasSellerInfoDto basSellerInfoDto)
         {
+            //查询表中信息
+            QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("id",basSellerInfoDto.getId());
+            BasSeller bas = super.getOne(queryWrapper);
             //注册到wms
-            SellerRequest sellerRequest = BeanMapperUtil.map(basSellerInfoDto,SellerRequest.class);
+            SellerRequest sellerRequest = BeanMapperUtil.map(bas,SellerRequest.class);
             sellerRequest.setIsActive(true);
+            //initializeValue(sellerRequest);
             R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
             if(r.getCode()!=200){
                 throw new BaseException("传wms失败"+r.getMsg());
@@ -266,6 +271,10 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         public int deleteBasSellerById(String id)
         {
         return baseMapper.deleteById(id);
+        }
+
+        private void initializeValue(SellerRequest sellerRequest){
+
         }
 
     }

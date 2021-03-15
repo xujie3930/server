@@ -73,7 +73,7 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         log.info("保存入库单明细：{}", inboundReceiptDetailDTO);
 
         // 验证SKU
-//        remoteComponent.vailSku(inboundReceiptDetailDTO.getSku());
+        remoteComponent.vailSku(inboundReceiptDetailDTO.getSku());
 
         Integer declareQty = inboundReceiptDetailDTO.getDeclareQty();
         AssertUtil.isTrue(declareQty > 0, "SKU[" + inboundReceiptDetailDTO.getSku() + "]申报数量不能为" + declareQty);
