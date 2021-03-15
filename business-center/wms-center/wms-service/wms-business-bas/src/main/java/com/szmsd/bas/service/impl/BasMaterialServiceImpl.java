@@ -1,9 +1,11 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.szmsd.bas.domain.BasMaterial;
 import com.szmsd.bas.mapper.BasMaterialMapper;
 import com.szmsd.bas.service.IBasMaterialService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.domain.R;
@@ -42,8 +44,13 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         @Override
         public List<BasMaterial> selectBasMaterialList(BasMaterial basMaterial)
         {
-        QueryWrapper<BasMaterial> where = new QueryWrapper<BasMaterial>();
-        return baseMapper.selectList(where);
+        QueryWrapper<BasMaterial> queryWrapper = new QueryWrapper<BasMaterial>();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", basMaterial.getCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basMaterial.getSellerCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "type_name", basMaterial.getTypeName());
+        queryWrapper.eq("is_active", true);
+        queryWrapper.orderByDesc("create_time");
+        return baseMapper.selectList(queryWrapper);
         }
 
         /**

@@ -2,6 +2,8 @@ package com.szmsd.bas.service;
 
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.bas.dto.VatQueryDto;
+
 import java.util.List;
 
 /**
@@ -32,6 +34,12 @@ public interface IBasSellerCertificateService extends IService<BasSellerCertific
         */
         List<BasSellerCertificate> selectBasSellerCertificateList(BasSellerCertificate basSellerCertificate);
 
+        /**
+         * 按用户名查询用户信息
+         * @param vatQueryDto
+         * @return
+         */
+        List<BasSellerCertificate> listVAT(VatQueryDto vatQueryDto);
         /**
         * 新增模块
         *

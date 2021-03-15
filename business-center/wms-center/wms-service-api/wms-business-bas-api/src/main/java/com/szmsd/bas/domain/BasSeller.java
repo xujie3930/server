@@ -73,7 +73,11 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "国家")
     @Excel(name = "国家")
-    private String country;
+    private String countryName;
+
+    @ApiModelProperty(value = "国家")
+    @Excel(name = "国家")
+    private String countryCode;
 
     @ApiModelProperty(value = "客服")
     @Excel(name = "客服")

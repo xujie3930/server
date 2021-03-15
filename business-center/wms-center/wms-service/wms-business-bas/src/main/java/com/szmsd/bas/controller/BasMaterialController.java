@@ -30,7 +30,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 
 @Api(tags = {""})
 @RestController
-@RequestMapping("/bas-material")
+@RequestMapping("/bas/material")
 public class BasMaterialController extends BaseController{
 
      @Resource

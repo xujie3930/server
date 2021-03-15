@@ -1,9 +1,13 @@
 package com.szmsd.bas.service.impl;
 
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
+import com.szmsd.bas.dto.VatQueryDto;
 import com.szmsd.bas.mapper.BasSellerCertificateMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.service.IBasSellerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.domain.R;
@@ -24,6 +28,8 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
 
     @Resource
     private BasSellerCertificateMapper basSellerCertificateMapper;
+    @Autowired
+    private IBasSellerService iBasSellerService;
         /**
         * 查询模块
         *
@@ -64,6 +70,18 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         public int insertBasSellerCertificate(BasSellerCertificate basSellerCertificate)
         {
         return baseMapper.insert(basSellerCertificate);
+        }
+
+        @Override
+        public List<BasSellerCertificate> listVAT(VatQueryDto vatQueryDto){
+            QueryWrapper<BasSeller> queryWrapper = new QueryWrapper();
+            queryWrapper.eq("user_name",vatQueryDto.getUserName());
+
+            BasSeller basSeller = iBasSellerService.getOne(queryWrapper);
+            QueryWrapper<BasSellerCertificate> vatQueryWrapper = new QueryWrapper();
+            vatQueryWrapper.eq("seller_code",basSeller.getSellerCode());
+            vatQueryWrapper.eq("country_code",vatQueryDto.getCountryCode());
+            return super.list(vatQueryWrapper);
         }
 
     /**
