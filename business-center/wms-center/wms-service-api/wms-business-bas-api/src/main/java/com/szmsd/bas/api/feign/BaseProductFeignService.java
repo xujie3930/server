@@ -12,9 +12,23 @@ import java.util.List;
 
 @FeignClient(contextId = "FeignClient.BaseProductFeignService", name = BusinessBasInterface.SERVICE_NAME, fallbackFactory = BaseProductFeignFallback.class)
 public interface BaseProductFeignService {
+
     @PostMapping(value = "/base/product/checkSkuValidToDelivery")
     R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct);
 
-    @PostMapping(value = "/base/product/listSKU")
-    R<List<BaseProduct>> listSKU(@RequestBody BaseProduct baseProduct);
+    /**
+     * 查询sku列表
+     * @param baseProduct
+     * @return
+     */
+    @PostMapping(value = "/base/product/listSku")
+    R<List<BaseProduct>> listSku(@RequestBody BaseProduct baseProduct);
+
+    /**
+     * 查询单条sku
+     * @param baseProduct
+     * @return
+     */
+    @PostMapping(value = "/base/product/getSku")
+    R<BaseProduct> getSku(@RequestBody BaseProduct baseProduct);
 }

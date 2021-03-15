@@ -63,21 +63,28 @@ public class BaseProductController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/listByCode")
     @ApiOperation(value = "通过code查询列表",notes = "通过code查询列表")
-    public  List<BaseProduct> listByCode(String code)
+    public  R<List<BaseProduct>> listByCode(String code)
     {
         List<BaseProduct> list = baseProductService.selectBaseProductByCode(code);
-        return list;
+        return R.ok(list);
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
-    @PostMapping("/listSKU")
+    @PostMapping("/listSku")
     @ApiOperation(value = "查询列表",notes = "查询列表")
-    public  List<BaseProduct> listSKU(@RequestBody BaseProduct baseProduct)
+    public  R<List<BaseProduct>> listSKU(@RequestBody BaseProduct baseProduct)
     {
-        List<BaseProduct> list = baseProductService.listSKU(baseProduct);
-        return list;
+        List<BaseProduct> list = baseProductService.listSku(baseProduct);
+        return R.ok(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
+    @PostMapping("/getSku")
+    @ApiOperation(value = "查询列表",notes = "查询列表")
+    public R<BaseProduct> getSku(@RequestBody BaseProduct baseProduct)
+    {
+        return baseProductService.getSku(baseProduct);
+    }
 
     /**
     * 导出模块列表

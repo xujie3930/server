@@ -57,7 +57,14 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @param baseProduct
      * @return
      */
-    List<BaseProduct> listSKU(BaseProduct baseProduct);
+    List<BaseProduct> listSku(BaseProduct baseProduct);
+
+    /**
+     * 获取单条sku
+     * @param baseProduct
+     * @return
+     */
+    R<BaseProduct> getSku(BaseProduct baseProduct);
 
     /**
      * 新增模块
