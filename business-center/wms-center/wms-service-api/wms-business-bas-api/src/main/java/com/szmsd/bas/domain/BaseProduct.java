@@ -219,9 +219,6 @@ public class BaseProduct extends BaseEntity {
     @Excel(name = "仓库编码")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "业务主键，用来做幂等校验")
-    @Excel(name = "业务主键，用来做幂等校验")
-    private String transactionId;
 
     @ApiModelProperty(value = "关联单号")
     @Excel(name = "关联单号")
