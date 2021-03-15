@@ -3,14 +3,11 @@ package com.szmsd.http.api.feign.fallback;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.HtpBasFeignService;
-import com.szmsd.http.api.feign.HtpInboundFeignService;
 import com.szmsd.http.dto.*;
-import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Slf4j
@@ -31,6 +28,10 @@ public class HtpBasFeignFallback implements FallbackFactory<HtpBasFeignService> 
             }
             @Override
             public R<ResponseVO> createSeller(@RequestBody SellerRequest sellerRequest){
+                return R.convertResultJson(throwable);
+            }
+            @Override
+            public R<ResponseVO> specialOperationType(SpecialOperationRequest specialOperationRequest) {
                 return R.convertResultJson(throwable);
             }
 
