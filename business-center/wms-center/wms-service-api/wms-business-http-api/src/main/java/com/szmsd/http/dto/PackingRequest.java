@@ -23,7 +23,7 @@ public class PackingRequest {
 
     @ApiModelProperty(value = "价格")
     @Excel(name = "价格")
-    private BigDecimal price;
+    private Double price;
 
     @ApiModelProperty(value = "优先值")
     @Excel(name = "优先值")

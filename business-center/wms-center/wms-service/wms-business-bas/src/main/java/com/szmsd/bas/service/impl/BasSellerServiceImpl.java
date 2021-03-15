@@ -12,11 +12,15 @@ import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.http.api.feign.HtpBasFeignService;
+import com.szmsd.http.dto.SellerRequest;
+import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
@@ -56,6 +60,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
     private Producer producer;
     @Autowired
     private IBasSellerCertificateService basSellerCertificateService;
+    @Resource
+    private HtpBasFeignService htpBasFeignService;
 
         /**
         * 查询模块
@@ -168,7 +174,6 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             }
             //注册信息到卖家表
             baseMapper.insert(basSeller);
-
             r.setData(true);
             r.setMsg("注册成功");
             return r;
@@ -225,6 +230,13 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         @Override
         public int updateBasSeller(BasSellerInfoDto basSellerInfoDto)
         {
+            //注册到wms
+            SellerRequest sellerRequest = BeanMapperUtil.map(basSellerInfoDto,SellerRequest.class);
+            sellerRequest.setIsActive(true);
+            R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
+            if(r.getCode()!=200){
+                throw new BaseException("传wms失败"+r.getMsg());
+            }
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
             basSellerCertificateService.delBasSellerCertificateByPhysics(basSellerInfoDto.getSellerCode());
             basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());

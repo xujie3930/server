@@ -7,6 +7,8 @@ import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 
 @Component
 public class BaseProductFeignFallback implements FallbackFactory<BaseProductFeignService> {
@@ -16,6 +18,11 @@ public class BaseProductFeignFallback implements FallbackFactory<BaseProductFeig
         return new BaseProductFeignService() {
             @Override
             public R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct){
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<BaseProduct>> listSKU(@RequestBody BaseProduct baseProduct){
                 return R.convertResultJson(throwable);
             }
         };
