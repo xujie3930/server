@@ -60,6 +60,13 @@ public interface IBaseProductService extends IService<BaseProduct> {
     List<BaseProduct> listSku(BaseProduct baseProduct);
 
     /**
+     * 查询sku信息
+     * @param queryDto
+     * @return
+     */
+    List<BaseProduct> listSkuBySeller(BaseProductQueryDto queryDto);
+
+    /**
      * 获取单条sku
      * @param baseProduct
      * @return

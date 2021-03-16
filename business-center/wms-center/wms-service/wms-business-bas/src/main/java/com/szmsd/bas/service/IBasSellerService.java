@@ -35,6 +35,7 @@ public interface IBasSellerService extends IService<BasSeller> {
         */
         List<BasSeller> selectBasSellerList(BasSeller basSeller);
 
+
         /**
          * 查询sellerCode
          * @param basSeller

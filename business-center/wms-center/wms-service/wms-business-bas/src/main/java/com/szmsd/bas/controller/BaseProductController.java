@@ -80,6 +80,15 @@ public class BaseProductController extends BaseController{
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
+    @GetMapping("/listSkuBySeller")
+    @ApiOperation(value = "查询当前用户列表",notes = "查询当前用户列表")
+    public  R<List<BaseProduct>> listSkuBySeller(BaseProductQueryDto queryDto)
+    {
+        List<BaseProduct> list = baseProductService.listSkuBySeller(queryDto);
+        return R.ok(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @PostMapping("/getSku")
     @ApiOperation(value = "查询列表",notes = "查询列表")
     public R<BaseProduct> getSku(@RequestBody BaseProduct baseProduct)

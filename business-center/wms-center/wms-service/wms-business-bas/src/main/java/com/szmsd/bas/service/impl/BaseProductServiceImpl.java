@@ -82,7 +82,19 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
-        queryWrapper.eq("is_active", true);
+        queryWrapper.orderByDesc("create_time");
+        return super.list(queryWrapper);
+    }
+    @Override
+    public List<BaseProduct> listSkuBySeller(BaseProductQueryDto queryDto){
+        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
+        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
+        BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
+        QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("seller_code",basSeller.getSellerCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
     }
@@ -95,7 +107,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code+"%");
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basSeller.getSellerCode());
-        //queryWrapper.eq("warehouse_acceptance", true);
+        queryWrapper.eq("is_active",true);
         queryWrapper.orderByAsc("code");
         List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper),BaseProductVO.class);
         return baseProductVOList;
@@ -118,8 +130,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         if(StringUtils.isNotEmpty(baseProduct.getCode())){
             queryWrapper.eq("code",baseProduct.getCode());
+            queryWrapper.eq("is_active",true);
         }else {
-           return R.failed("sku编码为空");
+           return R.failed("有效sku编码为空");
         }
        return  R.ok(super.getOne(queryWrapper));
     }
@@ -218,6 +231,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", baseProduct.getCode());
         queryWrapper.eq("category", "SKU");
+        queryWrapper.eq("is_active",true);
         //查询是否有SKU
         int count = super.count(queryWrapper);
         R r = new R();
