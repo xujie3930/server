@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.service;
 
 
+import com.msd.chargerules.domain.BasSpecialOperation;
 import com.msd.chargerules.domain.SpecialOperation;
 import com.msd.chargerules.dto.SpecialOperationDTO;
 
@@ -13,5 +14,7 @@ public interface ISpecialOperationService {
     int update(SpecialOperation dto);
 
     List<SpecialOperation> listPage(SpecialOperationDTO dto);
+
+    SpecialOperation selectOne(BasSpecialOperation basSpecialOperation);
 
 }
