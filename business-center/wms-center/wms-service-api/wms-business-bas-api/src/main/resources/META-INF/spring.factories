@@ -4,6 +4,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.bas.api.service.impl.BasWarehouseClientServiceImpl,\
   com.szmsd.bas.api.factory.SerialNumberFeignFallback,\
   com.szmsd.bas.api.factory.BaseProductFeignFallback,\
-  com.szmsd.bas.api.factory.BasWarehouseFeignFallback
+  com.szmsd.bas.api.factory.BasWarehouseFeignFallback,\
+   com.szmsd.bas.api.factory.BasSellerFeignFallback
 
   

@@ -225,7 +225,6 @@ public class SysUserController extends BaseController {
         map.put("roles", roles);
         map.put("permissions", permissions);
 
-
         return R.ok(map);
     }
 
