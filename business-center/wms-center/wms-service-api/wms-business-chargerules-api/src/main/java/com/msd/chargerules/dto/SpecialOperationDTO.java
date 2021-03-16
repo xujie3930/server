@@ -1,7 +1,5 @@
 package com.msd.chargerules.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,7 +12,6 @@ import java.math.BigDecimal;
 public class SpecialOperationDTO implements Serializable {
 
     @ApiModelProperty(value = "ID")
-    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @ApiModelProperty(value = "操作类型")
