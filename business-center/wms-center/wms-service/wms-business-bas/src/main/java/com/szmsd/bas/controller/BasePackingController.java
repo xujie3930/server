@@ -29,7 +29,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 */
 
 
-@Api(tags = {""})
+@Api(tags = {"物料模块"})
 @RestController
 @RequestMapping("/base/packing")
 public class BasePackingController extends BaseController{

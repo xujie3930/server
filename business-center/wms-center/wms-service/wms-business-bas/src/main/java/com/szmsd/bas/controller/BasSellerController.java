@@ -31,7 +31,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 */
 
 
-@Api(tags = {""})
+@Api(tags = {"卖家模块"})
 @RestController
 @RequestMapping("/bas/seller")
 public class BasSellerController extends BaseController{
