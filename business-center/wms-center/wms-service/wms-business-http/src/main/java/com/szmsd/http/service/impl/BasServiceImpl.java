@@ -2,10 +2,7 @@ package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.szmsd.http.config.HttpConfig;
-import com.szmsd.http.dto.PackingRequest;
-import com.szmsd.http.dto.ProductRequest;
-import com.szmsd.http.dto.SellerRequest;
-import com.szmsd.http.dto.SpecialOperationRequest;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IBasService;
 import com.szmsd.http.vo.ResponseVO;
 import org.springframework.stereotype.Service;
@@ -34,6 +31,11 @@ public class BasServiceImpl extends AbstractBaseHttpRequest implements IBasServi
     @Override
     public ResponseVO save(SpecialOperationRequest specialOperationRequest) {
         return JSON.parseObject(httpPost(httpConfig.getBas().getSpecialOperationType(), specialOperationRequest), ResponseVO.class);
+    }
+
+    @Override
+    public ResponseVO update(SpecialOperationResultRequest specialOperationResultRequest) {
+        return JSON.parseObject(httpPost(httpConfig.getBas().getSpecialOperationResult(), specialOperationResultRequest), ResponseVO.class);
     }
 
 }
