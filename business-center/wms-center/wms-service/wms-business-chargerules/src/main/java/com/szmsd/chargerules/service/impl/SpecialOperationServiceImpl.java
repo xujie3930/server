@@ -2,6 +2,7 @@ package com.szmsd.chargerules.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.msd.chargerules.domain.BasSpecialOperation;
 import com.msd.chargerules.domain.SpecialOperation;
 import com.msd.chargerules.dto.SpecialOperationDTO;
 import com.szmsd.chargerules.mapper.SpecialOperationMapper;
@@ -60,5 +61,13 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
         return specialOperationMapper.selectList(where);
     }
 
+    @Override
+    public SpecialOperation selectOne(BasSpecialOperation basSpecialOperation) {
+        QueryWrapper<SpecialOperation> where = new QueryWrapper<>();
+        if(StringUtils.isNotEmpty(basSpecialOperation.getOperationType())) {
+            where.eq("operation_type",basSpecialOperation.getOperationType());
+        }
+        return specialOperationMapper.selectOne(where);
+    }
 
 }
