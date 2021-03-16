@@ -133,7 +133,7 @@ public class RemoteComponent {
     public void vailSku(String sku) {
         log.info("验证SKU：SKU={}", sku);
         R<Boolean> booleanR = baseProductFeignService.checkSkuValidToDelivery(new BaseProduct().setCode(sku));
-        AssertUtil.isTrue(booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
+        AssertUtil.isTrue(booleanR != null && booleanR.getData() != null && booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
     }
 
     /**
