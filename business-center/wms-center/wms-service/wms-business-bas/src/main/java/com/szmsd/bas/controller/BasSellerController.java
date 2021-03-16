@@ -101,8 +101,7 @@ public class BasSellerController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块",notes = "修改模块")
-    public R edit(@RequestBody BasSellerInfoDto basSellerInfoDto)
-    {
+    public R edit(@RequestBody BasSellerInfoDto basSellerInfoDto) throws IllegalAccessException {
     return toOk(basSellerService.updateBasSeller(basSellerInfoDto));
     }
 
@@ -113,9 +112,8 @@ public class BasSellerController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.DELETE)
     @DeleteMapping("remove")
     @ApiOperation(value = "删除模块",notes = "删除模块")
-    public R remove(@RequestBody List<String> ids)
-    {
-    return toOk(basSellerService.deleteBasSellerByIds(ids));
+    public R remove(@RequestBody List<Long> ids) throws IllegalAccessException {
+    return R.ok(basSellerService.deleteBasSellerByIds(ids));
     }
 
 }

@@ -62,7 +62,7 @@ public interface IBasSellerService extends IService<BasSeller> {
         * @param basSellerInfoDto 模块
         * @return 结果
         */
-        int updateBasSeller(BasSellerInfoDto basSellerInfoDto);
+        int updateBasSeller(BasSellerInfoDto basSellerInfoDto) throws IllegalAccessException;
 
         /**
         * 批量删除模块
@@ -70,7 +70,7 @@ public interface IBasSellerService extends IService<BasSeller> {
         * @param ids 需要删除的模块ID
         * @return 结果
         */
-        int deleteBasSellerByIds(List<String> ids);
+        boolean deleteBasSellerByIds(List<Long> ids) throws IllegalAccessException;
 
         /**
         * 删除模块信息
