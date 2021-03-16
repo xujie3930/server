@@ -53,7 +53,7 @@ public class BasSellerCertificateController extends BaseController{
 
     @PreAuthorize("@ss.hasPermi('BasSellerCertificate:BasSellerCertificate:list')")
     @PostMapping("/listVAT")
-    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    @ApiOperation(value = "查询VAT模块列表",notes = "查询VAT模块列表")
     public R<List<BasSellerCertificate>> listVAT(@RequestBody VatQueryDto vatQueryDto)
     {
         List<BasSellerCertificate> list = basSellerCertificateService.listVAT(vatQueryDto);

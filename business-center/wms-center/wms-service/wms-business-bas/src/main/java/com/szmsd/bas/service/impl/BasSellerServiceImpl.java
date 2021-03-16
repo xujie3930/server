@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -99,6 +100,19 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         @Override
         public R<Boolean> insertBasSeller(HttpServletRequest request, BasSellerDto dto)
         {
+            //生成四位客户代码
+            boolean b = false;
+            while(b==false){
+                String sellerCode = sellerCode();
+                QueryWrapper<BasSeller> queryWrapperEmail = new QueryWrapper<>();
+                queryWrapperEmail.eq("seller_code",sellerCode);
+                int count = super.count(queryWrapperEmail);
+                if(count==0){
+                    dto.setSellerCode(sellerCode);
+                    b = true;
+                }
+            }
+
             //生成四位验证码
             String ip = IpUtils.getIpAddr(request);
             String userAccountKey = ip + "-login";
@@ -173,6 +187,13 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             if(sysUserResult.getCode() == -200){
                 r.setData(false);
                 r.setMsg(sysUserResult.getMsg());
+            }
+            //注册到wms
+            SellerRequest sellerRequest = BeanMapperUtil.map(dto,SellerRequest.class);
+            sellerRequest.setIsActive(true);
+            R<ResponseVO> result = htpBasFeignService.createSeller(sellerRequest);
+            if(result.getCode()!=200){
+                throw new BaseException("传wms失败"+r.getMsg());
             }
             //注册信息到卖家表
             baseMapper.insert(basSeller);
@@ -289,6 +310,38 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         public int deleteBasSellerById(String id)
         {
         return baseMapper.deleteById(id);
+        }
+
+        private String sellerCode(){
+
+            int  maxNum = 8;
+            int  maxStr = 26;
+            int i;
+            int count = 0;
+            char[] str = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
+                    'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+                    'X', 'Y', 'Z'};
+            char[] num = {'2', '3', '4', '5', '6', '7', '8', '9'};
+            //int[] digit = {1,2,3};
+            StringBuffer pwd = new StringBuffer("");
+            Random r = new Random();
+            int digit = (int)(Math.random()*3)+1;
+            while(count < digit){
+                i = Math.abs(r.nextInt(maxStr));
+                if (i >= 0 && i < str.length) {
+                    pwd.append(str[i]);
+                    count ++;
+                }
+            }
+            while(count < 4){
+                i = Math.abs(r.nextInt(maxNum));
+                if (i >= 0 && i < num.length) {
+                    pwd.append(num[i]);
+                    count ++;
+                }
+            }
+            return pwd.toString();
+
         }
 
     }

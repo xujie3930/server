@@ -81,6 +81,7 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
             QueryWrapper<BasSellerCertificate> vatQueryWrapper = new QueryWrapper();
             vatQueryWrapper.eq("seller_code",basSeller.getSellerCode());
             vatQueryWrapper.eq("country_code",vatQueryDto.getCountryCode());
+            vatQueryWrapper.eq("is_active",true);
             return super.list(vatQueryWrapper);
         }
 
