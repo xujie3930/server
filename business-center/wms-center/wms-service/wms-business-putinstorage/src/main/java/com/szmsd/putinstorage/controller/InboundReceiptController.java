@@ -79,9 +79,9 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
     @PostMapping("/receipt/importDetail")
     @ApiOperation(value = "导入明细", notes = "入库管理 - 新增 - 导入")
-    public R<List<InboundReceiptDetailVO>> importDetail(MultipartFile excel) {
-        AssertUtil.isTrue(ObjectUtils.allNotNull(excel), "上传文件不存在");
-        String originalFilename = excel.getOriginalFilename();
+    public R<List<InboundReceiptDetailVO>> importDetail(MultipartFile file) {
+        AssertUtil.isTrue(ObjectUtils.allNotNull(file), "上传文件不存在");
+        String originalFilename = file.getOriginalFilename();
         int lastIndexOf = originalFilename.lastIndexOf(".");
         String suffix = originalFilename.substring(lastIndexOf + 1);
         boolean isXls = "xls".equals(suffix);
@@ -89,7 +89,7 @@ public class InboundReceiptController extends BaseController {
         AssertUtil.isTrue(isXls || isXlsx, "请上传xls或xlsx文件");
         try {
             ExcelUtil<InboundReceiptDetailVO> excelUtil = new ExcelUtil<>(InboundReceiptDetailVO.class);
-            List<InboundReceiptDetailVO> inboundReceiptDetailVOS = excelUtil.importExcel(excel.getInputStream());
+            List<InboundReceiptDetailVO> inboundReceiptDetailVOS = excelUtil.importExcel(file.getInputStream());
             Map<String, Long> collect = inboundReceiptDetailVOS.stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
             collect.entrySet().forEach(item -> AssertUtil.isTrue(!(item.getValue() > 1L), "Excel存在重复SKU"));
             return R.ok(inboundReceiptDetailVOS);
