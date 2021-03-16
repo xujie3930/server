@@ -1,6 +1,7 @@
 package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
@@ -9,6 +10,7 @@ import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
@@ -228,8 +230,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         * @return 结果
         */
         @Override
-        public int updateBasSeller(BasSellerInfoDto basSellerInfoDto)
-        {
+        public int updateBasSeller(BasSellerInfoDto basSellerInfoDto) throws IllegalAccessException {
             //查询表中信息
             QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("id",basSellerInfoDto.getId());
@@ -237,7 +238,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             //注册到wms
             SellerRequest sellerRequest = BeanMapperUtil.map(bas,SellerRequest.class);
             sellerRequest.setIsActive(true);
-            //initializeValue(sellerRequest);
+            ObjectUtil.fillNull(sellerRequest,bas);
             R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
             if(r.getCode()!=200){
                 throw new BaseException("传wms失败"+r.getMsg());
@@ -256,9 +257,26 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         * @return 结果
         */
         @Override
-        public int deleteBasSellerByIds(List<String>  ids)
-       {
-            return baseMapper.deleteBatchIds(ids);
+        public boolean deleteBasSellerByIds(List<Long>  ids) throws IllegalAccessException {
+           UpdateWrapper<BasSeller> updateWrapper = new UpdateWrapper();
+           updateWrapper.in("id",ids);
+           updateWrapper.set("is_active",false);
+           //同步wms
+           for(Long id:ids){
+               QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
+               queryWrapper.eq("id",id);
+               BasSeller bas = super.getOne(queryWrapper);
+               if(StringUtils.isNotEmpty(bas.getNameCn())) {
+                   SellerRequest sellerRequest = BeanMapperUtil.map(bas, SellerRequest.class);
+                   sellerRequest.setIsActive(false);
+                   ObjectUtil.fillNull(sellerRequest, bas);
+                   R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
+                   if(r.getCode()!=200){
+                       throw new BaseException("传wms失败"+r.getMsg());
+                   }
+               }
+           }
+           return super.update(updateWrapper);
        }
 
         /**
@@ -271,10 +289,6 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         public int deleteBasSellerById(String id)
         {
         return baseMapper.deleteById(id);
-        }
-
-        private void initializeValue(SellerRequest sellerRequest){
-
         }
 
     }

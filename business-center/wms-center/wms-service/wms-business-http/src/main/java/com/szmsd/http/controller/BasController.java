@@ -17,7 +17,7 @@ import javax.annotation.Resource;
 @Api(tags = {"基础信息"})
 @RestController
 @RequestMapping("/api/bas/http")
-public class HtpBasController extends BaseController {
+public class BasController extends BaseController {
     @Resource
     private IBasService iBasService;
 

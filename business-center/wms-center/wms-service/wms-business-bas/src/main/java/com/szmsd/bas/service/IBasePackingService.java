@@ -54,7 +54,7 @@ public interface IBasePackingService extends IService<BasePacking> {
         * @param basePacking 模块
         * @return 结果
         */
-        int updateBasePacking(BasePacking basePacking);
+        int updateBasePacking(BasePacking basePacking) throws IllegalAccessException;
 
         /**
         * 批量删除模块
@@ -62,7 +62,7 @@ public interface IBasePackingService extends IService<BasePacking> {
         * @param ids 需要删除的模块ID
         * @return 结果
         */
-        int deleteBasePackingByIds(List<String> ids);
+        int deleteBasePackingByIds(List<Long> ids);
 
         /**
         * 删除模块信息

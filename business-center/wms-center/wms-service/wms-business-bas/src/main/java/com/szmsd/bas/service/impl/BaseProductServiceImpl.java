@@ -136,7 +136,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     public int insertBaseProduct(BaseProductDto baseProductDto) {
         //默认激活
         baseProductDto.setIsActive(true);
-        //TODO 卖家编码（暂无）
+        //卖家编码
+        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
+        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
+        BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
+        baseProductDto.setSellerCode(basSeller.getSellerCode());
         //默认仓库没有验收
         baseProductDto.setWarehouseAcceptance(false);
 
@@ -152,15 +156,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProductOms.setProductImage(baseProductDto.getProductImageBase64());
         //订单建议外包装材料
         baseProductOms.setSuggestPackingMaterial(baseProductDto.getSuggestPackingMaterialName());
-        Map<String, String> user = new HashMap<>();
-        user.put("UserId", "oms");
-        user.put("Password", "666");
-        ResponseEntity<String> result = RestTemplateUtils.post(AddBasProductUrl, baseProductOms, String.class, user);
-        JSONObject object = JSONObject.parseObject(result.getBody());
-        Boolean success = (Boolean) object.get("success");
-        if (success == false) {
-            throw new BaseException("传wms失败");
-        }
+
         return baseMapper.insert(baseProduct);
     }
 

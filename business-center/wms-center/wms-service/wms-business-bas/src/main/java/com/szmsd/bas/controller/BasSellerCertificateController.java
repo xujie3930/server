@@ -31,7 +31,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 */
 
 
-@Api(tags = {""})
+@Api(tags = {"卖家认证信息模块"})
 @RestController
 @RequestMapping("/bas/sellerCertificate")
 public class BasSellerCertificateController extends BaseController{

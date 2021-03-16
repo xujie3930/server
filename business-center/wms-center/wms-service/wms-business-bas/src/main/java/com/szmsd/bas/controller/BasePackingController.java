@@ -29,7 +29,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 */
 
 
-@Api(tags = {""})
+@Api(tags = {"物料模块"})
 @RestController
 @RequestMapping("/base/packing")
 public class BasePackingController extends BaseController{
@@ -102,8 +102,7 @@ public class BasePackingController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块",notes = "修改模块")
-    public R edit(@RequestBody BasePacking basePacking)
-    {
+    public R edit(@RequestBody BasePacking basePacking) throws IllegalAccessException {
     return toOk(basePackingService.updateBasePacking(basePacking));
     }
 
@@ -114,9 +113,9 @@ public class BasePackingController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.DELETE)
     @DeleteMapping("remove")
     @ApiOperation(value = "删除模块",notes = "删除模块")
-    public R remove(@RequestBody List<String> ids)
+    public R remove(@RequestBody List<Long> ids)
     {
-    return toOk(basePackingService.deleteBasePackingByIds(ids));
+    return R.ok(basePackingService.deleteBasePackingByIds(ids));
     }
 
 }

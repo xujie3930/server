@@ -41,7 +41,7 @@ import java.util.List;
 */
 
 
-@Api(tags = {"BaseProduct"})
+@Api(tags = {"SKU模块"})
 @RestController
 @RequestMapping("/base/product")
 public class BaseProductController extends BaseController{

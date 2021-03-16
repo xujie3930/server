@@ -28,7 +28,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 */
 
 
-@Api(tags = {""})
+@Api(tags = {"包材模块"})
 @RestController
 @RequestMapping("/bas/material")
 public class BasMaterialController extends BaseController{

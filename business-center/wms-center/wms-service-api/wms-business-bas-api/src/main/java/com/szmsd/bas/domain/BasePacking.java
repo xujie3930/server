@@ -107,4 +107,10 @@ public class BasePacking extends BaseEntity {
     @Excel(name = "是否激活")
     private Boolean isActive;
 
+    @ApiModelProperty(value = "仓库编码")
+    private String warehouseCode;
+
+    @ApiModelProperty(value = "仓库名")
+    private String warehouseName;
+
 }
