@@ -3,7 +3,6 @@ package com.szmsd.bas.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingQueryDto;
 import com.szmsd.bas.mapper.BasePackingMapper;
@@ -85,7 +84,7 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
         @Override
         public int insertBasePacking(BasePacking basePacking)
         {
-            PackingRequest packingRequest = BeanMapperUtil.map(basePacking,PackingRequest.class);
+            PackingRequest packingRequest = BeanMapperUtil.map(basePacking, PackingRequest.class);
             R<ResponseVO> r = htpBasFeignService.createPacking(packingRequest);
             if(r.getCode()!=200){
                 throw new BaseException("传wms失败"+r.getMsg());

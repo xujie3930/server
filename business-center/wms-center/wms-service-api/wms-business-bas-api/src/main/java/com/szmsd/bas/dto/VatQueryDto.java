@@ -10,8 +10,8 @@ public class VatQueryDto {
     @ApiModelProperty(value = "国家")
     @Excel(name = "国家")
     private String countryCode;
-    @ApiModelProperty(value = "用户名")
-    @Excel(name = "用户名")
-    private String userName;
+    @ApiModelProperty(value = "客户代码")
+    @Excel(name = "客户代码")
+    private String sellerCode;
 
 }

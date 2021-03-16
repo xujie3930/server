@@ -1,7 +1,7 @@
 package com.szmsd.bas.service;
 
-import com.szmsd.bas.domain.BasSeller;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.common.core.domain.R;
@@ -34,6 +34,13 @@ public interface IBasSellerService extends IService<BasSeller> {
         * @return 模块集合
         */
         List<BasSeller> selectBasSellerList(BasSeller basSeller);
+
+        /**
+         * 查询sellerCode
+         * @param basSeller
+         * @return
+         */
+        String getSellerCode(BasSeller basSeller);
 
         /**
         * 新增模块

@@ -1,10 +1,12 @@
 package com.szmsd.system.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.bas.api.feign.BasSellerFeignService;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -17,6 +19,7 @@ import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.model.UserInfo;
 import com.szmsd.system.domain.dto.SysUserEditPsw;
+import com.szmsd.system.domain.dto.SysUserSellerDto;
 import com.szmsd.system.service.ISysPermissionService;
 import com.szmsd.system.service.ISysPostService;
 import com.szmsd.system.service.ISysRoleService;
@@ -25,6 +28,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +62,9 @@ public class SysUserController extends BaseController {
 
     @Resource
     private ISysPermissionService permissionService;
+
+    @Autowired
+    private BasSellerFeignService basSellerFeignService;
 
 
 
@@ -203,7 +210,15 @@ public class SysUserController extends BaseController {
 
         Map map = new HashMap<>();
         // todo 此处修改ajax.put返回  R.ok(map)
-        map.put("user", userService.selectUserById(userId));
+        SysUserSellerDto sysUserDto = BeanMapperUtil.map(userService.selectUserById(userId),SysUserSellerDto.class);
+        //查询sellerCode
+        BasSeller basSeller = new BasSeller();
+        basSeller.setUserName(sysUserDto.getUserName());
+        R<String> r = basSellerFeignService.getSellerCode(basSeller);
+        if(StringUtils.isNotEmpty(r.getData())){
+            sysUserDto.setSellerCode(r.getData());
+        }
+        map.put("user", sysUserDto);
         map.put("roles", roles);
         map.put("permissions", permissions);
 

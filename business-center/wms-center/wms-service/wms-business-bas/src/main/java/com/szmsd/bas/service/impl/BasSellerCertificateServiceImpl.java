@@ -74,12 +74,8 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
 
         @Override
         public List<BasSellerCertificate> listVAT(VatQueryDto vatQueryDto){
-            QueryWrapper<BasSeller> queryWrapper = new QueryWrapper();
-            queryWrapper.eq("user_name",vatQueryDto.getUserName());
-
-            BasSeller basSeller = iBasSellerService.getOne(queryWrapper);
             QueryWrapper<BasSellerCertificate> vatQueryWrapper = new QueryWrapper();
-            vatQueryWrapper.eq("seller_code",basSeller.getSellerCode());
+            vatQueryWrapper.eq("seller_code",vatQueryDto.getSellerCode());
             vatQueryWrapper.eq("country_code",vatQueryDto.getCountryCode());
             vatQueryWrapper.eq("is_active",true);
             return super.list(vatQueryWrapper);

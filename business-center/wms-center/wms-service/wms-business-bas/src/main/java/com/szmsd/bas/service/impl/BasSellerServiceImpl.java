@@ -300,6 +300,14 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
            return super.update(updateWrapper);
        }
 
+       @Override
+       public String getSellerCode(BasSeller basSeller){
+           QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
+           queryWrapper.eq("user_name",basSeller.getUserName());
+           BasSeller seller = super.getOne(queryWrapper);
+           return seller.getSellerCode();
+       }
+
         /**
         * 删除模块信息
         *

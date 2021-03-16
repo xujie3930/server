@@ -8,7 +8,6 @@ import com.szmsd.bas.dto.PricedProductsDTO;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.bas.vo.PricedProductsVO;
 import com.szmsd.common.core.domain.R;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -81,7 +80,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @param baseProductDto 模块
      * @return 结果
      */
-    int updateBaseProduct(BaseProductDto baseProductDto);
+    int updateBaseProduct(BaseProductDto baseProductDto) throws IllegalAccessException;
 
     /**
      * 批量删除模块
@@ -89,7 +88,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @param ids 需要删除的模块ID
      * @return 结果
      */
-    int deleteBaseProductByIds(List<String> ids);
+    int deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException;
 
     /**
      * 删除模块信息

@@ -1,6 +1,5 @@
 package com.szmsd.bas.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -14,7 +13,7 @@ import com.szmsd.bas.dto.PricedProductsDTO;
 import com.szmsd.bas.mapper.BaseProductMapper;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBaseProductService;
-import com.szmsd.bas.util.RestTemplateUtils;
+import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.bas.vo.PricedProductsVO;
 import com.szmsd.common.core.domain.R;
@@ -22,20 +21,17 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
-import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.http.api.feign.HtpBasFeignService;
+import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.http.vo.DirectServiceFeeData;
+import com.szmsd.http.vo.ResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import static com.szmsd.bas.constant.UrlConstant.AddBasProductUrl;
 
 /**
  * <p>
@@ -52,6 +48,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     private RemoteRequest remoteRequest;
     @Autowired
     private IBasSellerService basSellerService;
+    @Resource
+    private HtpBasFeignService htpBasFeignService;
 
 
     /**
@@ -156,7 +154,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProductOms.setProductImage(baseProductDto.getProductImageBase64());
         //订单建议外包装材料
         baseProductOms.setSuggestPackingMaterial(baseProductDto.getSuggestPackingMaterialName());
-
+        ProductRequest productRequest = BeanMapperUtil.map(baseProductDto,ProductRequest.class);
+        R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+        if(r.getCode()!=200){
+            throw new BaseException("传wms失败"+r.getMsg());
+        }
         return baseMapper.insert(baseProduct);
     }
 
@@ -167,7 +169,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      * @return 结果
      */
     @Override
-    public int updateBaseProduct(BaseProductDto baseProductDto) {
+    public int updateBaseProduct(BaseProductDto baseProductDto) throws IllegalAccessException {
+        ProductRequest productRequest = BeanMapperUtil.map(baseProductDto,ProductRequest.class);
+        BaseProduct baseProduct = super.getById(baseProductDto.getId());
+        ObjectUtil.fillNull(productRequest,baseProduct);
+        R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+        if(r.getCode()!=200){
+            throw new BaseException("传wms失败"+r.getMsg());
+        }
         return baseMapper.updateById(baseProductDto);
     }
 
@@ -178,8 +187,18 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      * @return 结果
      */
     @Override
-    public int deleteBaseProductByIds(List<String> ids) {
+    public int deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException {
         //传删除给WMS
+       for(Long id: ids){
+           ProductRequest productRequest  = new ProductRequest();
+           productRequest.setIsActive(false);
+           BaseProduct baseProduct = super.getById(id);
+           ObjectUtil.fillNull(productRequest,baseProduct);
+           R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+           if(r.getCode()!=200){
+               throw new BaseException("传wms失败"+r.getMsg());
+           }
+       }
         return baseMapper.deleteBatchIds(ids);
     }
 

@@ -1,24 +1,24 @@
 package com.szmsd.bas.controller;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
-import org.springframework.security.access.prepost.PreAuthorize;
-import com.szmsd.common.core.domain.R;
-import org.springframework.web.bind.annotation.*;
 import com.szmsd.bas.service.IBasSellerService;
-import com.szmsd.bas.domain.BasSeller;
-import com.szmsd.common.log.annotation.Log;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
+import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.log.annotation.Log;
+import com.szmsd.common.log.enums.BusinessType;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.szmsd.common.core.utils.poi.ExcelUtil;
-import com.szmsd.common.log.enums.BusinessType;
-import io.swagger.annotations.Api;
-import java.util.List;
 import java.io.IOException;
-import org.springframework.web.bind.annotation.RestController;
-import io.swagger.annotations.ApiOperation;
-import com.szmsd.common.core.web.controller.BaseController;
+import java.util.List;
 
 
 /**
@@ -50,6 +50,19 @@ public class BasSellerController extends BaseController{
             List<BasSeller> list = basSellerService.selectBasSellerList(basSeller);
             return getDataTable(list);
       }
+
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
+    @PostMapping("/getSellerCode")
+    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    public R<String> getSellerCode(@RequestBody BasSeller basSeller)
+    {
+        R r = new R();
+        r.setCode(200);
+        r.setData(basSellerService.getSellerCode(basSeller));
+        r.setMsg("SUCCESS");
+        return r;
+    }
+
 
     /**
     * 导出模块列表

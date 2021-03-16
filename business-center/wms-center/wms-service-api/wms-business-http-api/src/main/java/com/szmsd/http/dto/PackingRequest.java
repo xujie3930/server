@@ -1,11 +1,8 @@
 package com.szmsd.http.dto;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.math.BigDecimal;
 
 @Data
 public class PackingRequest {
