@@ -32,4 +32,12 @@ public class PackingRequest {
     /** 备注 */
     @ApiModelProperty(value = "备注")
     private String remark;
+
+    @ApiModelProperty(value = "是否激活")
+    @Excel(name = "是否激活")
+    private Boolean isActive;
+
+    @ApiModelProperty(value = "仓库编码")
+    private String warehouseCode;
+
 }

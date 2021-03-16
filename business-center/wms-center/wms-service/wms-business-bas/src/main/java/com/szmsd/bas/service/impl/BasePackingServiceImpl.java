@@ -3,10 +3,12 @@ package com.szmsd.bas.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingQueryDto;
 import com.szmsd.bas.mapper.BasePackingMapper;
 import com.szmsd.bas.service.IBasePackingService;
+import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -98,9 +100,17 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
         * @return 结果
         */
         @Override
-        public int updateBasePacking(BasePacking basePacking)
-        {
-        return baseMapper.updateById(basePacking);
+        public int updateBasePacking(BasePacking basePacking) throws IllegalAccessException {
+            QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("id",basePacking.getId());
+            BasePacking packing = super.getOne(queryWrapper);
+            PackingRequest packingRequest = BeanMapperUtil.map(basePacking,PackingRequest.class);
+            ObjectUtil.fillNull(packingRequest,packing);
+            R<ResponseVO> r = htpBasFeignService.createPacking(packingRequest);
+            if(r.getCode()!=200){
+                throw new BaseException("传wms失败"+r.getMsg());
+            }
+            return baseMapper.updateById(basePacking);
         }
 
         /**
@@ -110,9 +120,9 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
         * @return 结果
         */
         @Override
-        public int deleteBasePackingByIds(List<String>  ids)
+        public int deleteBasePackingByIds(List<Long>  ids)
        {
-            return baseMapper.deleteBatchIds(ids);
+           return baseMapper.deleteBatchIds(ids);
        }
 
         /**

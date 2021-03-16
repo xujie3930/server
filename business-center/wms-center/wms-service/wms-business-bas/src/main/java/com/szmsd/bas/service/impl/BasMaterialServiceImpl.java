@@ -2,10 +2,14 @@ package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.szmsd.bas.domain.BasMaterial;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.mapper.BasMaterialMapper;
 import com.szmsd.bas.service.IBasMaterialService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.common.security.utils.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.domain.R;
@@ -22,6 +26,8 @@ import java.util.List;
 @Service
 public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMaterial> implements IBasMaterialService {
 
+    @Autowired
+    private IBasSellerService basSellerService;
 
         /**
         * 查询模块
@@ -62,7 +68,12 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         @Override
         public int insertBasMaterial(BasMaterial basMaterial)
         {
-        return baseMapper.insert(basMaterial);
+            //卖家编码
+            QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
+            basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
+            BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
+            basMaterial.setSellerCode(basSeller.getSellerCode());
+            return baseMapper.insert(basMaterial);
         }
 
         /**
