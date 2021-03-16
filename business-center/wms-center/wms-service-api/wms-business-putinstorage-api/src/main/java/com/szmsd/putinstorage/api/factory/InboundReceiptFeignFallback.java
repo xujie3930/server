@@ -2,6 +2,8 @@ package com.szmsd.putinstorage.api.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
+import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +11,16 @@ import org.springframework.stereotype.Component;
 public class InboundReceiptFeignFallback implements FallbackFactory<InboundReceiptFeignService> {
     @Override
     public InboundReceiptFeignService create(Throwable throwable) {
-        return receivingRequest -> R.convertResultJson(throwable);
+        return new InboundReceiptFeignService() {
+            @Override
+            public R receiving(ReceivingRequest receivingRequest) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R completed(ReceivingCompletedRequest receivingCompletedRequest) {
+                return R.convertResultJson(throwable);
+            }
+        };
     }
 }

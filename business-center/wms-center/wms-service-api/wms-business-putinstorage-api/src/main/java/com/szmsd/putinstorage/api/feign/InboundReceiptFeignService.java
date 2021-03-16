@@ -3,6 +3,7 @@ package com.szmsd.putinstorage.api.feign;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.putinstorage.api.BusinessPutinstorageInterface;
 import com.szmsd.putinstorage.api.factory.InboundReceiptFeignFallback;
+import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,4 +14,7 @@ public interface InboundReceiptFeignService {
 
     @PostMapping("/inbound/receiving")
     R receiving(@RequestBody ReceivingRequest receivingRequest);
+
+    @PostMapping("/inbound/receiving/completed")
+    R completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest);
 }

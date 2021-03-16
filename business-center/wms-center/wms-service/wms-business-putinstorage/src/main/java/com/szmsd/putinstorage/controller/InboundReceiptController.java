@@ -7,6 +7,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
+import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
@@ -104,6 +105,14 @@ public class InboundReceiptController extends BaseController {
     @ApiOperation(value = "#B1 接收入库上架", notes = "#B1 接收入库上架")
     public R receiving(@RequestBody ReceivingRequest receivingRequest) {
         iInboundReceiptService.receiving(receivingRequest);
+        return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:receiving:completed')")
+    @PostMapping("/receiving/completed")
+    @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")
+    public R completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest) {
+        iInboundReceiptService.completed(receivingCompletedRequest);
         return R.ok();
     }
 

@@ -3,10 +3,10 @@ package com.szmsd.open.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.open.vo.ResponseVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +23,18 @@ public class InboundReceiptController extends BaseController {
     @Resource
     private InboundReceiptFeignService inboundReceiptFeignService;
 
-    @PreAuthorize("@ss.hasPermi('inbound:receiving')")
     @PostMapping("/receiving")
     @ApiOperation(value = "#B1 接收入库上架", notes = "#B1 接收入库上架")
     public ResponseVO receiving(@RequestBody ReceivingRequest receivingRequest) {
         R.getDataAndException(inboundReceiptFeignService.receiving(receivingRequest));
         return ResponseVO.ok();
     }
-    
+
+    @PostMapping("/receiving/completed")
+    @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")
+    public ResponseVO completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest) {
+        R.getDataAndException(inboundReceiptFeignService.completed(receivingCompletedRequest));
+        return ResponseVO.ok();
+    }
+
 }

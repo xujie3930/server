@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -187,6 +188,21 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         remoteComponent.inboundInventory(receivingRequest);
 
         log.info("#B1 接收入库上架：操作完成");
+    }
+
+    /**
+     * #B3 接收完成入库
+     * @param receivingCompletedRequest
+     */
+    @Override
+    public void completed(ReceivingCompletedRequest receivingCompletedRequest) {
+        log.info("#B3 接收完成入库：{}",  receivingCompletedRequest);
+        InboundReceipt inboundReceipt = new InboundReceipt();
+        inboundReceipt.setWarehouseNo(receivingCompletedRequest.getOrderNo());
+        inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.HAS_BEEN_STORED.getValue());
+        this.update(inboundReceipt, new UpdateWrapper<InboundReceipt>().lambda().eq(InboundReceipt::getWarehouseNo, inboundReceipt.getWarehouseNo()));
+        log.info("#B3 接收完成入库：操作完成");
+
     }
 
     /**
