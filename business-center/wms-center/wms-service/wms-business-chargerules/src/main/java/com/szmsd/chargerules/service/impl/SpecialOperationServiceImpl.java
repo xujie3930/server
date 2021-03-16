@@ -6,7 +6,12 @@ import com.msd.chargerules.domain.SpecialOperation;
 import com.msd.chargerules.dto.SpecialOperationDTO;
 import com.szmsd.chargerules.mapper.SpecialOperationMapper;
 import com.szmsd.chargerules.service.ISpecialOperationService;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.http.api.feign.HtpBasFeignService;
+import com.szmsd.http.dto.SpecialOperationRequest;
+import com.szmsd.http.vo.ResponseVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +24,9 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
     @Resource
     private SpecialOperationMapper specialOperationMapper;
 
+    @Resource
+    private HtpBasFeignService htpBasFeignService;
+
     @Override
     public int save(SpecialOperationDTO dto) {
         SpecialOperation domain = new SpecialOperation();
@@ -26,6 +34,14 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
         int result = specialOperationMapper.insert(domain);
         if(result > 0) {
             //调用WMS接口
+            SpecialOperationRequest specialOperationRequest = new SpecialOperationRequest();
+            specialOperationRequest.setOperationType(domain.getOperationType());
+            specialOperationRequest.setOperationTypeDesc(String.valueOf(domain.getId()));
+            specialOperationRequest.setUnit(domain.getUnit());
+            R<ResponseVO> response = htpBasFeignService.specialOperationType(specialOperationRequest);
+            if(response.getCode() != 200){
+                throw new BaseException("传wms失败"+response.getMsg());
+            }
         }
         return result;
     }

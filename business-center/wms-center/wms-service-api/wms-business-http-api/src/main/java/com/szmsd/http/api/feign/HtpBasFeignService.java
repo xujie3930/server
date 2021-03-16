@@ -3,11 +3,7 @@ package com.szmsd.http.api.feign;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.fallback.HtpInboundFeignFallback;
-import com.szmsd.http.dto.CreateReceiptRequest;
-import com.szmsd.http.dto.PackingRequest;
-import com.szmsd.http.dto.ProductRequest;
-import com.szmsd.http.dto.SellerRequest;
-import com.szmsd.http.vo.CreateReceiptResponse;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.ResponseVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,5 +17,7 @@ public interface HtpBasFeignService {
     R<ResponseVO> createProduct(@RequestBody ProductRequest productRequest);
     @PostMapping("/api/bas/http/createSeller")
     R<ResponseVO> createSeller(@RequestBody SellerRequest sellerRequest);
+    @PostMapping("/api/bas/http/specialOperation/type")
+    R<ResponseVO> specialOperationType(@RequestBody SpecialOperationRequest specialOperationRequest);
 
 }

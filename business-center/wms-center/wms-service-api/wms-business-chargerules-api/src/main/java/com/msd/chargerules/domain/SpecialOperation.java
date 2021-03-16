@@ -35,7 +35,7 @@ public class SpecialOperation extends BaseEntity {
 
     @ApiModelProperty(value = "计费单位")
     @TableField
-    private String chargeUnit;
+    private String unit;
 
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建人")

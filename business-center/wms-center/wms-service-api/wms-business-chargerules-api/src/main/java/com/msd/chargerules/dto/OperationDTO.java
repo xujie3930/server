@@ -1,7 +1,5 @@
 package com.msd.chargerules.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,7 +12,6 @@ import java.math.BigDecimal;
 public class OperationDTO implements Serializable {
 
     @ApiModelProperty(value = "ID")
-    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @ApiModelProperty(value = "操作类型")
@@ -27,7 +24,7 @@ public class OperationDTO implements Serializable {
     private BigDecimal nextPrice;
 
     @ApiModelProperty(value = "计费单位")
-    private String chargeUnit;
+    private String unit;
 
     @ApiModelProperty(value = "备注")
     private String remark;

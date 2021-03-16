@@ -2,13 +2,8 @@ package com.szmsd.http.controller;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
-import com.szmsd.http.dto.CreateReceiptRequest;
-import com.szmsd.http.dto.PackingRequest;
-import com.szmsd.http.dto.ProductRequest;
-import com.szmsd.http.dto.SellerRequest;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IBasService;
-import com.szmsd.http.service.IInboundService;
-import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,6 +39,13 @@ public class BasController extends BaseController {
     @ApiOperation(value = "新增/修改卖家")
     public R<ResponseVO> createSeller(@RequestBody SellerRequest sellerRequest) {
         ResponseVO responseVO = iBasService.createSeller(sellerRequest);
+        return R.ok(responseVO);
+    }
+
+    @PostMapping("/specialOperation/type")
+    @ApiOperation(value = "A6 新增特殊操作类型")
+    public R<ResponseVO> create(@RequestBody SpecialOperationRequest specialOperationRequest) {
+        ResponseVO responseVO = iBasService.save(specialOperationRequest);
         return R.ok(responseVO);
     }
 }

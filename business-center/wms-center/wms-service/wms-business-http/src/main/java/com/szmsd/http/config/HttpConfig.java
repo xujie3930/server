@@ -61,6 +61,8 @@ public class HttpConfig {
         private String products;
         //卖家
         private String seller;
+        //特殊操作类型
+        private String specialOperationType;
     }
 
     @Data
