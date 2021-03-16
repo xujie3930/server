@@ -13,7 +13,7 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
     public BasSellerFeignService create(Throwable throwable) {
         return new BasSellerFeignService() {
             @Override
-            public R<String> getSellerCode(@RequestBody BasSeller basSeller){
+            public  R<String> getSellerCode(@RequestBody BasSeller basSeller){
                 return R.convertResultJson(throwable);
             }
         };

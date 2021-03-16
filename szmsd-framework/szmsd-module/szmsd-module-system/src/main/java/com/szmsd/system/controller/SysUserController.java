@@ -213,16 +213,17 @@ public class SysUserController extends BaseController {
         // todo 此处修改ajax.put返回  R.ok(map)
         SysUserSellerDto sysUserDto = BeanMapperUtil.map(userService.selectUserById(userId),SysUserSellerDto.class);
         //查询sellerCode
-        BasSeller basSeller = new BasSeller();
-        basSeller.setUserName(sysUserDto.getUserName());
-        R<String> r = basSellerFeignService.getSellerCode(basSeller);
-        if(StringUtils.isNotEmpty(r.getData())){
-            sysUserDto.setSellerCode(r.getData());
+        if(sysUserDto.getUserType().equals("01")){
+            BasSeller basSeller = new BasSeller();
+            basSeller.setUserName(sysUserDto.getUserName());
+            R<String> r = basSellerFeignService.getSellerCode(basSeller);
+            if(StringUtils.isNotEmpty(r.getData())){
+                sysUserDto.setSellerCode(r.getData());
+            }
         }
         map.put("user", sysUserDto);
         map.put("roles", roles);
         map.put("permissions", permissions);
-
 
         return R.ok(map);
     }

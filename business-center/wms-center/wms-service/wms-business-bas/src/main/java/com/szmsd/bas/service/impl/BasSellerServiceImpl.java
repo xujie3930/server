@@ -3,6 +3,7 @@ package com.szmsd.bas.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.code.kaptcha.Producer;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.BasSellerDto;
@@ -30,7 +31,6 @@ import com.szmsd.system.api.feign.RemoteUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import com.google.code.kaptcha.*;
 import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.annotation.Resource;
@@ -38,9 +38,7 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
