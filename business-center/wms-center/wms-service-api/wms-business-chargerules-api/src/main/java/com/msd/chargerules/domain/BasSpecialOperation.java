@@ -9,6 +9,8 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -33,6 +35,7 @@ public class BasSpecialOperation extends BaseEntity {
     @ApiModelProperty(value = "业务主键，用来做幂等校验")
     private String transactionId;
 
+    @NotBlank(message = "操作单号不能为空")
     @ApiModelProperty(value = "操作单号")
     private String operationOrderNo;
 
@@ -42,13 +45,16 @@ public class BasSpecialOperation extends BaseEntity {
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
+    @NotBlank(message = "操作类型不能为空")
     @ApiModelProperty(value = "操作类型")
     private String operationType;
 
+    @NotNull(message = "数量不能为空")
     @ApiModelProperty(value = "数量")
     private Integer qty;
 
-    @Min(1)
+    @Min(0)
+    @NotNull(message = "系数不能为空")
     @ApiModelProperty(value = "系数")
     private Integer coefficient;
 

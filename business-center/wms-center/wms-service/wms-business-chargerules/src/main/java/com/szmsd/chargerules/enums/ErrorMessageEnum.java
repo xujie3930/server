@@ -4,7 +4,7 @@ public enum ErrorMessageEnum {
 
     STATUS_RESULT("请确认审核结果"),
 
-    COEFFICIENT_IS_ZERO("系数必须大于0"),
+    COEFFICIENT_IS_ZERO("审批通过系数必须大于0"),
 
     OPERATION_TYPE_NOT_FOUND("未找到该特殊操作的操作类型配置"),
 

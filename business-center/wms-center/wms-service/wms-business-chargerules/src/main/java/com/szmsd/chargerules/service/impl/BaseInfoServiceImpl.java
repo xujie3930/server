@@ -66,21 +66,26 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         if (!SpecialOperationStatusEnum.PASS.checkStatus(basSpecialOperation.getStatus())) {
             return R.failed(ErrorMessageEnum.STATUS_RESULT.getMessage());
         }
+        //审批不通过->系数设为0 审批通过->系数必须大于0
+        if(basSpecialOperation.getStatus().equals(SpecialOperationStatusEnum.REJECT.getStatus())){
+            basSpecialOperation.setCoefficient(0);
+        } else {
+            if (basSpecialOperation.getCoefficient() == 0) {
+                return R.failed(ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
+            }
+        }
         baseInfoMapper.updateById(basSpecialOperation);
-        QueryWrapper<BasSpecialOperation> where = new QueryWrapper<>();
-        where.eq("id", basSpecialOperation.getId());
-        BasSpecialOperation bas = baseInfoMapper.selectOne(where);
 
-        SpecialOperation specialOperation = specialOperationService.selectOne(bas);
+        SpecialOperation specialOperation = specialOperationService.selectOne(basSpecialOperation);
         if (specialOperation == null) {
             return R.failed(ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
         }
         BigDecimal calculate = calculate(specialOperation.getFirstPrice(),
-                specialOperation.getNextPrice(), bas.getQty());
+                specialOperation.getNextPrice(), basSpecialOperation.getQty());
         //TODO 调用扣费接口
 
         SpecialOperationResultRequest request = new SpecialOperationResultRequest();
-        BeanUtils.copyProperties(bas, request);
+        BeanUtils.copyProperties(basSpecialOperation, request);
         R<com.szmsd.http.vo.ResponseVO> responseVOR = htpBasFeignService.specialOperationResult(request);
         if (responseVOR.getCode() != 200) {
             return R.failed(ErrorMessageEnum.UPDATE_OPERATION_TYPE_ERROR.getMessage());
