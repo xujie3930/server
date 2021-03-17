@@ -1,8 +1,8 @@
-package com.szmsd.http.service;
+package com.szmsd.chargerules.service;
 
-import com.szmsd.common.core.web.page.PageVO;
+import com.msd.chargerules.dto.PricedProductQueryDTO;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.dto.GetPricedProductsCommand;
-import com.szmsd.http.dto.PricedProductSearchCriteria;
 import com.szmsd.http.vo.DirectServiceFeeData;
 import com.szmsd.http.vo.KeyValuePair;
 import com.szmsd.http.vo.PricedProduct;
@@ -15,5 +15,5 @@ public interface IPricedProductService {
 
     List<KeyValuePair> keyValuePairs();
 
-    PageVO<PricedProduct> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria);
+    TableDataInfo<PricedProduct> selectList(PricedProductQueryDTO pricedProductQueryDTO);
 }
