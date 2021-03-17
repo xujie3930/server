@@ -45,7 +45,7 @@ public class BasServiceImpl extends AbstractBaseHttpRequest implements IBasServi
 
     @Override
     public ResponseVO update(SpecialOperationResultRequest specialOperationResultRequest) {
-        return JSON.parseObject(httpPost(httpConfig.getBas().getSpecialOperationResult(), specialOperationResultRequest), ResponseVO.class);
+        return JSON.parseObject(httpPut(httpConfig.getBas().getSpecialOperationResult(), specialOperationResultRequest), ResponseVO.class);
     }
 
 }
