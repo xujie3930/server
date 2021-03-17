@@ -1,9 +1,6 @@
 package com.szmsd.http.service;
 
-import com.szmsd.http.dto.PackingRequest;
-import com.szmsd.http.dto.ProductRequest;
-import com.szmsd.http.dto.SellerRequest;
-import com.szmsd.http.dto.SpecialOperationRequest;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.ResponseVO;
 
 public interface IBasService {
@@ -16,11 +13,18 @@ public interface IBasService {
     ResponseVO createPacking(PackingRequest packingRequest);
 
     /**
-     * 新增修改sku/包材
+     * 新增修改sku
      * @param productRequest
      * @return
      */
     ResponseVO createProduct(ProductRequest productRequest);
+
+    /**
+     * 新增修改包材
+     * @param materialRequest
+     * @return
+     */
+    ResponseVO createMaterial(MaterialRequest materialRequest);
 
     /**
      * 新增修改卖家

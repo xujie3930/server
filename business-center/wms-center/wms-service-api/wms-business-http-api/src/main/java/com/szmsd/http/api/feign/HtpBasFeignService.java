@@ -15,6 +15,8 @@ public interface HtpBasFeignService {
     R<ResponseVO> createPacking(@RequestBody PackingRequest packingRequest);
     @PostMapping("/api/bas/http/createProduct")
     R<ResponseVO> createProduct(@RequestBody ProductRequest productRequest);
+    @PostMapping("/api/bas/http/createMaterial")
+    R<ResponseVO> createMaterial(@RequestBody MaterialRequest materialRequest);
     @PostMapping("/api/bas/http/createSeller")
     R<ResponseVO> createSeller(@RequestBody SellerRequest sellerRequest);
     @PostMapping("/api/bas/http/specialOperation/type")
