@@ -65,9 +65,14 @@ public class RemoteRequest {
     }
 
     public void resultAssert(R<? extends ResponseVO> result, String api) {
-        AssertUtil.isTrue(result.getCode() == HttpStatus.SUCCESS, "RemoteRequest[" + api + "失败:" +  result.getMsg() + "]");
+        AssertUtil.notNull(result, "RemoteRequest[" + api + "请求失败]");
+
+        boolean expression = result.getCode() == HttpStatus.SUCCESS;
+        AssertUtil.isTrue(expression, "RemoteRequest[" + api + "失败:" +  result.getMsg() + "]");
+
         ResponseVO data = result.getData();
-        AssertUtil.isTrue(data != null && data.getSuccess() != null && data.getSuccess() == true, "RemoteRequest[" + api + "失败:" +  getDefaultStr(data.getMessage()).concat(getDefaultStr(data.getErrors())) + "]");
+        boolean expression1 = data != null && data.getSuccess() == new Boolean(true);
+        AssertUtil.isTrue(expression1, "RemoteRequest[" + api + "失败:" +  getDefaultStr(data.getMessage()).concat(getDefaultStr(data.getErrors())) + "]");
     }
 
     public String getDefaultStr(String str) {
