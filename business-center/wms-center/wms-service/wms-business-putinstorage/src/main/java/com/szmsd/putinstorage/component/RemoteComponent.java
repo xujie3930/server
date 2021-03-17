@@ -2,6 +2,7 @@ package com.szmsd.putinstorage.component;
 
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.BasCodeDto;
+import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
@@ -12,6 +13,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -76,7 +78,8 @@ public class RemoteComponent {
     public String genNo(String code) {
         log.info("调用自动生成单号：code={}", code);
         R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId("ck1").setCode(code));
-        AssertUtil.isTrue(r != null && r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
+        AssertUtil.notNull(r, "单号生成失败");
+        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
         String s = r.getData().get(0);
         log.info("调用自动生成单号：调用完成, {}-{}", code, s);
         return s;
@@ -88,6 +91,7 @@ public class RemoteComponent {
      * @return
      */
     public String getWarehouseNo(String cusCode) {
+        AssertUtil.isTrue(StringUtils.isNotEmpty(cusCode), "客户代码不能为空");
         String warehouseNo = this.genNo("INBOUND_RECEIPT_NO");
         String substring = warehouseNo.substring(2);
         return cusCode.concat(substring);
@@ -122,7 +126,7 @@ public class RemoteComponent {
      */
     public void saveAttachment(String businessNo, String businessItemNo, List<AttachmentFileDTO> fileList, AttachmentTypeEnum attachmentTypeEnum) {
         List<AttachmentDataDTO> attachmentDataDTOS = BeanMapperUtil.mapList(fileList, AttachmentDataDTO.class);
-        remoteAttachmentService.saveAndUpdate(com.szmsd.bas.api.domain.dto.AttachmentDTO.builder().businessNo(businessNo).businessItemNo(businessItemNo).fileList(attachmentDataDTOS).attachmentTypeEnum(attachmentTypeEnum).build());
+        remoteAttachmentService.saveAndUpdate(AttachmentDTO.builder().businessNo(businessNo).businessItemNo(businessItemNo).fileList(attachmentDataDTOS).attachmentTypeEnum(attachmentTypeEnum).build());
     }
 
     /**
@@ -131,21 +135,23 @@ public class RemoteComponent {
      * @return
      */
     public void vailSku(String sku) {
-        log.info("验证SKU：SKU={}", sku);
+        log.info("SKU验证：SKU={}", sku);
         R<Boolean> booleanR = baseProductFeignService.checkSkuValidToDelivery(new BaseProduct().setCode(sku));
-        AssertUtil.isTrue(booleanR != null && booleanR.getData() != null && booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
+        AssertUtil.notNull(booleanR, "SKU验证失败");
+        AssertUtil.isTrue(booleanR.getData() != null && booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
     }
 
     /**
-     * 库存 上架入库
+     * 库存 入库
      * @param receivingRequest
      */
     public void inboundInventory(ReceivingRequest receivingRequest) {
-        log.info("调用库存上架入库接口：{}", receivingRequest);
+        log.info("调用入库接口：{}", receivingRequest);
         InboundInventoryDTO inboundInventoryDTO = BeanMapperUtil.map(receivingRequest, InboundInventoryDTO.class);
         R inbound = inventoryFeignService.inbound(inboundInventoryDTO);
-        AssertUtil.isTrue(inbound != null && inbound.getCode() == HttpStatus.SUCCESS, inbound.getMsg());
-        log.info("调用库存上架入库接口：操作完成");
+        AssertUtil.notNull(inbound, "入库请求异常");
+        AssertUtil.isTrue(inbound.getCode() == HttpStatus.SUCCESS, "入库失败：" + inbound.getMsg());
+        log.info("调用入库接口：操作完成");
     }
 
 }

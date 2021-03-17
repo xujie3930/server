@@ -27,6 +27,10 @@ public class HtpBasFeignFallback implements FallbackFactory<HtpBasFeignService> 
                 return R.convertResultJson(throwable);
             }
             @Override
+            public R<ResponseVO> createMaterial(@RequestBody MaterialRequest materialRequest){
+                return R.convertResultJson(throwable);
+            }
+            @Override
             public R<ResponseVO> createSeller(@RequestBody SellerRequest sellerRequest){
                 return R.convertResultJson(throwable);
             }

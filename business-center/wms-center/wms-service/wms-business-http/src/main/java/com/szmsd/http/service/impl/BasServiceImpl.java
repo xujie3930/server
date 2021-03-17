@@ -2,6 +2,7 @@ package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.szmsd.http.config.HttpConfig;
+import com.szmsd.http.dto.MaterialRequest;
 import com.szmsd.http.dto.PackingRequest;
 import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.http.dto.SellerRequest;
@@ -24,6 +25,11 @@ public class BasServiceImpl extends AbstractBaseHttpRequest implements IBasServi
     @Override
     public ResponseVO createProduct(ProductRequest productRequest){
         return JSON.parseObject(httpPost(httpConfig.getBas().getProducts(), productRequest), ResponseVO.class);
+    }
+
+    @Override
+    public  ResponseVO createMaterial(MaterialRequest materialRequest){
+        return JSON.parseObject(httpPost(httpConfig.getBas().getProducts(), materialRequest), ResponseVO.class);
     }
 
     @Override

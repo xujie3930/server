@@ -1,16 +1,14 @@
 package com.szmsd.bas.service.impl;
 
-import com.szmsd.bas.domain.BasSeller;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.VatQueryDto;
 import com.szmsd.bas.mapper.BasSellerCertificateMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.service.IBasSellerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.szmsd.common.core.domain.R;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -78,6 +76,8 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
             vatQueryWrapper.eq("seller_code",vatQueryDto.getSellerCode());
             vatQueryWrapper.eq("country_code",vatQueryDto.getCountryCode());
             vatQueryWrapper.eq("is_active",true);
+            vatQueryWrapper.eq("vaild",true);
+            vatQueryWrapper.isNotNull("vat");
             return super.list(vatQueryWrapper);
         }
 
