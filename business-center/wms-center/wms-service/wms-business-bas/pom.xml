@@ -91,6 +91,11 @@
             <artifactId>wms-business-ord-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-http-api</artifactId>
+        </dependency>
+
         <!--验证码 -->
         <dependency>
             <groupId>com.github.penggle</groupId>

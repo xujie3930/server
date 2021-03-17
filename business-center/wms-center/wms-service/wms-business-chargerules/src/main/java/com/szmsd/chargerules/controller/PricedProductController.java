@@ -1,11 +1,11 @@
-package com.szmsd.http.controller;
+package com.szmsd.chargerules.controller;
 
+import com.msd.chargerules.dto.PricedProductQueryDTO;
+import com.szmsd.chargerules.service.IPricedProductService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
-import com.szmsd.common.core.web.page.PageVO;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.dto.GetPricedProductsCommand;
-import com.szmsd.http.dto.PricedProductSearchCriteria;
-import com.szmsd.http.service.IPricedProductService;
 import com.szmsd.http.vo.DirectServiceFeeData;
 import com.szmsd.http.vo.KeyValuePair;
 import com.szmsd.http.vo.PricedProduct;
@@ -18,30 +18,30 @@ import java.util.List;
 
 @Api(tags = {"PricedProduct"})
 @RestController
-@RequestMapping("/api/products/http")
-public class PricedProductController extends BaseController {
+@RequestMapping("/products")
+    public class PricedProductController extends BaseController {
 
     @Resource
-    private IPricedProductService iPricedProductService;
+    private IPricedProductService pricedProductService;
 
     @PostMapping("/pricedProducts")
     @ApiOperation(value = "根据包裹基本信息获取可下单报价产品")
     public R<List<DirectServiceFeeData>> pricedProducts(@RequestBody GetPricedProductsCommand getPricedProductsCommand) {
-        List<DirectServiceFeeData> directServiceFeeData = iPricedProductService.pricedProducts(getPricedProductsCommand);
+        List<DirectServiceFeeData> directServiceFeeData = pricedProductService.pricedProducts(getPricedProductsCommand);
         return R.ok(directServiceFeeData);
     }
 
-    @PostMapping("/pageResult")
-    @ApiOperation(value = "分页查询产品列表，返回指定页面的数据，以及统计总记录数")
-    public PageVO<PricedProduct> pageResult(@RequestBody PricedProductSearchCriteria pricedProductSearchCriteria) {
-        PageVO<PricedProduct> pageResult = iPricedProductService.pageResult(pricedProductSearchCriteria);
-        return pageResult == null ? PageVO.empty() : pageResult;
+    @GetMapping("/page")
+    @ApiOperation(value = "根据包裹基本信息获取可下单报价产品")
+    public TableDataInfo<PricedProduct> page(PricedProductQueryDTO pricedProductQueryDTO) {
+        TableDataInfo<PricedProduct> pricedProductList = pricedProductService.selectList(pricedProductQueryDTO);
+        return pricedProductList;
     }
 
     @GetMapping("/keyValuePairs")
     @ApiOperation(value = "查询产品下拉列表，返回list数据")
     public R<List<KeyValuePair>> keyValuePairs() {
-        List<KeyValuePair> directServiceFeeData = iPricedProductService.keyValuePairs();
+        List<KeyValuePair> directServiceFeeData = pricedProductService.keyValuePairs();
         return R.ok(directServiceFeeData);
     }
 }

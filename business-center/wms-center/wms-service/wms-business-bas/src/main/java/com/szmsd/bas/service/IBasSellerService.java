@@ -2,6 +2,7 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.dto.ActiveDto;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.common.core.domain.R;
@@ -75,10 +76,10 @@ public interface IBasSellerService extends IService<BasSeller> {
         /**
         * 批量删除模块
         *
-        * @param ids 需要删除的模块ID
+        * @param activeDto 需要删除的模块ID
         * @return 结果
         */
-        boolean deleteBasSellerByIds(List<Long> ids) throws IllegalAccessException;
+        boolean deleteBasSellerByIds(ActiveDto activeDto) throws IllegalAccessException;
 
         /**
         * 删除模块信息
