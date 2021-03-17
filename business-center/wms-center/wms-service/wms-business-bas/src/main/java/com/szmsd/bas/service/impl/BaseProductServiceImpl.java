@@ -144,7 +144,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      * @return 结果
      */
     @Override
-    public int insertBaseProduct(BaseProductDto baseProductDto) {
+    public int  insertBaseProduct(BaseProductDto baseProductDto) {
         //默认激活
         baseProductDto.setIsActive(true);
         //卖家编码

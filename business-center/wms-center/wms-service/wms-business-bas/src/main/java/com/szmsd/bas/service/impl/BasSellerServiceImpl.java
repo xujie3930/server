@@ -86,6 +86,9 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         public List<BasSeller> selectBasSellerList(BasSeller basSeller)
         {
         QueryWrapper<BasSeller> where = new QueryWrapper<BasSeller>();
+        if(basSeller.getIsActive()!=null){
+            where.eq("is_active",true);
+        }
         return baseMapper.selectList(where);
         }
 
