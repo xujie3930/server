@@ -99,8 +99,12 @@ public class HttpConfig {
     @Data
     @Accessors(chain = true)
     public static class PricedProduct {
+        // 分页查询产品列表，返回指定页面的数据，以及统计总记录数
+        private String pageResult;
         // 根据包裹基本信息获取可下单报价产品
         private String pricedProducts;
+        // 查询产品下拉列表，返回list数据
+        private String keyValuePairs;
     }
 
 
