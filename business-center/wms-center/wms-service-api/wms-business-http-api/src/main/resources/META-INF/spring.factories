@@ -1,5 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.szmsd.http.api.config.TransactionHandlerConfig,\
-  com.szmsd.http.api.feign.fallback.HtpBasFeignFallback
+  com.szmsd.http.api.config.TransactionHandlerConfig
 
   
