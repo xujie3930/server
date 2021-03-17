@@ -21,5 +21,7 @@ public interface HtpBasFeignService {
     R<ResponseVO> createSeller(@RequestBody SellerRequest sellerRequest);
     @PostMapping("/api/bas/http/specialOperation/type")
     R<ResponseVO> specialOperationType(@RequestBody SpecialOperationRequest specialOperationRequest);
+    @PostMapping("/api/bas/http/specialOperation/result")
+    R<ResponseVO> specialOperationResult(@RequestBody SpecialOperationResultRequest specialOperationResultRequest);
 
 }

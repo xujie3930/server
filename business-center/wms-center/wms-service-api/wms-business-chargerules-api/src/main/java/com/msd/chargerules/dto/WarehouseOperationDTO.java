@@ -14,6 +14,9 @@ public class WarehouseOperationDTO implements Serializable {
     @ApiModelProperty(value = "ID")
     private Long id;
 
+    @ApiModelProperty(value = "仓库")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "计费天数（天）")
     private Integer chargeDays;
 
