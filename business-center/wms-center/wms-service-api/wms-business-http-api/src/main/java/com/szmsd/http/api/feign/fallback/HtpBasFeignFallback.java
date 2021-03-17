@@ -35,7 +35,11 @@ public class HtpBasFeignFallback implements FallbackFactory<HtpBasFeignService> 
                 return R.convertResultJson(throwable);
             }
             @Override
-            public R<ResponseVO> specialOperationType(SpecialOperationRequest specialOperationRequest) {
+            public R<ResponseVO> specialOperationType(@RequestBody SpecialOperationRequest specialOperationRequest) {
+                return R.convertResultJson(throwable);
+            }
+            @Override
+            public R<ResponseVO> specialOperationResult(@RequestBody SpecialOperationResultRequest specialOperationResultRequest) {
                 return R.convertResultJson(throwable);
             }
 

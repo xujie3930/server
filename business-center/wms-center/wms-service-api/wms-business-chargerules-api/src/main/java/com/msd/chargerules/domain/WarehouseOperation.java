@@ -21,6 +21,10 @@ public class WarehouseOperation extends BaseEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    @ApiModelProperty(value = "仓库")
+    @TableField
+    private String warehouseCode;
+
     @ApiModelProperty(value = "计费天数")
     @TableField
     private Integer chargeDays;

@@ -39,4 +39,11 @@ public interface IBasService {
      * @return ResponseVO
      */
     ResponseVO save(SpecialOperationRequest specialOperationRequest);
+
+    /**
+     * 更新特殊操作结果
+     * @param specialOperationResultRequest specialOperationResultRequest
+     * @return ResponseVO
+     */
+    ResponseVO update(SpecialOperationResultRequest specialOperationResultRequest);
 }
