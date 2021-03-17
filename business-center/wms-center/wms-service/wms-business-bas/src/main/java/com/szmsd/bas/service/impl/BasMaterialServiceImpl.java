@@ -1,18 +1,25 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasMaterial;
-import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.mapper.BasMaterialMapper;
 import com.szmsd.bas.service.IBasMaterialService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.util.ObjectUtil;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
-import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.http.api.feign.HtpBasFeignService;
+import com.szmsd.http.dto.MaterialRequest;
+import com.szmsd.http.vo.ResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.szmsd.common.core.domain.R;
+
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -28,6 +35,8 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
 
     @Autowired
     private IBasSellerService basSellerService;
+    @Resource
+    private HtpBasFeignService htpBasFeignService;
 
         /**
         * 查询模块
@@ -68,11 +77,11 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         @Override
         public int insertBasMaterial(BasMaterial basMaterial)
         {
-            //卖家编码
-            QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
-            basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
-            BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
-            basMaterial.setSellerCode(basSeller.getSellerCode());
+            MaterialRequest materialRequest = BeanMapperUtil.map(basMaterial,MaterialRequest.class);
+            R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
+            if(r.getCode()!=200){
+                throw new BaseException("传wms失败"+r.getMsg());
+            }
             return baseMapper.insert(basMaterial);
         }
 
@@ -83,9 +92,15 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         * @return 结果
         */
         @Override
-        public int updateBasMaterial(BasMaterial basMaterial)
-        {
-        return baseMapper.updateById(basMaterial);
+        public int updateBasMaterial(BasMaterial basMaterial) throws IllegalAccessException {
+            MaterialRequest materialRequest = BeanMapperUtil.map(basMaterial,MaterialRequest.class);
+            BasMaterial material = super.getById(basMaterial.getId());
+            ObjectUtil.fillNull(materialRequest,material);
+            R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
+            if(r.getCode()!=200){
+                throw new BaseException("传wms失败"+r.getMsg());
+            }
+            return baseMapper.updateById(basMaterial);
         }
 
         /**
@@ -95,9 +110,21 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         * @return 结果
         */
         @Override
-        public int deleteBasMaterialByIds(List<String>  ids)
-       {
-            return baseMapper.deleteBatchIds(ids);
+        public boolean deleteBasMaterialByIds(List<Long>  ids) throws IllegalAccessException {
+           for(Long id: ids){
+               MaterialRequest materialRequest = new MaterialRequest();
+               materialRequest.setIsActive(false);
+               BasMaterial material = super.getById(id);
+               ObjectUtil.fillNull(materialRequest,material);
+               R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
+               if(r.getCode()!=200){
+                   throw new BaseException("传wms失败"+r.getMsg());
+               }
+           }
+           UpdateWrapper<BasMaterial> updateWrapper = new UpdateWrapper();
+           updateWrapper.in("id",ids);
+           updateWrapper.set("is_active",false);
+           return super.update(updateWrapper);
        }
 
         /**

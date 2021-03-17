@@ -1,6 +1,8 @@
 package com.szmsd.bas.domain;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -8,8 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.math.BigDecimal;
 
 
 /**
@@ -101,7 +101,7 @@ public class BasePacking extends BaseEntity {
 
     @ApiModelProperty(value = "父id")
     @Excel(name = "父id")
-    private Integer pId;
+    private Long pId;
 
     @ApiModelProperty(value = "是否激活")
     @Excel(name = "是否激活")

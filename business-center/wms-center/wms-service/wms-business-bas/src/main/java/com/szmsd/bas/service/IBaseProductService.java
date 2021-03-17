@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
-import com.szmsd.bas.dto.PricedProductsDTO;
 import com.szmsd.bas.vo.BaseProductVO;
-import com.szmsd.bas.vo.PricedProductsVO;
 import com.szmsd.common.core.domain.R;
 
 import java.util.List;
@@ -95,7 +93,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @param ids 需要删除的模块ID
      * @return 结果
      */
-    int deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException;
+    boolean deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException;
 
     /**
      * 删除模块信息
@@ -112,8 +110,6 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @return
      */
     R<Boolean> checkSkuValidToDelivery(BaseProduct baseProduct);
-
-    List<PricedProductsVO> pricedProducts(PricedProductsDTO pricedProductsDTO);
 
 }
 

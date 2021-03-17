@@ -3,10 +3,8 @@ package com.szmsd.bas.controller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
-import com.szmsd.bas.dto.PricedProductsDTO;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.vo.BaseProductVO;
-import com.szmsd.bas.vo.PricedProductsVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -145,7 +143,7 @@ public class BaseProductController extends BaseController{
     @DeleteMapping("remove")
     @ApiOperation(value = "删除模块",notes = "删除模块")
     public R remove(@RequestBody List<Long> ids) throws IllegalAccessException {
-    return toOk(baseProductService.deleteBaseProductByIds(ids));
+    return R.ok(baseProductService.deleteBaseProductByIds(ids));
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:checkSkuValidToDelivery')")
@@ -153,14 +151,6 @@ public class BaseProductController extends BaseController{
     @ApiOperation(value = "查询sku是否有效",notes = "查询sku是否有效")
     public R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct){
         return baseProductService.checkSkuValidToDelivery(baseProduct);
-    }
-
-    @PreAuthorize("@ss.hasPermi('baseproduct:baseproduct:pricedProducts')")
-    @PostMapping("/pricedProducts")
-    @ApiOperation(value = "运费测算",notes = "仓储服务 - 运费测算")
-    public R<List<PricedProductsVO>> pricedProducts(@RequestBody PricedProductsDTO pricedProductsDTO) {
-        List<PricedProductsVO> pricedProductsVO = baseProductService.pricedProducts(pricedProductsDTO);
-        return R.ok(pricedProductsVO);
     }
 
 }

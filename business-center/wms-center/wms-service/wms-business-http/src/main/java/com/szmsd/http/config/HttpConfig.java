@@ -55,9 +55,9 @@ public class HttpConfig {
     @Data
     @Accessors(chain = true)
     public static class Bas {
-        // sku和包材
-        private String packing;
         // 物料
+        private String packing;
+        // sku和包材
         private String products;
         //卖家
         private String seller;

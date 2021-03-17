@@ -29,9 +29,16 @@ public class BasController extends BaseController {
     }
 
     @PostMapping("/createProduct")
-    @ApiOperation(value = "新增/修改sku/包材")
+    @ApiOperation(value = "新增/修改sku")
     public R<ResponseVO> createProduct(@RequestBody ProductRequest productRequest) {
         ResponseVO responseVO = iBasService.createProduct(productRequest);
+        return R.ok(responseVO);
+    }
+
+    @PostMapping("/createMaterial")
+    @ApiOperation(value = "新增/包材")
+    public R<ResponseVO> createMaterial(@RequestBody MaterialRequest materialRequest) {
+        ResponseVO responseVO = iBasService.createMaterial(materialRequest);
         return R.ok(responseVO);
     }
 

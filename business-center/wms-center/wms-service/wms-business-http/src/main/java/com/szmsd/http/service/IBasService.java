@@ -13,11 +13,18 @@ public interface IBasService {
     ResponseVO createPacking(PackingRequest packingRequest);
 
     /**
-     * 新增修改sku/包材
+     * 新增修改sku
      * @param productRequest
      * @return
      */
     ResponseVO createProduct(ProductRequest productRequest);
+
+    /**
+     * 新增修改包材
+     * @param materialRequest
+     * @return
+     */
+    ResponseVO createMaterial(MaterialRequest materialRequest);
 
     /**
      * 新增修改卖家

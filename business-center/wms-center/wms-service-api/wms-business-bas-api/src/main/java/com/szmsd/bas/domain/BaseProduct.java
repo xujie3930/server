@@ -1,16 +1,18 @@
 package com.szmsd.bas.domain;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import com.szmsd.common.core.annotation.Excel;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 
 /**
@@ -135,13 +137,13 @@ public class BaseProduct extends BaseEntity {
     @Excel(name = "绑定专属包材产品名")
     private String bindCodeName;
 
-    @ApiModelProperty(value = "物流包装要求编码")
-    @Excel(name = "物流包装要求编码")
-    private String suggestPackingMaterial;
-
     @ApiModelProperty(value = "物流包装要求姓名")
     @Excel(name = "物流包装要求姓名")
-    private String suggestPackingMaterialName;
+    private String suggestPackingMaterial;
+
+    @ApiModelProperty(value = "物流包装要求编码")
+    @Excel(name = "物流包装要求编码")
+    private String suggestPackingMaterialCode;
 
     @ApiModelProperty(value = "开始价格")
     @Excel(name = "开始价格")

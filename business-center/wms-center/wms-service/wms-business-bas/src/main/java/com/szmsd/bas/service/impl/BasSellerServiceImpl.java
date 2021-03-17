@@ -2,6 +2,7 @@ package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.code.kaptcha.Producer;
 import com.szmsd.bas.domain.BasSeller;
@@ -18,6 +19,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -86,6 +88,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         public List<BasSeller> selectBasSellerList(BasSeller basSeller)
         {
         QueryWrapper<BasSeller> where = new QueryWrapper<BasSeller>();
+        if(basSeller.getIsActive()!=null){
+            where.eq("is_active",basSeller.getIsActive());
+        }
+        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "sellerCode", basSeller.getSellerCode());
+        QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"user_name",basSeller.getUserName());
         return baseMapper.selectList(where);
         }
 

@@ -35,7 +35,7 @@
                     <result column="have_packing_material" property="havePackingMaterial"/>
                     <result column="bind_code" property="bindCode"/>
                     <result column="suggest_packing_material" property="suggestPackingMaterial"/>
-                    <result column="suggest_packing_material_name" property="suggestPackingMaterialName"/>
+                    <result column="suggest_packing_material_code" property="suggestPackingMaterialCode"/>
                     <result column="begin_price" property="beginPrice"/>
                     <result column="end_price" property="endPrice"/>
                     <result column="product_description" property="productDescription"/>
