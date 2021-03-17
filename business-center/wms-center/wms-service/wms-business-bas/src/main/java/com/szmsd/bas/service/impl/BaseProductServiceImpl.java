@@ -3,19 +3,16 @@ package com.szmsd.bas.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szmsd.bas.component.RemoteRequest;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductOms;
 import com.szmsd.bas.dto.BaseProductQueryDto;
-import com.szmsd.bas.dto.PricedProductsDTO;
 import com.szmsd.bas.mapper.BaseProductMapper;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BaseProductVO;
-import com.szmsd.bas.vo.PricedProductsVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
@@ -24,13 +21,11 @@ import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.ProductRequest;
-import com.szmsd.http.vo.DirectServiceFeeData;
 import com.szmsd.http.vo.ResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,10 +39,9 @@ import java.util.List;
 @Service
 public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseProduct> implements IBaseProductService {
 
-    @Resource
-    private RemoteRequest remoteRequest;
     @Autowired
     private IBasSellerService basSellerService;
+
     @Resource
     private HtpBasFeignService htpBasFeignService;
 
@@ -245,18 +239,6 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             r.setMsg("SKU不存在");
         }
         return r;
-    }
-
-    /**
-     * 运费测算
-     *
-     * @param pricedProductsDTO
-     * @return
-     */
-    @Override
-    public List<PricedProductsVO> pricedProducts(PricedProductsDTO pricedProductsDTO) {
-        List<DirectServiceFeeData> directServiceFeeData = remoteRequest.pricedProducts(pricedProductsDTO);
-        return new ArrayList<>();
     }
 
 }
