@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.code.kaptcha.Producer;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
+import com.szmsd.bas.dto.ActiveDto;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.bas.mapper.BasSellerMapper;
@@ -283,25 +284,23 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         * @return 结果
         */
         @Override
-        public boolean deleteBasSellerByIds(List<Long>  ids) throws IllegalAccessException {
+        public boolean deleteBasSellerByIds(ActiveDto activeDto) throws IllegalAccessException {
            UpdateWrapper<BasSeller> updateWrapper = new UpdateWrapper();
-           updateWrapper.in("id",ids);
-           updateWrapper.set("is_active",false);
+           updateWrapper.in("id",activeDto.getId());
+           updateWrapper.set("is_active",activeDto.getIsActive());
            //同步wms
-           for(Long id:ids){
                QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
-               queryWrapper.eq("id",id);
+               queryWrapper.eq("id",activeDto.getId());
                BasSeller bas = super.getOne(queryWrapper);
                if(StringUtils.isNotEmpty(bas.getNameCn())) {
                    SellerRequest sellerRequest = BeanMapperUtil.map(bas, SellerRequest.class);
-                   sellerRequest.setIsActive(false);
+                   sellerRequest.setIsActive(activeDto.getIsActive());
                    ObjectUtil.fillNull(sellerRequest, bas);
                    R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
                    if(r.getCode()!=200){
                        throw new BaseException("传wms失败"+r.getMsg());
                    }
                }
-           }
            return super.update(updateWrapper);
        }
 

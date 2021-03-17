@@ -1,4 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
- com.szmsd.common.jpush.util.JiGuangPushUtil\
+ com.szmsd.common.jpush.util.JiGuangPushUtil
 
 
