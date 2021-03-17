@@ -1,5 +1,6 @@
 package com.szmsd.bas.controller;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.dto.ActiveDto;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.bas.service.IBasSellerService;
@@ -124,9 +125,9 @@ public class BasSellerController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:remove')")
     @Log(title = "模块", businessType = BusinessType.DELETE)
     @DeleteMapping("remove")
-    @ApiOperation(value = "删除模块",notes = "删除模块")
-    public R remove(@RequestBody List<Long> ids) throws IllegalAccessException {
-    return R.ok(basSellerService.deleteBasSellerByIds(ids));
+    @ApiOperation(value = "生效/失效模块",notes = "生效/失效模块")
+    public R remove(@RequestBody ActiveDto activeDto) throws IllegalAccessException {
+    return R.ok(basSellerService.deleteBasSellerByIds(activeDto));
     }
 
 }
