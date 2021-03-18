@@ -93,7 +93,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @param ids 需要删除的模块ID
      * @return 结果
      */
-    int deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException;
+    boolean deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException;
 
     /**
      * 删除模块信息

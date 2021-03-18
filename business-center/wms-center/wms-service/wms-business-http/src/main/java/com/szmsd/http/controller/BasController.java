@@ -29,9 +29,16 @@ public class BasController extends BaseController {
     }
 
     @PostMapping("/createProduct")
-    @ApiOperation(value = "新增/修改sku/包材")
+    @ApiOperation(value = "新增/修改sku")
     public R<ResponseVO> createProduct(@RequestBody ProductRequest productRequest) {
         ResponseVO responseVO = iBasService.createProduct(productRequest);
+        return R.ok(responseVO);
+    }
+
+    @PostMapping("/createMaterial")
+    @ApiOperation(value = "新增/包材")
+    public R<ResponseVO> createMaterial(@RequestBody MaterialRequest materialRequest) {
+        ResponseVO responseVO = iBasService.createMaterial(materialRequest);
         return R.ok(responseVO);
     }
 
@@ -46,6 +53,13 @@ public class BasController extends BaseController {
     @ApiOperation(value = "A6 新增特殊操作类型")
     public R<ResponseVO> create(@RequestBody SpecialOperationRequest specialOperationRequest) {
         ResponseVO responseVO = iBasService.save(specialOperationRequest);
-        return R.ok(responseVO);
+        return responseVO != null ? R.ok(responseVO) : R.failed();
+    }
+
+    @PostMapping("/specialOperation/result")
+    @ApiOperation(value = "A7 更新特殊操作结果")
+    public R<ResponseVO> update(@RequestBody SpecialOperationResultRequest specialOperationResultRequest) {
+        ResponseVO responseVO = iBasService.update(specialOperationResultRequest);
+        return responseVO != null ? R.ok(responseVO) : R.failed();
     }
 }

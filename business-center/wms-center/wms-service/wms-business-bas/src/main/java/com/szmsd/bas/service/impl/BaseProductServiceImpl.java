@@ -1,6 +1,7 @@
 package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasSeller;
@@ -138,7 +139,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      * @return 结果
      */
     @Override
-    public int insertBaseProduct(BaseProductDto baseProductDto) {
+    public int  insertBaseProduct(BaseProductDto baseProductDto) {
         //默认激活
         baseProductDto.setIsActive(true);
         //卖家编码
@@ -159,8 +160,6 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         BaseProductOms baseProductOms = BeanMapperUtil.map(baseProductDto, BaseProductOms.class);
         //base64图片
         baseProductOms.setProductImage(baseProductDto.getProductImageBase64());
-        //订单建议外包装材料
-        baseProductOms.setSuggestPackingMaterial(baseProductDto.getSuggestPackingMaterialName());
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto,ProductRequest.class);
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         if(r.getCode()!=200){
@@ -194,7 +193,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      * @return 结果
      */
     @Override
-    public int deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException {
+    public boolean deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException {
         //传删除给WMS
        for(Long id: ids){
            ProductRequest productRequest  = new ProductRequest();
@@ -206,7 +205,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                throw new BaseException("传wms失败"+r.getMsg());
            }
        }
-        return baseMapper.deleteBatchIds(ids);
+        UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper();
+        updateWrapper.in("id",ids);
+        updateWrapper.set("is_active",false);
+
+        return super.update(updateWrapper);
     }
 
     /**

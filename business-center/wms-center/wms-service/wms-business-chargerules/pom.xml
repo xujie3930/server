@@ -101,6 +101,16 @@
             <artifactId>wms-business-chargerules-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-open-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-putinstorage-api</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

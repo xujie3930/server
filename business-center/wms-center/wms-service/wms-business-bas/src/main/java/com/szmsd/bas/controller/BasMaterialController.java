@@ -1,21 +1,21 @@
 package com.szmsd.bas.controller;
-import org.springframework.security.access.prepost.PreAuthorize;
-import com.szmsd.common.core.domain.R;
-import org.springframework.web.bind.annotation.*;
-import com.szmsd.bas.service.IBasMaterialService;
 import com.szmsd.bas.domain.BasMaterial;
-import com.szmsd.common.log.annotation.Log;
-import com.szmsd.common.core.web.page.TableDataInfo;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
+import com.szmsd.bas.service.IBasMaterialService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
+import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import io.swagger.annotations.Api;
-import java.util.List;
-import java.io.IOException;
-import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
-import com.szmsd.common.core.web.controller.BaseController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -92,8 +92,7 @@ public class BasMaterialController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块",notes = "修改模块")
-    public R edit(@RequestBody BasMaterial basMaterial)
-    {
+    public R edit(@RequestBody BasMaterial basMaterial) throws IllegalAccessException {
     return toOk(basMaterialService.updateBasMaterial(basMaterial));
     }
 
@@ -104,9 +103,8 @@ public class BasMaterialController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.DELETE)
     @DeleteMapping("remove")
     @ApiOperation(value = "删除模块",notes = "删除模块")
-    public R remove(@RequestBody List<String> ids)
-    {
-    return toOk(basMaterialService.deleteBasMaterialByIds(ids));
+    public R remove(@RequestBody List<Long> ids) throws IllegalAccessException {
+    return R.ok(basMaterialService.deleteBasMaterialByIds(ids));
     }
 
 }

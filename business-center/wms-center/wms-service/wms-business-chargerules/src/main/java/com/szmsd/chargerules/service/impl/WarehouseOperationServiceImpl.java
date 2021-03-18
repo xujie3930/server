@@ -4,13 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.msd.chargerules.domain.WarehouseOperation;
 import com.msd.chargerules.dto.WarehouseOperationDTO;
+import com.szmsd.chargerules.enums.ErrorMessageEnum;
 import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
+import com.szmsd.common.core.exception.web.BaseException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Service
 public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperationMapper, WarehouseOperation> implements IWarehouseOperationService {
@@ -21,7 +24,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
     @Override
     public int save(WarehouseOperationDTO dto) {
         WarehouseOperation domain = new WarehouseOperation();
-        BeanUtils.copyProperties(dto,domain);
+        BeanUtils.copyProperties(dto, domain);
         return warehouseOperationMapper.insert(domain);
     }
 
@@ -36,5 +39,17 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
         return warehouseOperationMapper.selectList(where);
     }
 
+    @Override
+    public BigDecimal charge(int days, BigDecimal cbm, String warehouseCode, List<WarehouseOperation> dto) {
+
+        Optional<WarehouseOperation> optional = dto.stream().filter(value -> days > value.getChargeDays()).
+                max(Comparator.comparing(WarehouseOperation::getChargeDays));
+        if (optional.isPresent()) {
+            WarehouseOperation warehouseOperation = optional.get();
+            return cbm.multiply(warehouseOperation.getPrice()); //体积乘以价格
+        }
+
+        throw new BaseException(ErrorMessageEnum.WAREHOUSE_PRICE_NOT_FOUND.getMessage());
+    }
 
 }

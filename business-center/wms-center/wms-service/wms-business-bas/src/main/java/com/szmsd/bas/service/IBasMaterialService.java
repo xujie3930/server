@@ -44,7 +44,7 @@ public interface IBasMaterialService extends IService<BasMaterial> {
         * @param basMaterial 模块
         * @return 结果
         */
-        int updateBasMaterial(BasMaterial basMaterial);
+        int updateBasMaterial(BasMaterial basMaterial) throws IllegalAccessException;
 
         /**
         * 批量删除模块
@@ -52,7 +52,7 @@ public interface IBasMaterialService extends IService<BasMaterial> {
         * @param ids 需要删除的模块ID
         * @return 结果
         */
-        int deleteBasMaterialByIds(List<String> ids);
+        boolean deleteBasMaterialByIds(List<Long> ids) throws IllegalAccessException;
 
         /**
         * 删除模块信息

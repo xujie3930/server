@@ -143,7 +143,7 @@ public class BaseProductController extends BaseController{
     @DeleteMapping("remove")
     @ApiOperation(value = "删除模块",notes = "删除模块")
     public R remove(@RequestBody List<Long> ids) throws IllegalAccessException {
-    return toOk(baseProductService.deleteBaseProductByIds(ids));
+    return R.ok(baseProductService.deleteBaseProductByIds(ids));
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:checkSkuValidToDelivery')")

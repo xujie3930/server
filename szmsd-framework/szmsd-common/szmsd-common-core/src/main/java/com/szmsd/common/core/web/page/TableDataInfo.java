@@ -1,5 +1,7 @@
 package com.szmsd.common.core.web.page;
 
+import com.szmsd.common.core.constant.HttpStatus;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -94,4 +96,13 @@ public class TableDataInfo<T> implements Serializable
     public void setOtherData(Object otherData) {
         this.otherData = otherData;
     }
+
+    public static <T> TableDataInfo<T> convert(PageVO<T> pageVO) {
+        TableDataInfo<T> tableDataInfo = new TableDataInfo<>();
+        tableDataInfo.setCode(HttpStatus.SUCCESS);
+        tableDataInfo.setTotal(pageVO.getTotalRecords());
+        tableDataInfo.setRows(pageVO.getData());
+        return tableDataInfo;
+    }
+
 }

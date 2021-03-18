@@ -2,10 +2,12 @@ package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.code.kaptcha.Producer;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
+import com.szmsd.bas.dto.ActiveDto;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.bas.mapper.BasSellerMapper;
@@ -18,6 +20,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -28,6 +31,7 @@ import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.feign.RemoteUserService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -86,6 +90,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         public List<BasSeller> selectBasSellerList(BasSeller basSeller)
         {
         QueryWrapper<BasSeller> where = new QueryWrapper<BasSeller>();
+        if(basSeller.getIsActive()!=null){
+            where.eq("is_active",basSeller.getIsActive());
+        }
+        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "sellerCode", basSeller.getSellerCode());
+        QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"user_name",basSeller.getUserName());
         return baseMapper.selectList(where);
         }
 
@@ -209,7 +218,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
             queryWrapper.eq("seller_code",basSeller.getSellerCode());
             List<BasSellerCertificate> basSellerCertificateList = basSellerCertificateService.list(BasSellerCertificateQueryWrapper);
-            BasSellerInfoDto basSellerInfoDto = new BasSellerInfoDto();
+            BasSellerInfoDto basSellerInfoDto = BeanMapperUtil.map(basSeller,BasSellerInfoDto.class);
             basSellerInfoDto.setBasSellerCertificateList(basSellerCertificateList);
             return basSellerInfoDto;
         }
@@ -263,8 +272,10 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 throw new BaseException("传wms失败"+r.getMsg());
             }
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
-            basSellerCertificateService.delBasSellerCertificateByPhysics(basSellerInfoDto.getSellerCode());
-            basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
+            if(CollectionUtils.isNotEmpty(basSellerInfoDto.getBasSellerCertificateList())) {
+                basSellerCertificateService.delBasSellerCertificateByPhysics(basSeller.getSellerCode());
+                basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
+            }
             return baseMapper.updateById(basSeller);
         }
 
@@ -272,29 +283,27 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         /**
         * 批量删除模块
         *
-        * @param ids 需要删除的模块ID
+        * @param
         * @return 结果
         */
         @Override
-        public boolean deleteBasSellerByIds(List<Long>  ids) throws IllegalAccessException {
+        public boolean deleteBasSellerByIds(ActiveDto activeDto) throws IllegalAccessException {
            UpdateWrapper<BasSeller> updateWrapper = new UpdateWrapper();
-           updateWrapper.in("id",ids);
-           updateWrapper.set("is_active",false);
+           updateWrapper.in("id",activeDto.getId());
+           updateWrapper.set("is_active",activeDto.getIsActive());
            //同步wms
-           for(Long id:ids){
                QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
-               queryWrapper.eq("id",id);
+               queryWrapper.eq("id",activeDto.getId());
                BasSeller bas = super.getOne(queryWrapper);
                if(StringUtils.isNotEmpty(bas.getNameCn())) {
                    SellerRequest sellerRequest = BeanMapperUtil.map(bas, SellerRequest.class);
-                   sellerRequest.setIsActive(false);
+                   sellerRequest.setIsActive(activeDto.getIsActive());
                    ObjectUtil.fillNull(sellerRequest, bas);
                    R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
                    if(r.getCode()!=200){
                        throw new BaseException("传wms失败"+r.getMsg());
                    }
                }
-           }
            return super.update(updateWrapper);
        }
 
