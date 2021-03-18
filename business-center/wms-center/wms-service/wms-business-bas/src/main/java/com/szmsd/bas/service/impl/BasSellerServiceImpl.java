@@ -273,7 +273,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             }
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
             if(CollectionUtils.isNotEmpty(basSellerInfoDto.getBasSellerCertificateList())) {
-                basSellerCertificateService.delBasSellerCertificateByPhysics(basSellerInfoDto.getSellerCode());
+                basSellerCertificateService.delBasSellerCertificateByPhysics(basSeller.getSellerCode());
                 basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
             }
             return baseMapper.updateById(basSeller);
