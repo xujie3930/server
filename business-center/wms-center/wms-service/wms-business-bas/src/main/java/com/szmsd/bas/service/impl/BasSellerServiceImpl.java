@@ -31,6 +31,7 @@ import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.feign.RemoteUserService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -217,7 +218,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
             queryWrapper.eq("seller_code",basSeller.getSellerCode());
             List<BasSellerCertificate> basSellerCertificateList = basSellerCertificateService.list(BasSellerCertificateQueryWrapper);
-            BasSellerInfoDto basSellerInfoDto = new BasSellerInfoDto();
+            BasSellerInfoDto basSellerInfoDto = BeanMapperUtil.map(basSeller,BasSellerInfoDto.class);
             basSellerInfoDto.setBasSellerCertificateList(basSellerCertificateList);
             return basSellerInfoDto;
         }
@@ -271,8 +272,10 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 throw new BaseException("传wms失败"+r.getMsg());
             }
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
-            basSellerCertificateService.delBasSellerCertificateByPhysics(basSellerInfoDto.getSellerCode());
-            basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
+            if(CollectionUtils.isNotEmpty(basSellerInfoDto.getBasSellerCertificateList())) {
+                basSellerCertificateService.delBasSellerCertificateByPhysics(basSellerInfoDto.getSellerCode());
+                basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
+            }
             return baseMapper.updateById(basSeller);
         }
 
@@ -280,7 +283,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         /**
         * 批量删除模块
         *
-        * @param ids 需要删除的模块ID
+        * @param
         * @return 结果
         */
         @Override
