@@ -21,7 +21,7 @@ public interface InboundReceiptFeignService {
     @PostMapping("/inbound/receiving/completed")
     R completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest);
 
-    @GetMapping("/receipt/info/{warehouseNo}")
+    @GetMapping("/inbound/receipt/info/{warehouseNo}")
     R<InboundReceiptInfoVO> info(@PathVariable("warehouseNo") String warehouseNo);
 
 }
