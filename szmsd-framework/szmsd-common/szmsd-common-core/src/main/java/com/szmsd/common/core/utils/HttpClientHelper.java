@@ -160,6 +160,18 @@ public class HttpClientHelper {
         return execute(new HttpDelete(url), requestBody, headerMap);
     }
 
+    /**
+     * 执行 http get 请求
+     *
+     * @param url         请求URL
+     * @param requestBody 请求Body
+     * @param headerMap   请求Header
+     * @return 响应Body
+     */
+    public static String httpGet(String url, String requestBody, Map<String, String> headerMap) {
+        return execute(new HttpGet(url), requestBody, headerMap);
+    }
+
     public static String execute(HttpEntityEnclosingRequestBase request, String requestBody, Map<String, String> headerMap) {
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
@@ -230,4 +242,25 @@ public class HttpClientHelper {
             return METHOD_NAME;
         }
     }
+
+    static class HttpGet extends HttpEntityEnclosingRequestBase {
+        public static final String METHOD_NAME = "GET";
+
+        public HttpGet() {
+        }
+
+        public HttpGet(URI uri) {
+            this.setURI(uri);
+        }
+
+        public HttpGet(String uri) {
+            this.setURI(URI.create(uri));
+        }
+
+        @Override
+        public String getMethod() {
+            return METHOD_NAME;
+        }
+    }
+
 }
