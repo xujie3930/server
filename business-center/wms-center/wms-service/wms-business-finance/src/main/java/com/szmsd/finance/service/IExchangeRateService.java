@@ -1,9 +1,8 @@
 package com.szmsd.finance.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.finance.domain.FssExchangeRate;
-import com.szmsd.finance.dto.FssExchangeRateDTO;
+import com.szmsd.finance.domain.ExchangeRate;
+import com.szmsd.finance.dto.ExchangeRateDTO;
 
 import java.util.List;
 
@@ -11,9 +10,13 @@ import java.util.List;
  * @author liulei
  */
 public interface IExchangeRateService {
-    List<FssExchangeRate> listPage(FssExchangeRateDTO dto);
+    List<ExchangeRate> listPage(ExchangeRateDTO dto);
 
-    R save(FssExchangeRateDTO dto);
+    R save(ExchangeRateDTO dto);
 
-    R update(FssExchangeRateDTO dto);
+    R update(ExchangeRateDTO dto);
+
+    R delete(Long id);
+
+    R selectRate(Long currencyFromId, Long currencyToId);
 }

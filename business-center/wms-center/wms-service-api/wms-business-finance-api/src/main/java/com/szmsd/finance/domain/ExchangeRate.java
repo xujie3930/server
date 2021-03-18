@@ -2,7 +2,7 @@ package com.szmsd.finance.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.szmsd.common.core.web.domain.BaseEntity;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -18,7 +18,8 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value = "汇率转换", description = "汇率转换表")
-public class FssExchangeRate extends BaseEntity {
+@TableName("fss_exchange_rate")
+public class ExchangeRate extends FssBaseEntity {
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -36,5 +37,5 @@ public class FssExchangeRate extends BaseEntity {
     private String exchangeTo;
 
     @ApiModelProperty(value = "比率")
-    private BigDecimal rage;
+    private BigDecimal rate;
 }
