@@ -57,6 +57,16 @@ public abstract class AbstractHttpRequest {
         return responseBody;
     }
 
+    String httpGet(String api, Object object) {
+        String url = getUrl() + api;
+        String requestBody = JSON.toJSONString(object);
+        Map<String, String> headerMap = getHeaderMap();
+        Date requestTime = new Date();
+        String responseBody = HttpClientHelper.httpGet(url, requestBody, headerMap);
+        addLog(url, "GET", headerMap, requestBody, requestTime, responseBody);
+        return responseBody;
+    }
+
     void addLog(String url, String method, Map<String, String> headerMap, String requestBody, Date requestTime, String responseBody) {
         Date responseTime = new Date();
         HtpRequestLog log = new HtpRequestLog();
