@@ -28,6 +28,9 @@ public class HttpConfig {
     private String basUserId;
     private String basPassword;
 
+    //充值
+    private String thirdPayment;
+
     public Map<String, String> getBaseHeaderMap() {
         Map<String, String> map = new HashMap<>();
         map.put("UserId", this.getBasUserId());

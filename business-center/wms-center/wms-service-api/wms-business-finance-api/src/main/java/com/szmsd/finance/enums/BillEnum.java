@@ -26,7 +26,7 @@ public class BillEnum implements Serializable {
 
         @Override
         public String getValue() {
-            return null;
+            return payType;
         }
     }
 
@@ -56,20 +56,24 @@ public class BillEnum implements Serializable {
         @EnumValue
         private String paymentType;
 
-        private String value;
+        private String paymentName;
 
-        PayMethod(String paymentType,String value) {
+        PayMethod(String paymentType,String paymentName) {
             this.paymentType = paymentType;
-            this.value = value;
+            this.paymentName = paymentName;
         }
 
         @Override
         public String getValue() {
-            return this.value;
+            return this.paymentType;
         }
 
         public String getPaymentType() {
             return this.paymentType;
+        }
+
+        public String getPaymentName() {
+            return this.paymentName;
         }
     }
 }

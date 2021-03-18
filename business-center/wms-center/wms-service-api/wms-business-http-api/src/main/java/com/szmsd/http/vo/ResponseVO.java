@@ -26,6 +26,9 @@ public class ResponseVO implements Serializable {
     @ApiModelProperty(value = "返回消息")
     private String message;
 
+    @ApiModelProperty(value = "错误编码")
+    private String code;
+
     @ApiModelProperty(value = "错误信息")
     @ErrorSerializable
     private String errors;

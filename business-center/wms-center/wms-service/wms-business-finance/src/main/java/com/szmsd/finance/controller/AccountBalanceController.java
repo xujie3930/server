@@ -46,6 +46,13 @@ public class AccountBalanceController extends FssBaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:onlineIncome')")
+    @ApiOperation(value = "预充值")
+    @PostMapping("/preOnlineIncome")
+    public R preOnlineIncome(@RequestBody CustPayDTO dto) {
+        return accountBalanceService.onlineIncome(getLoginUser(), dto);
+    }
+
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:onlineIncome')")
     @ApiOperation(value = "在线充值")
     @PostMapping("/onlineIncome")
     public R onlineIncome(@RequestBody CustPayDTO dto) {
