@@ -83,7 +83,7 @@ public class BasSellerController extends BaseController{
     * 获取模块详细信息
     */
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:query')")
-    @GetMapping(value = "getInfo")
+    @GetMapping(value = "getInfo/{userName}")
     @ApiOperation(value = "获取模块详细信息",notes = "获取模块详细信息")
     public R<BasSellerInfoDto> getInfo(@PathVariable("userName") String userName)
     {
@@ -124,7 +124,7 @@ public class BasSellerController extends BaseController{
     */
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:remove')")
     @Log(title = "模块", businessType = BusinessType.DELETE)
-    @DeleteMapping("remove")
+    @PutMapping("remove")
     @ApiOperation(value = "生效/失效模块",notes = "生效/失效模块")
     public R remove(@RequestBody ActiveDto activeDto) throws IllegalAccessException {
     return R.ok(basSellerService.deleteBasSellerByIds(activeDto));
