@@ -1,7 +1,7 @@
 package com.szmsd.chargerules.controller;
 
-import com.msd.chargerules.domain.Operation;
-import com.msd.chargerules.dto.OperationDTO;
+import com.szmsd.chargerules.domain.Operation;
+import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.service.IOperationService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;

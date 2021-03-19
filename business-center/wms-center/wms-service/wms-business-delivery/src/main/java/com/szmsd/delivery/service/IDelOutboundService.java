@@ -105,5 +105,12 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return int
      */
     int underReview(DelOutboundUnderReviewDto dto);
+
+    /**
+     * 根据订单id查询出库单
+     * @param orderId orderId
+     * @return DelOutboundVO
+     */
+    DelOutbound selectDelOutboundByOrderId(String orderId);
 }
 

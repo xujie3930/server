@@ -2,6 +2,7 @@ package com.szmsd.delivery.api.feign.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.PackageMeasureRequestDto;
 import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
@@ -35,6 +36,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
 
             @Override
             public R<Integer> shipmentContainers(ShipmentContainersRequestDto dto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<DelOutbound> details(String orderId) {
                 return R.convertResultJson(throwable);
             }
         };

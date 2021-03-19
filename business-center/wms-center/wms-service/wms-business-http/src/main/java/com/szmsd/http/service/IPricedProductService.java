@@ -1,11 +1,10 @@
 package com.szmsd.http.service;
 
 import com.szmsd.common.core.web.page.PageVO;
+import com.szmsd.http.dto.CreatePricedProductCommand;
 import com.szmsd.http.dto.GetPricedProductsCommand;
 import com.szmsd.http.dto.PricedProductSearchCriteria;
-import com.szmsd.http.vo.DirectServiceFeeData;
-import com.szmsd.http.vo.KeyValuePair;
-import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.http.vo.*;
 
 import java.util.List;
 
@@ -16,4 +15,8 @@ public interface IPricedProductService {
     List<KeyValuePair> keyValuePairs();
 
     PageVO<PricedProduct> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria);
+
+    ResponseVO create(CreatePricedProductCommand createPricedProductCommand);
+
+    PricedProductInfo getInfo(String productCode);
 }
