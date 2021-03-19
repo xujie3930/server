@@ -3,11 +3,14 @@ package com.szmsd.delivery.api.feign;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.PackageMeasureRequestDto;
 import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.dto.ShipmentRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -53,4 +56,12 @@ public interface DelOutboundFeignService {
      */
     @PostMapping("/api/outbound/open/shipment/containers")
     R<Integer> shipmentContainers(@RequestBody ShipmentContainersRequestDto dto);
+
+    /**
+     * 根据单号查询出库单详情
+     * @param orderId orderId
+     * @return DelOutbound
+     */
+    @GetMapping("/api/outbound/getInfoByOrderId/{orderId}")
+    R<DelOutbound> details(@PathVariable("orderId") String orderId);
 }

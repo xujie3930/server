@@ -6,6 +6,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -50,6 +51,13 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 详情", position = 200)
     public R<DelOutboundVO> getInfo(@PathVariable("id") String id) {
         return R.ok(delOutboundService.selectDelOutboundById(id));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")
+    @GetMapping(value = "getInfoByOrderId/{orderId}")
+    @ApiOperation(value = "出库管理 - 详情", position = 200)
+    public R<DelOutbound> getInfoByOrderId(@PathVariable("orderId") String orderId) {
+        return R.ok(delOutboundService.selectDelOutboundByOrderId(orderId));
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:add')")
