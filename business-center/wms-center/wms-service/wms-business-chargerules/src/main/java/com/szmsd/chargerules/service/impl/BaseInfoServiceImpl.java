@@ -2,11 +2,13 @@ package com.szmsd.chargerules.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.msd.chargerules.domain.BasSpecialOperation;
-import com.msd.chargerules.domain.SpecialOperation;
-import com.msd.chargerules.dto.BasSpecialOperationDTO;
+import com.szmsd.chargerules.domain.BasSpecialOperation;
+import com.szmsd.chargerules.domain.SpecialOperation;
+import com.szmsd.chargerules.dto.BasSpecialOperationDTO;
 import com.szmsd.chargerules.enums.ErrorMessageEnum;
 import com.szmsd.chargerules.enums.SpecialOperationStatusEnum;
+import com.szmsd.chargerules.factory.OrderType;
+import com.szmsd.chargerules.factory.OrderTypeFactory;
 import com.szmsd.chargerules.mapper.BaseInfoMapper;
 import com.szmsd.chargerules.service.IBaseInfoService;
 import com.szmsd.chargerules.service.ISpecialOperationService;
@@ -16,8 +18,6 @@ import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationResultRequest;
 import com.szmsd.open.vo.ResponseVO;
-import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +38,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     private ISpecialOperationService specialOperationService;
 
     @Resource
-    private InboundReceiptFeignService inboundReceiptFeignService;
+    private OrderTypeFactory orderTypeFactory;
 
     @Override
     public ResponseVO add(BasSpecialOperationDTO basSpecialOperationDTO) {
@@ -72,18 +72,22 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
             return R.failed(ErrorMessageEnum.STATUS_RESULT.getMessage());
         }
         //审批不通过->系数设为0 审批通过->系数必须大于0
-        if(basSpecialOperation.getStatus().equals(SpecialOperationStatusEnum.REJECT.getStatus())){
+        if (basSpecialOperation.getStatus().equals(SpecialOperationStatusEnum.REJECT.getStatus())) {
             basSpecialOperation.setCoefficient(0);
         } else {
             if (basSpecialOperation.getCoefficient() == 0) {
                 return R.failed(ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
             }
         }
-        R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(basSpecialOperation.getOrderNo());
-        if(info.getData() == null) {
+
+        //校验单号是否存在
+        OrderType factory = orderTypeFactory.getFactory(basSpecialOperation.getOrderType());
+        boolean exist = factory.checkOrderExist(basSpecialOperation.getOrderNo());
+        if (!exist) {
             return R.failed(ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
         }
 
+        //修改数据
         baseInfoMapper.updateById(basSpecialOperation);
 
         SpecialOperation specialOperation = specialOperationService.selectOne(basSpecialOperation);

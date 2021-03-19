@@ -1,8 +1,8 @@
 package com.szmsd.chargerules.service;
 
 
-import com.msd.chargerules.domain.Operation;
-import com.msd.chargerules.dto.OperationDTO;
+import com.szmsd.chargerules.domain.Operation;
+import com.szmsd.chargerules.dto.OperationDTO;
 
 import java.util.List;
 
