@@ -33,27 +33,23 @@ public class BaseProduct extends BaseEntity {
 
     @ApiModelProperty(value = "id")
     @TableId(value = "id", type = IdType.AUTO)
-    @Excel(name = "id")
     private Long id;
 
     @ApiModelProperty(value = "创建人")
-    @Excel(name = "创建人")
     private String createBy;
 
     @ApiModelProperty(value = "修改人")
-    @Excel(name = "修改人")
     private String updateBy;
 
     @ApiModelProperty(value = "删除标识：0未删除 1已删除")
-    @Excel(name = "删除标识：0未删除 1已删除")
     private String delFlag;
 
     @ApiModelProperty(value = "产品名称")
-    @Excel(name = "产品名称")
+    @Excel(name = "名称")
     private String productName;
 
     @ApiModelProperty(value = "产品编码")
-    @Excel(name = "产品编码")
+    @Excel(name = "编码")
     @TableField("`code`")
     private String code;
 
@@ -74,15 +70,12 @@ public class BaseProduct extends BaseEntity {
     private Double initHeight;
 
     @ApiModelProperty(value = "是否激活")
-    @Excel(name = "是否激活")
     private Boolean isActive;
 
     @ApiModelProperty(value = "产品图片")
-    @Excel(name = "产品图片")
     private String productImage;
 
     @ApiModelProperty(value = "产品文件格式 jpg / png / jpeg")
-    @Excel(name = "产品文件格式 jpg / png / jpeg")
     private String suffix;
 
     @ApiModelProperty(value = "初始体积 cm3")
@@ -102,7 +95,6 @@ public class BaseProduct extends BaseEntity {
     private String declaredValue;
 
     @ApiModelProperty(value = "产品属性编号")
-    @Excel(name = "产品属性编号")
     private String productAttribute;
 
     @ApiModelProperty(value = "产品属性名")
@@ -110,7 +102,6 @@ public class BaseProduct extends BaseEntity {
     private String productAttributeName;
 
     @ApiModelProperty(value = "带电信息编号")
-    @Excel(name = "带电信息编号")
     private String electrifiedMode;
 
     @ApiModelProperty(value = "带电信息名")
@@ -118,7 +109,6 @@ public class BaseProduct extends BaseEntity {
     private String electrifiedModeName;
 
     @ApiModelProperty(value = "电池包装编号")
-    @Excel(name = "电池包装编号")
     private String batteryPackaging;
 
     @ApiModelProperty(value = "电池包装名")
@@ -126,11 +116,9 @@ public class BaseProduct extends BaseEntity {
     private String batteryPackagingName;
 
     @ApiModelProperty(value = "是否附带包材")
-    @Excel(name = "是否附带包材")
     private Boolean havePackingMaterial;
 
     @ApiModelProperty(value = "绑定专属包材产品编码")
-    @Excel(name = "绑定专属包材产品编码")
     private String bindCode;
 
     @ApiModelProperty(value = "绑定专属包材产品名")
@@ -142,7 +130,6 @@ public class BaseProduct extends BaseEntity {
     private String suggestPackingMaterial;
 
     @ApiModelProperty(value = "物流包装要求编码")
-    @Excel(name = "物流包装要求编码")
     private String suggestPackingMaterialCode;
 
     @ApiModelProperty(value = "开始价格")
@@ -158,55 +145,42 @@ public class BaseProduct extends BaseEntity {
     private String productDescription;
 
     @ApiModelProperty(value = "产品介绍地址")
-    @Excel(name = "产品介绍地址")
     private String productIntroductAddress;
 
     @ApiModelProperty(value = "sku")
-    @Excel(name = "sku")
     private String category;
 
     @ApiModelProperty(value = "是否仓库验收")
-    @Excel(name = "是否仓库验收")
     private Boolean warehouseAcceptance;
 
     @ApiModelProperty(value = "属性1")
-    @Excel(name = "属性1")
     private String attribute1;
 
     @ApiModelProperty(value = "属性2")
-    @Excel(name = "属性2")
     private String attribute2;
 
     @ApiModelProperty(value = "属性3")
-    @Excel(name = "属性3")
     private String attribute3;
 
     @ApiModelProperty(value = "属性4")
-    @Excel(name = "属性4")
     private String attribute4;
 
     @ApiModelProperty(value = "属性5")
-    @Excel(name = "属性5")
     private String attribute5;
 
     @ApiModelProperty(value = "仓库测量重量g")
-    @Excel(name = "仓库测量重量g")
     private Double weight;
 
     @ApiModelProperty(value = "仓库测量长 cm")
-    @Excel(name = "仓库测量长 cm")
     private Double length;
 
     @ApiModelProperty(value = "仓库测量宽 cm")
-    @Excel(name = "仓库测量宽 cm")
     private Double width;
 
     @ApiModelProperty(value = "仓库测量高 cm")
-    @Excel(name = "仓库测量高 cm")
     private Double height;
 
     @ApiModelProperty(value = "仓库测量体积 cm3")
-    @Excel(name = "仓库测量体积 cm3")
     private BigDecimal Volume;
 
     @ApiModelProperty(value = "操作员")
@@ -214,16 +188,13 @@ public class BaseProduct extends BaseEntity {
     private String operator;
 
     @ApiModelProperty(value = "操作时间")
-    @Excel(name = "操作时间")
     private Date operateOn;
 
     @ApiModelProperty(value = "仓库编码")
-    @Excel(name = "仓库编码")
     private String warehouseCode;
 
 
     @ApiModelProperty(value = "关联单号")
-    @Excel(name = "关联单号")
     private String orderNo;
 
 }
