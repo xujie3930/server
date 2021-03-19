@@ -2,7 +2,7 @@ package com.szmsd.chargerules;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.msd.chargerules.domain.WarehouseOperation;
+import com.szmsd.chargerules.domain.WarehouseOperation;
 import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import org.junit.jupiter.api.Test;

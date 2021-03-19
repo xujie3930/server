@@ -1,8 +1,8 @@
 package com.szmsd.chargerules.service;
 
 
-import com.msd.chargerules.domain.WarehouseOperation;
-import com.msd.chargerules.dto.WarehouseOperationDTO;
+import com.szmsd.chargerules.domain.WarehouseOperation;
+import com.szmsd.chargerules.dto.WarehouseOperationDTO;
 
 import java.math.BigDecimal;
 import java.util.List;

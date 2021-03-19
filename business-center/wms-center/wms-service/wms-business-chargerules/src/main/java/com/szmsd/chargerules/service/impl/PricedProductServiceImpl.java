@@ -1,6 +1,6 @@
 package com.szmsd.chargerules.service.impl;
 
-import com.msd.chargerules.dto.PricedProductQueryDTO;
+import com.szmsd.chargerules.dto.PricedProductQueryDTO;
 import com.szmsd.chargerules.service.IPricedProductService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.PageVO;
