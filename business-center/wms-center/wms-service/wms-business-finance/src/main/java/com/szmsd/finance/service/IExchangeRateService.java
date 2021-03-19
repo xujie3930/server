@@ -18,5 +18,5 @@ public interface IExchangeRateService {
 
     R delete(Long id);
 
-    R selectRate(Long currencyFromId, Long currencyToId);
+    R selectRate(String currencyFromCode, String currencyToCode);
 }

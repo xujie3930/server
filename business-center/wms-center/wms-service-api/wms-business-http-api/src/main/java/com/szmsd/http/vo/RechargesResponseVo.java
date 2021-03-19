@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "RechargesResponseVo")
-public class RechargesResponseVo extends ResponseVO{
+public class RechargesResponseVo{
 
     @ApiModelProperty(value = "充值编号")
     private String rechargeNo;
@@ -34,4 +34,13 @@ public class RechargesResponseVo extends ResponseVO{
 
     @ApiModelProperty(value = "请求参数唯一标识")
     private String serialNo;
+
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
+    @ApiModelProperty(value = "返回消息")
+    private String Message;
+
+    @ApiModelProperty(value = "错误编码")
+    private String Code;
 }

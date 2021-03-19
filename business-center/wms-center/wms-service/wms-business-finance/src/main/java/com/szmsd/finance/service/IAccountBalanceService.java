@@ -7,6 +7,7 @@ import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.AccountBalanceChangeDTO;
 import com.szmsd.finance.dto.AccountBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,9 +26,13 @@ public interface IAccountBalanceService {
 
     R balanceExchange(LoginUser loginUser, CustPayDTO dto);
 
-    BigDecimal getCurrentBalance(Long cusId,Long currencyId);
+    BigDecimal getCurrentBalance(Long cusId,String currencyCode);
 
-    void setCurrentBalance(Long cusId, Long currencyId, BigDecimal result);
+    void setCurrentBalance(Long cusId, String currencyCode, BigDecimal result);
 
     R withdraw(LoginUser loginUser, CustPayDTO dto);
+
+    R preOnlineIncome(CustPayDTO dto);
+
+    R rechargeCallback(RechargesCallbackRequestDTO requestDTO);
 }

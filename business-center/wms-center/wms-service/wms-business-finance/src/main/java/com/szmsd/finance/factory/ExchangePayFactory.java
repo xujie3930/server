@@ -37,21 +37,21 @@ public class ExchangePayFactory extends AbstractPayFactory {
         try{
             if(lock.tryLock(time,unit)){
                 //1.先扣款
-                BigDecimal oldBalance1=getCurrentBalance(dto.getCusId(),dto.getCurrencyId());
+                BigDecimal oldBalance1=getCurrentBalance(dto.getCusId(),dto.getCurrencyCode());
                 BigDecimal substractAmount=dto.getAmount();
                 //先判断扣款余额是否充足
                 if(oldBalance1.compareTo(substractAmount) < 0){
                     return false;
                 }
                 BigDecimal result1=oldBalance1.subtract(substractAmount);
-                setCurrentBalance(dto.getCusId(),dto.getCurrencyId(),result1);
+                setCurrentBalance(dto.getCusId(),dto.getCurrencyCode(),result1);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
                 recordOpLog(dto,result1);
                 //2.再充值
-                BigDecimal oldBalance2=getCurrentBalance(dto.getCusId(),dto.getCurrencyId2());
+                BigDecimal oldBalance2=getCurrentBalance(dto.getCusId(),dto.getCurrencyCode2());
                 BigDecimal addAmount=dto.getRate().multiply(substractAmount).setScale(2,BigDecimal.ROUND_FLOOR);
                 BigDecimal result2=oldBalance2.add(addAmount);
-                setCurrentBalance(dto.getCusId(),dto.getCurrencyId(),result2);
+                setCurrentBalance(dto.getCusId(),dto.getCurrencyCode(),result2);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
                 recordOpLog(dto,result2);
 

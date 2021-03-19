@@ -50,7 +50,19 @@ public class BillEnum implements Serializable {
         /**
          * 汇率转换扣款
          */
-        WITHDRAW_PAYMENT("05","提现");
+        WITHDRAW_PAYMENT("05","提现"),
+        /**
+         * 特殊操作
+         */
+        SPECIAL_OPERATE("06","特殊操作"),
+        /**
+         * 业务操作
+         */
+        BUSINESS_OPERATE("07","业务操作"),
+        /**
+         * 仓租
+         */
+        WAREHOUSE_RENT("08","仓租");
 
 
         @EnumValue

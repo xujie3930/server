@@ -41,7 +41,7 @@ public class AccountBalanceChange extends FssBaseEntity {
     private BillEnum.PayMethod payMethod;
 
     @ApiModelProperty(value = "币种id")
-    private Long currencyId;
+    private String currencyCode;
 
     @ApiModelProperty(value = "币种名")
     private String currencyName;

@@ -110,6 +110,8 @@ public class HttpConfig {
         private String pricedProducts;
         // 查询产品下拉列表，返回list数据
         private String keyValuePairs;
+        // 创建报价产品信息
+        private String products;
     }
 
 
@@ -119,6 +121,11 @@ public class HttpConfig {
     // CarrierService
     private CarrierService carrierService;
 
+    public Map<String, String> getCarrierServiceHeaderMap() {
+        Map<String, String> map = new HashMap<>();
+        return map;
+    }
+
     @Data
     @Accessors(chain = true)
     public static class CarrierService {
@@ -126,5 +133,7 @@ public class HttpConfig {
         private String shipmentOrder;
         // 取消承运商物流订单（客户端）
         private String cancellation;
+        // 获取可用的承运商服务名称(管理端)
+        private String services;
     }
 }

@@ -57,8 +57,8 @@ public class ExchangeRateController extends FssBaseController {
     @PreAuthorize("@ss.hasPermi('ExchangeRate:selectRate')")
     @ApiOperation(value = "汇率转换查询")
     @GetMapping("/selectRate")
-    public R selectRate(@RequestParam("currencyFromId") Long currencyFromId,@RequestParam("currencyToId")Long currencyToId){
-        return exchangeRateService.selectRate(currencyFromId,currencyToId);
+    public R selectRate(@RequestParam("currencyFromCode") String currencyFromCode,@RequestParam("currencyToCode") String currencyToCode){
+        return exchangeRateService.selectRate(currencyFromCode,currencyToCode);
     }
 
 }

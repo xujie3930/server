@@ -3,6 +3,7 @@ package com.szmsd.bas.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
+import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
@@ -49,6 +50,8 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @return
      */
     List<BaseProductVO> selectBaseProductByCode(String code);
+
+    List<BaseProductMeasureDto> batchSKU(List<String> codes);
 
     /**
      * 查询sku信息

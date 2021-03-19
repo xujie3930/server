@@ -12,14 +12,14 @@ import java.math.BigDecimal;
  */
 @Data
 public class BalanceExchangeDTO {
-    @ApiModelProperty(value = "原币别id")
-    private Long exchangeFromId;
+    @ApiModelProperty(value = "原币别code")
+    private Long exchangeFromCode;
 
     @ApiModelProperty(value = "原币别")
     private String exchangeFrom;
 
-    @ApiModelProperty(value = "现币别id")
-    private Long exchangeToId;
+    @ApiModelProperty(value = "现币别code")
+    private Long exchangeToCode;
 
     @ApiModelProperty(value = "现币别")
     private Long exchangeTo;
@@ -27,10 +27,11 @@ public class BalanceExchangeDTO {
     @ApiModelProperty(value = "比率")
     private BigDecimal rate;
 
-
-
     @ApiModelProperty(value = "交易金额")
     @NotNull
     @DecimalMin(value = "0")
     private BigDecimal amount;
+
+    private String remark;
+
 }

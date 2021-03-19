@@ -74,12 +74,4 @@ public class SnowflakeId {
         return System.currentTimeMillis();
     }
 
-    public static void main(String[] args) {
-        for(int i = 0; i < 100000; ++i) {
-            long id = _getNextId();
-            System.out.println(Long.toBinaryString(id));
-            System.out.println(id);
-        }
-
-    }
 }

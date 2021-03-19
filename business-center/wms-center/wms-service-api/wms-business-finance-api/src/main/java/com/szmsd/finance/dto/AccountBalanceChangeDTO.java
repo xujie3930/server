@@ -27,8 +27,8 @@ public class AccountBalanceChangeDTO implements Serializable {
     @ApiModelProperty(value = "交易类型")
     private BillEnum.PayMethod payMethod;
 
-    @ApiModelProperty(value = "币种id")
-    private Long currencyId;
+    @ApiModelProperty(value = "币种编码")
+    private String currencyCode;
 
     @ApiModelProperty(value = "币种名")
     private String currencyName;
@@ -44,4 +44,6 @@ public class AccountBalanceChangeDTO implements Serializable {
 
     @ApiModelProperty(value = "结束时间")
     private String endTime;
+
+    private String remark;
 }

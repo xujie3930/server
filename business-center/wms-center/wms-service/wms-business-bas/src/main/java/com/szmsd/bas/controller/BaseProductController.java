@@ -2,6 +2,7 @@ package com.szmsd.bas.controller;
 
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
+import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.vo.BaseProductVO;
@@ -52,12 +53,22 @@ public class BaseProductController extends BaseController{
             return getDataTable(list);
       }
 
+
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/listByCode")
     @ApiOperation(value = "通过code查询列表",notes = "通过code查询列表")
     public  R<List<BaseProductVO>> listByCode(String code)
     {
         List<BaseProductVO> list = baseProductService.selectBaseProductByCode(code);
+        return R.ok(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
+    @PostMapping("/batchSKU")
+    @ApiOperation(value = "通过code批量查询列表",notes = "通过code批量查询列表")
+    public  R<List<BaseProductMeasureDto>> batchSKU(@RequestBody List<String> codes)
+    {
+        List<BaseProductMeasureDto> list = baseProductService.batchSKU(codes);
         return R.ok(list);
     }
 
@@ -94,8 +105,8 @@ public class BaseProductController extends BaseController{
      @Log(title = "模块", businessType = BusinessType.EXPORT)
      @GetMapping("/export")
      @ApiOperation(value = "导出模块列表",notes = "导出模块列表")
-     public void export(HttpServletResponse response, BaseProduct baseProduct) throws IOException {
-     List<BaseProduct> list = baseProductService.selectBaseProductList(baseProduct);
+     public void export(HttpServletResponse response, BaseProductQueryDto queryDto) throws IOException {
+     List<BaseProduct> list = baseProductService.selectBaseProductPage(queryDto);
      ExcelUtil<BaseProduct> util = new ExcelUtil<BaseProduct>(BaseProduct.class);
         util.exportExcel(response,list, "BaseProduct");
 

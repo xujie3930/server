@@ -43,7 +43,6 @@ public class BasMaterial extends BaseEntity {
     private String updateBy;
 
     @ApiModelProperty(value = "删除标识：0未删除 1已删除")
-    @Excel(name = "删除标识：0未删除 1已删除")
     private String delFlag;
 
     @ApiModelProperty(value = "产品名称")
@@ -51,32 +50,32 @@ public class BasMaterial extends BaseEntity {
     private String productName;
 
     @ApiModelProperty(value = "产品编码")
-    @Excel(name = "产品编码")
+    @Excel(name = "SKU编号")
     @TableField("`code`")
     private String code;
 
     @ApiModelProperty(value = "初始重量g")
-    @Excel(name = "初始重量g")
-    private BigDecimal initWeight;
+    @Excel(name = "重量g")
+    private Double initWeight;
 
     @ApiModelProperty(value = "初始长 cm")
-    @Excel(name = "初始长 cm")
-    private BigDecimal initLength;
+    @Excel(name = "长 cm")
+    private Double initLength;
 
     @ApiModelProperty(value = "初始宽 cm")
-    @Excel(name = "初始宽 cm")
-    private BigDecimal initWidth;
+    @Excel(name = "宽 cm")
+    private Double initWidth;
 
     @ApiModelProperty(value = "初始高 cm")
-    @Excel(name = "初始高 cm")
-    private BigDecimal initHeight;
+    @Excel(name = "高 cm")
+    private Double initHeight;
 
     @ApiModelProperty(value = "是否激活")
-    @Excel(name = "是否激活")
+    @Excel(name = "激活")
     private Boolean isActive;
 
     @ApiModelProperty(value = "初始体积 cm3")
-    @Excel(name = "初始体积 cm3")
+    @Excel(name = "体积 cm3")
     private BigDecimal initVolume;
 
     @ApiModelProperty(value = "客户（卖家）编码")
@@ -88,11 +87,10 @@ public class BasMaterial extends BaseEntity {
     private String category;
 
     @ApiModelProperty(value = "类型")
-    @Excel(name = "类型")
     private String type;
 
     @ApiModelProperty(value = "类型名")
-        @TableField("typeName")
+    @TableField("typeName")
     @Excel(name = "类型名")
     private String typeName;
 
@@ -101,23 +99,18 @@ public class BasMaterial extends BaseEntity {
     private String productDescription;
 
     @ApiModelProperty(value = "属性1")
-    @Excel(name = "属性1")
     private String attribute1;
 
     @ApiModelProperty(value = "属性2")
-    @Excel(name = "属性2")
     private String attribute2;
 
     @ApiModelProperty(value = "属性3")
-    @Excel(name = "属性3")
     private String attribute3;
 
     @ApiModelProperty(value = "属性4")
-    @Excel(name = "属性4")
     private String attribute4;
 
     @ApiModelProperty(value = "属性5")
-    @Excel(name = "属性5")
     private String attribute5;
 
 
