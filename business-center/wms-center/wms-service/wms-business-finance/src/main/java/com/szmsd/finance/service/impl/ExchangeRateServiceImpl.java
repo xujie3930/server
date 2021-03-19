@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.ExchangeRate;
 import com.szmsd.finance.dto.ExchangeRateDTO;
 import com.szmsd.finance.mapper.ExchangeRateMapper;
@@ -27,11 +28,11 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
     @Override
     public List<ExchangeRate> listPage(ExchangeRateDTO dto) {
         LambdaQueryWrapper<ExchangeRate> queryWrapper = Wrappers.lambdaQuery();
-        if(dto.getExchangeFromId()!=null) {
-            queryWrapper.eq(ExchangeRate::getExchangeFromId, dto.getExchangeFromId());
+        if(StringUtils.isNotEmpty(dto.getExchangeFromCode())) {
+            queryWrapper.eq(ExchangeRate::getExchangeFromCode, dto.getExchangeFromCode());
         }
-        if(dto.getExchangeToId()!=null){
-            queryWrapper.eq(ExchangeRate::getExchangeToId,dto.getExchangeToId());
+        if(StringUtils.isNotEmpty(dto.getExchangeToCode())) {
+            queryWrapper.eq(ExchangeRate::getExchangeToCode,dto.getExchangeToCode());
         }
         return exchangeRateMapper.listPage(queryWrapper);
     }
@@ -54,9 +55,9 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
     }
 
     private boolean checkExchangeRateIsExists(ExchangeRateDTO dto, int count) {
-        Long exchangeFromId = dto.getExchangeFromId();
-        Long exchangeToId = dto.getExchangeToId();
-        if(exchangeFromId==null||exchangeToId==null){
+        String currencyFromCode = dto.getExchangeFromCode();
+        String currencyToCode = dto.getExchangeToCode();
+        if(currencyFromCode==null||currencyToCode==null){
             return false;
         }
         List<ExchangeRate> list=exchangeRateMapper.checkExchangeRateIsExists(dto);
@@ -81,16 +82,16 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
     }
 
     @Override
-    public R selectRate(Long currencyFromId, Long currencyToId) {
+    public R selectRate(String currencyFromCode, String currencyToCode) {
         ExchangeRate rate=exchangeRateMapper.selectOne(new QueryWrapper<ExchangeRate>().lambda()
-                .eq(ExchangeRate::getExchangeFromId,currencyFromId)
-                .eq(ExchangeRate::getExchangeToId,currencyToId));
+                .eq(ExchangeRate::getExchangeFromCode,currencyFromCode)
+                .eq(ExchangeRate::getExchangeToCode,currencyToCode));
         if(rate!=null){
             return R.ok(rate.getRate());
         }
         rate=exchangeRateMapper.selectOne(new QueryWrapper<ExchangeRate>().lambda()
-                .eq(ExchangeRate::getExchangeFromId,currencyToId)
-                .eq(ExchangeRate::getExchangeToId,currencyFromId));
+                .eq(ExchangeRate::getExchangeFromCode,currencyToCode)
+                .eq(ExchangeRate::getExchangeToCode,currencyFromCode));
         if(rate!=null){
             return R.ok(new BigDecimal("1").divide(rate.getRate()).setScale(4,BigDecimal.ROUND_FLOOR));
         }

@@ -33,8 +33,8 @@ public class AccountBalance extends FssBaseEntity {
     @ApiModelProperty(value = "客户名称")
     private String cusName;
 
-    @ApiModelProperty(value = "币种id")
-    private Long currencyId;
+    @ApiModelProperty(value = "币种编码")
+    private String currencyCode;
 
     @ApiModelProperty(value = "币种名")
     private String currencyName;
@@ -45,9 +45,9 @@ public class AccountBalance extends FssBaseEntity {
     public AccountBalance() {
     }
 
-    public AccountBalance(Long cusId, Long currencyId, String currencyName, BigDecimal currentBalance) {
+    public AccountBalance(Long cusId, String currencyCode, String currencyName, BigDecimal currentBalance) {
         this.cusId = cusId;
-        this.currencyId = currencyId;
+        this.currencyCode = currencyCode;
         this.currencyName = currencyName;
         this.currentBalance = currentBalance;
     }

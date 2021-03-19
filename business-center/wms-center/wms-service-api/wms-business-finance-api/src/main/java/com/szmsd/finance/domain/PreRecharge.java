@@ -41,8 +41,8 @@ public class PreRecharge extends FssBaseEntity {
     @ApiModelProperty(value = "汇款方式 0电汇 1转账 2支票")
     private String remittanceMethod;
 
-    @ApiModelProperty(value = "币种id")
-    private Long currencyId;
+    @ApiModelProperty(value = "币种编码")
+    private String currencyCode;
 
     @ApiModelProperty(value = "币种名")
     private String currencyName;
@@ -69,7 +69,4 @@ public class PreRecharge extends FssBaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "审核日期")
     private Date verifyDate;
-
-    @ApiModelProperty(value = "备注")
-    private String remark;
 }

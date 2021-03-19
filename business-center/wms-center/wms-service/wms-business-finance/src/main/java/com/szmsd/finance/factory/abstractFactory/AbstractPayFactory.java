@@ -40,18 +40,18 @@ public abstract class AbstractPayFactory {
 
     @Transactional
     public boolean updateBalance(CustPayDTO dto){
-        String key="cky-test-fss-balance-"+dto.getCurrencyId()+":"+dto.getCusId();
+        String key="cky-test-fss-balance-"+dto.getCurrencyCode()+":"+dto.getCusId();
         RLock lock=redissonClient.getLock(key);
         try{
             if(lock.tryLock(time,unit)){
-                BigDecimal oldBalance=getCurrentBalance(dto.getCusId(),dto.getCurrencyId());
+                BigDecimal oldBalance=getCurrentBalance(dto.getCusId(),dto.getCurrencyCode());
                 BigDecimal changeAmount=dto.getAmount();
                 //余额不足
                 if(dto.getPayType() == BillEnum.PayType.PAYMENT && oldBalance.compareTo(changeAmount) < 0){
                     return false;
                 }
                 BigDecimal result=calculateBalance(oldBalance,changeAmount);
-                setCurrentBalance(dto.getCusId(),dto.getCurrencyId(),result);
+                setCurrentBalance(dto.getCusId(),dto.getCurrencyCode(),result);
                 recordOpLog(dto,result);
             }
         }catch(Exception e){
@@ -78,12 +78,12 @@ public abstract class AbstractPayFactory {
 
     protected abstract void setOpLogAmount(AccountBalanceChange accountBalanceChange, BigDecimal amount);
 
-    protected void setCurrentBalance(Long cusId, Long currencyId, BigDecimal result){
-        accountBalanceService.setCurrentBalance(cusId,currencyId,result);
+    protected void setCurrentBalance(Long cusId, String currencyCode, BigDecimal result){
+        accountBalanceService.setCurrentBalance(cusId,currencyCode,result);
     }
 
-    protected BigDecimal getCurrentBalance(Long cusId,Long currencyId){
-        return accountBalanceService.getCurrentBalance(cusId,currencyId);
+    protected BigDecimal getCurrentBalance(Long cusId,String currencyCode){
+        return accountBalanceService.getCurrentBalance(cusId,currencyCode);
     }
 
     public abstract BigDecimal calculateBalance(BigDecimal oldBalance,BigDecimal changeAmount);

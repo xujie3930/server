@@ -26,9 +26,9 @@ public interface IAccountBalanceService {
 
     R balanceExchange(LoginUser loginUser, CustPayDTO dto);
 
-    BigDecimal getCurrentBalance(Long cusId,Long currencyId);
+    BigDecimal getCurrentBalance(Long cusId,String currencyCode);
 
-    void setCurrentBalance(Long cusId, Long currencyId, BigDecimal result);
+    void setCurrentBalance(Long cusId, String currencyCode, BigDecimal result);
 
     R withdraw(LoginUser loginUser, CustPayDTO dto);
 

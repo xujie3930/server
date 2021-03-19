@@ -25,10 +25,10 @@ public class ExchangeRate extends FssBaseEntity {
     private Long id;
 
     @ApiModelProperty(value = "原币别id")
-    private Long exchangeFromId;
+    private String exchangeFromCode;
 
     @ApiModelProperty(value = "现币别id")
-    private Long exchangeToId;
+    private String exchangeToCode;
 
     @ApiModelProperty(value = "原币别")
     private String exchangeFrom;

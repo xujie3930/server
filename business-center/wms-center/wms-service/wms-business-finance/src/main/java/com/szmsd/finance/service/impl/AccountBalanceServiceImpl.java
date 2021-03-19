@@ -93,6 +93,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         fillRechargesRequestDTO(rechargesRequestDTO,dto);
         R<RechargesResponseVo> result = httpRechargeFeignService.onlineRecharge(rechargesRequestDTO);
         RechargesResponseVo vo = result.getData();
+        //保存第三方接口调用充值记录
         thirdRechargeRecordService.saveRecord(dto,vo);
         if(result.getCode()!=200||vo==null||StringUtils.isNotEmpty(vo.getCode())){
             if(vo!=null&&StringUtils.isNotEmpty(vo.getCode())){
@@ -100,7 +101,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             }
             return R.failed();
         }
-        //保存第三方接口调用充值记录
         return R.ok();
     }
 
@@ -122,7 +122,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public R onlineIncome(LoginUser loginUser, CustPayDTO dto) {
-        fillCustInfo(loginUser,dto);
+//        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.ONLINE_INCOME);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
@@ -138,7 +138,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public R offlineIncome(LoginUser loginUser, CustPayDTO dto) {
-        fillCustInfo(loginUser,dto);
+//        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
@@ -154,7 +154,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public R balanceExchange(LoginUser loginUser, CustPayDTO dto) {
-        fillCustInfo(loginUser,dto);
+//        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.EXCHANGE);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
         boolean flag=abstractPayFactory.updateBalance(dto);
@@ -164,19 +164,19 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     /**
      * 查询币种余额，如果不存在初始化
      * @param custId
-     * @param currencyId
+     * @param currencyCode
      * @return
      */
     @Override
-    public BigDecimal getCurrentBalance(Long custId,Long currencyId) {
+    public BigDecimal getCurrentBalance(Long custId,String currencyCode) {
         QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper();
         queryWrapper.eq("cus_id",custId);
-        queryWrapper.eq("currency_id",currencyId);
+        queryWrapper.eq("currency_code",currencyCode);
         AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
         if(accountBalance!=null){
             return accountBalance.getCurrentBalance();
         }
-        accountBalance=new AccountBalance(custId,currencyId,getCurrencyName(currencyId),BigDecimal.ZERO);
+        accountBalance=new AccountBalance(custId,currencyCode,getCurrencyName(currencyCode),BigDecimal.ZERO);
         accountBalanceMapper.insert(accountBalance);
         return BigDecimal.ZERO;
     }
@@ -184,14 +184,14 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     /**
      * 更新币种余额
      * @param cusId
-     * @param currencyId
+     * @param currencyCode
      * @param result
      */
     @Override
-    public void setCurrentBalance(Long cusId, Long currencyId, BigDecimal result) {
+    public void setCurrentBalance(Long cusId, String currencyCode, BigDecimal result) {
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper=Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(AccountBalance::getCusId,cusId);
-        lambdaUpdateWrapper.eq(AccountBalance::getCurrencyId,currencyId);
+        lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode,currencyCode);
         lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance,result);
         accountBalanceMapper.update(null,lambdaUpdateWrapper);
     }
@@ -204,7 +204,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public R withdraw(LoginUser loginUser, CustPayDTO dto) {
-        fillCustInfo(loginUser,dto);
+//        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.PAYMENT);
         dto.setPayMethod(BillEnum.PayMethod.WITHDRAW_PAYMENT);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
@@ -212,7 +212,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         return flag?R.ok():R.failed();
     }
 
-    private String getCurrencyName(Long currencyId) {
+    private String getCurrencyName(String currencyCode) {
         //for test
         return "人民币";
     }
@@ -222,17 +222,17 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      * @param loginUser
      * @param payment
      */
-    private void fillCustInfo(LoginUser loginUser, CustPayDTO payment) {
-        if(loginUser!=null){
-            payment.setCusId(loginUser.getUserId());
-            payment.setCusCode("100015");
-            payment.setCusName(loginUser.getUsername());
-        }
-        //for test
-        payment.setCusId(100015l);
-        payment.setCusCode("100015");
-        payment.setCusName("Sunder");
-    }
+//    private void fillCustInfo(LoginUser loginUser, CustPayDTO payment) {
+//        if(loginUser!=null){
+//            payment.setCusId(loginUser.getUserId());
+//            payment.setCusCode(loginUser.getUsername());
+//            payment.setCusName(loginUser.getUsername());
+//        }
+//        //for test
+//        payment.setCusId(100015l);
+//        payment.setCusCode("100015");
+//        payment.setCusName("Sunder");
+//    }
 
     /**
      * 填充第三方支付请求

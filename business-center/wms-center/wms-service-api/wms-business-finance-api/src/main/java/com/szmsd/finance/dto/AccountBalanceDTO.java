@@ -31,12 +31,14 @@ public class AccountBalanceDTO implements Serializable {
     private String custName;
 
     @ApiModelProperty(value = "币种id")
-    private Long currencyId;
+    private String currencyCode;
 
     @ApiModelProperty(value = "币种姓名")
     private String currencyName;
 
     @ApiModelProperty(value = "余额")
     private BigDecimal currentBalance;
+
+    private String remark;
 
 }

@@ -38,7 +38,7 @@ public class PreRechargeDTO {
     private String remittanceMethod;
 
     @ApiModelProperty(value = "币种id")
-    private Long currencyId;
+    private String currencyCode;
 
     @ApiModelProperty(value = "币种名")
     private String currencyName;

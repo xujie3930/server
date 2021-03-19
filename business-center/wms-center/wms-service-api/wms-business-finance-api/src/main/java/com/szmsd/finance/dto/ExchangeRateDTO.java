@@ -19,11 +19,11 @@ public class ExchangeRateDTO implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty(value = "原币别id")
-    private Long exchangeFromId;
+    @ApiModelProperty(value = "原币别code")
+    private String exchangeFromCode;
 
-    @ApiModelProperty(value = "现币别id")
-    private Long exchangeToId;
+    @ApiModelProperty(value = "现币别code")
+    private String exchangeToCode;
 
     @ApiModelProperty(value = "原币别")
     private String exchangeFrom;
