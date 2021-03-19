@@ -142,6 +142,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     public int  insertBaseProduct(BaseProductDto baseProductDto) {
         //默认激活
         baseProductDto.setIsActive(true);
+        baseProductDto.setCategory("SKU");
         //卖家编码
         QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.msd.chargerules.domain.WarehouseOperation;
 import com.msd.chargerules.dto.WarehouseOperationDTO;
+import com.szmsd.chargerules.enums.ErrorMessageEnum;
 import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.common.core.exception.web.BaseException;
@@ -48,7 +49,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
             return cbm.multiply(warehouseOperation.getPrice()); //体积乘以价格
         }
 
-        throw new BaseException("仓储计费失败");
+        throw new BaseException(ErrorMessageEnum.WAREHOUSE_PRICE_NOT_FOUND.getMessage());
     }
 
 }

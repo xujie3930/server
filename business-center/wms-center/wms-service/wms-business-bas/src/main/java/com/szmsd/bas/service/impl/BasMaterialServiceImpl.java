@@ -77,6 +77,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         @Override
         public int insertBasMaterial(BasMaterial basMaterial)
         {
+            basMaterial.setCategory("包材");
             MaterialRequest materialRequest = BeanMapperUtil.map(basMaterial,MaterialRequest.class);
             R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
             if(r.getCode()!=200){

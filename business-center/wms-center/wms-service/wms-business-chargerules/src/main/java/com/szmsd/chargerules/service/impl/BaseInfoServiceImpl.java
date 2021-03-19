@@ -16,6 +16,8 @@ import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationResultRequest;
 import com.szmsd.open.vo.ResponseVO;
+import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,9 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
     @Resource
     private ISpecialOperationService specialOperationService;
+
+    @Resource
+    private InboundReceiptFeignService inboundReceiptFeignService;
 
     @Override
     public ResponseVO add(BasSpecialOperationDTO basSpecialOperationDTO) {
@@ -74,6 +79,11 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
                 return R.failed(ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
             }
         }
+        R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(basSpecialOperation.getOrderNo());
+        if(info.getData() == null) {
+            return R.failed(ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
+        }
+
         baseInfoMapper.updateById(basSpecialOperation);
 
         SpecialOperation specialOperation = specialOperationService.selectOne(basSpecialOperation);
