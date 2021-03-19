@@ -2,8 +2,8 @@ package com.szmsd.chargerules.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.msd.chargerules.domain.WarehouseOperation;
-import com.msd.chargerules.dto.WarehouseOperationDTO;
+import com.szmsd.chargerules.domain.WarehouseOperation;
+import com.szmsd.chargerules.dto.WarehouseOperationDTO;
 import com.szmsd.chargerules.enums.ErrorMessageEnum;
 import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IWarehouseOperationService;

@@ -1,4 +1,4 @@
-package com.msd.chargerules.domain;
+package com.szmsd.chargerules.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -13,25 +13,25 @@ import java.math.BigDecimal;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value = "业务操作", description = "业务操作表")
-@TableName("cha_operation")
-public class Operation extends BaseEntity {
+@ApiModel(value = "仓储业务操作", description = "仓储业务操作表")
+@TableName("cha_warehouse_operation")
+public class WarehouseOperation extends BaseEntity {
 
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty(value = "操作类型")
+    @ApiModelProperty(value = "仓库")
     @TableField
-    private String operationType;
+    private String warehouseCode;
 
-    @ApiModelProperty(value = "首件价格")
+    @ApiModelProperty(value = "计费天数")
     @TableField
-    private BigDecimal firstPrice;
+    private Integer chargeDays;
 
-    @ApiModelProperty(value = "续件价格")
+    @ApiModelProperty(value = "价格")
     @TableField
-    private BigDecimal nextPrice;
+    private BigDecimal price;
 
     @ApiModelProperty(value = "计费单位")
     @TableField

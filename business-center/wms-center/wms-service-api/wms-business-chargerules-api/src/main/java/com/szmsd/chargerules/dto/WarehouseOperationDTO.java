@@ -1,4 +1,4 @@
-package com.msd.chargerules.dto;
+package com.szmsd.chargerules.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
