@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class HtpBasFeignFallback implements FallbackFactory<HtpBasFeignService> {
     @Override
     public HtpBasFeignService create(Throwable throwable) {
-        log.info("{}服务调用失败：{}", BusinessHttpInterface.SERVICE_NAME, throwable.getMessage());
+        log.error("{}服务调用失败：{}", BusinessHttpInterface.SERVICE_NAME, throwable.getMessage());
         return new HtpBasFeignService() {
             @Override
             public R<ResponseVO> createPacking(@RequestBody PackingRequest packingRequest)

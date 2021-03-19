@@ -1,6 +1,7 @@
 package com.szmsd.http.controller;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.GetPricedProductsCommand;
 import com.szmsd.http.service.IPricedProductService;
 import com.szmsd.http.vo.DirectServiceFeeData;
@@ -15,7 +16,7 @@ import java.util.List;
 @Api(tags = {"PricedSheet"})
 @RestController
 @RequestMapping("/api/sheets/http")
-public class PricedSheetController {
+public class PricedSheetController extends BaseController {
 
     @Resource
     private IPricedProductService pricedProductService;

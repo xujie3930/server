@@ -4,12 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.config.HttpConfig;
+import com.szmsd.http.dto.CreatePricedProductCommand;
 import com.szmsd.http.dto.GetPricedProductsCommand;
 import com.szmsd.http.dto.PricedProductSearchCriteria;
 import com.szmsd.http.service.IPricedProductService;
-import com.szmsd.http.vo.DirectServiceFeeData;
-import com.szmsd.http.vo.KeyValuePair;
-import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.http.vo.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +33,16 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
     @Override
     public PageVO<PricedProduct> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria) {
         return JSON.parseObject(httpPost(httpConfig.getPricedProduct().getPageResult(), pricedProductSearchCriteria), new TypeReference<PageVO<PricedProduct>>(){});
+    }
+
+    @Override
+    public ResponseVO create(CreatePricedProductCommand createPricedProductCommand) {
+        return JSON.parseObject(httpPost(httpConfig.getPricedProduct().getProducts(), createPricedProductCommand), ResponseVO.class);
+    }
+
+    @Override
+    public PricedProductInfo getInfo(String productCode) {
+        return JSON.parseObject(httpGet(httpConfig.getPricedProduct().getProducts(), null, productCode), PricedProductInfo.class);
     }
 
 }

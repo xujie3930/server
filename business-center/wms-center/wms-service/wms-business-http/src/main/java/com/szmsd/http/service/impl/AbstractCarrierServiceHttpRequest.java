@@ -21,6 +21,6 @@ public abstract class AbstractCarrierServiceHttpRequest extends AbstractHttpRequ
 
     @Override
     Map<String, String> getHeaderMap() {
-        return null;
+        return httpConfig.getCarrierServiceHeaderMap();
     }
 }
