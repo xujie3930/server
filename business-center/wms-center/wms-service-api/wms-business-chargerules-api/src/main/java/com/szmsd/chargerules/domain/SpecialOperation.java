@@ -1,4 +1,4 @@
-package com.msd.chargerules.domain;
+package com.szmsd.chargerules.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.szmsd.common.core.web.domain.BaseEntity;

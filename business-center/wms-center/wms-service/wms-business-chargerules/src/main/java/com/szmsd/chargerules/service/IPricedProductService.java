@@ -1,6 +1,6 @@
 package com.szmsd.chargerules.service;
 
-import com.msd.chargerules.dto.PricedProductQueryDTO;
+import com.szmsd.chargerules.dto.PricedProductQueryDTO;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.dto.GetPricedProductsCommand;
 import com.szmsd.http.vo.DirectServiceFeeData;

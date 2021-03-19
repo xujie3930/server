@@ -1,4 +1,4 @@
-package com.msd.chargerules.dto;
+package com.szmsd.chargerules.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,8 +8,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
-@ApiModel(value = "SpecialOperationDTO", description = "SpecialOperationDTO对象")
-public class SpecialOperationDTO implements Serializable {
+@ApiModel(value = "OperationDTO", description = "OperationDTO对象")
+public class OperationDTO implements Serializable {
 
     @ApiModelProperty(value = "ID")
     private Long id;
