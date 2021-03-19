@@ -9,10 +9,10 @@ import javax.annotation.Resource;
 @Component
 public class OrderTypeFactory {
 
-    //入库单
+    //出库
     public static final String Shipment = "Shipment";
 
-    //出库
+    //入库
     public static final String Receipt = "Receipt";
 
     //退件
