@@ -66,7 +66,7 @@ public class BaseProductController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @PostMapping("/batchSKU")
     @ApiOperation(value = "通过code批量查询列表",notes = "通过code批量查询列表")
-    public  R<List<BaseProductMeasureDto>> batchSKU(List<String> codes)
+    public  R<List<BaseProductMeasureDto>> batchSKU(@RequestBody List<String> codes)
     {
         List<BaseProductMeasureDto> list = baseProductService.batchSKU(codes);
         return R.ok(list);
