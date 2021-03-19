@@ -1,8 +1,7 @@
 # Tomcat
 server:
   port: 7211
-  servlet:
-    context-path: /fss
+
 # Spring
 spring:
   application:
