@@ -9,16 +9,23 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.domain.ThirdRechargeRecord;
 import com.szmsd.finance.dto.AccountBalanceChangeDTO;
 import com.szmsd.finance.dto.AccountBalanceDTO;
-import com.szmsd.finance.dto.BalanceExchangeDTO;
 import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
+import com.szmsd.finance.service.IThirdRechargeRecordService;
+import com.szmsd.finance.util.SnowflakeId;
+import com.szmsd.http.api.feign.HttpRechargeFeignService;
+import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
+import com.szmsd.http.dto.recharges.RechargesRequestDTO;
+import com.szmsd.http.vo.RechargesResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +47,12 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Autowired
     AccountBalanceChangeMapper accountBalanceChangeMapper;
+
+    @Autowired
+    HttpRechargeFeignService httpRechargeFeignService;
+
+    @Autowired
+    IThirdRechargeRecordService thirdRechargeRecordService;
 
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
@@ -66,6 +79,39 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             queryWrapper.le(AccountBalanceChange::getCreateTime,dto.getEndTime());
         }
         return accountBalanceChangeMapper.recordListPage(queryWrapper);
+    }
+
+    /**
+     * 线上预充值
+     * @param dto
+     * @return
+     */
+    @Override
+    public R preOnlineIncome(CustPayDTO dto) {
+        RechargesRequestDTO rechargesRequestDTO=new RechargesRequestDTO();
+        //填充rechargesRequestDTO的信息
+        fillRechargesRequestDTO(rechargesRequestDTO,dto);
+        R<RechargesResponseVo> result = httpRechargeFeignService.onlineRecharge(rechargesRequestDTO);
+        RechargesResponseVo vo = result.getData();
+        thirdRechargeRecordService.saveRecord(dto,vo);
+        if(result.getCode()!=200||vo==null||StringUtils.isNotEmpty(vo.getCode())){
+            if(vo!=null&&StringUtils.isNotEmpty(vo.getCode())){
+                return R.failed(vo.getCode());
+            }
+            return R.failed();
+        }
+        //保存第三方接口调用充值记录
+        return R.ok();
+    }
+
+    @Override
+    @Transactional
+    public R rechargeCallback(RechargesCallbackRequestDTO requestDTO) {
+        ThirdRechargeRecord thirdRechargeRecord = thirdRechargeRecordService.updateRecordIfSuccess(requestDTO);
+        if(thirdRechargeRecord==null){
+            return R.failed();
+        }
+        return R.ok();
     }
 
     /**
@@ -186,5 +232,22 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         payment.setCusId(100015l);
         payment.setCusCode("100015");
         payment.setCusName("Sunder");
+    }
+
+    /**
+     * 填充第三方支付请求
+     * @param rechargesRequestDTO
+     * @param dto
+     */
+    private void fillRechargesRequestDTO(RechargesRequestDTO rechargesRequestDTO, CustPayDTO dto) {
+        rechargesRequestDTO.setSerialNo(SnowflakeId.getNextId12());
+        rechargesRequestDTO.setBankCode(dto.getBankCode());
+        rechargesRequestDTO.setRemark(dto.getRemark());
+        rechargesRequestDTO.setMethod(dto.getMethod());
+        //set amount
+        RechargesRequestAmountDTO amount= new RechargesRequestAmountDTO();
+        amount.setAmount(dto.getAmount());
+        amount.setCurrencyCode(dto.getCurrencyCode());
+        rechargesRequestDTO.setAmount(amount);
     }
 }

@@ -32,6 +32,9 @@ public class CustPayDTO {
     @ApiModelProperty(value = "币种id")
     private Long currencyId;
 
+    @ApiModelProperty(value = "币种编码")
+    private String currencyCode;
+
     @ApiModelProperty(value = "币种名")
     private String currencyName;
 
@@ -49,5 +52,12 @@ public class CustPayDTO {
     @ApiModelProperty(value = "币种名2")
     private String currencyName2;
 
+    @ApiModelProperty(value = "充值渠道")
+    private String method;
 
+    @ApiModelProperty(value = "银联银行代码")
+    private String bankCode;
+
+    @ApiModelProperty(value = "充值说明")
+    private String remark;
 }

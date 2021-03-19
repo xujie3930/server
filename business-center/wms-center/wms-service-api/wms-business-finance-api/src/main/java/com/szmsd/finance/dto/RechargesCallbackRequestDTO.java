@@ -1,6 +1,5 @@
-package com.szmsd.http.vo;
+package com.szmsd.finance.dto;
 
-import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,19 +11,19 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "RechargesResponseVo")
-public class RechargesResponseVo{
+public class RechargesCallbackRequestDTO {
 
     @ApiModelProperty(value = "充值编号")
     private String rechargeNo;
 
     @ApiModelProperty(value = "充值金额")
-    private RechargesRequestAmountDTO rechargeAmount;
+    private RechargesCallbackAmountDTO rechargeAmount;
 
     @ApiModelProperty(value = "手续费")
-    private RechargesRequestAmountDTO transactionFee;
+    private RechargesCallbackAmountDTO transactionFee;
 
     @ApiModelProperty(value = "实际到账金额")
-    private RechargesRequestAmountDTO actualRechargeAmount;
+    private RechargesCallbackAmountDTO actualRechargeAmount;
 
     @ApiModelProperty(value = "充值状态")
     private String status;

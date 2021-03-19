@@ -6,8 +6,8 @@ import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.AccountBalanceChangeDTO;
 import com.szmsd.finance.dto.AccountBalanceDTO;
-import com.szmsd.finance.dto.BalanceExchangeDTO;
 import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
 import com.szmsd.finance.service.IAccountBalanceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,7 +49,13 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "预充值")
     @PostMapping("/preOnlineIncome")
     public R preOnlineIncome(@RequestBody CustPayDTO dto) {
-        return accountBalanceService.onlineIncome(getLoginUser(), dto);
+        return accountBalanceService.preOnlineIncome(dto);
+    }
+
+    @PostMapping("/rechargeCallback")
+    @ApiOperation(value = "第三方充值接口回调")
+    public R rechargeCallback(@RequestBody RechargesCallbackRequestDTO requestDTO){
+        return accountBalanceService.rechargeCallback(requestDTO);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:onlineIncome')")

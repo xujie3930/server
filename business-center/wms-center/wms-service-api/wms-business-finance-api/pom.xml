@@ -25,6 +25,10 @@
             <groupId>com.szmsd</groupId>
             <artifactId>szmsd-common-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-open-api</artifactId>
+        </dependency>
 
     </dependencies>
 
