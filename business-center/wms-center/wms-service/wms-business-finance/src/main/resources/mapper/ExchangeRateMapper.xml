@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.finance.mapper.ExchangeRateMapper">
-    <select id="listPage" resultType="com.szmsd.finance.domain.FssExchangeRate">
+    <select id="listPage" resultType="com.szmsd.finance.domain.ExchangeRate">
         select *from fss_exchange_rate
         <where>
             ${ew.sqlSegment}
         </where>
     </select>
 
-    <select id="checkExchangeRateIsExists" resultType="com.szmsd.finance.domain.FssExchangeRate">
+    <select id="checkExchangeRateIsExists" resultType="com.szmsd.finance.domain.ExchangeRate"
+        parameterType="com.szmsd.finance.dto.ExchangeRateDTO">
         select * from fss_exchange_rate
-        where (exchange_from_id=#{exchangeFromId} and exchange_to_id=#{exchangeToId})
-        or (exchange_from_id=#{exchangeToId} and exchange_to_id=#{exchangeFromId})
+        where (exchange_from_id=#{dto.exchangeFromId} and exchange_to_id=#{dto.exchangeToId})
+        or (exchange_from_id=#{dto.exchangeToId} and exchange_to_id=#{dto.exchangeFromId})
+        <if test="dto.id != null">
+            and id <![CDATA[ <> ]]> #{dto.id}
+        </if>
     </select>
 </mapper>

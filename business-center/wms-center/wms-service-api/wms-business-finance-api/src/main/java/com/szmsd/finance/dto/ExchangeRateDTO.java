@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  */
 @Data
 @ApiModel(value = "FssExchangeRateDTO", description = "FssExchangeRateDTO对象")
-public class FssExchangeRateDTO implements Serializable {
+public class ExchangeRateDTO implements Serializable {
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -32,7 +32,7 @@ public class FssExchangeRateDTO implements Serializable {
     private String exchangeTo;
 
     @ApiModelProperty(value = "比率")
-    private BigDecimal rage;
+    private BigDecimal rate;
 
     @ApiModelProperty(value = "备注")
     private String remark;
