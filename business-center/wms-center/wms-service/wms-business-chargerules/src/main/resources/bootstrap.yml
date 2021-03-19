@@ -8,4 +8,4 @@ spring:
     name: wms-business-chargerules
   profiles:
     # 环境配置
-    active: dev
+    active: test
