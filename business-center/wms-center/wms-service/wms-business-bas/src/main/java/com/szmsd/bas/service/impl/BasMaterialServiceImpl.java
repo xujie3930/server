@@ -63,7 +63,9 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", basMaterial.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basMaterial.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "type_name", basMaterial.getTypeName());
-        queryWrapper.eq("is_active", true);
+        if(basMaterial.getIsActive()!=null){
+            queryWrapper.eq("is_active", basMaterial.getIsActive());
+        }
         queryWrapper.orderByDesc("create_time");
         return baseMapper.selectList(queryWrapper);
         }

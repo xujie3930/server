@@ -2,6 +2,7 @@ package com.szmsd.bas.api.factory;
 
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,10 @@ public class BaseProductFeignFallback implements FallbackFactory<BaseProductFeig
             }
             @Override
             public R<BaseProduct> getSku(@RequestBody BaseProduct baseProduct){
+                return R.convertResultJson(throwable);
+            }
+            @Override
+            public R<List<BaseProductMeasureDto>> batchSKU(@RequestBody List<String> codes){
                 return R.convertResultJson(throwable);
             }
         };

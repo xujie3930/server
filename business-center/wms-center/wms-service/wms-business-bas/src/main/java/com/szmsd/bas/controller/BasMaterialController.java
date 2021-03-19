@@ -58,7 +58,7 @@ public class BasMaterialController extends BaseController{
      public void export(HttpServletResponse response, BasMaterial basMaterial) throws IOException {
      List<BasMaterial> list = basMaterialService.selectBasMaterialList(basMaterial);
      ExcelUtil<BasMaterial> util = new ExcelUtil<BasMaterial>(BasMaterial.class);
-        util.exportExcel(response,list, "BasMaterial");
+     util.exportExcel(response,list, "BasMaterial");
 
      }
 
