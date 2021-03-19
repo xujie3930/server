@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.service;
 
+import com.szmsd.chargerules.dto.CreateProductDTO;
 import com.szmsd.chargerules.dto.PricedProductQueryDTO;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.dto.GetPricedProductsCommand;
@@ -15,5 +16,7 @@ public interface IPricedProductService {
 
     List<KeyValuePair> keyValuePairs();
 
-    TableDataInfo<PricedProduct> selectList(PricedProductQueryDTO pricedProductQueryDTO);
+    TableDataInfo<PricedProduct> selectPage(PricedProductQueryDTO pricedProductQueryDTO);
+
+    void create(CreateProductDTO createProductDTO);
 }

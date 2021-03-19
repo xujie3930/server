@@ -1,8 +1,6 @@
 package com.szmsd.putinstorage.component;
 
-import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.http.api.feign.HtpInboundFeignService;
 import com.szmsd.http.dto.CancelReceiptRequest;
 import com.szmsd.http.dto.CreateReceiptRequest;
@@ -15,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -48,7 +45,7 @@ public class RemoteRequest {
             return receiptDetailInfo;
         }).collect(Collectors.toList()));
         R<CreateReceiptResponse> createReceiptResponseR = htpInboundFeignService.create(createInboundReceipt);
-        resultAssert(createReceiptResponseR, "创建入库单");
+        ResponseVO.resultAssert(createReceiptResponseR, "创建入库单");
     }
 
     /**
@@ -61,22 +58,7 @@ public class RemoteRequest {
         cancelReceiptRequest.setOrderNo(orderNo);
         cancelReceiptRequest.setWarehouseCode(warehouseCode);
         R<ResponseVO> cancel = htpInboundFeignService.cancel(cancelReceiptRequest);
-        resultAssert(cancel, "取消入库单");
-    }
-
-    public void resultAssert(R<? extends ResponseVO> result, String api) {
-        AssertUtil.notNull(result, "RemoteRequest[" + api + "请求失败]");
-
-        boolean expression = result.getCode() == HttpStatus.SUCCESS;
-        AssertUtil.isTrue(expression, "RemoteRequest[" + api + "失败:" +  result.getMsg() + "]");
-
-        ResponseVO data = result.getData();
-        boolean expression1 = data != null && data.getSuccess() == new Boolean(true);
-        AssertUtil.isTrue(expression1, "RemoteRequest[" + api + "失败:" +  getDefaultStr(data.getMessage()).concat(getDefaultStr(data.getErrors())) + "]");
-    }
-
-    public String getDefaultStr(String str) {
-        return Optional.ofNullable(str).orElse("");
+        ResponseVO.resultAssert(cancel, "取消入库单");
     }
 
 }

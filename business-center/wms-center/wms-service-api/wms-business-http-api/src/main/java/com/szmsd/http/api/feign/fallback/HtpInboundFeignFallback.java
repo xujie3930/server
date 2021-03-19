@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class HtpInboundFeignFallback implements FallbackFactory<HtpInboundFeignService> {
     @Override
     public HtpInboundFeignService create(Throwable throwable) {
-        log.info("{}服务调用失败：{}", BusinessHttpInterface.SERVICE_NAME, throwable.getMessage());
+        log.error("{}服务调用失败：{}", BusinessHttpInterface.SERVICE_NAME, throwable.getMessage());
         return new HtpInboundFeignService() {
             @Override
             public R<CreateReceiptResponse> create(CreateReceiptRequest createReceiptRequestDTO) {

@@ -8,8 +8,11 @@ import com.szmsd.http.event.EventUtil;
 import com.szmsd.http.event.RequestLogEvent;
 import org.slf4j.MDC;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangyuyuan
@@ -57,8 +60,9 @@ public abstract class AbstractHttpRequest {
         return responseBody;
     }
 
-    String httpGet(String api, Object object) {
+    String httpGet(String api, Object object, String... pathVariable) {
         String url = getUrl() + api;
+        url += (pathVariable != null) ? ("/" + Arrays.asList(pathVariable).stream().filter(Objects::nonNull).collect(Collectors.joining("/"))) : "";
         String requestBody = JSON.toJSONString(object);
         Map<String, String> headerMap = getHeaderMap();
         Date requestTime = new Date();
@@ -80,4 +84,5 @@ public abstract class AbstractHttpRequest {
         log.setResponseTime(responseTime);
         EventUtil.publishEvent(new RequestLogEvent(log));
     }
+
 }
