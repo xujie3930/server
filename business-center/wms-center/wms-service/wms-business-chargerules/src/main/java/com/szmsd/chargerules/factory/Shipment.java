@@ -19,13 +19,13 @@ public class Shipment extends OrderType {
     private DelOutboundFeignService delOutboundFeignService;
 
     @Override
-    public boolean checkOrderExist(String orderNo) {
-        R<DelOutbound> details = delOutboundFeignService.details(orderNo);
-        if(details.getCode() != 200) {
-            log.error("checkOrderExist error: {}",details.getData());
-            return false;
+    public String findOrderById(String orderNo) {
+        R<DelOutbound> info = delOutboundFeignService.details(orderNo);
+        if(info.getCode() == 200 && info.getData() != null) {
+            return info.getData().getCustomCode();
         }
-        return details.getData() != null;
+        log.error("checkOrderExist error: {}",info.getData());
+        return null;
     }
 
 }

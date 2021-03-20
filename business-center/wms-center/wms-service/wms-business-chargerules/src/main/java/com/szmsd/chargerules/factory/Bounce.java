@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 public class Bounce extends OrderType {
 
     @Override
-    public boolean checkOrderExist(String orderNo) {
-        return false;
+    public String findOrderById(String orderNo) {
+        return null;
     }
 
 }
