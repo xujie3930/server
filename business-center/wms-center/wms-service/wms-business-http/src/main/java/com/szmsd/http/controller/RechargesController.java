@@ -8,10 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author liulei
@@ -31,10 +28,10 @@ public class RechargesController {
         return R.ok(accountService.onlineRecharge(dto));
     }
 
-//    @PostMapping("/rechargeResult")
-//    @ApiOperation(value = "充值结果查询")
-//    @ApiImplicitParam(name = "dto", value = "RechargesResponseVo", dataType = "RechargesRequestDTO")
-//    public R<RechargesResponseVo> rechargeResult(@RequestBody RechargesRequestDTO dto) {
-//        return R.ok(accountService.rechargeResult(dto));
-//    }
+    @PostMapping("/rechargeResult")
+    @ApiOperation(value = "充值结果查询")
+    @ApiImplicitParam(name = "dto", value = "RechargesResponseVo", dataType = "RechargesRequestDTO")
+    public R<RechargesResponseVo> rechargeResult(@RequestParam("rechargeNo") String rechargeNo) {
+        return R.ok(accountService.rechargeResult(rechargeNo));
+    }
 }

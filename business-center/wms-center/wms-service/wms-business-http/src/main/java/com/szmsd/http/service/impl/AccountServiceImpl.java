@@ -24,13 +24,23 @@ public class AccountServiceImpl extends AbstractBaseHttpRequest implements IAcco
     @Override
     public RechargesResponseVo onlineRecharge(RechargesRequestDTO dto) {
         dto.setNotifyUrl(httpConfig.getNotifyUrl());
-        return JSON.parseObject(httpPost(httpConfig.getThirdPayment(), dto), RechargesResponseVo.class);
+        return JSON.parseObject(httpPost("", dto), RechargesResponseVo.class);
+    }
+
+    @Override
+    public RechargesResponseVo rechargeResult(String rechargeNo) {
+        return JSON.parseObject(httpPost("/", rechargeNo), RechargesResponseVo.class);
+    }
+
+    @Override
+    public String getUrl(){
+        return httpConfig.getThirdPayment();
     }
 
     @Override
     Map<String, String> getHeaderMap() {
         Map<String,String> headerMap=new HashMap<String,String>();
         headerMap.put("Authorization","Bearer "+httpConfig.getRechargeToken());
-        return httpConfig.getBaseHeaderMap();
+        return headerMap;
     }
 }

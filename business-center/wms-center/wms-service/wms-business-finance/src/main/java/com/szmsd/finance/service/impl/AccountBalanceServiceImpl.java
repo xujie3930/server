@@ -97,7 +97,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         thirdRechargeRecordService.saveRecord(dto,vo);
         if(result.getCode()!=200||vo==null||StringUtils.isNotEmpty(vo.getCode())){
             if(vo!=null&&StringUtils.isNotEmpty(vo.getCode())){
-                return R.failed(vo.getCode());
+                return R.failed(vo.getMessage());
             }
             return R.failed();
         }

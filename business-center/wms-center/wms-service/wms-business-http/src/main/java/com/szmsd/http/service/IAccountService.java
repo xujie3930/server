@@ -8,4 +8,6 @@ import com.szmsd.http.vo.RechargesResponseVo;
  */
 public interface IAccountService {
     RechargesResponseVo onlineRecharge(RechargesRequestDTO dto);
+
+    RechargesResponseVo rechargeResult(String rechargeNo);
 }

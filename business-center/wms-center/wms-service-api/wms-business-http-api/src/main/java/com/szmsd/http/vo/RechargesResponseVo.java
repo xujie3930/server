@@ -43,4 +43,13 @@ public class RechargesResponseVo{
 
     @ApiModelProperty(value = "错误编码")
     private String Code;
+
+    @ApiModelProperty(value = "渠道")
+    private String method;
+
+    @ApiModelProperty(value = "创建时间")
+    private String createdTime;
+
+    @ApiModelProperty(value = "充值完成")
+    private String finishedTime;
 }
