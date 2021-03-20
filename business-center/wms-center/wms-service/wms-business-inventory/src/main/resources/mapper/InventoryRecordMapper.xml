@@ -5,6 +5,8 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="InventoryRecordVO" type="com.szmsd.inventory.domain.vo.InventoryRecordVO">
         <result column="receipt_no" property="receiptNo"/>
+        <result column="sku" property="sku"/>
+        <result column="warehouse_code" property="warehouseCode"/>
         <result column="type_name" property="typeName"/>
         <result column="quantity" property="quantity"/>
         <result column="before_total_inventory" property="beforeTotalInventory"/>
@@ -24,6 +26,8 @@
     <!-- 通用查询结果列 -->
     <sql id="Column_List_VO">
         t.receipt_no,
+        t.sku,
+        t.warehouse_code,
         t.type type_name,
         t.quantity,
         t.before_total_inventory,
