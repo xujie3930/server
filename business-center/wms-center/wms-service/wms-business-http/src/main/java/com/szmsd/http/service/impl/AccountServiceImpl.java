@@ -5,7 +5,11 @@ import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.recharges.RechargesRequestDTO;
 import com.szmsd.http.service.IAccountService;
 import com.szmsd.http.vo.RechargesResponseVo;
+import org.apache.commons.collections.map.HashedMap;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author liulei
@@ -19,6 +23,14 @@ public class AccountServiceImpl extends AbstractBaseHttpRequest implements IAcco
 
     @Override
     public RechargesResponseVo onlineRecharge(RechargesRequestDTO dto) {
+        dto.setNotifyUrl(httpConfig.getNotifyUrl());
         return JSON.parseObject(httpPost(httpConfig.getThirdPayment(), dto), RechargesResponseVo.class);
+    }
+
+    @Override
+    Map<String, String> getHeaderMap() {
+        Map<String,String> headerMap=new HashMap<String,String>();
+        headerMap.put("Authorization","Bearer "+httpConfig.getRechargeToken());
+        return httpConfig.getBaseHeaderMap();
     }
 }

@@ -9,4 +9,4 @@ spring:
     name: wms-business-http
   profiles:
     # 环境配置
-    active: test
+    active: dev
