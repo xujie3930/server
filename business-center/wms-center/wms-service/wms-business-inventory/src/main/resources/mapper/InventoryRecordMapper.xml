@@ -19,6 +19,7 @@
         <result column="after_freeze_inventory" property="afterFreezeInventory"/>
         <result column="after_total_inbound" property="afterTotalInbound"/>
         <result column="after_total_outbound" property="afterTotalOutbound"/>
+        <result column="operate_on" property="operateOn"/>
         <result column="logs" property="logs"/>
         <result column="logs_language" property="logsLanguage"/>
     </resultMap>
@@ -40,6 +41,7 @@
         t.after_freeze_inventory,
         t.after_total_inbound,
         t.after_total_outbound,
+        t.operate_on,
         t.remark logs,
         <![CDATA[ CONCAT(t.type, "&", t.placeholder) logs_language ]]>
     </sql>

@@ -52,7 +52,7 @@ public class BaseProductMeasureDto {
 
     @ApiModelProperty(value = "仓库测量体积 cm3")
     @Excel(name = "仓库测量体积 cm3")
-    private BigDecimal Volume;
+    private BigDecimal volume;
 
     @ApiModelProperty(value = "是否仓库验收")
     private Boolean warehouseAcceptance;
