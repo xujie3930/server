@@ -62,27 +62,27 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "在线充值")
     @PostMapping("/onlineIncome")
     public R onlineIncome(@RequestBody CustPayDTO dto) {
-        return accountBalanceService.onlineIncome(getLoginUser(), dto);
+        return accountBalanceService.onlineIncome(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:offlineIncome')")
     @ApiOperation(value = "线下充值")
     @PostMapping("/offlineIncome")
     public R offlineIncome(@RequestBody CustPayDTO dto) {
-        return accountBalanceService.offlineIncome(getLoginUser(), dto);
+        return accountBalanceService.offlineIncome(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:withdraw')")
     @ApiOperation(value = "提现")
     @PostMapping("/withdraw")
     public R withdraw(@RequestBody CustPayDTO dto) {
-        return accountBalanceService.withdraw(getLoginUser(), dto);
+        return accountBalanceService.withdraw(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:balanceExchange')")
     @ApiOperation(value = "余额汇率转换")
     @PostMapping("/balanceExchange")
     public R balanceExchange(@RequestBody CustPayDTO dto) {
-        return accountBalanceService.balanceExchange(getLoginUser(), dto);
+        return accountBalanceService.balanceExchange(dto);
     }
 }

@@ -11,8 +11,8 @@
     <select id="checkExchangeRateIsExists" resultType="com.szmsd.finance.domain.ExchangeRate"
         parameterType="com.szmsd.finance.dto.ExchangeRateDTO">
         select * from fss_exchange_rate
-        where (exchange_from_id=#{dto.exchangeFromId} and exchange_to_id=#{dto.exchangeToId})
-        or (exchange_from_id=#{dto.exchangeToId} and exchange_to_id=#{dto.exchangeFromId})
+        where (exchange_from_code=#{dto.exchangeFromCode} and exchange_to_code=#{dto.exchangeToCode})
+        or (exchange_from_code=#{dto.exchangeToCode} and exchange_to_code=#{dto.exchangeFromCode})
         <if test="dto.id != null">
             and id <![CDATA[ <> ]]> #{dto.id}
         </if>

@@ -45,8 +45,8 @@ public class AccountBalance extends FssBaseEntity {
     public AccountBalance() {
     }
 
-    public AccountBalance(Long cusId, String currencyCode, String currencyName, BigDecimal currentBalance) {
-        this.cusId = cusId;
+    public AccountBalance(String cusCode, String currencyCode, String currencyName, BigDecimal currentBalance) {
+        this.cusCode = cusCode;
         this.currencyCode = currencyCode;
         this.currencyName = currencyName;
         this.currentBalance = currentBalance;

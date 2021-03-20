@@ -20,17 +20,17 @@ public interface IAccountBalanceService {
 
     List<AccountBalanceChange> recordListPage(AccountBalanceChangeDTO dto);
 
-    R onlineIncome(LoginUser loginUser, CustPayDTO dto);
+    R onlineIncome(CustPayDTO dto);
 
-    R offlineIncome(LoginUser loginUser, CustPayDTO dto);
+    R offlineIncome(CustPayDTO dto);
 
-    R balanceExchange(LoginUser loginUser, CustPayDTO dto);
+    R balanceExchange(CustPayDTO dto);
 
-    BigDecimal getCurrentBalance(Long cusId,String currencyCode);
+    BigDecimal getCurrentBalance(String cusCode,String currencyCode);
 
-    void setCurrentBalance(Long cusId, String currencyCode, BigDecimal result);
+    void setCurrentBalance(String cusCode, String currencyCode, BigDecimal result);
 
-    R withdraw(LoginUser loginUser, CustPayDTO dto);
+    R withdraw(CustPayDTO dto);
 
     R preOnlineIncome(CustPayDTO dto);
 

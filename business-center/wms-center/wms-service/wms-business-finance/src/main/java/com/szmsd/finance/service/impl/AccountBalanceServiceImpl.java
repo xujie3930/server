@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
@@ -15,8 +14,8 @@ import com.szmsd.finance.dto.AccountBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
 import com.szmsd.finance.enums.BillEnum;
-import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
-import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
+import com.szmsd.finance.api.feign.factory.abstractFactory.AbstractPayFactory;
+import com.szmsd.finance.api.feign.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
@@ -25,6 +24,7 @@ import com.szmsd.finance.util.SnowflakeId;
 import com.szmsd.http.api.feign.HttpRechargeFeignService;
 import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
 import com.szmsd.http.dto.recharges.RechargesRequestDTO;
+import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.http.vo.RechargesResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -107,21 +107,30 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     @Transactional
     public R rechargeCallback(RechargesCallbackRequestDTO requestDTO) {
+        //更新第三方接口调用记录
         ThirdRechargeRecord thirdRechargeRecord = thirdRechargeRecordService.updateRecordIfSuccess(requestDTO);
         if(thirdRechargeRecord==null){
             return R.failed();
+        }
+        String rechargeStatus= HttpRechargeConstants.RechargeStatusCode.Successed.name();
+        //如果充值成功进行充值
+        if(StringUtils.equals(thirdRechargeRecord.getRechargeStatus(),rechargeStatus)){
+            CustPayDTO dto=new CustPayDTO();
+            dto.setAmount(thirdRechargeRecord.getActualAmount());
+            dto.setCurrencyCode(thirdRechargeRecord.getActualCurrency());
+            dto.setCusCode(thirdRechargeRecord.getCusCode());
+            return onlineIncome(dto);
         }
         return R.ok();
     }
 
     /**
      * 线上充值
-     * @param loginUser
      * @param dto
      * @return
      */
     @Override
-    public R onlineIncome(LoginUser loginUser, CustPayDTO dto) {
+    public R onlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.ONLINE_INCOME);
@@ -132,12 +141,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     /**
      * 线下充值
-     * @param loginUser
      * @param dto
      * @return
      */
     @Override
-    public R offlineIncome(LoginUser loginUser, CustPayDTO dto) {
+    public R offlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);
@@ -148,12 +156,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     /**
      * 余额汇率转换
-     * @param loginUser
      * @param dto
      * @return
      */
     @Override
-    public R balanceExchange(LoginUser loginUser, CustPayDTO dto) {
+    public R balanceExchange(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.EXCHANGE);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
@@ -163,34 +170,34 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     /**
      * 查询币种余额，如果不存在初始化
-     * @param custId
+     * @param cusCode
      * @param currencyCode
      * @return
      */
     @Override
-    public BigDecimal getCurrentBalance(Long custId,String currencyCode) {
+    public BigDecimal getCurrentBalance(String cusCode,String currencyCode) {
         QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper();
-        queryWrapper.eq("cus_id",custId);
+        queryWrapper.eq("cus_code",cusCode);
         queryWrapper.eq("currency_code",currencyCode);
         AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
         if(accountBalance!=null){
             return accountBalance.getCurrentBalance();
         }
-        accountBalance=new AccountBalance(custId,currencyCode,getCurrencyName(currencyCode),BigDecimal.ZERO);
+        accountBalance=new AccountBalance(cusCode,currencyCode,getCurrencyName(currencyCode),BigDecimal.ZERO);
         accountBalanceMapper.insert(accountBalance);
         return BigDecimal.ZERO;
     }
 
     /**
      * 更新币种余额
-     * @param cusId
+     * @param cusCode
      * @param currencyCode
      * @param result
      */
     @Override
-    public void setCurrentBalance(Long cusId, String currencyCode, BigDecimal result) {
+    public void setCurrentBalance(String cusCode, String currencyCode, BigDecimal result) {
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper=Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.eq(AccountBalance::getCusId,cusId);
+        lambdaUpdateWrapper.eq(AccountBalance::getCusId,cusCode);
         lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode,currencyCode);
         lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance,result);
         accountBalanceMapper.update(null,lambdaUpdateWrapper);
@@ -198,12 +205,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     /**
      * 提现
-     * @param loginUser
      * @param dto
      * @return
      */
     @Override
-    public R withdraw(LoginUser loginUser, CustPayDTO dto) {
+    public R withdraw(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.PAYMENT);
         dto.setPayMethod(BillEnum.PayMethod.WITHDRAW_PAYMENT);
@@ -216,23 +222,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         //for test
         return "人民币";
     }
-
-    /**
-     * 填充客户信息
-     * @param loginUser
-     * @param payment
-     */
-//    private void fillCustInfo(LoginUser loginUser, CustPayDTO payment) {
-//        if(loginUser!=null){
-//            payment.setCusId(loginUser.getUserId());
-//            payment.setCusCode(loginUser.getUsername());
-//            payment.setCusName(loginUser.getUsername());
-//        }
-//        //for test
-//        payment.setCusId(100015l);
-//        payment.setCusCode("100015");
-//        payment.setCusName("Sunder");
-//    }
 
     /**
      * 填充第三方支付请求
