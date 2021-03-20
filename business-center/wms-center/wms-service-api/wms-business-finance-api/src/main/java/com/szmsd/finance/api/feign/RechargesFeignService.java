@@ -19,6 +19,6 @@ public interface RechargesFeignService {
     @PostMapping("/accountBalance/rechargeCallback")
     R rechargeCallback(@RequestBody RechargesCallbackRequestDTO requestDTO);
 
-    @PostMapping("/accountBalance/warehouseFeeDeductions")
+    @PostMapping("/accountBalance/warehouseFeeDeduct")
     R warehouseFeeDeductions(@RequestBody CustPayDTO dto);
 }

@@ -35,4 +35,6 @@ public interface IAccountBalanceService {
     R preOnlineIncome(CustPayDTO dto);
 
     R rechargeCallback(RechargesCallbackRequestDTO requestDTO);
+
+    R warehouseFeeDeductions(CustPayDTO dto);
 }
