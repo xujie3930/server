@@ -106,10 +106,11 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
                 List<BaseProductMeasureDto> sku = skuData.get(skuR.getSku());
                 BigDecimal skuVolume = BigDecimal.ZERO;
                 if (CollectionUtils.isNotEmpty(sku)) {
-                    skuVolume = sku.get(0).getVolume();
+                    BigDecimal initVolume = sku.get(0).getInitVolume();
+                    skuVolume = initVolume == null ? skuVolume : initVolume;
                 }
                 BigDecimal multiply = new BigDecimal(skuR.getQuantity()).multiply(skuVolume);
-                return new SkuVolumeVO().setSku(skuR.getSku()).setVolume(multiply);
+                return new SkuVolumeVO().setSku(skuR.getSku()).setVolume(multiply).setWarehouseNo(skuR.getWarehouseCode()).setOperateOn(skuR.getOperateOn());
             }).collect(Collectors.toList());
             inventorySkuVolumeVO.setSkuVolumes(skuVolumeVO);
             return inventorySkuVolumeVO;

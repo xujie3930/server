@@ -58,7 +58,7 @@ public class InventoryController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:skuvolume')")
-    @GetMapping("/inventory/skuVolume")
+    @GetMapping("/skuVolume")
     @ApiOperation(value = "获取库存SKU体积", notes = "获取库存SKU体积 - 按入库单")
     public R<List<InventorySkuVolumeVO>> querySkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO) {
         startPage();
