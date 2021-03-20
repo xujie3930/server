@@ -56,4 +56,8 @@ public class BaseProductMeasureDto {
 
     @ApiModelProperty(value = "是否仓库验收")
     private Boolean warehouseAcceptance;
+
+    @ApiModelProperty(value = "客户（卖家）编码")
+    @Excel(name = "客户（卖家）编码")
+    private String sellerCode;
 }
