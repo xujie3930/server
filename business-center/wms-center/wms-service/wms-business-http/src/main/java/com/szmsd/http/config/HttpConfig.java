@@ -30,6 +30,8 @@ public class HttpConfig {
 
     //充值
     private String thirdPayment;
+    private String notifyUrl;
+    private String rechargeToken;
 
     public Map<String, String> getBaseHeaderMap() {
         Map<String, String> map = new HashMap<>();
