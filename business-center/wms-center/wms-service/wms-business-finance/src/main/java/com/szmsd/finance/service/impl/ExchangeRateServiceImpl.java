@@ -93,8 +93,9 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
                 .eq(ExchangeRate::getExchangeFromCode,currencyToCode)
                 .eq(ExchangeRate::getExchangeToCode,currencyFromCode));
         if(rate!=null){
-            return R.ok(new BigDecimal("1").divide(rate.getRate()).setScale(4,BigDecimal.ROUND_FLOOR));
+            return R.ok(new BigDecimal("1").divide(rate.getRate(),4,BigDecimal.ROUND_FLOOR));
         }
         return R.failed("未查询到对应币种的汇率交换");
     }
+
 }
