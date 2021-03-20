@@ -7,7 +7,6 @@ import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -19,6 +18,6 @@ public interface InventoryFeignService {
     @PostMapping("/inventory/inbound")
     R inbound(@RequestBody InboundInventoryDTO receivingRequest);
 
-    @GetMapping("/inventory/skuVolume")
-    R<List<InventorySkuVolumeVO>> querySkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO);
+    @PostMapping("/inventory/skuVolume")
+    R<List<InventorySkuVolumeVO>> querySkuVolume(@RequestBody InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO);
 }
