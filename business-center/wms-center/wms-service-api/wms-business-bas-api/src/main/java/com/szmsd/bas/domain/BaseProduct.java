@@ -181,7 +181,7 @@ public class BaseProduct extends BaseEntity {
     private Double height;
 
     @ApiModelProperty(value = "仓库测量体积 cm3")
-    private BigDecimal Volume;
+    private BigDecimal volume;
 
     @ApiModelProperty(value = "操作员")
     @Excel(name = "操作员")
