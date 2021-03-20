@@ -1,4 +1,4 @@
-package com.szmsd.finance.api.feign.factory.abstractFactory;
+package com.szmsd.finance.factory.abstractFactory;
 
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.CustPayDTO;

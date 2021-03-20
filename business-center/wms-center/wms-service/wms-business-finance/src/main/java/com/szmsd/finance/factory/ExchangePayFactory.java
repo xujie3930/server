@@ -1,9 +1,9 @@
-package com.szmsd.finance.api.feign.factory;
+package com.szmsd.finance.factory;
 
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
-import com.szmsd.finance.api.feign.factory.abstractFactory.AbstractPayFactory;
+import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -81,10 +81,4 @@ public class ExchangePayFactory extends AbstractPayFactory {
         return null;
     }
 
-    public static void main(String[] args) {
-        BigDecimal rate=new BigDecimal("12.54");
-        BigDecimal substractAmount=new BigDecimal("12.54");
-        System.out.println( rate.multiply(substractAmount).setScale(2,BigDecimal.ROUND_FLOOR));
-
-    }
 }

@@ -1,10 +1,10 @@
-package com.szmsd.finance.api.feign.factory.abstractFactory;
+package com.szmsd.finance.factory.abstractFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.szmsd.finance.enums.BillEnum;
-import com.szmsd.finance.api.feign.factory.ExchangePayFactory;
-import com.szmsd.finance.api.feign.factory.IncomePayFactory;
-import com.szmsd.finance.api.feign.factory.PaymentPayFactory;
+import com.szmsd.finance.factory.ExchangePayFactory;
+import com.szmsd.finance.factory.IncomePayFactory;
+import com.szmsd.finance.factory.PaymentPayFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
