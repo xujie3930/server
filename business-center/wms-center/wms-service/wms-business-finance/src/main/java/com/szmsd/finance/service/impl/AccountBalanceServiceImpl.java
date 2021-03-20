@@ -14,8 +14,8 @@ import com.szmsd.finance.dto.AccountBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
 import com.szmsd.finance.enums.BillEnum;
-import com.szmsd.finance.api.feign.factory.abstractFactory.AbstractPayFactory;
-import com.szmsd.finance.api.feign.factory.abstractFactory.PayFactoryBuilder;
+import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
+import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
@@ -57,8 +57,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
         LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
-        if(dto.getCusId()!=null) {
-            queryWrapper.eq(AccountBalance::getCusId, dto.getCusId());
+        if(StringUtils.isNotEmpty(dto.getCusCode())) {
+            queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
         }
         return accountBalanceMapper.listPage(queryWrapper);
     }
@@ -122,6 +122,16 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             return onlineIncome(dto);
         }
         return R.ok();
+    }
+
+    @Override
+    public R warehouseFeeDeductions(CustPayDTO dto) {
+        if(dto.getPayType()==null){
+            return R.failed("支付类型为空");
+        }
+        AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
+        boolean flag=abstractPayFactory.updateBalance(dto);
+        return flag?R.ok():R.failed();
     }
 
     /**
@@ -197,7 +207,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public void setCurrentBalance(String cusCode, String currencyCode, BigDecimal result) {
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper=Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.eq(AccountBalance::getCusId,cusCode);
+        lambdaUpdateWrapper.eq(AccountBalance::getCusCode,cusCode);
         lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode,currencyCode);
         lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance,result);
         accountBalanceMapper.update(null,lambdaUpdateWrapper);

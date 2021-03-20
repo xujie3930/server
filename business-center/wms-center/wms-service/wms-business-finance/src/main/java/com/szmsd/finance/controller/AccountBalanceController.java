@@ -85,4 +85,11 @@ public class AccountBalanceController extends FssBaseController {
     public R balanceExchange(@RequestBody CustPayDTO dto) {
         return accountBalanceService.balanceExchange(dto);
     }
+
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:withdraw')")
+    @ApiOperation(value = "仓储费用扣除")
+    @PostMapping("/warehouseFeeDeduct")
+    public R warehouseFeeDeductions(@RequestBody CustPayDTO dto){
+        return accountBalanceService.warehouseFeeDeductions(dto);
+    }
 }

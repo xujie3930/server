@@ -1,8 +1,8 @@
-package com.szmsd.finance.api.feign.factory;
+package com.szmsd.finance.factory;
 
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.finance.domain.AccountBalanceChange;
-import com.szmsd.finance.api.feign.factory.abstractFactory.AbstractPayFactory;
+import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
