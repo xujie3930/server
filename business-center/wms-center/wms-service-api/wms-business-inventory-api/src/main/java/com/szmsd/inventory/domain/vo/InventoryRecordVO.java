@@ -15,6 +15,12 @@ public class InventoryRecordVO {
     @ApiModelProperty(value = "单据号")
     private String receiptNo;
 
+    @ApiModelProperty(value = "SKU")
+    private String sku;
+
+    @ApiModelProperty(value = "目的仓库编码")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "类型：系统语言")
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INVENTORY_RECORD_TYPE)
     private String typeName;

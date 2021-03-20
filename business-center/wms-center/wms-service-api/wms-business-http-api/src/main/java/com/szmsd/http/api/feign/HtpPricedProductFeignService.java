@@ -1,17 +1,18 @@
 package com.szmsd.http.api.feign;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.fallback.HtpPricedProductFeignFallback;
-import com.szmsd.http.dto.CreatePricedProductCommand;
-import com.szmsd.http.dto.GetPricedProductsCommand;
-import com.szmsd.http.dto.PricedProductSearchCriteria;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.DirectServiceFeeData;
 import com.szmsd.http.vo.KeyValuePair;
+import com.szmsd.http.vo.PricedProductInfo;
 import com.szmsd.http.vo.ResponseVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -31,4 +32,13 @@ public interface HtpPricedProductFeignService {
 
     @PostMapping("/api/products/http/create")
     R<ResponseVO> create(@RequestBody CreatePricedProductCommand createPricedProductCommand);
+
+    @PostMapping("/api/products/http/info/{productCode}")
+    R<PricedProductInfo> info(@PathVariable("productCode") String productCode);
+
+    @PostMapping("/api/products/http/update")
+    R<ResponseVO> update(@RequestBody UpdatePricedProductCommand updatePricedProductCommand);
+
+    @PostMapping("/api/products/http/exportFile")
+    R<FileStream> exportFile(@RequestBody PricedProductCodesCriteria pricedProductCodesCriteria);
 }

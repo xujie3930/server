@@ -1,5 +1,6 @@
 package com.szmsd.common.core.utils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -194,6 +195,34 @@ public class HttpClientHelper {
                 }
             }
             return result;
+        } catch (Exception e) {
+            try {
+                if (null != response)
+                    EntityUtils.consume(response.getEntity());
+            } catch (IOException e1) {
+                log.error(e.getMessage(), e1);
+            }
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public static FileStream httpPostStream(String url, Map<String, String> headerMap, String requestBody) {
+        return execute(new HttpPost(url), headerMap, requestBody);
+    }
+
+    public static FileStream execute(HttpEntityEnclosingRequestBase request, Map<String, String> headerMap, String requestBody) {
+        CloseableHttpClient httpClient = getHttpClient();
+        CloseableHttpResponse response = null;
+        try {
+            //添加http头信息
+            setHeader(request, headerMap);
+            setRaw(request, requestBody);
+            response = httpClient.execute(request);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                return new FileStream().setInputStream(IOUtils.toByteArray(entity.getContent())).setContentDisposition(response.getHeaders("Content-Disposition")[0].getValue());
+            }
         } catch (Exception e) {
             try {
                 if (null != response)

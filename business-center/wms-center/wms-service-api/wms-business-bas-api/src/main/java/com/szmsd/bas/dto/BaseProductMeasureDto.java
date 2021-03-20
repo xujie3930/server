@@ -30,6 +30,10 @@ public class BaseProductMeasureDto {
     @Excel(name = "初始高 cm")
     private Double initHeight;
 
+    @ApiModelProperty(value = "初始体积 cm3")
+    @Excel(name = "初始体积 cm3")
+    private BigDecimal initVolume;
+
     @ApiModelProperty(value = "仓库测量重量g")
     @Excel(name = "仓库测量重量g")
     private Double weight;
@@ -49,4 +53,7 @@ public class BaseProductMeasureDto {
     @ApiModelProperty(value = "仓库测量体积 cm3")
     @Excel(name = "仓库测量体积 cm3")
     private BigDecimal Volume;
+
+    @ApiModelProperty(value = "是否仓库验收")
+    private Boolean warehouseAcceptance;
 }
