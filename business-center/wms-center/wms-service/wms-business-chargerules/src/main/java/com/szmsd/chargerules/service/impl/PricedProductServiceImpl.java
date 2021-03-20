@@ -2,18 +2,17 @@ package com.szmsd.chargerules.service.impl;
 
 import com.szmsd.chargerules.dto.CreateProductDTO;
 import com.szmsd.chargerules.dto.PricedProductQueryDTO;
+import com.szmsd.chargerules.dto.UpdateProductDTO;
 import com.szmsd.chargerules.service.IPricedProductService;
+import com.szmsd.chargerules.vo.PricedProductInfoVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.FileStream;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
-import com.szmsd.http.dto.CreatePricedProductCommand;
-import com.szmsd.http.dto.GetPricedProductsCommand;
-import com.szmsd.http.dto.PricedProductSearchCriteria;
-import com.szmsd.http.vo.DirectServiceFeeData;
-import com.szmsd.http.vo.KeyValuePair;
-import com.szmsd.http.vo.PricedProduct;
-import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.http.dto.*;
+import com.szmsd.http.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +68,7 @@ public class PricedProductServiceImpl implements IPricedProductService {
 
     /**
      * 创建报价产品信息
-     * https://pricedproduct-internalapi-external.dsloco.com/swagger/index.html/api/products
+     * https://pricedproduct-internalapi-external.dsloco.com/api/products
      * @param createProductDTO
      */
     @Override
@@ -86,6 +85,48 @@ public class PricedProductServiceImpl implements IPricedProductService {
         R<ResponseVO> responseVOR = htpPricedProductFeignService.create(createPricedProductCommand);
         ResponseVO.resultAssert(responseVOR, "创建报价产品信息");
         log.info("创建报价产品信息：操作完成");
+    }
+
+    /**
+     * 根据产品代码获取计价产品信息
+     * https://pricedproduct-internalapi-external.dsloco.com/api/products/{productCode}
+     * @param productCode
+     * @return
+     */
+    @Override
+    public PricedProductInfoVO getInfo(String productCode) {
+        log.info("根据产品代码获取计价产品信息：productCode={}", productCode);
+        R<PricedProductInfo> info = htpPricedProductFeignService.info(productCode);
+        log.info("根据产品代码获取计价产品信息：{}", info);
+        PricedProductInfo data = info.getData();
+        PricedProductInfoVO pricedProductInfoVO = data == null ? null : BeanMapperUtil.map(data, PricedProductInfoVO.class);
+        return pricedProductInfoVO;
+    }
+
+    /**
+     * 修改报价产品信息
+     * https://pricedproduct-internalapi-external.dsloco.com/api/products
+     * @param updateProductDTO
+     */
+    @Override
+    public void update(UpdateProductDTO updateProductDTO) {
+        log.info("修改报价产品信息：{}", updateProductDTO);
+        UpdatePricedProductCommand updatePricedProductCommand = BeanMapperUtil.map(updateProductDTO, UpdatePricedProductCommand.class);
+        R<ResponseVO> responseVOR = htpPricedProductFeignService.update(updatePricedProductCommand);
+        ResponseVO.resultAssert(responseVOR, "修改报价产品信息");
+        log.info("创建报价产品信息：操作完成");
+    }
+
+    /**
+     * 导出产品信息列表
+     * https://pricedproduct-internalapi-external.dsloco.com/api/products/exportFile
+     * @param codes
+     * @return
+     */
+    @Override
+    public FileStream exportFile(List<String> codes) {
+        R<FileStream> exportFile = htpPricedProductFeignService.exportFile(new PricedProductCodesCriteria().setCodes(codes));
+        return exportFile.getData();
     }
 
 }

@@ -1,11 +1,10 @@
 package com.szmsd.http.controller;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.PageVO;
-import com.szmsd.http.dto.CreatePricedProductCommand;
-import com.szmsd.http.dto.GetPricedProductsCommand;
-import com.szmsd.http.dto.PricedProductSearchCriteria;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IPricedProductService;
 import com.szmsd.http.vo.*;
 import io.swagger.annotations.Api;
@@ -58,10 +57,18 @@ public class PricedProductController extends BaseController {
         return R.ok(pricedProductInfo);
     }
 
-    @PutMapping("/update/{productCode}")
+    @PutMapping("/update")
     @ApiOperation(value = "修改报价产品信息")
-    public R<ResponseVO> update() {
-        return R.ok();
+    public R<ResponseVO> update(@RequestBody UpdatePricedProductCommand updatePricedProductCommand) {
+        ResponseVO update = iPricedProductService.update(updatePricedProductCommand);
+        return R.ok(update);
+    }
+
+    @PostMapping("/exportFile")
+    @ApiOperation(value = "导出产品信息列表")
+    public R<FileStream> exportFile(@RequestBody PricedProductCodesCriteria pricedProductCodesCriteria) {
+        FileStream fileStream = iPricedProductService.exportFile(pricedProductCodesCriteria);
+        return R.ok(fileStream);
     }
 
 }

@@ -8,14 +8,19 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.InventoryRecord;
 import com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO;
+import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryRecordVO;
+import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.mapper.InventoryRecordMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -45,11 +50,11 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         inventoryRecord.setBeforeFreezeInventory(beforeInventory.getFreezeInventory());
         inventoryRecord.setBeforeTotalInbound(beforeInventory.getTotalInbound());
         inventoryRecord.setBeforeTotalOutbound(beforeInventory.getTotalOutbound());
-        inventoryRecord.setAfterTotalInventory(beforeInventory.getTotalInventory());
-        inventoryRecord.setAfterAvailableInventory(beforeInventory.getAvailableInventory());
-        inventoryRecord.setAfterFreezeInventory(beforeInventory.getFreezeInventory());
-        inventoryRecord.setAfterTotalInbound(beforeInventory.getTotalInbound());
-        inventoryRecord.setAfterTotalOutbound(beforeInventory.getTotalOutbound());
+        inventoryRecord.setAfterTotalInventory(afterInventory.getTotalInventory());
+        inventoryRecord.setAfterAvailableInventory(afterInventory.getAvailableInventory());
+        inventoryRecord.setAfterFreezeInventory(afterInventory.getFreezeInventory());
+        inventoryRecord.setAfterTotalInbound(afterInventory.getTotalInbound());
+        inventoryRecord.setAfterTotalOutbound(afterInventory.getTotalOutbound());
         String logs = getLogs(type, inventoryRecord.getReceiptNo(), operator, operateOn, quantity);
         inventoryRecord.setRemark(logs);
         inventoryRecord.setOperator(operator);
@@ -63,6 +68,24 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
     @Override
     public List<InventoryRecordVO> selectList(InventoryRecordQueryDTO inventoryRecordQueryDTO) {
         return baseMapper.selectList(inventoryRecordQueryDTO);
+    }
+
+    /**
+     * 查询入库日志 - 按sku 仓库代码统计sku的体积
+     * @param inventorySkuVolumeQueryDTO
+     * @return
+     */
+    @Override
+    public List<InventorySkuVolumeVO> selectSkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO) {
+        inventorySkuVolumeQueryDTO = Optional.ofNullable(inventorySkuVolumeQueryDTO).orElse(new InventorySkuVolumeQueryDTO());
+
+        List<InventoryRecordVO> inventoryRecordVOS = this.selectList(new InventoryRecordQueryDTO().setSku(inventorySkuVolumeQueryDTO.getSku()).setWarehouseCode(inventorySkuVolumeQueryDTO.getWarehouseCode()));
+        if (CollectionUtils.isEmpty(inventoryRecordVOS)) {
+            return new ArrayList<>();
+        }
+
+
+        return null;
     }
 
     private static String getLogs(String type, String receiptNo, String operator, String operateOn, Integer quantity) {
