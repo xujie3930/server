@@ -1,6 +1,7 @@
 package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.domain.HtpRequestLog;
@@ -40,6 +41,16 @@ public abstract class AbstractHttpRequest {
         return responseBody;
     }
 
+    FileStream httpPostFile(String api, Object object) {
+        String url = getUrl() + api;
+        Map<String, String> headerMap = getHeaderMap();
+        Date requestTime = new Date();
+        String requestBody = JSON.toJSONString(object);
+        FileStream responseBody = HttpClientHelper.httpPostStream(url, headerMap, requestBody);
+        addLog(url, "POST", headerMap, requestBody, requestTime, "FileInputStream");
+        return responseBody;
+    }
+
     String httpPut(String api, Object object) {
         String url = getUrl() + api;
         String requestBody = JSON.toJSONString(object);
@@ -70,6 +81,7 @@ public abstract class AbstractHttpRequest {
         addLog(url, "GET", headerMap, requestBody, requestTime, responseBody);
         return responseBody;
     }
+
 
     void addLog(String url, String method, Map<String, String> headerMap, String requestBody, Date requestTime, String responseBody) {
         Date responseTime = new Date();

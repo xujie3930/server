@@ -6,8 +6,10 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
 import com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO;
 import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
+import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryRecordVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
+import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
 import io.swagger.annotations.Api;
@@ -54,5 +56,16 @@ public class InventoryController extends BaseController {
         List<InventoryRecordVO> inventoryRecordVOS = iInventoryRecordService.selectList(inventoryRecordQueryDTO);
         return getDataTable(inventoryRecordVOS);
     }
+
+    @PreAuthorize("@ss.hasPermi('inbound:skuvolume')")
+    @GetMapping("/inventory/skuVolume")
+    @ApiOperation(value = "获取库存SKU体积", notes = "获取库存SKU体积 - 按入库单")
+    public R<List<InventorySkuVolumeVO>> querySkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO) {
+        startPage();
+        List<InventorySkuVolumeVO> inventorySkuVolumeVOS = iInventoryRecordService.selectSkuVolume(inventorySkuVolumeQueryDTO);
+        return R.ok(inventorySkuVolumeVOS);
+    }
+
+
 
 }

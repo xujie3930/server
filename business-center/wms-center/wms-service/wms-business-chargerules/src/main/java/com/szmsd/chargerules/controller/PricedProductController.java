@@ -2,8 +2,11 @@ package com.szmsd.chargerules.controller;
 
 import com.szmsd.chargerules.dto.CreateProductDTO;
 import com.szmsd.chargerules.dto.PricedProductQueryDTO;
+import com.szmsd.chargerules.dto.UpdateProductDTO;
 import com.szmsd.chargerules.service.IPricedProductService;
+import com.szmsd.chargerules.vo.PricedProductInfoVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.dto.GetPricedProductsCommand;
@@ -16,6 +19,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 @Api(tags = {"PricedProduct"})
@@ -52,10 +60,41 @@ public class PricedProductController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('products:create')")
     @PostMapping("/create")
-    @ApiOperation(value = "根据包裹基本信息获取可下单报价产品")
+    @ApiOperation(value = "创建报价产品信息")
     public R create(@RequestBody CreateProductDTO createProductDTO) {
         iPricedProductService.create(createProductDTO);
         return R.ok();
+    }
+
+    @GetMapping("/info/{productCode}")
+    @ApiOperation(value = "根据产品代码获取计价产品信息")
+    public R<PricedProductInfoVO> info(@PathVariable("productCode") String productCode) {
+        PricedProductInfoVO pricedProductInfoVO = iPricedProductService.getInfo(productCode);
+        return R.ok(pricedProductInfoVO);
+    }
+
+    @PreAuthorize("@ss.hasPermi('products:update')")
+    @PutMapping("/update")
+    @ApiOperation(value = "修改报价产品信息")
+    public R update(@RequestBody UpdateProductDTO updateProductDTO) {
+        iPricedProductService.update(updateProductDTO);
+        return R.ok();
+    }
+
+    @PostMapping("/exportFile")
+    @ApiOperation(value = "导出产品信息列表")
+    public void exportFile(HttpServletResponse response, @RequestBody List<String> codes) throws Exception {
+        response.setContentType("application/vnd.ms-excel");
+        FileStream fileStream = iPricedProductService.exportFile(codes);
+        response.addHeader("Content-Disposition", fileStream.getContentDisposition());
+        try (InputStream fis = new ByteArrayInputStream(fileStream.getInputStream()); BufferedInputStream bis = new BufferedInputStream(fis); OutputStream os = response.getOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int i = bis.read(buffer);
+            while (i != -1) {
+                os.write(buffer, 0, i);
+                i = bis.read(buffer);
+            }
+        }
     }
 
 }

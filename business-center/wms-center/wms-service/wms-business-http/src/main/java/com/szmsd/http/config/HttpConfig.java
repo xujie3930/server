@@ -112,6 +112,8 @@ public class HttpConfig {
         private String keyValuePairs;
         // 创建报价产品信息
         private String products;
+        // 导出产品信息列表
+        private String exportFile;
     }
 
 
