@@ -3,6 +3,8 @@ package com.szmsd.open.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 /**
  * @author zhangyuyuan
  * @date 2021-03-06 15:01
@@ -16,6 +18,8 @@ public class AuthConfig {
     private String appId;
 
     private String sign;
+
+    public Set<String> whiteSet;
 
     public String getAppId() {
         return appId;
@@ -31,5 +35,13 @@ public class AuthConfig {
 
     public void setSign(String sign) {
         this.sign = sign;
+    }
+
+    public Set<String> getWhiteSet() {
+        return whiteSet;
+    }
+
+    public void setWhiteSet(Set<String> whiteSet) {
+        this.whiteSet = whiteSet;
     }
 }
