@@ -3,6 +3,7 @@ package com.szmsd.open.interceptor;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.open.config.AuthConfig;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * @author zhangyuyuan
@@ -31,6 +33,13 @@ public class AuthHandlerInterceptor implements HandlerInterceptor, Ordered {
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         // 从请求头上获取
+        Set<String> whiteSet = authConfig.getWhiteSet();
+        if (CollectionUtils.isNotEmpty(whiteSet)) {
+            String requestURI = request.getRequestURI();
+            if (whiteSet.contains(requestURI)) {
+                return true;
+            }
+        }
         String appId = request.getParameter(RequestConstant.APP_ID);
         if (StringUtils.isEmpty(appId)) {
             appId = request.getHeader(RequestConstant.APP_ID);
