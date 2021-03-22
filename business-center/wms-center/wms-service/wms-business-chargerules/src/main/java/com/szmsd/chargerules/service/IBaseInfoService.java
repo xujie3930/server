@@ -6,6 +6,7 @@ import com.szmsd.chargerules.dto.BasSpecialOperationDTO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.open.vo.ResponseVO;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface IBaseInfoService {
@@ -15,4 +16,6 @@ public interface IBaseInfoService {
     List<BasSpecialOperation> list(BasSpecialOperationDTO basSpecialOperationDTO);
 
     R update(BasSpecialOperation basSpecialOperation);
+
+    R pay(String customCode, BigDecimal amount);
 }
