@@ -15,9 +15,14 @@ import com.szmsd.chargerules.service.ISpecialOperationService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanUtils;
+import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationResultRequest;
+import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.open.vo.ResponseVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +30,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Service
 public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialOperation> implements IBaseInfoService {
 
@@ -39,6 +45,9 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
     @Resource
     private OrderTypeFactory orderTypeFactory;
+
+    @Resource
+    private RechargesFeignService rechargesFeignService;
 
     @Override
     public ResponseVO add(BasSpecialOperationDTO basSpecialOperationDTO) {
@@ -68,7 +77,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     @Override
     public R update(BasSpecialOperation basSpecialOperation) {
 
-        if (!SpecialOperationStatusEnum.PASS.checkStatus(basSpecialOperation.getStatus())) {
+        if (!SpecialOperationStatusEnum.checkStatus(basSpecialOperation.getStatus())) {
             return R.failed(ErrorMessageEnum.STATUS_RESULT.getMessage());
         }
         //审批不通过->系数设为0 审批通过->系数必须大于0
@@ -82,21 +91,28 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
         //校验单号是否存在
         OrderType factory = orderTypeFactory.getFactory(basSpecialOperation.getOrderType());
-        boolean exist = factory.checkOrderExist(basSpecialOperation.getOrderNo());
-        if (!exist) {
+        String customCode = factory.findOrderById(basSpecialOperation.getOrderNo());
+        if (StringUtils.isEmpty(customCode)) {
             return R.failed(ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
         }
 
         //修改数据
         baseInfoMapper.updateById(basSpecialOperation);
 
+        //查询操作类型对应的收费配置
         SpecialOperation specialOperation = specialOperationService.selectOne(basSpecialOperation);
         if (specialOperation == null) {
             return R.failed(ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
         }
-        BigDecimal calculate = calculate(specialOperation.getFirstPrice(),
+        BigDecimal amount = calculate(specialOperation.getFirstPrice(),
                 specialOperation.getNextPrice(), basSpecialOperation.getQty());
-        //TODO 调用扣费接口
+
+        //调用扣费接口扣费
+        R r = pay(customCode, amount);
+        if(r.getCode() != 200) {
+            log.error("pay failed: {}",r.getData());
+            return R.failed(ErrorMessageEnum.PAY_FAILED.getMessage());
+        }
 
         SpecialOperationResultRequest request = new SpecialOperationResultRequest();
         BeanUtils.copyProperties(basSpecialOperation, request);
@@ -105,6 +121,18 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
             return R.failed(ErrorMessageEnum.UPDATE_OPERATION_TYPE_ERROR.getMessage());
         }
         return R.ok();
+
+    }
+
+    @Override
+    public R pay(String customCode, BigDecimal amount) {
+        CustPayDTO custPayDTO = new CustPayDTO();
+        custPayDTO.setCusCode(customCode);
+        custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
+        custPayDTO.setPayMethod(BillEnum.PayMethod.SPECIAL_OPERATE);
+        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        custPayDTO.setAmount(amount);
+        return rechargesFeignService.warehouseFeeDeductions(custPayDTO);
     }
 
     public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Integer qty) {

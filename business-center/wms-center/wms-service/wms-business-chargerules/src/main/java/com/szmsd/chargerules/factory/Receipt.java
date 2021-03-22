@@ -19,13 +19,13 @@ public class Receipt extends OrderType {
     private InboundReceiptFeignService inboundReceiptFeignService;
 
     @Override
-    public boolean checkOrderExist(String orderNo) {
+    public String findOrderById(String orderNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(orderNo);
-        if(info.getCode() != 200) {
-            log.error("checkOrderExist error: {}",info.getData());
-            return false;
+        if(info.getCode() == 200 && info.getData() != null) {
+            return info.getData().getCusCode();
         }
-        return info.getData() != null;
+        log.error("checkOrderExist error: {}",info.getData());
+        return null;
     }
 
 }

@@ -16,7 +16,7 @@ public class OrderTypeFactory {
     public static final String Receipt = "Receipt";
 
     //退件
-    public static final String Bounce = "bounce";
+    public static final String Bounce = "Bounce";
 
     private ImmutableMap<String,OrderType> map;
 

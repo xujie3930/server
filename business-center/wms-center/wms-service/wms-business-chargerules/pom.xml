@@ -116,6 +116,16 @@
             <artifactId>wms-business-delivery-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-finance-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-inventory-api</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

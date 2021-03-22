@@ -12,6 +12,8 @@ public enum ErrorMessageEnum {
 
     WAREHOUSE_PRICE_NOT_FOUND("未找到该储存仓租的计费配置"),
 
+    PAY_FAILED("扣款失败"),
+
     UPDATE_OPERATION_TYPE_ERROR("更新远程特殊操作结果失败");
 
     private final String message;

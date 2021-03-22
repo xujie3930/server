@@ -16,9 +16,17 @@ public enum SpecialOperationStatusEnum {
         return status;
     }
 
-    public Boolean checkStatus(String status) {
-        return (SpecialOperationStatusEnum.PASS.getStatus().equals(status)
-                || SpecialOperationStatusEnum.REJECT.getStatus().equals(status));
+    public static Boolean checkStatus(String status) {
+        return get(status) != null;
+    }
+
+    public static SpecialOperationStatusEnum get(String code) {
+        for (SpecialOperationStatusEnum statusEnum : SpecialOperationStatusEnum.values()) {
+            if (statusEnum.getStatus().equals(code)) {
+                return statusEnum;
+            }
+        }
+        return null;
     }
 
 }

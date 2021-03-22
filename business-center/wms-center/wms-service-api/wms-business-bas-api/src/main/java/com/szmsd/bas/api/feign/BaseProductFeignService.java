@@ -4,6 +4,7 @@ import com.szmsd.bas.api.BusinessBasInterface;
 import com.szmsd.bas.api.factory.BaseProductFeignFallback;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
+import com.szmsd.bas.dto.MeasuringProductRequest;
 import com.szmsd.common.core.domain.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,4 +41,7 @@ public interface BaseProductFeignService {
      */
     @PostMapping(value = "/base/product/batchSKU")
     R<List<BaseProductMeasureDto>> batchSKU(@RequestBody List<String> codes);
+
+    @PostMapping(value = "/base/product/measuring")
+    R measuringProduct(@RequestBody MeasuringProductRequest measuringProductRequest);
 }

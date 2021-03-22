@@ -42,8 +42,8 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
     @Override
     public BigDecimal charge(int days, BigDecimal cbm, String warehouseCode, List<WarehouseOperation> dto) {
 
-        Optional<WarehouseOperation> optional = dto.stream().filter(value -> days > value.getChargeDays()).
-                max(Comparator.comparing(WarehouseOperation::getChargeDays));
+        Optional<WarehouseOperation> optional = dto.stream().filter(value -> value.getWarehouseCode().equals(warehouseCode)
+                && days > value.getChargeDays()).max(Comparator.comparing(WarehouseOperation::getChargeDays));
         if (optional.isPresent()) {
             WarehouseOperation warehouseOperation = optional.get();
             return cbm.multiply(warehouseOperation.getPrice()); //体积乘以价格
