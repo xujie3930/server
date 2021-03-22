@@ -107,7 +107,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             }
             return R.failed();
         }
-        return R.ok();
+        String rechargeUrl = vo.getRechargeUrl();
+        if(StringUtils.isEmpty(rechargeUrl)){
+            return R.failed();
+        }
+        return R.ok(rechargeUrl);
     }
 
     @Override
@@ -116,7 +120,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         //更新第三方接口调用记录
         ThirdRechargeRecord thirdRechargeRecord = thirdRechargeRecordService.updateRecordIfSuccess(requestDTO);
         if(thirdRechargeRecord==null){
-            return R.failed();
+            return R.failed("没有找到对应的充值记录");
         }
         String rechargeStatus= HttpRechargeConstants.RechargeStatusCode.Successed.name();
         //如果充值成功进行充值

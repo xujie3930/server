@@ -55,7 +55,7 @@ public class ThirdRechargeRecordServiceImpl implements IThirdRechargeRecordServi
     public ThirdRechargeRecord updateRecordIfSuccess(RechargesCallbackRequestDTO requestDTO) {
         ThirdRechargeRecord domain=thirdRechargeRecordMapper.selectOne(new QueryWrapper<ThirdRechargeRecord>().lambda()
                 .eq(ThirdRechargeRecord::getRechargeNo,requestDTO.getRechargeNo())
-                .eq(ThirdRechargeRecord::getRechargeStatus,HttpRechargeConstants.RechargeStatusCode.Pending.name())
+                .ne(ThirdRechargeRecord::getRechargeStatus,HttpRechargeConstants.RechargeStatusCode.Successed.name())
         );
         if(domain!=null){
             domain.setRechargeStatus(requestDTO.getStatus());

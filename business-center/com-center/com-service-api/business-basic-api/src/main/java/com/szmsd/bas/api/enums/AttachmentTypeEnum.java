@@ -18,6 +18,7 @@ public enum AttachmentTypeEnum {
     PREFIX_TEMP("PREFIX_TEMP", "临时目录", "临时文件", ""),
     INBOUND_RECEIPT_DOCUMENTS("INBOUND_RECEIPT", "入库单", "单证信息文件", "documents"),
     INBOUND_RECEIPT_EDITION_IMAGE("INBOUND_RECEIPT", "入库单", "对版图片", "editionImage"),
+    PAYMENT_DOCUMENT("PAYMENT_DOCUMENT","汇款凭证","","paymentDocument"),
     ;
 
     /** 业务编码 **/

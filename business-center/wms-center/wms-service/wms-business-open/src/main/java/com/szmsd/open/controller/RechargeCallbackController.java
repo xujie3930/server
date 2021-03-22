@@ -26,7 +26,11 @@ public class RechargeCallbackController extends BaseController {
     @PostMapping("/rechargeCallback")
     @ApiOperation(value = "充值回调", notes = "充值回调")
     public String rechargeCallback(@RequestBody RechargesCallbackRequestDTO requestDTO) {
-        R.getDataAndException(rechargesFeignService.rechargeCallback(requestDTO));
+        R r = rechargesFeignService.rechargeCallback(requestDTO);
+        R.getDataAndException(r);
+        if(r.getCode()!=200){
+            return "0001";
+        }
         return "0000";
     }
 }
