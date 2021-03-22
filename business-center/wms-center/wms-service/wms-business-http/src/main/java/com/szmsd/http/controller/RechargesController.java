@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * @author liulei
  */
-@Api(tags = {"基础信息"})
+@Api(tags = {"第三方充值"})
 @RestController
 @RequestMapping("/api/recharges/http")
 public class RechargesController {
