@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "RechargesResponseVo")
+@ApiModel(value = "RechargesCallbackRequestDTO")
 public class RechargesCallbackRequestDTO {
 
     @ApiModelProperty(value = "充值编号")
