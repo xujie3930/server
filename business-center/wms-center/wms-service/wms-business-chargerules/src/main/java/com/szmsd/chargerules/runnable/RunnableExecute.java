@@ -3,7 +3,7 @@ package com.szmsd.chargerules.runnable;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.chargerules.domain.WarehouseOperation;
 import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
-import com.szmsd.chargerules.service.IBaseInfoService;
+import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
@@ -34,7 +34,7 @@ public class RunnableExecute {
     private IWarehouseOperationService warehouseOperationService;
 
     @Resource
-    private IBaseInfoService baseInfoService;
+    private IPayService payService;
 
     /**
      * 定时任务：普通操作计价扣费；每天12点，23点执行一次
@@ -48,7 +48,7 @@ public class RunnableExecute {
      * 定时任务：储存仓租计价扣费；每周日晚上8点执行
      */
 //    @Scheduled(cron = "0 0 20 * * 7")
-    @Scheduled(cron = "0/60 * * * * *")
+//    @Scheduled(cron = "0/60 * * * * *")
     public void executeWarehouse() {
         // 获取当前全量库存
         R<List<InventorySkuVolumeVO>> result = inventoryFeignService.querySkuVolume(new InventorySkuVolumeQueryDTO());
@@ -64,7 +64,7 @@ public class RunnableExecute {
                     int days = Integer.parseInt(datePoor.substring(0, datePoor.indexOf("天")));
                     // 根据存放天数、存放体积计算应收取的费用
                     BigDecimal charge = warehouseOperationService.charge(days, skuVolume.getVolume(), warehouseOperation.getWarehouseCode(), warehouseOperations);
-                    baseInfoService.pay("",charge);
+                    payService.pay("",charge);
                 });
             });
         }
