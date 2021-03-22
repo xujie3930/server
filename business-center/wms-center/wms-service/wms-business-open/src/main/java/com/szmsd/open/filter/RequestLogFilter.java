@@ -8,10 +8,12 @@ import com.szmsd.common.core.filter.ContextHttpServletRequestWrapper;
 import com.szmsd.common.core.filter.ContextHttpServletResponseWrapper;
 import com.szmsd.common.core.filter.ContextServletInputStream;
 import com.szmsd.common.core.filter.ContextServletOutputStream;
+import com.szmsd.open.config.AuthConfig;
 import com.szmsd.open.domain.OpnRequestLog;
 import com.szmsd.open.event.EventUtil;
 import com.szmsd.open.event.RequestLogEvent;
 import com.szmsd.open.interceptor.RequestConstant;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,12 @@ public class RequestLogFilter implements Filter {
     private static final String METHOD_GET = "GET";
     private final Logger logger = LoggerFactory.getLogger(RequestLogFilter.class);
 
+    private final AuthConfig authConfig;
+
+    public RequestLogFilter(AuthConfig authConfig) {
+        this.authConfig = authConfig;
+    }
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         ContextHttpServletRequestWrapper requestWrapper;
@@ -51,21 +59,26 @@ public class RequestLogFilter implements Filter {
         }
 
         Date requestTime = new Date();
-
         String traceId = MDC.get("TID");
+
+        String requestUri = requestWrapper.getRequestURI();
+        Set<String> whiteSet = authConfig.getWhiteSet();
+        if (CollectionUtils.isNotEmpty(whiteSet)) {
+            if (whiteSet.contains(requestUri)) {
+                filterChain.doFilter(requestWrapper, responseWrapper);
+                return;
+            }
+        }
         // 获取transactionId
         String transactionId = requestWrapper.getHeader(RequestConstant.TRANSACTION_ID);
         AssertUtil.isTrue(StringUtils.isNotEmpty(transactionId), "transactionId cannot be null");
-        String requestUri = requestWrapper.getRequestURI();
         RequestLogFilterContext currentContext = RequestLogFilterContext.getCurrentContext();
         currentContext.setRequestId(traceId);
         currentContext.setTransactionId(transactionId);
         currentContext.setRequestUri(requestUri);
-
         filterChain.doFilter(requestWrapper, responseWrapper);
 
         Date responseDate = new Date();
-
         OpnRequestLog opnRequestLog = new OpnRequestLog();
         opnRequestLog.setTraceId(traceId);
         opnRequestLog.setRequestUri(requestUri);
