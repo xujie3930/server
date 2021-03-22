@@ -101,7 +101,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         fillRechargesRequestDTO(rechargesRequestDTO,dto);
         R<RechargesResponseVo> result = httpRechargeFeignService.onlineRecharge(rechargesRequestDTO);
         RechargesResponseVo vo = result.getData();
-        log.info("vo:"+vo.toString());
         //保存第三方接口调用充值记录
         thirdRechargeRecordService.saveRecord(dto,vo);
         if(result.getCode()!=200||vo==null||StringUtils.isNotEmpty(vo.getCode())){
