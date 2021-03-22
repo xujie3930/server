@@ -31,9 +31,13 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -51,11 +55,42 @@ public class HttpClientHelper {
     private final CloseableHttpClient httpClient;
 
     private HttpClientHelper() {
+        SSLContext sc = null;
+        try {
+            sc = SSLContext.getInstance("TLS");
+            sc.init(null, new TrustManager[]{new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+            }}, new SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String arg0, SSLSession arg1) {
+                    return true;
+                }
+            });
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        if (null == sc) {
+            throw new RuntimeException("init SSLContext error");
+        }
         //注册访问协议相关的Socket工厂
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .register("https", SSLConnectionSocketFactory.getSystemSocketFactory()).build();
-
+                // SSLConnectionSocketFactory.getSystemSocketFactory();
+                .register("https", new SSLConnectionSocketFactory(sc)).build();
         //HttpConnection工厂：皮遏制写请求/解析响应处理器
         HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> connectionFactory = new
                 ManagedHttpClientConnectionFactory(DefaultHttpRequestWriterFactory.INSTANCE,
