@@ -29,7 +29,7 @@ public class ThirdRechargeRecordServiceImpl implements IThirdRechargeRecordServi
         BeanUtils.copyProperties(dto,thirdRechargeRecord);
         if(vo!=null){
             //正常返回结果
-            if(StringUtils.isNotEmpty(vo.getRechargeNo()) && HttpRechargeConstants.RechargeStatusCode.Pending.equals(vo.getStatus())){
+            if(StringUtils.isNotEmpty(vo.getRechargeNo()) && HttpRechargeConstants.RechargeStatusCode.Pending.name().equals(vo.getStatus())){
                 thirdRechargeRecord.setRechargeNo(vo.getRechargeNo());
                 thirdRechargeRecord.setRechargeAmount(vo.getRechargeAmount().getAmount());
                 thirdRechargeRecord.setRechargeCurrency(vo.getRechargeAmount().getCurrencyCode());

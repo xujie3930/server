@@ -26,6 +26,7 @@ import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
 import com.szmsd.http.dto.recharges.RechargesRequestDTO;
 import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.http.vo.RechargesResponseVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ import java.util.List;
  * @author liulei
  */
 @Service
+@Slf4j
 public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Autowired
@@ -99,6 +101,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         fillRechargesRequestDTO(rechargesRequestDTO,dto);
         R<RechargesResponseVo> result = httpRechargeFeignService.onlineRecharge(rechargesRequestDTO);
         RechargesResponseVo vo = result.getData();
+        log.info("vo:"+vo.toString());
         //保存第三方接口调用充值记录
         thirdRechargeRecordService.saveRecord(dto,vo);
         if(result.getCode()!=200||vo==null||StringUtils.isNotEmpty(vo.getCode())){
