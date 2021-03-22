@@ -1,6 +1,7 @@
 package com.szmsd.finance.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.szmsd.finance.enums.BillEnum;
@@ -40,6 +41,10 @@ public class AccountBalanceChange extends FssBaseEntity {
     @ApiModelProperty(value = "交易类型")
     private BillEnum.PayMethod payMethod;
 
+    @ApiModelProperty(value = "交易类型名称")
+    @TableField(exist = false)
+    private String PayMethodName;
+
     @ApiModelProperty(value = "币种id")
     private String currencyCode;
 
@@ -52,4 +57,7 @@ public class AccountBalanceChange extends FssBaseEntity {
     @ApiModelProperty(value = "当前余额")
     private BigDecimal currentBalance;
 
+    public String getPayMethodName(){
+        return payMethod.getPaymentName();
+    }
 }

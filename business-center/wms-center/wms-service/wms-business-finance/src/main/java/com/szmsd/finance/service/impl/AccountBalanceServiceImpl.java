@@ -66,11 +66,16 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public List<AccountBalanceChange> recordListPage(AccountBalanceChangeDTO dto) {
         LambdaQueryWrapper<AccountBalanceChange> queryWrapper = Wrappers.lambdaQuery();
-        if(dto.getCusId()!=null) {
-            queryWrapper.eq(AccountBalanceChange::getCusId, dto.getCusId());
+        if(StringUtils.isNotEmpty(dto.getCusCode())) {
+            queryWrapper.eq(AccountBalanceChange::getCusCode, dto.getCusCode());
         }
         if(dto.getPayMethod()!=null) {
-            queryWrapper.eq(AccountBalanceChange::getPayMethod, dto.getPayMethod());
+            if(dto.getPayMethod()==BillEnum.PayMethod.EXCHANGE_INCOME){
+                queryWrapper.and(wrapper -> wrapper.eq(AccountBalanceChange::getPayMethod,BillEnum.PayMethod.EXCHANGE_INCOME)
+                .or().eq(AccountBalanceChange::getPayMethod,BillEnum.PayMethod.EXCHANGE_PAYMENT));
+            }else {
+                queryWrapper.eq(AccountBalanceChange::getPayMethod, dto.getPayMethod());
+            }
         }
         if(StringUtils.isNotEmpty(dto.getBeginTime())){
             queryWrapper.ge(AccountBalanceChange::getCreateTime,dto.getBeginTime());
@@ -78,6 +83,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if(StringUtils.isNotEmpty(dto.getEndTime())){
             queryWrapper.le(AccountBalanceChange::getCreateTime,dto.getEndTime());
         }
+        queryWrapper.orderByDesc(AccountBalanceChange::getCreateTime);
         return accountBalanceChangeMapper.recordListPage(queryWrapper);
     }
 
@@ -175,7 +181,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayType(BillEnum.PayType.EXCHANGE);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
         boolean flag=abstractPayFactory.updateBalance(dto);
-        return flag?R.ok():R.failed();
+        return flag?R.ok():R.failed("余额不足");
     }
 
     /**

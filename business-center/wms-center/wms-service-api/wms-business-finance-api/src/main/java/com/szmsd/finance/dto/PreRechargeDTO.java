@@ -57,7 +57,7 @@ public class PreRechargeDTO {
     private String paymentVoucher;
 
     @ApiModelProperty(value = "审核状态(默认0=未审核，1=审核，2=审核未通过)")
-    private String verifyStatus;
+    private String verifyStatus="0";
 
     @ApiModelProperty(value = "审核备注")
     private String verifyRemark;
@@ -68,4 +68,10 @@ public class PreRechargeDTO {
 
     @ApiModelProperty(value = "备注")
     private String remark;
+
+    @ApiModelProperty(value = "开始时间")
+    private String beginTime;
+
+    @ApiModelProperty(value = "结束时间")
+    private String endTime;
 }
