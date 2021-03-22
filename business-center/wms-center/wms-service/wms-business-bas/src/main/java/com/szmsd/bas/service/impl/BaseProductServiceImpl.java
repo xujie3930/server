@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
-import com.szmsd.bas.dto.BaseProductDto;
-import com.szmsd.bas.dto.BaseProductMeasureDto;
-import com.szmsd.bas.dto.BaseProductOms;
-import com.szmsd.bas.dto.BaseProductQueryDto;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BaseProductMapper;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBaseProductService;
@@ -26,9 +23,11 @@ import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.http.vo.ResponseVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -120,6 +119,20 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             queryWrapper.in("code",codes);
         }
         return BeanMapperUtil.mapList(super.list(queryWrapper),BaseProductMeasureDto.class);
+    }
+
+    @Override
+    public void measuringProduct(MeasuringProductRequest request){
+        BigDecimal volume = new BigDecimal(request.getHeight()).multiply(new BigDecimal(request.getWidth()))
+                .multiply(new BigDecimal(request.getLength()))
+                .setScale(2, BigDecimal.ROUND_HALF_UP);
+        BaseProduct baseProduct = BeanMapperUtil.map(request,BaseProduct.class);
+        baseProduct.setCode(null);
+        baseProduct.setWarehouseAcceptance(true);
+        baseProduct.setVolume(volume);
+        UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("code",request.getCode());
+        super.update(baseProduct,updateWrapper);
     }
 
     @Override

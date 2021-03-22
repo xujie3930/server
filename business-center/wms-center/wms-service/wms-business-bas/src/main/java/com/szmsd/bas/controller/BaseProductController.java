@@ -4,6 +4,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
+import com.szmsd.bas.dto.MeasuringProductRequest;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
@@ -70,6 +71,15 @@ public class BaseProductController extends BaseController{
     {
         List<BaseProductMeasureDto> list = baseProductService.batchSKU(codes);
         return R.ok(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
+    @PostMapping("/measuring")
+    @ApiOperation(value = "通过code批量查询列表",notes = "通过code批量查询列表")
+    public  R measuringProduct(@RequestBody MeasuringProductRequest measuringProductRequest)
+    {
+        baseProductService.measuringProduct(measuringProductRequest);
+        return R.ok();
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
