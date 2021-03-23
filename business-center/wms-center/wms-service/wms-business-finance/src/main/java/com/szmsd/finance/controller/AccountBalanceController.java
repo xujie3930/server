@@ -4,10 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
-import com.szmsd.finance.dto.AccountBalanceChangeDTO;
-import com.szmsd.finance.dto.AccountBalanceDTO;
-import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
+import com.szmsd.finance.dto.*;
 import com.szmsd.finance.service.IAccountBalanceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,7 +42,7 @@ public class AccountBalanceController extends FssBaseController {
         return getDataTable(list);
     }
 
-    @PreAuthorize("@ss.hasPermi('ExchangeRate:onlineIncome')")
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:preOnlineIncome')")
     @ApiOperation(value = "预充值")
     @PostMapping("/preOnlineIncome")
     public R preOnlineIncome(@RequestBody CustPayDTO dto) {
@@ -59,21 +56,21 @@ public class AccountBalanceController extends FssBaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:onlineIncome')")
-    @ApiOperation(value = "在线充值")
+    @ApiOperation(value = "在线充值（仅供测试）")
     @PostMapping("/onlineIncome")
     public R onlineIncome(@RequestBody CustPayDTO dto) {
         return accountBalanceService.onlineIncome(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:offlineIncome')")
-    @ApiOperation(value = "线下充值")
+    @ApiOperation(value = "线下充值（仅供测试）")
     @PostMapping("/offlineIncome")
     public R offlineIncome(@RequestBody CustPayDTO dto) {
         return accountBalanceService.offlineIncome(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:withdraw')")
-    @ApiOperation(value = "提现")
+    @ApiOperation(value = "提现（仅供测试）")
     @PostMapping("/withdraw")
     public R withdraw(@RequestBody CustPayDTO dto) {
         return accountBalanceService.withdraw(dto);
@@ -86,10 +83,25 @@ public class AccountBalanceController extends FssBaseController {
         return accountBalanceService.balanceExchange(dto);
     }
 
-    @PreAuthorize("@ss.hasPermi('ExchangeRate:withdraw')")
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:warehouseFeeDeduct')")
     @ApiOperation(value = "仓储费用扣除")
     @PostMapping("/warehouseFeeDeduct")
     public R warehouseFeeDeductions(@RequestBody CustPayDTO dto){
         return accountBalanceService.warehouseFeeDeductions(dto);
     }
+
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:freezeBalance')")
+    @ApiOperation(value = "冻结余额")
+    @PostMapping("/freezeBalance")
+    public R freezeBalance(@RequestBody CusFreezeBalanceDTO dto){
+        return accountBalanceService.freezeBalance(dto);
+    }
+
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:thawBalance')")
+    @ApiOperation(value = "解冻余额")
+    @PostMapping("/thawBalance")
+    public R thawBalance(@RequestBody CusFreezeBalanceDTO dto){
+        return accountBalanceService.thawBalance(dto);
+    }
+
 }

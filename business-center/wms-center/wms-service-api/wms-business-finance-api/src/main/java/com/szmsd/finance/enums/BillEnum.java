@@ -13,7 +13,9 @@ public class BillEnum implements Serializable {
     public enum PayType implements IEnum<String> {
         INCOME("01"),
         PAYMENT("02"),
-        EXCHANGE("03");
+        EXCHANGE("03"),
+        FREEZE("04"),
+        ;
         PayType(String payType){
             this.payType=payType;
         }
@@ -62,7 +64,16 @@ public class BillEnum implements Serializable {
         /**
          * 仓租
          */
-        WAREHOUSE_RENT("08","仓租");
+        WAREHOUSE_RENT("08","仓租"),
+        /**
+         * 仓租
+         */
+        BALANCE_FREEZE("09","余额冻结"),
+        /**
+         * 仓租
+         */
+        BALANCE_THAW("10","余额解冻")
+        ;
 
 
         @EnumValue

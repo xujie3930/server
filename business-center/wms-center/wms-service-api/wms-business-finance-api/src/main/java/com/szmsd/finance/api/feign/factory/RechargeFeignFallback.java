@@ -2,6 +2,7 @@ package com.szmsd.finance.api.feign.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
 import feign.hystrix.FallbackFactory;
@@ -28,6 +29,18 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
             @Override
             public R warehouseFeeDeductions(CustPayDTO dto) {
                 log.info("仓储费扣款失败，服务调用降级");
+                return R.failed();
+            }
+
+            @Override
+            public R freezeBalance(CusFreezeBalanceDTO dto) {
+                log.info("冻结余额失败，服务调用降级");
+                return R.failed();
+            }
+
+            @Override
+            public R thawBalance(CusFreezeBalanceDTO dto) {
+                log.info("解冻余额失败，服务调用降级");
                 return R.failed();
             }
 

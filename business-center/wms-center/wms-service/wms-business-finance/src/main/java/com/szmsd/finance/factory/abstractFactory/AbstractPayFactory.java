@@ -1,6 +1,7 @@
 package com.szmsd.finance.factory.abstractFactory;
 
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
@@ -52,17 +53,17 @@ public abstract class AbstractPayFactory {
                 setCurrentBalance(dto.getCusCode(),dto.getCurrencyCode(),result);
                 recordOpLog(dto,result);
             }
+            return true;
         }catch(Exception e){
-            log.info("获取余额异常，加锁失败");
-            log.info(e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
-            return false;
+            log.info("获取余额异常，加锁失败");
+            log.info("异常信息:"+e.getMessage());
         }finally {
             if(lock.isLocked()){
                 lock.unlock();
             }
         }
-        return true;
+        return false;
     }
 
     public void recordOpLog(CustPayDTO dto,BigDecimal result){
@@ -76,12 +77,20 @@ public abstract class AbstractPayFactory {
 
     protected abstract void setOpLogAmount(AccountBalanceChange accountBalanceChange, BigDecimal amount);
 
+    protected BigDecimal getCurrentBalance(String cusCode,String currencyCode){
+        return accountBalanceService.getCurrentBalance(cusCode,currencyCode);
+    }
+
     protected void setCurrentBalance(String cusCode, String currencyCode, BigDecimal result){
         accountBalanceService.setCurrentBalance(cusCode,currencyCode,result);
     }
 
-    protected BigDecimal getCurrentBalance(String cusCode,String currencyCode){
-        return accountBalanceService.getCurrentBalance(cusCode,currencyCode);
+    protected BalanceDTO getBalance(String cusCode, String currencyCode){
+        return accountBalanceService.getBalance(cusCode,currencyCode);
+    }
+
+    protected void setBalance(String cusCode, String currencyCode, BalanceDTO result){
+        accountBalanceService.setBalance(cusCode,currencyCode,result);
     }
 
     public abstract BigDecimal calculateBalance(BigDecimal oldBalance,BigDecimal changeAmount);

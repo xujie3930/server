@@ -2,6 +2,7 @@ package com.szmsd.finance.factory.abstractFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.finance.factory.BalanceFreezeFactory;
 import com.szmsd.finance.factory.ExchangePayFactory;
 import com.szmsd.finance.factory.IncomePayFactory;
 import com.szmsd.finance.factory.PaymentPayFactory;
@@ -24,6 +25,9 @@ public class PayFactoryBuilder {
     @Autowired
     private ExchangePayFactory exchangePayFactory;
 
+    @Autowired
+    private BalanceFreezeFactory balanceFreezeFactory;
+
     private ImmutableMap<BillEnum.PayType, AbstractPayFactory> factoryMap;
 
     @PostConstruct
@@ -32,6 +36,7 @@ public class PayFactoryBuilder {
                 .put(BillEnum.PayType.INCOME,incomePayFactory)
                 .put(BillEnum.PayType.PAYMENT,paymentPayFactory)
                 .put(BillEnum.PayType.EXCHANGE,exchangePayFactory)
+                .put(BillEnum.PayType.FREEZE,balanceFreezeFactory)
                 .build();
 
     }

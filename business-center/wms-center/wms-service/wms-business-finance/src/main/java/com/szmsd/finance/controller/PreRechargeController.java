@@ -26,7 +26,7 @@ public class PreRechargeController extends BaseController {
     IPreRechargeService preRechargeService;
 
     @PreAuthorize("@ss.hasPermi('PreRecharge:listPage')")
-    @ApiOperation(value = "分页查询账户余额信息")
+    @ApiOperation(value = "分页查询汇款充值信息")
     @GetMapping("/listPage")
     public TableDataInfo listPage(PreRechargeDTO dto) {
         startPage();

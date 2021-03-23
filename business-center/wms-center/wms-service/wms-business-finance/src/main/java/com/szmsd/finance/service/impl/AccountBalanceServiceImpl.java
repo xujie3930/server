@@ -9,10 +9,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
-import com.szmsd.finance.dto.AccountBalanceChangeDTO;
-import com.szmsd.finance.dto.AccountBalanceDTO;
-import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
+import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
@@ -27,6 +24,7 @@ import com.szmsd.http.dto.recharges.RechargesRequestDTO;
 import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.http.vo.RechargesResponseVo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,6 +94,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public R preOnlineIncome(CustPayDTO dto) {
+        if(StringUtils.isEmpty(dto.getCusCode())){
+            return R.failed("客户编码不能为空");
+        }
         RechargesRequestDTO rechargesRequestDTO=new RechargesRequestDTO();
         //填充rechargesRequestDTO的信息
         fillRechargesRequestDTO(rechargesRequestDTO,dto);
@@ -138,12 +139,68 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Override
     public R warehouseFeeDeductions(CustPayDTO dto) {
+        if(StringUtils.isEmpty(dto.getCusCode())){
+            return R.failed("客户编码不能为空");
+        }
         if(dto.getPayType()==null){
             return R.failed("支付类型为空");
         }
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
         boolean flag=abstractPayFactory.updateBalance(dto);
-        return flag?R.ok():R.failed();
+        return flag?R.ok():R.failed("余额不足");
+    }
+
+    @Override
+    public R freezeBalance(CusFreezeBalanceDTO cfbDTO) {
+        CustPayDTO dto=new CustPayDTO();
+        BeanUtils.copyProperties(cfbDTO,dto);
+        if(StringUtils.isEmpty(cfbDTO.getCusCode())){
+            return R.failed("客户编码不能为空");
+        }
+        dto.setPayType(BillEnum.PayType.FREEZE);
+        dto.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE);
+        AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
+        boolean flag=abstractPayFactory.updateBalance(dto);
+        return flag?R.ok():R.failed("可用余额不足以冻结");
+    }
+
+    @Override
+    public R thawBalance(CusFreezeBalanceDTO cfbDTO) {
+        CustPayDTO dto=new CustPayDTO();
+        BeanUtils.copyProperties(cfbDTO,dto);
+        if(StringUtils.isEmpty(cfbDTO.getCusCode())){
+            return R.failed("客户编码不能为空");
+        }
+        dto.setPayType(BillEnum.PayType.FREEZE);
+        dto.setPayMethod(BillEnum.PayMethod.BALANCE_THAW);
+        AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
+        boolean flag=abstractPayFactory.updateBalance(dto);
+        return flag?R.ok():R.failed("冻结金额不足以解冻");
+    }
+
+    @Override
+    public BalanceDTO getBalance(String cusCode, String currencyCode) {
+        QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("cus_code",cusCode);
+        queryWrapper.eq("currency_code",currencyCode);
+        AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
+        if(accountBalance!=null){
+            return new BalanceDTO(accountBalance.getCurrentBalance(),accountBalance.getFreezeBalance(),accountBalance.getTotalBalance());
+        }
+        accountBalance=new AccountBalance(cusCode,currencyCode,getCurrencyName(currencyCode));
+        accountBalanceMapper.insert(accountBalance);
+        return new BalanceDTO(BigDecimal.ZERO,BigDecimal.ZERO,BigDecimal.ZERO);
+    }
+
+    @Override
+    @Transactional
+    public void setBalance(String cusCode, String currencyCode, BalanceDTO result) {
+        LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper=Wrappers.lambdaUpdate();
+        lambdaUpdateWrapper.eq(AccountBalance::getCusCode,cusCode);
+        lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode,currencyCode);
+        lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance,result.getCurrentBalance());
+        lambdaUpdateWrapper.set(AccountBalance::getFreezeBalance,result.getFreezeBalance());
+        accountBalanceMapper.update(null,lambdaUpdateWrapper);
     }
 
     /**
@@ -154,6 +211,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R onlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
+        if(StringUtils.isEmpty(dto.getCusCode())){
+            return R.failed("客户编码不能为空");
+        }
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.ONLINE_INCOME);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
@@ -169,6 +229,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R offlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
+        if(StringUtils.isEmpty(dto.getCusCode())){
+            return R.failed("客户编码不能为空");
+        }
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
@@ -205,7 +268,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if(accountBalance!=null){
             return accountBalance.getCurrentBalance();
         }
-        accountBalance=new AccountBalance(cusCode,currencyCode,getCurrencyName(currencyCode),BigDecimal.ZERO);
+        accountBalance=new AccountBalance(cusCode,currencyCode,getCurrencyName(currencyCode));
         accountBalanceMapper.insert(accountBalance);
         return BigDecimal.ZERO;
     }
@@ -217,6 +280,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      * @param result
      */
     @Override
+    @Transactional
     public void setCurrentBalance(String cusCode, String currencyCode, BigDecimal result) {
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper=Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(AccountBalance::getCusCode,cusCode);
@@ -232,12 +296,15 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public R withdraw(CustPayDTO dto) {
+        if(StringUtils.isEmpty(dto.getCusCode())){
+            return R.failed("客户编码不能为空");
+        }
 //        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.PAYMENT);
         dto.setPayMethod(BillEnum.PayMethod.WITHDRAW_PAYMENT);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
         boolean flag=abstractPayFactory.updateBalance(dto);
-        return flag?R.ok():R.failed();
+        return flag?R.ok():R.failed("余额不足");
     }
 
     private String getCurrencyName(String currencyCode) {

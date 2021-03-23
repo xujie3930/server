@@ -21,50 +21,48 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ExchangePayFactory extends AbstractPayFactory {
 
-    public static final TimeUnit unit=TimeUnit.MILLISECONDS;
-
     @Autowired
     private RedissonClient redissonClient;
 
     @Override
     public boolean updateBalance(CustPayDTO dto){
-        boolean flag=true;
         String key="cky-test-fss-balance-all:"+dto.getCusId();
         RLock lock=redissonClient.getLock(key);
         try{
             if(lock.tryLock(time,unit)){
-                //1.先扣款
-                BigDecimal oldBalance1=getCurrentBalance(dto.getCusCode(),dto.getCurrencyCode());
                 BigDecimal substractAmount=dto.getAmount();
+                //1.先扣款
+                BigDecimal beforeSubtract=getCurrentBalance(dto.getCusCode(),dto.getCurrencyCode());
                 //先判断扣款余额是否充足
-                if(oldBalance1.compareTo(substractAmount) < 0){
+                if(beforeSubtract.compareTo(substractAmount) < 0){
                     return false;
                 }
-                BigDecimal result1=oldBalance1.subtract(substractAmount);
-                setCurrentBalance(dto.getCusCode(),dto.getCurrencyCode(),result1);
+                BigDecimal afterSubtract=beforeSubtract.subtract(substractAmount);
+                setCurrentBalance(dto.getCusCode(),dto.getCurrencyCode(),afterSubtract);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
-                recordOpLog(dto,result1);
+                recordOpLog(dto,afterSubtract);
                 //2.再充值
-                BigDecimal oldBalance2=getCurrentBalance(dto.getCusCode(),dto.getCurrencyCode2());
+                BigDecimal beforeAdd=getCurrentBalance(dto.getCusCode(),dto.getCurrencyCode2());
                 BigDecimal addAmount=dto.getRate().multiply(substractAmount).setScale(2,BigDecimal.ROUND_FLOOR);
-                BigDecimal result2=oldBalance2.add(addAmount);
-                setCurrentBalance(dto.getCusCode(),dto.getCurrencyCode2(),result2);
+                BigDecimal afterAdd=beforeAdd.add(addAmount);
+                setCurrentBalance(dto.getCusCode(),dto.getCurrencyCode2(),afterAdd);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
                 dto.setAmount(addAmount);
                 dto.setCurrencyCode(dto.getCurrencyCode2());
                 dto.setCurrencyName(dto.getCurrencyName2());
-                recordOpLog(dto,result2);
-
+                recordOpLog(dto,afterAdd);
             }
+            return true;
         }catch(Exception e){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             log.info("获取余额异常，加锁失败");
+            log.info("异常信息:"+e.getMessage());
         }finally {
             if(lock.isLocked()){
                 lock.unlock();
             }
         }
-        return flag;
+        return false;
     }
 
     @Override

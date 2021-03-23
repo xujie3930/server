@@ -36,8 +36,14 @@ public class AccountBalanceDTO implements Serializable {
     @ApiModelProperty(value = "币种姓名")
     private String currencyName;
 
-    @ApiModelProperty(value = "余额")
+    @ApiModelProperty(value = "可用余额")
     private BigDecimal currentBalance;
+
+    @ApiModelProperty(value = "冻结余额")
+    private BigDecimal freezeBalance;
+
+    @ApiModelProperty(value = "总余额")
+    private BigDecimal totalBalance;
 
     private String remark;
 

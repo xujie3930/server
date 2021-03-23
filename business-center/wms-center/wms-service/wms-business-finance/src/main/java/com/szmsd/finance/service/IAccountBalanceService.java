@@ -4,10 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
-import com.szmsd.finance.dto.AccountBalanceChangeDTO;
-import com.szmsd.finance.dto.AccountBalanceDTO;
-import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
+import com.szmsd.finance.dto.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -37,4 +34,12 @@ public interface IAccountBalanceService {
     R rechargeCallback(RechargesCallbackRequestDTO requestDTO);
 
     R warehouseFeeDeductions(CustPayDTO dto);
+
+    R freezeBalance(CusFreezeBalanceDTO dto);
+
+    R thawBalance(CusFreezeBalanceDTO dto);
+
+    BalanceDTO getBalance(String cusCode, String currencyCode);
+
+    void setBalance(String cusCode, String currencyCode, BalanceDTO result);
 }
