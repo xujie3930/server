@@ -1,6 +1,7 @@
 package com.szmsd.bas.controller;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingQueryDto;
+import com.szmsd.bas.service.IBasSerialNumberService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,8 @@ public class BasePackingController extends BaseController{
 
      @Resource
      private IBasePackingService basePackingService;
+    @Resource
+    private IBasSerialNumberService baseSerialNumberService;
      /**
        * 查询模块列表
      */

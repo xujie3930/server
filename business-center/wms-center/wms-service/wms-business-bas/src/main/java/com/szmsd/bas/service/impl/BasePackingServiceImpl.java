@@ -82,6 +82,12 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
      */
     @Override
     public int insertBasePacking(BasePacking basePacking) {
+        QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("code",basePacking.getCode());
+        int count  = super.count(queryWrapper);
+        if(count!=0){
+            throw new BaseException("物料编码重复，请更换之后重新提交");
+        }
         PackingRequest packingRequest = BeanMapperUtil.map(basePacking, PackingRequest.class);
         if (basePacking.getPId() != null) {
             R<ResponseVO> r = htpBasFeignService.createPacking(packingRequest);

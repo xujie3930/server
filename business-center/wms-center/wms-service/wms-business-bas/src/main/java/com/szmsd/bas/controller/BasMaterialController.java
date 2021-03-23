@@ -1,6 +1,7 @@
 package com.szmsd.bas.controller;
 import com.szmsd.bas.domain.BasMaterial;
 import com.szmsd.bas.service.IBasMaterialService;
+import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -35,6 +36,7 @@ public class BasMaterialController extends BaseController{
 
      @Resource
      private IBasMaterialService basMaterialService;
+
      /**
        * 查询模块列表
      */
