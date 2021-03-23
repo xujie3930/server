@@ -9,6 +9,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BaseProductMapper;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BaseProductVO;
@@ -47,6 +48,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
     @Resource
     private HtpBasFeignService htpBasFeignService;
+
+    @Resource
+    private IBasSerialNumberService baseSerialNumberService;
 
 
     /**
@@ -175,6 +179,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         baseProductDto.setSellerCode(basSeller.getSellerCode());
+        baseProductDto.setCode("S"+basSeller.getSellerCode()+baseSerialNumberService.generateNumber("SKU"));
         //默认仓库没有验收
         baseProductDto.setWarehouseAcceptance(false);
 

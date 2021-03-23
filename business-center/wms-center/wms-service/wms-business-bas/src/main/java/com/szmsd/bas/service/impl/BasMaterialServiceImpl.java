@@ -8,6 +8,7 @@ import com.szmsd.bas.domain.BasMaterial;
 import com.szmsd.bas.mapper.BasMaterialMapper;
 import com.szmsd.bas.service.IBasMaterialService;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
@@ -37,6 +38,9 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
     private IBasSellerService basSellerService;
     @Resource
     private HtpBasFeignService htpBasFeignService;
+
+    @Resource
+    private IBasSerialNumberService baseSerialNumberService;
 
         /**
         * 查询模块
@@ -81,6 +85,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         {
             basMaterial.setCategory("包材");
             basMaterial.setIsActive(true);
+            basMaterial.setCode("WL"+basMaterial.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
             MaterialRequest materialRequest = BeanMapperUtil.map(basMaterial,MaterialRequest.class);
             R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
             if(r.getCode()!=200){

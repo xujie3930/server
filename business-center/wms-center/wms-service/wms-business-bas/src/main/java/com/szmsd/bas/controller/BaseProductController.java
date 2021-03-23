@@ -5,6 +5,7 @@ import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.dto.MeasuringProductRequest;
+import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
@@ -41,6 +42,7 @@ public class BaseProductController extends BaseController{
 
      @Resource
      private IBaseProductService baseProductService;
+
      /**
        * 查询模块列表
      */
