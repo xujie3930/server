@@ -1,5 +1,7 @@
 package com.szmsd.open.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
@@ -25,8 +27,14 @@ public class RechargeCallbackController extends BaseController {
 
     @PostMapping("/rechargeCallback")
     @ApiOperation(value = "充值回调", notes = "充值回调")
-    public String rechargeCallback(@RequestBody RechargesCallbackRequestDTO requestDTO) {
-        R.getDataAndException(rechargesFeignService.rechargeCallback(requestDTO));
+    public String rechargeCallback(@RequestBody JSONObject json) {
+        System.out.println(json);
+        RechargesCallbackRequestDTO dto = JSON.parseObject(json.toJSONString(), RechargesCallbackRequestDTO.class);
+        R r = rechargesFeignService.rechargeCallback(dto);
+        R.getDataAndException(r);
+        if(r.getCode()!=200){
+            return "0001";
+        }
         return "0000";
     }
 }

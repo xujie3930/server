@@ -11,16 +11,13 @@ import com.szmsd.chargerules.factory.OrderType;
 import com.szmsd.chargerules.factory.OrderTypeFactory;
 import com.szmsd.chargerules.mapper.BaseInfoMapper;
 import com.szmsd.chargerules.service.IBaseInfoService;
+import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.ISpecialOperationService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanUtils;
-import com.szmsd.finance.api.feign.RechargesFeignService;
-import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationResultRequest;
-import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.open.vo.ResponseVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,7 +44,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     private OrderTypeFactory orderTypeFactory;
 
     @Resource
-    private RechargesFeignService rechargesFeignService;
+    private IPayService payService;
 
     @Override
     public ResponseVO add(BasSpecialOperationDTO basSpecialOperationDTO) {
@@ -108,7 +105,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
                 specialOperation.getNextPrice(), basSpecialOperation.getQty());
 
         //调用扣费接口扣费
-        R r = pay(customCode, amount);
+        R r = payService.pay(customCode, amount);
         if(r.getCode() != 200) {
             log.error("pay failed: {}",r.getData());
             return R.failed(ErrorMessageEnum.PAY_FAILED.getMessage());
@@ -122,17 +119,6 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         }
         return R.ok();
 
-    }
-
-    @Override
-    public R pay(String customCode, BigDecimal amount) {
-        CustPayDTO custPayDTO = new CustPayDTO();
-        custPayDTO.setCusCode(customCode);
-        custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
-        custPayDTO.setPayMethod(BillEnum.PayMethod.SPECIAL_OPERATE);
-        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
-        custPayDTO.setAmount(amount);
-        return rechargesFeignService.warehouseFeeDeductions(custPayDTO);
     }
 
     public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Integer qty) {

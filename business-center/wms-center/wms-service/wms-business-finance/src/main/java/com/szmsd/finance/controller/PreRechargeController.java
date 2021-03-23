@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * @author liulei
  */
-@Api(tags = {"预充值"})
+@Api(tags = {"汇款充值"})
 @RestController
 @RequestMapping("/preRecharge")
 public class PreRechargeController extends BaseController {

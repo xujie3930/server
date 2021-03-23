@@ -17,5 +17,4 @@ public interface IBaseInfoService {
 
     R update(BasSpecialOperation basSpecialOperation);
 
-    R pay(String customCode, BigDecimal amount);
 }

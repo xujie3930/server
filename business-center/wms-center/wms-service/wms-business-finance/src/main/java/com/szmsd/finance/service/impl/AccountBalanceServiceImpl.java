@@ -26,6 +26,7 @@ import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
 import com.szmsd.http.dto.recharges.RechargesRequestDTO;
 import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.http.vo.RechargesResponseVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ import java.util.List;
  * @author liulei
  */
 @Service
+@Slf4j
 public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Autowired
@@ -107,7 +109,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             }
             return R.failed();
         }
-        return R.ok();
+        String rechargeUrl = vo.getRechargeUrl();
+        if(StringUtils.isEmpty(rechargeUrl)){
+            return R.failed();
+        }
+        return R.ok(rechargeUrl);
     }
 
     @Override
@@ -116,7 +122,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         //更新第三方接口调用记录
         ThirdRechargeRecord thirdRechargeRecord = thirdRechargeRecordService.updateRecordIfSuccess(requestDTO);
         if(thirdRechargeRecord==null){
-            return R.failed();
+            return R.failed("没有找到对应的充值记录");
         }
         String rechargeStatus= HttpRechargeConstants.RechargeStatusCode.Successed.name();
         //如果充值成功进行充值

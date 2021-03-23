@@ -1,6 +1,7 @@
 package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.recharges.RechargesRequestDTO;
 import com.szmsd.http.service.IAccountService;
@@ -24,6 +25,12 @@ public class AccountServiceImpl extends AbstractBaseHttpRequest implements IAcco
     @Override
     public RechargesResponseVo onlineRecharge(RechargesRequestDTO dto) {
         dto.setNotifyUrl(httpConfig.getNotifyUrl());
+        if(StringUtils.isEmpty(dto.getBankCode())){
+            dto.setBankCode("");
+        }
+        if(StringUtils.isEmpty(dto.getRemark())){
+            dto.setRemark("");
+        }
         return JSON.parseObject(httpPost("", dto), RechargesResponseVo.class);
     }
 
