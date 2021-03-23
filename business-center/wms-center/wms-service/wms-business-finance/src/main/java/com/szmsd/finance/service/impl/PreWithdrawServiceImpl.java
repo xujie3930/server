@@ -37,13 +37,13 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
             queryWrapper.eq(PreWithdraw::getCusCode, dto.getCusCode());
         }
         if(StringUtils.isNotEmpty(dto.getVerifyStatus())){
-            queryWrapper.ge(PreWithdraw::getVerifyStatus,dto.getVerifyStatus());
+            queryWrapper.eq(PreWithdraw::getVerifyStatus,dto.getVerifyStatus());
         }
         if(StringUtils.isNotEmpty(dto.getCusCode())){
-            queryWrapper.ge(PreWithdraw::getCusCode,dto.getCusCode());
+            queryWrapper.eq(PreWithdraw::getCusCode,dto.getCusCode());
         }
         if(StringUtils.isNotEmpty(dto.getCurrencyCode())){
-            queryWrapper.ge(PreWithdraw::getCurrencyCode,dto.getCurrencyCode());
+            queryWrapper.eq(PreWithdraw::getCurrencyCode,dto.getCurrencyCode());
         }
         if(StringUtils.isNotEmpty(dto.getBeginTime())){
             queryWrapper.ge(PreWithdraw::getCreateTime,dto.getBeginTime());

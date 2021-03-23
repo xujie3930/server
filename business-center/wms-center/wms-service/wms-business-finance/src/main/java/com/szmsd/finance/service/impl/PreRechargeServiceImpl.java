@@ -39,16 +39,16 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             queryWrapper.eq(PreRecharge::getCusId, dto.getCusId());
         }
         if(StringUtils.isNotEmpty(dto.getCusCode())){
-            queryWrapper.ge(PreRecharge::getCusCode,dto.getCusCode());
+            queryWrapper.eq(PreRecharge::getCusCode,dto.getCusCode());
         }
         if(StringUtils.isNotEmpty(dto.getVerifyStatus())){
-            queryWrapper.ge(PreRecharge::getVerifyStatus,dto.getVerifyStatus());
+            queryWrapper.eq(PreRecharge::getVerifyStatus,dto.getVerifyStatus());
         }
         if(StringUtils.isNotEmpty(dto.getRemittanceMethod())){
-            queryWrapper.ge(PreRecharge::getRemittanceMethod,dto.getRemittanceMethod());
+            queryWrapper.eq(PreRecharge::getRemittanceMethod,dto.getRemittanceMethod());
         }
         if(StringUtils.isNotEmpty(dto.getCurrencyCode())){
-            queryWrapper.ge(PreRecharge::getCurrencyCode,dto.getCurrencyCode());
+            queryWrapper.eq(PreRecharge::getCurrencyCode,dto.getCurrencyCode());
         }
         if(StringUtils.isNotEmpty(dto.getBeginTime())){
             queryWrapper.ge(PreRecharge::getRemittanceTime,dto.getBeginTime());
