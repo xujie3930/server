@@ -216,7 +216,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             BasSeller basSeller = super.getOne(queryWrapper);
            //查询用户证件信息
             QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("seller_code",basSeller.getSellerCode());
+            BasSellerCertificateQueryWrapper.eq("seller_code",basSeller.getSellerCode());
             List<BasSellerCertificate> basSellerCertificateList = basSellerCertificateService.list(BasSellerCertificateQueryWrapper);
             BasSellerInfoDto basSellerInfoDto = BeanMapperUtil.map(basSeller,BasSellerInfoDto.class);
             basSellerInfoDto.setBasSellerCertificateList(basSellerCertificateList);
