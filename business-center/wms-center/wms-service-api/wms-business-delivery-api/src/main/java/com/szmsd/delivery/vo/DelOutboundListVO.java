@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -48,6 +49,18 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "挂号")
     private String trackingNo;
+
+    @ApiModelProperty(value = "规格")
+    private String specifications;
+
+    @ApiModelProperty(value = "计费重")
+    private Double billingWeight;
+
+    @ApiModelProperty(value = "费用")
+    private BigDecimal cost;
+
+    @ApiModelProperty(value = "异常描述")
+    private String exceptionMessage;
 
     @ApiModelProperty(value = "客户代码")
     private String customCode;

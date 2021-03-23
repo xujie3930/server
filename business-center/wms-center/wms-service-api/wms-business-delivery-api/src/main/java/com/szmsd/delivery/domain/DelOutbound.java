@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -101,6 +102,9 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "重量 g")
     private Double weight;
 
+    @ApiModelProperty(value = "规格")
+    private String specifications;
+
     @ApiModelProperty(value = "包材类型")
     private String packingMaterial;
 
@@ -112,4 +116,13 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "采购单号")
     private String purchaseNo;
+
+    @ApiModelProperty(value = "计费重")
+    private Double billingWeight;
+
+    @ApiModelProperty(value = "费用")
+    private BigDecimal cost;
+
+    @ApiModelProperty(value = "异常描述")
+    private String exceptionMessage;
 }
