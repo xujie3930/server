@@ -36,8 +36,14 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         if(dto.getCusCode()!=null) {
             queryWrapper.eq(PreWithdraw::getCusCode, dto.getCusCode());
         }
+        if(StringUtils.isNotEmpty(dto.getVerifyStatus())){
+            queryWrapper.ge(PreWithdraw::getVerifyStatus,dto.getVerifyStatus());
+        }
         if(StringUtils.isNotEmpty(dto.getCusCode())){
             queryWrapper.ge(PreWithdraw::getCusCode,dto.getCusCode());
+        }
+        if(StringUtils.isNotEmpty(dto.getCurrencyCode())){
+            queryWrapper.ge(PreWithdraw::getCurrencyCode,dto.getCurrencyCode());
         }
         if(StringUtils.isNotEmpty(dto.getBeginTime())){
             queryWrapper.ge(PreWithdraw::getCreateTime,dto.getBeginTime());
@@ -45,11 +51,15 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         if(StringUtils.isNotEmpty(dto.getEndTime())){
             queryWrapper.le(PreWithdraw::getCreateTime,dto.getEndTime());
         }
+        queryWrapper.orderByDesc(PreWithdraw::getCreateTime);
         return preWithdrawMapper.listPage(queryWrapper);
     }
 
     @Override
     public R save(PreWithdrawDTO dto) {
+        if(StringUtils.isEmpty(dto.getCusCode())){
+            return R.failed("客户编码不能为空");
+        }
         dto.setSerialNo(SnowflakeId.getNextId12());
         PreWithdraw domain= new PreWithdraw();
         BeanUtils.copyProperties(dto,domain);

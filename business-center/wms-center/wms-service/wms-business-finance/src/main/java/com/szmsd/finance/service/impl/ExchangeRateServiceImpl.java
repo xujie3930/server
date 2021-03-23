@@ -34,6 +34,7 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
         if(StringUtils.isNotEmpty(dto.getExchangeToCode())) {
             queryWrapper.eq(ExchangeRate::getExchangeToCode,dto.getExchangeToCode());
         }
+        queryWrapper.orderByDesc(ExchangeRate::getCreateTime);
         return exchangeRateMapper.listPage(queryWrapper);
     }
 

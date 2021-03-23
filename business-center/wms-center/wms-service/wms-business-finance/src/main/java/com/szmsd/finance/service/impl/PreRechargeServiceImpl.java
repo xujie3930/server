@@ -41,17 +41,30 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
         if(StringUtils.isNotEmpty(dto.getCusCode())){
             queryWrapper.ge(PreRecharge::getCusCode,dto.getCusCode());
         }
+        if(StringUtils.isNotEmpty(dto.getVerifyStatus())){
+            queryWrapper.ge(PreRecharge::getVerifyStatus,dto.getVerifyStatus());
+        }
+        if(StringUtils.isNotEmpty(dto.getRemittanceMethod())){
+            queryWrapper.ge(PreRecharge::getRemittanceMethod,dto.getRemittanceMethod());
+        }
+        if(StringUtils.isNotEmpty(dto.getCurrencyCode())){
+            queryWrapper.ge(PreRecharge::getCurrencyCode,dto.getCurrencyCode());
+        }
         if(StringUtils.isNotEmpty(dto.getBeginTime())){
-            queryWrapper.ge(PreRecharge::getCreateTime,dto.getBeginTime());
+            queryWrapper.ge(PreRecharge::getRemittanceTime,dto.getBeginTime());
         }
         if(StringUtils.isNotEmpty(dto.getEndTime())){
-            queryWrapper.le(PreRecharge::getCreateTime,dto.getEndTime());
+            queryWrapper.le(PreRecharge::getRemittanceTime,dto.getEndTime());
         }
+        queryWrapper.orderByDesc(PreRecharge::getCreateTime);
         return preRechargeMapper.listPage(queryWrapper);
     }
 
     @Override
     public R save(PreRechargeDTO dto) {
+        if(StringUtils.isEmpty(dto.getCusCode())){
+            return R.failed("客户编码不能为空");
+        }
         dto.setSerialNo(SnowflakeId.getNextId12());
         PreRecharge domain= new PreRecharge();
         BeanUtils.copyProperties(dto,domain);
