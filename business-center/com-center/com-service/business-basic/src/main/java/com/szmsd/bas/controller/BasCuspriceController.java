@@ -1,6 +1,10 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.*;
+import com.szmsd.bas.api.domain.BasCusprice;
+import com.szmsd.bas.api.domain.BasCuspriceCode;
+import com.szmsd.bas.api.domain.Cus;
+import com.szmsd.bas.domain.BasFormula;
+import com.szmsd.bas.domain.Calculation;
 import com.szmsd.bas.service.IBasCuspriceCodeService;
 import com.szmsd.bas.service.IBasCuspriceService;
 import com.szmsd.bas.service.IBasFormulaService;

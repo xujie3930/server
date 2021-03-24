@@ -1,7 +1,7 @@
 package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.szmsd.bas.domain.BasApiCity;
+import com.szmsd.bas.api.domain.BasApiCity;
 
 import java.util.List;
 

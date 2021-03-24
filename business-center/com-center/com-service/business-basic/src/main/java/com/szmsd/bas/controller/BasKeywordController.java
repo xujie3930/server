@@ -1,6 +1,6 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasKeyword;
+import com.szmsd.bas.api.domain.BasKeyword;
 import com.szmsd.bas.service.IBasKeywordService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;

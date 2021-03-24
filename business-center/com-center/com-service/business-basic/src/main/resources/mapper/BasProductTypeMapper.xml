@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.dao.BasProductTypeMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasProductType">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasProductType">
         <id column="id" property="id"/>
         <result column="remark" property="remark"/>
         <result column="create_by" property="createBy"/>
@@ -35,7 +35,7 @@
             id, product_type_code, product_type_name, product_type_name_en, product_type_name_ar, prefix_number, create_id, update_id, parm1, parm2, parm3, parm4, parm5, version
         </sql>
 
-    <select id="selectGenTableColumnListByTableIds" parameterType="com.szmsd.bas.domain.BasProductType"
+    <select id="selectGenTableColumnListByTableIds" parameterType="com.szmsd.bas.api.domain.BasProductType"
             resultMap="BaseResultMap">
         <include refid="Base_Column_List"/>
         where id = #{id}

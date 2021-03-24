@@ -1,6 +1,6 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasAppMes;
+import com.szmsd.bas.api.domain.BasAppMes;
 import com.szmsd.bas.service.IBasAppMesService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;

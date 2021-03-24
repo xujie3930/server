@@ -1,8 +1,8 @@
 package com.szmsd.bas.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.szmsd.bas.domain.BasAttachment;
-import com.szmsd.bas.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

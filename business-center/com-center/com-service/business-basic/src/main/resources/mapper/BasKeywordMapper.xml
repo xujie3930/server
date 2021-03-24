@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.dao.BasKeywordMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasKeyword">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasKeyword">
         <id column="id" property="id"/>
         <result column="create_by" property="createBy"/>
         <result column="create_time" property="createTime"/>
@@ -11,7 +11,6 @@
         <result column="keyword_name" property="keywordName"/>
         <result column="site_code" property="siteCode"/>
         <result column="site_name" property="siteName"/>
-        <result column="remark" property="remark"/>
         <result column="create_id" property="createId"/>
         <result column="create_site" property="createSite"/>
         <result column="parm1" property="parm1"/>

@@ -1,7 +1,7 @@
 package com.szmsd.bas.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.szmsd.bas.domain.BasEmployees;
+import com.szmsd.bas.api.domain.BasEmployees;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

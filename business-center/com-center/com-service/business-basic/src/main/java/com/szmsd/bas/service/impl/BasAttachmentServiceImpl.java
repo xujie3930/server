@@ -2,11 +2,11 @@ package com.szmsd.bas.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.dao.BasAttachmentMapper;
-import com.szmsd.bas.domain.BasAttachment;
 import com.szmsd.bas.domain.dto.BasAttachmentDTO;
 import com.szmsd.bas.domain.dto.BasAttachmentDataDTO;
-import com.szmsd.bas.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.enums.BasAttachmentTypeEnum;
 import com.szmsd.bas.service.IBasAttachmentService;
 import com.szmsd.bas.util.FileUtil;

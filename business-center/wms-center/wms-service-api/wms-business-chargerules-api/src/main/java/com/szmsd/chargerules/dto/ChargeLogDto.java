@@ -1,6 +1,5 @@
-package com.szmsd.chargerules.domain;
+package com.szmsd.chargerules.dto;
 
-import com.baomidou.mybatisplus.annotation.*;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,15 +14,10 @@ import java.math.BigDecimal;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value = "ChargeLog", description = "扣费日志")
-@TableName("cha_log")
+@ApiModel(value = "ChargeLog", description = "日志查询")
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChargeLog extends BaseEntity {
-
-    @ApiModelProperty(value = "ID")
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+public class ChargeLogDto extends BaseEntity {
 
     @ApiModelProperty(value = "客户编号")
     private String customCode;
@@ -46,19 +40,10 @@ public class ChargeLog extends BaseEntity {
     @ApiModelProperty(value = "是否成功")
     private Boolean success;
 
-    @ApiModelProperty(value = "版本号")
-    private Long version;
-
-    @TableField(fill = FieldFill.INSERT)
-    @ApiModelProperty(value = "创建人")
-    private String createBy;
-
-    @TableField(fill = FieldFill.UPDATE)
-    @ApiModelProperty(value = "修改人")
-    private String updateBy;
-
-    public ChargeLog(String orderNo, String operationType) {
-        this.operationType = operationType;
+    public ChargeLogDto(String orderNo, String payMethod, String operationType, Boolean success) {
         this.orderNo = orderNo;
+        this.payMethod = payMethod;
+        this.operationType = operationType;
+        this.success = success;
     }
 }

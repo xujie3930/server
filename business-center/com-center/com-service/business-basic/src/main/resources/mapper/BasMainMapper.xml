@@ -3,11 +3,9 @@
 <mapper namespace="com.szmsd.bas.dao.BasMainMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasMain">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasMain">
         <id column="id" property="id"/>
-        <result column="create_by" property="createBy"/>
         <result column="create_time" property="createTime"/>
-        <result column="update_by" property="updateBy"/>
         <result column="update_time" property="updateTime"/>
         <result column="main_code" property="mainCode"/>
         <result column="main_name" property="mainName"/>

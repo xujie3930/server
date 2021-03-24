@@ -1,6 +1,6 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasApiCountry;
+import com.szmsd.bas.api.domain.BasApiCountry;
 import com.szmsd.bas.service.IBasApiCountryService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;

@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.dao.BasAppMesMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasAppMes">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasAppMes">
         <id column="id" property="id"/>
         <result column="create_by_name" property="createByName"/>
         <result column="create_time" property="createTime"/>

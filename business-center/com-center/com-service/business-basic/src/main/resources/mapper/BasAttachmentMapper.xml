@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.dao.BasAttachmentMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasAttachment">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasAttachment">
         <id column="id" property="id"/>
         <result column="create_by_name" property="createByName"/>
         <result column="create_time" property="createTime"/>
@@ -46,7 +46,7 @@
         t.attachment_format
     </sql>
 
-    <select id="selectList" parameterType="com.szmsd.bas.domain.dto.BasAttachmentQueryDTO" resultMap="BaseResultMap">
+    <select id="selectList" parameterType="com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
         FROM bas_attachment t

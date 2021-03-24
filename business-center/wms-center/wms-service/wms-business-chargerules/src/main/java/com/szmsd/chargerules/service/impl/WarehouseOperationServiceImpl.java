@@ -54,4 +54,9 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
         throw new BaseException(ErrorMessageEnum.WAREHOUSE_PRICE_NOT_FOUND.getMessage());
     }
 
+    @Override
+    public WarehouseOperation details(int id) {
+        return warehouseOperationMapper.selectById(id);
+    }
+
 }

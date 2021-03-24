@@ -1,8 +1,8 @@
 package com.szmsd.bas.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.bas.domain.BasMain;
-import com.szmsd.bas.domain.BasSub;
+import com.szmsd.bas.api.domain.BasMain;
+import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.service.IBasMainService;
 import com.szmsd.bas.service.IBasSubService;
 import com.szmsd.common.core.domain.R;
@@ -96,7 +96,7 @@ public class BasMainController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping
     public R add(@RequestBody BasMain basMain) {
-        if (basMain.getId() == 0) {
+        if (basMain.getId() == null) {
             BasMain basMain1 = new BasMain();
             basMain1.setMainName(basMain.getMainName());
             List<BasMain> list = basMainService.selectBasMainList(basMain1);
@@ -105,7 +105,7 @@ public class BasMainController extends BaseController {
             }
             basMain.setCreateTime(new Date());
             basMainService.insertBasMain(basMain);
-            int t = basMain.getId();
+            Long t = basMain.getId();
             String s = String.format("%03d", t);
             basMain.setMainCode(s);
             basMainService.updateBasMain(basMain);

@@ -25,4 +25,10 @@ public interface IWarehouseOperationService {
      */
     BigDecimal charge(int days, BigDecimal cbm, String warehouseCode, List<WarehouseOperation> dto);
 
+    /**
+     * 根据id查询详情
+     * @param id id
+     * @return WarehouseOperation
+     */
+    WarehouseOperation details(int id);
 }

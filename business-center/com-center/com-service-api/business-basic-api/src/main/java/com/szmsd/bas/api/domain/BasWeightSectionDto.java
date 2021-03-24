@@ -1,5 +1,6 @@
 package com.szmsd.bas.api.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -30,4 +31,8 @@ public class BasWeightSectionDto {
 
     @ApiModelProperty(value = "重量段集")
     private List<BasWeightDto> weightDto;
+
+    @ApiModelProperty(value = "用户编码")
+    @TableField(exist = false)
+    private List<String> userCodes;
 }

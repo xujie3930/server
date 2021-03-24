@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.dao.BasApiCityMapper">
 
         <!-- 通用查询映射结果 -->
-        <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasApiCity">
+        <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasApiCity">
                     <id column="id" property="id"/>
                     <result column="country_id" property="countryId"/>
                     <result column="create_by_name" property="createByName"/>
@@ -31,7 +31,7 @@
             id, country_id, actual_place_name, name, description, lon, lat, create_by, update_by, del_flag
         </sql>
 
-    <select id="getBasApiCity" resultType="com.szmsd.bas.domain.BasApiCity">
+    <select id="getBasApiCity" resultType="com.szmsd.bas.api.domain.BasApiCity">
         select
         <include refid="Base_Column_List"/>
         from

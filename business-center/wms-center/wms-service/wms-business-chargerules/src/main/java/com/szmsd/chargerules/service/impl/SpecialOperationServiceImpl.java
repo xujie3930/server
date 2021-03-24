@@ -72,4 +72,9 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
         return specialOperationMapper.selectOne(where);
     }
 
+    @Override
+    public SpecialOperation details(int id) {
+        return specialOperationMapper.selectById(id);
+    }
+
 }
