@@ -40,5 +40,10 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return operationMapper.selectList(where);
     }
 
+    @Override
+    public Operation details(int id) {
+        return operationMapper.selectById(id);
+    }
+
 
 }

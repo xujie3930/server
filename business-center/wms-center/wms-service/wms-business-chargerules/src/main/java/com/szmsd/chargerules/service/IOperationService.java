@@ -29,4 +29,10 @@ public interface IOperationService {
      */
     List<Operation> listPage(OperationDTO dto);
 
+    /**
+     * 根据id查询详情
+     * @param id id
+     * @return Operation
+     */
+    Operation details(int id);
 }

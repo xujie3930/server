@@ -45,4 +45,11 @@ public class SpecialOperationController extends BaseController {
         return getDataTable(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('SpecialOperation:SpecialOperation:details')")
+    @ApiOperation(value = "特殊操作计费规则 - 详情")
+    @GetMapping("/details/{id}")
+    public R<SpecialOperation> details(@PathVariable int id) {
+        return R.ok(specialOperationService.details(id));
+    }
+
 }
