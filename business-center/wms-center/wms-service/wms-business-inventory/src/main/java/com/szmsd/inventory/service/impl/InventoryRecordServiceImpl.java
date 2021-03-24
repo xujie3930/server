@@ -89,7 +89,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
     public List<InventorySkuVolumeVO> selectSkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO) {
         inventorySkuVolumeQueryDTO = Optional.ofNullable(inventorySkuVolumeQueryDTO).orElse(new InventorySkuVolumeQueryDTO());
 
-        List<InventoryRecordVO> inventoryRecordVOS = this.selectList(new InventoryRecordQueryDTO().setSku(inventorySkuVolumeQueryDTO.getSku()).setWarehouseCode(inventorySkuVolumeQueryDTO.getWarehouseCode()));
+        List<InventoryRecordVO> inventoryRecordVOS = this.selectList(new InventoryRecordQueryDTO().setSku(inventorySkuVolumeQueryDTO.getSku()).setWarehouseCode(inventorySkuVolumeQueryDTO.getWarehouseCode()).setType("1"));
         if (CollectionUtils.isEmpty(inventoryRecordVOS)) {
             return new ArrayList<>();
         }
@@ -105,12 +105,14 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
             List<SkuVolumeVO> skuVolumeVO = item.getValue().stream().map(skuR -> {
                 List<BaseProductMeasureDto> sku = skuData.get(skuR.getSku());
                 BigDecimal skuVolume = BigDecimal.ZERO;
+                String cusCode = null;
                 if (CollectionUtils.isNotEmpty(sku)) {
                     BigDecimal initVolume = sku.get(0).getInitVolume();
                     skuVolume = initVolume == null ? skuVolume : initVolume;
+                    cusCode = sku.get(0).getSellerCode();
                 }
                 BigDecimal multiply = new BigDecimal(skuR.getQuantity()).multiply(skuVolume);
-                return new SkuVolumeVO().setSku(skuR.getSku()).setVolume(multiply).setWarehouseNo(skuR.getWarehouseCode()).setOperateOn(skuR.getOperateOn());
+                return new SkuVolumeVO().setSku(skuR.getSku()).setVolume(multiply).setWarehouseNo(skuR.getWarehouseCode()).setOperateOn(skuR.getOperateOn()).setCusCode(cusCode);
             }).collect(Collectors.toList());
             inventorySkuVolumeVO.setSkuVolumes(skuVolumeVO);
             return inventorySkuVolumeVO;

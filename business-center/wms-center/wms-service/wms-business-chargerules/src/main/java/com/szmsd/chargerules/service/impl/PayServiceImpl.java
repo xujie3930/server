@@ -25,19 +25,23 @@ public class PayServiceImpl implements IPayService {
     private PayLogMapper payLogMapper;
 
     @Override
-    public R pay(String customCode, BigDecimal amount) {
+    public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Integer qty) {
+        return qty == 1 ? firstPrice : new BigDecimal(qty - 1).multiply(nextPrice).add(firstPrice);
+    }
+
+    @Override
+    public R pay(String customCode, BigDecimal amount,BillEnum.PayMethod payMethod,ChargeLog chargeLog) {
         CustPayDTO custPayDTO = new CustPayDTO();
         custPayDTO.setCusCode(customCode);
         custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
-        custPayDTO.setPayMethod(BillEnum.PayMethod.SPECIAL_OPERATE);
+        custPayDTO.setPayMethod(payMethod);
         custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
         custPayDTO.setAmount(amount);
 
-        ChargeLog chargeLog = new ChargeLog();
         chargeLog.setCustomCode(customCode);
-        chargeLog.setPayMethod(BillEnum.PayMethod.SPECIAL_OPERATE.getPaymentName());
         chargeLog.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
         chargeLog.setAmount(amount);
+        chargeLog.setPayMethod(payMethod.getPaymentName());
 
         R r = rechargesFeignService.warehouseFeeDeductions(custPayDTO);
         chargeLog.setSuccess(r.getCode() == 200);

@@ -10,6 +10,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import io.swagger.annotations.Api;
@@ -84,6 +85,13 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 删除", position = 500)
     public R<Integer> remove(@RequestBody List<String> ids) {
         return R.ok(delOutboundService.deleteDelOutboundByIds(ids));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
+    @PostMapping("/getDelOutboundDetailsList")
+    @ApiOperation(value = "出库管理 - 按条件查询出库单及详情", position = 100)
+    public R<List<DelOutboundDetailListVO>> getDelOutboundDetailsList(@RequestBody DelOutboundListQueryDto queryDto) {
+        return R.ok(delOutboundService.getDelOutboundDetailsList(queryDto));
     }
 
 }

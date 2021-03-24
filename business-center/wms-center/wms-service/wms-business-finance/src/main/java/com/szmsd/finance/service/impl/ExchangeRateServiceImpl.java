@@ -9,6 +9,7 @@ import com.szmsd.finance.domain.ExchangeRate;
 import com.szmsd.finance.dto.ExchangeRateDTO;
 import com.szmsd.finance.mapper.ExchangeRateMapper;
 import com.szmsd.finance.service.IExchangeRateService;
+import com.szmsd.finance.util.RateCalculateUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -95,6 +96,13 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
                 .eq(ExchangeRate::getExchangeToCode,currencyFromCode));
         if(rate!=null){
             return R.ok(BigDecimal.ONE.divide(rate.getRate(),4,BigDecimal.ROUND_FLOOR));
+        }
+        //尝试递归查询汇率
+        List<ExchangeRate> exchangeRates=exchangeRateMapper.selectList(new QueryWrapper<ExchangeRate>());
+        RateCalculateUtil rateCalculateUtil = RateCalculateUtil.buildRateTree(currencyFromCode, currencyToCode, exchangeRates);
+        BigDecimal fromToRate = rateCalculateUtil.getFromToRate();
+        if(fromToRate!=null){
+            return R.ok(fromToRate);
         }
         return R.failed("未查询到对应币种的汇率交换");
     }

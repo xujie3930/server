@@ -2,4 +2,47 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.delivery.mapper.DelOutboundMapper">
 
+    <resultMap id="outboundDetailsListMap" type="com.szmsd.delivery.vo.DelOutboundDetailListVO">
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <result property="orderNo" column="order_no" />
+        <result property="warehouseCode" column="warehouse_code" />
+        <result property="orderType" column="order_type" />
+        <result property="sellerCode" column="seller_code" />
+        <result property="trackingNo" column="tracking_no" />
+        <result property="shipmentRule" column="shipment_rule" />
+        <result property="customCode" column="custom_code" />
+        <result property="state" column="state" />
+        <collection property="details" column="id" javaType="java.util.List" resultMap="outboundDetailsMap"/>
+    </resultMap>
+
+    <resultMap id="outboundDetailsMap" type="com.szmsd.delivery.dto.DelOutboundDetailDto">
+        <result property="sku" column="sku" />
+        <result property="qty" column="qty" />
+    </resultMap>
+
+    <select id="getDelOutboundAndDetailsList" resultMap="outboundDetailsListMap">
+        SELECT
+            a.`create_time`,
+            a.`update_time`,
+            a.`remark`,
+            a.`order_no`,
+            a.`warehouse_code`,
+            a.`order_type`,
+            a.`seller_code`,
+            a.`tracking_no`,
+            a.`shipment_rule`,
+            a.`custom_code`,
+            a.`state`,
+            b.`sku`,
+            b.`qty`
+        FROM
+            del_outbound a
+        INNER JOIN
+            del_outbound_detail b
+        ON a.order_no = b.order_no
+        ${ew.customSqlSegment}
+    </select>
+
 </mapper>

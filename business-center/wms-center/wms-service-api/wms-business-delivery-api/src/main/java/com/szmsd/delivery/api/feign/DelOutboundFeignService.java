@@ -4,15 +4,15 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.dto.PackageMeasureRequestDto;
-import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
-import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
-import com.szmsd.delivery.dto.ShipmentRequestDto;
+import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -64,4 +64,12 @@ public interface DelOutboundFeignService {
      */
     @GetMapping("/api/outbound/getInfoByOrderId/{orderId}")
     R<DelOutbound> details(@PathVariable("orderId") String orderId);
+
+    /**
+     * 根据单号查询出库单详情列表
+     * @param queryDto queryDto
+     * @return List<DelOutboundDetailListVO>
+     */
+    @GetMapping("/api/outbound/getDelOutboundDetailsList")
+    R<List<DelOutboundDetailListVO>> getDelOutboundDetailsList(@RequestBody DelOutboundListQueryDto queryDto);
 }

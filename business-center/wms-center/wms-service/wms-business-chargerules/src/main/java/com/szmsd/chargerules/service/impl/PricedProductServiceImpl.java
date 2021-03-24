@@ -82,6 +82,7 @@ public class PricedProductServiceImpl implements IPricedProductService {
         createPricedProductCommand.setOverdueDay(createProductDTO.getOverdueDay());
         createPricedProductCommand.setShipmentTypeSupported(createProductDTO.getShipmentTypeSupported());
         createPricedProductCommand.setLogisticsRouteId(createProductDTO.getLogisticsRouteId());
+        createPricedProductCommand.setTerminalCarrier(createProductDTO.getTerminalCarrier());
         R<ResponseVO> responseVOR = htpPricedProductFeignService.create(createPricedProductCommand);
         ResponseVO.resultAssert(responseVOR, "创建报价产品信息");
         log.info("创建报价产品信息：操作完成");

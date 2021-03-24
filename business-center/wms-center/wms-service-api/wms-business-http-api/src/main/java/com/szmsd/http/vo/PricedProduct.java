@@ -14,6 +14,9 @@ public class PricedProduct {
     @ApiModelProperty(value = "产品名称")
     private String name;
 
+    @ApiModelProperty(value = "服务商名称")
+    private String terminalCarrier;
+
     @ApiModelProperty(value = "服务商名称 - 挂号服务")
     private String logisticsRouteId;
 

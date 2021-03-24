@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import org.apache.ibatis.annotations.Param;
 
@@ -27,4 +28,11 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
      * @return DelOutboundListVO
      */
     List<DelOutboundListVO> pageList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
+
+    /**
+     * 按条件查询出库单及详情列表
+     * @param queryWrapper queryWrapper
+     * @return DelOutboundListVO
+     */
+    List<DelOutboundDetailListVO> getDelOutboundAndDetailsList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
 }

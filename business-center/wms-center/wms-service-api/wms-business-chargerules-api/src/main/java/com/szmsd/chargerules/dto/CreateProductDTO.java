@@ -30,15 +30,10 @@ public class CreateProductDTO {
     @ApiModelProperty(value = "支持发货类型：普货、电池/带电池、液体、粉末")
     private List<String> shipmentTypeSupported;
 
-    /****************************** 待确认 ******************************/
-    @ApiModelProperty(value = "挂号服务名称")
+    @ApiModelProperty(value = "服务渠道名称")
     private String logisticsRouteId;
 
-    @ApiModelProperty(value = "终端运输商", hidden = true)
+    @ApiModelProperty(value = "服务商名称")
     private String terminalCarrier;
-
-    @ApiModelProperty(value = "轨迹官网地址", hidden = true)
-    private String trackWebsite;
-    /****************************** 待确认 ******************************/
 
 }

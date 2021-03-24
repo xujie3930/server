@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
@@ -24,6 +25,7 @@ import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundHttpWrapperService;
+import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.http.dto.ShipmentCancelRequestDto;
@@ -353,5 +355,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         return delOutbound;
     }
+
+    @Override
+    public List<DelOutboundDetailListVO> getDelOutboundDetailsList(DelOutboundListQueryDto queryDto) {
+        QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
+        if(StringUtils.isNotBlank(queryDto.getOrderType())){
+            queryWrapper.eq("a.order_type",queryDto.getOrderType());
+        }
+        return baseMapper.getDelOutboundAndDetailsList(queryWrapper);
+    }
+
 }
 

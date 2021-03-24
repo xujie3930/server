@@ -24,4 +24,7 @@ public class SkuVolumeVO {
     @ApiModelProperty(value = "入库单")
     private String warehouseNo;
 
+    @ApiModelProperty(value = "客户")
+    private String cusCode;
+
 }

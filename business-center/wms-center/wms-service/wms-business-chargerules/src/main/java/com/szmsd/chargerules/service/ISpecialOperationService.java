@@ -17,4 +17,10 @@ public interface ISpecialOperationService {
 
     SpecialOperation selectOne(BasSpecialOperation basSpecialOperation);
 
+    /**
+     * 根据id查询详情
+     * @param id id
+     * @return SpecialOperation
+     */
+    SpecialOperation details(int id);
 }
