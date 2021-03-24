@@ -19,7 +19,7 @@ import java.util.Date;
  */
 
 @Data
-public class BasMain {
+public class BasMain{
 
     private static final long serialVersionUID = 1L;
 
@@ -92,4 +92,21 @@ public class BasMain {
     @ApiModelProperty(value = "修改时间")
     @Excel(name = "修改时间")
     private Date updateTime;
+
+    @ApiModelProperty(value = "创建人")
+    @Excel(name = "创建人")
+    private String createBy;
+
+    @ApiModelProperty(value = "创建者")
+    @TableField(exist = false)
+    private String createByName;
+
+    @ApiModelProperty(value = "修改人")
+    @Excel(name = "修改人")
+    private String updateBy;
+
+    /** 更新者 */
+    @ApiModelProperty(value = "更新者")
+    @TableField(exist = false)
+    private String updateByName;
 }

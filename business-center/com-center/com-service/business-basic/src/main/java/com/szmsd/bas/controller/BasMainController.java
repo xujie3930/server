@@ -96,7 +96,7 @@ public class BasMainController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping
     public R add(@RequestBody BasMain basMain) {
-        if (basMain.getId() == 0) {
+        if (basMain.getId() == null) {
             BasMain basMain1 = new BasMain();
             basMain1.setMainName(basMain.getMainName());
             List<BasMain> list = basMainService.selectBasMainList(basMain1);

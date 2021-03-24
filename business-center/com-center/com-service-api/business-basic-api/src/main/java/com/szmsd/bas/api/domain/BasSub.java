@@ -120,4 +120,22 @@ public class BasSub {
     @ApiModelProperty(value = "子类别值")
     @Excel(name = "子类别值")
     private String subValue;
+
+
+    @ApiModelProperty(value = "创建人")
+    @Excel(name = "创建人")
+    private String createBy;
+
+    @ApiModelProperty(value = "创建者")
+    @TableField(exist = false)
+    private String createByName;
+
+    @ApiModelProperty(value = "修改人")
+    @Excel(name = "修改人")
+    private String updateBy;
+
+    /** 更新者 */
+    @ApiModelProperty(value = "更新者")
+    @TableField(exist = false)
+    private String updateByName;
 }
