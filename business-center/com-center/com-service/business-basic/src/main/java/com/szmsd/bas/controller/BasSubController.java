@@ -201,7 +201,7 @@ public class BasSubController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping
     public R add(@RequestBody BasSub basSub) {
-        if (basSub.getId() == 0) {
+        if (basSub.getId() == null) {
             basSub.setCreateTime(new Date());
             BasSub basSub2 = new BasSub();
             String mainSub = basSub.getMainCode();
