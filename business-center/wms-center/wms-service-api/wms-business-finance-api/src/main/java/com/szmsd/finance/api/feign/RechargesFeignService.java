@@ -14,8 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 /**
  * @author liulei
  */
-//@FeignClient(contextId = "FeignClient.RechargesFeignService", name = BusinessFssInterface.SERVICE_NAME, fallbackFactory = RechargeFeignFallback.class)
-@FeignClient(contextId = "FeignClient.RechargesFeignService", name = BusinessFssInterface.SERVICE_NAME)
+@FeignClient(contextId = "FeignClient.RechargesFeignService", name = BusinessFssInterface.SERVICE_NAME, fallbackFactory = RechargeFeignFallback.class)
 public interface RechargesFeignService {
 
     @ApiOperation(value = "第三方充值接口回调")

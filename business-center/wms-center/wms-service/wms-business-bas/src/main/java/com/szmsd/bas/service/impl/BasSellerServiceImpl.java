@@ -200,6 +200,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             sysUserDto.setUserType(UserConstants.USER_TYPE_CRS);
             sysUserDto.setRoleIds(roleIds);
             sysUserDto.setNickName(dto.getNickName());
+            sysUserDto.setSellerCode(dto.getSellerCode());
             R sysUserResult = remoteUserService.baseCopyUserAdd(sysUserDto);
             if(sysUserResult.getCode() == -200){
                 r.setData(false);
