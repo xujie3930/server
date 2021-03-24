@@ -139,6 +139,9 @@ public class SysUser extends BaseEntity {
     @TableField(fill = FieldFill.UPDATE)
     private String updateBy;
 
+    @ApiModelProperty(value = "客户代码")
+    @Excel(name = "客户代码")
+    private String sellerCode;
 
     public SysUser() {
 
