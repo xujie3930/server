@@ -42,4 +42,13 @@ public class ExchangeRate extends FssBaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "失效时间")
     private Date expireTime;
+
+    public ExchangeRate() {
+    }
+
+    public ExchangeRate(String exchangeFromCode, String exchangeToCode, BigDecimal rate) {
+        this.exchangeFromCode = exchangeFromCode;
+        this.exchangeToCode = exchangeToCode;
+        this.rate = rate;
+    }
 }
