@@ -2,11 +2,11 @@ package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasWeightSectionDto;
+import com.szmsd.bas.api.domain.BasWeightSectionQueryDto;
+import com.szmsd.bas.api.domain.BasWeightSectionVo;
 import com.szmsd.bas.dao.BasWeightSectionMapper;
 import com.szmsd.bas.domain.BasWeightSection;
-import com.szmsd.bas.domain.dto.BasWeightSectionDto;
-import com.szmsd.bas.domain.dto.BasWeightSectionQueryDto;
-import com.szmsd.bas.domain.vo.BasWeightSectionVo;
 import com.szmsd.bas.service.IBasWeightSectionService;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.LogisticsExceptionUtil;

@@ -3,13 +3,12 @@
 <mapper namespace="com.szmsd.bas.dao.BasCustomerMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasCustomer">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasCustomer">
         <id column="id" property="id"/>
         <result column="remark" property="remark"/>
         <result column="create_time" property="createTime"/>
         <result column="update_by" property="updateBy"/>
         <result column="update_time" property="updateTime"/>
-        <result column="create_by" property="createBy"/>
         <result column="cus_code" property="cusCode"/>
         <result column="cus_abbverviation" property="cusAbbverviation"/>
         <result column="cus_name" property="cusName"/>

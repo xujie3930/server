@@ -1,4 +1,4 @@
-package com.szmsd.bas.domain;
+package com.szmsd.bas.api.domain;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.szmsd.common.core.annotation.Excel;

@@ -25,7 +25,7 @@ public class BasMain {
 
     @ApiModelProperty(value = "主键id")
     @Excel(name = "主键id")
-    private String id;
+    private Long id;
 
     @ApiModelProperty(value = "主类id")
     @Excel(name = "主类id")

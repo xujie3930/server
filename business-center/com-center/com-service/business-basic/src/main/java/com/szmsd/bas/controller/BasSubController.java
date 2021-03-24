@@ -1,7 +1,7 @@
 package com.szmsd.bas.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.bas.domain.BasSub;
+import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.domain.dto.basSubDto;
 import com.szmsd.bas.driver.UpdateRedis;
 import com.szmsd.bas.service.IBasSubService;

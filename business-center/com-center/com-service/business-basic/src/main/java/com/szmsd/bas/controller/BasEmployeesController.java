@@ -1,8 +1,8 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasEmployees;
-import com.szmsd.bas.domain.dto.BasWeightDto;
-import com.szmsd.bas.domain.dto.BasWeightSectionDto;
+import com.szmsd.bas.api.domain.BasEmployees;
+import com.szmsd.bas.api.domain.BasWeightDto;
+import com.szmsd.bas.api.domain.BasWeightSectionDto;
 import com.szmsd.bas.driver.UpdateRedis;
 import com.szmsd.bas.service.IBasEmployeesService;
 import com.szmsd.bas.service.IBasWeightSectionService;

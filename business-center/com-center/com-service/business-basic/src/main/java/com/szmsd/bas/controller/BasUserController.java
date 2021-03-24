@@ -1,7 +1,7 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasCodeDto;
-import com.szmsd.bas.domain.BasUser;
+import com.szmsd.bas.api.domain.BasCodeDto;
+import com.szmsd.bas.api.domain.BasUser;
 import com.szmsd.bas.service.BasCodeService;
 import com.szmsd.bas.service.IBasUserService;
 import com.szmsd.common.core.domain.Files;

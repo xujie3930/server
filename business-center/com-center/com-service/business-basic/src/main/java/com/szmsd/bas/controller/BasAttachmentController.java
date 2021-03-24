@@ -1,9 +1,9 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasAttachment;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.domain.dto.BasAttachmentDTO;
 import com.szmsd.bas.domain.dto.BasAttachmentDataDTO;
-import com.szmsd.bas.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.domain.dto.FileDTO;
 import com.szmsd.bas.enums.BasAttachmentTypeEnum;
 import com.szmsd.bas.service.IBasAttachmentService;

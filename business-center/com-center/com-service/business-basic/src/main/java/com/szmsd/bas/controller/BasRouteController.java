@@ -1,6 +1,6 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasRoute;
+import com.szmsd.bas.api.domain.BasRoute;
 import com.szmsd.bas.service.IBasRouteService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
@@ -76,17 +76,17 @@ public class BasRouteController extends BaseController {
     @Log(title = "路由表模块", businessType = BusinessType.INSERT)
     @PostMapping
     public R add(@RequestBody BasRoute basRoute) {
-        BasRoute basRoute2=new BasRoute();
+        BasRoute basRoute2 = new BasRoute();
         basRoute2.setEndStationCode(basRoute.getEndStationCode());
         basRoute2.setStartStationCode(basRoute.getStartStationCode());
         List<BasRoute> list2 = basRouteService.selectBasRouteList(basRoute2);
-        if (list2.size()!=0){
+        if (list2.size() != 0) {
             return R.failed("起始，结束站重复");
         }
-        BasRoute basRoute1=new BasRoute();
+        BasRoute basRoute1 = new BasRoute();
         basRoute1.setRouteCode(basRoute.getRouteCode());
         List<BasRoute> list1 = basRouteService.selectBasRouteList(basRoute1);
-        if (list1.size()!=0){
+        if (list1.size() != 0) {
             return R.failed("路由编号重复");
         }
         basRoute.setCreateTime(new Date());
@@ -100,17 +100,17 @@ public class BasRouteController extends BaseController {
     @Log(title = "路由表模块", businessType = BusinessType.UPDATE)
     @PutMapping
     public R edit(@RequestBody BasRoute basRoute) {
-        BasRoute basRoute1=new BasRoute();
+        BasRoute basRoute1 = new BasRoute();
         basRoute1.setRouteCode(basRoute.getRouteCode());
         List<BasRoute> list1 = basRouteService.selectBasRouteList(basRoute1);
-        if (list1.size()!=0){
+        if (list1.size() != 0) {
             return R.failed("路由编号重复");
         }
-        BasRoute basRoute2=new BasRoute();
+        BasRoute basRoute2 = new BasRoute();
         basRoute2.setStartStationCode(basRoute.getStartStationCode());
         basRoute2.setEndStationCode(basRoute.getEndStationCode());
         List<BasRoute> list2 = basRouteService.selectBasRouteList(basRoute2);
-        if (list2.size()!=0){
+        if (list2.size() != 0) {
             return R.failed("起始，结束站重复");
         }
         basRoute.setUpdateTime(new Date());

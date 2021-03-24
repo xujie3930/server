@@ -1,6 +1,6 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasCustomer;
+import com.szmsd.bas.api.domain.BasCustomer;
 import com.szmsd.bas.domain.BasMes;
 import com.szmsd.bas.domain.Mes;
 import com.szmsd.bas.service.IBasCustomerService;

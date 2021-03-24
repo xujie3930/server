@@ -2,7 +2,9 @@ package com.szmsd.bas.api.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.szmsd.common.core.annotation.CodeToNameElement;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.enums.CodeToNameEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -32,6 +35,7 @@ public class BasCusprice {
 
     @ApiModelProperty(value = "主键id")
     @Excel(name = "主键id")
+//    @TableId(value = "id", type = IdType.UUID)
     private String id;
 
     @ApiModelProperty(value = "客户id")
@@ -39,6 +43,7 @@ public class BasCusprice {
     private String cusCode;
 
     @ApiModelProperty(value = "客户名称")
+    @CodeToNameElement(type = CodeToNameEnum.BAS_CUSTOMER,keyCode = "cusCode")
     @Excel(name = "客户名称")
     private String cusName;
 
@@ -48,6 +53,7 @@ public class BasCusprice {
 
     @ApiModelProperty(value = "产品类型名称")
     @Excel(name = "产品类型名称")
+    @CodeToNameElement(type = CodeToNameEnum.BAS_PRODUCT,keyCode = "productTypeCode")
     private String productTypeName;
 
     @ApiModelProperty(value = "主类别id")
@@ -56,7 +62,12 @@ public class BasCusprice {
 
     @ApiModelProperty(value = "费用类别")
     @Excel(name = "费用类别")
+    @CodeToNameElement(type = CodeToNameEnum.BAS_SUB,keyCode = "costCategoryCode")
     private String costCategory;
+
+    @ApiModelProperty(value = "费用类别code")
+    @Excel(name = "费用类别code")
+    private String costCategoryCode;
 
     @ApiModelProperty(value = "子类别id")
     @Excel(name = "子类别id")
@@ -66,9 +77,14 @@ public class BasCusprice {
     @Excel(name = "录入网点")
     private String createSite;
 
-    @ApiModelProperty(value = "计费模式（0=实际重量，1=进位舍一，2=进位舍二）")
-    @Excel(name = "计费模式（0=实际重量，1=进位舍一，2=进位舍二）")
+    @ApiModelProperty(value = "计费模式（）")
+    @Excel(name = "计费模式（）")
+    @CodeToNameElement(type = CodeToNameEnum.BAS_SUB,keyCode = "chargingPatternCode")
     private String chargingPattern;
+
+    @ApiModelProperty(value = "计费模式code")
+    @Excel(name = "计费模式code")
+    private String chargingPatternCode;
 
     @ApiModelProperty(value = "有效起始时间")
     @Excel(name = "有效起始时间")
@@ -114,13 +130,21 @@ public class BasCusprice {
     @Excel(name = "预留字段5")
     private String parm5;
 
+    @ApiModelProperty(value = "创建者")
+    @Excel(name = "创建者")
+    private String createByName;
+
     @ApiModelProperty(value = "创建者id")
     @Excel(name = "创建者id")
-    private String createId;
+    private String createBy;
+
+    @ApiModelProperty(value = "修改者")
+    @Excel(name = "修改者")
+    private String updateByName;
 
     @ApiModelProperty(value = "修改者id")
     @Excel(name = "修改者id")
-    private String updateId;
+    private String updateBy;
 
     @ApiModelProperty(value = "删除标志（0代表存在 2代表删除）")
     @Excel(name = "删除标志（0代表存在 2代表删除）")
@@ -155,4 +179,20 @@ public class BasCusprice {
     @ApiModelProperty(value = "重量")
     @Excel(name = "重量")
     private String heft;
+
+    @ApiModelProperty(value = "目的地")
+    @Excel(name = "目的地")
+    private String destination;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "目的地")
+    @Excel(name = "目的地")
+    private String destinationCode;
+
+    @TableField(exist = false)
+    private List<BasCuspriceCode> cusList;
+
+
+    @TableField(exist = false)
+    private List<BasCuspriceCode> desList;
 }

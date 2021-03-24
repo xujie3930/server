@@ -37,11 +37,11 @@ public class BasCustomer {
     private String id;
 
     @ApiModelProperty(value = "客户编号")
-    @Excel(name = "客户编号")
+    @Excel(name = "Customer number")
     private String cusCode;
 
     @ApiModelProperty(value = "客户简称")
-    @Excel(name = "客户简称")
+    @Excel(name = "Customer abbreviation")
     private String cusAbbverviation;
 
     @ApiModelProperty(value = "客户名称（中）")
@@ -61,15 +61,15 @@ public class BasCustomer {
     private String cusPhone;
 
     @ApiModelProperty(value = "手机号码")
-    @Excel(name = "手机号码")
+    @Excel(name = "Customer tell")
     private String cusTle;
 
     @ApiModelProperty(value = "网点编号")
-    @Excel(name = "网点编号")
+    @Excel(name = "Site code")
     private String siteCode;
 
     @ApiModelProperty(value = "网点名称")
-    @Excel(name = "网点名称")
+    @Excel(name = "Site name")
     private String siteName;
 
     @ApiModelProperty(value = "所属员工编号")
@@ -219,8 +219,12 @@ public class BasCustomer {
     @Excel(name = "图片5")
     private String picture5;
 
+    @TableField(exist = false)
+    @ApiModelProperty(value = "错误消息")
+    @Excel(name = "错误消息")
+    private String message;
+
     @ApiModelProperty(value = "客户编号集")
     @TableField(exist = false)
     private List<String> cusCodeList;
-
 }

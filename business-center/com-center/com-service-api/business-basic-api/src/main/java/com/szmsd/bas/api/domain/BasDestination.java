@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 
 /**
  * <p>
@@ -25,7 +27,7 @@ import lombok.experimental.Accessors;
 @SuppressWarnings("serial")
 @Data
 @ApiModel(value = "BasDestination对象", description = "")
-public class BasDestination {
+public class BasDestination  {
 
     private static final long serialVersionUID = 1L;
 
@@ -149,6 +151,38 @@ public class BasDestination {
     @ApiModelProperty(value = "营业件网点code")
     @Excel(name = "营业网点code")
     private String businesSiteCode;
+
+    @ApiModelProperty(value = "目的地类型code")
+    @Excel(name = "目的地类型code")
+    private String destinationTypeCode;
+
+    @ApiModelProperty(value = "目的地类型")
+    @Excel(name = "目的地类型")
+    private String destinationTypeName;
+
+    @ApiModelProperty(value = "创建人")
+    @Excel(name = "创建人")
+    private String createByName;
+
+    @ApiModelProperty(value = "修改人name")
+    @Excel(name = "修改人name")
+    private String updateByName;
+
+    @ApiModelProperty(value = "创建人id")
+    @Excel(name = "创建人id")
+    private String createBy;
+
+    @ApiModelProperty(value = "修改人id")
+    @Excel(name = "修改人id")
+    private String updateBy;
+
+    @ApiModelProperty(value = "修改时间")
+    @Excel(name = "修改时间")
+    private Date updateTime;
+
+    @ApiModelProperty(value = "创建时间")
+    @Excel(name = "创建时间")
+    private Date createTime;
 
     @ApiModelProperty(value = "分拣码")
     @Excel(name = "分拣码")

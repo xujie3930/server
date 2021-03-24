@@ -1,7 +1,7 @@
 package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.szmsd.bas.domain.BasCustomer;
+import com.szmsd.bas.api.domain.BasCustomer;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.multipart.MultipartFile;
 

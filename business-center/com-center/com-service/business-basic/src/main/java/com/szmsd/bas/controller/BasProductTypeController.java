@@ -1,6 +1,6 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasProductType;
+import com.szmsd.bas.api.domain.BasProductType;
 import com.szmsd.bas.driver.UpdateRedis;
 import com.szmsd.bas.service.IBasProductTypeService;
 import com.szmsd.common.core.annotation.CodeToName;

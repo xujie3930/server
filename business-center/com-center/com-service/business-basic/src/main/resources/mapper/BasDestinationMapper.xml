@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.dao.BasDestinationMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasDestination">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasDestination">
         <id column="id" property="id"/>
         <result column="remark" property="remark"/>
         <result column="current_id" property="currentId"/>

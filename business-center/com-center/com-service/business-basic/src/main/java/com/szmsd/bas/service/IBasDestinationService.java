@@ -2,7 +2,7 @@ package com.szmsd.bas.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.szmsd.bas.domain.BasDestination;
+import com.szmsd.bas.api.domain.BasDestination;
 
 import javax.annotation.Resource;
 import java.util.List;

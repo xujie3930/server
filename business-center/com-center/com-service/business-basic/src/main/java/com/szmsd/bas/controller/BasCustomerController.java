@@ -1,8 +1,8 @@
 package com.szmsd.bas.controller;
 
 import com.alibaba.fastjson.JSONArray;
-import com.szmsd.bas.domain.BasCustomer;
-import com.szmsd.bas.domain.BasUser;
+import com.szmsd.bas.api.domain.BasCustomer;
+import com.szmsd.bas.api.domain.BasUser;
 import com.szmsd.bas.driver.UpdateRedis;
 import com.szmsd.bas.service.IBasCustomerService;
 import com.szmsd.common.core.domain.Files;

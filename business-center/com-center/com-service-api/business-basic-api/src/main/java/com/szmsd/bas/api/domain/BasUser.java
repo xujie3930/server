@@ -1,6 +1,7 @@
 package com.szmsd.bas.api.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.szmsd.common.core.annotation.Excel;
@@ -11,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -34,7 +36,7 @@ public class BasUser implements Serializable {
 
     @ApiModelProperty(value = "主键id")
     @Excel(name = "主键id")
-    @TableId(type=IdType.AUTO)
+    @TableId(type = IdType.AUTO)
     private int id;
 
     @ApiModelProperty(value = "用户编号")
@@ -177,6 +179,39 @@ public class BasUser implements Serializable {
     @Excel(name = "关联id")
     private long userId;
 
+    @ApiModelProperty(value = "修改人id")
+    @Excel(name = "修改人id")
+    private String updateBy;
 
+    @ApiModelProperty(value = "创建人id")
+    @Excel(name = "创建人id")
+    private String createBy;
 
+    @ApiModelProperty(value = "代收货款费率")
+    @Excel(name = "代收货款费率")
+    private BigDecimal feeRate;
+
+    @ApiModelProperty(value = "保价费率")
+    @Excel(name = "保价费率")
+    private BigDecimal premiumRate;
+
+    @ApiModelProperty(value = "代收货款限额")
+    @Excel(name = "代收货款限额")
+    private String feeQuota;
+
+    @ApiModelProperty(value = "保价限额")
+    @Excel(name = "保价限额")
+    private BigDecimal premiumQuota;
+
+    @TableField(exist = false)
+    private String parm;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "分页")
+    private String pageSize;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "分页")
+    @Excel(name = "分页")
+    private String pageNum;
 }

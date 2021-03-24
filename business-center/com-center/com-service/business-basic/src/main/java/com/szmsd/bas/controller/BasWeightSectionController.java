@@ -1,8 +1,8 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.dto.BasWeightSectionDto;
-import com.szmsd.bas.domain.dto.BasWeightSectionQueryDto;
-import com.szmsd.bas.domain.vo.BasWeightSectionVo;
+import com.szmsd.bas.api.domain.BasWeightSectionDto;
+import com.szmsd.bas.api.domain.BasWeightSectionQueryDto;
+import com.szmsd.bas.api.domain.BasWeightSectionVo;
 import com.szmsd.bas.service.IBasWeightSectionService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;

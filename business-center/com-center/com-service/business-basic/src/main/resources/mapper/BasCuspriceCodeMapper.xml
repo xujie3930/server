@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.dao.BasCuspriceCodeMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasCuspriceCode">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasCuspriceCode">
         <id column="id" property="id"/>
         <result column="types" property="types"/>
         <result column="code" property="code"/>

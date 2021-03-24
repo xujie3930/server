@@ -1,6 +1,6 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasCodeDto;
+import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.domain.BasTrainNumber;
 import com.szmsd.bas.service.BasCodeService;
 import com.szmsd.bas.service.IBasTrainNumberService;

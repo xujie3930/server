@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.dao.BasSubMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasSub">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasSub">
         <id column="id" property="id"/>
         <result column="create_time" property="createTime"/>
         <result column="sort" property="sort"/>

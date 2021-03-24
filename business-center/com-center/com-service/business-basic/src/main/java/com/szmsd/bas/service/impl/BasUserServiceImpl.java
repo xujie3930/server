@@ -2,8 +2,8 @@ package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasUser;
 import com.szmsd.bas.dao.BasUserMapper;
-import com.szmsd.bas.domain.BasUser;
 import com.szmsd.bas.service.IBasUserService;
 import com.szmsd.common.core.utils.StringUtils;
 import org.springframework.stereotype.Service;
