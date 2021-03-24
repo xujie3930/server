@@ -10,6 +10,7 @@ import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.ActiveDto;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
+import com.szmsd.bas.dto.BasSellerSysDto;
 import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
@@ -31,6 +32,7 @@ import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.feign.RemoteUserService;
+import com.szmsd.system.api.model.UserInfo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -87,7 +89,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         * @return 模块
         */
         @Override
-        public List<BasSeller> selectBasSellerList(BasSeller basSeller)
+        public List<BasSellerSysDto> selectBasSellerList(BasSeller basSeller)
         {
         QueryWrapper<BasSeller> where = new QueryWrapper<BasSeller>();
         if(basSeller.getIsActive()!=null){
@@ -95,7 +97,15 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "sellerCode", basSeller.getSellerCode());
         QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"user_name",basSeller.getUserName());
-        return baseMapper.selectList(where);
+        List<BasSellerSysDto> basSellerSysDtos = BeanMapperUtil.mapList(baseMapper.selectList(where),BasSellerSysDto.class);
+        for(BasSellerSysDto b:basSellerSysDtos){
+            SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
+            sysUserByTypeAndUserType.setUserType("01");
+            sysUserByTypeAndUserType.setUsername(b.getUserName());
+            UserInfo userInfo= remoteUserService.getUserInfo(sysUserByTypeAndUserType).getData();
+            b.setSysId(userInfo.getSysUser().getUserId());
+        }
+        return basSellerSysDtos;
         }
 
         /**
@@ -304,6 +314,15 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                        throw new BaseException("传wms失败"+r.getMsg());
                    }
                }
+            SysUserDto userDto = new SysUserDto();
+            userDto.setUserId(activeDto.getSysId());
+               //禁用系统用户表
+            if(activeDto.getIsActive()==true){
+               userDto.setStatus("0");
+            }else{
+                userDto.setStatus("1");
+            }
+            remoteUserService.changeStatus(userDto);
            return super.update(updateWrapper);
        }
 

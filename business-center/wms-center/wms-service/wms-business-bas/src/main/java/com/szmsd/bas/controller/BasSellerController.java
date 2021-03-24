@@ -3,6 +3,7 @@ import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.ActiveDto;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
+import com.szmsd.bas.dto.BasSellerSysDto;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
@@ -48,7 +49,7 @@ public class BasSellerController extends BaseController{
       public TableDataInfo list(BasSeller basSeller)
      {
             startPage();
-            List<BasSeller> list = basSellerService.selectBasSellerList(basSeller);
+            List<BasSellerSysDto> list = basSellerService.selectBasSellerList(basSeller);
             return getDataTable(list);
       }
 
@@ -73,8 +74,8 @@ public class BasSellerController extends BaseController{
      @GetMapping("/export")
      @ApiOperation(value = "导出模块列表",notes = "导出模块列表")
      public void export(HttpServletResponse response, BasSeller basSeller) throws IOException {
-     List<BasSeller> list = basSellerService.selectBasSellerList(basSeller);
-     ExcelUtil<BasSeller> util = new ExcelUtil<BasSeller>(BasSeller.class);
+     List<BasSellerSysDto> list = basSellerService.selectBasSellerList(basSeller);
+     ExcelUtil<BasSellerSysDto> util = new ExcelUtil<BasSellerSysDto>(BasSellerSysDto.class);
         util.exportExcel(response,list, "BasSeller");
 
      }

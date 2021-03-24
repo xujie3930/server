@@ -5,6 +5,7 @@ import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.ActiveDto;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
+import com.szmsd.bas.dto.BasSellerSysDto;
 import com.szmsd.common.core.domain.R;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +35,7 @@ public interface IBasSellerService extends IService<BasSeller> {
         * @param basSeller 模块
         * @return 模块集合
         */
-        List<BasSeller> selectBasSellerList(BasSeller basSeller);
+        List<BasSellerSysDto> selectBasSellerList(BasSeller basSeller);
 
 
         /**
