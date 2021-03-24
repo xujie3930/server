@@ -7,4 +7,5 @@ public class ActiveDto {
 
     private Long id;
     private Boolean isActive;
+    private Long sysId;
 }

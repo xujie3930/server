@@ -1,10 +1,14 @@
 package com.szmsd.chargerules.service;
 
+import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.finance.enums.BillEnum;
 
 import java.math.BigDecimal;
 
 public interface IPayService {
+
+    BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Integer qty);
 
     /**
      * 调用扣费接口扣费
@@ -12,6 +16,6 @@ public interface IPayService {
      * @param amount 金额
      * @return result
      */
-    R pay(String customCode, BigDecimal amount);
+    R pay(String customCode, BigDecimal amount, BillEnum.PayMethod payMethod, ChargeLog chargeLog);
 
 }

@@ -41,7 +41,6 @@ public class CreatePricedProductCommand  {
     @ApiModelProperty(value = "挂号服务名称")
     private String logisticsRouteId;
 
-    @Deprecated
     @ApiModelProperty(value = "终端运输商")
     private String terminalCarrier;
 

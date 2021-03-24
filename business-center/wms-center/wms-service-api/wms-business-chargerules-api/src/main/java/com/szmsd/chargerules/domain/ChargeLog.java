@@ -34,7 +34,7 @@ public class ChargeLog extends BaseEntity {
     private String operationType;
 
     @ApiModelProperty(value = "订单号")
-    private String orderId;
+    private String orderNo;
 
     @ApiModelProperty(value = "金额")
     private BigDecimal amount;

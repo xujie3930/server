@@ -8,6 +8,7 @@ import com.szmsd.chargerules.enums.ErrorMessageEnum;
 import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.common.core.exception.web.BaseException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 
+@Slf4j
 @Service
 public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperationMapper, WarehouseOperation> implements IWarehouseOperationService {
 
@@ -48,7 +50,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
             WarehouseOperation warehouseOperation = optional.get();
             return cbm.multiply(warehouseOperation.getPrice()); //体积乘以价格
         }
-
+        log.error("charge() warehouseCode: {}, days: {}",warehouseCode,days);
         throw new BaseException(ErrorMessageEnum.WAREHOUSE_PRICE_NOT_FOUND.getMessage());
     }
 
