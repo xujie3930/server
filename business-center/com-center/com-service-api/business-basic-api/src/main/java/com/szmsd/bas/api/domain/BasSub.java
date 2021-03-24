@@ -73,6 +73,7 @@ public class BasSub {
 
     @ApiModelProperty(value = "状态（0正常 1停用）")
     @Excel(name = "状态（0正常 1停用）")
+    @TableField(exist = false)
     private String status;
 
     @ApiModelProperty(value = "删除标志（0代表存在 2代表删除）")
