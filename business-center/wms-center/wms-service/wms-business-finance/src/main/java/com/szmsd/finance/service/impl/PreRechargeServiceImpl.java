@@ -35,6 +35,7 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
     @Override
     public List<PreRecharge> listPage(PreRechargeDTO dto) {
         LambdaQueryWrapper<PreRecharge> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.isNotNull(PreRecharge::getCusCode);
         if(dto.getCusId()!=null) {
             queryWrapper.eq(PreRecharge::getCusId, dto.getCusId());
         }

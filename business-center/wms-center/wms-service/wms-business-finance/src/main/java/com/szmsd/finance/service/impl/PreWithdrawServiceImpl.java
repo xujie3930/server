@@ -33,6 +33,7 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
     @Override
     public List<PreWithdraw> listPage(PreWithdrawDTO dto) {
         LambdaQueryWrapper<PreWithdraw> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.isNotNull(PreWithdraw::getCusCode);
         if(dto.getCusCode()!=null) {
             queryWrapper.eq(PreWithdraw::getCusCode, dto.getCusCode());
         }
