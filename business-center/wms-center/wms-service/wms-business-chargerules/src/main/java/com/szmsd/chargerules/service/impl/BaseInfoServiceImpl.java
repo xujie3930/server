@@ -3,6 +3,7 @@ package com.szmsd.chargerules.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.chargerules.domain.BasSpecialOperation;
+import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.domain.SpecialOperation;
 import com.szmsd.chargerules.dto.BasSpecialOperationDTO;
 import com.szmsd.chargerules.enums.ErrorMessageEnum;
@@ -16,6 +17,7 @@ import com.szmsd.chargerules.service.ISpecialOperationService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanUtils;
+import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationResultRequest;
 import com.szmsd.open.vo.ResponseVO;
@@ -101,11 +103,14 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         if (specialOperation == null) {
             return R.failed(ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
         }
-        BigDecimal amount = calculate(specialOperation.getFirstPrice(),
+        BigDecimal amount = payService.calculate(specialOperation.getFirstPrice(),
                 specialOperation.getNextPrice(), basSpecialOperation.getQty());
 
         //调用扣费接口扣费
-        R r = payService.pay(customCode, amount);
+        ChargeLog chargeLog = new ChargeLog();
+        chargeLog.setOrderNo(basSpecialOperation.getOrderNo());
+        chargeLog.setOperationType(basSpecialOperation.getOperationType());
+        R r = payService.pay(customCode, amount,BillEnum.PayMethod.SPECIAL_OPERATE,chargeLog);
         if(r.getCode() != 200) {
             log.error("pay failed: {}",r.getData());
             return R.failed(ErrorMessageEnum.PAY_FAILED.getMessage());
@@ -119,10 +124,6 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         }
         return R.ok();
 
-    }
-
-    public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Integer qty) {
-        return qty == 1 ? firstPrice : new BigDecimal(qty - 1).multiply(nextPrice).add(firstPrice);
     }
 
 }
