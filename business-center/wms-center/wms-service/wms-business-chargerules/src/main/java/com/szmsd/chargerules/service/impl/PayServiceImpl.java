@@ -1,7 +1,7 @@
 package com.szmsd.chargerules.service.impl;
 
 import com.szmsd.chargerules.domain.ChargeLog;
-import com.szmsd.chargerules.mapper.PayLogMapper;
+import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.RechargesFeignService;
@@ -22,7 +22,7 @@ public class PayServiceImpl implements IPayService {
     private RechargesFeignService rechargesFeignService;
 
     @Resource
-    private PayLogMapper payLogMapper;
+    private IChargeLogService chargeLogService;
 
     @Override
     public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Integer qty) {
@@ -30,7 +30,7 @@ public class PayServiceImpl implements IPayService {
     }
 
     @Override
-    public R pay(String customCode, BigDecimal amount,BillEnum.PayMethod payMethod,ChargeLog chargeLog) {
+    public R pay(String customCode, BigDecimal amount, BillEnum.PayMethod payMethod, ChargeLog chargeLog) {
         CustPayDTO custPayDTO = new CustPayDTO();
         custPayDTO.setCusCode(customCode);
         custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
@@ -45,9 +45,9 @@ public class PayServiceImpl implements IPayService {
 
         R r = rechargesFeignService.warehouseFeeDeductions(custPayDTO);
         chargeLog.setSuccess(r.getCode() == 200);
-        int insert = payLogMapper.insert(chargeLog);
-        if(insert < 1) {
-            log.error("pay() failed {}",chargeLog);
+        int insert = chargeLogService.save(chargeLog);
+        if (insert < 1) {
+            log.error("pay() failed {}", chargeLog);
         }
         return r;
     }
