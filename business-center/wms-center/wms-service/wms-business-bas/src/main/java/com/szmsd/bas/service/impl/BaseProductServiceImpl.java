@@ -189,6 +189,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         //SKU需要仓库测量尺寸
         baseProduct.setWarehouseAcceptance(false);
+        baseProduct.setWeight(baseProduct.getInitWeight());
+        baseProduct.setLength(baseProduct.getInitLength());
+        baseProduct.setHeight(baseProduct.getInitWidth());
+        baseProduct.setVolume(baseProduct.getInitVolume());
         //传oms修改字段
         BaseProductOms baseProductOms = BeanMapperUtil.map(baseProductDto, BaseProductOms.class);
         //base64图片
