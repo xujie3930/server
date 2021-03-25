@@ -69,4 +69,13 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
         }
         return responseObject;
     }
+
+    @Override
+    public ResponseVO grade(ChangeSheetGradeCommand changeSheetGradeCommand) {
+        String text = httpPut(httpConfig.getPricedProduct().getProducts(), changeSheetGradeCommand, changeSheetGradeCommand.getProductCode(), changeSheetGradeCommand.getSheetCode(), httpConfig.getPricedProduct().getGrade());
+        if ("true".equalsIgnoreCase(text)) {
+            return null;
+        }
+        return JSON.parseObject(text, ResponseVO.class);
+    }
 }

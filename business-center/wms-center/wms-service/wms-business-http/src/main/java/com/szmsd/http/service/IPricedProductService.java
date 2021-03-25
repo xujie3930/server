@@ -30,4 +30,6 @@ public interface IPricedProductService {
      * @return ResponseObject<ChargeWrapper, ProblemDetails>
      */
     ResponseObject<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command);
+
+    ResponseVO grade(ChangeSheetGradeCommand changeSheetGradeCommand);
 }

@@ -121,6 +121,8 @@ public class HttpConfig {
         private String exportFile;
         // 计算包裹的费用
         private String pricing;
+        // 修改一个计价产品信息的报价表对应的等级和生效时间段
+        private String grade;
     }
 
     @Data
@@ -128,6 +130,10 @@ public class HttpConfig {
     public static class PricedSheet {
         // 创建报价产品报价表详情信息、修改报价产品报价表详情信息、根据报价表编号获取产品报价表信息
         private String sheets;
+        // 使用file文件导入产品报价表信息
+        private String importFile;
+        // 导出报价表信息
+        private String exportFile;
     }
 
 

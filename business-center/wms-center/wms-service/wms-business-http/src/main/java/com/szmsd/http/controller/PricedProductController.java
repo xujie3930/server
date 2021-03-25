@@ -77,4 +77,11 @@ public class PricedProductController extends BaseController {
         return R.ok(iPricedProductService.pricing(command));
     }
 
+    @PostMapping("/grade")
+    @ApiOperation(value = "修改一个计价产品信息的报价表对应的等级和生效时间段")
+    public R<ResponseVO> grade(@RequestBody ChangeSheetGradeCommand changeSheetGradeCommand) {
+        ResponseVO grade = iPricedProductService.grade(changeSheetGradeCommand);
+        return R.ok(grade);
+    }
+
 }
