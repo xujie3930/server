@@ -2,6 +2,7 @@ package com.szmsd.bas.api.service.impl;
 
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.service.BaseProductClientService;
+import com.szmsd.bas.constant.ShipmentType;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.MeasuringProductRequest;
@@ -32,6 +33,15 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
     @Override
     public List<String> listProductAttribute(BaseProductConditionQueryDto conditionQueryDto) {
         return R.getDataAndException(this.baseProductFeignService.listProductAttribute(conditionQueryDto));
+    }
+
+    @Override
+    public String buildShipmentType(String warehouseCode, List<String> skus) {
+        BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+        conditionQueryDto.setWarehouseCode(warehouseCode);
+        conditionQueryDto.setSkus(skus);
+        List<String> listProductAttribute = this.listProductAttribute(conditionQueryDto);
+        return ShipmentType.highest(listProductAttribute);
     }
 
     @Override

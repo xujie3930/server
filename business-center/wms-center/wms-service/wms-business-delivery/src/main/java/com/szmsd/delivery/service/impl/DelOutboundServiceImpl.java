@@ -9,8 +9,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
-import com.szmsd.bas.constant.ShipmentType;
-import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -143,12 +141,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     private String buildShipmentType(DelOutboundDto dto) {
-        BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
-        conditionQueryDto.setWarehouseCode(dto.getWarehouseCode());
         List<DelOutboundDetailDto> details = dto.getDetails();
-        conditionQueryDto.setSkus(details.stream().map(DelOutboundDetailDto::getSku).collect(Collectors.toList()));
-        List<String> listProductAttribute = this.baseProductClientService.listProductAttribute(conditionQueryDto);
-        return ShipmentType.highest(listProductAttribute);
+        return this.baseProductClientService.buildShipmentType(dto.getWarehouseCode(), details.stream().map(DelOutboundDetailDto::getSku).collect(Collectors.toList()));
     }
 
     /**

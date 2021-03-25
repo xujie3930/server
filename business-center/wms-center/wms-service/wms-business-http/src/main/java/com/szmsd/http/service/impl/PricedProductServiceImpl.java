@@ -1,6 +1,7 @@
 package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.TypeReference;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.HttpResponseBody;
@@ -8,6 +9,7 @@ import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IPricedProductService;
+import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.*;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -77,5 +79,10 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
             return null;
         }
         return JSON.parseObject(text, ResponseVO.class);
+    }
+
+    @Override
+    public List<PricedProduct> inService(PricedProductInServiceCriteria criteria) {
+        return JSONArray.parseArray(httpPost(httpConfig.getPricedProduct().getInService(), criteria), PricedProduct.class);
     }
 }

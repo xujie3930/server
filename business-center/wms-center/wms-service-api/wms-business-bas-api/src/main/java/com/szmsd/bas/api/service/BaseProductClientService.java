@@ -33,6 +33,15 @@ public interface BaseProductClientService {
     List<String> listProductAttribute(BaseProductConditionQueryDto conditionQueryDto);
 
     /**
+     * 返回SKU属性
+     *
+     * @param warehouseCode warehouseCode
+     * @param skus          sku
+     * @return String
+     */
+    String buildShipmentType(String warehouseCode, List<String> skus);
+
+    /**
      * 根据仓库，SKU查询产品信息
      *
      * @param conditionQueryDto conditionQueryDto

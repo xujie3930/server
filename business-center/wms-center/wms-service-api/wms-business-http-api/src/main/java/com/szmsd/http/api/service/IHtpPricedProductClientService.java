@@ -1,9 +1,9 @@
 package com.szmsd.http.api.service;
 
-import com.szmsd.http.dto.CalcShipmentFeeCommand;
-import com.szmsd.http.dto.ChargeWrapper;
-import com.szmsd.http.dto.ProblemDetails;
-import com.szmsd.http.dto.ResponseObject;
+import com.szmsd.http.dto.*;
+import com.szmsd.http.vo.PricedProduct;
+
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -18,4 +18,12 @@ public interface IHtpPricedProductClientService {
      * @return ResponseObject<ChargeWrapper, ProblemDetails>
      */
     ResponseObject<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command);
+
+    /**
+     * 根据客户代码国家等信息获取可下单产品
+     *
+     * @param criteria criteria
+     * @return PricedProduct
+     */
+    List<PricedProduct> inService(PricedProductInServiceCriteria criteria);
 }
