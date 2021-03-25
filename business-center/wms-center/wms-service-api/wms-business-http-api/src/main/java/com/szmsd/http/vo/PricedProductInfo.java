@@ -50,7 +50,7 @@ public class PricedProductInfo {
     private List<String> subProducts;
 
     @ApiModelProperty(value = "报价表")
-    private List<String> sheets;
+    private List<PricedProductSheet> sheets;
 
     @ApiModelProperty(value = "是否生效")
     private Boolean isValid;

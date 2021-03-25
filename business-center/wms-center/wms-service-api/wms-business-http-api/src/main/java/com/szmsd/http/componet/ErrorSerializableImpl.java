@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,8 +27,16 @@ public class ErrorSerializableImpl extends JsonSerializer<String> implements Con
     @Override
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         try {
-            Map<String, List<String>> errors = JSONObject.parseObject(value, new TypeReference<Map<String, List<String>>>(){});
-            String collect = errors.entrySet().stream().map(Map.Entry::getValue).flatMap(Collection::stream).collect(Collectors.joining(","));
+            Map<String, ?> errors = JSONObject.parseObject(value, new TypeReference<Map<String, ?>>(){});
+            String collect = errors.entrySet().stream().map(item -> {
+                if (item.getValue() instanceof String) {
+                    return (String) item.getValue();
+                }
+                if (item.getValue() instanceof List) {
+                    return ((List<String>) item.getValue()).stream().collect(Collectors.joining(","));
+                }
+                return item.getValue() + "";
+            }).collect(Collectors.joining(","));
             gen.writeString(collect);
         } catch (Exception e) {
             gen.writeString(value);

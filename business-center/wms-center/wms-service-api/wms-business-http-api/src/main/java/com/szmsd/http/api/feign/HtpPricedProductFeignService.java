@@ -33,7 +33,7 @@ public interface HtpPricedProductFeignService {
     @PostMapping("/api/products/http/create")
     R<ResponseVO> create(@RequestBody CreatePricedProductCommand createPricedProductCommand);
 
-    @PostMapping("/api/products/http/info/{productCode}")
+    @GetMapping("/api/products/http/info/{productCode}")
     R<PricedProductInfo> info(@PathVariable("productCode") String productCode);
 
     @PostMapping("/api/products/http/update")

@@ -47,7 +47,7 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
 
     @Override
     public ResponseVO update(UpdatePricedProductCommand updatePricedProductCommand) {
-        return JSON.parseObject(httpPut(httpConfig.getPricedProduct().getProducts(), updatePricedProductCommand), ResponseVO.class);
+        return JSON.parseObject(httpPut(httpConfig.getPricedProduct().getProducts(), updatePricedProductCommand, updatePricedProductCommand.getCode()), ResponseVO.class);
     }
 
     @Override

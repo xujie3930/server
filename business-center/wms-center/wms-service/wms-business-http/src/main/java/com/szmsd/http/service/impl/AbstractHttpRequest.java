@@ -52,9 +52,14 @@ public abstract class AbstractHttpRequest {
     }
 
     String httpPut(String api, Object object) {
-        String url = getUrl() + api;
-        String requestBody = JSON.toJSONString(object);
+        return httpPut(api, object, null);
+    }
+
+    String httpPut(String api, Object object, String... pathVariable) {
         Map<String, String> headerMap = getHeaderMap();
+        String url = getUrl() + api;
+        url += (pathVariable != null) ? ("/" + Arrays.asList(pathVariable).stream().filter(Objects::nonNull).collect(Collectors.joining("/"))) : "";
+        String requestBody = JSON.toJSONString(object);
         Date requestTime = new Date();
         String responseBody = HttpClientHelper.httpPut(url, requestBody, headerMap);
         addLog(url, "PUT", headerMap, requestBody, requestTime, responseBody);
