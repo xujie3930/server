@@ -132,13 +132,9 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "物流包装要求编码")
     private String suggestPackingMaterialCode;
 
-    @ApiModelProperty(value = "开始价格")
-    @Excel(name = "开始价格")
-    private BigDecimal beginPrice;
-
-    @ApiModelProperty(value = "结束价格")
-    @Excel(name = "结束价格")
-    private BigDecimal endPrice;
+    @ApiModelProperty(value = "价格区间")
+    @Excel(name = "价格区间")
+    private String priceRange;
 
     @ApiModelProperty(value = "产品说明")
     @Excel(name = "产品说明")
