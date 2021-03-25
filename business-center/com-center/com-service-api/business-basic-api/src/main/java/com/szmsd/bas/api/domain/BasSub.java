@@ -125,6 +125,7 @@ public class BasSub {
 
     @ApiModelProperty(value = "创建人")
     @Excel(name = "创建人")
+    @TableField(exist = false)
     private String createBy;
 
     @ApiModelProperty(value = "创建者")
@@ -133,6 +134,7 @@ public class BasSub {
 
     @ApiModelProperty(value = "修改人")
     @Excel(name = "修改人")
+    @TableField(exist = false)
     private String updateBy;
 
     /** 更新者 */
