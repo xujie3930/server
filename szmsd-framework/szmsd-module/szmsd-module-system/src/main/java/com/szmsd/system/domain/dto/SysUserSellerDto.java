@@ -5,5 +5,5 @@ import lombok.Data;
 
 @Data
 public class SysUserSellerDto extends SysUser {
-    private String sellerCode;
+//    private String sellerCode;
 }

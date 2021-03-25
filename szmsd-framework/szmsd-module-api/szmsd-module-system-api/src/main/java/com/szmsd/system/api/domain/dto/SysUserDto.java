@@ -114,6 +114,8 @@ public class SysUserDto
     @ApiModelProperty(value = "更新者")
     private String updateByName;
 
+    @ApiModelProperty(value = "客户代码")
+    private String sellerCode;
 
     @ApiModelProperty(value = "角色组")
     @TableField(exist = false)

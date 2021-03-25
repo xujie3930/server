@@ -107,9 +107,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
                 specialOperation.getNextPrice(), basSpecialOperation.getQty());
 
         //调用扣费接口扣费
-        ChargeLog chargeLog = new ChargeLog();
-        chargeLog.setOrderNo(basSpecialOperation.getOrderNo());
-        chargeLog.setOperationType(basSpecialOperation.getOperationType());
+        ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(),basSpecialOperation.getOperationType());
         R r = payService.pay(customCode, amount,BillEnum.PayMethod.SPECIAL_OPERATE,chargeLog);
         if(r.getCode() != 200) {
             log.error("pay failed: {}",r.getData());
