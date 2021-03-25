@@ -1,6 +1,5 @@
 package com.szmsd.inventory.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -109,10 +108,10 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         if (StringUtils.isEmpty(queryDto.getWarehouseCode())) {
             return Collections.emptyList();
         }
-        LambdaQueryWrapper<InventoryAvailableQueryDto> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(InventoryAvailableQueryDto::getWarehouseCode, queryDto.getWarehouseCode());
+        QueryWrapper<InventoryAvailableQueryDto> queryWrapper = Wrappers.query();
+        queryWrapper.eq("warehouse_code", queryDto.getWarehouseCode());
         if (StringUtils.isNotEmpty(queryDto.getSku())) {
-            queryWrapper.like(InventoryAvailableQueryDto::getSku, queryDto.getSku());
+            queryWrapper.like("sku", queryDto.getSku());
         }
         List<InventoryAvailableListVO> voList = this.baseMapper.queryAvailableList(queryWrapper);
         if (CollectionUtils.isNotEmpty(voList)) {

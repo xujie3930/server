@@ -1,6 +1,6 @@
 package com.szmsd.inventory.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.szmsd.inventory.domain.Inventory;
@@ -22,5 +22,5 @@ public interface InventoryMapper extends BaseMapper<Inventory> {
      * @param queryWrapper queryWrapper
      * @return InventoryAvailableDto
      */
-    List<InventoryAvailableListVO> queryAvailableList(@Param(Constants.WRAPPER) LambdaQueryWrapper<InventoryAvailableQueryDto> queryWrapper);
+    List<InventoryAvailableListVO> queryAvailableList(@Param(Constants.WRAPPER) Wrapper<InventoryAvailableQueryDto> queryWrapper);
 }
