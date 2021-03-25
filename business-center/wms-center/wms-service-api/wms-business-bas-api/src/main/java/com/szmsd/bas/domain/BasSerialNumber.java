@@ -1,8 +1,10 @@
 package com.szmsd.bas.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -63,4 +65,14 @@ public class BasSerialNumber extends BaseEntity {
 
     @ApiModelProperty(value = "转换器")
     private String converts;
+
+    @ApiModelProperty(value = "创建人")
+    @TableField(exist = false)
+    @Excel(name = "创建人")
+    private String createBy;
+
+    @ApiModelProperty(value = "修改人")
+    @TableField(exist = false)
+    @Excel(name = "修改人")
+    private String updateBy;
 }
