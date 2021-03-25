@@ -168,7 +168,7 @@ public class HttpClientHelper {
      * @param headerMap   请求Header
      * @return 响应Body
      */
-    public static String httpPost(String url, String requestBody, Map<String, String> headerMap) {
+    public static HttpResponseBody httpPost(String url, String requestBody, Map<String, String> headerMap) {
         return execute(new HttpPost(url), requestBody, headerMap);
     }
 
@@ -180,7 +180,7 @@ public class HttpClientHelper {
      * @param headerMap   请求Header
      * @return 响应Body
      */
-    public static String httpPut(String url, String requestBody, Map<String, String> headerMap) {
+    public static HttpResponseBody httpPut(String url, String requestBody, Map<String, String> headerMap) {
         return execute(new HttpPut(url), requestBody, headerMap);
     }
 
@@ -192,7 +192,7 @@ public class HttpClientHelper {
      * @param headerMap   请求Header
      * @return 响应Body
      */
-    public static String httpDelete(String url, String requestBody, Map<String, String> headerMap) {
+    public static HttpResponseBody httpDelete(String url, String requestBody, Map<String, String> headerMap) {
         return execute(new HttpDelete(url), requestBody, headerMap);
     }
 
@@ -204,11 +204,11 @@ public class HttpClientHelper {
      * @param headerMap   请求Header
      * @return 响应Body
      */
-    public static String httpGet(String url, String requestBody, Map<String, String> headerMap) {
+    public static HttpResponseBody httpGet(String url, String requestBody, Map<String, String> headerMap) {
         return execute(new HttpGet(url), requestBody, headerMap);
     }
 
-    public static String execute(HttpEntityEnclosingRequestBase request, String requestBody, Map<String, String> headerMap) {
+    public static HttpResponseBody execute(HttpEntityEnclosingRequestBase request, String requestBody, Map<String, String> headerMap) {
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
         try {
@@ -229,7 +229,7 @@ public class HttpClientHelper {
                     result = EntityUtils.toString(entity, "UTF-8");
                 }
             }
-            return result;
+            return new HttpResponseBody.HttpResponseBodyWrapper(status, result);
         } catch (Exception e) {
             try {
                 if (null != response)
@@ -239,7 +239,7 @@ public class HttpClientHelper {
             }
             log.error(e.getMessage(), e);
         }
-        return null;
+        return new HttpResponseBody.HttpResponseBodyEmpty();
     }
 
     public static FileStream httpPostStream(String url, Map<String, String> headerMap, String requestBody) {

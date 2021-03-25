@@ -57,6 +57,11 @@ public class HtpPricedProductFeignFallback implements FallbackFactory<HtpPricedP
             public R<FileStream> exportFile(PricedProductCodesCriteria pricedProductCodesCriteria) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<ResponseObject<ChargeWrapper, ProblemDetails>> pricing(CalcShipmentFeeCommand command) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

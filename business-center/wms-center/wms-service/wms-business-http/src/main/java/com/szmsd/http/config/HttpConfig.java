@@ -119,6 +119,8 @@ public class HttpConfig {
         private String products;
         // 导出产品信息列表
         private String exportFile;
+        // 计算包裹的费用
+        private String pricing;
     }
 
     @Data

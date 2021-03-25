@@ -1,7 +1,8 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.domain.BasCountry;
+import com.szmsd.bas.api.domain.BasCountry;
 import com.szmsd.bas.service.IBasCountryService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.Api;
@@ -43,4 +44,10 @@ public class BasCountryController extends BaseController {
         return getDataTable(list);
     }
 
+    @ApiOperation(value = "根据国家编码查询国家")
+    @PreAuthorize("@ss.hasPermi('bas:bascountry:queryByCountryCode')")
+    @GetMapping("/queryByCountryCode")
+    public R<BasCountry> queryByCountryCode(String countryCode) {
+        return R.ok(this.basCountryService.queryByCountryCode(countryCode));
+    }
 }
