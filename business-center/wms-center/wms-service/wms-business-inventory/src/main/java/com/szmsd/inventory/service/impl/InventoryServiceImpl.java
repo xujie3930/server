@@ -1,27 +1,33 @@
 package com.szmsd.inventory.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
+import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -36,24 +42,26 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     @Resource
     private RemoteComponent remoteComponent;
+    @Autowired
+    private BaseProductClientService baseProductClientService;
 
     /**
      * 上架入库 - Inbound - /api/inbound/receiving #B1 接收入库上架 - 修改库存
      *
-     * @param  inboundInventoryDTO
+     * @param inboundInventoryDTO
      */
     @Transactional(rollbackFor = Throwable.class)
     @Override
-    public void inbound(InboundInventoryDTO  inboundInventoryDTO) {
-        log.info("上架入库：{}",  inboundInventoryDTO);
+    public void inbound(InboundInventoryDTO inboundInventoryDTO) {
+        log.info("上架入库：{}", inboundInventoryDTO);
         Lock lock = new ReentrantLock(true);
         try {
             // 获取锁
             lock.lock();
             // 获取库存 仓库代码 + SKU
-            String sku =  inboundInventoryDTO.getSku();
-            String warehouseCode =  inboundInventoryDTO.getWarehouseCode();
-            Integer qty =  inboundInventoryDTO.getQty();
+            String sku = inboundInventoryDTO.getSku();
+            String warehouseCode = inboundInventoryDTO.getWarehouseCode();
+            Integer qty = inboundInventoryDTO.getQty();
             // before inventory
             Inventory beforeInventory = baseMapper.selectOne(new QueryWrapper<Inventory>().eq("warehouse_code", warehouseCode).eq("sku", sku));
             Inventory afterInventory = new Inventory();
@@ -71,8 +79,8 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             this.saveOrUpdate(afterInventory);
 
             // 记录库存日志
-            String placeholder =  inboundInventoryDTO.getOperator() + "," +  inboundInventoryDTO.getOperateOn() + "," +  inboundInventoryDTO.getOrderNo() + "," + inboundInventoryDTO.getSku() + "," + inboundInventoryDTO.getWarehouseCode() + "," +  inboundInventoryDTO.getQty();
-            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory,  inboundInventoryDTO.getOrderNo(),  inboundInventoryDTO.getOperator(),  inboundInventoryDTO.getOperateOn(), qty, placeholder);
+            String placeholder = inboundInventoryDTO.getOperator() + "," + inboundInventoryDTO.getOperateOn() + "," + inboundInventoryDTO.getOrderNo() + "," + inboundInventoryDTO.getSku() + "," + inboundInventoryDTO.getWarehouseCode() + "," + inboundInventoryDTO.getQty();
+            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty, placeholder);
         } finally {
             lock.unlock();
         }
@@ -81,6 +89,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     /**
      * 库存列表查询 - 库存管理 - 查询
+     *
      * @param inventorySkuQueryDTO
      * @return
      */
@@ -93,6 +102,54 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             inventorySkuQueryDTO.setSkuList(Stream.of(skuSplit, skuList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
         }
         return baseMapper.selectList(inventorySkuQueryDTO);
+    }
+
+    @Override
+    public List<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto) {
+        if (StringUtils.isEmpty(queryDto.getWarehouseCode())) {
+            return Collections.emptyList();
+        }
+        LambdaQueryWrapper<InventoryAvailableQueryDto> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(InventoryAvailableQueryDto::getWarehouseCode, queryDto.getWarehouseCode());
+        if (StringUtils.isNotEmpty(queryDto.getSku())) {
+            queryWrapper.like(InventoryAvailableQueryDto::getSku, queryDto.getSku());
+        }
+        List<InventoryAvailableListVO> voList = this.baseMapper.queryAvailableList(queryWrapper);
+        if (CollectionUtils.isNotEmpty(voList)) {
+            // 填充SKU属性信息
+            List<String> skus = voList.stream().map(InventoryAvailableListVO::getSku).collect(Collectors.toList());
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            conditionQueryDto.setWarehouseCode(queryDto.getWarehouseCode());
+            conditionQueryDto.setSkus(skus);
+            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            Map<String, BaseProduct> productMap;
+            if (CollectionUtils.isNotEmpty(productList)) {
+                productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            } else {
+                productMap = Collections.emptyMap();
+            }
+            for (InventoryAvailableListVO vo : voList) {
+                BaseProduct product = productMap.get(vo.getSku());
+                if (null == product) {
+                    continue;
+                }
+                vo.setCode(product.getCode());
+                vo.setProductName(product.getProductName());
+                vo.setInitWeight(product.getInitWeight());
+                vo.setInitLength(product.getInitLength());
+                vo.setInitWidth(product.getInitWidth());
+                vo.setInitHeight(product.getInitHeight());
+                vo.setInitVolume(product.getInitVolume());
+                vo.setWeight(product.getWeight());
+                vo.setLength(product.getLength());
+                vo.setWidth(product.getWidth());
+                vo.setHeight(product.getHeight());
+                vo.setVolume(product.getVolume());
+                vo.setBindCode(product.getBindCode());
+                vo.setBindCodeName(product.getBindCodeName());
+            }
+        }
+        return voList;
     }
 
 }

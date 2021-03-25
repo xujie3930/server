@@ -66,5 +66,9 @@
         </where>
     </select>
 
+    <select id="queryAvailableList" resultType="com.szmsd.inventory.domain.vo.InventoryAvailableListVO">
+        select warehouse_code, sku, total_inventory, available_inventory from inventory
+        ${ew.customSqlSegment}
+    </select>
 
 </mapper>
