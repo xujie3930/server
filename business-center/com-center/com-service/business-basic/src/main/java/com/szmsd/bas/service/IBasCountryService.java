@@ -1,7 +1,7 @@
 package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.szmsd.bas.domain.BasCountry;
+import com.szmsd.bas.api.domain.BasCountry;
 
 import java.util.List;
 
@@ -53,8 +53,7 @@ public interface IBasCountryService extends IService<BasCountry> {
      * @param ids 需要删除的国家表模块ID
      * @return 结果
      */
-    public int deleteBasCountryByIds(List
-                                             <String> ids);
+    public int deleteBasCountryByIds(List<String> ids);
 
     /**
      * 删除国家表模块信息
@@ -63,4 +62,12 @@ public interface IBasCountryService extends IService<BasCountry> {
      * @return 结果
      */
     public int deleteBasCountryById(String id);
+
+    /**
+     * 根据国家编码返回国家信息
+     *
+     * @param countryCode countryCode
+     * @return BasCountry
+     */
+    BasCountry queryByCountryCode(String countryCode);
 }

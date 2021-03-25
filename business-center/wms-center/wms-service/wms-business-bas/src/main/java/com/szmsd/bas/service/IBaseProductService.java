@@ -8,7 +8,6 @@ import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.dto.MeasuringProductRequest;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -48,6 +47,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
 
     /**
      * 通过code查询
+     *
      * @param code
      * @return
      */
@@ -59,6 +59,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
 
     /**
      * 查询sku信息
+     *
      * @param baseProduct
      * @return
      */
@@ -66,6 +67,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
 
     /**
      * 查询sku信息
+     *
      * @param queryDto
      * @return
      */
@@ -73,6 +75,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
 
     /**
      * 获取单条sku
+     *
      * @param baseProduct
      * @return
      */
@@ -117,6 +120,14 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @return
      */
     R<Boolean> checkSkuValidToDelivery(BaseProduct baseProduct);
+
+    /**
+     * 根据sku返回产品属性
+     *
+     * @param skus skus
+     * @return String
+     */
+    List<String> listProductAttribute(List<String> skus);
 
 }
 

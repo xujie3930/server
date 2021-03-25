@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 
@@ -109,6 +110,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
     /**
      * 根据订单id查询出库单
+     *
      * @param orderId orderId
      * @return DelOutboundVO
      */
@@ -120,5 +122,21 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return DelOutboundListVO
      */
     List<DelOutboundDetailListVO> getDelOutboundDetailsList(DelOutboundListQueryDto queryDto);
+
+    /**
+     * 提审
+     *
+     * @param id id
+     * @return int
+     */
+    int bringVerify(Long id);
+
+    /**
+     * 修改单据状态
+     *
+     * @param id        id
+     * @param stateEnum stateEnum
+     */
+    void updateState(Long id, DelOutboundStateEnum stateEnum);
 }
 

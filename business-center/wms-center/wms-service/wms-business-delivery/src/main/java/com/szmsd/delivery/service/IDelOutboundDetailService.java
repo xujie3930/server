@@ -63,5 +63,13 @@ public interface IDelOutboundDetailService extends IService<DelOutboundDetail> {
      */
     int deleteDelOutboundDetailById(String id);
 
+    /**
+     * 根据orderNo查询
+     *
+     * @param orderNo orderNo
+     * @return List<DelOutboundDetail>
+     */
+    List<DelOutboundDetail> listByOrderNo(String orderNo);
+
 }
 

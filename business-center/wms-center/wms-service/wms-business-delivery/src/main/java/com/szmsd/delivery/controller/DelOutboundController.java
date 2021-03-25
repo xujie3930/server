@@ -7,6 +7,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -87,9 +88,17 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.deleteDelOutboundByIds(ids));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:bringVerify')")
+    @PostMapping("/bringVerify")
+    @ApiOperation(value = "出库管理 - 提审", position = 600)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundBringVerifyDto")
+    public R<Integer> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto) {
+        return R.ok(delOutboundService.bringVerify(dto.getId()));
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/getDelOutboundDetailsList")
-    @ApiOperation(value = "出库管理 - 按条件查询出库单及详情", position = 100)
+    @ApiOperation(value = "出库管理 - 按条件查询出库单及详情", position = 1000)
     public R<List<DelOutboundDetailListVO>> getDelOutboundDetailsList(@RequestBody DelOutboundListQueryDto queryDto) {
         return R.ok(delOutboundService.getDelOutboundDetailsList(queryDto));
     }

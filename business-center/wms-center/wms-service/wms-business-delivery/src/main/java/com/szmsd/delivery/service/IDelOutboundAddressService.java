@@ -63,5 +63,12 @@ public interface IDelOutboundAddressService extends IService<DelOutboundAddress>
      */
     int deleteDelOutboundAddressById(String id);
 
+    /**
+     * 根据orderNo查询地址
+     *
+     * @param orderNo orderNo
+     * @return DelOutboundAddress
+     */
+    DelOutboundAddress getByOrderNo(String orderNo);
 }
 

@@ -348,12 +348,29 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public DelOutbound selectDelOutboundByOrderId(String orderId) {
         LambdaQueryWrapper<DelOutbound> query = Wrappers.lambdaQuery();
-        query.eq(DelOutbound::getOrderNo,orderId);
+        query.eq(DelOutbound::getOrderNo, orderId);
         DelOutbound delOutbound = baseMapper.selectOne(query);
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("999", "单据不存在");
         }
         return delOutbound;
+    }
+
+    @Transactional
+    @Override
+    public int bringVerify(Long id) {
+
+
+        return 0;
+    }
+
+    @Transactional
+    @Override
+    public void updateState(Long id, DelOutboundStateEnum stateEnum) {
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getState, stateEnum.getCode());
+        updateWrapper.eq(DelOutbound::getId, id);
+        this.update(updateWrapper);
     }
 
     @Override

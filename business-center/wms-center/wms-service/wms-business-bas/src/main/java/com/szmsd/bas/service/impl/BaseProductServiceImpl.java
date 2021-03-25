@@ -277,5 +277,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         return r;
     }
 
+    @Override
+    public List<String> listProductAttribute(List<String> skus) {
+        return null;
+    }
 }
 

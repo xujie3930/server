@@ -3,11 +3,13 @@ package com.szmsd.http.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.szmsd.common.core.utils.FileStream;
+import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IPricedProductService;
 import com.szmsd.http.vo.*;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,7 +49,7 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
 
     @Override
     public ResponseVO update(UpdatePricedProductCommand updatePricedProductCommand) {
-        return JSON.parseObject(httpPut(httpConfig.getPricedProduct().getProducts(), updatePricedProductCommand), ResponseVO.class);
+        return JSON.parseObject(httpPut(httpConfig.getPricedProduct().getProducts(), updatePricedProductCommand, updatePricedProductCommand.getCode()), ResponseVO.class);
     }
 
     @Override
@@ -55,4 +57,16 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
         return httpPostFile(httpConfig.getPricedProduct().getExportFile(), pricedProductCodesCriteria);
     }
 
+    @Override
+    public ResponseObject<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command) {
+        HttpResponseBody responseBody = httpPostBody(httpConfig.getPricedProduct().getPricing(), command);
+        ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> responseObject = new ResponseObject.ResponseObjectWrapper<>();
+        if (HttpStatus.SC_OK == responseBody.getStatus()) {
+            responseObject.setSuccess(true);
+            responseObject.setObject(JSON.parseObject(responseBody.getBody(), ChargeWrapper.class));
+        } else {
+            responseObject.setError(JSON.parseObject(responseBody.getBody(), ProblemDetails.class));
+        }
+        return responseObject;
+    }
 }

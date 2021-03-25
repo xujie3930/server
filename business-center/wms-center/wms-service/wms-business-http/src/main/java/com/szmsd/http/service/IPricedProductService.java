@@ -22,4 +22,12 @@ public interface IPricedProductService {
     ResponseVO update(UpdatePricedProductCommand updatePricedProductCommand);
 
     FileStream exportFile(PricedProductCodesCriteria pricedProductCodesCriteria);
+
+    /**
+     * 计算包裹的费用
+     *
+     * @param command command
+     * @return ResponseObject<ChargeWrapper, ProblemDetails>
+     */
+    ResponseObject<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command);
 }

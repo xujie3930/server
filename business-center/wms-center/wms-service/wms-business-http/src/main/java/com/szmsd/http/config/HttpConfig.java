@@ -98,6 +98,9 @@ public class HttpConfig {
     // PricedProduct
     private PricedProduct pricedProduct;
 
+    // PricedProduct
+    private PricedSheet pricedSheet;
+
     public Map<String, String> getPricedProductHeaderMap() {
         Map<String, String> map = new HashMap<>();
         return map;
@@ -116,6 +119,15 @@ public class HttpConfig {
         private String products;
         // 导出产品信息列表
         private String exportFile;
+        // 计算包裹的费用
+        private String pricing;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class PricedSheet {
+        // 创建报价产品报价表详情信息、修改报价产品报价表详情信息、根据报价表编号获取产品报价表信息
+        private String sheets;
     }
 
 

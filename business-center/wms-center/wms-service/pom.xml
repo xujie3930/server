@@ -36,6 +36,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.szmsd</groupId>
+                <artifactId>business-basic-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-bas-api</artifactId>
                 <version>${business.version}</version>

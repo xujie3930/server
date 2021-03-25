@@ -1,5 +1,6 @@
 package com.szmsd.bas.controller;
 
+import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BasWarehouseCus;
 import com.szmsd.bas.dto.AddWarehouseRequest;
 import com.szmsd.bas.dto.BasWarehouseQueryDTO;
@@ -79,4 +80,10 @@ public class BasWarehouseController extends BaseController {
         return R.ok(kvList);
     }
 
+    @PreAuthorize("@ss.hasPermi('bas:warehouse:queryByWarehouseCode')")
+    @GetMapping("/queryByWarehouseCode")
+    @ApiOperation(value = "根据仓库编码查询仓库信息")
+    public R<BasWarehouse> queryByWarehouseCode(String warehouseCode) {
+        return R.ok(this.basWarehouseService.queryByWarehouseCode(warehouseCode));
+    }
 }
