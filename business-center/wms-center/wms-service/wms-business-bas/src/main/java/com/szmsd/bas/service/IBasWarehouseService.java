@@ -36,5 +36,12 @@ public interface IBasWarehouseService extends IService<BasWarehouse> {
 
     boolean vailCusWarehouse(String warehouseCode);
 
+    /**
+     * 根据仓库编码查询仓库信息
+     *
+     * @param warehouseCode warehouseCode
+     * @return BasWarehouse
+     */
+    BasWarehouse queryByWarehouseCode(String warehouseCode);
 }
 

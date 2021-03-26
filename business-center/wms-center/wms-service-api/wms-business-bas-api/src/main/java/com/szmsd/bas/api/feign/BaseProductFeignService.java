@@ -3,6 +3,7 @@ package com.szmsd.bas.api.feign;
 import com.szmsd.bas.api.BusinessBasInterface;
 import com.szmsd.bas.api.factory.BaseProductFeignFallback;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.bas.dto.MeasuringProductRequest;
 import com.szmsd.common.core.domain.R;
@@ -20,6 +21,7 @@ public interface BaseProductFeignService {
 
     /**
      * 查询sku列表
+     *
      * @param baseProduct
      * @return
      */
@@ -28,6 +30,7 @@ public interface BaseProductFeignService {
 
     /**
      * 查询单条sku
+     *
      * @param baseProduct
      * @return
      */
@@ -36,6 +39,7 @@ public interface BaseProductFeignService {
 
     /**
      * 批量查询SKU数值信息
+     *
      * @param codes
      * @return
      */
@@ -44,4 +48,22 @@ public interface BaseProductFeignService {
 
     @PostMapping(value = "/base/product/measuring")
     R measuringProduct(@RequestBody MeasuringProductRequest measuringProductRequest);
+
+    /**
+     * 根据sku返回产品属性
+     *
+     * @param conditionQueryDto conditionQueryDto
+     * @return String
+     */
+    @PostMapping("/base/product/listProductAttribute")
+    R<List<String>> listProductAttribute(@RequestBody BaseProductConditionQueryDto conditionQueryDto);
+
+    /**
+     * 根据仓库，SKU查询产品信息
+     *
+     * @param conditionQueryDto conditionQueryDto
+     * @return BaseProduct
+     */
+    @PostMapping("/base/product/queryProductList")
+    R<List<BaseProduct>> queryProductList(@RequestBody BaseProductConditionQueryDto conditionQueryDto);
 }

@@ -30,4 +30,16 @@ public class ShipmentPackingMaterialRequestDto implements Serializable {
     @ApiModelProperty(value = "包材类型")
     private String packingMaterial;
 
+    @ApiModelProperty(value = "长 CM")
+    private Double length;
+
+    @ApiModelProperty(value = "宽 CM")
+    private Double width;
+
+    @ApiModelProperty(value = "高 CM")
+    private Double height;
+
+    @ApiModelProperty(value = "重量 g")
+    private Double weight;
+
 }

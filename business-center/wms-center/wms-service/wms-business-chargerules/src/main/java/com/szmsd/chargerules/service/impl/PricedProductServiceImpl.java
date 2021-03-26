@@ -13,6 +13,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.*;
+import com.szmsd.http.vo.PricedProduct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

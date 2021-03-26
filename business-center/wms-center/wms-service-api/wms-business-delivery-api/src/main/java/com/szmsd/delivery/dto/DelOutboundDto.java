@@ -22,6 +22,10 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "ID")
     private Long id;
 
+    @NotBlank(message = "客户代码不能为空")
+    @ApiModelProperty(value = "客户代码")
+    private String customCode;
+
     @NotBlank(message = "仓库代码不能为空")
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
@@ -61,6 +65,18 @@ public class DelOutboundDto implements Serializable {
 
     @ApiModelProperty(value = "出库后重新上架的新SKU编码")
     private String newSku;
+
+    @ApiModelProperty(value = "提货方式")
+    private String deliveryMethod;
+
+    @ApiModelProperty(value = "提货时间")
+    private String deliveryTime;
+
+    @ApiModelProperty(value = "提货商/快递商")
+    private String deliveryAgent;
+
+    @ApiModelProperty(value = "提货/快递信息")
+    private String deliveryInfo;
 
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")

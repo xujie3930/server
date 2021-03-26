@@ -32,6 +32,26 @@ public class HttpConfig {
     private String thirdPayment;
     private String notifyUrl;
     private String rechargeToken;
+    // Inbound
+    private InboundConfig inbound;
+    // Outbound
+    private OutboundConfig outbound;
+    private Bas bas;
+    // ------------------------------------------pricedProductUrl--------------------
+    // 计价系统PRC接口 https://pricedproduct-internalapi-external.dsloco.com/swagger/index.html
+    private String pricedProductUrl;
+    // 身份认证
+    private String pricedProductUserId;
+    private String pricedProductPassword;
+    // PricedProduct
+    private PricedProduct pricedProduct;
+    // PricedProduct
+    private PricedSheet pricedSheet;
+    // ------------------------------------------carrierServiceUrl--------------------
+    // 服务商接口 https://carrierservice-api-admin-external.dsloco.com/swagger/index.html
+    private String carrierServiceUrl;
+    // CarrierService
+    private CarrierService carrierService;
 
     public Map<String, String> getBaseHeaderMap() {
         Map<String, String> map = new HashMap<>();
@@ -40,13 +60,15 @@ public class HttpConfig {
         return map;
     }
 
-    // Inbound
-    private InboundConfig inbound;
+    public Map<String, String> getPricedProductHeaderMap() {
+        Map<String, String> map = new HashMap<>();
+        return map;
+    }
 
-    // Outbound
-    private OutboundConfig outbound;
-
-    private Bas bas;
+    public Map<String, String> getCarrierServiceHeaderMap() {
+        Map<String, String> map = new HashMap<>();
+        return map;
+    }
 
     @Data
     @Accessors(chain = true)
@@ -87,22 +109,6 @@ public class HttpConfig {
         private String shipping;
     }
 
-    // ------------------------------------------pricedProductUrl--------------------
-    // 计价系统PRC接口 https://pricedproduct-internalapi-external.dsloco.com/swagger/index.html
-    private String pricedProductUrl;
-
-    // 身份认证
-    private String pricedProductUserId;
-    private String pricedProductPassword;
-
-    // PricedProduct
-    private PricedProduct pricedProduct;
-
-    public Map<String, String> getPricedProductHeaderMap() {
-        Map<String, String> map = new HashMap<>();
-        return map;
-    }
-
     @Data
     @Accessors(chain = true)
     public static class PricedProduct {
@@ -116,18 +122,23 @@ public class HttpConfig {
         private String products;
         // 导出产品信息列表
         private String exportFile;
+        // 计算包裹的费用
+        private String pricing;
+        // 修改一个计价产品信息的报价表对应的等级和生效时间段
+        private String grade;
+        // 根据客户代码国家等信息获取可下单产品
+        private String inService;
     }
 
-
-    // ------------------------------------------carrierServiceUrl--------------------
-    // 服务商接口 https://carrierservice-api-admin-external.dsloco.com/swagger/index.html
-    private String carrierServiceUrl;
-    // CarrierService
-    private CarrierService carrierService;
-
-    public Map<String, String> getCarrierServiceHeaderMap() {
-        Map<String, String> map = new HashMap<>();
-        return map;
+    @Data
+    @Accessors(chain = true)
+    public static class PricedSheet {
+        // 创建报价产品报价表详情信息、修改报价产品报价表详情信息、根据报价表编号获取产品报价表信息
+        private String sheets;
+        // 使用file文件导入产品报价表信息
+        private String importFile;
+        // 导出报价表信息
+        private String exportFile;
     }
 
     @Data

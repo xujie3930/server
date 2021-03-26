@@ -2,13 +2,9 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BaseProduct;
-import com.szmsd.bas.dto.BaseProductDto;
-import com.szmsd.bas.dto.BaseProductMeasureDto;
-import com.szmsd.bas.dto.BaseProductQueryDto;
-import com.szmsd.bas.dto.MeasuringProductRequest;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -48,6 +44,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
 
     /**
      * 通过code查询
+     *
      * @param code
      * @return
      */
@@ -59,6 +56,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
 
     /**
      * 查询sku信息
+     *
      * @param baseProduct
      * @return
      */
@@ -66,6 +64,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
 
     /**
      * 查询sku信息
+     *
      * @param queryDto
      * @return
      */
@@ -73,6 +72,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
 
     /**
      * 获取单条sku
+     *
      * @param baseProduct
      * @return
      */
@@ -118,5 +118,20 @@ public interface IBaseProductService extends IService<BaseProduct> {
      */
     R<Boolean> checkSkuValidToDelivery(BaseProduct baseProduct);
 
+    /**
+     * 根据sku返回产品属性
+     *
+     * @param conditionQueryDto conditionQueryDto
+     * @return String
+     */
+    List<String> listProductAttribute(BaseProductConditionQueryDto conditionQueryDto);
+
+    /**
+     * 根据仓库，SKU查询产品信息
+     *
+     * @param conditionQueryDto conditionQueryDto
+     * @return BaseProduct
+     */
+    List<BaseProduct> queryProductList(BaseProductConditionQueryDto conditionQueryDto);
 }
 

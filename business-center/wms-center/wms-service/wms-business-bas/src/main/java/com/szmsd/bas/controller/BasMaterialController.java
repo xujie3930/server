@@ -51,6 +51,19 @@ public class BasMaterialController extends BaseController{
       }
 
     /**
+     * 查询模块列表
+     */
+    @PreAuthorize("@ss.hasPermi('BasMaterial:BasMaterial:list')")
+    @GetMapping("/listBasMaterial")
+    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    public R<List<BasMaterial>> listBasMaterial(BasMaterial basMaterial)
+    {
+        List<BasMaterial> list = basMaterialService.selectBasMaterialList(basMaterial);
+        return R.ok(list);
+    }
+
+
+    /**
     * 导出模块列表
     */
      @PreAuthorize("@ss.hasPermi('BasMaterial:BasMaterial:export')")

@@ -6,6 +6,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IPricedProductService;
+import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -69,6 +70,25 @@ public class PricedProductController extends BaseController {
     public R<FileStream> exportFile(@RequestBody PricedProductCodesCriteria pricedProductCodesCriteria) {
         FileStream fileStream = iPricedProductService.exportFile(pricedProductCodesCriteria);
         return R.ok(fileStream);
+    }
+
+    @PostMapping("/pricing")
+    @ApiOperation(value = "计算包裹的费用")
+    public R<ResponseObject<ChargeWrapper, ProblemDetails>> pricing(@RequestBody CalcShipmentFeeCommand command) {
+        return R.ok(iPricedProductService.pricing(command));
+    }
+
+    @PostMapping("/grade")
+    @ApiOperation(value = "修改一个计价产品信息的报价表对应的等级和生效时间段")
+    public R<ResponseVO> grade(@RequestBody ChangeSheetGradeCommand changeSheetGradeCommand) {
+        ResponseVO grade = iPricedProductService.grade(changeSheetGradeCommand);
+        return R.ok(grade);
+    }
+
+    @PostMapping("/inService")
+    @ApiOperation(value = "根据客户代码国家等信息获取可下单产品")
+    public R<List<PricedProduct>> inService(@RequestBody PricedProductInServiceCriteria criteria) {
+        return R.ok(iPricedProductService.inService(criteria));
     }
 
 }

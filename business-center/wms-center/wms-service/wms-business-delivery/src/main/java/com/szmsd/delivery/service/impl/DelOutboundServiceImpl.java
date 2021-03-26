@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -57,6 +58,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private SerialNumberClientService serialNumberClientService;
     @Autowired
     private IDelOutboundHttpWrapperService delOutboundHttpWrapperService;
+    @Autowired
+    private BaseProductClientService baseProductClientService;
 
     /**
      * 查询出库单模块
@@ -116,14 +119,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (Objects.isNull(loginUser)) {
             throw new CommonException("999", "获取登录用户信息失败");
         }
+        // 冻结库存
         DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
-        // 从登录人信息中获取客户代码
-        delOutbound.setCustomCode("");
         // 生成出库单号
         // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
         delOutbound.setOrderNo("CK" + delOutbound.getCustomCode() + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
         // 默认状态
         delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
+        // 计算发货类型
+        delOutbound.setShipmentType(this.buildShipmentType(dto));
         // 保存出库单
         int insert = baseMapper.insert(delOutbound);
         if (insert == 0) {
@@ -134,6 +138,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 保存明细
         this.saveDetail(dto, delOutbound.getOrderNo());
         return insert;
+    }
+
+    private String buildShipmentType(DelOutboundDto dto) {
+        List<DelOutboundDetailDto> details = dto.getDetails();
+        return this.baseProductClientService.buildShipmentType(dto.getWarehouseCode(), details.stream().map(DelOutboundDetailDto::getSku).collect(Collectors.toList()));
     }
 
     /**
@@ -202,6 +211,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (null == delOutbound) {
             throw new CommonException("999", "单据不存在");
         }
+        // 可以修改的状态：待提审，审核失败
+        if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
+                || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
+            throw new CommonException("999", "单据不能修改");
+        }
+        // 先释放，再冻结
+
         // 先删后增
         String orderNo = delOutbound.getOrderNo();
         this.deleteAddress(orderNo);
@@ -210,6 +226,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.saveAddress(dto, orderNo);
         // 保存明细
         this.saveDetail(dto, orderNo);
+        // 计算发货类型
+        inputDelOutbound.setShipmentType(this.buildShipmentType(dto));
         // 更新
         return baseMapper.updateById(inputDelOutbound);
     }
@@ -302,24 +320,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Transactional
     @Override
-    public int shipmentMeasure(PackageMeasureRequestDto dto) {
-        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
-        updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
-        updateWrapper.set(DelOutbound::getLength, dto.getLength());
-        updateWrapper.set(DelOutbound::getWidth, dto.getWidth());
-        updateWrapper.set(DelOutbound::getHeight, dto.getHeight());
-        updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
-        return this.baseMapper.update(null, updateWrapper);
-    }
-
-    @Transactional
-    @Override
     public int shipmentPacking(ShipmentPackingMaterialRequestDto dto) {
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
         updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
         updateWrapper.set(DelOutbound::getPackingMaterial, dto.getPackingMaterial());
+        updateWrapper.set(DelOutbound::getLength, dto.getLength());
+        updateWrapper.set(DelOutbound::getWidth, dto.getWidth());
+        updateWrapper.set(DelOutbound::getHeight, dto.getHeight());
+        updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
         return this.baseMapper.update(null, updateWrapper);
     }
 
@@ -348,7 +357,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public DelOutbound selectDelOutboundByOrderId(String orderId) {
         LambdaQueryWrapper<DelOutbound> query = Wrappers.lambdaQuery();
-        query.eq(DelOutbound::getOrderNo,orderId);
+        query.eq(DelOutbound::getOrderNo, orderId);
         DelOutbound delOutbound = baseMapper.selectOne(query);
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("999", "单据不存在");
@@ -356,11 +365,28 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return delOutbound;
     }
 
+    @Transactional
+    @Override
+    public int bringVerify(Long id) {
+
+
+        return 0;
+    }
+
+    @Transactional
+    @Override
+    public void updateState(Long id, DelOutboundStateEnum stateEnum) {
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getState, stateEnum.getCode());
+        updateWrapper.eq(DelOutbound::getId, id);
+        this.update(updateWrapper);
+    }
+
     @Override
     public List<DelOutboundDetailListVO> getDelOutboundDetailsList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        if(StringUtils.isNotBlank(queryDto.getOrderType())){
-            queryWrapper.eq("a.order_type",queryDto.getOrderType());
+        if (StringUtils.isNotBlank(queryDto.getOrderType())) {
+            queryWrapper.eq("a.order_type", queryDto.getOrderType());
         }
         return baseMapper.getDelOutboundAndDetailsList(queryWrapper);
     }

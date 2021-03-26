@@ -2,6 +2,7 @@ package com.szmsd.bas.api.service.impl;
 
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
+import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.dto.AddWarehouseRequest;
 import com.szmsd.common.core.domain.R;
 import org.springframework.stereotype.Service;
@@ -21,5 +22,10 @@ public class BasWarehouseClientServiceImpl implements BasWarehouseClientService 
     @Override
     public R saveOrUpdate(AddWarehouseRequest addWarehouseRequest) {
         return basWarehouseFeignService.saveOrUpdate(addWarehouseRequest);
+    }
+
+    @Override
+    public BasWarehouse queryByWarehouseCode(String warehouseCode) {
+        return R.getDataAndException(this.basWarehouseFeignService.queryByWarehouseCode(warehouseCode));
     }
 }

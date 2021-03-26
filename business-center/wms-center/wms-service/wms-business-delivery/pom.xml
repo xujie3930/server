@@ -97,6 +97,11 @@
             <artifactId>wms-business-http-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>business-basic-api</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

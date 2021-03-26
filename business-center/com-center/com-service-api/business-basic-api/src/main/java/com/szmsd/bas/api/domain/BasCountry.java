@@ -1,4 +1,4 @@
-package com.szmsd.bas.domain;
+package com.szmsd.bas.api.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -25,7 +25,7 @@ import lombok.experimental.Accessors;
 @SuppressWarnings("serial")
 @Data
 @ApiModel(value = "BasCountry对象", description = "国家表")
-public class BasCountry{
+public class BasCountry {
 
     private static final long serialVersionUID = 1L;
 

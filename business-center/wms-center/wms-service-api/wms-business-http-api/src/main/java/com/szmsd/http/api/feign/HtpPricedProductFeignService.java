@@ -6,10 +6,8 @@ import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.fallback.HtpPricedProductFeignFallback;
 import com.szmsd.http.dto.*;
-import com.szmsd.http.vo.DirectServiceFeeData;
-import com.szmsd.http.vo.KeyValuePair;
-import com.szmsd.http.vo.PricedProductInfo;
-import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.http.vo.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +31,7 @@ public interface HtpPricedProductFeignService {
     @PostMapping("/api/products/http/create")
     R<ResponseVO> create(@RequestBody CreatePricedProductCommand createPricedProductCommand);
 
-    @PostMapping("/api/products/http/info/{productCode}")
+    @GetMapping("/api/products/http/info/{productCode}")
     R<PricedProductInfo> info(@PathVariable("productCode") String productCode);
 
     @PostMapping("/api/products/http/update")
@@ -41,4 +39,10 @@ public interface HtpPricedProductFeignService {
 
     @PostMapping("/api/products/http/exportFile")
     R<FileStream> exportFile(@RequestBody PricedProductCodesCriteria pricedProductCodesCriteria);
+
+    @PostMapping("/api/products/http/pricing")
+    R<ResponseObject<ChargeWrapper, ProblemDetails>> pricing(@RequestBody CalcShipmentFeeCommand command);
+
+    @PostMapping("/api/products/http/inService")
+    R<List<PricedProduct>> inService(@RequestBody PricedProductInServiceCriteria criteria);
 }

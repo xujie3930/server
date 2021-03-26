@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.dao.BasCountryMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasCountry">
+    <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasCountry">
         <id column="id" property="id"/>
         <result column="country_code" property="countryCode"/>
         <result column="country_name" property="countryName"/>

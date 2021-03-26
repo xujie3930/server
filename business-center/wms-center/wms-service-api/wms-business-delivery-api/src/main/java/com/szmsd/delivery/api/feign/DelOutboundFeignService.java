@@ -4,7 +4,10 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
+import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
+import com.szmsd.delivery.dto.ShipmentRequestDto;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,15 +34,6 @@ public interface DelOutboundFeignService {
     R<Integer> shipment(@RequestBody ShipmentRequestDto dto);
 
     /**
-     * 出库管理 - Open - 接收出库包裹测量信息
-     *
-     * @param dto dto
-     * @return Integer
-     */
-    @PostMapping("/api/outbound/open/shipment/measure")
-    R<Integer> shipmentMeasure(@RequestBody PackageMeasureRequestDto dto);
-
-    /**
      * 出库管理 - Open - 接收出库包裹使用包材
      *
      * @param dto dto
@@ -59,6 +53,7 @@ public interface DelOutboundFeignService {
 
     /**
      * 根据单号查询出库单详情
+     *
      * @param orderId orderId
      * @return DelOutbound
      */
@@ -67,6 +62,7 @@ public interface DelOutboundFeignService {
 
     /**
      * 根据单号查询出库单详情列表
+     *
      * @param queryDto queryDto
      * @return List<DelOutboundDetailListVO>
      */

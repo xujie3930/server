@@ -1,6 +1,8 @@
 package com.szmsd.delivery.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.mapper.DelOutboundDetailMapper;
@@ -87,6 +89,11 @@ public class DelOutboundDetailServiceImpl extends ServiceImpl<DelOutboundDetailM
         return baseMapper.deleteById(id);
     }
 
-
+    @Override
+    public List<DelOutboundDetail> listByOrderNo(String orderNo) {
+        LambdaQueryWrapper<DelOutboundDetail> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutboundDetail::getOrderNo, orderNo);
+        return this.list(queryWrapper);
+    }
 }
 

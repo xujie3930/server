@@ -1,8 +1,10 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
@@ -24,13 +26,13 @@ import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.http.vo.ResponseVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -86,13 +88,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
     }
+
     @Override
-    public List<BaseProduct> listSkuBySeller(BaseProductQueryDto queryDto){
+    public List<BaseProduct> listSkuBySeller(BaseProductQueryDto queryDto) {
         QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("seller_code",basSeller.getSellerCode());
+        queryWrapper.eq("seller_code", basSeller.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
@@ -101,46 +104,46 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductVO> selectBaseProductByCode(String code){
+    public List<BaseProductVO> selectBaseProductByCode(String code) {
         QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code+"%");
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code + "%");
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basSeller.getSellerCode());
-        queryWrapper.eq("is_active",true);
+        queryWrapper.eq("is_active", true);
         queryWrapper.orderByAsc("code");
-        List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper),BaseProductVO.class);
+        List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductVO.class);
         return baseProductVOList;
     }
 
     @Override
-    public List<BaseProductMeasureDto> batchSKU(List<String> codes){
+    public List<BaseProductMeasureDto> batchSKU(List<String> codes) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        if(CollectionUtils.isEmpty(codes)){
+        if (CollectionUtils.isEmpty(codes)) {
             return Collections.emptyList();
-        }else{
-            queryWrapper.in("code",codes);
+        } else {
+            queryWrapper.in("code", codes);
         }
-        return BeanMapperUtil.mapList(super.list(queryWrapper),BaseProductMeasureDto.class);
+        return BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductMeasureDto.class);
     }
 
     @Override
-    public void measuringProduct(MeasuringProductRequest request){
+    public void measuringProduct(MeasuringProductRequest request) {
         BigDecimal volume = new BigDecimal(request.getHeight()).multiply(new BigDecimal(request.getWidth()))
                 .multiply(new BigDecimal(request.getLength()))
                 .setScale(2, BigDecimal.ROUND_HALF_UP);
-        BaseProduct baseProduct = BeanMapperUtil.map(request,BaseProduct.class);
+        BaseProduct baseProduct = BeanMapperUtil.map(request, BaseProduct.class);
         baseProduct.setCode(null);
         baseProduct.setWarehouseAcceptance(true);
         baseProduct.setVolume(volume);
         UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("code",request.getCode());
-        super.update(baseProduct,updateWrapper);
+        updateWrapper.eq("code", request.getCode());
+        super.update(baseProduct, updateWrapper);
     }
 
     @Override
-    public List<BaseProduct> listSku(BaseProduct baseProduct){
+    public List<BaseProduct> listSku(BaseProduct baseProduct) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", baseProduct.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", baseProduct.getProductName());
@@ -152,15 +155,15 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public R<BaseProduct> getSku(BaseProduct baseProduct){
+    public R<BaseProduct> getSku(BaseProduct baseProduct) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        if(StringUtils.isNotEmpty(baseProduct.getCode())){
-            queryWrapper.eq("code",baseProduct.getCode());
-            queryWrapper.eq("is_active",true);
-        }else {
-           return R.failed("有效sku编码为空");
+        if (StringUtils.isNotEmpty(baseProduct.getCode())) {
+            queryWrapper.eq("code", baseProduct.getCode());
+            queryWrapper.eq("is_active", true);
+        } else {
+            return R.failed("有效sku编码为空");
         }
-       return  R.ok(super.getOne(queryWrapper));
+        return R.ok(super.getOne(queryWrapper));
     }
 
     /**
@@ -170,7 +173,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      * @return 结果
      */
     @Override
-    public int  insertBaseProduct(BaseProductDto baseProductDto) {
+    public int insertBaseProduct(BaseProductDto baseProductDto) {
         //默认激活
         baseProductDto.setIsActive(true);
         baseProductDto.setCategory("SKU");
@@ -179,7 +182,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         baseProductDto.setSellerCode(basSeller.getSellerCode());
-        baseProductDto.setCode("S"+basSeller.getSellerCode()+baseSerialNumberService.generateNumber("SKU"));
+        baseProductDto.setCode("S" + basSeller.getSellerCode() + baseSerialNumberService.generateNumber("SKU"));
         //默认仓库没有验收
         baseProductDto.setWarehouseAcceptance(false);
 
@@ -189,14 +192,18 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         //SKU需要仓库测量尺寸
         baseProduct.setWarehouseAcceptance(false);
+        baseProduct.setWeight(baseProduct.getInitWeight());
+        baseProduct.setLength(baseProduct.getInitLength());
+        baseProduct.setHeight(baseProduct.getInitWidth());
+        baseProduct.setVolume(baseProduct.getInitVolume());
         //传oms修改字段
         BaseProductOms baseProductOms = BeanMapperUtil.map(baseProductDto, BaseProductOms.class);
         //base64图片
         baseProductOms.setProductImage(baseProductDto.getProductImageBase64());
-        ProductRequest productRequest = BeanMapperUtil.map(baseProductDto,ProductRequest.class);
+        ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-        if(r.getCode()!=200){
-            throw new BaseException("传wms失败"+r.getMsg());
+        if (r.getCode() != 200) {
+            throw new BaseException("传wms失败" + r.getMsg());
         }
         return baseMapper.insert(baseProduct);
     }
@@ -209,12 +216,12 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      */
     @Override
     public int updateBaseProduct(BaseProductDto baseProductDto) throws IllegalAccessException {
-        ProductRequest productRequest = BeanMapperUtil.map(baseProductDto,ProductRequest.class);
+        ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         BaseProduct baseProduct = super.getById(baseProductDto.getId());
-        ObjectUtil.fillNull(productRequest,baseProduct);
+        ObjectUtil.fillNull(productRequest, baseProduct);
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-        if(r.getCode()!=200){
-            throw new BaseException("传wms失败"+r.getMsg());
+        if (r.getCode() != 200) {
+            throw new BaseException("传wms失败" + r.getMsg());
         }
         return baseMapper.updateById(baseProductDto);
     }
@@ -228,19 +235,19 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     public boolean deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException {
         //传删除给WMS
-       for(Long id: ids){
-           ProductRequest productRequest  = new ProductRequest();
-           productRequest.setIsActive(false);
-           BaseProduct baseProduct = super.getById(id);
-           ObjectUtil.fillNull(productRequest,baseProduct);
-           R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-           if(r.getCode()!=200){
-               throw new BaseException("传wms失败"+r.getMsg());
-           }
-       }
+        for (Long id : ids) {
+            ProductRequest productRequest = new ProductRequest();
+            productRequest.setIsActive(false);
+            BaseProduct baseProduct = super.getById(id);
+            ObjectUtil.fillNull(productRequest, baseProduct);
+            R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+            if (r.getCode() != 200) {
+                throw new BaseException("传wms失败" + r.getMsg());
+            }
+        }
         UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper();
-        updateWrapper.in("id",ids);
-        updateWrapper.set("is_active",false);
+        updateWrapper.in("id", ids);
+        updateWrapper.set("is_active", false);
 
         return super.update(updateWrapper);
     }
@@ -261,7 +268,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", baseProduct.getCode());
         queryWrapper.eq("category", "SKU");
-        queryWrapper.eq("is_active",true);
+        queryWrapper.eq("is_active", true);
         //查询是否有SKU
         int count = super.count(queryWrapper);
         R r = new R();
@@ -277,5 +284,33 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         return r;
     }
 
+    private List<BaseProduct> queryConditionList(BaseProductConditionQueryDto conditionQueryDto) {
+        if (StringUtils.isEmpty(conditionQueryDto.getWarehouseCode())
+                || CollectionUtils.isEmpty(conditionQueryDto.getSkus())) {
+            return Collections.emptyList();
+        }
+        LambdaQueryWrapper<BaseProduct> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(BaseProduct::getWarehouseCode, conditionQueryDto.getWarehouseCode());
+        queryWrapper.in(BaseProduct::getCode, conditionQueryDto.getSkus());
+        return this.list(queryWrapper);
+    }
+
+    @Override
+    public List<String> listProductAttribute(BaseProductConditionQueryDto conditionQueryDto) {
+        List<BaseProduct> list = this.queryConditionList(conditionQueryDto);
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        return list.stream().map(BaseProduct::getProductAttribute).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BaseProduct> queryProductList(BaseProductConditionQueryDto conditionQueryDto) {
+        List<BaseProduct> list = this.queryConditionList(conditionQueryDto);
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        return list;
+    }
 }
 

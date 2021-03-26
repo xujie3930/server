@@ -1,7 +1,9 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.component.RemoteComponent;
 import com.szmsd.bas.domain.BasWarehouse;
@@ -150,6 +152,13 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
             }
         }
         return true;
+    }
+
+    @Override
+    public BasWarehouse queryByWarehouseCode(String warehouseCode) {
+        LambdaQueryWrapper<BasWarehouse> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(BasWarehouse::getWarehouseCode, warehouseCode);
+        return this.getOne(queryWrapper);
     }
 }
 

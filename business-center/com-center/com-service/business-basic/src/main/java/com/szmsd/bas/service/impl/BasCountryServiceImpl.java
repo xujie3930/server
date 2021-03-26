@@ -1,11 +1,14 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasCountry;
 import com.szmsd.bas.dao.BasCountryMapper;
-import com.szmsd.bas.domain.BasCountry;
 import com.szmsd.bas.service.IBasCountryService;
 import com.szmsd.common.core.utils.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,11 +45,11 @@ public class BasCountryServiceImpl extends ServiceImpl<BasCountryMapper, BasCoun
     @Override
     public List<BasCountry> selectBasCountryList(BasCountry basCountry) {
         QueryWrapper<BasCountry> where = new QueryWrapper<BasCountry>();
-        if (StringUtils.isNotEmpty(basCountry.getCountryCode())){
-            where.like("country_code",basCountry.getCountryCode());
+        if (StringUtils.isNotEmpty(basCountry.getCountryCode())) {
+            where.like("country_code", basCountry.getCountryCode());
         }
-        if (StringUtils.isNotEmpty(basCountry.getCountryName())){
-            where.like("country_name",basCountry.getCountryName());
+        if (StringUtils.isNotEmpty(basCountry.getCountryName())) {
+            where.like("country_name", basCountry.getCountryName());
         }
 
         return baseMapper.selectList(where);
@@ -94,5 +97,16 @@ public class BasCountryServiceImpl extends ServiceImpl<BasCountryMapper, BasCoun
     @Override
     public int deleteBasCountryById(String id) {
         return baseMapper.deleteById(id);
+    }
+
+    @Override
+    public BasCountry queryByCountryCode(String countryCode) {
+        LambdaQueryWrapper<BasCountry> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(BasCountry::getCountryCode, countryCode);
+        List<BasCountry> list = this.list(queryWrapper);
+        if (CollectionUtils.isNotEmpty(list)) {
+            return list.get(0);
+        }
+        return null;
     }
 }

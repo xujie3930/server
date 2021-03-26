@@ -1,7 +1,9 @@
 package com.szmsd.bas.api.domain;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -27,6 +29,7 @@ public class BasSub {
 
     @ApiModelProperty(value = "主键id")
     @Excel(name = "主键id")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @ApiModelProperty(value = "子类id")
@@ -125,6 +128,7 @@ public class BasSub {
 
     @ApiModelProperty(value = "创建人")
     @Excel(name = "创建人")
+    @TableField(exist = false)
     private String createBy;
 
     @ApiModelProperty(value = "创建者")
@@ -133,6 +137,7 @@ public class BasSub {
 
     @ApiModelProperty(value = "修改人")
     @Excel(name = "修改人")
+    @TableField(exist = false)
     private String updateBy;
 
     /** 更新者 */
