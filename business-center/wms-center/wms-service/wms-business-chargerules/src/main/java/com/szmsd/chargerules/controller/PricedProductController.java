@@ -20,10 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 @Api(tags = {"PricedProduct"})
@@ -83,18 +79,9 @@ public class PricedProductController extends BaseController {
 
     @PostMapping("/exportFile")
     @ApiOperation(value = "导出产品信息列表")
-    public void exportFile(HttpServletResponse response, @RequestBody List<String> codes) throws Exception {
-        response.setContentType("application/vnd.ms-excel");
+    public void exportFile(HttpServletResponse response, @RequestBody List<String> codes) {
         FileStream fileStream = iPricedProductService.exportFile(codes);
-        response.addHeader("Content-Disposition", fileStream.getContentDisposition());
-        try (InputStream fis = new ByteArrayInputStream(fileStream.getInputStream()); BufferedInputStream bis = new BufferedInputStream(fis); OutputStream os = response.getOutputStream()) {
-            byte[] buffer = new byte[1024];
-            int i = bis.read(buffer);
-            while (i != -1) {
-                os.write(buffer, 0, i);
-                i = bis.read(buffer);
-            }
-        }
+        super.fileStreamWrite(response, fileStream);
     }
 
 }

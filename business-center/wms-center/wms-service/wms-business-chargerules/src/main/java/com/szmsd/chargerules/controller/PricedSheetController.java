@@ -18,10 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 @Api(tags = {"PricedSheet"})
@@ -68,18 +64,9 @@ public class PricedSheetController extends BaseController {
 
     @PostMapping("/exportFile")
     @ApiOperation(value = "导出报价表信息")
-    public void exportFile(HttpServletResponse response, @RequestBody PricedSheetCodeCriteria pricedSheetCodeCriteria) throws Exception {
-        response.setContentType("application/vnd.ms-excel");
+    public void exportFile(HttpServletResponse response, @RequestBody PricedSheetCodeCriteria pricedSheetCodeCriteria) {
         FileStream fileStream = iPricedSheetService.exportFile(pricedSheetCodeCriteria);
-        response.addHeader("Content-Disposition", fileStream.getContentDisposition());
-        try (InputStream fis = new ByteArrayInputStream(fileStream.getInputStream()); BufferedInputStream bis = new BufferedInputStream(fis); OutputStream os = response.getOutputStream()) {
-            byte[] buffer = new byte[1024];
-            int i = bis.read(buffer);
-            while (i != -1) {
-                os.write(buffer, 0, i);
-                i = bis.read(buffer);
-            }
-        }
+        super.fileStreamWrite(response, fileStream);
     }
 
 }
