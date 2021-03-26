@@ -200,6 +200,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode,currencyCode);
         lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance,result.getCurrentBalance());
         lambdaUpdateWrapper.set(AccountBalance::getFreezeBalance,result.getFreezeBalance());
+        lambdaUpdateWrapper.set(AccountBalance::getTotalBalance,result.getTotalBalance());
         accountBalanceMapper.update(null,lambdaUpdateWrapper);
     }
 
@@ -285,6 +286,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper=Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(AccountBalance::getCusCode,cusCode);
         lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode,currencyCode);
+        lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance,result);
         lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance,result);
         accountBalanceMapper.update(null,lambdaUpdateWrapper);
     }

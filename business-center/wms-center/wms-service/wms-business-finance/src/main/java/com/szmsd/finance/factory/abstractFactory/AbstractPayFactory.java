@@ -43,15 +43,15 @@ public abstract class AbstractPayFactory {
         RLock lock=redissonClient.getLock(key);
         try{
             if(lock.tryLock(time,unit)){
-                BigDecimal oldBalance=getCurrentBalance(dto.getCusCode(),dto.getCurrencyCode());
+                BalanceDTO oldBalance=getBalance(dto.getCusCode(),dto.getCurrencyCode());
                 BigDecimal changeAmount=dto.getAmount();
                 //余额不足
-                if(dto.getPayType() == BillEnum.PayType.PAYMENT && oldBalance.compareTo(changeAmount) < 0){
+                if(dto.getPayType() == BillEnum.PayType.PAYMENT && oldBalance.getCurrentBalance().compareTo(changeAmount) < 0){
                     return false;
                 }
-                BigDecimal result=calculateBalance(oldBalance,changeAmount);
-                setCurrentBalance(dto.getCusCode(),dto.getCurrencyCode(),result);
-                recordOpLog(dto,result);
+                BalanceDTO result=calculateBalance(oldBalance,changeAmount);
+                setBalance(dto.getCusCode(),dto.getCurrencyCode(),result);
+                recordOpLog(dto,result.getCurrentBalance());
             }
             return true;
         }catch(Exception e){
@@ -93,6 +93,6 @@ public abstract class AbstractPayFactory {
         accountBalanceService.setBalance(cusCode,currencyCode,result);
     }
 
-    public abstract BigDecimal calculateBalance(BigDecimal oldBalance,BigDecimal changeAmount);
+    public abstract BalanceDTO calculateBalance(BalanceDTO oldBalance,BigDecimal changeAmount);
 
 }

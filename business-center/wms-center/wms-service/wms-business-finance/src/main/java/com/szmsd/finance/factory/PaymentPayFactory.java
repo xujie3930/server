@@ -2,6 +2,7 @@ package com.szmsd.finance.factory;
 
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,9 @@ public class PaymentPayFactory extends AbstractPayFactory {
     }
 
     @Override
-    public BigDecimal calculateBalance(BigDecimal oldBalance, BigDecimal changeAmount) {
-        return oldBalance.subtract(changeAmount);
+    public BalanceDTO calculateBalance(BalanceDTO oldBalance, BigDecimal changeAmount) {
+        oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().subtract(changeAmount));
+        oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(changeAmount));
+        return oldBalance;
     }
 }
