@@ -24,22 +24,24 @@
 
     <select id="pageList" resultType="com.szmsd.delivery.vo.DelOutboundListVO">
         SELECT
-            id,
-            order_no,
-            purchase_no,
-            order_type,
-            state,
-            warehouse_code,
-            shipment_rule,
-            tracking_no,
-            specifications,
-            billing_weight,
-            amount,
-            exception_message,
-            custom_code,
-            create_by_name,
-            create_time
-        FROM del_outbound
+            o.id,
+            o.order_no,
+            o.purchase_no,
+            o.order_type,
+            o.state,
+            o.warehouse_code,
+            o.shipment_rule,
+            o.tracking_no,
+            o.specifications,
+            o.billing_weight,
+            o.amount,
+            o.exception_message,
+            o.custom_code,
+            o.create_by_name,
+            o.create_time,
+            a.consignee
+        FROM del_outbound o
+        LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
     </select>
 
