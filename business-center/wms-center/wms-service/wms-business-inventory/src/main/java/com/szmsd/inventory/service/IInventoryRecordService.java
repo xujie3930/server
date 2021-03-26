@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface IInventoryRecordService extends IService<InventoryRecord> {
 
-    void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity, String placeholder);
+    void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity, String... placeholder);
 
     List<InventoryRecordVO> selectList(InventoryRecordQueryDTO inventoryRecordQueryDTO);
 

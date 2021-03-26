@@ -26,7 +26,7 @@ public enum LocalLanguageEnum {
     INVENTORY_RECORD_TYPE_2(INVENTORY_RECORD_TYPE, "2", "出库", "Outbound inventory"),
 
     /** 上架入库 **/
-    INBOUND_INVENTORY_LOG(INVENTORY_RECORD_LOGS, LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), "{0}, 在{1}操作上架入库[单号: {2}, SKU：{3}, 仓库编码：{4} , 数量: {5}]", "{0}, in {1} operate put inbound inventory[receiptNo: {2}, SKU：{3}, warehouseCode：{4}, quantity: {5}]"),
+    INBOUND_INVENTORY_LOG(INVENTORY_RECORD_LOGS, LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), "操作人：{0}, 在{1}操作上架入库[单号: {2}, SKU：{3}, 仓库编码：{4} , 数量: {5}]", "operator: {0}, in {1} operate put inbound inventory[receiptNo: {2}, SKU：{3}, warehouseCode：{4}, quantity: {5}]"),
     ;
     
     private LocalLanguageTypeEnum typeEnum;

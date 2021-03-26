@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,6 +35,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
 
     /**
      * 保存入库操作日志
+     *
      * @param type
      * @param beforeInventory
      * @param afterInventory
@@ -48,7 +46,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
      * @param placeholder
      */
     @Override
-    public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity, String placeholder) {
+    public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity, String... placeholder) {
         InventoryRecord inventoryRecord = new InventoryRecord();
         inventoryRecord.setType(type);
         inventoryRecord.setReceiptNo(receiptNo);
@@ -65,11 +63,11 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         inventoryRecord.setAfterFreezeInventory(afterInventory.getFreezeInventory());
         inventoryRecord.setAfterTotalInbound(afterInventory.getTotalInbound());
         inventoryRecord.setAfterTotalOutbound(afterInventory.getTotalOutbound());
-        String logs = getLogs(type, inventoryRecord.getReceiptNo(), operator, operateOn, quantity);
+        String logs = getLogs(type, placeholder);
         inventoryRecord.setRemark(logs);
         inventoryRecord.setOperator(operator);
         inventoryRecord.setOperateOn(operateOn);
-        inventoryRecord.setPlaceholder("".equals(placeholder) ? null : placeholder);
+        inventoryRecord.setPlaceholder(Arrays.asList(placeholder).stream().collect(Collectors.joining(",")));
         log.info("保存入库操作日志：" + inventoryRecord);
         this.save(inventoryRecord);
         log.info("保存入库操作日志：操作完成");
@@ -82,6 +80,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
 
     /**
      * 查询入库日志 - 按sku 仓库代码统计sku的体积
+     *
      * @param inventorySkuVolumeQueryDTO
      * @return
      */
@@ -120,7 +119,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         return inventorySkuVolumeVOS;
     }
 
-    private static String getLogs(String type, String receiptNo, String operator, String operateOn, Integer quantity) {
+    private static String getLogs(String type, String... placeholder) {
         LocalLanguageEnum localLanguageEnum = LocalLanguageEnum.getLocalLanguageEnum(LocalLanguageTypeEnum.INVENTORY_RECORD_LOGS, type);
         if (localLanguageEnum == null) {
             log.error("没有维护[{}]枚举语言[{}]", "INVENTORY_RECORD_LOGS", type);
@@ -137,7 +136,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         }
         switch (localLanguageEnum) {
             case INBOUND_INVENTORY_LOG:
-                return MessageFormat.format(logs, operator, operateOn, receiptNo, quantity);
+                return MessageFormat.format(logs, placeholder);
         }
         return logs;
     }

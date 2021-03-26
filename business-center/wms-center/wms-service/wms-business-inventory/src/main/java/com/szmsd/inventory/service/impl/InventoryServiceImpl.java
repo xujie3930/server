@@ -76,8 +76,10 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             this.saveOrUpdate(afterInventory);
 
             // 记录库存日志
-            String placeholder = inboundInventoryDTO.getOperator() + "," + inboundInventoryDTO.getOperateOn() + "," + inboundInventoryDTO.getOrderNo() + "," + inboundInventoryDTO.getSku() + "," + inboundInventoryDTO.getWarehouseCode() + "," + inboundInventoryDTO.getQty();
-            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty, placeholder);
+            iInventoryRecordService.saveLogs(
+                LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty,
+                inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getSku(), inboundInventoryDTO.getWarehouseCode(), (inboundInventoryDTO.getQty() + "")
+            );
         } finally {
             lock.unlock();
         }
