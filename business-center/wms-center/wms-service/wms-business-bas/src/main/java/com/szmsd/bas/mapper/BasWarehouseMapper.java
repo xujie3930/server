@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface BasWarehouseMapper extends BaseMapper<BasWarehouse> {
 
-    List<BasWarehouseVO> selectList(BasWarehouseQueryDTO queryDTO);
+    List<BasWarehouseVO> selectListVO(BasWarehouseQueryDTO queryDTO);
 
     BasWarehouseInfoVO selectInfo(@Param("id") Long id, @Param("warehouseCode") String warehouseCode);
 

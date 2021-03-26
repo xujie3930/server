@@ -133,7 +133,7 @@ public class HandlerContext<T> {
                 if (StringUtils.isNotEmpty(setValue)) {
                     try {
                         // 设置值
-                        MethodUtils.invokeMethod(object, ObjectUtil.toSetMethod(nameField), setValue);
+                        MethodUtils.invokeMethod(object, ObjectUtil.toNormalSetMethod(nameField), setValue);
                     } catch (NoSuchMethodException e) {
                         logger.error("对象中无方法可调用" + e.getMessage(), e);
                     } catch (InvocationTargetException e) {

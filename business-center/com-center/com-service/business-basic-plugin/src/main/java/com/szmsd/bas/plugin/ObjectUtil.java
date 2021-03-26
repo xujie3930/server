@@ -57,6 +57,13 @@ public final class ObjectUtil {
                 str.substring(1);
     }
 
+    /**
+     * 转成set方法
+     * USER_NAME -> setUserName
+     *
+     * @param str str
+     * @return setUserName
+     */
     public static String toSetMethod(String str) {
         str = "_" + str.toLowerCase();
         Matcher matcher = LINE_PATTERN.matcher(str);
@@ -67,6 +74,19 @@ public final class ObjectUtil {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    /**
+     * 转成set方法
+     * userName -> setUserName
+     *
+     * @param str str
+     * @return setUserName
+     */
+    public static String toNormalSetMethod(String str) {
+        return "set" +
+                str.substring(0, 1).toUpperCase() +
+                str.substring(1);
     }
 
     public static String setDefaultEmptyValue(String text) {

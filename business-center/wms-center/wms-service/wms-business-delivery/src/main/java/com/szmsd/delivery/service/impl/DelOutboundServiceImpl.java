@@ -6,9 +6,11 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
+import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -35,7 +37,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -60,6 +64,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private IDelOutboundHttpWrapperService delOutboundHttpWrapperService;
     @Autowired
     private BaseProductClientService baseProductClientService;
+    @Autowired
+    private BasWarehouseClientService basWarehouseClientService;
 
     /**
      * 查询出库单模块
@@ -100,7 +106,25 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "shipment_rule", queryDto.getShipmentRule());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "warehouse_code", queryDto.getWarehouseCode());
-        return baseMapper.pageList(queryWrapper);
+        List<DelOutboundListVO> voList = baseMapper.pageList(queryWrapper);
+        if (CollectionUtils.isNotEmpty(voList)) {
+            List<String> warehouseCodes = voList.stream().map(DelOutboundListVO::getWarehouseCode).filter(Objects::nonNull).collect(Collectors.toList());
+            List<BasWarehouse> warehouseList = this.basWarehouseClientService.queryByWarehouseCodes(warehouseCodes);
+            Map<String, BasWarehouse> warehouseMap;
+            if (CollectionUtils.isNotEmpty(warehouseList)) {
+                warehouseMap = warehouseList.stream().collect(Collectors.toMap(BasWarehouse::getWarehouseCode, v1 -> v1, (v1, v2) -> v1));
+            } else {
+                warehouseMap = Collections.emptyMap();
+            }
+            for (DelOutboundListVO vo : voList) {
+                BasWarehouse warehouse = warehouseMap.get(vo.getWarehouseCode());
+                if (null != warehouse) {
+                    vo.setWarehouseName(warehouse.getWarehouseNameCn());
+                }
+            }
+        }
+
+        return voList;
     }
 
     /**
@@ -152,7 +176,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param orderNo orderNo
      */
     private void saveAddress(DelOutboundDto dto, String orderNo) {
-        DelOutboundAddress delOutboundAddress = BeanMapperUtil.map(dto.getAddress(), DelOutboundAddress.class);
+        DelOutboundAddressDto address = dto.getAddress();
+        if (Objects.isNull(address)) {
+            return;
+        }
+        DelOutboundAddress delOutboundAddress = BeanMapperUtil.map(address, DelOutboundAddress.class);
         if (Objects.nonNull(delOutboundAddress)) {
             delOutboundAddress.setOrderNo(orderNo);
             this.delOutboundAddressService.save(delOutboundAddress);
@@ -166,7 +194,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param orderNo orderNo
      */
     private void saveDetail(DelOutboundDto dto, String orderNo) {
-        List<DelOutboundDetail> delOutboundDetailList = BeanMapperUtil.mapList(dto.getDetails(), DelOutboundDetail.class);
+        List<DelOutboundDetailDto> details = dto.getDetails();
+        if (CollectionUtils.isEmpty(details)) {
+            return;
+        }
+        List<DelOutboundDetail> delOutboundDetailList = BeanMapperUtil.mapList(details, DelOutboundDetail.class);
         if (CollectionUtils.isNotEmpty(delOutboundDetailList)) {
             for (DelOutboundDetail delOutboundDetail : delOutboundDetailList) {
                 delOutboundDetail.setOrderNo(orderNo);

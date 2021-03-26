@@ -59,8 +59,8 @@ public class BasSubController extends BaseController {
     }
 
     @ApiOperation(value = "根据code查询子类别（下拉框）")
-    @GetMapping("/getSub")
-    public R<Map<String, List<BasSubWrapperVO>>> getSub(String code) {
+    @RequestMapping("/getSub")
+    public R<Map<String, List<BasSubWrapperVO>>> getSub(@RequestParam("code") String code) {
         List<String> codes = new ArrayList<>();
         if (code.contains(",")) {
             codes.addAll(Arrays.asList(code.split(",")));

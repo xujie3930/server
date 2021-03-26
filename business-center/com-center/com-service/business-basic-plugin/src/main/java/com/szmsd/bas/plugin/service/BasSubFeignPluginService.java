@@ -5,7 +5,8 @@ import com.szmsd.common.core.constant.ServiceNameConstants;
 import com.szmsd.common.core.domain.R;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ import java.util.Map;
 public interface BasSubFeignPluginService {
 
     @ApiOperation(value = "根据code查询子类别（下拉框）")
-    @GetMapping("/bas-sub/getSub")
-    R<Map<String, List<BasSubWrapperVO>>> getSub(String code);
+    @RequestMapping("/bas-sub/getSub")
+    R<Map<String, List<BasSubWrapperVO>>> getSub(@RequestParam("code") String code);
 
 }

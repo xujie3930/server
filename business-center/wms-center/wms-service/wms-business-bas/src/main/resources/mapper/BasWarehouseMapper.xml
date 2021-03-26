@@ -72,7 +72,7 @@
         t.status
     </sql>
 
-    <select id="selectList" parameterType="com.szmsd.bas.dto.BasWarehouseQueryDTO" resultMap="BasWarehouseVO">
+    <select id="selectListVO" parameterType="com.szmsd.bas.dto.BasWarehouseQueryDTO" resultMap="BasWarehouseVO">
         SELECT <include refid="Column_List_VO"/>
         FROM bas_warehouse t
         <where>

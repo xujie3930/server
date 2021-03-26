@@ -1,5 +1,6 @@
 package com.szmsd.delivery.controller;
 
+import com.szmsd.bas.plugin.AutoValue;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -43,6 +44,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/page")
     @ApiOperation(value = "出库管理 - 分页", position = 100)
+    @AutoValue
     public TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto queryDto) {
         startPage();
         return getDataTable(this.delOutboundService.selectDelOutboundList(queryDto));

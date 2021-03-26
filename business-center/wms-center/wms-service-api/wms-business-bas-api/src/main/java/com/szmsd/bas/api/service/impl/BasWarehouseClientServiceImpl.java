@@ -8,6 +8,7 @@ import com.szmsd.common.core.domain.R;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 public class BasWarehouseClientServiceImpl implements BasWarehouseClientService {
@@ -17,6 +18,7 @@ public class BasWarehouseClientServiceImpl implements BasWarehouseClientService 
 
     /**
      * 创建/更新仓库
+     *
      * @param addWarehouseRequest
      */
     @Override
@@ -27,5 +29,10 @@ public class BasWarehouseClientServiceImpl implements BasWarehouseClientService 
     @Override
     public BasWarehouse queryByWarehouseCode(String warehouseCode) {
         return R.getDataAndException(this.basWarehouseFeignService.queryByWarehouseCode(warehouseCode));
+    }
+
+    @Override
+    public List<BasWarehouse> queryByWarehouseCodes(List<String> warehouseCodes) {
+        return R.getDataAndException(this.basWarehouseFeignService.queryByWarehouseCodes(warehouseCodes));
     }
 }

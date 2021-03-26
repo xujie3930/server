@@ -8,6 +8,8 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @Component
 public class BasWarehouseFeignFallback implements FallbackFactory<BasWarehouseFeignService> {
@@ -23,6 +25,11 @@ public class BasWarehouseFeignFallback implements FallbackFactory<BasWarehouseFe
 
             @Override
             public R<BasWarehouse> queryByWarehouseCode(String warehouseCode) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<BasWarehouse>> queryByWarehouseCodes(List<String> warehouseCodes) {
                 return R.convertResultJson(throwable);
             }
         };
