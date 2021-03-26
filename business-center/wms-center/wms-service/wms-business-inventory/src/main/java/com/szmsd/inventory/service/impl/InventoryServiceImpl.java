@@ -10,9 +10,7 @@ import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
-import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
-import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
-import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
+import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.mapper.InventoryMapper;
@@ -149,6 +147,30 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             }
         }
         return voList;
+    }
+
+    @Transactional
+    @Override
+    public int freeze(InventoryFreezeListDto freezeListDto) {
+        return 0;
+    }
+
+    @Transactional
+    @Override
+    public int unFreeze(InventoryFreezeListDto freezeListDto) {
+        return 0;
+    }
+
+    @Transactional
+    @Override
+    public int deduction(InventoryDeductionListDto deductionListDto) {
+        return 0;
+    }
+
+    @Transactional
+    @Override
+    public int unDeduction(InventoryDeductionListDto deductionListDto) {
+        return 0;
     }
 
 }

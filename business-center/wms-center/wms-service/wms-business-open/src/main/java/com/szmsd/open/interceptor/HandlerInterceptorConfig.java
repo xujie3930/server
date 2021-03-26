@@ -14,17 +14,11 @@ public class HandlerInterceptorConfig implements WebMvcConfigurer {
 
     @Autowired
     private AuthHandlerInterceptor authHandlerInterceptor;
-    @Autowired
-    private TransactionHandlerInterceptor transactionHandlerInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 验证
         registry.addInterceptor(authHandlerInterceptor)
-                .addPathPatterns("/api/**")
-                .excludePathPatterns("/*.html", "/webjars/**", "/swagger-resources/**");
-        // 事务验证
-        registry.addInterceptor(transactionHandlerInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns("/*.html", "/webjars/**", "/swagger-resources/**");
     }
