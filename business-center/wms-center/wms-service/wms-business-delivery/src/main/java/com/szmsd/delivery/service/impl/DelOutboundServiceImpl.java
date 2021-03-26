@@ -320,24 +320,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Transactional
     @Override
-    public int shipmentMeasure(PackageMeasureRequestDto dto) {
-        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
-        updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
-        updateWrapper.set(DelOutbound::getLength, dto.getLength());
-        updateWrapper.set(DelOutbound::getWidth, dto.getWidth());
-        updateWrapper.set(DelOutbound::getHeight, dto.getHeight());
-        updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
-        return this.baseMapper.update(null, updateWrapper);
-    }
-
-    @Transactional
-    @Override
     public int shipmentPacking(ShipmentPackingMaterialRequestDto dto) {
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
         updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
         updateWrapper.set(DelOutbound::getPackingMaterial, dto.getPackingMaterial());
+        updateWrapper.set(DelOutbound::getLength, dto.getLength());
+        updateWrapper.set(DelOutbound::getWidth, dto.getWidth());
+        updateWrapper.set(DelOutbound::getHeight, dto.getHeight());
+        updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
         return this.baseMapper.update(null, updateWrapper);
     }
 

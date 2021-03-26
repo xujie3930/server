@@ -3,8 +3,8 @@ package com.szmsd.delivery.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 
@@ -77,14 +77,6 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     int shipmentOperationType(ShipmentRequestDto dto);
 
     /**
-     * 出库管理 - Open - 接收出库包裹测量信息
-     *
-     * @param dto dto
-     * @return int
-     */
-    int shipmentMeasure(PackageMeasureRequestDto dto);
-
-    /**
      * 出库管理 - Open - 接收出库包裹使用包材
      *
      * @param dto dto
@@ -118,6 +110,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
     /**
      * 根据条件查询出库单及详情列表
+     *
      * @param queryDto queryDto
      * @return DelOutboundListVO
      */

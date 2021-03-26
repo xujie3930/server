@@ -20,14 +20,6 @@ public interface DelOutboundClientService {
     int shipment(ShipmentRequestDto dto);
 
     /**
-     * 出库管理 - Open - 接收出库包裹测量信息
-     *
-     * @param dto dto
-     * @return Integer
-     */
-    int shipmentMeasure(PackageMeasureRequestDto dto);
-
-    /**
      * 出库管理 - Open - 接收出库包裹使用包材
      *
      * @param dto dto
