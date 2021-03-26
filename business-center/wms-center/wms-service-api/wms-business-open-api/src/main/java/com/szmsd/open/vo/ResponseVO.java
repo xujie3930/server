@@ -32,6 +32,10 @@ public class ResponseVO implements Serializable {
         return new ResponseVO(true, null);
     }
 
+    public static ResponseVO ok(String message) {
+        return new ResponseVO(true, message);
+    }
+
     public static ResponseVO failed(String message) {
         return new ResponseVO(false, message == null ? null : message.replaceAll("(?s)(运行时异常:)(?=.*\\1)", ""));
     }

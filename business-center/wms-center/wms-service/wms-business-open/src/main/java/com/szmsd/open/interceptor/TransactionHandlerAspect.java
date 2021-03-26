@@ -40,7 +40,7 @@ public class TransactionHandlerAspect {
     /**
      * 拦截所有的Controller
      */
-    @Pointcut("execution(* com.szmsd.open.controller..*.*(..)) && !@annotation(com.szmsd.open.interceptor.NoTransactionHandler)")
+    @Pointcut("execution(* com.szmsd.open.controller..*.*(..)) && !execution(* com.szmsd.open.controller.BaseController.*(..)) && !@annotation(com.szmsd.open.interceptor.NoTransactionHandler)")
     public void transactionHandler() {
     }
 
@@ -65,7 +65,7 @@ public class TransactionHandlerAspect {
                 if (lock.tryLock(time, timeUnit)) {
                     // 验证有没有REP记录
                     if (this.opnTransactionService.hasRep(currentContext.getRequestUri(), currentContext.getTransactionId())) {
-                        result = ResponseVO.ok();
+                        result = ResponseVO.ok("重复请求");
                     } else {
                         // 新增记录
                         this.opnTransactionService.add(currentContext.getRequestId(), currentContext.getRequestUri(), currentContext.getTransactionId());

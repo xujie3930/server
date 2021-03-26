@@ -32,7 +32,7 @@ import java.util.Date;
  */
 public class BaseController {
 
-    protected static final Logger log = LoggerFactory.getLogger(com.szmsd.common.core.web.controller.BaseController.class);
+    protected static final Logger log = LoggerFactory.getLogger(BaseController.class);
 
     /**
      * 获取多语言标识
