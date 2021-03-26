@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @FeignClient(contextId = "FeignClient.BasWarehouseFeignService", name = BusinessBasInterface.SERVICE_NAME, fallbackFactory = BasWarehouseFeignFallback.class)
 public interface BasWarehouseFeignService {
 
@@ -31,4 +33,13 @@ public interface BasWarehouseFeignService {
      */
     @RequestMapping("/bas/warehouse/queryByWarehouseCode")
     R<BasWarehouse> queryByWarehouseCode(@RequestParam("warehouseCode") String warehouseCode);
+
+    /**
+     * 根据仓库编码查询仓库信息
+     *
+     * @param warehouseCodes warehouseCodes
+     * @return BasWarehouse
+     */
+    @RequestMapping("/bas/warehouse/queryByWarehouseCodes")
+    R<List<BasWarehouse>> queryByWarehouseCodes(@RequestParam("warehouseCodes") List<String> warehouseCodes);
 }

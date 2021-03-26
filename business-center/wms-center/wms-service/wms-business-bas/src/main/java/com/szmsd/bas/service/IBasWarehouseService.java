@@ -43,5 +43,13 @@ public interface IBasWarehouseService extends IService<BasWarehouse> {
      * @return BasWarehouse
      */
     BasWarehouse queryByWarehouseCode(String warehouseCode);
+
+    /**
+     * 根据仓库编码查询仓库信息
+     *
+     * @param warehouseCodes warehouseCodes
+     * @return BasWarehouse
+     */
+    List<BasWarehouse> queryByWarehouseCodes(List<String> warehouseCodes);
 }
 

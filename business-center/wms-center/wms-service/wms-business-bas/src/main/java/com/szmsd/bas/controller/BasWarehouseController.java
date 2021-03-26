@@ -81,9 +81,16 @@ public class BasWarehouseController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('bas:warehouse:queryByWarehouseCode')")
-    @RequestMapping("/queryByWarehouseCode")
+    @RequestMapping(value = "/queryByWarehouseCode", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
     @ApiOperation(value = "根据仓库编码查询仓库信息")
     public R<BasWarehouse> queryByWarehouseCode(@RequestParam("warehouseCode") String warehouseCode) {
         return R.ok(this.basWarehouseService.queryByWarehouseCode(warehouseCode));
+    }
+
+    @PreAuthorize("@ss.hasPermi('bas:warehouse:queryByWarehouseCodes')")
+    @RequestMapping(value = "/queryByWarehouseCodes", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+    @ApiOperation(value = "根据仓库编码查询仓库信息")
+    public R<List<BasWarehouse>> queryByWarehouseCodes(@RequestParam("warehouseCodes") List<String> warehouseCodes) {
+        return R.ok(this.basWarehouseService.queryByWarehouseCodes(warehouseCodes));
     }
 }

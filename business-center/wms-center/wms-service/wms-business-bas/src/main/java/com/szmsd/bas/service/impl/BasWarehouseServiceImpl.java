@@ -35,16 +35,18 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 仓库列表查询
+     *
      * @param queryDTO
      * @return
      */
     @Override
     public List<BasWarehouseVO> selectList(BasWarehouseQueryDTO queryDTO) {
-        return baseMapper.selectList(queryDTO);
+        return baseMapper.selectListVO(queryDTO);
     }
 
     /**
      * 创建/更新仓库
+     *
      * @param addWarehouseRequest
      */
     @Override
@@ -63,6 +65,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 仓库详情 【包含黑白名单客户】
+     *
      * @param warehouseCode
      * @return
      */
@@ -85,6 +88,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 更新仓库客户黑白名单
+     *
      * @param basWarehouseCusList
      */
     @Override
@@ -108,6 +112,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 状态修改
+     *
      * @param basWarehouseStatusChangeDTO
      */
     @Override
@@ -120,6 +125,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 查询入库单 - 创建 - 目的仓库下拉 【过滤出有效仓库、当前登录人没在黑名单、并且白名单非空或白名单包含当前登录人】
+     *
      * @return
      */
     @Override
@@ -131,6 +137,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 判断当前登录人是是否能使用这个仓库
+     *
      * @param warehouseCode
      * @return
      */
@@ -159,6 +166,13 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
         LambdaQueryWrapper<BasWarehouse> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(BasWarehouse::getWarehouseCode, warehouseCode);
         return this.getOne(queryWrapper);
+    }
+
+    @Override
+    public List<BasWarehouse> queryByWarehouseCodes(List<String> warehouseCodes) {
+        LambdaQueryWrapper<BasWarehouse> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.in(BasWarehouse::getWarehouseCode, warehouseCodes);
+        return this.list(queryWrapper);
     }
 }
 
