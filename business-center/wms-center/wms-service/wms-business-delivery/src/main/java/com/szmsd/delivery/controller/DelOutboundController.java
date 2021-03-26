@@ -67,7 +67,7 @@ public class DelOutboundController extends BaseController {
     @PostMapping("/shipment")
     @ApiOperation(value = "出库管理 - 创建", position = 300)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
-    public R<Integer> add(@RequestBody @Validated DelOutboundDto dto) {
+    public R<Integer> add(@RequestBody DelOutboundDto dto) {
         return R.ok(delOutboundService.insertDelOutbound(dto));
     }
 
