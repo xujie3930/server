@@ -11,6 +11,7 @@ import com.szmsd.http.event.EventUtil;
 import com.szmsd.http.event.RequestLogEvent;
 import org.slf4j.MDC;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -104,6 +105,28 @@ public abstract class AbstractHttpRequest {
         return responseBody;
     }
 
+    String httpPostMuFile(String api, Object object, MultipartFile file, String... pathVariable) {
+        String url = getUrl() + api;
+        url = pathVariable(url, pathVariable);
+        Map<String, String> headerMap = getHeaderMap();
+        Date requestTime = new Date();
+        String requestBody = JSON.toJSONString(object);
+        HttpResponseBody responseBody = HttpClientHelper.httpPost(url, requestBody, file, headerMap);
+        addLog(url, "PUT", headerMap, requestBody, requestTime, responseBody.getBody());
+        return responseBody.getBody();
+    }
+
+    String httpPutMuFile(String api, Object object, MultipartFile file, String... pathVariable) {
+        String url = getUrl() + api;
+        url = pathVariable(url, pathVariable);
+        Map<String, String> headerMap = getHeaderMap();
+        Date requestTime = new Date();
+        String requestBody = JSON.toJSONString(object);
+        HttpResponseBody responseBody = HttpClientHelper.httpPut(url, requestBody, file, headerMap);
+        addLog(url, "PUT", headerMap, requestBody, requestTime, responseBody.getBody());
+        return responseBody.getBody();
+    }
+
     String httpGet(String api, Object object, String... pathVariable) {
         String url = getUrl() + api;
         url = pathVariable(url, pathVariable);
@@ -116,7 +139,7 @@ public abstract class AbstractHttpRequest {
     }
 
     String pathVariable(String url, String... pathVariable) {
-        return (pathVariable != null) ? ("/" + Arrays.stream(pathVariable).filter(Objects::nonNull).collect(Collectors.joining("/"))) : "";
+        return url + ((pathVariable != null) ? ("/" + Arrays.stream(pathVariable).filter(Objects::nonNull).collect(Collectors.joining("/"))) : "");
     }
 
     void addLog(String url, String method, Map<String, String> headerMap, String requestBody, Date requestTime, String responseBody) {

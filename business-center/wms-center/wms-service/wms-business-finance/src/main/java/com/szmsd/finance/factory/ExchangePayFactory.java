@@ -1,6 +1,7 @@
 package com.szmsd.finance.factory;
 
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
@@ -32,25 +33,25 @@ public class ExchangePayFactory extends AbstractPayFactory {
             if(lock.tryLock(time,unit)){
                 BigDecimal substractAmount=dto.getAmount();
                 //1.先扣款
-                BigDecimal beforeSubtract=getCurrentBalance(dto.getCusCode(),dto.getCurrencyCode());
+                BalanceDTO beforeSubtract=getBalance(dto.getCusCode(),dto.getCurrencyCode());
                 //先判断扣款余额是否充足
-                if(beforeSubtract.compareTo(substractAmount) < 0){
+                if(beforeSubtract.getCurrentBalance().compareTo(substractAmount) < 0){
                     return false;
                 }
-                BigDecimal afterSubtract=beforeSubtract.subtract(substractAmount);
-                setCurrentBalance(dto.getCusCode(),dto.getCurrencyCode(),afterSubtract);
+                BalanceDTO afterSubtract=calculateBalance(beforeSubtract,substractAmount.negate());
+                setBalance(dto.getCusCode(),dto.getCurrencyCode(),afterSubtract);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
-                recordOpLog(dto,afterSubtract);
+                recordOpLog(dto,afterSubtract.getCurrentBalance());
                 //2.再充值
-                BigDecimal beforeAdd=getCurrentBalance(dto.getCusCode(),dto.getCurrencyCode2());
+                BalanceDTO beforeAdd=getBalance(dto.getCusCode(),dto.getCurrencyCode2());
                 BigDecimal addAmount=dto.getRate().multiply(substractAmount).setScale(2,BigDecimal.ROUND_FLOOR);
-                BigDecimal afterAdd=beforeAdd.add(addAmount);
-                setCurrentBalance(dto.getCusCode(),dto.getCurrencyCode2(),afterAdd);
+                BalanceDTO afterAdd=calculateBalance(beforeAdd,addAmount);
+                setBalance(dto.getCusCode(),dto.getCurrencyCode2(),afterAdd);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
                 dto.setAmount(addAmount);
                 dto.setCurrencyCode(dto.getCurrencyCode2());
                 dto.setCurrencyName(dto.getCurrencyName2());
-                recordOpLog(dto,afterAdd);
+                recordOpLog(dto,afterAdd.getCurrentBalance());
             }
             return true;
         }catch(Exception e){
@@ -75,8 +76,9 @@ public class ExchangePayFactory extends AbstractPayFactory {
     }
 
     @Override
-    public BigDecimal calculateBalance(BigDecimal oldBalance, BigDecimal changeAmount) {
-        return null;
+    public BalanceDTO calculateBalance(BalanceDTO oldBalance, BigDecimal changeAmount) {
+        oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().add(changeAmount));
+        oldBalance.setTotalBalance(oldBalance.getTotalBalance().add(changeAmount));
+        return oldBalance;
     }
-
 }

@@ -1,6 +1,8 @@
 package com.szmsd.common.core.utils;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -19,6 +21,10 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.DefaultHttpResponseParserFactory;
@@ -30,6 +36,7 @@ import org.apache.http.message.AbstractHttpMessage;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.net.ssl.*;
 import java.io.IOException;
@@ -270,6 +277,61 @@ public class HttpClientHelper {
         return null;
     }
 
+    /**
+     * 执行 http put 请求
+     *
+     * @param url         请求URL
+     * @param requestBody 请求Body
+     * @param file 文件
+     * @param headerMap   请求Header
+     * @return 响应Body
+     * @return
+     */
+    public static HttpResponseBody httpPut(String url, String requestBody, MultipartFile file, Map<String, String> headerMap) {
+        return execute(new HttpPut(url), headerMap, requestBody, file);
+    }
+
+    /**
+     * 执行 http post 请求
+     *
+     * @param url         请求URL
+     * @param requestBody 请求Body
+     * @param file 文件
+     * @param headerMap   请求Header
+     * @return 响应Body
+     * @return
+     */
+    public static HttpResponseBody httpPost(String url, String requestBody, MultipartFile file, Map<String, String> headerMap) {
+        return execute(new HttpPost(url), headerMap, requestBody, file);
+    }
+
+    public static HttpResponseBody execute(HttpEntityEnclosingRequestBase request, Map<String, String> headerMap, String requestBody, MultipartFile file) {
+        CloseableHttpClient httpClient = getHttpClient();
+        CloseableHttpResponse response = null;
+        try {
+            String result = null;
+            //添加http头信息
+            setHeader(request, headerMap);
+            setRaw(request, requestBody, file);
+            response = httpClient.execute(request);
+            int status = response.getStatusLine().getStatusCode();
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                result = EntityUtils.toString(entity, "UTF-8");
+            }
+            return new HttpResponseBody.HttpResponseBodyWrapper(status, result);
+        } catch (Exception e) {
+            try {
+                if (null != response)
+                    EntityUtils.consume(response.getEntity());
+            } catch (IOException e1) {
+                log.error(e.getMessage(), e1);
+            }
+            log.error(e.getMessage(), e);
+        }
+        return new HttpResponseBody.HttpResponseBodyEmpty();
+    }
+
     public static void setHeader(AbstractHttpMessage httpMessage, Map<String, String> headerMap) {
         //添加http头信息
         for (Map.Entry<String, String> entry : headerMap.entrySet()) {
@@ -281,6 +343,25 @@ public class HttpClientHelper {
         ByteArrayEntity byteArrayEntity = new ByteArrayEntity(requestBody.getBytes(StandardCharsets.UTF_8));
         byteArrayEntity.setContentType("application/json;charset=UTF-8");
         httpEntity.setEntity(byteArrayEntity);
+    }
+
+    public static void setRaw(HttpEntityEnclosingRequestBase httpEntity, String requestBody, MultipartFile file) {
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        try {
+            String originalFilename = file.getOriginalFilename();
+            builder.addBinaryBody(file.getName(), file.getInputStream(), ContentType.MULTIPART_FORM_DATA, originalFilename);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Map<String, String> params = JSON.parseObject(requestBody, Map.class);
+        if (params != null) {
+            for (String key : params.keySet()) {
+                builder.addPart(key, new StringBody(params.get(key), ContentType.create("text/plain", Consts.UTF_8)));
+            }
+        }
+        HttpEntity entity = builder.build();
+        httpEntity.setEntity(entity);
     }
 
     private static class HttpClientHelperInstance {

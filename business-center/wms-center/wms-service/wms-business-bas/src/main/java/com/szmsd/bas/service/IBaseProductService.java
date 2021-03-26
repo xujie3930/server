@@ -2,10 +2,7 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BaseProduct;
-import com.szmsd.bas.dto.BaseProductDto;
-import com.szmsd.bas.dto.BaseProductMeasureDto;
-import com.szmsd.bas.dto.BaseProductQueryDto;
-import com.szmsd.bas.dto.MeasuringProductRequest;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
 
@@ -124,10 +121,17 @@ public interface IBaseProductService extends IService<BaseProduct> {
     /**
      * 根据sku返回产品属性
      *
-     * @param skus skus
+     * @param conditionQueryDto conditionQueryDto
      * @return String
      */
-    List<String> listProductAttribute(List<String> skus);
+    List<String> listProductAttribute(BaseProductConditionQueryDto conditionQueryDto);
 
+    /**
+     * 根据仓库，SKU查询产品信息
+     *
+     * @param conditionQueryDto conditionQueryDto
+     * @return BaseProduct
+     */
+    List<BaseProduct> queryProductList(BaseProductConditionQueryDto conditionQueryDto);
 }
 

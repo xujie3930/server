@@ -24,6 +24,11 @@
             <artifactId>szmsd-common-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>business-basic-plugin</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

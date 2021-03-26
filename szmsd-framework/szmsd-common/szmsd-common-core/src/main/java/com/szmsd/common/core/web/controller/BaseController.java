@@ -4,22 +4,17 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.enums.BaseEnum;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.ApiException;
 import com.szmsd.common.core.exception.com.LogisticsException;
 import com.szmsd.common.core.exception.com.LogisticsExceptionUtil;
 import com.szmsd.common.core.exception.web.BaseException;
-import com.szmsd.common.core.utils.DateUtils;
-import com.szmsd.common.core.utils.ExceptionUtil;
-import com.szmsd.common.core.utils.ServletUtils;
-import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.*;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.sql.SqlUtil;
 import com.szmsd.common.core.web.page.PageDomain;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.core.web.page.TableSupport;
-import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -34,7 +29,9 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.security.auth.login.LoginException;
+import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyEditorSupport;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -229,6 +226,21 @@ public class BaseController {
             len = "zh";
         }
         return len;
+    }
+
+    public void fileStreamWrite(HttpServletResponse response, FileStream fileStream) {
+        response.setContentType("application/vnd.ms-excel");
+        response.addHeader("Content-Disposition", fileStream.getContentDisposition());
+        try (InputStream fis = new ByteArrayInputStream(fileStream.getInputStream()); BufferedInputStream bis = new BufferedInputStream(fis); OutputStream os = response.getOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int i = bis.read(buffer);
+            while (i != -1) {
+                os.write(buffer, 0, i);
+                i = bis.read(buffer);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

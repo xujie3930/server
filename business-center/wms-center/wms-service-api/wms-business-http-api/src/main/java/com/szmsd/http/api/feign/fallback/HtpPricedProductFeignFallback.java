@@ -8,6 +8,7 @@ import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.DirectServiceFeeData;
 import com.szmsd.http.vo.KeyValuePair;
+import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.PricedProductInfo;
 import com.szmsd.http.vo.ResponseVO;
 import feign.hystrix.FallbackFactory;
@@ -60,6 +61,11 @@ public class HtpPricedProductFeignFallback implements FallbackFactory<HtpPricedP
 
             @Override
             public R<ResponseObject<ChargeWrapper, ProblemDetails>> pricing(CalcShipmentFeeCommand command) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<PricedProduct>> inService(PricedProductInServiceCriteria criteria) {
                 return R.convertResultJson(throwable);
             }
         };

@@ -8,16 +8,19 @@ import com.szmsd.chargerules.vo.PricedSheetInfoVO;
 import com.szmsd.chargerules.vo.PricedVolumeWeightVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.api.feign.HtpPricedSheetFeignService;
 import com.szmsd.http.dto.CreatePricedSheetCommand;
 import com.szmsd.http.dto.Packing;
+import com.szmsd.http.dto.PricedSheetCodeCriteria;
 import com.szmsd.http.dto.UpdatePricedSheetCommand;
 import com.szmsd.http.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -118,6 +121,30 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         refactor(pricedSheetDTO, update);
         R<ResponseVO> responseVOR = htpPricedSheetFeignService.update(update);
         ResponseVO.resultAssert(responseVOR, "修改报价产品报价表详情信息");
+    }
+
+    /**
+     * 导出报价表信息
+     * @param pricedSheetCodeCriteria
+     * https://pricedproduct-internalapi-external.dsloco.com/api/sheets/exportFile
+     * @return
+     */
+    @Override
+    public FileStream exportFile(PricedSheetCodeCriteria pricedSheetCodeCriteria) {
+        R<FileStream> exportFile = htpPricedSheetFeignService.exportFile(pricedSheetCodeCriteria);
+        return exportFile.getData();
+    }
+
+    /**
+     * 使用file文件导入产品报价表信息
+     * @param sheetCode
+     * @param file
+     * @return
+     */
+    @Override
+    public void importFile(String sheetCode, MultipartFile file) {
+        R<ResponseVO> responseVOR = htpPricedSheetFeignService.importFile(sheetCode, file);
+        ResponseVO.resultAssert(responseVOR, "使用file文件导入产品报价表信息");
     }
 
     private static <T> void refactor(PricedSheetDTO pricedSheetDTO, T t) {

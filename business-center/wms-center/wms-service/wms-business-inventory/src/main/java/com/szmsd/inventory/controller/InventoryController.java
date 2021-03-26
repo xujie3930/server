@@ -3,10 +3,8 @@ package com.szmsd.inventory.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
-import com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO;
-import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
-import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
+import com.szmsd.inventory.domain.dto.*;
+import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventoryRecordVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
@@ -66,6 +64,12 @@ public class InventoryController extends BaseController {
         return R.ok(inventorySkuVolumeVOS);
     }
 
-
+    @PreAuthorize("@ss.hasPermi('inbound:queryAvailableList')")
+    @PostMapping("/queryAvailableList")
+    @ApiOperation(value = "根据仓库编码，SKU查询可用库存", notes = "根据仓库编码，SKU查询可用库存")
+    public TableDataInfo<InventoryAvailableListVO> queryAvailableList(@RequestBody InventoryAvailableQueryDto queryDto) {
+        startPage();
+        return getDataTable(this.inventoryService.queryAvailableList(queryDto));
+    }
 
 }

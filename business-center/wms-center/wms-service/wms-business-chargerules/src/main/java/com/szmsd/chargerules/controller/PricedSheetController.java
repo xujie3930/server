@@ -5,15 +5,19 @@ import com.szmsd.chargerules.service.IPricedSheetService;
 import com.szmsd.chargerules.vo.PricedProductSheetVO;
 import com.szmsd.chargerules.vo.PricedSheetInfoVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.http.dto.PricedSheetCodeCriteria;
 import com.szmsd.http.vo.ResponseVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Api(tags = {"PricedSheet"})
@@ -49,6 +53,20 @@ public class PricedSheetController extends BaseController {
             iPricedSheetService.update(pricedSheetDTO);
         }
         return R.ok();
+    }
+
+    @PutMapping(value = "{sheetCode}/importFile", headers = "content-type=multipart/form-data")
+    @ApiOperation(value = "使用file文件导入产品报价表信息")
+    public R importFile(@PathVariable("sheetCode") String sheetCode, @RequestParam MultipartFile file) {
+        iPricedSheetService.importFile(sheetCode, file);
+        return R.ok();
+    }
+
+    @PostMapping("/exportFile")
+    @ApiOperation(value = "导出报价表信息")
+    public void exportFile(HttpServletResponse response, @RequestBody PricedSheetCodeCriteria pricedSheetCodeCriteria) {
+        FileStream fileStream = iPricedSheetService.exportFile(pricedSheetCodeCriteria);
+        super.fileStreamWrite(response, fileStream);
     }
 
 }

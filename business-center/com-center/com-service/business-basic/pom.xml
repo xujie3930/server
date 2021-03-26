@@ -79,11 +79,18 @@
             <groupId>com.szmsd</groupId>
             <artifactId>szmsd-common-swagger</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.szmsd</groupId>
             <artifactId>business-basic-api</artifactId>
             <version>1.0.0</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>business-basic-plugin-api</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
     </dependencies>

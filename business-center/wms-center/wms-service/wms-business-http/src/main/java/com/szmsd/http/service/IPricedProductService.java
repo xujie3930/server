@@ -3,6 +3,7 @@ package com.szmsd.http.service;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.dto.*;
+import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.*;
 
 import java.util.List;
@@ -30,4 +31,14 @@ public interface IPricedProductService {
      * @return ResponseObject<ChargeWrapper, ProblemDetails>
      */
     ResponseObject<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command);
+
+    ResponseVO grade(ChangeSheetGradeCommand changeSheetGradeCommand);
+
+    /**
+     * 根据客户代码国家等信息获取可下单产品
+     *
+     * @param criteria criteria
+     * @return PricedProduct
+     */
+    List<PricedProduct> inService(PricedProductInServiceCriteria criteria);
 }

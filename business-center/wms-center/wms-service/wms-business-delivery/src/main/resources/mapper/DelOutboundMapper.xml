@@ -22,6 +22,27 @@
         <result property="qty" column="qty" />
     </resultMap>
 
+    <select id="pageList" resultType="com.szmsd.delivery.vo.DelOutboundListVO">
+        SELECT
+            id,
+            order_no,
+            purchase_no,
+            order_type,
+            state,
+            warehouse_code,
+            shipment_rule,
+            tracking_no,
+            specifications,
+            billing_weight,
+            amount,
+            exception_message,
+            custom_code,
+            create_by_name,
+            create_time
+        FROM del_outbound
+        ${ew.customSqlSegment}
+    </select>
+
     <select id="getDelOutboundAndDetailsList" resultMap="outboundDetailsListMap">
         SELECT
             a.`create_time`,
