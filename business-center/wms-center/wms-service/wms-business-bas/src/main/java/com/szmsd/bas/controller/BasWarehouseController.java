@@ -81,9 +81,9 @@ public class BasWarehouseController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('bas:warehouse:queryByWarehouseCode')")
-    @GetMapping("/queryByWarehouseCode")
+    @RequestMapping("/queryByWarehouseCode")
     @ApiOperation(value = "根据仓库编码查询仓库信息")
-    public R<BasWarehouse> queryByWarehouseCode(String warehouseCode) {
+    public R<BasWarehouse> queryByWarehouseCode(@RequestParam("warehouseCode") String warehouseCode) {
         return R.ok(this.basWarehouseService.queryByWarehouseCode(warehouseCode));
     }
 }

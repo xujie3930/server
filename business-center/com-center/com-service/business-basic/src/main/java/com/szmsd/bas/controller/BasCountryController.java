@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -46,8 +47,8 @@ public class BasCountryController extends BaseController {
 
     @ApiOperation(value = "根据国家编码查询国家")
     @PreAuthorize("@ss.hasPermi('bas:bascountry:queryByCountryCode')")
-    @GetMapping("/queryByCountryCode")
-    public R<BasCountry> queryByCountryCode(String countryCode) {
+    @RequestMapping("/queryByCountryCode")
+    public R<BasCountry> queryByCountryCode(@RequestParam("countryCode") String countryCode) {
         return R.ok(this.basCountryService.queryByCountryCode(countryCode));
     }
 }

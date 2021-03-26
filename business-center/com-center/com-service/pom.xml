@@ -16,6 +16,7 @@
 
     <modules>
         <module>business-basic</module>
+        <module>business-basic-plugin</module>
     </modules>
 
     <description>

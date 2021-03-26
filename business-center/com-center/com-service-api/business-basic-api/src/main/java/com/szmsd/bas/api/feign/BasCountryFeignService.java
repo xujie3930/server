@@ -5,7 +5,8 @@ import com.szmsd.bas.api.factory.BasCountryFeignServiceFallbackFactory;
 import com.szmsd.common.core.constant.ServiceNameConstants;
 import com.szmsd.common.core.domain.R;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author zhangyuyuan
@@ -14,6 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @FeignClient(contextId = "BasCountryFeignService", value = ServiceNameConstants.BUSINESS_BAS, fallbackFactory = BasCountryFeignServiceFallbackFactory.class)
 public interface BasCountryFeignService {
 
-    @GetMapping("/bas-country/queryByCountryCode")
-    R<BasCountry> queryByCountryCode(String countryCode);
+    @RequestMapping("/bas-country/queryByCountryCode")
+    R<BasCountry> queryByCountryCode(@RequestParam("countryCode") String countryCode);
 }

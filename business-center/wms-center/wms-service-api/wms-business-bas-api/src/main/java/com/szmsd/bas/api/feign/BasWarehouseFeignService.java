@@ -6,9 +6,10 @@ import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.dto.AddWarehouseRequest;
 import com.szmsd.common.core.domain.R;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(contextId = "FeignClient.BasWarehouseFeignService", name = BusinessBasInterface.SERVICE_NAME, fallbackFactory = BasWarehouseFeignFallback.class)
 public interface BasWarehouseFeignService {
@@ -28,6 +29,6 @@ public interface BasWarehouseFeignService {
      * @param warehouseCode warehouseCode
      * @return BasWarehouse
      */
-    @GetMapping("/bas/warehouse/queryByWarehouseCode")
-    R<BasWarehouse> queryByWarehouseCode(String warehouseCode);
+    @RequestMapping("/bas/warehouse/queryByWarehouseCode")
+    R<BasWarehouse> queryByWarehouseCode(@RequestParam("warehouseCode") String warehouseCode);
 }

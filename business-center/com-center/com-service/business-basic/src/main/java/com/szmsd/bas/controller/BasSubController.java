@@ -1,13 +1,17 @@
 package com.szmsd.bas.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.domain.dto.basSubDto;
 import com.szmsd.bas.driver.UpdateRedis;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.bas.service.IBasSubService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.enums.CodeToNameEnum;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -22,10 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -57,6 +58,37 @@ public class BasSubController extends BaseController {
         return getDataTable(list);
     }
 
+    @ApiOperation(value = "根据code查询子类别（下拉框）")
+    @GetMapping("/getSub")
+    public R<Map<String, List<BasSubWrapperVO>>> getSub(String code) {
+        List<String> codes = new ArrayList<>();
+        if (code.contains(",")) {
+            codes.addAll(Arrays.asList(code.split(",")));
+        } else {
+            codes.add(code);
+        }
+        QueryWrapper<BasSub> queryWrapper = Wrappers.query();
+        queryWrapper.select("main_code", "sub_code", "sub_value", "sub_name", "sub_name_en");
+        queryWrapper.in("main_code", codes);
+        List<BasSub> list = this.basSubService.list(queryWrapper);
+        Map<String, List<BasSubWrapperVO>> map;
+        if (CollectionUtils.isEmpty(list)) {
+            map = Collections.emptyMap();
+        } else {
+            map = new HashMap<>();
+            for (BasSub basSub : list) {
+                String mainCode = basSub.getMainCode();
+                if (map.containsKey(mainCode)) {
+                    map.get(mainCode).add(BeanMapperUtil.map(basSub, BasSubWrapperVO.class));
+                } else {
+                    List<BasSubWrapperVO> voList = new ArrayList<>();
+                    voList.add(BeanMapperUtil.map(basSub, BasSubWrapperVO.class));
+                    map.put(mainCode, voList);
+                }
+            }
+        }
+        return R.ok(map);
+    }
 
     @ApiOperation(value = "根据name，code查询子类别（下拉框）", notes = "根据name，code查询子类别列表（下拉框）")
     @GetMapping("/getSubName")
