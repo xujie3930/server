@@ -27,6 +27,7 @@ import com.szmsd.http.vo.ResponseVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -173,16 +174,17 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      * @return 结果
      */
     @Override
+    @Transactional
     public int insertBaseProduct(BaseProductDto baseProductDto) {
         //默认激活
         baseProductDto.setIsActive(true);
         baseProductDto.setCategory("SKU");
         //卖家编码
-        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
+       /* QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
-        baseProductDto.setSellerCode(basSeller.getSellerCode());
-        baseProductDto.setCode("S" + basSeller.getSellerCode() + baseSerialNumberService.generateNumber("SKU"));
+        baseProductDto.setSellerCode(basSeller.getSellerCode());*/
+        baseProductDto.setCode("S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU"));
         //默认仓库没有验收
         baseProductDto.setWarehouseAcceptance(false);
 
