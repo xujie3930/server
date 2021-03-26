@@ -88,7 +88,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
             basMaterial.setCode("WL"+basMaterial.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
             MaterialRequest materialRequest = BeanMapperUtil.map(basMaterial,MaterialRequest.class);
             R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
-            if(r.getCode()!=200){
+            if(!r.getData().getSuccess()){
                 throw new BaseException("传wms失败"+r.getMsg());
             }
             return baseMapper.insert(basMaterial);
@@ -106,7 +106,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
             BasMaterial material = super.getById(basMaterial.getId());
             ObjectUtil.fillNull(materialRequest,material);
             R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
-            if(r.getCode()!=200){
+            if(!r.getData().getSuccess()){
                 throw new BaseException("传wms失败"+r.getMsg());
             }
             return baseMapper.updateById(basMaterial);
@@ -126,7 +126,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
                BasMaterial material = super.getById(id);
                ObjectUtil.fillNull(materialRequest,material);
                R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
-               if(r.getCode()!=200){
+               if(!r.getData().getSuccess()){
                    throw new BaseException("传wms失败"+r.getMsg());
                }
            }

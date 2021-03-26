@@ -222,7 +222,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         BaseProduct baseProduct = super.getById(baseProductDto.getId());
         ObjectUtil.fillNull(productRequest, baseProduct);
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-        if (r.getCode() != 200) {
+        if (!r.getData().getSuccess()) {
             throw new BaseException("传wms失败" + r.getMsg());
         }
         return baseMapper.updateById(baseProductDto);
@@ -243,7 +243,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             BaseProduct baseProduct = super.getById(id);
             ObjectUtil.fillNull(productRequest, baseProduct);
             R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-            if (r.getCode() != 200) {
+            if (!r.getData().getSuccess()) {
                 throw new BaseException("传wms失败" + r.getMsg());
             }
         }

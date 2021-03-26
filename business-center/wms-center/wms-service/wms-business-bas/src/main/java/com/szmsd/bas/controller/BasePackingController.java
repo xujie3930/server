@@ -60,7 +60,6 @@ public class BasePackingController extends BaseController{
         List<BasePacking> list = basePackingService.selectBasePackingParent();
         return R.ok(list);
     }
-
     /**
     * 导出模块列表
     */

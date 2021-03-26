@@ -210,7 +210,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             SellerRequest sellerRequest = BeanMapperUtil.map(dto,SellerRequest.class);
             sellerRequest.setIsActive(true);
             R<ResponseVO> result = htpBasFeignService.createSeller(sellerRequest);
-            if(result.getCode()!=200){
+            if(!result.getData().getSuccess()){
                 throw new BaseException("传wms失败"+r.getMsg());
             }
             //注册信息到卖家表
@@ -279,7 +279,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             sellerRequest.setIsActive(true);
             ObjectUtil.fillNull(sellerRequest,bas);
             R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
-            if(r.getCode()!=200){
+            if(!r.getData().getSuccess()){
                 throw new BaseException("传wms失败"+r.getMsg());
             }
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
@@ -311,7 +311,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                    sellerRequest.setIsActive(activeDto.getIsActive());
                    ObjectUtil.fillNull(sellerRequest, bas);
                    R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
-                   if(r.getCode()!=200){
+                   if(!r.getData().getSuccess()){
                        throw new BaseException("传wms失败"+r.getMsg());
                    }
                }
