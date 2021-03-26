@@ -53,6 +53,12 @@ public class HttpConfig {
     // CarrierService
     private CarrierService carrierService;
 
+    // 偏远地区接口 https://api-productremotearea-external.dsloco.com/swagger/index.html
+    private String productRemoteAreaUrl;
+
+    // RemoteAreaTemplate
+    private RemoteAreaTemplate remoteAreaTemplate;
+
     public Map<String, String> getBaseHeaderMap() {
         Map<String, String> map = new HashMap<>();
         map.put("UserId", this.getBasUserId());
@@ -66,6 +72,11 @@ public class HttpConfig {
     }
 
     public Map<String, String> getCarrierServiceHeaderMap() {
+        Map<String, String> map = new HashMap<>();
+        return map;
+    }
+
+    public Map<String, String> getProductRemoteAreaHeaderMap() {
         Map<String, String> map = new HashMap<>();
         return map;
     }
@@ -150,5 +161,16 @@ public class HttpConfig {
         private String cancellation;
         // 获取可用的承运商服务名称(管理端)
         private String services;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class RemoteAreaTemplate {
+        // 分页查询地址库模板列表，返回指定页面的数据，以及统计总记录数
+        private String pageResult;
+        // 导出地址库模板信息
+        private String exportFile;
+        // 导入地址库模板
+        private String importFile;
     }
 }

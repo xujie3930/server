@@ -105,6 +105,17 @@ public abstract class AbstractHttpRequest {
         return responseBody;
     }
 
+    String httpPostMuFile(String api, Object object, MultipartFile file, String... pathVariable) {
+        String url = getUrl() + api;
+        url = pathVariable(url, pathVariable);
+        Map<String, String> headerMap = getHeaderMap();
+        Date requestTime = new Date();
+        String requestBody = JSON.toJSONString(object);
+        HttpResponseBody responseBody = HttpClientHelper.httpPost(url, requestBody, file, headerMap);
+        addLog(url, "PUT", headerMap, requestBody, requestTime, responseBody.getBody());
+        return responseBody.getBody();
+    }
+
     String httpPutMuFile(String api, Object object, MultipartFile file, String... pathVariable) {
         String url = getUrl() + api;
         url = pathVariable(url, pathVariable);

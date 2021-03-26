@@ -291,6 +291,20 @@ public class HttpClientHelper {
         return execute(new HttpPut(url), headerMap, requestBody, file);
     }
 
+    /**
+     * 执行 http post 请求
+     *
+     * @param url         请求URL
+     * @param requestBody 请求Body
+     * @param file 文件
+     * @param headerMap   请求Header
+     * @return 响应Body
+     * @return
+     */
+    public static HttpResponseBody httpPost(String url, String requestBody, MultipartFile file, Map<String, String> headerMap) {
+        return execute(new HttpPost(url), headerMap, requestBody, file);
+    }
+
     public static HttpResponseBody execute(HttpEntityEnclosingRequestBase request, Map<String, String> headerMap, String requestBody, MultipartFile file) {
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
