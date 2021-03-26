@@ -131,4 +131,16 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "发货类型")
     private String shipmentType;
+
+    @ApiModelProperty(value = "提货方式")
+    private String deliveryMethod;
+
+    @ApiModelProperty(value = "提货时间")
+    private String deliveryTime;
+
+    @ApiModelProperty(value = "提货商/快递商")
+    private String deliveryAgent;
+
+    @ApiModelProperty(value = "提货/快递信息")
+    private String deliveryInfo;
 }
