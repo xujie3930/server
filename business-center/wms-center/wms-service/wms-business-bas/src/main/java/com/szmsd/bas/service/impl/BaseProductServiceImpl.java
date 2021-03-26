@@ -199,7 +199,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProductOms.setProductImage(baseProductDto.getProductImageBase64());
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto,ProductRequest.class);
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-        if(r.getCode()!=200){
+        if(!r.getData().getSuccess()){
             throw new BaseException("传wms失败"+r.getMsg());
         }
         return baseMapper.insert(baseProduct);
