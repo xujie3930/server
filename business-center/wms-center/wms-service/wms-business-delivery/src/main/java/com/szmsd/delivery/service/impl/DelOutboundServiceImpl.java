@@ -37,10 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -104,11 +101,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundListVO> selectDelOutboundList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "shipment_rule", queryDto.getShipmentRule());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "warehouse_code", queryDto.getWarehouseCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.shipment_rule", queryDto.getShipmentRule());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.warehouse_code", queryDto.getWarehouseCode());
         List<DelOutboundListVO> voList = baseMapper.pageList(queryWrapper);
         if (CollectionUtils.isNotEmpty(voList)) {
-            List<String> warehouseCodes = voList.stream().map(DelOutboundListVO::getWarehouseCode).filter(Objects::nonNull).collect(Collectors.toList());
+            List<String> warehouseCodes = new ArrayList<>();
+            for (DelOutboundListVO vo : voList) {
+                if (StringUtils.isNotEmpty(vo.getWarehouseCode())) {
+                    warehouseCodes.add(vo.getWarehouseCode());
+                }
+            }
             List<BasWarehouse> warehouseList = this.basWarehouseClientService.queryByWarehouseCodes(warehouseCodes);
             Map<String, BasWarehouse> warehouseMap;
             if (CollectionUtils.isNotEmpty(warehouseList)) {
@@ -123,7 +125,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
             }
         }
-
         return voList;
     }
 
