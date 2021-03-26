@@ -176,7 +176,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param orderNo orderNo
      */
     private void saveAddress(DelOutboundDto dto, String orderNo) {
-        DelOutboundAddress delOutboundAddress = BeanMapperUtil.map(dto.getAddress(), DelOutboundAddress.class);
+        DelOutboundAddressDto address = dto.getAddress();
+        if (Objects.isNull(address)) {
+            return;
+        }
+        DelOutboundAddress delOutboundAddress = BeanMapperUtil.map(address, DelOutboundAddress.class);
         if (Objects.nonNull(delOutboundAddress)) {
             delOutboundAddress.setOrderNo(orderNo);
             this.delOutboundAddressService.save(delOutboundAddress);
@@ -190,7 +194,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param orderNo orderNo
      */
     private void saveDetail(DelOutboundDto dto, String orderNo) {
-        List<DelOutboundDetail> delOutboundDetailList = BeanMapperUtil.mapList(dto.getDetails(), DelOutboundDetail.class);
+        List<DelOutboundDetailDto> details = dto.getDetails();
+        if (CollectionUtils.isEmpty(details)) {
+            return;
+        }
+        List<DelOutboundDetail> delOutboundDetailList = BeanMapperUtil.mapList(details, DelOutboundDetail.class);
         if (CollectionUtils.isNotEmpty(delOutboundDetailList)) {
             for (DelOutboundDetail delOutboundDetail : delOutboundDetailList) {
                 delOutboundDetail.setOrderNo(orderNo);
