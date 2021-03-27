@@ -30,6 +30,7 @@
         <module>wms-business-finance-api</module>
         <module>wms-business-inventory-api</module>
         <module>wms-business-chargerules-api</module>
+        <module>vms-business-returnex-api</module>
     </modules>
 
     <dependencyManagement>

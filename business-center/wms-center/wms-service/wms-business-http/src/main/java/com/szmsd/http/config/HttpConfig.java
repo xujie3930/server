@@ -59,6 +59,8 @@ public class HttpConfig {
     // RemoteAreaTemplate
     private RemoteAreaTemplate remoteAreaTemplate;
 
+    private ReturnExpressConfig returnExpressConfig;
+
     public Map<String, String> getBaseHeaderMap() {
         Map<String, String> map = new HashMap<>();
         map.put("UserId", this.getBasUserId());
@@ -172,5 +174,22 @@ public class HttpConfig {
         private String exportFile;
         // 导入地址库模板
         private String importFile;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class ReturnExpressConfig {
+        /**
+         * 创建退件预报
+         * /api/return/expected #F1-VMS 创建退件预报
+         */
+        private String expectedCreate;
+
+        /**
+         * 接收客户提供的处理方式
+         * /api/return/processing #F2-VMS 接收客户提供的处理方式
+         */
+        private String processingUpdate;
+
     }
 }

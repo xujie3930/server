@@ -1,0 +1,11 @@
+# Tomcat
+server:
+  port: 7222
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: wms-business-returnex
+  profiles:
+    # 环境配置
+    active: dev
