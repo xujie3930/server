@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.controller;
 
 import com.szmsd.chargerules.dto.PricedSheetDTO;
+import com.szmsd.chargerules.dto.ProductSheetGradeDTO;
 import com.szmsd.chargerules.service.IPricedSheetService;
 import com.szmsd.chargerules.vo.PricedProductSheetVO;
 import com.szmsd.chargerules.vo.PricedSheetInfoVO;
@@ -59,6 +60,13 @@ public class PricedSheetController extends BaseController {
     @ApiOperation(value = "使用file文件导入产品报价表信息")
     public R importFile(@PathVariable("sheetCode") String sheetCode, @RequestParam MultipartFile file) {
         iPricedSheetService.importFile(sheetCode, file);
+        return R.ok();
+    }
+
+    @PostMapping("/grade")
+    @ApiOperation(value = "修改一个计价产品信息的报价表对应的等级和生效时间段")
+    public R grade(@RequestBody ProductSheetGradeDTO productSheetGradeDTO) {
+        iPricedSheetService.grade(productSheetGradeDTO);
         return R.ok();
     }
 
