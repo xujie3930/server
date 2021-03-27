@@ -1,6 +1,9 @@
 package com.szmsd.open.interceptor;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.filter.ContextServletInputStream;
 import com.szmsd.open.filter.RequestLogFilterContext;
 import com.szmsd.open.service.IOpnTransactionService;
 import com.szmsd.open.vo.ResponseVO;
@@ -16,7 +19,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
@@ -71,7 +78,7 @@ public class TransactionHandlerAspect {
                         this.opnTransactionService.add(currentContext.getRequestId(), currentContext.getRequestUri(), currentContext.getTransactionId());
                         try {
                             // 执行业务操作
-                            result = point.proceed();
+                            result = proceed(point);
                             // 执行成功
                             this.opnTransactionService.onRep(currentContext.getRequestId());
                         } catch (CommonException e) {
@@ -96,6 +103,29 @@ public class TransactionHandlerAspect {
             result = point.proceed();
         }
         return result;
+    }
+
+    /**
+     * 执行业务操作
+     * @param point
+     * @return
+     * @throws Throwable
+     */
+    public Object proceed(ProceedingJoinPoint point) throws Throwable {
+        String requestBody = getRequestBody();
+        Object[] args = point.getArgs();
+        if (StringUtils.isEmpty(requestBody) && (args == null || args.length == 0)) {
+            return point.proceed();
+        }
+        Object parse = JSON.parse(requestBody);
+        args[0] = JSON.toJavaObject((JSONObject) parse, args[0].getClass());
+        return point.proceed(args);
+    }
+
+    public String getRequestBody() throws IOException {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        byte[] bytes = ((ContextServletInputStream) request.getInputStream()).getContent().getBytes();
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     private String builderOnlyKey(RequestLogFilterContext currentContext) {
