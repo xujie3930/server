@@ -6,11 +6,8 @@ import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.dto.*;
-import com.szmsd.http.vo.DirectServiceFeeData;
-import com.szmsd.http.vo.KeyValuePair;
 import com.szmsd.http.vo.PricedProduct;
-import com.szmsd.http.vo.PricedProductInfo;
-import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.http.vo.*;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -66,6 +63,11 @@ public class HtpPricedProductFeignFallback implements FallbackFactory<HtpPricedP
 
             @Override
             public R<List<PricedProduct>> inService(PricedProductInServiceCriteria criteria) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<ResponseVO> grade(ChangeSheetGradeCommand changeSheetGradeCommand) {
                 return R.convertResultJson(throwable);
             }
         };

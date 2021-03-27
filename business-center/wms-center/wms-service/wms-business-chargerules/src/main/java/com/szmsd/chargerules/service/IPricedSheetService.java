@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.service;
 
 import com.szmsd.chargerules.dto.PricedSheetDTO;
+import com.szmsd.chargerules.dto.ProductSheetGradeDTO;
 import com.szmsd.chargerules.vo.PricedProductSheetVO;
 import com.szmsd.chargerules.vo.PricedSheetInfoVO;
 import com.szmsd.common.core.utils.FileStream;
@@ -22,4 +23,6 @@ public interface IPricedSheetService {
     FileStream exportFile(PricedSheetCodeCriteria pricedSheetCodeCriteria);
 
     void importFile(String sheetCode, MultipartFile file);
+
+    void grade(ProductSheetGradeDTO productSheetGradeDTO);
 }

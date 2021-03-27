@@ -45,4 +45,7 @@ public interface HtpPricedProductFeignService {
 
     @PostMapping("/api/products/http/inService")
     R<List<PricedProduct>> inService(@RequestBody PricedProductInServiceCriteria criteria);
+
+    @PostMapping("/api/products/http/grade")
+    R<ResponseVO> grade(@RequestBody ChangeSheetGradeCommand changeSheetGradeCommand);
 }

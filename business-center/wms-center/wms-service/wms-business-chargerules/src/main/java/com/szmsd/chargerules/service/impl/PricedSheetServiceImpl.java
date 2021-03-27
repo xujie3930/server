@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.service.impl;
 
 import com.szmsd.chargerules.dto.PricedSheetDTO;
+import com.szmsd.chargerules.dto.ProductSheetGradeDTO;
 import com.szmsd.chargerules.service.IPricedSheetService;
 import com.szmsd.chargerules.vo.PackageLimitVO;
 import com.szmsd.chargerules.vo.PricedProductSheetVO;
@@ -13,10 +14,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.api.feign.HtpPricedSheetFeignService;
-import com.szmsd.http.dto.CreatePricedSheetCommand;
-import com.szmsd.http.dto.Packing;
-import com.szmsd.http.dto.PricedSheetCodeCriteria;
-import com.szmsd.http.dto.UpdatePricedSheetCommand;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -137,6 +135,7 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
 
     /**
      * 使用file文件导入产品报价表信息
+     * https://pricedproduct-internalapi-external.dsloco.com/api/sheets/importFile
      * @param sheetCode
      * @param file
      * @return
@@ -145,6 +144,18 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
     public void importFile(String sheetCode, MultipartFile file) {
         R<ResponseVO> responseVOR = htpPricedSheetFeignService.importFile(sheetCode, file);
         ResponseVO.resultAssert(responseVOR, "使用file文件导入产品报价表信息");
+    }
+
+    /**
+     * 修改一个计价产品信息的报价表对应的等级和生效时间段
+     * https://pricedproduct-internalapi-external.dsloco.com/api/products/{productCode}/{sheetCode}/Grade
+     * @param productSheetGradeDTO
+     */
+    @Override
+    public void grade(ProductSheetGradeDTO productSheetGradeDTO) {
+        ChangeSheetGradeCommand changeSheetGradeCommand = BeanMapperUtil.map(productSheetGradeDTO, ChangeSheetGradeCommand.class);
+        R<ResponseVO> responseVOR = htpPricedProductFeignService.grade(changeSheetGradeCommand);
+        ResponseVO.resultAssert(responseVOR, "修改一个计价产品信息的报价表对应的等级和生效时间段");
     }
 
     private static <T> void refactor(PricedSheetDTO pricedSheetDTO, T t) {
