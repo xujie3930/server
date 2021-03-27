@@ -48,7 +48,7 @@
         t.cus_code
     </sql>
 
-    <select id="selectList" parameterType="com.szmsd.inventory.domain.dto.InventorySkuQueryDTO" resultMap="InventorySkuVO">
+    <select id="selectListVO" parameterType="com.szmsd.inventory.domain.dto.InventorySkuQueryDTO" resultMap="InventorySkuVO">
         SELECT <include refid="Column_List_VO"/>
         FROM inventory t LEFT JOIN base_product sku ON t.sku = sku.code
         <where>

@@ -104,7 +104,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             List<String> skuList = ListUtils.emptyIfNull(inventorySkuQueryDTO.getSkuList());
             inventorySkuQueryDTO.setSkuList(Stream.of(skuSplit, skuList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
         }
-        return baseMapper.selectList(inventorySkuQueryDTO);
+        return baseMapper.selectListVO(inventorySkuQueryDTO);
     }
 
     @Override
@@ -220,7 +220,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         queryWrapper.eq(Inventory::getWarehouseCode, warehouseCode);
         queryWrapper.eq(Inventory::getSku, sku);
         queryWrapperConsumer.accept(queryWrapper);
-        List<Inventory> list = list(queryWrapper);
+        List<Inventory> list = this.list(queryWrapper);
         if (CollectionUtils.isEmpty(list)) {
             return 0;
         }
@@ -240,7 +240,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         updateConsumer.accept(updateInventory);
         int update = baseMapper.updateById(updateInventory);
         if (update > 0) {
-            iInventoryRecordService.saveLogs(type.getKey(), inventory, updateInventory, invoiceNo, null, null, num, null);
+            iInventoryRecordService.saveLogs(type.getKey(), inventory, updateInventory, invoiceNo, null, null, num, "");
         }
         return update;
     }

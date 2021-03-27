@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface InventoryMapper extends BaseMapper<Inventory> {
 
-    List<InventorySkuVO> selectList(InventorySkuQueryDTO inventorySkuQueryDTO);
+    List<InventorySkuVO> selectListVO(InventorySkuQueryDTO inventorySkuQueryDTO);
 
     /**
      * 根据仓库编码，SKU查询可用库存
