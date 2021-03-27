@@ -183,6 +183,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     throw new CommonException("999", exceptionMessage);
                 }
             }
+        } catch (CommonException e) {
+            throw e;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // 回滚状态
