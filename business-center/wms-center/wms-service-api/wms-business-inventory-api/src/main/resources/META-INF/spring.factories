@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
- com.szmsd.inventory.api.factory.InventoryFeignFallback
+ com.szmsd.inventory.api.factory.InventoryFeignFallback,\
+ com.szmsd.inventory.api.service.impl.InventoryFeignClientServiceImpl

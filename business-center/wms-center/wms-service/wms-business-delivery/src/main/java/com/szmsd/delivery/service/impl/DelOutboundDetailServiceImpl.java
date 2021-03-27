@@ -95,5 +95,12 @@ public class DelOutboundDetailServiceImpl extends ServiceImpl<DelOutboundDetailM
         queryWrapper.eq(DelOutboundDetail::getOrderNo, orderNo);
         return this.list(queryWrapper);
     }
+
+    @Override
+    public List<DelOutboundDetail> listByOrderNos(List<String> orderNos) {
+        LambdaQueryWrapper<DelOutboundDetail> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.in(DelOutboundDetail::getOrderNo, orderNos);
+        return this.list(queryWrapper);
+    }
 }
 

@@ -71,5 +71,13 @@ public interface IDelOutboundDetailService extends IService<DelOutboundDetail> {
      */
     List<DelOutboundDetail> listByOrderNo(String orderNo);
 
+    /**
+     * 根据orderNo查询
+     *
+     * @param orderNos orderNos
+     * @return List<DelOutboundDetail>
+     */
+    List<DelOutboundDetail> listByOrderNos(List<String> orderNos);
+
 }
 

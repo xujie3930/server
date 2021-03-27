@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -17,4 +18,7 @@ public class InventoryAvailableQueryDto implements Serializable {
 
     @ApiModelProperty(value = "sku")
     private String sku;
+
+    @ApiModelProperty(value = "skus")
+    private List<String> skus;
 }

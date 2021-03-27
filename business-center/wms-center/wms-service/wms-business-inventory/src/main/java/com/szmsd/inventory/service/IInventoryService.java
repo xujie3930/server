@@ -2,7 +2,9 @@ package com.szmsd.inventory.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.inventory.domain.Inventory;
-import com.szmsd.inventory.domain.dto.*;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
+import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
 
@@ -23,35 +25,48 @@ public interface IInventoryService extends IService<Inventory> {
     List<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto);
 
     /**
-     * 批量冻结库存
+     * 冻结库存
      *
-     * @param freezeListDto freezeListDto
+     * @param invoiceNo     invoiceNo
+     * @param warehouseCode warehouseCode
+     * @param sku           sku
+     * @param num           num
      * @return int
      */
-    int freeze(InventoryFreezeListDto freezeListDto);
+    int freeze(String invoiceNo, String warehouseCode, String sku, Integer num);
 
     /**
-     * 批量释放冻结库存
+     * 释放冻结库存
      *
-     * @param freezeListDto freezeListDto
+     * @param invoiceNo     invoiceNo
+     * @param warehouseCode warehouseCode
+     * @param sku           sku
+     * @param num           num
      * @return int
      */
-    int unFreeze(InventoryFreezeListDto freezeListDto);
+    int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num);
 
     /**
-     * 批量扣减库存
+     * 扣减库存
      *
-     * @param deductionListDto deductionListDto
+     * @param invoiceNo     invoiceNo
+     * @param warehouseCode warehouseCode
+     * @param sku           sku
+     * @param num           num
      * @return int
      */
-    int deduction(InventoryDeductionListDto deductionListDto);
+    int deduction(String invoiceNo, String warehouseCode, String sku, Integer num);
 
     /**
-     * 批量释放扣减库存
+     * 释放扣减库存
      *
-     * @param deductionListDto deductionListDto
+     * @param invoiceNo     invoiceNo
+     * @param warehouseCode warehouseCode
+     * @param sku           sku
+     * @param num           num
      * @return int
      */
-    int unDeduction(InventoryDeductionListDto deductionListDto);
+    int unDeduction(String invoiceNo, String warehouseCode, String sku, Integer num);
+
 }
 

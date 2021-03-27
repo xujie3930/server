@@ -28,10 +28,13 @@ import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundHttpWrapperService;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
-import com.szmsd.delivery.vo.DelOutboundListVO;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.http.dto.ShipmentCancelRequestDto;
+import com.szmsd.inventory.api.service.InventoryFeignClientService;
+import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
+import com.szmsd.inventory.domain.dto.InventoryOperateDto;
+import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
+import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,6 +66,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private BaseProductClientService baseProductClientService;
     @Autowired
     private BasWarehouseClientService basWarehouseClientService;
+    @Autowired
+    private InventoryFeignClientService inventoryFeignClientService;
 
     /**
      * 查询出库单模块
@@ -81,13 +86,33 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         outboundAddressLambdaQueryWrapper.eq(DelOutboundAddress::getOrderNo, delOutbound.getOrderNo());
         DelOutboundAddress delOutboundAddress = delOutboundAddressService.getOne(outboundAddressLambdaQueryWrapper);
         if (Objects.nonNull(delOutboundAddress)) {
-            delOutboundVO.setAddress(BeanMapperUtil.map(delOutboundAddress, DelOutboundAddressDto.class));
+            delOutboundVO.setAddress(BeanMapperUtil.map(delOutboundAddress, DelOutboundAddressVO.class));
         }
-        LambdaQueryWrapper<DelOutboundDetail> outboundDetailLambdaQueryWrapper = Wrappers.lambdaQuery();
-        outboundDetailLambdaQueryWrapper.eq(DelOutboundDetail::getOrderNo, delOutbound.getOrderNo());
-        List<DelOutboundDetail> delOutboundDetailList = delOutboundDetailService.list(outboundDetailLambdaQueryWrapper);
+        List<DelOutboundDetail> delOutboundDetailList = delOutboundDetailService.listByOrderNo(delOutbound.getOrderNo());
         if (CollectionUtils.isNotEmpty(delOutboundDetailList)) {
-            delOutboundVO.setDetails(BeanMapperUtil.mapList(delOutboundDetailList, DelOutboundDetailDto.class));
+            List<DelOutboundDetailVO> detailDtos = new ArrayList<>(delOutboundDetailList.size());
+            List<String> skus = new ArrayList<>(delOutboundDetailList.size());
+            for (DelOutboundDetail detail : delOutboundDetailList) {
+                detailDtos.add(BeanMapperUtil.map(detail, DelOutboundDetailVO.class));
+                skus.add(detail.getSku());
+            }
+            InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
+            inventoryAvailableQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            inventoryAvailableQueryDto.setSkus(skus);
+            List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+            Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(availableList)) {
+                for (InventoryAvailableListVO vo : availableList) {
+                    availableMap.put(vo.getSku(), vo);
+                }
+            }
+            for (DelOutboundDetailVO vo : detailDtos) {
+                InventoryAvailableListVO available = availableMap.get(vo.getSku());
+                if (null != available) {
+                    BeanMapperUtil.map(available, vo);
+                }
+            }
+            delOutboundVO.setDetails(detailDtos);
         }
         return delOutboundVO;
     }
@@ -144,11 +169,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (Objects.isNull(loginUser)) {
             throw new CommonException("999", "获取登录用户信息失败");
         }
-        // 冻结库存
         DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
         // 生成出库单号
         // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
         delOutbound.setOrderNo("CK" + delOutbound.getCustomCode() + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
+        // 冻结库存
+        this.freeze(delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), dto.getDetails());
         // 默认状态
         delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
         // 计算发货类型
@@ -249,10 +275,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
             throw new CommonException("999", "单据不能修改");
         }
-        // 先释放，再冻结
-
-        // 先删后增
+        // 先取消冻结，再冻结
+        // 取消冻结
         String orderNo = delOutbound.getOrderNo();
+        String warehouseCode = delOutbound.getWarehouseCode();
+        List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
+        this.unFreezeAndFreeze(orderNo, warehouseCode, detailList, dto.getDetails());
+        // 先删后增
         this.deleteAddress(orderNo);
         this.deleteDetail(orderNo);
         // 保存地址
@@ -263,6 +292,64 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         inputDelOutbound.setShipmentType(this.buildShipmentType(dto));
         // 更新
         return baseMapper.updateById(inputDelOutbound);
+    }
+
+    private void unFreezeAndFreeze(String invoiceNo, String warehouseCode, List<DelOutboundDetail> details, List<DelOutboundDetailDto> detailDtos) {
+        if (CollectionUtils.isEmpty(details) && CollectionUtils.isEmpty(detailDtos)) {
+            return;
+        }
+        InventoryOperateListDto operateListDto = new InventoryOperateListDto();
+        operateListDto.setInvoiceNo(invoiceNo);
+        operateListDto.setWarehouseCode(warehouseCode);
+        if (CollectionUtils.isNotEmpty(details)) {
+            List<InventoryOperateDto> unOperateList = new ArrayList<>();
+            for (DelOutboundDetail detail : details) {
+                unOperateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+            }
+            operateListDto.setUnOperateList(unOperateList);
+        }
+        if (CollectionUtils.isNotEmpty(detailDtos)) {
+            List<InventoryOperateDto> operateList = new ArrayList<>();
+            long lineNo = 1L;
+            for (DelOutboundDetailDto detail : detailDtos) {
+                detail.setLineNo(lineNo++);
+                operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+            }
+            operateListDto.setOperateList(operateList);
+        }
+        this.inventoryFeignClientService.unFreezeAndFreeze(operateListDto);
+    }
+
+    private void freeze(String invoiceNo, String warehouseCode, List<DelOutboundDetailDto> details) {
+        if (CollectionUtils.isEmpty(details)) {
+            return;
+        }
+        InventoryOperateListDto operateListDto = new InventoryOperateListDto();
+        operateListDto.setInvoiceNo(invoiceNo);
+        operateListDto.setWarehouseCode(warehouseCode);
+        List<InventoryOperateDto> operateList = new ArrayList<>();
+        long lineNo = 1L;
+        for (DelOutboundDetailDto detail : details) {
+            detail.setLineNo(lineNo++);
+            operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+        }
+        operateListDto.setOperateList(operateList);
+        this.inventoryFeignClientService.freeze(operateListDto);
+    }
+
+    private void unFreeze(String invoiceNo, String warehouseCode, List<DelOutboundDetail> details) {
+        if (CollectionUtils.isEmpty(details)) {
+            return;
+        }
+        InventoryOperateListDto operateListDto = new InventoryOperateListDto();
+        operateListDto.setInvoiceNo(invoiceNo);
+        operateListDto.setWarehouseCode(warehouseCode);
+        List<InventoryOperateDto> operateList = new ArrayList<>();
+        for (DelOutboundDetail detail : details) {
+            operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+        }
+        operateListDto.setOperateList(operateList);
+        this.inventoryFeignClientService.unFreeze(operateListDto);
     }
 
     /**
@@ -288,17 +375,24 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("999", "记录信息已被修改，请刷新后再试");
         }
         DelOutbound delOutbound = list.get(0);
+        Map<String, String> warehouseMap = new HashMap<>();
         for (int i = 1; i < list.size(); i++) {
             DelOutbound delOutbound1 = list.get(i);
             if (!delOutbound.getWarehouseCode().equals(delOutbound1.getWarehouseCode())) {
                 throw new CommonException("999", "只能批量删除同一仓库下的出库单");
             }
+            warehouseMap.put(delOutbound1.getOrderNo(), delOutbound1.getWarehouseCode());
         }
         List<String> orderNos = list.stream().map(DelOutbound::getOrderNo).collect(Collectors.toList());
         // 删除地址
         LambdaQueryWrapper<DelOutboundAddress> addressLambdaQueryWrapper = Wrappers.lambdaQuery();
         addressLambdaQueryWrapper.in(DelOutboundAddress::getOrderNo, orderNos);
         this.delOutboundAddressService.remove(addressLambdaQueryWrapper);
+        // 取消冻结
+        for (String orderNo : orderNos) {
+            List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
+            this.unFreeze(orderNo, warehouseMap.get(orderNo), detailList);
+        }
         // 删除明细
         LambdaQueryWrapper<DelOutboundDetail> detailLambdaQueryWrapper = Wrappers.lambdaQuery();
         detailLambdaQueryWrapper.in(DelOutboundDetail::getOrderNo, orderNos);

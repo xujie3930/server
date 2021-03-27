@@ -1,5 +1,6 @@
 package com.szmsd.inventory.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -10,7 +11,9 @@ import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
-import com.szmsd.inventory.domain.dto.*;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
+import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.mapper.InventoryMapper;
@@ -27,6 +30,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -113,6 +117,9 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         if (StringUtils.isNotEmpty(queryDto.getSku())) {
             queryWrapper.like("sku", queryDto.getSku());
         }
+        if (CollectionUtils.isNotEmpty(queryDto.getSkus())) {
+            queryWrapper.in("sku", queryDto.getSkus());
+        }
         List<InventoryAvailableListVO> voList = this.baseMapper.queryAvailableList(queryWrapper);
         if (CollectionUtils.isNotEmpty(voList)) {
             // 填充SKU属性信息
@@ -153,26 +160,89 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     @Transactional
     @Override
-    public int freeze(InventoryFreezeListDto freezeListDto) {
-        return 0;
+    public int freeze(String invoiceNo, String warehouseCode, String sku, Integer num) {
+        return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
+            // >=
+            queryWrapperConsumer.ge(Inventory::getAvailableInventory, num);
+        }, (updateConsumer) -> {
+            updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() - num);
+            updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() + num);
+        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_3);
     }
 
     @Transactional
     @Override
-    public int unFreeze(InventoryFreezeListDto freezeListDto) {
-        return 0;
+    public int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num) {
+        return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
+            // >=
+            queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
+        }, (updateConsumer) -> {
+            updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() + num);
+            updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
+        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_3);
     }
 
     @Transactional
     @Override
-    public int deduction(InventoryDeductionListDto deductionListDto) {
-        return 0;
+    public int deduction(String invoiceNo, String warehouseCode, String sku, Integer num) {
+        return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
+            // >=
+            queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
+        }, (updateConsumer) -> {
+            updateConsumer.setTotalInventory(updateConsumer.getTotalInventory() - num);
+            updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
+            updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() + num);
+        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);
     }
 
     @Transactional
     @Override
-    public int unDeduction(InventoryDeductionListDto deductionListDto) {
-        return 0;
+    public int unDeduction(String invoiceNo, String warehouseCode, String sku, Integer num) {
+        return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
+        }, (updateConsumer) -> {
+            updateConsumer.setTotalInventory(updateConsumer.getTotalInventory() + num);
+            updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() + num);
+            updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() - num);
+        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);
+    }
+
+    private int doWorker(String invoiceNo, String warehouseCode, String sku, Integer num,
+                         Consumer<LambdaQueryWrapper<Inventory>> queryWrapperConsumer,
+                         Consumer<Inventory> updateConsumer,
+                         LocalLanguageEnum type) {
+        if (StringUtils.isEmpty(warehouseCode)
+                || StringUtils.isEmpty(sku)
+                || Objects.isNull(num)
+                || num < 1) {
+            return 0;
+        }
+        LambdaQueryWrapper<Inventory> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(Inventory::getWarehouseCode, warehouseCode);
+        queryWrapper.eq(Inventory::getSku, sku);
+        queryWrapperConsumer.accept(queryWrapper);
+        List<Inventory> list = list(queryWrapper);
+        if (CollectionUtils.isEmpty(list)) {
+            return 0;
+        }
+        Inventory inventory = list.get(0);
+        if (null == inventory) {
+            return 0;
+        }
+        Inventory updateInventory = new Inventory();
+        updateInventory.setWarehouseCode(inventory.getWarehouseCode());
+        updateInventory.setSku(inventory.getSku());
+        updateInventory.setTotalInbound(inventory.getTotalInbound());
+        updateInventory.setAvailableInventory(inventory.getAvailableInventory());
+        updateInventory.setFreezeInventory(inventory.getFreezeInventory());
+        updateInventory.setTotalInbound(inventory.getTotalInbound());
+        updateInventory.setTotalOutbound(inventory.getTotalOutbound());
+        updateInventory.setId(inventory.getId());
+        updateConsumer.accept(updateInventory);
+        int update = baseMapper.updateById(updateInventory);
+        if (update > 0) {
+            iInventoryRecordService.saveLogs(type.getKey(), inventory, updateInventory, invoiceNo, null, null, num, null);
+        }
+        return update;
     }
 
 }

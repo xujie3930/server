@@ -1,7 +1,5 @@
 package com.szmsd.delivery.vo;
 
-import com.szmsd.delivery.dto.DelOutboundAddressDto;
-import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -63,8 +61,8 @@ public class DelOutboundVO implements Serializable {
     private String state;
 
     @ApiModelProperty(value = "地址信息")
-    private DelOutboundAddressDto address;
+    private DelOutboundAddressVO address;
 
     @ApiModelProperty(value = "明细信息")
-    private List<DelOutboundDetailDto> details;
+    private List<DelOutboundDetailVO> details;
 }

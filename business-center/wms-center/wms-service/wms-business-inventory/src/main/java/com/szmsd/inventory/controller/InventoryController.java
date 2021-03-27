@@ -10,8 +10,11 @@ import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
+import com.szmsd.inventory.service.IInventoryWrapperService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +28,10 @@ public class InventoryController extends BaseController {
 
     @Resource
     private IInventoryService inventoryService;
-
     @Resource
     private IInventoryRecordService iInventoryRecordService;
+    @Autowired
+    private IInventoryWrapperService inventoryWrapperService;
 
     @PreAuthorize("@ss.hasPermi('inventory:inbound')")
     @PostMapping("/inbound")
@@ -72,4 +76,51 @@ public class InventoryController extends BaseController {
         return getDataTable(this.inventoryService.queryAvailableList(queryDto));
     }
 
+    @PreAuthorize("@ss.hasPermi('inbound:freeze')")
+    @PostMapping("/freeze")
+    @ApiOperation(value = "库存管理 - 冻结库存")
+    @ApiImplicitParam(name = "operateListDto", value = "参数", dataType = "InventoryOperateListDto")
+    public R<Integer> freeze(@RequestBody InventoryOperateListDto operateListDto) {
+        return R.ok(this.inventoryWrapperService.freeze(operateListDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:unFreeze')")
+    @PostMapping("/unFreeze")
+    @ApiOperation(value = "库存管理 - 取消冻结库存")
+    @ApiImplicitParam(name = "operateListDto", value = "参数", dataType = "InventoryOperateListDto")
+    public R<Integer> unFreeze(@RequestBody InventoryOperateListDto operateListDto) {
+        return R.ok(this.inventoryWrapperService.unFreeze(operateListDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:unFreezeAndFreeze')")
+    @PostMapping("/unFreezeAndFreeze")
+    @ApiOperation(value = "库存管理 - 重置冻结库存")
+    @ApiImplicitParam(name = "operateListDto", value = "参数", dataType = "InventoryOperateListDto")
+    public R<Integer> unFreezeAndFreeze(@RequestBody InventoryOperateListDto operateListDto) {
+        return R.ok(this.inventoryWrapperService.unFreezeAndFreeze(operateListDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:deduction')")
+    @PostMapping("/deduction")
+    @ApiOperation(value = "库存管理 - 扣减库存")
+    @ApiImplicitParam(name = "operateListDto", value = "参数", dataType = "InventoryOperateListDto")
+    public R<Integer> deduction(@RequestBody InventoryOperateListDto operateListDto) {
+        return R.ok(this.inventoryWrapperService.deduction(operateListDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:unDeduction')")
+    @PostMapping("/unDeduction")
+    @ApiOperation(value = "库存管理 - 取消扣减库存")
+    @ApiImplicitParam(name = "operateListDto", value = "参数", dataType = "InventoryOperateListDto")
+    public R<Integer> unDeduction(@RequestBody InventoryOperateListDto operateListDto) {
+        return R.ok(this.inventoryWrapperService.unDeduction(operateListDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:unDeductionAndDeduction')")
+    @PostMapping("/unDeductionAndDeduction")
+    @ApiOperation(value = "库存管理 - 重置扣减库存")
+    @ApiImplicitParam(name = "operateListDto", value = "参数", dataType = "InventoryOperateListDto")
+    public R<Integer> unDeductionAndDeduction(@RequestBody InventoryOperateListDto operateListDto) {
+        return R.ok(this.inventoryWrapperService.unDeductionAndDeduction(operateListDto));
+    }
 }
