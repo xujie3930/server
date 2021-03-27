@@ -17,7 +17,7 @@ public interface IHtpPricedProductClientService {
      * @param command command
      * @return ResponseObject<ChargeWrapper, ProblemDetails>
      */
-    ResponseObject<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command);
+    ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command);
 
     /**
      * 根据客户代码国家等信息获取可下单产品

@@ -74,7 +74,7 @@ public class PricedProductController extends BaseController {
 
     @PostMapping("/pricing")
     @ApiOperation(value = "计算包裹的费用")
-    public R<ResponseObject<ChargeWrapper, ProblemDetails>> pricing(@RequestBody CalcShipmentFeeCommand command) {
+    public R<ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails>> pricing(@RequestBody CalcShipmentFeeCommand command) {
         return R.ok(iPricedProductService.pricing(command));
     }
 

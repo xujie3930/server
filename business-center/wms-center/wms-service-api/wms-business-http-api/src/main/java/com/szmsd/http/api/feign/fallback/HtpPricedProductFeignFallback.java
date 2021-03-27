@@ -60,7 +60,7 @@ public class HtpPricedProductFeignFallback implements FallbackFactory<HtpPricedP
             }
 
             @Override
-            public R<ResponseObject<ChargeWrapper, ProblemDetails>> pricing(CalcShipmentFeeCommand command) {
+            public R<ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails>> pricing(CalcShipmentFeeCommand command) {
                 return R.convertResultJson(throwable);
             }
 

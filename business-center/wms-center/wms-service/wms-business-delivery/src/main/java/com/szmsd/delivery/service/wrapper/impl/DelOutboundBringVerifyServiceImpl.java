@@ -1,11 +1,18 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
+import com.szmsd.bas.api.domain.BasCountry;
+import com.szmsd.bas.api.feign.BasCountryFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
+import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
@@ -14,14 +21,15 @@ import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.*;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangyuyuan
@@ -41,6 +49,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IHtpPricedProductClientService htpPricedProductClientService;
     @Autowired
     private BasWarehouseClientService basWarehouseClientService;
+    @Autowired
+    private BasCountryFeignService basCountryFeignService;
+    @Autowired
+    private BaseProductClientService baseProductClientService;
 
     @Override
     public int bringVerify(Long id) {
@@ -49,18 +61,23 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("999", "单据不存在");
         }
+        // 可以提审的单据类型：正常出库
+        if (!(DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType()))) {
+            throw new CommonException("999", "单据类型不正确，不能提审");
+        }
         // 可以提审的状态：待提审，审核失败
         if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
                 || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
-            throw new CommonException("999", "单据不能提审");
+            throw new CommonException("999", "单据状态不正确，不能提审");
         }
         // 查询地址信息
-        DelOutboundAddress address = this.delOutboundAddressService.getByOrderNo(delOutbound.getOrderNo());
+        String orderNo = delOutbound.getOrderNo();
+        DelOutboundAddress address = this.delOutboundAddressService.getByOrderNo(orderNo);
         if (null == address) {
             throw new CommonException("999", "收货地址信息不存在");
         }
         // 查询sku信息
-        List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(delOutbound.getOrderNo());
+        List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
         if (CollectionUtils.isEmpty(detailList)) {
             throw new CommonException("999", "出库明细不存在");
         }
@@ -69,8 +86,15 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (null == warehouse) {
             throw new CommonException("999", "仓库信息不存在");
         }
+        // 查询国家信息，收货地址所在的国家
+        R<BasCountry> countryR = this.basCountryFeignService.queryByCountryCode(address.getCountryCode());
+        BasCountry country = R.getDataAndException(countryR);
+        if (null == country) {
+            throw new CommonException("999", "国家信息不存在");
+        }
         // 修改单据状态为提审中
-        this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.UNDER_REVIEW);
+        Long id1 = delOutbound.getId();
+        this.delOutboundService.updateState(id1, DelOutboundStateEnum.UNDER_REVIEW);
         try {
             // 计算包裹费用
             CalcShipmentFeeCommand command = new CalcShipmentFeeCommand();
@@ -79,11 +103,49 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             command.setClientCode(delOutbound.getCustomCode());
             command.setShipmentType(delOutbound.getShipmentType());
             // 包裹信息
-            command.setPackageInfos(null);
+            List<PackageInfo> packageInfos = new ArrayList<>();
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            List<String> skus = new ArrayList<>();
+            for (DelOutboundDetail detail : detailList) {
+                skus.add(detail.getSku());
+            }
+            conditionQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            conditionQueryDto.setSkus(skus);
+            // 查询sku信息
+            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            if (CollectionUtils.isEmpty(productList)) {
+                throw new CommonException("999", "查询SKU信息失败");
+            }
+            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            for (DelOutboundDetail detail : detailList) {
+                String sku = detail.getSku();
+                BaseProduct product = productMap.get(sku);
+                if (null == product) {
+                    throw new CommonException("999", "SKU[" + sku + "]信息不存在");
+                }
+                packageInfos.add(new PackageInfo(new Weight(valueOf(product.getWeight()), "g"),
+                        new Packing(valueOf(product.getLength()), valueOf(product.getWidth()), valueOf(product.getHeight()), "cm"),
+                        Math.toIntExact(detail.getQty()), orderNo, BigDecimal.ZERO));
+            }
+            command.setPackageInfos(packageInfos);
             // 收货地址
-            command.setToAddress(new Address());
+            command.setToAddress(new Address(address.getStreet1(),
+                    address.getStreet2(),
+                    address.getStreet3(),
+                    address.getPostCode(),
+                    address.getCity(),
+                    address.getStateOrProvince(),
+                    new CountryInfo(country.getCountryCode(), null, country.getCountryNameEn(), country.getCountryName())
+            ));
             // 发货地址
-            command.setFromAddress(new Address());
+            command.setFromAddress(new Address(warehouse.getStreet1(),
+                    warehouse.getStreet2(),
+                    null,
+                    warehouse.getPostcode(),
+                    warehouse.getCity(),
+                    warehouse.getProvince(),
+                    new CountryInfo(warehouse.getCountryCode(), null, warehouse.getCountryName(), warehouse.getCountryChineseName())
+            ));
             // 联系信息
             command.setToContactInfo(new ContactInfo(address.getConsignee(), address.getPhoneNo(), address.getEmail(), null));
             command.setCalcTimeForDiscount(new Date());
@@ -96,17 +158,38 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 // 判断返回值
                 if (responseObject.isSuccess()) {
                     // 计算成功了
+                    ChargeWrapper chargeWrapper = responseObject.getObject();
 
                 } else {
                     // 计算失败
-
+                    String exceptionMessage = null;
+                    ProblemDetails problemDetails = responseObject.getError();
+                    if (null != problemDetails) {
+                        List<ErrorDto2> errors = problemDetails.getErrors();
+                        if (CollectionUtils.isNotEmpty(errors)) {
+                            ErrorDto2 errorDto2 = errors.get(0);
+                            exceptionMessage = errorDto2.getCode() + " " + errorDto2.getMessage();
+                        }
+                    }
+                    if (StringUtils.isEmpty(exceptionMessage)) {
+                        exceptionMessage = "计算包裹费用失败";
+                    }
+                    exceptionMessage = StringUtils.substring(exceptionMessage, 0, 255);
+                    this.delOutboundService.updateExceptionMessage(id1, exceptionMessage);
                 }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // 回滚状态
-            this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.AUDIT_FAILED);
+            this.delOutboundService.updateState(id1, DelOutboundStateEnum.AUDIT_FAILED);
         }
         return 0;
+    }
+
+    private BigDecimal valueOf(Double value) {
+        if (null == value) {
+            return BigDecimal.ZERO;
+        }
+        return BigDecimal.valueOf(value);
     }
 }

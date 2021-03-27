@@ -41,7 +41,7 @@ public interface HtpPricedProductFeignService {
     R<FileStream> exportFile(@RequestBody PricedProductCodesCriteria pricedProductCodesCriteria);
 
     @PostMapping("/api/products/http/pricing")
-    R<ResponseObject<ChargeWrapper, ProblemDetails>> pricing(@RequestBody CalcShipmentFeeCommand command);
+    R<ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails>> pricing(@RequestBody CalcShipmentFeeCommand command);
 
     @PostMapping("/api/products/http/inService")
     R<List<PricedProduct>> inService(@RequestBody PricedProductInServiceCriteria criteria);

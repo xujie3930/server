@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -18,4 +19,6 @@ public class ProblemDetails implements Serializable {
     private Integer status;
     private String detail;
     private String instance;
+    // 错误集合2
+    private List<ErrorDto2> Errors;
 }

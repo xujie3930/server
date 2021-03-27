@@ -1,5 +1,6 @@
 package com.szmsd.http.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -50,6 +51,7 @@ public class CalcShipmentFeeCommand implements Serializable {
     private Boolean addressValifition;
 
     // 计价时间，用于选择对应生效的折扣
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date calcTimeForDiscount;
 
     // 需要忽略计算的费用类型

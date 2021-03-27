@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.core.enums.SqlLike;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
@@ -126,8 +127,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundListVO> selectDelOutboundList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
+        QueryWrapperUtil.filter(queryWrapper, SqlLike.RIGHT, "o.order_no", queryDto.getOrderNo());
+        QueryWrapperUtil.filter(queryWrapper, SqlLike.RIGHT, "o.purchase_no", queryDto.getPurchaseNo());
+        QueryWrapperUtil.filter(queryWrapper, SqlLike.RIGHT, "o.tracking_no", queryDto.getTrackingNo());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.shipment_rule", queryDto.getShipmentRule());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.warehouse_code", queryDto.getWarehouseCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.state", queryDto.getState());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.order_type", queryDto.getOrderType());
+        QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
+        QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
+        // 按照创建时间倒序
+        queryWrapper.orderByDesc("o.create_time");
         List<DelOutboundListVO> voList = baseMapper.pageList(queryWrapper);
         if (CollectionUtils.isNotEmpty(voList)) {
             List<String> warehouseCodes = new ArrayList<>();
@@ -518,5 +528,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return baseMapper.getDelOutboundAndDetailsList(queryWrapper);
     }
 
+    @Transactional
+    @Override
+    public void updateExceptionMessage(Long id, String exceptionMessage) {
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.AUDIT_FAILED);
+        updateWrapper.set(DelOutbound::getExceptionMessage, exceptionMessage);
+        updateWrapper.eq(DelOutbound::getId, id);
+        this.update(updateWrapper);
+    }
 }
 

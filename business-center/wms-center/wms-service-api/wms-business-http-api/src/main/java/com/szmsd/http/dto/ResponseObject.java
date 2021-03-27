@@ -1,10 +1,12 @@
 package com.szmsd.http.dto;
 
+import java.io.Serializable;
+
 /**
  * @author zhangyuyuan
  * @date 2021-03-24 14:19
  */
-public interface ResponseObject<S, E> {
+public interface ResponseObject<S, E> extends Serializable {
 
     /**
      * 是否成功

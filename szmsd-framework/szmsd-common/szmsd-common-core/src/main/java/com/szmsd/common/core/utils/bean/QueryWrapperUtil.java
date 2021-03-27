@@ -2,6 +2,7 @@ package com.szmsd.common.core.utils.bean;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.core.enums.SqlLike;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,6 +36,30 @@ public final class QueryWrapperUtil {
                 queryWrapper.like(column, value);
             } else if (SqlKeyword.NE.equals(keyword)) {
                 queryWrapper.ne(column, value);
+            }
+        }
+    }
+
+    /**
+     * 字段like
+     *
+     * @param queryWrapper queryWrapper
+     * @param sqlLike      sqlLike
+     * @param column       column
+     * @param value        value
+     */
+    public static void filter(QueryWrapper<?> queryWrapper, SqlLike sqlLike, String column, String value) {
+        if (StringUtils.isNotEmpty(value)) {
+            value = value.trim();
+            if (value.length() == 0) {
+                return;
+            }
+            if (SqlLike.DEFAULT.equals(sqlLike)) {
+                queryWrapper.like(column, value);
+            } else if (SqlLike.LEFT.equals(sqlLike)) {
+                queryWrapper.likeLeft(column, value);
+            } else if (SqlLike.RIGHT.equals(sqlLike)) {
+                queryWrapper.likeRight(column, value);
             }
         }
     }

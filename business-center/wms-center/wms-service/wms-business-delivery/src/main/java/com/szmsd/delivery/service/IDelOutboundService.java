@@ -131,5 +131,13 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param stateEnum stateEnum
      */
     void updateState(Long id, DelOutboundStateEnum stateEnum);
+
+    /**
+     * 修改单据异常描述
+     *
+     * @param id               id
+     * @param exceptionMessage exceptionMessage
+     */
+    void updateExceptionMessage(Long id, String exceptionMessage);
 }
 

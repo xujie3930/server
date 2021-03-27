@@ -60,7 +60,7 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
     }
 
     @Override
-    public ResponseObject<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command) {
+    public ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command) {
         HttpResponseBody responseBody = httpPostBody(httpConfig.getPricedProduct().getPricing(), command);
         ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> responseObject = new ResponseObject.ResponseObjectWrapper<>();
         if (HttpStatus.SC_OK == responseBody.getStatus()) {

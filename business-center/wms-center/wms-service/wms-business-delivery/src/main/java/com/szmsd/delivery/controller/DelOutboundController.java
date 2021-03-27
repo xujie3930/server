@@ -12,6 +12,7 @@ import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
@@ -19,11 +20,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiSort;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -38,8 +39,10 @@ import java.util.List;
 @RequestMapping("/api/outbound")
 public class DelOutboundController extends BaseController {
 
-    @Resource
+    @Autowired
     private IDelOutboundService delOutboundService;
+    @Autowired
+    private IDelOutboundBringVerifyService delOutboundBringVerifyService;
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/page")
@@ -95,7 +98,7 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 提审", position = 600)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundBringVerifyDto")
     public R<Integer> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto) {
-        return R.ok(delOutboundService.bringVerify(dto.getId()));
+        return R.ok(delOutboundBringVerifyService.bringVerify(dto.getId()));
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")

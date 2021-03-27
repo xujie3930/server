@@ -21,7 +21,7 @@ public class HtpPricedProductClientServiceImpl implements IHtpPricedProductClien
     private HtpPricedProductFeignService htpPricedProductFeignService;
 
     @Override
-    public ResponseObject<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command) {
+    public ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command) {
         return R.getDataAndException(this.htpPricedProductFeignService.pricing(command));
     }
 
