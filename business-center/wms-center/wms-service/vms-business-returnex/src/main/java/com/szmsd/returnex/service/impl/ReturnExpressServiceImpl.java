@@ -48,7 +48,6 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         List<ReturnExpressDetail> returnExpressDetails = returnExpressMapper.selectList(Wrappers.<ReturnExpressDetail>lambdaQuery()
                 .eq(StringUtil.isNotBlank(queryDto.getReturnType()), ReturnExpressDetail::getReturnType, queryDto.getReturnType())
                 .eq(StringUtil.isNotBlank(queryDto.getApplyProcessMethod()), ReturnExpressDetail::getApplyProcessMethod, queryDto.getApplyProcessMethod())
-                .eq(StringUtil.isNotBlank(queryDto.getReturnSubType()), ReturnExpressDetail::getReturnSubType, queryDto.getReturnSubType())
                 .between(queryDto.getCreateTimeStart() != null && queryDto.getCreateTimeEnd() != null, BaseEntity::getCreateTime, queryDto.getCreateTimeStart(), queryDto.getCreateTimeEnd())
                 .eq(StringUtil.isNotBlank(queryDto.getReturnDestinationWarehouse()), ReturnExpressDetail::getReturnDestinationWarehouse, queryDto.getReturnDestinationWarehouse())
                 .in(CollectionUtils.isNotEmpty(queryDto.getForecastNumberList()), ReturnExpressDetail::getFromOrderNo, queryDto.getForecastNumberList())
@@ -118,6 +117,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Override
     public int saveArrivalInfoFormVms(ReturnArrivalReqDTO returnArrivalReqDTO) {
+
         //TODO 修改预报单状态？
 
         return 0;

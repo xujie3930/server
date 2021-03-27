@@ -33,6 +33,20 @@ public class ReturnExpressClientController extends BaseController {
     private IReturnExpressService returnExpressService;
 
     /**
+     * 新建退件单
+     * 用户新增退件单，本地化数据，并推送给WMS
+     *
+     * @param returnExpressAddDTO 新增
+     * @return 返回结果
+     */
+    //@PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:add')")
+    @PostMapping("/add")
+    @ApiOperation(value = "新增退件单-创建退报单")
+    public R add(@RequestBody ReturnExpressAddDTO returnExpressAddDTO) {
+        return toOk(returnExpressService.insertReturnExpressDetail(returnExpressAddDTO));
+    }
+
+    /**
      * 退件单列表 - 分页
      *
      * @param queryDto 查询条件
@@ -46,17 +60,5 @@ public class ReturnExpressClientController extends BaseController {
         return getDataTable(returnExpressService.selectReturnOrderList(queryDto));
     }
 
-    /**
-     * 新建退件单
-     * 用户新增退件单，本地化数据，并推送给WMS
-     *
-     * @param returnExpressAddDTO 新增
-     * @return 返回结果
-     */
-    //@PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:add')")
-    @PostMapping("/add")
-    @ApiOperation(value = "新增退件单-创建退报单")
-    public R add(@RequestBody ReturnExpressAddDTO returnExpressAddDTO) {
-        return toOk(returnExpressService.insertReturnExpressDetail(returnExpressAddDTO));
-    }
+
 }

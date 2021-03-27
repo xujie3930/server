@@ -78,6 +78,9 @@ public class ReturnArrivalReqDTO {
     @ApiModelProperty(value = "备注")
     private String remark;
 
+    //TODO 未返回收到的货物
+
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

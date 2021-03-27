@@ -67,11 +67,11 @@ public class ReturnExpressListQueryDTO {
     @ApiModelProperty(value = "VMS处理单号", hidden = true)
     private List<String> vmsProcessNumberList;
 
-    @ApiModelProperty(value = "类型[ 退件预报，VMS通知退件]")
+    @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]")
     private String returnType;
 
-    @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]")
-    private String returnSubType;
+    @ApiModelProperty(value = "类型[退件预报 VMS通知退件]")
+    private String returnSource;
 
     @ApiModelProperty(value = "退件目标仓库编码")
     private String returnDestinationWarehouse;

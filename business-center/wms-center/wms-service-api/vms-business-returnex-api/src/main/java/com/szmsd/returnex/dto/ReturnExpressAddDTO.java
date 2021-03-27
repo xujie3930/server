@@ -2,7 +2,9 @@ package com.szmsd.returnex.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.validator.annotation.StringLength;
 import com.szmsd.returnex.domain.BOConvert;
+import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,8 +12,6 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 /**
  * @ClassName: ReturnExpressAddDTO
@@ -26,92 +26,48 @@ import java.time.LocalDateTime;
 public class ReturnExpressAddDTO implements Serializable, BOConvert {
 
     @ApiModelProperty(value = "主键ID")
-    @Excel(name = "主键ID")
     private Integer id;
 
-    @ApiModelProperty(value = "创建人")
-    @Excel(name = "创建人")
-    private String createBy;
-
-    @ApiModelProperty(value = "修改人")
-    @Excel(name = "修改人")
-    private String updateBy;
-
-    @ApiModelProperty(value = "版本号")
-    @Excel(name = "版本号")
-    private BigDecimal version;
-
-    @ApiModelProperty(value = "客户代码")
-    @Excel(name = "客户代码")
+    @ApiModelProperty(value = "客户代码", example = "UID123456")
     private String sellerCode;
 
-    @ApiModelProperty(value = "退件原始单号 原出库单号")
-    @Excel(name = "退件原始单号 原出库单号")
+    @ApiModelProperty(value = "退件来源[ 申请退件 VMS]", example = "RETURN_FORECAST")
+    private ReturnExpressEnums.ReturnSourceEnum returnSource;
+
+    @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]", example = "OWN_INVENTORY_RETURN")
+    private ReturnExpressEnums.ReturnTypeEnum returnType;
+
+    @StringLength(maxLength = 50, message = "原出库单号错误")
+    @ApiModelProperty(value = "退件原始单号 原出库单号", example = "SF123456")
     private String fromOrderNo;
 
-    @ApiModelProperty(value = "退件可扫描编码")
-    @Excel(name = "退件可扫描编码")
-    private String scanCode;
-
-    @ApiModelProperty(value = "入库方式编码")
-    @Excel(name = "入库方式编码")
-    private String warehouseMethodCode;
-
-    @ApiModelProperty(value = "预报单号")
-    @Excel(name = "预报单号")
-    private String forecastNumber;
+    //TODO 生成规则
+    @ApiModelProperty(value = "预报单号 系统生成", hidden = true)
+    private String expectedNo = "xxxxx";
 
     @ApiModelProperty(value = "VMS处理单号")
-    @Excel(name = "VMS处理单号")
     private String vmsProcessNumber;
 
-    @ApiModelProperty(value = "申请处理方式")
-    @Excel(name = "申请处理方式")
-    private String processType;
+    @ApiModelProperty(value = "退件目标仓库编码", example = "SZ")
+    private ReturnExpressEnums.DestinationWarehouseEnum returnDestinationWarehouse;
 
-    @ApiModelProperty(value = "类型[ 退件预报，VMS通知退件]")
-    @Excel(name = "类型[ 退件预报，VMS通知退件]")
-    private String returnType;
+    @ApiModelProperty(value = "退货渠道", example = "客户自选")
+    private String returnChannel;
 
-    @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]")
-    @Excel(name = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]")
-    private String returnSubType;
-
-    @ApiModelProperty(value = "退件目标仓库编码")
-    @Excel(name = "退件目标仓库编码")
-    private String returnDestinationWarehouse;
-
-    @ApiModelProperty(value = "申请处理方式编码")
-    @Excel(name = "申请处理方式编码")
-    private String applyProcessMethod;
-
-    @ApiModelProperty(value = "到仓时间")
-    @Excel(name = "到仓时间")
-    private LocalDateTime arrivalTime;
-
-    @ApiModelProperty(value = "完成时间")
-    @Excel(name = "完成时间")
-    private LocalDateTime finishTime;
-
-    @ApiModelProperty(value = "是否逾期")
-    @Excel(name = "是否逾期")
-    private String overdue;
-
-    @ApiModelProperty(value = "处理备注")
-    @Excel(name = "处理备注")
-    private String processRemark;
-
-    @ApiModelProperty(value = "退件单来源[默认：1：申请退件]")
-    @Excel(name = "退件单来源[默认：1：申请退件]")
-    private Integer returnSource;
-
-    @ApiModelProperty(value = "处理状态编码")
-    @Excel(name = "处理状态编码")
-    private String dealStatus;
-
-    @ApiModelProperty(value = "退货Tracking 号")
-    @Excel(name = "退货Tracking 号")
+    @ApiModelProperty(value = "退货Tracking 号", example = "TID123456")
     private String returnTracking;
+    /**
+     * 销毁 包裹上架 拆包检查
+     */
+    @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "Destroy")
+    private ReturnExpressEnums.ProcessTypeEnum processType;
+
+    @ApiModelProperty(value = "处理方式 编码", example = "Destroy")
+    private ReturnExpressEnums.ApplyProcessMethodEnum applyProcessMethod;
+
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
 
     @Override
     public String toString() {

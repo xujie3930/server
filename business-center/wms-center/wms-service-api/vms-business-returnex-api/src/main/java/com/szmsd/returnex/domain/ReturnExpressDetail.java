@@ -75,13 +75,13 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     @Excel(name = "类型[ 退件预报，VMS通知退件]")
     private String returnType;
 
-    @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]")
-    @Excel(name = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]")
-    private String returnSubType;
-
     @ApiModelProperty(value = "退件目标仓库编码")
     @Excel(name = "退件目标仓库编码")
     private String returnDestinationWarehouse;
+
+    @ApiModelProperty(value = "退货渠道", example = "客户自选")
+    @Excel(name = "退货渠道")
+    private String returnChannel;;
 
     @ApiModelProperty(value = "申请处理方式编码")
     @Excel(name = "申请处理方式编码")

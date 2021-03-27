@@ -2,7 +2,7 @@ package com.szmsd.returnex.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.validator.annotation.StringLength;
-import com.szmsd.returnex.enums.ProcessTypeEnum;
+import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -52,10 +52,11 @@ public class ReturnProcessingReqDTO {
      * 按明细上架：PutawayBySku
      */
     @ApiModelProperty(value = "处理方式")
-    private ProcessTypeEnum processType;
+    private ReturnExpressEnums.ProcessTypeEnum processType;
 
     @ApiModelProperty(value = "处理方式")
     private String remark;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
