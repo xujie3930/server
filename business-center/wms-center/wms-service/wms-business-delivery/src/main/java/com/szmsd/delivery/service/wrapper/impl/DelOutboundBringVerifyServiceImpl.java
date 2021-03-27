@@ -159,7 +159,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 if (responseObject.isSuccess()) {
                     // 计算成功了
                     ChargeWrapper chargeWrapper = responseObject.getObject();
-
+                    return 1;
                 } else {
                     // 计算失败
                     String exceptionMessage = null;
@@ -168,7 +168,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         List<ErrorDto2> errors = problemDetails.getErrors();
                         if (CollectionUtils.isNotEmpty(errors)) {
                             ErrorDto2 errorDto2 = errors.get(0);
-                            exceptionMessage = errorDto2.getCode() + " " + errorDto2.getMessage();
+                            if (StringUtils.isNotEmpty(errorDto2.getCode())) {
+                                exceptionMessage = "[" + errorDto2.getCode() + "]" + errorDto2.getMessage();
+                            } else {
+                                exceptionMessage = errorDto2.getMessage();
+                            }
                         }
                     }
                     if (StringUtils.isEmpty(exceptionMessage)) {
@@ -176,14 +180,15 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     exceptionMessage = StringUtils.substring(exceptionMessage, 0, 255);
                     this.delOutboundService.updateExceptionMessage(id1, exceptionMessage);
+                    throw new CommonException("999", exceptionMessage);
                 }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // 回滚状态
             this.delOutboundService.updateState(id1, DelOutboundStateEnum.AUDIT_FAILED);
+            throw new CommonException("999", "提审操作失败");
         }
-        return 0;
     }
 
     private BigDecimal valueOf(Double value) {
