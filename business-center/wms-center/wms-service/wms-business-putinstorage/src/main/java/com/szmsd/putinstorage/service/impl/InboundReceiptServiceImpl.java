@@ -184,7 +184,6 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         iInboundReceiptDetailService.receiving(receivingRequest.getOrderNo(), receivingRequest.getSku(), receivingRequest.getQty());
 
         // 库存 上架入库
-        receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseName());
         remoteComponent.inboundInventory(receivingRequest);
 
         log.info("#B1 接收入库上架：操作完成");

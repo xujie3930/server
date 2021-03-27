@@ -16,9 +16,6 @@ public class ReceivingRequest {
     @ApiModelProperty(value = "操作时间")
     private String operateOn;
 
-    @ApiModelProperty(value = "仓库代码 - 从入库单号中获取仓库", hidden = true)
-    private String warehouseCode;
-
     @ApiModelProperty(value = "单号 - 入库单号")
     private String orderNo;
 
