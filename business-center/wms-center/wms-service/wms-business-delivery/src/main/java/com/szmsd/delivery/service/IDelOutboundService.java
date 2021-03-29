@@ -138,6 +138,13 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param id               id
      * @param exceptionMessage exceptionMessage
      */
-    void updateExceptionMessage(Long id, String exceptionMessage);
+    void bringVerifyFail(Long id, String exceptionMessage);
+
+    /**
+     * 提审成功
+     *
+     * @param delOutbound delOutbound
+     */
+    void bringVerifySuccess(DelOutbound delOutbound);
 }
 

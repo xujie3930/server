@@ -1,12 +1,12 @@
 package com.szmsd.delivery.controller;
 
-import com.szmsd.bas.plugin.AutoValue;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundDto;

@@ -1,4 +1,4 @@
-package com.szmsd.bas.plugin;
+package com.szmsd.common.plugin.interfaces;
 
 import java.util.HashMap;
 import java.util.Map;

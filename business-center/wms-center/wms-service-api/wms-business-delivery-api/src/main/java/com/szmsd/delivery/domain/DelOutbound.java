@@ -118,7 +118,10 @@ public class DelOutbound extends BaseEntity {
     private String purchaseNo;
 
     @ApiModelProperty(value = "计费重")
-    private Double billingWeight;
+    private BigDecimal calcWeight;
+
+    @ApiModelProperty(value = "计费重单位")
+    private String calcWeightUnit;
 
     @ApiModelProperty(value = "金额")
     private BigDecimal amount;

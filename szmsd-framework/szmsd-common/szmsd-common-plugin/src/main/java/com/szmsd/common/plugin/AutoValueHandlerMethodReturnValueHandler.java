@@ -1,6 +1,6 @@
-package com.szmsd.bas.plugin;
+package com.szmsd.common.plugin;
 
-import com.szmsd.bas.plugin.service.BasSubFeignPluginService;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -19,11 +19,9 @@ public class AutoValueHandlerMethodReturnValueHandler implements HandlerMethodRe
     private final Logger logger = LoggerFactory.getLogger(AutoValueHandlerMethodReturnValueHandler.class);
 
     private final HandlerMethodReturnValueHandler delegate;
-    private final BasSubFeignPluginService basSubFeignPluginService;
 
-    public AutoValueHandlerMethodReturnValueHandler(HandlerMethodReturnValueHandler delegate, BasSubFeignPluginService basSubFeignService) {
+    public AutoValueHandlerMethodReturnValueHandler(HandlerMethodReturnValueHandler delegate) {
         this.delegate = delegate;
-        this.basSubFeignPluginService = basSubFeignService;
     }
 
     @Override
@@ -42,7 +40,7 @@ public class AutoValueHandlerMethodReturnValueHandler implements HandlerMethodRe
         if (null != source && null != returnTypeMethod && returnTypeMethod.isAnnotationPresent(AutoValue.class)) {
             // handlerAutoValue(source);
             // return source;
-            return new HandlerContext<>(basSubFeignPluginService, source).handlerValue();
+            return new HandlerContext<>(source).handlerValue();
         }
         return source;
     }
