@@ -43,7 +43,7 @@ public class DelOutboundController extends BaseController {
     }
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
-    @PostMapping("/shipment/packing")
+    @PostMapping("/shipment/package")
     @ApiOperation(value = "出库管理 - #D2 接收出库包裹信息", position = 200)
     @ApiImplicitParam(name = "dto", value = "ShipmentPackingMaterialRequestDto", dataType = "ShipmentPackingMaterialRequestDto")
     public ResponseVO shipmentPacking(@RequestBody @Validated ShipmentPackingMaterialRequestDto dto) {
