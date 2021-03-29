@@ -49,11 +49,11 @@ public class ReturnExpressListVO implements Serializable {
 
     public void setWarehouseMethodCode(String warehouseMethodCode) {
         this.warehouseMethodCode = warehouseMethodCode;
-        Optional.ofNullable(warehouseMethodCode)
-                .filter(StringUtils::isNotEmpty)
-                .ifPresent(x -> {
-
-                });
+//        Optional.ofNullable(warehouseMethodCode)
+//                .filter(StringUtils::isNotEmpty)
+//                .ifPresent(x -> {
+//
+//                });
     }
 
     @ApiModelProperty(value = "入库方式编码", hidden = true)
@@ -63,7 +63,7 @@ public class ReturnExpressListVO implements Serializable {
     private String expectedNo;
 
     @ApiModelProperty(value = "VMS处理单号")
-    private String vmsProcessNumber;
+    private String returnNo;
 
     @ApiModelProperty(value = "申请处理方式")
     private String processType;
@@ -91,16 +91,6 @@ public class ReturnExpressListVO implements Serializable {
 
     @ApiModelProperty(value = "退件目标仓库编码")
     private String returnDestinationWarehouse;
-    @ApiModelProperty(value = "退件目标仓库编码", hidden = true)
-    private String returnDestinationWarehouseStr;
-
-    public void setReturnDestinationWarehouse(String returnDestinationWarehouse) {
-        this.returnDestinationWarehouse = returnDestinationWarehouse;
-        Optional.ofNullable(returnDestinationWarehouse)
-                .filter(StringUtils::isNotEmpty)
-                .ifPresent(x -> returnDestinationWarehouseStr = ReturnExpressEnums.DestinationWarehouseEnum.valueOf(x).getDesc());
-    }
-
 
     @ApiModelProperty(value = "实际处理方式编码")
     private String applyProcessMethod;

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
+import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -65,11 +66,11 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
 
     @ApiModelProperty(value = "VMS处理单号")
     @Excel(name = "VMS处理单号")
-    private String vmsProcessNumber;
+    private String returnNo;
 
     @ApiModelProperty(value = "申请处理方式")
     @Excel(name = "申请处理方式")
-    private String processType;
+    private ReturnExpressEnums.ProcessTypeEnum processType;
 
     @ApiModelProperty(value = "类型[ 退件预报，VMS通知退件]")
     @Excel(name = "类型[ 退件预报，VMS通知退件]")
@@ -77,7 +78,7 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
 
     @ApiModelProperty(value = "退件目标仓库编码")
     @Excel(name = "退件目标仓库编码")
-    private String returnDestinationWarehouse;
+    private String warehouseCode;
 
     @ApiModelProperty(value = "退货渠道", example = "客户自选")
     @Excel(name = "退货渠道")
@@ -109,7 +110,7 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
 
     @ApiModelProperty(value = "处理状态编码")
     @Excel(name = "处理状态编码")
-    private String dealStatus;
+    private ReturnExpressEnums.DealStatusEnum dealStatus;
 
     @ApiModelProperty(value = "退货Tracking 号")
     @Excel(name = "退货Tracking 号")

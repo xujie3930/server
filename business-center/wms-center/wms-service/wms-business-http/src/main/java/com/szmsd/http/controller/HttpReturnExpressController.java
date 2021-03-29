@@ -15,11 +15,11 @@ import javax.annotation.Resource;
 
 /**
  * @ClassName: HttpReturnExpressController
- * @Description: 退货服务-VMS端 HTTP
+ * @Description: 退货服务-请求VMS端接口 HTTP
  * @Author: 11
  * @Date: 2021/3/26 11:42
  */
-@Api(tags = {"退货服务-VMS端"})
+@Api(tags = {"退货服务-请求VMS端"})
 @RestController
 @RequestMapping("/api/return/http")
 public class HttpReturnExpressController extends BaseController {

@@ -2,6 +2,7 @@ package com.szmsd.returnex.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.validator.annotation.StringLength;
+import com.szmsd.returnex.domain.BOConvert;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -20,21 +21,24 @@ import javax.validation.constraints.NotBlank;
 @EqualsAndHashCode
 @Accessors(chain = true)
 @ApiModel("接受VMS库存信息")
-public class ReturnArrivalReqDTO {
+public class ReturnArrivalReqDTO implements BOConvert {
 
     /**
      * 仓库退件单号，唯一，WMS生成 1-50
      */
     @StringLength(minLength = 1, maxLength = 50, message = "仓库退件单号超过约定长度[1-50]")
     @NotBlank(message = "仓库退件单号不能为空")
-    @ApiModelProperty(value = "仓库退件单号，唯一，WMS生成")
+    @ApiModelProperty(value = "仓库退件单号，唯一，WMS生成",example = "VMS12345")
     private String returnNo;
+
+    @ApiModelProperty(value = "仓库",example = "SZ")
+    private String warehouseCode;
 
     /**
      * 预报单号，可能空 1-50
      */
     @StringLength(minLength = 1, maxLength = 50, message = "预报单号超过约定长度[1-50]")
-    @ApiModelProperty(value = "预报单号")
+    @ApiModelProperty(value = "预报单号",example = "OMS123")
     private String expectedNo;
 
     /**
@@ -57,7 +61,7 @@ public class ReturnArrivalReqDTO {
     private String scanCode;
 
     /**
-     * string
+     * stringf
      * maxLength: 50
      * minLength: 1
      * 卖家代码
