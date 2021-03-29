@@ -3,9 +3,9 @@ package com.szmsd.bas.plugin;
 import com.szmsd.bas.plugin.service.BasSubFeignPluginService;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.plugin.interfaces.AbstractCommonParameter;
 import com.szmsd.common.plugin.interfaces.CacheContext;
 import com.szmsd.common.plugin.interfaces.CommonPlugin;
+import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,9 +30,8 @@ public class BasSubCommonPlugin implements CommonPlugin {
         return SUPPORTS;
     }
 
-    @SuppressWarnings({"unchecked"})
     @Override
-    public Object handlerValue(Object object, AbstractCommonParameter cp, CacheContext cacheContext) {
+    public Map<Object, Object> handlerValue(List<Object> list, DefaultCommonParameter cp, CacheContext cacheContext) {
         String code = (String) cp.getObject();
         String valueField;
         if (cp instanceof BasSubCodeCommonParameter) {
@@ -40,34 +39,23 @@ public class BasSubCommonPlugin implements CommonPlugin {
         } else {
             valueField = "subValue";
         }
-        Map<String, BasSubWrapperVO> map;
-        if (cacheContext.containsKey(code)) {
-            map = (Map<String, BasSubWrapperVO>) cacheContext.get(code);
-        } else {
-            map = new HashMap<>();
-            R<Map<String, List<BasSubWrapperVO>>> r = this.basSubFeignPluginService.getSub(code);
-            if (null != r) {
-                Map<String, List<BasSubWrapperVO>> voMap = r.getData();
-                if (null != voMap) {
-                    List<BasSubWrapperVO> voList = voMap.get(code);
-                    if (CollectionUtils.isNotEmpty(voList)) {
-                        for (BasSubWrapperVO vo : voList) {
-                            if ("subCode".equals(valueField)) {
-                                map.put(vo.getSubCode(), vo);
-                            } else {
-                                map.put(vo.getSubValue(), vo);
-                            }
+        Map<Object, Object> map = new HashMap<>();
+        R<Map<String, List<BasSubWrapperVO>>> r = this.basSubFeignPluginService.getSub(code);
+        if (null != r) {
+            Map<String, List<BasSubWrapperVO>> voMap = r.getData();
+            if (null != voMap) {
+                List<BasSubWrapperVO> voList = voMap.get(code);
+                if (CollectionUtils.isNotEmpty(voList)) {
+                    for (BasSubWrapperVO vo : voList) {
+                        if ("subCode".equals(valueField)) {
+                            map.put(vo.getSubCode(), vo.getSubName());
+                        } else {
+                            map.put(vo.getSubValue(), vo.getSubName());
                         }
                     }
                 }
             }
-            cacheContext.set(code, map);
         }
-        // 获取值
-        BasSubWrapperVO vo = map.get(String.valueOf(object));
-        if (null != vo) {
-            return vo.getSubName();
-        }
-        return null;
+        return map;
     }
 }

@@ -1,6 +1,6 @@
 package com.szmsd.common.plugin.annotation;
 
-import com.szmsd.common.plugin.interfaces.AbstractCommonParameter;
+import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
 
 import java.lang.annotation.*;
 
@@ -39,5 +39,6 @@ public @interface AutoFieldValue {
      *
      * @return CommonParameter
      */
-    Class<? extends AbstractCommonParameter> cp();
+    Class<? extends DefaultCommonParameter> cp();
+
 }
