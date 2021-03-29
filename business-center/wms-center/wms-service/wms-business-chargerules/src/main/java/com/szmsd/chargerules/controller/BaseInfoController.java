@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Api(tags = {"BaseInfo"})
 @RestController
-@RequestMapping("/api/base")
+@RequestMapping("/base")
 public class BaseInfoController extends BaseController {
 
     @Resource

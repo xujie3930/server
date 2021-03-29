@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(contextId = "FeignClient.BaseSpecialOperationFeignService", name = SpecialOperationInterface.SERVICE_NAME, fallbackFactory = SpecialOperationFeignFallback.class)
 public interface SpecialOperationFeignService {
 
-    @PostMapping(value = "/api/base/specialOperation")
+    @PostMapping(value = "/base/specialOperation")
     R<Boolean> specialOperation(@RequestBody BasSpecialOperationRequestDTO baseProduct);
 
 }
