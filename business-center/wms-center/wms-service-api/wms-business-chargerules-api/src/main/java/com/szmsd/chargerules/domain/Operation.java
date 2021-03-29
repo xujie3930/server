@@ -25,6 +25,10 @@ public class Operation extends BaseEntity {
     @TableField
     private String operationType;
 
+    @ApiModelProperty(value = "订单类型")
+    @TableField
+    private String orderType;
+
     @ApiModelProperty(value = "首件价格")
     @TableField
     private BigDecimal firstPrice;
