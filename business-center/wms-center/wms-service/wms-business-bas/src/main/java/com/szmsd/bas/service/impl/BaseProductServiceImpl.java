@@ -24,6 +24,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.http.vo.ResponseVO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
  * @since 2021-03-04
  */
 @Service
+@Slf4j
 public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseProduct> implements IBaseProductService {
 
     @Autowired
@@ -131,6 +133,12 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
     @Override
     public void measuringProduct(MeasuringProductRequest request) {
+        log.info("更新sku测量值: {}", request);
+        QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("code", request.getCode());
+        if(super.count(queryWrapper)!=1){
+            throw new BaseException("sku不存在");
+        }
         BigDecimal volume = new BigDecimal(request.getHeight()).multiply(new BigDecimal(request.getWidth()))
                 .multiply(new BigDecimal(request.getLength()))
                 .setScale(2, BigDecimal.ROUND_HALF_UP);

@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 @Data
 public class MeasuringProductRequest {
@@ -13,7 +15,7 @@ public class MeasuringProductRequest {
     private String operator;
 
     @ApiModelProperty(value = "操作时间")
-    private String operateOn;
+    private Date operateOn;
 
     @ApiModelProperty(value = "目的仓库编码")
     private String warehouseCode;
@@ -24,19 +26,19 @@ public class MeasuringProductRequest {
     private String code;
 
     @ApiModelProperty(value = "仓库测量重量g")
-    @NotBlank(message = "仓库测量重量不能为空")
+    @NotNull(message = "仓库测量重量不能为空")
     private Double weight;
 
     @ApiModelProperty(value = "仓库测量长 cm")
-    @NotBlank(message = "仓库测量长不能为空")
+    @NotNull(message = "仓库测量长不能为空")
     private Double length;
 
     @ApiModelProperty(value = "仓库测量宽 cm")
-    @NotBlank(message = "仓库测量宽不能为空")
+    @NotNull(message = "仓库测量宽不能为空")
     private Double width;
 
     @ApiModelProperty(value = "仓库测量高 cm")
-    @NotBlank(message = "仓库测量高不能为空")
+    @NotNull(message = "仓库测量高不能为空")
     private Double height;
 
     @ApiModelProperty(value = "关联单号")
