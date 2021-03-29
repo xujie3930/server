@@ -1,5 +1,8 @@
 package com.szmsd.common.plugin.interfaces;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author zhangyuyuan
  * @date 2021-03-29 9:47
@@ -16,12 +19,12 @@ public interface CommonPlugin {
     /**
      * 处理
      *
-     * @param object       object
+     * @param list         list
      * @param cp           cp
      * @param cacheContext cacheContext
      * @return Object
      */
-    Object handlerValue(Object object, AbstractCommonParameter cp, CacheContext cacheContext);
+    Map<Object, Object> handlerValue(List<Object> list, DefaultCommonParameter cp, CacheContext cacheContext);
 
     /**
      * Get the order value of this object.

@@ -11,7 +11,6 @@ import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
-import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -138,29 +137,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
-        List<DelOutboundListVO> voList = baseMapper.pageList(queryWrapper);
-        if (CollectionUtils.isNotEmpty(voList)) {
-            List<String> warehouseCodes = new ArrayList<>();
-            for (DelOutboundListVO vo : voList) {
-                if (StringUtils.isNotEmpty(vo.getWarehouseCode())) {
-                    warehouseCodes.add(vo.getWarehouseCode());
-                }
-            }
-            List<BasWarehouse> warehouseList = this.basWarehouseClientService.queryByWarehouseCodes(warehouseCodes);
-            Map<String, BasWarehouse> warehouseMap;
-            if (CollectionUtils.isNotEmpty(warehouseList)) {
-                warehouseMap = warehouseList.stream().collect(Collectors.toMap(BasWarehouse::getWarehouseCode, v1 -> v1, (v1, v2) -> v1));
-            } else {
-                warehouseMap = Collections.emptyMap();
-            }
-            for (DelOutboundListVO vo : voList) {
-                BasWarehouse warehouse = warehouseMap.get(vo.getWarehouseCode());
-                if (null != warehouse) {
-                    vo.setWarehouseName(warehouse.getWarehouseNameCn());
-                }
-            }
-        }
-        return voList;
+        return baseMapper.pageList(queryWrapper);
     }
 
     /**
