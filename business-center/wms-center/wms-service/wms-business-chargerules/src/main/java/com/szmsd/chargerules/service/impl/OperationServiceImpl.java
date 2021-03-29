@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
@@ -33,9 +34,12 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     @Override
     public List<Operation> listPage(OperationDTO dto) {
-        QueryWrapper<Operation> where = new QueryWrapper<>();
+        LambdaQueryWrapper<Operation> where = Wrappers.lambdaQuery();
         if(StringUtils.isNotEmpty(dto.getOperationType())) {
-            where.eq("operation_type",dto.getOperationType());
+            where.eq(Operation::getOperationType,dto.getOperationType());
+        }
+        if(StringUtils.isNotEmpty(dto.getOrderType())) {
+            where.eq(Operation::getOrderType,dto.getOrderType());
         }
         return operationMapper.selectList(where);
     }

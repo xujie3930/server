@@ -8,11 +8,12 @@ import com.szmsd.chargerules.dto.SpecialOperationDTO;
 import com.szmsd.chargerules.mapper.SpecialOperationMapper;
 import com.szmsd.chargerules.service.ISpecialOperationService;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationRequest;
 import com.szmsd.http.vo.ResponseVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
 
+@Slf4j
 @Service
 public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMapper, SpecialOperation> implements ISpecialOperationService {
 
@@ -35,23 +37,35 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
         SpecialOperation domain = new SpecialOperation();
         BeanUtils.copyProperties(dto, domain);
         int result = specialOperationMapper.insert(domain);
-        if (result > 0) {
-            //调用WMS接口
-            SpecialOperationRequest specialOperationRequest = new SpecialOperationRequest();
-            specialOperationRequest.setOperationType(String.valueOf(domain.getId()));
-            specialOperationRequest.setOperationTypeDesc(domain.getOperationType());
-            specialOperationRequest.setUnit(domain.getUnit());
-            R<ResponseVO> response = htpBasFeignService.specialOperationType(specialOperationRequest);
-            if (response.getCode() != 200) {
-                throw new BaseException("传wms失败" + response.getMsg());
-            }
-        }
+        specialOperationType(domain, result);
         return result;
     }
 
+    @Transactional
     @Override
     public int update(SpecialOperation dto) {
-        return specialOperationMapper.updateById(dto);
+        int result = specialOperationMapper.updateById(dto);
+        specialOperationType(dto, result);
+        return result;
+    }
+
+    /**
+     * 调用WMS接口传入特殊操作
+     * @param specialOperation specialOperation
+     * @param result result
+     */
+    private void specialOperationType(SpecialOperation specialOperation, int result) {
+        if (result > 0) {
+            SpecialOperationRequest specialOperationRequest = new SpecialOperationRequest();
+            specialOperationRequest.setOperationType(String.valueOf(specialOperation.getId()));
+            specialOperationRequest.setOperationTypeDesc(specialOperation.getOperationType());
+            specialOperationRequest.setUnit(specialOperation.getUnit());
+            R<ResponseVO> response = htpBasFeignService.specialOperationType(specialOperationRequest);
+            if (response.getCode() != 200) {
+                log.error("specialOperationType() 传wms失败: {},response.getMsg()");
+                throw new CommonException("999", "新增/修改特殊操作类型失败");
+            }
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.factory;
 
+import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
@@ -21,11 +22,16 @@ public class Receipt extends OrderType {
     @Override
     public String findOrderById(String orderNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(orderNo);
-        if(info.getCode() == 200 && info.getData() != null) {
+        if (info.getCode() == 200 && info.getData() != null) {
             return info.getData().getCusCode();
         }
-        log.error("checkOrderExist error: {}",info.getData());
+        log.error("checkOrderExist error: {}", info.getData());
         return null;
+    }
+
+    @Override
+    public void operationPay(Operation operation) {
+
     }
 
 }
