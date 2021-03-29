@@ -54,6 +54,7 @@
             <if test="sku != null and sku != ''">AND t.sku = #{sku}</if>
             <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
         </where>
+        ORDER BY operate_on DESC
     </select>
 
 
