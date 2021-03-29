@@ -38,8 +38,8 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
         if (result > 0) {
             //调用WMS接口
             SpecialOperationRequest specialOperationRequest = new SpecialOperationRequest();
-            specialOperationRequest.setOperationType(domain.getOperationType());
-            specialOperationRequest.setOperationTypeDesc(String.valueOf(domain.getId()));
+            specialOperationRequest.setOperationType(String.valueOf(domain.getId()));
+            specialOperationRequest.setOperationTypeDesc(domain.getOperationType());
             specialOperationRequest.setUnit(domain.getUnit());
             R<ResponseVO> response = htpBasFeignService.specialOperationType(specialOperationRequest);
             if (response.getCode() != 200) {
