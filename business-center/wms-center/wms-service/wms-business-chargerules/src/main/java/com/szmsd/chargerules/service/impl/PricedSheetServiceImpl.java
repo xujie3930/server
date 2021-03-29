@@ -10,13 +10,13 @@ import com.szmsd.chargerules.vo.PricedVolumeWeightVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.FileStream;
-import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.api.feign.HtpPricedSheetFeignService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -169,11 +169,14 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
             packageLimit.setMinPhysicalWeight(item.getMinPhysicalWeight());
             packageLimit.setMaxPhysicalWeight(item.getMaxPhysicalWeight());
 
-            String packingLimit = StringUtils.defaultString(item.getPackingLimitStr());
-            String[] split = packingLimit.split("\\*");
-            AssertUtil.isTrue(split.length == 3, "包裹总尺寸填写不符合规则(L*W*H)");
-            Packing packing = new Packing().setLength(new BigDecimal(split[0])).setWidth(new BigDecimal(split[1])).setHeight(new BigDecimal(split[2])).setLengthUnit("CM");
-            packageLimit.setPackingLimit(packing);
+            String packingLimit = item.getPackingLimitStr();
+            if (StringUtils.isNotEmpty(packingLimit)) {
+                String[] split = packingLimit.split("\\*");
+                AssertUtil.isTrue(split.length == 3, "包裹总尺寸填写不符合规则(L*W*H)");
+                Packing packing = new Packing().setLength(new BigDecimal(split[0])).setWidth(new BigDecimal(split[1])).setHeight(new BigDecimal(split[2])).setLengthUnit("CM");
+                packageLimit.setPackingLimit(packing);
+            }
+
             packageLimit.setVolumeLong(item.getVolumeLong());
             packageLimit.setVolume(item.getVolume());
             packageLimit.setPerimeter(item.getPerimeter());
@@ -185,17 +188,21 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         PackageLimitVO limitVo = pricedSheetDTO.getLimit();
         PackageLimit limit = BeanMapperUtil.map(limitVo, PackageLimit.class);
 
-        String minPackingLimit = StringUtils.defaultString(limitVo.getMinPackingLimitStr());
-        String[] split = minPackingLimit.split("\\*");
-        AssertUtil.isTrue(split.length == 3, "最小尺寸填写不符合规则(L*W*H)");
-        Packing minPacking = new Packing().setLength(new BigDecimal(split[0])).setWidth(new BigDecimal(split[1])).setHeight(new BigDecimal(split[2])).setLengthUnit("CM");
-        limit.setMinPackingLimit(minPacking);
+        String minPackingLimit = limitVo.getMinPackingLimitStr();
+        if (StringUtils.isNotEmpty(minPackingLimit)) {
+            String[] split = minPackingLimit.split("\\*");
+            AssertUtil.isTrue(split.length == 3, "最小尺寸填写不符合规则(L*W*H)");
+            Packing minPacking = new Packing().setLength(new BigDecimal(split[0])).setWidth(new BigDecimal(split[1])).setHeight(new BigDecimal(split[2])).setLengthUnit("CM");
+            limit.setMinPackingLimit(minPacking);
+        }
 
-        String packingLimit = StringUtils.defaultString(limitVo.getPackingLimitStr());
-        String[] split2 = packingLimit.split("\\*");
-        AssertUtil.isTrue(split2.length == 3, "最大尺寸填写不符合规则(L*W*H)");
-        Packing packing = new Packing().setLength(new BigDecimal(split2[0])).setWidth(new BigDecimal(split2[1])).setHeight(new BigDecimal(split2[2])).setLengthUnit("CM");
-        limit.setPackingLimit(packing);
+        String packingLimit = limitVo.getPackingLimitStr();
+        if (StringUtils.isNotEmpty(packingLimit)) {
+            String[] split2 = packingLimit.split("\\*");
+            AssertUtil.isTrue(split2.length == 3, "最大尺寸填写不符合规则(L*W*H)");
+            Packing packing = new Packing().setLength(new BigDecimal(split2[0])).setWidth(new BigDecimal(split2[1])).setHeight(new BigDecimal(split2[2])).setLengthUnit("CM");
+            limit.setPackingLimit(packing);
+        }
 
         if (t instanceof CreatePricedSheetCommand) {
             CreatePricedSheetCommand create = (CreatePricedSheetCommand) t;
