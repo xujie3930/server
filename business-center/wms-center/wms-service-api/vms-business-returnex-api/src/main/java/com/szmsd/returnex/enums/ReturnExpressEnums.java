@@ -63,8 +63,8 @@ public class ReturnExpressEnums {
         /**
          * 申请退件 预约退件
          */
-        RETURN_FORECAST(1,"退件预报"),
-        WMS_RETURN(2,"WMS通知退件");
+        RETURN_FORECAST(1, "退件预报"),
+        WMS_RETURN(2, "WMS通知退件");
         private Integer key;
         private String desc;
 
@@ -104,4 +104,24 @@ public class ReturnExpressEnums {
         private String desc;
     }
 
+    /**
+     * 退件处理状态
+     */
+    @Getter
+    @AllArgsConstructor
+    public enum DealStatusEnum {
+        /**
+         * sz
+         */
+        VMS_WAIT_RECEIVE("处理中", "VMS待收货"),
+        VMS_RECEIVED("处理中", "VMS已收货"),
+        WAIT_CUSTOMER_DEAL("待客户处理", "待客户反馈意见"),
+        WAIT_ASSIGNED("待指派", "待指派无主件"),
+        WAIT_PROCESSED_AFTER_UNPACKING("待指派", "拆包检查后待处理"),
+        VMS_RECEIVED_DEAL_WAY("处理中", "VMS接收客户处理结果"),
+        VMS_FINISH("已完成", "VMS处理完成");
+
+        private String desc;
+        private String note;
+    }
 }

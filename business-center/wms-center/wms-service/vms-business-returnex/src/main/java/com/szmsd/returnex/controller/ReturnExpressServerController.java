@@ -72,32 +72,4 @@ public class ReturnExpressServerController extends BaseController {
     public R assignUsersForNoUserBindBatch(@RequestBody ReturnExpressAssignDTO expressAssignDTO) {
         return toOk(returnExpressService.assignUsersForNoUserBindBatch(expressAssignDTO));
     }
-
-    /**
-     * 接收VMS仓库到件信息
-     * /api/return/arrival #G1-接收仓库退件到货
-     *
-     * @param returnArrivalReqDTO 接收VMS仓库到件信息
-     * @return 操作结果
-     */
-    //@PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
-    @PostMapping("/arrival")
-    @ApiOperation(value = "接收仓库退件到货", notes = "/api/return/arrival #G1-接收仓库退件到货")
-    public R saveArrivalInfoFormVms(@RequestBody ReturnArrivalReqDTO returnArrivalReqDTO) {
-        return toOk(returnExpressService.saveArrivalInfoFormVms(returnArrivalReqDTO));
-    }
-
-    /**
-     * 接收VMS仓库退件处理结果
-     * /api/return/processing #G2-接收仓库退件处理
-     *
-     * @param returnProcessingReqDTO 接收VMS仓库退件处理结果
-     * @return 操作结果
-     */
-    //@PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
-    @PostMapping("/processing")
-    @ApiOperation(value = "接收仓库退件处理", notes = "/api/return/processing #G2-接收仓库退件处理")
-    public R updateProcessingInfoFromVms(@RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
-        return toOk(returnExpressService.updateProcessingInfoFromVms(returnProcessingReqDTO));
-    }
 }

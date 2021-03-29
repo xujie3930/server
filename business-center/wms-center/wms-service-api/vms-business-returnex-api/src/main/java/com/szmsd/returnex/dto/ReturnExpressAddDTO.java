@@ -46,10 +46,10 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     private String expectedNo = "xxxxx";
 
     @ApiModelProperty(value = "VMS处理单号")
-    private String vmsProcessNumber;
+    private String returnNo;
 
     @ApiModelProperty(value = "退件目标仓库编码", example = "SZ")
-    private ReturnExpressEnums.DestinationWarehouseEnum returnDestinationWarehouse;
+    private String warehouseCode;
 
     @ApiModelProperty(value = "退货渠道", example = "客户自选")
     private String returnChannel;
@@ -66,7 +66,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     private ReturnExpressEnums.ApplyProcessMethodEnum applyProcessMethod;
 
     @ApiModelProperty(value = "备注")
-    private String remark;
+    private String processRemark;
 
 
     @Override

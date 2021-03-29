@@ -65,4 +65,12 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @return 返回结果
      */
     int assignUsersForNoUserBindBatch(ReturnExpressAssignDTO expressAssignDTO);
+
+    /**
+     * 更新退件单信息
+     *
+     * @param expressUpdateDTO 更新条件
+     * @return 返回结果
+     */
+    int updateExpressInfo(ReturnExpressAddDTO expressUpdateDTO);
 }

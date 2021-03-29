@@ -55,17 +55,17 @@ public class ReturnExpressListQueryDTO {
     private List<String> forecastNumberList;
 
     @ApiModelProperty(value = "VMS处理单号")
-    private String vmsProcessNumber;
+    private String returnNo;
 
-    public void setVmsProcessNumber(String vmsProcessNumber) {
-        this.vmsProcessNumber = vmsProcessNumber;
-        Optional.ofNullable(vmsProcessNumber)
+    public void setReturnNo(String returnNo) {
+        this.returnNo = returnNo;
+        Optional.ofNullable(returnNo)
                 .filter(x -> x.contains(","))
-                .ifPresent(res -> vmsProcessNumberList = Arrays.asList(res.split(",")));
+                .ifPresent(res -> returnNoList = Arrays.asList(res.split(",")));
     }
 
     @ApiModelProperty(value = "VMS处理单号", hidden = true)
-    private List<String> vmsProcessNumberList;
+    private List<String> returnNoList;
 
     @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]")
     private String returnType;
@@ -74,7 +74,7 @@ public class ReturnExpressListQueryDTO {
     private String returnSource;
 
     @ApiModelProperty(value = "退件目标仓库编码")
-    private String returnDestinationWarehouse;
+    private String warehouseCode;
 
     @ApiModelProperty(value = "申请处理方式编码")
     private String applyProcessMethod;

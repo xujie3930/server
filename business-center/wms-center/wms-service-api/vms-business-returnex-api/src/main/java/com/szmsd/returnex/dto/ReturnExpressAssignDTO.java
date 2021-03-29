@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class ReturnExpressAssignDTO implements Serializable {
     /**
      * 列表勾选无名件
      */
+    @NotEmpty(message = "请先勾选需要指派的无名件")
     @ApiModelProperty(value = "列表勾选无名件")
     private List<Long> ids;
 

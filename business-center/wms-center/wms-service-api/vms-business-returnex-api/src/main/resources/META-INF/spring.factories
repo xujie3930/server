@@ -1,5 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.szmsd.returnex.api.feign.serivice.facotry.HttpFeignFallback,\
-  com.szmsd.returnex.api.feign.client.impl.HttpFeignClientServiceImpl
+  com.szmsd.returnex.api.feign.serivice.facotry.ReturnExpressFeignFallback,\
+  com.szmsd.returnex.api.feign.client.impl.ReturnExpressFeignClientServiceImpl,\
+  com.szmsd.returnex.api.feign.serivice.facotry.HttpFeignServiceFallback
   
   
