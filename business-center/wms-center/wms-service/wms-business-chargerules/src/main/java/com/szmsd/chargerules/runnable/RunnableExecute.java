@@ -4,19 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.domain.WarehouseOperation;
-import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.dto.OperationDTO;
+import com.szmsd.chargerules.enums.OrderTypeEnum;
+import com.szmsd.chargerules.factory.OrderType;
+import com.szmsd.chargerules.factory.OrderTypeFactory;
 import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
-import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IOperationService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
-import com.szmsd.delivery.api.feign.DelOutboundFeignService;
-import com.szmsd.delivery.dto.DelOutboundDetailDto;
-import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
@@ -33,7 +30,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Component
@@ -52,57 +48,33 @@ public class RunnableExecute {
     private InventoryFeignService inventoryFeignService;
 
     @Resource
-    private DelOutboundFeignService delOutboundFeignService;
-
-    @Resource
     private WarehouseOperationMapper warehouseOperationMapper;
-
-    @Resource
-    private IChargeLogService chargeLogService;
 
     @Resource
     private RedissonClient redissonClient;
 
+    @Resource
+    private OrderTypeFactory orderTypeFactory;
+
     /**
      * 定时任务：普通操作计价扣费；每天12点，23点执行一次
      */
-//    @Scheduled(cron = "0 0 13,23 * * *")
+    @Scheduled(cron = "0 0 13,23 * * *")
 //    @Scheduled(cron = "0/60 * * * * *")
     public void executeOperation() {
         log.info("executeOperation() start...");
         RLock lock = redissonClient.getLock("executeOperation");
         try {
             if (lock.tryLock()) {
+                OrderTypeEnum[] types = OrderTypeEnum.values();
                 OperationDTO operationDTO = new OperationDTO();
-                List<Operation> operations = operationService.listPage(operationDTO);
-                DelOutboundListQueryDto delOutbound = new DelOutboundListQueryDto();
-                for (Operation operation : operations) {
-                    delOutbound.setOrderType(operation.getOperationType());
-                    R<List<DelOutboundDetailListVO>> rList = delOutboundFeignService.getDelOutboundDetailsList(delOutbound);
-                    if (rList.getCode() != 200 || CollectionUtils.isEmpty(rList.getData())) {
-                        log.error("getDelOutboundDetailsList() failed: {} {}", rList.getMsg(), rList.getData());
-                        continue;
-                    }
-                    for (DelOutboundDetailListVO datum : rList.getData()) {
-                        String customCode = datum.getCustomCode();
-                        List<DelOutboundDetailDto> details = datum.getDetails();
-                        if (!CollectionUtils.isEmpty(details)) {
-                            int count = details.stream().mapToInt(detail -> detail.getQty().intValue()).sum();
-                            BigDecimal amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), count);
-                            if (log.isInfoEnabled())
-                                log.info("orderNo: {} orderType: {} count: {} amount: {}", datum.getOrderNo(), datum.getOrderType(), count, amount);
-                            ChargeLogDto chargeLogDto = new ChargeLogDto(datum.getOrderNo(), BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName(), datum.getOrderType(), true);
-                            ChargeLog exist = chargeLogService.selectLog(chargeLogDto);
-                            if (Objects.isNull(exist)) {
-                                log.info("该单已经扣过费, chargeLogDto: {}", chargeLogDto);
-                                continue;
-                            }
-                            ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType());
-                            R resultPay = payService.pay(customCode, amount, BillEnum.PayMethod.BUSINESS_OPERATE, chargeLog);
-                            if (resultPay.getCode() != 200) {
-                                log.error("executeOperation() pay failed.. msg: {},data: {}", resultPay.getMsg(), resultPay.getData());
-                            }
-                        }
+                for (OrderTypeEnum type : types) {
+                    operationDTO.setOrderType(type.getNameEn());
+                    // 查询出每个订单类型对应的所有操作类型
+                    List<Operation> operations = operationService.listPage(operationDTO);
+                    for (Operation operation : operations) {
+                        OrderType factory = orderTypeFactory.getFactory(type.getNameEn());
+                        factory.operationPay(operation);
                     }
                 }
             }
