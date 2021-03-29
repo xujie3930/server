@@ -1,6 +1,7 @@
 package com.szmsd.bas.dto;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -15,7 +16,8 @@ public class MeasuringProductRequest {
     private String operator;
 
     @ApiModelProperty(value = "操作时间")
-    private Date operateOn;
+    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private String operateOn;
 
     @ApiModelProperty(value = "目的仓库编码")
     private String warehouseCode;
