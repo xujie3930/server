@@ -1,4 +1,4 @@
-package com.szmsd.bas.plugin;
+package com.szmsd.common.plugin;
 
 import java.util.Objects;
 import java.util.regex.Matcher;

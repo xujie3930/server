@@ -1,4 +1,6 @@
-package com.szmsd.bas.plugin;
+package com.szmsd.common.plugin.annotation;
+
+import com.szmsd.common.plugin.interfaces.AbstractCommonParameter;
 
 import java.lang.annotation.*;
 
@@ -12,19 +14,18 @@ import java.lang.annotation.*;
 public @interface AutoFieldValue {
 
     /**
+     * 支持的类型
+     *
+     * @return String
+     */
+    String supports();
+
+    /**
      * 主类别编码
      *
      * @return String
      */
-    String code();
-
-    /**
-     * 从数据字典上去取值的字段，有 subCode，subValue 两个
-     * 默认 subCode
-     *
-     * @return String
-     */
-    String valueField() default "";
+    String code() default "";
 
     /**
      * name字段名称，默认在当前字段后面增加Name
@@ -32,4 +33,11 @@ public @interface AutoFieldValue {
      * @return String
      */
     String nameField() default "";
+
+    /**
+     * CommonParameter
+     *
+     * @return CommonParameter
+     */
+    Class<? extends AbstractCommonParameter> cp();
 }

@@ -1,7 +1,9 @@
 package com.szmsd.delivery.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.szmsd.bas.plugin.AutoFieldValue;
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -27,14 +29,14 @@ public class DelOutboundListVO implements Serializable {
     @ApiModelProperty(value = "采购单号")
     private String purchaseNo;
 
-    @AutoFieldValue(code = "063", valueField = "subValue")
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "063", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "出库订单类型")
     private String orderType;
 
     @ApiModelProperty(value = "出库订单类型名称")
     private String orderTypeName;
 
-    @AutoFieldValue(code = "065", valueField = "subValue")
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "065", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "单据状态")
     private String state;
 

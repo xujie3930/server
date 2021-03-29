@@ -25,5 +25,10 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>szmsd-common-plugin-api</artifactId>
+        </dependency>
     </dependencies>
 </project>

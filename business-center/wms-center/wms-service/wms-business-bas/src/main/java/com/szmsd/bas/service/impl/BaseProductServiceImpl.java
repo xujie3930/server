@@ -32,8 +32,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 /**
@@ -142,7 +146,17 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         BigDecimal volume = new BigDecimal(request.getHeight()).multiply(new BigDecimal(request.getWidth()))
                 .multiply(new BigDecimal(request.getLength()))
                 .setScale(2, BigDecimal.ROUND_HALF_UP);
+        String operationOn = request.getOperateOn();
+        request.setOperateOn(null);
         BaseProduct baseProduct = BeanMapperUtil.map(request, BaseProduct.class);
+        try {
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date date = df.parse(operationOn);
+            baseProduct.setOperateOn(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         baseProduct.setCode(null);
         baseProduct.setWarehouseAcceptance(true);
         baseProduct.setVolume(volume);

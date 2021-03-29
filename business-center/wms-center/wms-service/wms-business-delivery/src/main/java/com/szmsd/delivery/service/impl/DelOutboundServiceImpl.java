@@ -530,12 +530,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Transactional
     @Override
-    public void updateExceptionMessage(Long id, String exceptionMessage) {
+    public void bringVerifyFail(Long id, String exceptionMessage) {
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.AUDIT_FAILED);
+        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.AUDIT_FAILED.getCode());
         updateWrapper.set(DelOutbound::getExceptionMessage, exceptionMessage);
         updateWrapper.eq(DelOutbound::getId, id);
         this.update(updateWrapper);
+    }
+
+    @Transactional
+    @Override
+    public void bringVerifySuccess(DelOutbound delOutbound) {
+        delOutbound.setState(DelOutboundStateEnum.DELIVERED.getCode());
+        this.updateById(delOutbound);
     }
 }
 

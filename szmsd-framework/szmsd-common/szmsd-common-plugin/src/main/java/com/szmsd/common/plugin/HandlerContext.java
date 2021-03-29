@@ -1,21 +1,21 @@
-package com.szmsd.bas.plugin;
+package com.szmsd.common.plugin;
 
-import com.szmsd.bas.plugin.service.BasSubFeignPluginService;
-import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
+import com.szmsd.common.plugin.interfaces.AbstractCommonParameter;
+import com.szmsd.common.plugin.interfaces.CacheContext;
+import com.szmsd.common.plugin.interfaces.CommonPlugin;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author zhangyuyuan
@@ -25,11 +25,9 @@ public class HandlerContext<T> {
     private final Logger logger = LoggerFactory.getLogger(HandlerContext.class);
 
     private final CacheContext cacheContext = new CacheContext.HandlerCacheContext();
-    private final BasSubFeignPluginService basSubFeignPluginService;
     private final T t;
 
-    public HandlerContext(BasSubFeignPluginService basSubFeignService, T t) {
-        this.basSubFeignPluginService = basSubFeignService;
+    public HandlerContext(T t) {
         this.t = t;
     }
 
@@ -74,8 +72,12 @@ public class HandlerContext<T> {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
     private void doJsonEncrypt(Field field, AutoFieldValue autoFieldValue, Object object) {
+        // get plugin
+        List<CommonPlugin> plugins = CommonPluginContext.getInstance().getPlugins(autoFieldValue.supports());
+        if (CollectionUtils.isEmpty(plugins)) {
+            return;
+        }
         try {
             field.setAccessible(true);
             Object val;
@@ -91,54 +93,29 @@ public class HandlerContext<T> {
             if (null == val) {
                 return;
             }
-            // 从数据字典上对应值的字段
-            String valueField = autoFieldValue.valueField();
-            if ("".equals(valueField)) {
-                valueField = "subCode";
-            }
             // 需要赋值的字段
             String nameField = autoFieldValue.nameField();
             if ("".equals(nameField)) {
                 nameField = field.getName() + "Name";
             }
-            // 数据字典的主编码
-            String code = autoFieldValue.code();
-            Map<String, BasSubWrapperVO> map;
-            if (this.cacheContext.containsKey(code)) {
-                map = (Map<String, BasSubWrapperVO>) this.cacheContext.get(code);
-            } else {
-                map = new HashMap<>();
-                R<Map<String, List<BasSubWrapperVO>>> r = this.basSubFeignPluginService.getSub(code);
-                if (null != r) {
-                    Map<String, List<BasSubWrapperVO>> voMap = r.getData();
-                    if (null != voMap) {
-                        List<BasSubWrapperVO> voList = voMap.get(code);
-                        if (CollectionUtils.isNotEmpty(voList)) {
-                            for (BasSubWrapperVO vo : voList) {
-                                if ("subCode".equals(valueField)) {
-                                    map.put(vo.getSubCode(), vo);
-                                } else {
-                                    map.put(vo.getSubValue(), vo);
-                                }
-                            }
-                        }
-                    }
-                }
-                this.cacheContext.set(code, map);
-            }
             // 获取值
-            BasSubWrapperVO vo = map.get(String.valueOf(val));
-            if (null != vo) {
-                String setValue = vo.getSubName();
-                if (StringUtils.isNotEmpty(setValue)) {
-                    try {
-                        // 设置值
-                        MethodUtils.invokeMethod(object, ObjectUtil.toNormalSetMethod(nameField), setValue);
-                    } catch (NoSuchMethodException e) {
-                        logger.error("对象中无方法可调用" + e.getMessage(), e);
-                    } catch (InvocationTargetException e) {
-                        logger.error("执行目标方法失败" + e.getMessage(), e);
-                    }
+            Object setValue = null;
+            if (this.cacheContext.containsKey(val)) {
+                setValue = this.cacheContext.get(val);
+            } else {
+                for (CommonPlugin plugin : plugins) {
+                    setValue = plugin.handlerValue(val, cp(autoFieldValue.cp(), autoFieldValue.code()), this.cacheContext);
+                }
+                this.cacheContext.set(val, setValue);
+            }
+            if (Objects.nonNull(setValue)) {
+                try {
+                    // 设置值
+                    MethodUtils.invokeMethod(object, ObjectUtil.toNormalSetMethod(nameField), setValue);
+                } catch (NoSuchMethodException e) {
+                    logger.error("对象中无方法可调用" + e.getMessage(), e);
+                } catch (InvocationTargetException e) {
+                    logger.error("执行目标方法失败" + e.getMessage(), e);
                 }
             }
         } catch (Exception e) {
@@ -146,4 +123,16 @@ public class HandlerContext<T> {
         }
     }
 
+    private AbstractCommonParameter cp(Class<? extends AbstractCommonParameter> cc, String code) {
+        try {
+            AbstractCommonParameter instance = cc.newInstance();
+            instance.setObject(code);
+            return instance;
+        } catch (InstantiationException e) {
+            logger.error("InstantiationException:" + e.getMessage(), e);
+        } catch (IllegalAccessException e) {
+            logger.error("IllegalAccessException:" + e.getMessage(), e);
+        }
+        return null;
+    }
 }

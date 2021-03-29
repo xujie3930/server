@@ -1,4 +1,4 @@
-package com.szmsd.bas.plugin;
+package com.szmsd.common.plugin.annotation;
 
 import java.lang.annotation.*;
 

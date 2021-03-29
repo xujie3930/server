@@ -228,6 +228,18 @@
                 <version>${szmsd.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.szmsd</groupId>
+                <artifactId>szmsd-common-plugin</artifactId>
+                <version>${szmsd.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.szmsd</groupId>
+                <artifactId>szmsd-common-plugin-api</artifactId>
+                <version>${szmsd.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

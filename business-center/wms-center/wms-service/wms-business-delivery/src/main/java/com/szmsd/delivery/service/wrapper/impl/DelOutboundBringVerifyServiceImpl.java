@@ -159,6 +159,20 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 if (responseObject.isSuccess()) {
                     // 计算成功了
                     ChargeWrapper chargeWrapper = responseObject.getObject();
+                    DelOutbound updateDelOutbound = new DelOutbound();
+                    updateDelOutbound.setId(id1);
+                    // 更新：计费重，金额
+                    ShipmentChargeInfo data = chargeWrapper.getData();
+                    PricingPackageInfo packageInfo = data.getPackageInfo();
+                    Weight calcWeight = packageInfo.getCalcWeight();
+                    updateDelOutbound.setCalcWeight(calcWeight.getValue());
+                    updateDelOutbound.setCalcWeightUnit(calcWeight.getUnit());
+                    List<ChargeItem> charges = chargeWrapper.getCharges();
+                    ChargeItem chargeItem = charges.get(0);
+                    Money money = chargeItem.getMoney();
+                    updateDelOutbound.setAmount(valueOf(money.getAmount()));
+                    updateDelOutbound.setCurrencyCode(money.getCurrencyCode());
+                    this.delOutboundService.bringVerifySuccess(updateDelOutbound);
                     return 1;
                 } else {
                     // 计算失败
@@ -179,7 +193,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         exceptionMessage = "计算包裹费用失败";
                     }
                     exceptionMessage = StringUtils.substring(exceptionMessage, 0, 255);
-                    this.delOutboundService.updateExceptionMessage(id1, exceptionMessage);
+                    this.delOutboundService.bringVerifyFail(id1, exceptionMessage);
                     throw new CommonException("999", exceptionMessage);
                 }
             }
