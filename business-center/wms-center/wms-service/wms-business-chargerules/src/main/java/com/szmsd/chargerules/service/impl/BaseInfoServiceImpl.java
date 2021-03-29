@@ -1,11 +1,14 @@
 package com.szmsd.chargerules.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.chargerules.domain.BasSpecialOperation;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.domain.SpecialOperation;
-import com.szmsd.chargerules.dto.BasSpecialOperationDTO;
+import com.szmsd.chargerules.dto.BasSpecialOperationRequestDTO;
 import com.szmsd.chargerules.enums.ErrorMessageEnum;
 import com.szmsd.chargerules.enums.SpecialOperationStatusEnum;
 import com.szmsd.chargerules.factory.OrderType;
@@ -28,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -49,16 +53,25 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     private IPayService payService;
 
     @Override
-    public ResponseVO add(BasSpecialOperationDTO basSpecialOperationDTO) {
+    public void add(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO) {
         BasSpecialOperation domain = new BasSpecialOperation();
-        BeanUtils.copyProperties(basSpecialOperationDTO, domain);
-
-        int insert = baseInfoMapper.insert(domain);
-        return insert > 0 ? ResponseVO.ok() : ResponseVO.failed(null);
+        BeanUtils.copyProperties(basSpecialOperationRequestDTO, domain);
+        LambdaQueryWrapper<BasSpecialOperation> query = Wrappers.lambdaQuery();
+        query.eq(BasSpecialOperation::getOperationOrderNo,basSpecialOperationRequestDTO.getOperationOrderNo());
+        BasSpecialOperation basSpecialOperation = baseInfoMapper.selectOne(query);
+        if(Objects.isNull(basSpecialOperation)) {
+            baseInfoMapper.insert(domain);
+            log.info("#A3 已创建特殊操作");
+        } else {
+            LambdaUpdateWrapper<BasSpecialOperation> updateWrapper = Wrappers.lambdaUpdate();
+            updateWrapper.eq(BasSpecialOperation::getOperationOrderNo,basSpecialOperationRequestDTO.getOperationOrderNo());
+            baseInfoMapper.update(domain,updateWrapper);
+            log.info("#A3 已修改特殊操作");
+        }
     }
 
     @Override
-    public List<BasSpecialOperation> list(BasSpecialOperationDTO dto) {
+    public List<BasSpecialOperation> list(BasSpecialOperationRequestDTO dto) {
         QueryWrapper<BasSpecialOperation> where = new QueryWrapper<>();
         if (StringUtils.isNotEmpty(dto.getOperationType())) {
             where.eq("operation_order_no", dto.getOperationType());
