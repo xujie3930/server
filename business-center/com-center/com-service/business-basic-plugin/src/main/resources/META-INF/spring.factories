@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.szmsd.bas.plugin.HandlerConfig
+com.szmsd.bas.plugin.BasSubCommonPlugin,\
+com.szmsd.bas.plugin.service.BasSubFeignPluginServiceFallbackFactory

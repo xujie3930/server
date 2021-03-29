@@ -16,6 +16,8 @@
         <module>szmsd-common-security</module>
         <module>szmsd-common-datascope</module>
         <module>szmsd-common-jpush</module>
+        <module>szmsd-common-plugin</module>
+        <module>szmsd-common-plugin-api</module>
     </modules>
 
     <artifactId>szmsd-common</artifactId>
