@@ -9,7 +9,7 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 @ApiModel(value = "BasSpecialOperationDTO", description = "特殊操作")
-public class BasSpecialOperationDTO {
+public class BasSpecialOperationRequestDTO {
 
     @ApiModelProperty(value = "操作人姓名")
     private String operator;

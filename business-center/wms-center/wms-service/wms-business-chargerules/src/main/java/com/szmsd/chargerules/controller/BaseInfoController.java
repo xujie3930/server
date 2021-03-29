@@ -1,12 +1,11 @@
 package com.szmsd.chargerules.controller;
 
 import com.szmsd.chargerules.domain.BasSpecialOperation;
-import com.szmsd.chargerules.dto.BasSpecialOperationDTO;
+import com.szmsd.chargerules.dto.BasSpecialOperationRequestDTO;
 import com.szmsd.chargerules.service.IBaseInfoService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.open.vo.ResponseVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
@@ -28,15 +27,16 @@ public class BaseInfoController extends BaseController {
 
     @PostMapping("/specialOperation")
     @ApiOperation(value = "#A3 创建/更新特殊操作")
-    public ResponseVO add(@RequestBody @Validated BasSpecialOperationDTO basSpecialOperationDTO) {
-        return baseInfoService.add(basSpecialOperationDTO);
+    public R add(@RequestBody @Validated BasSpecialOperationRequestDTO basSpecialOperationRequestDTO) {
+        baseInfoService.add(basSpecialOperationRequestDTO);
+        return R.ok();
     }
 
     @GetMapping("/specialOperation/list")
     @ApiOperation(value = "特殊操作待办 - 分页查询")
-    public TableDataInfo<BasSpecialOperation> list(BasSpecialOperationDTO basSpecialOperationDTO) {
+    public TableDataInfo<BasSpecialOperation> list(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO) {
         startPage();
-        List<BasSpecialOperation> list = baseInfoService.list(basSpecialOperationDTO);
+        List<BasSpecialOperation> list = baseInfoService.list(basSpecialOperationRequestDTO);
         return getDataTable(list);
     }
 

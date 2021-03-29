@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -71,7 +72,7 @@ public class RunnableExecute {
         log.info("executeOperation() start...");
         RLock lock = redissonClient.getLock("executeOperation");
         try {
-            if (lock.isLocked()) {
+            if (lock.tryLock()) {
                 OperationDTO operationDTO = new OperationDTO();
                 List<Operation> operations = operationService.listPage(operationDTO);
                 DelOutboundListQueryDto delOutbound = new DelOutboundListQueryDto();

@@ -2,18 +2,16 @@ package com.szmsd.chargerules.service;
 
 
 import com.szmsd.chargerules.domain.BasSpecialOperation;
-import com.szmsd.chargerules.dto.BasSpecialOperationDTO;
+import com.szmsd.chargerules.dto.BasSpecialOperationRequestDTO;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.open.vo.ResponseVO;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface IBaseInfoService {
 
-    ResponseVO add(BasSpecialOperationDTO basSpecialOperationDTO);
+    void add(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO);
 
-    List<BasSpecialOperation> list(BasSpecialOperationDTO basSpecialOperationDTO);
+    List<BasSpecialOperation> list(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO);
 
     R update(BasSpecialOperation basSpecialOperation);
 
