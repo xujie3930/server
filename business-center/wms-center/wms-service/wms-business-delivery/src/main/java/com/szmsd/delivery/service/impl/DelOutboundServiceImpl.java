@@ -440,8 +440,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getOperationType, dto.getOperationType());
         updateWrapper.set(DelOutbound::getOperationTime, dto.getOperationTime());
         updateWrapper.set(DelOutbound::getRemark, dto.getRemark());
+        // 仓库开始处理
+        if (DelOutboundOperationTypeEnum.PROCESSING.getCode().equals(dto.getOperationType())) {
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
+        }
         // 仓库已发货
-        if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
+        else if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
             updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.COMPLETED.getCode());
         }
         return this.baseMapper.update(null, updateWrapper);
