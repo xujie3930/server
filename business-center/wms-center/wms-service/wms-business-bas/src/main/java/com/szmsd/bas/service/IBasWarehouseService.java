@@ -32,6 +32,8 @@ public interface IBasWarehouseService extends IService<BasWarehouse> {
 
     void statusChange(BasWarehouseStatusChangeDTO basWarehouseStatusChangeDTO);
 
+    List<WarehouseKvDTO> selectInboundWarehouse();
+
     List<WarehouseKvDTO> selectCusInboundWarehouse();
 
     boolean vailCusWarehouse(String warehouseCode);

@@ -124,6 +124,17 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
     }
 
     /**
+     * 查询所有的仓库下拉
+     * @return
+     */
+    @Override
+    public List<WarehouseKvDTO> selectInboundWarehouse() {
+        List<BasWarehouseVO> basWarehouseVOS = this.selectList(new BasWarehouseQueryDTO().setStatus("1"));
+        List<WarehouseKvDTO> collect = basWarehouseVOS.stream().map(item -> new WarehouseKvDTO().setKey(item.getWarehouseCode()).setValue(item.getWarehouseCode()).setCountry(item.getCountryCode())).collect(Collectors.toList());
+        return collect;
+    }
+
+    /**
      * 查询入库单 - 创建 - 目的仓库下拉 【过滤出有效仓库、当前登录人没在黑名单、并且白名单非空或白名单包含当前登录人】
      *
      * @return

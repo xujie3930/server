@@ -40,7 +40,8 @@ public class BasCountryController extends BaseController {
     @ApiOperation(value = "查询国家", notes = "查询国家('bas:bascountry:list')")
     @PreAuthorize("@ss.hasPermi('bas:bascountry:list')")
     @GetMapping("/list")
-    public TableDataInfo list(BasCountry basCountry) {
+    public TableDataInfo<BasCountry> list(BasCountry basCountry) {
+        startPage();
         List<BasCountry> list = basCountryService.selectBasCountryList(basCountry);
         return getDataTable(list);
     }
