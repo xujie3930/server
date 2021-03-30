@@ -74,7 +74,15 @@ public class BasWarehouseController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('bas:warehouse:queryInboundWarehouse')")
     @GetMapping("/queryInboundWarehouse")
-    @ApiOperation(value = "查询仓库下拉", notes = "入库单 - 创建 - 目的仓库")
+    @ApiOperation(value = "查询仓库下拉", notes = "全部的仓库")
+    public R<List<WarehouseKvDTO>> queryInboundWarehouse() {
+        List<WarehouseKvDTO> kvList = basWarehouseService.selectInboundWarehouse();
+        return R.ok(kvList);
+    }
+
+    @PreAuthorize("@ss.hasPermi('bas:warehouse:queryCusInboundWarehouse')")
+    @GetMapping("/queryCusInboundWarehouse")
+    @ApiOperation(value = "查询客户仓库下拉", notes = "入库单 - 创建 - 目的仓库 - 黑白名单过滤")
     public R<List<WarehouseKvDTO>> queryCusInboundWarehouse() {
         List<WarehouseKvDTO> kvList = basWarehouseService.selectCusInboundWarehouse();
         return R.ok(kvList);
