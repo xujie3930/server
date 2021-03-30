@@ -9,6 +9,7 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.datascope.service.AwaitUserService;
 import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
+import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
 import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
 import com.szmsd.returnex.config.BeanCopyUtil;
@@ -98,9 +99,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Override
     public List<ReturnExpressListVO> selectReturnOrderList(ReturnExpressListQueryDTO queryDto) {
 
-        //TODO 获取当前用户
         List<ReturnExpressDetail> returnExpressDetails = returnExpressMapper.selectList(Wrappers.<ReturnExpressDetail>lambdaQuery()
-                .eq(StringUtil.isNotBlank(queryDto.getReturnType()), ReturnExpressDetail::getReturnType, queryDto.getReturnType())
+                .eq(queryDto.getReturnSource() != null, ReturnExpressDetail::getReturnSource, queryDto.getReturnSource())
+                .eq(queryDto.getProcessType() != null, ReturnExpressDetail::getProcessType, queryDto.getProcessType())
+                .eq(queryDto.getReturnType() != null, ReturnExpressDetail::getReturnType, queryDto.getReturnType())
                 .eq(StringUtil.isNotBlank(queryDto.getApplyProcessMethod()), ReturnExpressDetail::getApplyProcessMethod, queryDto.getApplyProcessMethod())
                 .between(queryDto.getCreateTimeStart() != null && queryDto.getCreateTimeEnd() != null, BaseEntity::getCreateTime, queryDto.getCreateTimeStart(), queryDto.getCreateTimeEnd())
                 .eq(StringUtil.isNotBlank(queryDto.getWarehouseCode()), ReturnExpressDetail::getWarehouseCode, queryDto.getWarehouseCode())
@@ -108,6 +110,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .in(CollectionUtils.isNotEmpty(queryDto.getReturnNoList()), ReturnExpressDetail::getReturnNo, queryDto.getReturnNoList())
                 .eq(StringUtil.isNotBlank(queryDto.getSellerCode()), ReturnExpressDetail::getSellerCode, queryDto.getSellerCode())
                 .isNull(queryDto.getNoUserQuery(), ReturnExpressDetail::getSellerCode)
+                .orderByDesc(BaseEntity::getUpdateTime)
         );
         return BeanCopyUtil.copyListProperties(returnExpressDetails, ReturnExpressListVO::new);
     }
@@ -182,8 +185,6 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Transactional(rollbackFor = Exception.class)
     public int saveReturnExpressDetail(ReturnExpressDetail returnExpressDetail) {
-        returnExpressDetail.setScanCode(returnExpressDetail.getReturnTracking());
-        returnExpressDetail.setReturnTracking(null);
         return returnExpressMapper.insert(returnExpressDetail);
     }
 
@@ -213,10 +214,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         } else {
             // 新增无主件 状态待指派
             ReturnExpressDetail returnExpressDetail = returnArrivalReqDTO.convertThis(ReturnExpressDetail.class);
+            returnExpressDetail.setReturnSource(ReturnExpressEnums.ReturnSourceEnum.WMS_RETURN);
             returnExpressDetail.setDealStatus(ReturnExpressEnums.DealStatusEnum.WAIT_ASSIGNED);
             int insert = returnExpressMapper.insert(returnExpressDetail);
             // 其他处理
-
             return insert;
         }
 
@@ -230,7 +231,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @return 操作结果
      */
     @Override
-    public int updateProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
+    @Transactional(rollbackFor = Exception.class)
+    public int updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO) {
+        log.info("接收WMS仓库退件处理结果 {}", returnProcessingReqDTO);
         boolean finish = returnProcessingReqDTO.getProcessType().equals(ReturnExpressEnums.ProcessTypeEnum.OpenAndCheck);
         ReturnExpressEnums.DealStatusEnum dealStatusEnum = finish ?
                 ReturnExpressEnums.DealStatusEnum.WAIT_PROCESSED_AFTER_UNPACKING :
@@ -245,7 +248,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .set(finish, ReturnExpressDetail::getFinishTime, LocalDateTime.now())
                 .last("LIMIT 1")
         );
-
+        log.info("接收WMS仓库退件处理结果 {} - 更新条数 {}", returnProcessingReqDTO, update);
+        AssertUtil.isTrue(update == 1, "更新异常");
         return update;
     }
 
@@ -256,15 +260,21 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @return 返回结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int updateExpressInfo(ReturnExpressAddDTO expressUpdateDTO) {
+        log.info("更新退单信息 req:{}", expressUpdateDTO);
         AssertUtil.isTrue(expressUpdateDTO.getId() != null && expressUpdateDTO.getId() > 0, "更新异常！");
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
+                .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL)
+                .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.VMS_RECEIVED_DEAL_WAY)
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
                 .set(StringUtil.isNotBlank(expressUpdateDTO.getFromOrderNo()), ReturnExpressDetail::getFromOrderNo, expressUpdateDTO.getFromOrderNo())
+                .last("LIMIT 1")
         );
-        // TODO 更新货物信息 货物信息未返回
-
+        AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
+        // TODO 更新货物信息 货物信息未返回无法更新sku货物信息
+        httpFeignClient.processingUpdate(expressUpdateDTO.convertThis(ProcessingUpdateReqDTO.class));
         return update;
     }
 }

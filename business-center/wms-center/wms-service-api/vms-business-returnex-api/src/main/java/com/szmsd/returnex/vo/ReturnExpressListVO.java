@@ -44,21 +44,6 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "退件可扫描编码")
     private String scanCode;
 
-    @ApiModelProperty(value = "入库方式编码")
-    private String warehouseMethodCode;
-
-    public void setWarehouseMethodCode(String warehouseMethodCode) {
-        this.warehouseMethodCode = warehouseMethodCode;
-//        Optional.ofNullable(warehouseMethodCode)
-//                .filter(StringUtils::isNotEmpty)
-//                .ifPresent(x -> {
-//
-//                });
-    }
-
-    @ApiModelProperty(value = "入库方式编码", hidden = true)
-    private String warehouseMethodCodeStr;
-
     @ApiModelProperty(value = "预报单号")
     private String expectedNo;
 
@@ -89,9 +74,6 @@ public class ReturnExpressListVO implements Serializable {
                 .ifPresent(x -> returnTypeStr = ReturnExpressEnums.ReturnTypeEnum.valueOf(x).getDesc());
     }
 
-    @ApiModelProperty(value = "退件目标仓库编码")
-    private String returnDestinationWarehouse;
-
     @ApiModelProperty(value = "实际处理方式编码")
     private String applyProcessMethod;
 
@@ -108,14 +90,14 @@ public class ReturnExpressListVO implements Serializable {
     private String processRemark;
 
     @ApiModelProperty(value = "类型[默认：1：退件预报，2：VMS通知退件]")
-    private Integer returnSource;
+    private ReturnExpressEnums.ReturnSourceEnum returnSource;
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
 
-    public void setReturnSource(Integer returnSource) {
+    public void setReturnSource(ReturnExpressEnums.ReturnSourceEnum returnSource) {
         this.returnSource = returnSource;
         Optional.ofNullable(returnSource)
-                .ifPresent(x -> returnSourceStr = ReturnExpressEnums.ReturnSourceEnum.getDesc(x));
+                .ifPresent(x -> returnSourceStr = x.getDesc());
     }
 
     @ApiModelProperty(value = "处理状态编码")

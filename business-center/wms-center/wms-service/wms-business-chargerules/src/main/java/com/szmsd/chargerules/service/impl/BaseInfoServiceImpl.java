@@ -17,13 +17,13 @@ import com.szmsd.chargerules.mapper.BaseInfoMapper;
 import com.szmsd.chargerules.service.IBaseInfoService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.ISpecialOperationService;
+import com.szmsd.chargerules.vo.BasSpecialOperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationResultRequest;
-import com.szmsd.open.vo.ResponseVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -138,8 +138,8 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     }
 
     @Override
-    public BasSpecialOperation details(int id) {
-        return baseInfoMapper.selectById(id);
+    public BasSpecialOperationVo details(int id) {
+        return baseInfoMapper.selectDetails(id);
     }
 
 }

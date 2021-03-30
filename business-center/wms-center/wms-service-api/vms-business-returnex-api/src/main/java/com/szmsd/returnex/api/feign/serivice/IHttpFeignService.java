@@ -32,7 +32,7 @@ public interface IHttpFeignService {
      * @return 返回结果
      */
     @PostMapping("/api/return/http/expected")
-    @ApiOperation(value = "创建退件预报", notes = "/api/return/expected #F1-VMS 创建退件预报")
+    @ApiOperation(value = "创建退件预报", notes = "/api/return/expected #F1-WMS 创建退件预报")
     R<CreateExpectedRespVO> expectedCreate(@RequestBody CreateExpectedReqDTO expectedReqDTO);
 
     /**
@@ -43,6 +43,6 @@ public interface IHttpFeignService {
      * @return 返回结果
      */
     @PutMapping("/api/return/http/processing")
-    @ApiOperation(value = "接收客户提供的处理方式", notes = "/api/return/processing #F2-VMS 接收客户提供的处理方式")
+    @ApiOperation(value = "接收客户提供的处理方式", notes = "/api/return/processing #F2-WMS 接收客户提供的处理方式")
     R<ProcessingUpdateRespVO> processingUpdate(@RequestBody ProcessingUpdateReqDTO processingUpdateReqDTO);
 }

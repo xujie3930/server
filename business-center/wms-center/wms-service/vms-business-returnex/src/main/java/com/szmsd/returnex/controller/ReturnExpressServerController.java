@@ -14,6 +14,7 @@ import com.szmsd.returnex.vo.ReturnExpressListVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,7 +45,7 @@ public class ReturnExpressServerController extends BaseController {
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
     @PostMapping("/page")
     @ApiOperation(value = "退件单列表 - 分页")
-    public TableDataInfo<ReturnExpressListVO> page(@RequestBody ReturnExpressListQueryDTO queryDto) {
+    public TableDataInfo<ReturnExpressListVO> page(@Validated @RequestBody ReturnExpressListQueryDTO queryDto) {
         startPage();
         return getDataTable(returnExpressService.selectReturnOrderList(queryDto));
     }
@@ -58,7 +59,7 @@ public class ReturnExpressServerController extends BaseController {
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
     @PostMapping("/noUserBind/page")
     @ApiOperation(value = "无名件管理列表 - 分页")
-    public TableDataInfo<ReturnExpressListVO> pageForNoUserBind(@RequestBody ReturnExpressListQueryDTO queryDto) {
+    public TableDataInfo<ReturnExpressListVO> pageForNoUserBind(@Validated @RequestBody ReturnExpressListQueryDTO queryDto) {
         startPage();
         return getDataTable(returnExpressService.pageForNoUserBind(queryDto));
     }
@@ -73,7 +74,7 @@ public class ReturnExpressServerController extends BaseController {
     @PostMapping("/noUserBind/assignUsers")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "无名件批量指派客户")
-    public R assignUsersForNoUserBindBatch(@RequestBody ReturnExpressAssignDTO expressAssignDTO) {
+    public R assignUsersForNoUserBindBatch(@Validated @RequestBody ReturnExpressAssignDTO expressAssignDTO) {
         return toOk(returnExpressService.assignUsersForNoUserBindBatch(expressAssignDTO));
     }
 }

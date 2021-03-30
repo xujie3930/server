@@ -95,7 +95,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         if(basSeller.getIsActive()!=null){
             where.eq("is_active",basSeller.getIsActive());
         }
-        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "sellerCode", basSeller.getSellerCode());
+        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "seller_code", basSeller.getSellerCode());
         QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"user_name",basSeller.getUserName());
         List<BasSellerSysDto> basSellerSysDtos = BeanMapperUtil.mapList(baseMapper.selectList(where),BasSellerSysDto.class);
         for(BasSellerSysDto b:basSellerSysDtos){
