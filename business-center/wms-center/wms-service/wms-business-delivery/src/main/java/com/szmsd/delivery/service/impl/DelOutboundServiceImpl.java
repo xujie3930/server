@@ -82,13 +82,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("999", "单据不存在");
         }
         DelOutboundVO delOutboundVO = BeanMapperUtil.map(delOutbound, DelOutboundVO.class);
-        LambdaQueryWrapper<DelOutboundAddress> outboundAddressLambdaQueryWrapper = Wrappers.lambdaQuery();
-        outboundAddressLambdaQueryWrapper.eq(DelOutboundAddress::getOrderNo, delOutbound.getOrderNo());
-        DelOutboundAddress delOutboundAddress = delOutboundAddressService.getOne(outboundAddressLambdaQueryWrapper);
+        String orderNo = delOutbound.getOrderNo();
+        DelOutboundAddress delOutboundAddress = delOutboundAddressService.getByOrderNo(orderNo);
         if (Objects.nonNull(delOutboundAddress)) {
             delOutboundVO.setAddress(BeanMapperUtil.map(delOutboundAddress, DelOutboundAddressVO.class));
         }
-        List<DelOutboundDetail> delOutboundDetailList = delOutboundDetailService.listByOrderNo(delOutbound.getOrderNo());
+        List<DelOutboundDetail> delOutboundDetailList = delOutboundDetailService.listByOrderNo(orderNo);
         if (CollectionUtils.isNotEmpty(delOutboundDetailList)) {
             List<DelOutboundDetailVO> detailDtos = new ArrayList<>(delOutboundDetailList.size());
             List<String> skus = new ArrayList<>(delOutboundDetailList.size());
