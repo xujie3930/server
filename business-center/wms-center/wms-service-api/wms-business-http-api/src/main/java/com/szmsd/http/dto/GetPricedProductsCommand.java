@@ -22,6 +22,9 @@ public class GetPricedProductsCommand {
     List<PackageInfo> packageInfos;
 
     @ApiModelProperty
+    private Address fromAddress;
+
+    @ApiModelProperty
     private Address toAddress;
 
     @ApiModelProperty(value = "联系信息")

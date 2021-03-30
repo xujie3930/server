@@ -1,9 +1,15 @@
 package com.szmsd.chargerules.service.impl;
 
+import com.szmsd.bas.api.domain.BasCountry;
+import com.szmsd.bas.api.feign.BasCountryFeignService;
+import com.szmsd.bas.api.feign.BasWarehouseFeignService;
+import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.chargerules.dto.CreateProductDTO;
+import com.szmsd.chargerules.dto.FreightCalculationDTO;
 import com.szmsd.chargerules.dto.PricedProductQueryDTO;
 import com.szmsd.chargerules.dto.UpdateProductDTO;
 import com.szmsd.chargerules.service.IPricedProductService;
+import com.szmsd.chargerules.vo.FreightCalculationVO;
 import com.szmsd.chargerules.vo.PricedProductInfoVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
@@ -12,13 +18,18 @@ import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.dto.*;
-import com.szmsd.http.vo.*;
 import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.http.vo.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,16 +38,73 @@ public class PricedProductServiceImpl implements IPricedProductService {
     @Resource
     private HtpPricedProductFeignService htpPricedProductFeignService;
 
+    @Resource
+    private BasCountryFeignService basCountryFeignService;
+
+    @Resource
+    private BasWarehouseFeignService basWarehouseFeignService;
+
     /**
      * 根据包裹基本信息获取可下单报价产品
      * https://pricedproduct-internalapi-external.dsloco.com/api/products/PricedProducts
-     * @param getPricedProductsCommand
+     * @param freightCalculationDTO
      * @return
      */
     @Override
-    public List<DirectServiceFeeData> pricedProducts(GetPricedProductsCommand getPricedProductsCommand) {
+    public List<FreightCalculationVO> pricedProducts(FreightCalculationDTO freightCalculationDTO) {
+        GetPricedProductsCommand getPricedProductsCommand = new GetPricedProductsCommand();
+        getPricedProductsCommand.setClientCode(freightCalculationDTO.getClientCode());
+        getPricedProductsCommand.setShipmentType(freightCalculationDTO.getShipmentType());
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.setWeight(new Weight().setValue(freightCalculationDTO.getWeight()).setUnit("KG"));
+        packageInfo.setPacking(new Packing().setLength(freightCalculationDTO.getExtent()).setWidth(freightCalculationDTO.getWidth()).setHeight(freightCalculationDTO.getHeight()).setLengthUnit("CM"));
+        packageInfo.setQuantity(freightCalculationDTO.getQuantity());
+        getPricedProductsCommand.setPackageInfos(Arrays.asList(packageInfo));
+
+        Address fromAddress = new Address();
+        String dealPoint = freightCalculationDTO.getDealPoint();
+        R<BasWarehouse> warehouseR = basWarehouseFeignService.queryByWarehouseCode(dealPoint);
+        if (warehouseR != null && null != warehouseR.getData()) {
+            BasWarehouse warehouse = warehouseR.getData();
+            fromAddress.setStreet1(warehouse.getStreet1()).setStreet2(warehouse.getStreet2());
+            fromAddress.setProvince(warehouse.getProvince()).setCity(warehouse.getCity());
+            fromAddress.setPostCode(warehouse.getPostcode());
+            fromAddress.setCountry(new CountryInfo(warehouse.getCountryCode(), null, null, warehouse.getCountryChineseName()));
+        }
+        getPricedProductsCommand.setFromAddress(fromAddress);
+
+        Address toAddress = new Address();
+        R<BasCountry> countryR = basCountryFeignService.queryByCountryCode(freightCalculationDTO.getCountry());
+        if (countryR != null && null != countryR.getData()) {
+            BasCountry country = countryR.getData();
+            toAddress.setCountry(new CountryInfo(country.getCountryCode(), null, country.getCountryNameEn(), country.getCountryName()));
+        }
+        toAddress.setPostCode(freightCalculationDTO.getPostCode());
+        getPricedProductsCommand.setToAddress(toAddress);
+
+        getPricedProductsCommand.setToContactInfo(new ContactInfo());
+
         R<List<DirectServiceFeeData>> listR = htpPricedProductFeignService.pricedProducts(getPricedProductsCommand);
-        return R.getDataAndException(listR);
+        if (listR == null || CollectionUtils.isEmpty(listR.getData())) {
+            return new ArrayList<>();
+        }
+        List<FreightCalculationVO> result = listR.getData().stream().map(directServiceFeeData -> {
+            FreightCalculationVO freightCalculationVO = new FreightCalculationVO();
+            freightCalculationVO.setShippingChannel(directServiceFeeData.getShippingChannel());
+            freightCalculationVO.setCalcWeight(directServiceFeeData.getCalcWeight().getValue());
+            freightCalculationVO.setCalcType(directServiceFeeData.getCalcType());
+            freightCalculationVO.setTotalAmount(directServiceFeeData.getChargeItems().getTotalAmount());
+
+            String amountDetail = directServiceFeeData.getChargeItems().getDetails().stream().map(chargeItem -> MessageFormat.format("【{0}】：{1} - {2}", chargeItem.getDescription(), chargeItem.getCurrency(), chargeItem.getPrice())).collect(Collectors.joining(";"));
+            freightCalculationVO.setAmountDetail(amountDetail);
+
+            String timeliness = MessageFormat.format("{0} - {1} days", directServiceFeeData.getTimelinessMin(), directServiceFeeData.getTimelinessMax());
+            freightCalculationVO.setTimeliness(timeliness);
+
+            return freightCalculationVO;
+        }).collect(Collectors.toList());
+        return result;
     }
 
     /**

@@ -1,16 +1,16 @@
 package com.szmsd.chargerules.controller;
 
 import com.szmsd.chargerules.dto.CreateProductDTO;
+import com.szmsd.chargerules.dto.FreightCalculationDTO;
 import com.szmsd.chargerules.dto.PricedProductQueryDTO;
 import com.szmsd.chargerules.dto.UpdateProductDTO;
 import com.szmsd.chargerules.service.IPricedProductService;
+import com.szmsd.chargerules.vo.FreightCalculationVO;
 import com.szmsd.chargerules.vo.PricedProductInfoVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.http.dto.GetPricedProductsCommand;
-import com.szmsd.http.vo.DirectServiceFeeData;
 import com.szmsd.http.vo.KeyValuePair;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
@@ -31,10 +31,10 @@ public class PricedProductController extends BaseController {
     private IPricedProductService iPricedProductService;
 
     @PreAuthorize("@ss.hasPermi('products:pricedproducts')")
-    @PostMapping("/pricedProducts")
-    @ApiOperation(value = "根据包裹基本信息获取可下单报价产品")
-    public R<List<DirectServiceFeeData>> pricedProducts(@RequestBody GetPricedProductsCommand getPricedProductsCommand) {
-        List<DirectServiceFeeData> directServiceFeeData = iPricedProductService.pricedProducts(getPricedProductsCommand);
+    @PostMapping("/freightCalculation")
+    @ApiOperation(value = "运费测算 - 根据包裹基本信息获取可下单报价产品")
+    public R<List<FreightCalculationVO>> freightCalculation(@RequestBody FreightCalculationDTO freightCalculationDTO) {
+        List<FreightCalculationVO> directServiceFeeData = iPricedProductService.pricedProducts(freightCalculationDTO);
         return R.ok(directServiceFeeData);
     }
 

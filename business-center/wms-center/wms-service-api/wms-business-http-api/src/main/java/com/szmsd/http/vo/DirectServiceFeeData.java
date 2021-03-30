@@ -1,11 +1,11 @@
 package com.szmsd.http.vo;
 
+import com.szmsd.http.dto.Weight;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -31,33 +31,20 @@ public class DirectServiceFeeData {
     @ApiModelProperty(value = "金额记录")
     private ChargeModel chargeItems;
 
-    @Data
-    @Accessors(chain = true)
-    public class ChargeModel {
-
-        @ApiModelProperty
-        private String totalAmount;
-
-        @ApiModelProperty
-        private List<PricingChargeItem> details;
-
-        @Data
-        @Accessors(chain = true)
-        public class PricingChargeItem {
-
-            @ApiModelProperty
-            private String description;
-
-            @ApiModelProperty
-            private BigDecimal price;
-
-            @ApiModelProperty
-            private String currency;
-
-        }
-    }
-
     @ApiModelProperty
     private List<String> tags;
+
+    @ApiModelProperty
+    private Weight weight;
+
+    @ApiModelProperty
+    private Weight volumeWeight;
+
+    @ApiModelProperty
+    private Weight calcWeight;
+
+    @ApiModelProperty
+    private String calcType;
+
 
 }

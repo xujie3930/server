@@ -125,6 +125,10 @@
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-inventory-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>business-basic-api</artifactId>
+        </dependency>
 
     </dependencies>
 

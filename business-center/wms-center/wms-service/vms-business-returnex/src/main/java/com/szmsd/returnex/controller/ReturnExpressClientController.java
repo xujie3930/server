@@ -12,6 +12,7 @@ import com.szmsd.returnex.vo.ReturnExpressListVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -54,7 +55,7 @@ public class ReturnExpressClientController extends BaseController {
     @PostMapping("/add")
     @Log(title = "退货服务模块", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增退件单-创建退报单")
-    public R add(@RequestBody ReturnExpressAddDTO returnExpressAddDTO) {
+    public R add(@Validated @RequestBody ReturnExpressAddDTO returnExpressAddDTO) {
         return toOk(returnExpressService.insertReturnExpressDetail(returnExpressAddDTO));
     }
 
@@ -67,7 +68,7 @@ public class ReturnExpressClientController extends BaseController {
     //@PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
     @PostMapping("/page")
     @ApiOperation(value = "退件单列表 - 分页")
-    public TableDataInfo<ReturnExpressListVO> page(@RequestBody ReturnExpressListQueryDTO queryDto) {
+    public TableDataInfo<ReturnExpressListVO> page(@Validated @RequestBody ReturnExpressListQueryDTO queryDto) {
         startPage();
         return getDataTable(returnExpressService.selectReturnOrderList(queryDto));
     }
@@ -82,7 +83,7 @@ public class ReturnExpressClientController extends BaseController {
     @PostMapping("/update")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "更新退件单信息")
-    public R update(@RequestBody ReturnExpressAddDTO expressUpdateDTO) {
+    public R update(@Validated @RequestBody ReturnExpressAddDTO expressUpdateDTO) {
         return toOk(returnExpressService.updateExpressInfo(expressUpdateDTO));
     }
 
