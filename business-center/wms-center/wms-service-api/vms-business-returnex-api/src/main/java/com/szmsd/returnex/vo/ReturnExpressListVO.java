@@ -90,14 +90,13 @@ public class ReturnExpressListVO implements Serializable {
     private String processRemark;
 
     @ApiModelProperty(value = "类型[默认：1：退件预报，2：VMS通知退件]")
-    private ReturnExpressEnums.ReturnSourceEnum returnSource;
+    private String returnSource;
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
 
-    public void setReturnSource(ReturnExpressEnums.ReturnSourceEnum returnSource) {
+    public void setReturnSource(String returnSource) {
         this.returnSource = returnSource;
-        Optional.ofNullable(returnSource)
-                .ifPresent(x -> returnSourceStr = x.getDesc());
+
     }
 
     @ApiModelProperty(value = "处理状态编码")
