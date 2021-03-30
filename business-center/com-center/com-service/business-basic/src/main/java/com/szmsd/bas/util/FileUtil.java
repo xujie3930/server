@@ -1,8 +1,8 @@
 package com.szmsd.bas.util;
 
 
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.domain.dto.FileDTO;
-import com.szmsd.bas.enums.BasAttachmentTypeEnum;
 import com.szmsd.common.core.domain.Files;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.LogisticsExceptionUtil;
@@ -38,7 +38,7 @@ public class FileUtil {
             throw LogisticsExceptionUtil.getException(ExceptionMessageEnum.CANNOTBENULL, getLen());
         }
         MultipartFile myFile = fileGen.getMyFile();
-        BasAttachmentTypeEnum type = fileGen.getType();
+        AttachmentTypeEnum type = fileGen.getType();
         String uploadFolder = fileGen.getUploadFolder();
         String url = fileGen.getUrl();
         String mainUploadFolder = fileGen.getMainUploadFolder();
@@ -56,7 +56,7 @@ public class FileUtil {
         } else {
             newName = myFile.getOriginalFilename().substring(0, myFile.getOriginalFilename().indexOf(".")).concat(".").concat(suffix);
         }
-        type = Optional.ofNullable(type).orElse(BasAttachmentTypeEnum.PREFIX_TEMP);
+        type = Optional.ofNullable(type).orElse(AttachmentTypeEnum.PREFIX_TEMP);
         String prefix = lineToHump(type.getBusinessCode()) + "/" + type.getFileDirectory();
         try {
             // 这里使用Apache的FileUtils方法来进行保存

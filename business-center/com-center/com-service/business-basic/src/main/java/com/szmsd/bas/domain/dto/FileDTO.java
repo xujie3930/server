@@ -1,6 +1,6 @@
 package com.szmsd.bas.domain.dto;
 
-import com.szmsd.bas.enums.BasAttachmentTypeEnum;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +32,7 @@ public class FileDTO {
     /**
      * 文件类型
      */
-    private BasAttachmentTypeEnum type;
+    private AttachmentTypeEnum type;
 
     /**
      * 是否重写文件名

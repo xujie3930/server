@@ -3,9 +3,9 @@ package com.szmsd.bas.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.domain.dto.BasAttachmentDTO;
 import com.szmsd.bas.domain.dto.BasAttachmentDataDTO;
-import com.szmsd.bas.enums.BasAttachmentTypeEnum;
 
 import java.util.List;
 
@@ -41,11 +41,11 @@ public interface IBasAttachmentService extends IService<BasAttachment> {
      * @param businessNo            业务编号 非空
      * @param businessItemNo        业务编号
      * @param filesUrl              文件路径 - 多文件 非空
-     * @param basAttachmentTypeEnum 文件上传业务枚举 非空
+     * @param attachmentTypeEnum 文件上传业务枚举 非空
      */
-    void insert(String businessNo, String businessItemNo, List<String> filesUrl, BasAttachmentTypeEnum basAttachmentTypeEnum);
+    void insert(String businessNo, String businessItemNo, List<String> filesUrl, AttachmentTypeEnum attachmentTypeEnum);
 
-    void insertList(String businessNo, String businessItemNo, List<BasAttachmentDataDTO> filesUrl, BasAttachmentTypeEnum basAttachmentTypeEnum);
+    void insertList(String businessNo, String businessItemNo, List<BasAttachmentDataDTO> filesUrl, AttachmentTypeEnum attachmentTypeEnum);
 
     /**
      * 新增

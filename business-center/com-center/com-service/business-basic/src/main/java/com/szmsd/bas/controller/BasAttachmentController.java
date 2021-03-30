@@ -2,10 +2,10 @@ package com.szmsd.bas.controller;
 
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.domain.dto.BasAttachmentDTO;
 import com.szmsd.bas.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.domain.dto.FileDTO;
-import com.szmsd.bas.enums.BasAttachmentTypeEnum;
 import com.szmsd.bas.service.IBasAttachmentService;
 import com.szmsd.bas.util.FileUtil;
 import com.szmsd.common.core.domain.Files;
@@ -21,14 +21,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -113,7 +106,7 @@ public class BasAttachmentController extends BaseController {
     @ApiImplicitParams({@ApiImplicitParam(name = "attachmentTypeEnum", value = "附件类型", required = true),
             @ApiImplicitParam(name = "businessNo", value = "业务编号 - 业务场景：补充附件"),
             @ApiImplicitParam(name = "businessItemNo", value = "业务明细号 - 业务场景：补充附件"),})
-    public R<List<BasAttachmentDataDTO>> uploadAttachment(@RequestParam("attachmentUrl") MultipartFile[] myFiles, @RequestParam("attachmentTypeEnum") BasAttachmentTypeEnum attachmentTypeEnum, String businessNo, String businessItemNo) {
+    public R<List<BasAttachmentDataDTO>> uploadAttachment(@RequestParam("attachmentUrl") MultipartFile[] myFiles, @RequestParam("attachmentTypeEnum") AttachmentTypeEnum attachmentTypeEnum, String businessNo, String businessItemNo) {
         List<BasAttachmentDataDTO> filesUrl = new ArrayList<>();
         List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
         if (CollectionUtils.isEmpty(multipartFiles)) {
