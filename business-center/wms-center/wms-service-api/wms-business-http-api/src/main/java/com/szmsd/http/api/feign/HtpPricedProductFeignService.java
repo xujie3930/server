@@ -9,10 +9,7 @@ import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.*;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,7 +31,7 @@ public interface HtpPricedProductFeignService {
     @GetMapping("/api/products/http/info/{productCode}")
     R<PricedProductInfo> info(@PathVariable("productCode") String productCode);
 
-    @PostMapping("/api/products/http/update")
+    @PutMapping("/api/products/http/update")
     R<ResponseVO> update(@RequestBody UpdatePricedProductCommand updatePricedProductCommand);
 
     @PostMapping("/api/products/http/exportFile")
