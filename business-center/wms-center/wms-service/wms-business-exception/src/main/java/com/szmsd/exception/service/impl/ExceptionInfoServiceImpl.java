@@ -3,6 +3,7 @@ package com.szmsd.exception.service.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.exception.domain.ExceptionInfo;
@@ -97,7 +98,10 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             String operationOn = newExceptionRequest.getOperateOn();
             newExceptionRequest.setOperateOn(null);
             ExceptionInfo exceptionInfo = BeanMapperUtil.map(newExceptionRequest, ExceptionInfo.class);
-            exceptionInfo.setOperateOn(dealUTZTime(operationOn));
+            if(StringUtils.isNotEmpty(operationOn)){
+                Date  d = dealUTZTime(operationOn);
+                exceptionInfo.setOperateOn(d);
+            }
             //赋值
             exceptionInfo.setExceptionTypeName(ExceptionTypeEnum.get(exceptionInfo.getExceptionType()).getName());
             exceptionInfo.setOrderTypeName(OrderTypeEnum.get(exceptionInfo.getOrderType()).getName());
@@ -115,7 +119,10 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             String operationOn = processExceptionRequest.getOperateOn();
             processExceptionRequest.setOperateOn(null);
             ExceptionInfo exceptionInfo = BeanMapperUtil.map(processExceptionRequest, ExceptionInfo.class);
-            exceptionInfo.setOperateOn(dealUTZTime(operationOn));
+            if(StringUtils.isNotEmpty(operationOn)){
+                Date d = dealUTZTime(operationOn);
+                exceptionInfo.setOperateOn(d);
+            }
             exceptionInfo.setSolveRemark(processExceptionRequest.getRemark());
             exceptionInfo.setState(true);
             UpdateWrapper<ExceptionInfo> updateWrapper = new UpdateWrapper<>();

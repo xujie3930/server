@@ -146,21 +146,19 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         BigDecimal volume = new BigDecimal(request.getHeight()).multiply(new BigDecimal(request.getWidth()))
                 .multiply(new BigDecimal(request.getLength()))
                 .setScale(2, BigDecimal.ROUND_HALF_UP);
-        Date date = new Date();
-        if(StringUtils.isNotEmpty(request.getOperateOn())){
-            String operationOn = request.getOperateOn();
-            request.setOperateOn(null);
+        String operationOn = request.getOperateOn();
+        request.setOperateOn(null);
+        BaseProduct baseProduct = BeanMapperUtil.map(request, BaseProduct.class);
+        if(StringUtils.isNotEmpty(operationOn)){
             try {
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 df.setTimeZone(TimeZone.getTimeZone("UTC"));
-                date = df.parse(operationOn);
+                Date date = df.parse(operationOn);
+                baseProduct.setOperateOn(date);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
-
-        BaseProduct baseProduct = BeanMapperUtil.map(request, BaseProduct.class);
-        baseProduct.setOperateOn(date);
         baseProduct.setCode(null);
         baseProduct.setWarehouseAcceptance(true);
         baseProduct.setVolume(volume);
