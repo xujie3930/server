@@ -92,7 +92,7 @@ public class BaseProduct extends BaseEntity {
 
     @ApiModelProperty(value = "申报价值")
     @Excel(name = "申报价值")
-    private String declaredValue;
+    private Double declaredValue;
 
     @ApiModelProperty(value = "产品属性编号")
     private String productAttribute;
