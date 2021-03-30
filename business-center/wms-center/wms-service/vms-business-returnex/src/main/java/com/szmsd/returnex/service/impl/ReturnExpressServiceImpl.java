@@ -4,14 +4,13 @@ import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.feign.BasFeignService;
-import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.datascope.service.AwaitUserService;
 import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
 import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
-import com.szmsd.returnex.api.feign.serivice.IHttpFeignService;
+import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
 import com.szmsd.returnex.config.BeanCopyUtil;
 import com.szmsd.returnex.constant.ReturnExpressConstant;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
@@ -47,7 +46,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     private ReturnExpressMapper returnExpressMapper;
 
     @Resource
-    private IHttpFeignService httpFeignClient;
+    private IHttpFeignClientService httpFeignClient;
 
     @Resource
     private AwaitUserService awaitUserService;
@@ -137,6 +136,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .isNull(ReturnExpressDetail::getSellerCode)
                 .in(ReturnExpressDetail::getId, expressAssignDTO.getIds())
                 .set(ReturnExpressDetail::getSellerCode, expressAssignDTO.getSellerCode())
+                .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL)
         );
         return update;
     }
@@ -155,8 +155,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         returnExpressAddDTO.setSellerCode(sellerCode);*/
         checkSubmit(returnExpressAddDTO);
         // 创建退报单 推给VMS仓库
-        R<CreateExpectedRespVO> createExpectedRespVO = httpFeignClient.expectedCreate(returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class));
-        Optional.ofNullable(createExpectedRespVO).orElseThrow(() -> new BaseException("推送VMS仓库退单信息异常"));
+        CreateExpectedReqDTO createExpectedReqDTO = returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class);
+        createExpectedReqDTO.setRefOrderNo(returnExpressAddDTO.getFromOrderNo());
+        CreateExpectedRespVO createExpectedRespVO = httpFeignClient.expectedCreate(createExpectedReqDTO);
+        //Optional.ofNullable(createExpectedRespVO).orElseThrow(() -> new BaseException("推送VMS仓库退单信息异常"));
         // 本地保存
 
         return saveReturnExpressDetail(returnExpressAddDTO.convertThis(ReturnExpressDetail.class));
@@ -180,6 +182,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Transactional(rollbackFor = Exception.class)
     public int saveReturnExpressDetail(ReturnExpressDetail returnExpressDetail) {
+        returnExpressDetail.setScanCode(returnExpressDetail.getReturnTracking());
+        returnExpressDetail.setReturnTracking(null);
         return returnExpressMapper.insert(returnExpressDetail);
     }
 
@@ -207,7 +211,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             );
             return update;
         } else {
-            // 新增无主件
+            // 新增无主件 状态待指派
             ReturnExpressDetail returnExpressDetail = returnArrivalReqDTO.convertThis(ReturnExpressDetail.class);
             returnExpressDetail.setDealStatus(ReturnExpressEnums.DealStatusEnum.WAIT_ASSIGNED);
             int insert = returnExpressMapper.insert(returnExpressDetail);

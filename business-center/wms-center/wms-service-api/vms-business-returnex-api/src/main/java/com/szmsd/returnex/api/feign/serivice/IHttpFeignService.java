@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @Author: 11
  * @Date: 2021/3/27 14:21
  */
-@FeignClient(value = "wms-business-http", fallbackFactory = HttpFeignServiceFallback.class)
+@FeignClient(contextId = "feignClient.IHttpFeignService",value = "wms-business-http", fallbackFactory = HttpFeignServiceFallback.class)
 public interface IHttpFeignService {
 
     /**
@@ -31,7 +31,7 @@ public interface IHttpFeignService {
      * @param expectedReqDTO 创建
      * @return 返回结果
      */
-    @PostMapping("/api/return/expected")
+    @PostMapping("/api/return/http/expected")
     @ApiOperation(value = "创建退件预报", notes = "/api/return/expected #F1-VMS 创建退件预报")
     R<CreateExpectedRespVO> expectedCreate(@RequestBody CreateExpectedReqDTO expectedReqDTO);
 
@@ -42,7 +42,7 @@ public interface IHttpFeignService {
      * @param processingUpdateReqDTO 更新数据
      * @return 返回结果
      */
-    @PutMapping("/api/return/processing")
+    @PutMapping("/api/return/http/processing")
     @ApiOperation(value = "接收客户提供的处理方式", notes = "/api/return/processing #F2-VMS 接收客户提供的处理方式")
     R<ProcessingUpdateRespVO> processingUpdate(@RequestBody ProcessingUpdateReqDTO processingUpdateReqDTO);
 }
