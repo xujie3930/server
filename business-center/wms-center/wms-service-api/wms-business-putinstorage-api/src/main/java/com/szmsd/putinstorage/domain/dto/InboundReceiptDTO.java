@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "InboundReceiptDTO", description = "入库参数")
@@ -59,7 +61,7 @@ public class InboundReceiptDTO {
     private String remark;
 
     @ApiModelProperty(value = "单证信息文件")
-    private AttachmentFileDTO documentsFile;
+    private List<AttachmentFileDTO> documentsFile;
 
     @ApiModelProperty(value = "状态0已取消，1待提审，2待收货，3仓库处理中，4已入库")
     private String status;
