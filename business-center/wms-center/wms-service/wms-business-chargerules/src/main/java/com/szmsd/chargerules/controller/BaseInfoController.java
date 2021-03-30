@@ -3,6 +3,7 @@ package com.szmsd.chargerules.controller;
 import com.szmsd.chargerules.domain.BasSpecialOperation;
 import com.szmsd.chargerules.dto.BasSpecialOperationRequestDTO;
 import com.szmsd.chargerules.service.IBaseInfoService;
+import com.szmsd.chargerules.vo.BasSpecialOperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -60,7 +61,7 @@ public class BaseInfoController extends BaseController {
      */
     @GetMapping("/specialOperation/details/{id}")
     @ApiOperation(value = "特殊操作待办 - 详情")
-    public R<BasSpecialOperation> details(@PathVariable int id) {
+    public R<BasSpecialOperationVo> details(@PathVariable int id) {
         return R.ok(baseInfoService.details(id));
     }
 

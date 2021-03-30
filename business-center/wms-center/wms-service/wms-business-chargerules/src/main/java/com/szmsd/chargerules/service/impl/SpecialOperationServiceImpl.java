@@ -91,4 +91,13 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
         return specialOperationMapper.selectById(id);
     }
 
+    /**
+     * 根据操作类型获取详情
+     * @param operationType operationType
+     * @return SpecialOperation
+     */
+    public SpecialOperation detailsByOperationType(String operationType) {
+        return specialOperationMapper.detailsByOperationType(operationType);
+    }
+
 }
