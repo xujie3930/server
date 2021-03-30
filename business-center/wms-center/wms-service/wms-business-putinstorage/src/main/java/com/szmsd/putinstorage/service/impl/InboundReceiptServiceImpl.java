@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -212,10 +211,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      */
     private void asyncAttachment(String warehouseNo, InboundReceiptDTO inboundReceiptDTO) {
         CompletableFuture.runAsync(() -> {
-            AttachmentFileDTO documentsFile = inboundReceiptDTO.getDocumentsFile();
-            if (documentsFile != null) {
+            List<AttachmentFileDTO> documentsFile = inboundReceiptDTO.getDocumentsFile();
+            if (CollectionUtils.isNotEmpty(documentsFile)) {
                 log.info("保存单证信息文件");
-                remoteComponent.saveAttachment(warehouseNo, Arrays.asList(documentsFile), AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
+                remoteComponent.saveAttachment(warehouseNo, documentsFile, AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
             }
         });
     }

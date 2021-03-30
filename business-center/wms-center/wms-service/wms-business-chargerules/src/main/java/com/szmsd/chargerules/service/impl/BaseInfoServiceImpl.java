@@ -19,6 +19,7 @@ import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.ISpecialOperationService;
 import com.szmsd.chargerules.vo.BasSpecialOperationVo;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.finance.enums.BillEnum;
@@ -139,7 +140,9 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
     @Override
     public BasSpecialOperationVo details(int id) {
-        return baseInfoMapper.selectDetails(id);
+        BasSpecialOperationVo basSpecialOperationVo = baseInfoMapper.selectDetailsById(id);
+        if(Objects.isNull(basSpecialOperationVo)) throw new CommonException("999","未找到该操作类型对应的收费规则");
+        return basSpecialOperationVo;
     }
 
 }
