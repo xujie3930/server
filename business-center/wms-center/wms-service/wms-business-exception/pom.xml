@@ -7,11 +7,10 @@
         <artifactId>wms-service</artifactId>
         <version>1.0.0</version>
     </parent>
-
-    <groupId>com.szmsd.wms</groupId>
-    <artifactId>wms-business-open</artifactId>
-    <name>wms-business-open</name>
-    <description>open</description>
+    <artifactId>wms-business-exception</artifactId>
+    <version>1.0.0</version>
+    <name>wms-business-exception</name>
+    <description>异常信息</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -84,42 +83,26 @@
 
         <dependency>
             <groupId>com.szmsd.wms</groupId>
-            <artifactId>wms-business-delivery-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.szmsd.wms</groupId>
-            <artifactId>wms-business-open-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.szmsd.wms</groupId>
-            <artifactId>wms-business-bas-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.szmsd.wms</groupId>
-            <artifactId>wms-business-putinstorage-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.szmsd.wms</groupId>
-            <artifactId>wms-business-finance-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.szmsd.wms</groupId>
-            <artifactId>vms-business-returnex-api</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.szmsd.wms</groupId>
-            <artifactId>wms-business-chargerules-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-exception-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-ord-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-http-api</artifactId>
+        </dependency>
+
+        <!--验证码 -->
+        <dependency>
+            <groupId>com.github.penggle</groupId>
+            <artifactId>kaptcha</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
 
     </dependencies>
 
@@ -139,3 +122,5 @@
         </plugins>
     </build>
 </project>
+
+

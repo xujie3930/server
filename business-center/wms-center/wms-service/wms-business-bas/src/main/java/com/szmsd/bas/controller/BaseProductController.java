@@ -70,7 +70,7 @@ public class BaseProductController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @PostMapping("/measuring")
-    @ApiOperation(value = "通过code批量查询列表", notes = "通过code批量查询列表")
+    @ApiOperation(value = "仓库测量SKU", notes = "仓库测量SKU")
     public R measuringProduct(@RequestBody MeasuringProductRequest measuringProductRequest) {
         baseProductService.measuringProduct(measuringProductRequest);
         return R.ok();
