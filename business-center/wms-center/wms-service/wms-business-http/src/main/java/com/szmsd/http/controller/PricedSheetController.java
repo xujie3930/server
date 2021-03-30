@@ -35,7 +35,7 @@ public class PricedSheetController extends BaseController {
     @ApiOperation(value = "创建报价产品报价表详情信息")
     public R<ResponseVO> create(@RequestBody CreatePricedSheetCommand createPricedSheetCommand) {
         ResponseVO create = iPricedSheetService.create(createPricedSheetCommand);
-        return R.ok(create);
+        return create.getErrors() == null ? R.ok() : R.ok(create);
     }
 
     @PostMapping("/update")

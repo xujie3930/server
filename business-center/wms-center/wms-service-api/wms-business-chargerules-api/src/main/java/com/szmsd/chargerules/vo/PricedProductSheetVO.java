@@ -11,6 +11,9 @@ public class PricedProductSheetVO {
     @ApiModelProperty("报价表Id")
     private String sheetId;
 
+    @ApiModelProperty(value = "产品代码")
+    private String productCode;
+
     @ApiModelProperty("报价表编号")
     private String code;
 
