@@ -1,18 +1,12 @@
 package com.szmsd.returnex.api.feign.serivice;
 
 import com.szmsd.common.core.domain.R;
-import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
-import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
-import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
-import com.szmsd.http.vo.returnex.ProcessingUpdateRespVO;
 import com.szmsd.returnex.api.feign.serivice.facotry.ReturnExpressFeignFallback;
 import com.szmsd.returnex.dto.ReturnArrivalReqDTO;
 import com.szmsd.returnex.dto.ReturnProcessingReqDTO;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.models.auth.In;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**

@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 /**
@@ -41,9 +42,9 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "退件原始单号 原出库单号", example = "SF123456")
     private String fromOrderNo;
 
-    //TODO 生成规则
+    @NotEmpty(message = "预报单号不能为空")
     @ApiModelProperty(value = "预报单号 系统生成", hidden = true)
-    private String expectedNo = "xxxxx";
+    private String expectedNo;
 
     @ApiModelProperty(value = "VMS处理单号")
     private String returnNo;

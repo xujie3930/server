@@ -48,6 +48,7 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         PricedProductInfo data = info.getData();
         List<PricedProductSheet> sheets = data.getSheets();
         List<PricedProductSheetVO> pricedProductSheetVOS = BeanMapperUtil.mapList(sheets, PricedProductSheetVO.class);
+        pricedProductSheetVOS.forEach(sheet -> sheet.setProductCode(productCode));
         return pricedProductSheetVOS;
     }
 
@@ -86,10 +87,16 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
 
         PackageLimitVO limitVo = result.getLimit();
         PackageLimit limit = data.getLimit();
-        Packing minPackingLimit = limit.getMinPackingLimit();
-        limitVo.setMinPackingLimitStr(minPackingLimit.getLength() + "*" + minPackingLimit.getWidth() + "*" + minPackingLimit.getHeight());
-        Packing packingLimit = limit.getPackingLimit();
-        limitVo.setPackingLimitStr(packingLimit.getLength() + "*" + packingLimit.getWidth() + "*" + packingLimit.getHeight());
+        if (limit != null) {
+            Packing minPackingLimit = limit.getMinPackingLimit();
+            if (minPackingLimit != null) {
+                limitVo.setMinPackingLimitStr(minPackingLimit.getLength() + "*" + minPackingLimit.getWidth() + "*" + minPackingLimit.getHeight());
+            }
+            Packing packingLimit = limit.getPackingLimit();
+            if (packingLimit != null) {
+                limitVo.setPackingLimitStr(packingLimit.getLength() + "*" + packingLimit.getWidth() + "*" + packingLimit.getHeight());
+            }
+        }
         result.setLimit(limitVo);
 
         return result;

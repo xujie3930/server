@@ -17,4 +17,7 @@ public class AttachmentFileDTO {
     @NotEmpty(message = "附件URL不能为空")
     private String attachmentUrl;
 
+    @NotEmpty(message = "文件名")
+    private String attachmentName;
+
 }

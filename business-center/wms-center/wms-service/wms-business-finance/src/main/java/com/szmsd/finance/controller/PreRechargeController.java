@@ -52,9 +52,9 @@ public class PreRechargeController extends BaseController {
     @Autowired
     ISysDictDataService sysDictDataService;
 
-    @ApiOperation(value="xxx")
-    @PostMapping("/test")
-    public String test(String s){
-        return sysDictDataService.getCurrencyNameByCode(s);
-    }
+//    @ApiOperation(value="xxx")
+//    @PostMapping("/test")
+//    public String test(String s){
+//        return sysDictDataService.getCurrencyNameByCode(s);
+//    }
 }

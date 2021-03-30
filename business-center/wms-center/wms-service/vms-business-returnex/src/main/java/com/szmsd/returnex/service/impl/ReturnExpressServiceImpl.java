@@ -3,6 +3,7 @@ package com.szmsd.returnex.service.impl;
 import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
@@ -12,6 +13,7 @@ import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
 import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
 import com.szmsd.returnex.api.feign.serivice.IHttpFeignService;
 import com.szmsd.returnex.config.BeanCopyUtil;
+import com.szmsd.returnex.constant.ReturnExpressConstant;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
 import com.szmsd.returnex.dto.*;
 import com.szmsd.returnex.enums.ReturnExpressEnums;
@@ -49,6 +51,44 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     @Resource
     private AwaitUserService awaitUserService;
+
+    @Resource
+    private BasFeignService basFeignService;
+
+    private String getSellCode() {
+        //UserInfo info = awaitUserService.info();
+        UserInfo info = new UserInfo();
+        Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException(""));
+        info.setSysUser(new SysUser().setSellerCode("User11"));
+        return "User11";
+    }
+
+    /**
+     * 单号生成
+     *
+     * @return
+     */
+    public String genNo() {
+        String code = getSellCode();
+        log.info("调用自动生成单号：code={}", code);
+        /*R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId("ck1").setCode(code));
+        AssertUtil.notNull(r, "单号生成失败");
+        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
+        String s = r.getData().get(0);*/
+        String s = System.currentTimeMillis() + "";
+        log.info("调用自动生成单号：调用完成, {}-{}", code, s);
+        return s;
+    }
+
+    /**
+     * 新增退件单-生成预报单号
+     *
+     * @return 返回结果
+     */
+    @Override
+    public String createExpectedNo() {
+        return ReturnExpressConstant.RETURN_NO_KEY_PREFIX + genNo();
+    }
 
     /**
      * 退件单列表 - 分页
@@ -113,13 +153,23 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         SysUser sysUser = info.getSysUser();
         String sellerCode = sysUser.getSellerCode();
         returnExpressAddDTO.setSellerCode(sellerCode);*/
-
+        checkSubmit(returnExpressAddDTO);
         // 创建退报单 推给VMS仓库
         R<CreateExpectedRespVO> createExpectedRespVO = httpFeignClient.expectedCreate(returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class));
         Optional.ofNullable(createExpectedRespVO).orElseThrow(() -> new BaseException("推送VMS仓库退单信息异常"));
         // 本地保存
 
         return saveReturnExpressDetail(returnExpressAddDTO.convertThis(ReturnExpressDetail.class));
+    }
+
+    private void checkSubmit(ReturnExpressAddDTO returnExpressAddDTO) {
+        // 校验重复条件 TODO
+        ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaQuery()
+                .eq(ReturnExpressDetail::getExpectedNo, returnExpressAddDTO.getExpectedNo())
+                .select(ReturnExpressDetail::getId));
+        Optional.ofNullable(returnExpressDetail).ifPresent(x -> {
+            throw new BaseException("请勿重复提交");
+        });
     }
 
     /**
