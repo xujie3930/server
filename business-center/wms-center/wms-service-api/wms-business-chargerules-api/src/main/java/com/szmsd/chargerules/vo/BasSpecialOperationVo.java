@@ -1,15 +1,15 @@
 package com.szmsd.chargerules.vo;
 
-import com.szmsd.chargerules.domain.SpecialOperation;
-import com.szmsd.chargerules.enums.SpecialOperationStatusEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
+
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "BasSpecialOperationDTO", description = "特殊操作")
+@ApiModel(value = "BasSpecialOperationVo", description = "特殊操作详情")
 public class BasSpecialOperationVo {
 
     @ApiModelProperty(value = "ID")
@@ -54,7 +54,10 @@ public class BasSpecialOperationVo {
     @ApiModelProperty(value = "状态（审核结果）")
     private String status;
 
-    @ApiModelProperty(value = "list")
-    private SpecialOperation specialOperationList;
+    @ApiModelProperty(value = "首件价格")
+    private BigDecimal firstPrice;
+
+    @ApiModelProperty(value = "续件价格")
+    private BigDecimal nextPrice;
 
 }
