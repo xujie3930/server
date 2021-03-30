@@ -18,6 +18,9 @@ public class DelOutboundVO implements Serializable {
     @ApiModelProperty(value = "ID")
     private Long id;
 
+    @ApiModelProperty(value = "出库单号")
+    private String orderNo;
+
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
 

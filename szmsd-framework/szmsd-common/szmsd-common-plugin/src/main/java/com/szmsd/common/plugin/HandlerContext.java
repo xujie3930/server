@@ -25,7 +25,6 @@ public class HandlerContext<T> {
 
     private final CacheContext cacheContext = new CacheContext.HandlerCacheContext();
     private final T t;
-    private boolean initCacheData = false;
 
     public HandlerContext(T t) {
         this.t = t;
@@ -39,12 +38,12 @@ public class HandlerContext<T> {
     private void handlerAutoValue(Object source) {
         if (source instanceof List) {
             Iterable<?> iterable = (Iterable<?>) source;
-            doJsonEncrypt(iterable);
+            doJsonEncryptInit(iterable);
         } else if (source instanceof TableDataInfo) {
             TableDataInfo<?> tableDataInfo = (TableDataInfo<?>) source;
             List<?> rows = tableDataInfo.getRows();
             if (CollectionUtils.isNotEmpty(rows)) {
-                doJsonEncrypt(rows);
+                doJsonEncryptInit(rows);
             }
         } else if (source instanceof R) {
             R<?> result = (R<?>) source;
@@ -53,23 +52,26 @@ public class HandlerContext<T> {
                 handlerAutoValue(data);
             }
         } else {
-            doJsonEncrypt(source);
+            doJsonEncryptInit(source);
         }
     }
 
-    private void doJsonEncrypt(Iterable<?> iterable) {
-        // 验证是否存在分组处理的数据
-        getCacheData(iterable);
-        for (Object object : iterable) {
+    private void doJsonEncryptInit(Iterable<?> iterable) {
+        if (getCacheData(iterable)) {
+            doJsonEncrypt(iterable);
+        }
+    }
+
+    private void doJsonEncryptInit(Object object) {
+        List<Object> list = new ArrayList<>();
+        list.add(object);
+        if (getCacheData(list)) {
             doJsonEncrypt(object);
         }
     }
 
-    private void getCacheData(Iterable<?> iterable) {
-        if (this.initCacheData) {
-            return;
-        }
-        this.initCacheData = true;
+    private boolean getCacheData(Iterable<?> iterable) {
+        boolean hasAuto = false;
         Object next = iterable.iterator().next();
         Field[] fields = getFields(next);
         if (ArrayUtils.isNotEmpty(fields)) {
@@ -98,12 +100,13 @@ public class HandlerContext<T> {
                         }
                     }
                 }
+                byte b = 0x00;
                 for (String field : groupByField) {
                     // get plugin
                     AutoFieldValue autoFieldValue = autoFieldValueMap.get(field);
                     List<CommonPlugin> plugins = CommonPluginContext.getInstance().getPlugins(autoFieldValue.supports());
                     if (CollectionUtils.isEmpty(plugins)) {
-                        return;
+                        continue;
                     }
                     Set<Object> objectSet = stringSetMap.get(field);
                     Map<Object, Object> map = Collections.emptyMap();
@@ -111,15 +114,21 @@ public class HandlerContext<T> {
                         map = plugin.handlerValue(new ArrayList<>(objectSet), cp(autoFieldValue.cp(), autoFieldValue.code()), this.cacheContext);
                     }
                     this.cacheContext.set(field, map);
+                    b |= 0x01;
                 }
+                hasAuto = b > 0x00;
             }
+        }
+        return hasAuto;
+    }
+
+    private void doJsonEncrypt(Iterable<?> iterable) {
+        for (Object object : iterable) {
+            doJsonEncrypt(object);
         }
     }
 
     private void doJsonEncrypt(Object object) {
-        List<Object> list = new ArrayList<>();
-        list.add(object);
-        getCacheData(list);
         Field[] fields = getFields(object);
         if (ArrayUtils.isNotEmpty(fields)) {
             for (Field field : fields) {

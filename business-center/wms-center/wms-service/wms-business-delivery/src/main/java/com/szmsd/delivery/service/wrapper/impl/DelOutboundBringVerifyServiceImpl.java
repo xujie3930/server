@@ -201,9 +201,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             throw e;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            // 回滚状态
-            this.delOutboundService.updateState(id1, DelOutboundStateEnum.AUDIT_FAILED);
-            throw new CommonException("999", "提审操作失败");
+            // 提审失败
+            String exceptionMessage = "提审操作失败";
+            this.delOutboundService.bringVerifyFail(id1, exceptionMessage);
+            throw new CommonException("999", exceptionMessage);
         }
     }
 
