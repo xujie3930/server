@@ -2,6 +2,7 @@ package com.szmsd.http.api.service;
 
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.http.vo.PricedProductInfo;
 
 import java.util.List;
 
@@ -10,6 +11,14 @@ import java.util.List;
  * @date 2021-03-24 14:29
  */
 public interface IHtpPricedProductClientService {
+
+    /**
+     * 根据产品代码获取产品信息
+     *
+     * @param productCode productCode
+     * @return PricedProductInfo
+     */
+    PricedProductInfo info(String productCode);
 
     /**
      * 计算包裹的费用

@@ -19,6 +19,7 @@ public enum AttachmentTypeEnum {
     INBOUND_RECEIPT_DOCUMENTS("INBOUND_RECEIPT", "入库单", "单证信息文件", "documents"),
     INBOUND_RECEIPT_EDITION_IMAGE("INBOUND_RECEIPT", "入库单", "对版图片", "editionImage"),
     PAYMENT_DOCUMENT("PAYMENT_DOCUMENT","汇款凭证","","paymentDocument"),
+    DEL_OUTBOUND_DOCUMENT("DEL_OUTBOUND_DOCUMENT","出库单","","delOutboundDocument"),
     ;
 
     /** 业务编码 **/

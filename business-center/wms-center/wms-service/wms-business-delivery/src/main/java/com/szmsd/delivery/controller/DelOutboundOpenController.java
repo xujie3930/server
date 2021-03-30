@@ -8,10 +8,12 @@ import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.dto.ShipmentRequestDto;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.wrapper.IDelOutboundOpenService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiSort;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +36,8 @@ public class DelOutboundOpenController extends BaseController {
 
     @Resource
     private IDelOutboundService delOutboundService;
+    @Autowired
+    private IDelOutboundOpenService delOutboundOpenService;
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
     @PostMapping("/shipment")
@@ -48,7 +52,7 @@ public class DelOutboundOpenController extends BaseController {
     @ApiOperation(value = "出库管理 - Open - #D2 接收出库包裹信息", position = 200)
     @ApiImplicitParam(name = "dto", value = "ShipmentPackingMaterialRequestDto", dataType = "ShipmentPackingMaterialRequestDto")
     public R<Integer> shipmentPacking(@RequestBody @Validated ShipmentPackingMaterialRequestDto dto) {
-        return R.ok(this.delOutboundService.shipmentPacking(dto));
+        return R.ok(this.delOutboundOpenService.shipmentPacking(dto));
     }
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)

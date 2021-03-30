@@ -63,9 +63,22 @@ public class DelOutboundVO implements Serializable {
     @ApiModelProperty(value = "单据状态")
     private String state;
 
+    @ApiModelProperty(value = "提货方式")
+    private String deliveryMethod;
+
+    @ApiModelProperty(value = "提货时间")
+    private String deliveryTime;
+
+    @ApiModelProperty(value = "提货商/快递商")
+    private String deliveryAgent;
+
+    @ApiModelProperty(value = "提货/快递信息")
+    private String deliveryInfo;
+
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressVO address;
 
     @ApiModelProperty(value = "明细信息")
     private List<DelOutboundDetailVO> details;
+
 }

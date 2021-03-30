@@ -66,6 +66,9 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
 
+    @ApiModelProperty(value = "发货服务名称")
+    private String shipmentService;
+
     @ApiModelProperty(value = "装箱规则")
     private String packingRule;
 
@@ -129,6 +132,9 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "币种")
     private String currencyCode;
 
+    @ApiModelProperty(value = "异常状态")
+    private String exceptionState;
+
     @ApiModelProperty(value = "异常描述")
     private String exceptionMessage;
 
@@ -146,4 +152,8 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "提货/快递信息")
     private String deliveryInfo;
+
+    @ApiModelProperty(value = "挂号获取方式")
+    private String trackingAcquireType;
+
 }

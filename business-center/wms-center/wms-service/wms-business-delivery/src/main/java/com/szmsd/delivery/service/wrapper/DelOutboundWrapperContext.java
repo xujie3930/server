@@ -1,0 +1,89 @@
+package com.szmsd.delivery.service.wrapper;
+
+import com.szmsd.bas.api.domain.BasCountry;
+import com.szmsd.bas.domain.BasWarehouse;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundAddress;
+import com.szmsd.delivery.domain.DelOutboundDetail;
+
+import java.util.List;
+
+/**
+ * @author zhangyuyuan
+ * @date 2021-03-30 15:07
+ */
+public class DelOutboundWrapperContext {
+
+    private DelOutbound delOutbound;
+    private DelOutboundAddress address;
+    private List<DelOutboundDetail> detailList;
+    private BasWarehouse warehouse;
+    private BasCountry country;
+    private List<BaseProduct> productList;
+
+    public DelOutboundWrapperContext() {
+    }
+
+    public DelOutboundWrapperContext(DelOutbound delOutbound, DelOutboundAddress address, List<DelOutboundDetail> detailList, BasWarehouse warehouse, BasCountry country) {
+        this();
+        this.delOutbound = delOutbound;
+        this.address = address;
+        this.detailList = detailList;
+        this.warehouse = warehouse;
+        this.country = country;
+    }
+
+    public DelOutboundWrapperContext(DelOutbound delOutbound, DelOutboundAddress address, List<DelOutboundDetail> detailList, BasWarehouse warehouse, BasCountry country, List<BaseProduct> productList) {
+        this(delOutbound, address, detailList, warehouse, country);
+        this.productList = productList;
+    }
+
+    public DelOutbound getDelOutbound() {
+        return delOutbound;
+    }
+
+    public void setDelOutbound(DelOutbound delOutbound) {
+        this.delOutbound = delOutbound;
+    }
+
+    public DelOutboundAddress getAddress() {
+        return address;
+    }
+
+    public void setAddress(DelOutboundAddress address) {
+        this.address = address;
+    }
+
+    public List<DelOutboundDetail> getDetailList() {
+        return detailList;
+    }
+
+    public void setDetailList(List<DelOutboundDetail> detailList) {
+        this.detailList = detailList;
+    }
+
+    public BasWarehouse getWarehouse() {
+        return warehouse;
+    }
+
+    public void setWarehouse(BasWarehouse warehouse) {
+        this.warehouse = warehouse;
+    }
+
+    public BasCountry getCountry() {
+        return country;
+    }
+
+    public void setCountry(BasCountry country) {
+        this.country = country;
+    }
+
+    public List<BaseProduct> getProductList() {
+        return productList;
+    }
+
+    public void setProductList(List<BaseProduct> productList) {
+        this.productList = productList;
+    }
+}
