@@ -37,6 +37,7 @@ public class HttpConfig {
     // Outbound
     private OutboundConfig outbound;
     private Bas bas;
+    private ExceptionInfo exceptionInfo;
     // ------------------------------------------pricedProductUrl--------------------
     // 计价系统PRC接口 https://pricedproduct-internalapi-external.dsloco.com/swagger/index.html
     private String pricedProductUrl;
@@ -191,5 +192,12 @@ public class HttpConfig {
          */
         private String processingUpdate;
 
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class ExceptionInfo {
+        // 异常处理
+        private String processing;
     }
 }

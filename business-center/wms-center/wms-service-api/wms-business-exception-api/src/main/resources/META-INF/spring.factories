@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.szmsd.exception.api.factory.ExceptionInfoFeignFallback,\
+  com.szmsd.exception.api.service.impl.ExceptionInfoClientServiceImpl
+
+  

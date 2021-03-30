@@ -1,6 +1,7 @@
 package com.szmsd.bas.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import java.util.Date;
 import io.swagger.annotations.ApiModel;
@@ -78,6 +79,7 @@ public class BasSellerCertificate extends BaseEntity {
 
     @ApiModelProperty(value = "登记时间")
     @Excel(name = "登记时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date registrationDate;
 
     @ApiModelProperty(value = "是否生效")
