@@ -37,7 +37,7 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
     public List<InboundReceiptDetailVO> selectList(InboundReceiptDetailQueryDTO queryDto) {
         List<InboundReceiptDetailVO> inboundReceiptDetailVOS = baseMapper.selectList(queryDto);
         inboundReceiptDetailVOS.forEach(inboundReceiptDetailVO -> {
-            List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setBusinessNo(inboundReceiptDetailVO.getWarehouseNo()).setBusinessItemNo(inboundReceiptDetailVO.getId().toString()));
+            List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.INBOUND_RECEIPT_EDITION_IMAGE.getAttachmentType()).setBusinessNo(inboundReceiptDetailVO.getWarehouseNo()).setBusinessItemNo(inboundReceiptDetailVO.getId().toString()));
             if (CollectionUtils.isNotEmpty(attachment)) {
                 inboundReceiptDetailVO.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
             }
