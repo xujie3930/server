@@ -16,11 +16,13 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(tags = {"仓库"})
 @RestController
@@ -75,8 +77,11 @@ public class BasWarehouseController extends BaseController {
     @PreAuthorize("@ss.hasPermi('bas:warehouse:queryInboundWarehouse')")
     @GetMapping("/queryInboundWarehouse")
     @ApiOperation(value = "查询仓库下拉", notes = "全部的仓库")
-    public R<List<WarehouseKvDTO>> queryInboundWarehouse() {
+    public R<List<WarehouseKvDTO>> queryInboundWarehouse(String country) {
         List<WarehouseKvDTO> kvList = basWarehouseService.selectInboundWarehouse();
+        if (StringUtils.isNotEmpty(country))  {
+            kvList = kvList.stream().filter(kv -> country.equals(kv.getCountry())).collect(Collectors.toList());
+        }
         return R.ok(kvList);
     }
 
