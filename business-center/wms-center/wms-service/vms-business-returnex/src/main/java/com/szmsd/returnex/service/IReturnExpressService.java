@@ -73,4 +73,11 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @return 返回结果
      */
     int updateExpressInfo(ReturnExpressAddDTO expressUpdateDTO);
+
+    /**
+     * 新增退件单-生成预报单号
+     *
+     * @return 返回结果
+     */
+    String createExpectedNo();
 }

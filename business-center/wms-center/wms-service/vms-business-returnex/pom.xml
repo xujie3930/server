@@ -93,6 +93,10 @@
             <artifactId>vms-business-returnex-api</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>business-basic-api</artifactId>
+        </dependency>
 
     </dependencies>
 
