@@ -99,7 +99,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R preOnlineIncome(CustPayDTO dto) {
         if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
-            return R.failed("客户编码/币种/金额不能为空");
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         RechargesRequestDTO rechargesRequestDTO=new RechargesRequestDTO();
         //填充rechargesRequestDTO的信息
@@ -144,7 +144,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R warehouseFeeDeductions(CustPayDTO dto) {
         if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
-            return R.failed("客户编码/币种/金额不能为空");
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         if(dto.getPayType()==null){
             return R.failed("支付类型为空");
@@ -159,7 +159,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         CustPayDTO dto=new CustPayDTO();
         BeanUtils.copyProperties(cfbDTO,dto);
         if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
-            return R.failed("客户编码/币种/金额不能为空");
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         dto.setPayType(BillEnum.PayType.FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE);
@@ -173,7 +173,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         CustPayDTO dto=new CustPayDTO();
         BeanUtils.copyProperties(cfbDTO,dto);
         if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
-            return R.failed("客户编码/币种/金额不能为空");
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         dto.setPayType(BillEnum.PayType.FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_THAW);
@@ -223,7 +223,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R onlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
         if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
-            return R.failed("客户编码/币种/金额不能为空");
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.ONLINE_INCOME);
@@ -241,7 +241,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R offlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
         if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
-            return R.failed("客户编码/币种/金额不能为空");
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);
@@ -258,10 +258,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R balanceExchange(CustPayDTO dto) {
         if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
-            return R.failed("客户编码/币种/金额不能为空");
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode2(),dto.getAmount())){
-            return R.failed("客户编码/币种/金额不能为空");
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         dto.setPayType(BillEnum.PayType.EXCHANGE);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
