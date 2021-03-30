@@ -7,7 +7,9 @@ import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.enums.SqlLike;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szmsd.bas.api.service.BasWarehouseClientService;
+import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
@@ -21,14 +23,16 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
+import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
-import com.szmsd.delivery.service.wrapper.IDelOutboundHttpWrapperService;
 import com.szmsd.delivery.vo.*;
+import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.ShipmentCancelRequestDto;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
@@ -61,13 +65,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Autowired
     private SerialNumberClientService serialNumberClientService;
     @Autowired
-    private IDelOutboundHttpWrapperService delOutboundHttpWrapperService;
-    @Autowired
     private BaseProductClientService baseProductClientService;
     @Autowired
-    private BasWarehouseClientService basWarehouseClientService;
-    @Autowired
     private InventoryFeignClientService inventoryFeignClientService;
+    @Autowired
+    private IHtpOutboundClientService htpOutboundClientService;
+    @Autowired
+    private RemoteAttachmentService remoteAttachmentService;
 
     /**
      * 查询出库单模块
@@ -163,6 +167,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.freeze(delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), dto.getDetails());
         // 默认状态
         delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
+        // 默认异常状态
+        delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         // 计算发货类型
         delOutbound.setShipmentType(this.buildShipmentType(dto));
         // 保存出库单
@@ -174,6 +180,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.saveAddress(dto, delOutbound.getOrderNo());
         // 保存明细
         this.saveDetail(dto, delOutbound.getOrderNo());
+        // 附件信息
+        AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(delOutbound.getOrderNo()).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
+        this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         return insert;
     }
 
@@ -276,6 +285,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.saveDetail(dto, orderNo);
         // 计算发货类型
         inputDelOutbound.setShipmentType(this.buildShipmentType(dto));
+        // 附件信息
+        AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(delOutbound.getOrderNo()).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
+        this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         // 更新
         return baseMapper.updateById(inputDelOutbound);
     }
@@ -391,7 +403,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         ShipmentCancelRequestDto requestDto = new ShipmentCancelRequestDto();
         requestDto.setWarehouseCode(delOutbound.getWarehouseCode());
         requestDto.setOrderNoList(orderNos);
-        this.delOutboundHttpWrapperService.shipmentDelete(requestDto);
+        this.htpOutboundClientService.shipmentDelete(requestDto);
         // 返回处理结果
         return i;
     }
@@ -428,6 +440,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getOperationType, dto.getOperationType());
         updateWrapper.set(DelOutbound::getOperationTime, dto.getOperationTime());
         updateWrapper.set(DelOutbound::getRemark, dto.getRemark());
+        // 仓库开始处理
+        if (DelOutboundOperationTypeEnum.PROCESSING.getCode().equals(dto.getOperationType())) {
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
+        }
+        // 仓库已发货
+        else if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.COMPLETED.getCode());
+        }
         return this.baseMapper.update(null, updateWrapper);
     }
 
@@ -509,6 +529,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public void bringVerifyFail(Long id, String exceptionMessage) {
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.AUDIT_FAILED.getCode());
+        updateWrapper.set(DelOutbound::getExceptionState, DelOutboundExceptionStateEnum.ABNORMAL.getCode());
         updateWrapper.set(DelOutbound::getExceptionMessage, exceptionMessage);
         updateWrapper.eq(DelOutbound::getId, id);
         this.update(updateWrapper);
@@ -518,6 +539,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public void bringVerifySuccess(DelOutbound delOutbound) {
         delOutbound.setState(DelOutboundStateEnum.DELIVERED.getCode());
+        delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         this.updateById(delOutbound);
     }
 }

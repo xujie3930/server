@@ -1,5 +1,6 @@
 package com.szmsd.delivery.dto;
 
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -85,4 +86,7 @@ public class DelOutboundDto implements Serializable {
     @NotNull(message = "明细信息不能为空")
     @ApiModelProperty(value = "明细信息")
     private List<DelOutboundDetailDto> details;
+
+    @ApiModelProperty(value = "文件信息")
+    private List<AttachmentDataDTO> documentsFiles;
 }

@@ -3,6 +3,7 @@ package com.szmsd.chargerules.service;
 
 import com.szmsd.chargerules.domain.BasSpecialOperation;
 import com.szmsd.chargerules.dto.BasSpecialOperationRequestDTO;
+import com.szmsd.chargerules.vo.BasSpecialOperationVo;
 import com.szmsd.common.core.domain.R;
 
 import java.util.List;
@@ -15,5 +16,5 @@ public interface IBaseInfoService {
 
     R update(BasSpecialOperation basSpecialOperation);
 
-    BasSpecialOperation details(int id);
+    BasSpecialOperationVo details(int id);
 }

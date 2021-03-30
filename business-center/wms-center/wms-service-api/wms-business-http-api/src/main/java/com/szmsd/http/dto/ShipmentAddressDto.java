@@ -2,7 +2,9 @@ package com.szmsd.http.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -11,6 +13,8 @@ import java.io.Serializable;
  * @date 2021-03-09 10:52
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(value = "ShipmentAddressDto", description = "ShipmentAddressDto对象")
 public class ShipmentAddressDto implements Serializable {
 

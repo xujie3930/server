@@ -4,10 +4,10 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.dao.BasAttachmentMapper;
 import com.szmsd.bas.domain.dto.BasAttachmentDTO;
 import com.szmsd.bas.domain.dto.BasAttachmentDataDTO;
-import com.szmsd.bas.enums.BasAttachmentTypeEnum;
 import com.szmsd.bas.service.IBasAttachmentService;
 import com.szmsd.bas.util.FileUtil;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
@@ -62,22 +62,22 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
      *
      * @param businessNo 业务编号
      * @param filesUrl 文件路径 - 多文件
-     * @param basAttachmentTypeEnum 文件上传业务枚举
+     * @param attachmentTypeEnum 文件上传业务枚举
      */
     @Override
-    public void insert(String businessNo, String businessItemNo, List<String> filesUrl, BasAttachmentTypeEnum basAttachmentTypeEnum) {
-        log.info("保存附件：{}, {}, {}, {}", businessNo, businessItemNo, filesUrl, basAttachmentTypeEnum);
+    public void insert(String businessNo, String businessItemNo, List<String> filesUrl, AttachmentTypeEnum attachmentTypeEnum) {
+        log.info("保存附件：{}, {}, {}, {}", businessNo, businessItemNo, filesUrl, attachmentTypeEnum);
         if (CollectionUtils.isEmpty(filesUrl)) {
             log.info("保存附件：附件地址为空");
             return;
         }
         filesUrl.forEach(fileUrl -> {
             BasAttachment basAttachment = new BasAttachment();
-            basAttachment.setBusinessCode(basAttachmentTypeEnum.getBusinessCode());
-            basAttachment.setBusinessType(basAttachmentTypeEnum.getBusinessType());
+            basAttachment.setBusinessCode(attachmentTypeEnum.getBusinessCode());
+            basAttachment.setBusinessType(attachmentTypeEnum.getBusinessType());
             basAttachment.setBusinessNo(businessNo);
             Optional.ofNullable(businessItemNo).ifPresent(item -> basAttachment.setBusinessItemNo(item));
-            basAttachment.setAttachmentType(basAttachmentTypeEnum.getAttachmentType());
+            basAttachment.setAttachmentType(attachmentTypeEnum.getAttachmentType());
             basAttachment.setAttachmentId(Math.abs(UUID.getRandom().nextInt()));
             basAttachment.setAttachmentName(FileUtil.getFileName(fileUrl));
             basAttachment.setAttachmentPath(env.getProperty("file.mainUploadFolder") + FileUtil.getFileRelativePath(fileUrl));
@@ -89,9 +89,9 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
     }
 
     @Override
-    public void insertList(String businessNo, String businessItemNo, List<BasAttachmentDataDTO> fileList, BasAttachmentTypeEnum basAttachmentTypeEnum) {
+    public void insertList(String businessNo, String businessItemNo, List<BasAttachmentDataDTO> fileList, AttachmentTypeEnum attachmentTypeEnum) {
         List<String> filesUrl = fileList.stream().map(BasAttachmentDataDTO::getAttachmentUrl).collect(Collectors.toList());
-        insert(businessNo, businessItemNo, filesUrl, basAttachmentTypeEnum);
+        insert(businessNo, businessItemNo, filesUrl, attachmentTypeEnum);
     }
 
     /**
@@ -114,7 +114,7 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
     public void saveAndUpdate(BasAttachmentDTO basAttachmentDto) {
         String businessNo = basAttachmentDto.getBusinessNo();
         AssertUtil.isTrue(StringUtils.isNotEmpty(businessNo), ExceptionMessageEnum.CANNOTBENULL, "businessNo");
-        BasAttachmentTypeEnum attachmentTypeEnum = basAttachmentDto.getAttachmentTypeEnum();
+        AttachmentTypeEnum attachmentTypeEnum = basAttachmentDto.getAttachmentTypeEnum();
         AssertUtil.notNull(attachmentTypeEnum, ExceptionMessageEnum.CANNOTBENULL, "attachmentTypeEnum");
         List<BasAttachmentDataDTO> fileList = basAttachmentDto.getFileList();
 
