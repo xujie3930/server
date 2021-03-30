@@ -2,6 +2,7 @@ package com.szmsd.returnex.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,7 +48,6 @@ public class ReturnExpressListQueryDTO {
     public void setForecastNumber(String forecastNumber) {
         this.forecastNumber = forecastNumber;
         Optional.ofNullable(forecastNumber)
-                .filter(x -> x.contains(","))
                 .ifPresent(res -> forecastNumberList = Arrays.asList(res.split(",")));
     }
 
@@ -60,7 +60,6 @@ public class ReturnExpressListQueryDTO {
     public void setReturnNo(String returnNo) {
         this.returnNo = returnNo;
         Optional.ofNullable(returnNo)
-                .filter(x -> x.contains(","))
                 .ifPresent(res -> returnNoList = Arrays.asList(res.split(",")));
     }
 
@@ -68,10 +67,10 @@ public class ReturnExpressListQueryDTO {
     private List<String> returnNoList;
 
     @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]")
-    private String returnType;
+    private ReturnExpressEnums.ReturnTypeEnum returnType;
 
     @ApiModelProperty(value = "类型[退件预报 VMS通知退件]")
-    private String returnSource;
+    private ReturnExpressEnums.ReturnSourceEnum returnSource;
 
     @ApiModelProperty(value = "退件目标仓库编码")
     private String warehouseCode;
@@ -80,7 +79,7 @@ public class ReturnExpressListQueryDTO {
     private String applyProcessMethod;
 
     @ApiModelProperty(value = "处理状态编码")
-    private String dealStatus;
+    private ReturnExpressEnums.ProcessTypeEnum processType;
 
     @ApiModelProperty(value = "无名件列表查询", hidden = true)
     private Boolean noUserQuery = false;

@@ -57,10 +57,6 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     @Excel(name = "退件可扫描编码")
     private String scanCode;
 
-    @ApiModelProperty(value = "入库方式编码")
-    @Excel(name = "入库方式编码")
-    private String warehouseMethodCode;
-
     @ApiModelProperty(value = "预报单号")
     @Excel(name = "预报单号")
     private String expectedNo;
@@ -73,8 +69,8 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     @Excel(name = "申请处理方式")
     private ReturnExpressEnums.ProcessTypeEnum processType;
 
-    @ApiModelProperty(value = "类型[ 退件预报，VMS通知退件]")
-    @Excel(name = "类型[ 退件预报，VMS通知退件]")
+    @ApiModelProperty(value = "类型")
+    @Excel(name = "类型")
     private String returnType;
 
     @ApiModelProperty(value = "退件目标仓库编码")
@@ -107,15 +103,11 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
 
     @ApiModelProperty(value = "退件单来源[默认：1：申请退件]")
     @Excel(name = "退件单来源[默认：1：申请退件]")
-    private Integer returnSource;
+    private ReturnExpressEnums.ReturnSourceEnum returnSource;
 
     @ApiModelProperty(value = "处理状态编码")
     @Excel(name = "处理状态编码")
     private ReturnExpressEnums.DealStatusEnum dealStatus;
-
-    @ApiModelProperty(value = "退货Tracking 号")
-    @Excel(name = "退货Tracking 号")
-    private String returnTracking;
 
     @Override
     public String toString() {

@@ -48,7 +48,7 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @param returnProcessingReqDTO 接收VMS仓库退件处理结果
      * @return 操作结果
      */
-    int updateProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO);
+    int updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO);
 
     /**
      * 无名件管理列表 - 分页
