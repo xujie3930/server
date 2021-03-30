@@ -47,4 +47,10 @@ public class BasSpecialOperationRequestDTO {
     @ApiModelProperty(value = "备注")
     private String remark;
 
+    @ApiModelProperty(value = "计费单位")
+    private String unit;
+
+    @ApiModelProperty(value = "oms备注")
+    private String omsRemark;
+
 }
