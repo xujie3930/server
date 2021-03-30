@@ -5,6 +5,7 @@ import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.http.vo.PricedProductInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,11 @@ public class HtpPricedProductClientServiceImpl implements IHtpPricedProductClien
 
     @Autowired
     private HtpPricedProductFeignService htpPricedProductFeignService;
+
+    @Override
+    public PricedProductInfo info(String productCode) {
+        return R.getDataAndException(this.htpPricedProductFeignService.info(productCode));
+    }
 
     @Override
     public ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command) {
