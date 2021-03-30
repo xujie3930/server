@@ -137,4 +137,9 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
     }
 
+    @Override
+    public BasSpecialOperation details(int id) {
+        return baseInfoMapper.selectById(id);
+    }
+
 }

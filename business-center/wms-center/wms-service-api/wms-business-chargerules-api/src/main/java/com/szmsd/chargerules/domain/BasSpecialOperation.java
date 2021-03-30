@@ -59,6 +59,14 @@ public class BasSpecialOperation extends BaseEntity {
     @ApiModelProperty(value = "系数")
     private Integer coefficient;
 
+    @ApiModelProperty(value = "计费单位")
+    @TableField
+    private String unit;
+
+    @ApiModelProperty(value = "oms备注")
+    @TableField
+    private String omsRemark;
+
     @ApiModelProperty(value = "状态（审核结果）")
     private String status;
 

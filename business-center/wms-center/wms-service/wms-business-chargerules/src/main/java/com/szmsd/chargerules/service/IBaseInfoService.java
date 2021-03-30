@@ -15,4 +15,5 @@ public interface IBaseInfoService {
 
     R update(BasSpecialOperation basSpecialOperation);
 
+    BasSpecialOperation details(int id);
 }

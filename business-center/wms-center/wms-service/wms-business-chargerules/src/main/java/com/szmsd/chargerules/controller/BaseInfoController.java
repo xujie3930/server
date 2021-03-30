@@ -52,4 +52,16 @@ public class BaseInfoController extends BaseController {
     public R update(@Validated @RequestBody BasSpecialOperation basSpecialOperation) {
         return baseInfoService.update(basSpecialOperation);
     }
+
+    /**
+     * 特殊操作详情
+     * @param id id
+     * @return R
+     */
+    @GetMapping("/specialOperation/details/{id}")
+    @ApiOperation(value = "特殊操作待办 - 详情")
+    public R<BasSpecialOperation> details(@PathVariable int id) {
+        return R.ok(baseInfoService.details(id));
+    }
+
 }
