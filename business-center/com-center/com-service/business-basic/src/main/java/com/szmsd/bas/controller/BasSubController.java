@@ -58,6 +58,13 @@ public class BasSubController extends BaseController {
         return getDataTable(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('bas:bassub:listApi')")
+    @ApiOperation(value = "查询子类别列表api", notes = "查询子类别列表api")
+    @GetMapping("/listApi")
+    public List<BasSub> listApi(@RequestParam("mainCode") String mainCode,@RequestParam("subValue") String subValue) {
+        return basSubService.selectBasSubList(new BasSub(mainCode,subValue));
+    }
+
     @ApiOperation(value = "根据code查询子类别（下拉框）")
     @RequestMapping("/getSub")
     public R<Map<String, List<BasSubWrapperVO>>> getSub(@RequestParam("code") String code) {

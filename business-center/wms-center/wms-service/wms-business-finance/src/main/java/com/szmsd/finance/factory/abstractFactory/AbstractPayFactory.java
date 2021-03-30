@@ -1,11 +1,13 @@
 package com.szmsd.finance.factory.abstractFactory;
 
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
+import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.util.SnowflakeId;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -36,6 +38,9 @@ public abstract class AbstractPayFactory {
 
     @Autowired
     AccountBalanceChangeMapper accountBalanceChangeMapper;
+
+    @Autowired
+    ISysDictDataService sysDictDataService;
 
     @Transactional
     public boolean updateBalance(CustPayDTO dto){
@@ -69,6 +74,11 @@ public abstract class AbstractPayFactory {
     public void recordOpLog(CustPayDTO dto,BigDecimal result){
         AccountBalanceChange accountBalanceChange=new AccountBalanceChange();
         BeanUtils.copyProperties(dto,accountBalanceChange);
+        if(StringUtils.isEmpty(accountBalanceChange.getCurrencyName())){
+            String currencyName=sysDictDataService.getCurrencyNameByCode(accountBalanceChange.getCurrencyCode());
+            accountBalanceChange.setCurrencyName(currencyName);
+        }
+
         accountBalanceChange.setSerialNum(SnowflakeId.getNextId12());
         setOpLogAmount(accountBalanceChange,dto.getAmount());
         accountBalanceChange.setCurrentBalance(result);

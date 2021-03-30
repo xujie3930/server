@@ -42,4 +42,6 @@ public interface IAccountBalanceService {
     BalanceDTO getBalance(String cusCode, String currencyCode);
 
     void setBalance(String cusCode, String currencyCode, BalanceDTO result);
+
+    boolean withDrawBalanceCheck(String cusCode, String currencyCode, BigDecimal amount);
 }

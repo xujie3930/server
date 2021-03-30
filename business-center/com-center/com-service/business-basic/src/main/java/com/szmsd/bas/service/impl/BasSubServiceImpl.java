@@ -64,6 +64,9 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
         if (StringUtils.isNotEmpty(basSub.getSubCode()) ) {
             where.like("sub_code", basSub.getSubCode());
         }
+        if (StringUtils.isNotEmpty(basSub.getSubValue()) ) {
+            where.like("sub_value", basSub.getSubValue());
+        }
         where.orderByDesc("create_time");
         return baseMapper.selectList(where);
     }

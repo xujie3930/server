@@ -61,6 +61,9 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         if(StringUtils.isEmpty(dto.getCusCode())){
             return R.failed("客户编码不能为空");
         }
+        if(!accountBalanceService.withDrawBalanceCheck(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
+            return R.failed("余额不足");
+        }
         dto.setSerialNo(SnowflakeId.getNextId12());
         PreWithdraw domain= new PreWithdraw();
         BeanUtils.copyProperties(dto,domain);

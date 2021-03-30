@@ -7,6 +7,7 @@ import com.szmsd.finance.domain.PreRecharge;
 import com.szmsd.finance.dto.PreRechargeAuditDTO;
 import com.szmsd.finance.dto.PreRechargeDTO;
 import com.szmsd.finance.service.IPreRechargeService;
+import com.szmsd.finance.service.ISysDictDataService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,5 +47,14 @@ public class PreRechargeController extends BaseController {
     @PostMapping("/audit")
     public R audit(@RequestBody PreRechargeAuditDTO dto){
         return preRechargeService.audit(dto);
+    }
+
+    @Autowired
+    ISysDictDataService sysDictDataService;
+
+    @ApiOperation(value="xxx")
+    @PostMapping("/test")
+    public String test(String s){
+        return sysDictDataService.getCurrencyNameByCode(s);
     }
 }

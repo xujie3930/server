@@ -16,6 +16,7 @@ import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
+import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.service.IThirdRechargeRecordService;
 import com.szmsd.finance.util.SnowflakeId;
 import com.szmsd.http.api.feign.HttpRechargeFeignService;
@@ -53,6 +54,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Autowired
     IThirdRechargeRecordService thirdRechargeRecordService;
+
+    @Autowired
+    ISysDictDataService sysDictDataService;
 
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
@@ -204,6 +208,12 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         accountBalanceMapper.update(null,lambdaUpdateWrapper);
     }
 
+    @Override
+    public boolean withDrawBalanceCheck(String cusCode, String currencyCode, BigDecimal amount) {
+        BigDecimal currentBalance = getCurrentBalance(cusCode, currencyCode);
+        return currentBalance.compareTo(amount)>0;
+    }
+
     /**
      * 线上充值
      * @param dto
@@ -310,8 +320,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     }
 
     private String getCurrencyName(String currencyCode) {
-        //for test
-        return "人民币";
+        return sysDictDataService.getCurrencyNameByCode(currencyCode);
     }
 
     /**

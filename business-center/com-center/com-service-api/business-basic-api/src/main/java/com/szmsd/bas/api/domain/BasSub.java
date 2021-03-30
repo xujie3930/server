@@ -144,4 +144,11 @@ public class BasSub {
     @ApiModelProperty(value = "更新者")
     @TableField(exist = false)
     private String updateByName;
+
+    public BasSub() {}
+
+    public BasSub(String mainCode,String subValue) {
+        this.mainCode = mainCode;
+        this.subValue = subValue;
+    }
 }
