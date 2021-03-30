@@ -1,6 +1,6 @@
 package com.szmsd.bas.domain.dto;
 
-import com.szmsd.bas.enums.BasAttachmentTypeEnum;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -32,6 +32,6 @@ public class BasAttachmentDTO {
     private List<BasAttachmentDataDTO> fileList;
 
     @ApiModelProperty(value = "附件业务枚举")
-    private BasAttachmentTypeEnum attachmentTypeEnum;
+    private AttachmentTypeEnum attachmentTypeEnum;
 
 }
