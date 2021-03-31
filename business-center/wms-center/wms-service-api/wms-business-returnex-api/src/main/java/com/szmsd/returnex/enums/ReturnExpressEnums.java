@@ -3,7 +3,6 @@ package com.szmsd.returnex.enums;
 import lombok.*;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 /**
  * @ClassName: ReturnExpressEnums
@@ -92,7 +91,7 @@ public class ReturnExpressEnums {
      */
     @Getter
     @AllArgsConstructor
-    public enum DestinationWarehouseEnum {
+    public enum WarehouseEnum {
         /**
          * sz
          */

@@ -106,7 +106,7 @@
         <if test="orderNo != null and orderNo != ''">AND t.order_no = #{orderNo}</if>
         <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
         <if test="cusCode != null and cusCode != ''">AND t.cus_code = #{cusCode}</if>
-        <if test="status != null and status != ''">AND t.cus_code = #{status}</if>
+        <if test="status != null and status != ''">AND t.status = #{status}</if>
         <if test="deliveryWayCode != null and deliveryWayCode != ''">AND t.delivery_way_code = #{deliveryWayCode}</if>
         <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
         <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>
