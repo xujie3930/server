@@ -1,6 +1,8 @@
 package com.szmsd.bas.api.domain;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -50,4 +52,12 @@ public class BasRegion extends BaseEntity {
     @ApiModelProperty(value = "英文名")
     @Excel(name = "英文名")
     private String enName;
+
+    @ApiModelProperty(value = "创建ID",hidden = true)
+    @TableField(fill = FieldFill.INSERT)
+    private String createBy;
+
+    @ApiModelProperty(value = "修改者ID",hidden = true)
+    @TableField(fill = FieldFill.UPDATE)
+    private String updateBy;
 }
