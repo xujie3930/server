@@ -9,10 +9,11 @@ import com.szmsd.http.dto.PackingRequest;
 import com.szmsd.http.vo.ResponseVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(contextId = "FeignClient.HtpExceptionFeignService", name = BusinessHttpInterface.SERVICE_NAME, fallbackFactory = HtpExceptionFeignFallback.class)
 public interface HtpExceptionFeignService {
-    @PostMapping("/api/exception/http/processing")
+    @PutMapping("/api/exception/http/processing")
     R<ResponseVO> processing(@RequestBody ExceptionProcessRequest exceptionProcessRequest);
 }
