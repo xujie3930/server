@@ -212,7 +212,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             sellerRequest.setIsActive(true);
             R<ResponseVO> result = htpBasFeignService.createSeller(sellerRequest);
             if(!result.getData().getSuccess()){
-                throw new BaseException("传wms失败"+r.getMsg());
+                throw new BaseException("传wms失败:" + result.getData().getMessage());
             }
             //注册信息到卖家表
             baseMapper.insert(basSeller);
@@ -281,7 +281,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             ObjectUtil.fillNull(sellerRequest,bas);
             R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
             if(!r.getData().getSuccess()){
-                throw new BaseException("传wms失败"+r.getMsg());
+                throw new BaseException("传wms失败:"+r.getData().getMessage());
             }
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
             if(CollectionUtils.isNotEmpty(basSellerInfoDto.getBasSellerCertificateList())) {
@@ -313,7 +313,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                    ObjectUtil.fillNull(sellerRequest, bas);
                    R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
                    if(!r.getData().getSuccess()){
-                       throw new BaseException("传wms失败"+r.getMsg());
+                       throw new BaseException("传wms失败:"+r.getData().getMessage());
                    }
                }
             SysUserDto userDto = new SysUserDto();
