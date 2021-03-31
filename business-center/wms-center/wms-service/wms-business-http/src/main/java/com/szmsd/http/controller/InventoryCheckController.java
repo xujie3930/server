@@ -3,7 +3,7 @@ package com.szmsd.http.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.*;
-import com.szmsd.http.service.IBasService;
+import com.szmsd.http.service.IInventoryCheckService;
 import com.szmsd.http.vo.ResponseVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,12 +20,12 @@ import javax.annotation.Resource;
 public class InventoryCheckController extends BaseController {
 
     @Resource
-    private IBasService iBasService;
+    private IInventoryCheckService inventoryCheckService;
 
     @PostMapping("/counting")
     @ApiOperation(value = "I3 创建/修改盘点单")
-    public R<ResponseVO> update(@RequestBody SpecialOperationResultRequest specialOperationResultRequest) {
-        ResponseVO responseVO = iBasService.update(specialOperationResultRequest);
+    public R<ResponseVO> counting(@RequestBody CountingRequest countingRequest) {
+        ResponseVO responseVO = inventoryCheckService.counting(countingRequest);
         return responseVO != null ? R.ok(responseVO) : R.failed();
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(contextId = "FeignClient.HtpInventoryCheckFeignService", name = BusinessHttpInterface.SERVICE_NAME, fallbackFactory = HtpInventoryCheckFeignFallback.class)
 public interface HtpInventoryCheckFeignService {
 
-    @PostMapping("/api/inventory/counting")
+    @PostMapping("/api/inventory/check/http/counting")
     R<ResponseVO> counting(@RequestBody CountingRequest countingRequest);
 
 }
