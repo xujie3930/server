@@ -225,7 +225,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProduct.setWarehouseAcceptance(false);
         baseProduct.setWeight(baseProduct.getInitWeight());
         baseProduct.setLength(baseProduct.getInitLength());
-        baseProduct.setHeight(baseProduct.getInitWidth());
+        baseProduct.setHeight(baseProduct.getInitHeight());
         baseProduct.setVolume(baseProduct.getInitVolume());
         //传oms修改字段
         BaseProductOms baseProductOms = BeanMapperUtil.map(baseProductDto, BaseProductOms.class);
