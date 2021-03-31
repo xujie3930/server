@@ -14,11 +14,11 @@ import com.szmsd.common.log.enums.BusinessType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
@@ -127,6 +127,14 @@ public class BasRegionController extends BaseController {
     public R<List<BasRegionSelectListVO>> countryList(BasRegionSelectListQueryDto queryDto) {
         queryDto.setType(1);
         return R.ok(basRegionService.selectList(queryDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('BasRegion:BasRegion:country')")
+    @GetMapping("/queryByCountryCode")
+    @ApiOperation(value = "基础资料 - 地区信息 - 国家", notes = "基础资料 - 地区信息 - 国家")
+    public R<BasRegionSelectListVO> queryByCountryCode(@RequestParam("addressCode") String addressCode) {
+        List<BasRegionSelectListVO> data = basRegionService.selectList(new BasRegionSelectListQueryDto().setType(1).setAddressCode(addressCode));
+        return CollectionUtils.isEmpty(data) ? R.ok() : R.ok(data.get(0));
     }
 
     @PreAuthorize("@ss.hasPermi('BasRegion:BasRegion:provinceList')")
