@@ -1,6 +1,6 @@
 package com.szmsd.delivery.service.wrapper;
 
-import com.szmsd.bas.api.domain.BasCountry;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -19,13 +19,13 @@ public class DelOutboundWrapperContext {
     private DelOutboundAddress address;
     private List<DelOutboundDetail> detailList;
     private BasWarehouse warehouse;
-    private BasCountry country;
+    private BasRegionSelectListVO country;
     private List<BaseProduct> productList;
 
     public DelOutboundWrapperContext() {
     }
 
-    public DelOutboundWrapperContext(DelOutbound delOutbound, DelOutboundAddress address, List<DelOutboundDetail> detailList, BasWarehouse warehouse, BasCountry country) {
+    public DelOutboundWrapperContext(DelOutbound delOutbound, DelOutboundAddress address, List<DelOutboundDetail> detailList, BasWarehouse warehouse, BasRegionSelectListVO country) {
         this();
         this.delOutbound = delOutbound;
         this.address = address;
@@ -34,7 +34,7 @@ public class DelOutboundWrapperContext {
         this.country = country;
     }
 
-    public DelOutboundWrapperContext(DelOutbound delOutbound, DelOutboundAddress address, List<DelOutboundDetail> detailList, BasWarehouse warehouse, BasCountry country, List<BaseProduct> productList) {
+    public DelOutboundWrapperContext(DelOutbound delOutbound, DelOutboundAddress address, List<DelOutboundDetail> detailList, BasWarehouse warehouse, BasRegionSelectListVO country, List<BaseProduct> productList) {
         this(delOutbound, address, detailList, warehouse, country);
         this.productList = productList;
     }
@@ -71,11 +71,11 @@ public class DelOutboundWrapperContext {
         this.warehouse = warehouse;
     }
 
-    public BasCountry getCountry() {
+    public BasRegionSelectListVO getCountry() {
         return country;
     }
 
-    public void setCountry(BasCountry country) {
+    public void setCountry(BasRegionSelectListVO country) {
         this.country = country;
     }
 

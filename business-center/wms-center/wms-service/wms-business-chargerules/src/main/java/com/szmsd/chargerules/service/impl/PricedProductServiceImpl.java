@@ -1,7 +1,7 @@
 package com.szmsd.chargerules.service.impl;
 
-import com.szmsd.bas.api.domain.BasCountry;
-import com.szmsd.bas.api.feign.BasCountryFeignService;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.chargerules.dto.CreateProductDTO;
@@ -39,7 +39,7 @@ public class PricedProductServiceImpl implements IPricedProductService {
     private HtpPricedProductFeignService htpPricedProductFeignService;
 
     @Resource
-    private BasCountryFeignService basCountryFeignService;
+    private BasRegionFeignService basCountryFeignService;
 
     @Resource
     private BasWarehouseFeignService basWarehouseFeignService;
@@ -75,10 +75,10 @@ public class PricedProductServiceImpl implements IPricedProductService {
         getPricedProductsCommand.setFromAddress(fromAddress);
 
         Address toAddress = new Address();
-        R<BasCountry> countryR = basCountryFeignService.queryByCountryCode(freightCalculationDTO.getCountry());
+        R<BasRegionSelectListVO> countryR = basCountryFeignService.queryByCountryCode(freightCalculationDTO.getCountry());
         if (countryR != null && null != countryR.getData()) {
-            BasCountry country = countryR.getData();
-            toAddress.setCountry(new CountryInfo(country.getCountryCode(), null, country.getCountryNameEn(), country.getCountryName()));
+            BasRegionSelectListVO country = countryR.getData();
+            toAddress.setCountry(new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName()));
         }
         toAddress.setPostCode(freightCalculationDTO.getPostCode());
         getPricedProductsCommand.setToAddress(toAddress);

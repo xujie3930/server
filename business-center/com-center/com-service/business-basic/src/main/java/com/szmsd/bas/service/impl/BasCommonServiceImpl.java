@@ -38,20 +38,14 @@ public class BasCommonServiceImpl implements BasCommonService {
             case BAS_SUB:
                 res = getBasSub();
                 break;
-            case BAS_CITY:
-                res = getCity();
-                break;
-            case BAS_COUNTRY:
-                res = getCountry();
+            case BAS_REGION:
+                res = getRegion();
                 break;
             case BAS_PRODUCT:
                 res = getBasProductType();
                 break;
             case BAS_CUSTOMER:
                 res = getCustomer();
-                break;
-            case BAS_PROVINCE:
-                res = getProvince();
                 break;
             case BAS_EMPLOYEE:
                 res = getBasEmployees();
@@ -118,34 +112,12 @@ public class BasCommonServiceImpl implements BasCommonService {
     }
 
     /**
-     * 省
+     * 地区
      *
      * @return
      */
-    private Map<String, Map<String, String>> getProvince() {
-        List<Map<String, String>> provinces = mapper.getProvince();
-        return ListUtils.emptyIfNull(provinces).stream()
-                .filter(e -> StringUtils.isNotEmpty(e.get("code"))).collect(Collectors.toMap(k -> k.get("code"), v -> v, (k1, k2) -> k1));
-    }
-
-    /**
-     * 市
-     *
-     * @return
-     */
-    private Map<String, Map<String, String>> getCity() {
-        List<Map<String, String>> citys = mapper.getCity();
-        return ListUtils.emptyIfNull(citys).stream()
-                .filter(e -> StringUtils.isNotEmpty(e.get("code"))).collect(Collectors.toMap(k -> k.get("code"), v -> v, (k1, k2) -> k1));
-    }
-
-    /**
-     * 国家
-     *
-     * @return
-     */
-    private Map<String, Map<String, String>> getCountry() {
-        List<Map<String, String>> countries = mapper.getCountry();
+    private Map<String, Map<String, String>> getRegion() {
+        List<Map<String, String>> countries = mapper.getRegion();
         return ListUtils.emptyIfNull(countries).stream()
                 .filter(e -> StringUtils.isNotEmpty(e.get("code"))).collect(Collectors.toMap(k -> k.get("code"), v -> v, (k1, k2) -> k1));
     }

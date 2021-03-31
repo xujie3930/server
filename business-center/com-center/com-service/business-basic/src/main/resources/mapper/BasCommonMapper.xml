@@ -31,29 +31,13 @@
         from bas_product_type bpt
     </select>
 
-    <select id="getCountry" resultType="java.util.Map">
+    <select id="getRegion" resultType="java.util.Map">
         select
-        bc.country_code as code,
-        bc.country_name as zhName,
-        bc.country_name_en as enName,
-        bc.country_name_ar as arName
-        from bas_country bc
-    </select>
-    <select id="getCity" resultType="java.util.Map">
-        select
-        bc.city_code as code,
-        bc.city_name as zhName,
-        bc.city_name_en as enName,
-        bc.city_name_ar as arName
-        from bas_city bc
-    </select>
-    <select id="getProvince" resultType="java.util.Map">
-        select
-        bp.province_code as code,
-        bp.province_name as zhName,
-        bp.province_name_en as enName,
-        bp.province_name_ar as arName
-        from bas_province bp
+        bc.address_code as code,
+        bc.name as zhName,
+        bc.en_name as enName,
+        '' as arName
+        from bas_region bc
     </select>
     <select id="getBasSub" resultType="java.util.Map">
          select
