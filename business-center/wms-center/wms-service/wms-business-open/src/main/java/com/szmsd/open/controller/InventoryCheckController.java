@@ -1,7 +1,5 @@
 package com.szmsd.open.controller;
 
-import com.szmsd.common.log.annotation.Log;
-import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.inventory.api.service.IInventoryCheckClientService;
 import com.szmsd.inventory.domain.dto.AdjustRequestDto;
 import com.szmsd.inventory.domain.dto.CountingRequestDto;
