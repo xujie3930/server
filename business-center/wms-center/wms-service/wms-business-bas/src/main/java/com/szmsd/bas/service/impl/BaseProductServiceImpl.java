@@ -92,6 +92,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
+        if(queryDto.getIsActive()!=null){
+            queryWrapper.eq("is_active",queryDto.getIsActive());
+        }
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
     }
@@ -103,6 +106,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seller_code", basSeller.getSellerCode());
+        queryWrapper.eq("is_active", true);
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
@@ -130,6 +134,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         if (CollectionUtils.isEmpty(codes)) {
             return Collections.emptyList();
         } else {
+            queryWrapper.eq("is_active", true);
             queryWrapper.in("code", codes);
         }
         return BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductMeasureDto.class);
@@ -220,7 +225,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProduct.setWarehouseAcceptance(false);
         baseProduct.setWeight(baseProduct.getInitWeight());
         baseProduct.setLength(baseProduct.getInitLength());
-        baseProduct.setHeight(baseProduct.getInitWidth());
+        baseProduct.setHeight(baseProduct.getInitHeight());
         baseProduct.setVolume(baseProduct.getInitVolume());
         //传oms修改字段
         BaseProductOms baseProductOms = BeanMapperUtil.map(baseProductDto, BaseProductOms.class);
