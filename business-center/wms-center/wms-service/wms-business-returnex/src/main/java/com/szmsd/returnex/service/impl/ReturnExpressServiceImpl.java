@@ -2,7 +2,10 @@ package com.szmsd.returnex.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.feign.BasFeignService;
+import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -13,9 +16,11 @@ import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
 import com.szmsd.returnex.constant.ReturnExpressConstant;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
+import com.szmsd.returnex.domain.ReturnExpressGood;
 import com.szmsd.returnex.dto.*;
 import com.szmsd.returnex.enums.ReturnExpressEnums;
 import com.szmsd.returnex.mapper.ReturnExpressMapper;
+import com.szmsd.returnex.service.IReturnExpressGoodService;
 import com.szmsd.returnex.service.IReturnExpressService;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.system.api.domain.SysUser;
@@ -48,11 +53,18 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     private IHttpFeignClientService httpFeignClient;
 
     @Resource
+    private IReturnExpressGoodService returnExpressGoodService;
+
+    @Resource
     private AwaitUserService awaitUserService;
 
     @Resource
     private BasFeignService basFeignService;
 
+    /**
+     * TODO 开发使用 测试需要取消注释
+     * @return
+     */
     private String getSellCode() {
         //UserInfo info = awaitUserService.info();
         UserInfo info = new UserInfo();
@@ -63,17 +75,17 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     /**
      * 单号生成
-     *
+     * TODO 开发使用 测试需要取消注释
      * @return
      */
     public String genNo() {
-        String code = getSellCode();
+        String code = ReturnExpressConstant.GENERATE_CODE;
+        String appId = ReturnExpressConstant.GENERATE_APP_ID;
         log.info("调用自动生成单号：code={}", code);
-        /*R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId("ck1").setCode(code));
+        R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId(appId).setCode(code));
         AssertUtil.notNull(r, "单号生成失败");
         AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
-        String s = r.getData().get(0);*/
-        String s = System.currentTimeMillis() + "";
+        String s = r.getData().get(0);
         log.info("调用自动生成单号：调用完成, {}-{}", code, s);
         return s;
     }
@@ -85,7 +97,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Override
     public String createExpectedNo() {
-        return ReturnExpressConstant.RETURN_NO_KEY_PREFIX + genNo();
+        return  genNo();
     }
 
     /**
@@ -181,7 +193,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @return 操作结果
      */
     @Override
-    public int saveArrivalInfoFormVms(ReturnArrivalReqDTO returnArrivalReqDTO) {
+    public int saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO) {
         //TODO 操作上架的需要增加对应sku库存
         // 接收到件，状态未待用户确认
         if (returnArrivalReqDTO.getExpectedNo() != null) {
@@ -209,6 +221,15 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         }
 
     }
+
+    /**
+     * 批量 新增/修改sku
+     * @param list
+     */
+    private void addOrUpdateSkuList(List<ReturnExpressGood> list) {
+        returnExpressGoodService.saveOrUpdateBatch(list);
+    }
+
 
     /**
      * 接收VMS仓库退件处理结果

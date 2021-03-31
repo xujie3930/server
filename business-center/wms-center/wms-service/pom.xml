@@ -27,6 +27,7 @@
         <module>wms-business-inventory</module>
         <module>wms-business-chargerules</module>
         <module>wms-business-exception</module>
+        <module>wms-business-returnex</module>
     </modules>
 
     <properties>

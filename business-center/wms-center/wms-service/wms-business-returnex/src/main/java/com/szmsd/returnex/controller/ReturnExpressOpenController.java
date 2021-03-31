@@ -42,8 +42,8 @@ public class ReturnExpressOpenController extends BaseController {
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
     @PostMapping("/processing")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "接收仓库退件处理", notes = "/api/return/processing #G2-接收仓库退件处理")
-    public R updateProcessingInfoFromVms(@Validated @RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
+    @ApiOperation(value = "接收仓库-退件处理", notes = "/api/return/processing #G2-接收仓库退件处理")
+    public R updateProcessingInfoFromWms(@Validated @RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
         return toOk(returnExpressService.updateProcessingInfoFromWms(returnProcessingReqDTO));
     }
 
@@ -57,9 +57,9 @@ public class ReturnExpressOpenController extends BaseController {
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @PostMapping("/arrival")
-    @ApiOperation(value = "接收仓库退件到货", notes = "/api/return/arrival #G1-接收仓库退件到货")
-    public R saveArrivalInfoFormVms(@Validated @RequestBody ReturnArrivalReqDTO returnArrivalReqDTO) {
-        return toOk(returnExpressService.saveArrivalInfoFormVms(returnArrivalReqDTO));
+    @ApiOperation(value = "接收仓库退件-到货", notes = "/api/return/arrival #G1-接收仓库退件到货")
+    public R saveArrivalInfoFormWms(@Validated @RequestBody ReturnArrivalReqDTO returnArrivalReqDTO) {
+        return toOk(returnExpressService.saveArrivalInfoFormWms(returnArrivalReqDTO));
     }
 
 }
