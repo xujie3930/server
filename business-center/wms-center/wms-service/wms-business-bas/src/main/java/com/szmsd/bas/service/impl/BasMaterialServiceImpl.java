@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasMaterial;
+import com.szmsd.bas.dto.BasMaterialQueryDto;
 import com.szmsd.bas.mapper.BasMaterialMapper;
 import com.szmsd.bas.service.IBasMaterialService;
 import com.szmsd.bas.service.IBasSellerService;
@@ -12,6 +13,7 @@ import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.http.api.feign.HtpBasFeignService;
@@ -57,18 +59,22 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         /**
         * 查询模块列表
         *
-        * @param basMaterial 模块
+        * @param basMaterialQueryDto 模块
         * @return 模块
         */
         @Override
-        public List<BasMaterial> selectBasMaterialList(BasMaterial basMaterial)
+        public List<BasMaterial> selectBasMaterialList(BasMaterialQueryDto basMaterialQueryDto)
         {
         QueryWrapper<BasMaterial> queryWrapper = new QueryWrapper<BasMaterial>();
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", basMaterial.getCode());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basMaterial.getSellerCode());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "type_name", basMaterial.getTypeName());
-        if(basMaterial.getIsActive()!=null){
-            queryWrapper.eq("is_active", basMaterial.getIsActive());
+            if(StringUtils.isNotEmpty(basMaterialQueryDto.getCodes())){
+                String[] codes = basMaterialQueryDto.getCodes().split(",");
+                queryWrapper.in("code",codes);
+            }
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", basMaterialQueryDto.getCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basMaterialQueryDto.getSellerCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "type_name", basMaterialQueryDto.getTypeName());
+        if(basMaterialQueryDto.getIsActive()!=null){
+            queryWrapper.eq("is_active", basMaterialQueryDto.getIsActive());
         }
         queryWrapper.orderByDesc("create_time");
         return baseMapper.selectList(queryWrapper);

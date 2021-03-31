@@ -15,6 +15,10 @@ public class BaseProductQueryDto {
     @Excel(name = "产品编码")
     private String code;
 
+    @ApiModelProperty(value = "产品编码")
+    @Excel(name = "产品编码")
+    private String codes;
+
     @ApiModelProperty(value = "sku/包材")
     @Excel(name = "sku/包材")
     private String category;
@@ -23,6 +27,10 @@ public class BaseProductQueryDto {
     @ApiModelProperty(value = "客户（卖家）编码")
     @Excel(name = "客户（卖家）编码")
     private String sellerCode;
+
+    @ApiModelProperty(value = "客户（卖家）编码")
+    @Excel(name = "客户（卖家）编码")
+    private String sellerCodes;
 
     @ApiModelProperty(value = "产品属性编号")
     @Excel(name = "产品属性编号")

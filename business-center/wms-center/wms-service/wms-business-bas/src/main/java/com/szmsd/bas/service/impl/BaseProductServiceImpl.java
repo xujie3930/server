@@ -88,6 +88,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     public List<BaseProduct> selectBaseProductPage(BaseProductQueryDto queryDto) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        if(StringUtils.isNotEmpty(queryDto.getCodes())){
+            String[] codes = queryDto.getCodes().split(",");
+            queryWrapper.in("code",codes);
+        }
+        if(StringUtils.isNotEmpty(queryDto.getSellerCodes())){
+            String[] sellerCodes = queryDto.getSellerCodes().split(",");
+            queryWrapper.in("seller_code",sellerCodes);
+        }
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
