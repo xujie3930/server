@@ -1,7 +1,7 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
-import com.szmsd.bas.api.domain.BasCountry;
-import com.szmsd.bas.api.feign.BasCountryFeignService;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
@@ -61,7 +61,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     @Autowired
     private BasWarehouseClientService basWarehouseClientService;
     @Autowired
-    private BasCountryFeignService basCountryFeignService;
+    private BasRegionFeignService basRegionFeignService;
     @Autowired
     private BaseProductClientService baseProductClientService;
     @Autowired
@@ -193,8 +193,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             throw new CommonException("999", "仓库信息不存在");
         }
         // 查询国家信息，收货地址所在的国家
-        R<BasCountry> countryR = this.basCountryFeignService.queryByCountryCode(address.getCountryCode());
-        BasCountry country = R.getDataAndException(countryR);
+        R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(address.getCountryCode());
+        BasRegionSelectListVO country = R.getDataAndException(countryR);
         if (null == country) {
             throw new CommonException("999", "国家信息不存在");
         }
@@ -223,7 +223,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 查询仓库信息
         BasWarehouse warehouse = delOutboundWrapperContext.getWarehouse();
         // 查询国家信息，收货地址所在的国家
-        BasCountry country = delOutboundWrapperContext.getCountry();
+        BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
         // 查询sku信息
         List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
         Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
@@ -253,7 +253,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 address.getPostCode(),
                 address.getCity(),
                 address.getStateOrProvince(),
-                new CountryInfo(country.getCountryCode(), null, country.getCountryNameEn(), country.getCountryName())
+                new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName())
         ));
         // 发货地址
         calcShipmentFeeCommand.setFromAddress(new Address(warehouse.getStreet1(),
@@ -281,7 +281,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 查询仓库信息
         BasWarehouse warehouse = delOutboundWrapperContext.getWarehouse();
         // 查询国家信息，收货地址所在的国家
-        BasCountry country = delOutboundWrapperContext.getCountry();
+        BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
         // 查询sku信息
         List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
         Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
@@ -296,7 +296,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 address.getPostCode(),
                 address.getCity(),
                 address.getStateOrProvince(),
-                new CountryInfo(country.getCountryCode(), null, country.getCountryNameEn(), country.getCountryName())
+                new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName())
         ));
         createShipmentOrderCommand.setReturnAddress(new Address(warehouse.getStreet1(),
                 warehouse.getStreet2(),
@@ -349,7 +349,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 查询sku信息
         List<DelOutboundDetail> detailList = delOutboundWrapperContext.getDetailList();
         // 查询国家信息，收货地址所在的国家
-        BasCountry country = delOutboundWrapperContext.getCountry();
+        BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
         // 推单到WMS
         CreateShipmentRequestDto createShipmentRequestDto = new CreateShipmentRequestDto();
         createShipmentRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
@@ -361,7 +361,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setRemark(delOutbound.getRemark());
         createShipmentRequestDto.setRefOrderNo(delOutbound.getOrderNo());
         createShipmentRequestDto.setAddress(new ShipmentAddressDto(address.getConsignee(),
-                address.getCountryCode(), country.getCountryName(), address.getZone(), address.getStateOrProvince(), address.getCity(),
+                address.getCountryCode(), country.getName(), address.getZone(), address.getStateOrProvince(), address.getCity(),
                 address.getStreet1(), address.getStreet2(), address.getStreet3(), address.getPostCode(), address.getPhoneNo(), address.getEmail()));
         List<ShipmentDetailInfoDto> details = new ArrayList<>();
         for (DelOutboundDetail detail : detailList) {

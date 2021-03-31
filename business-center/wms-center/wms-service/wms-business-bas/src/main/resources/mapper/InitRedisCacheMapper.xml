@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.mapper.InitRedisCacheMapper">
+
+
+    <select id="getWarehouse" resultType="java.util.Map">
+        SELECT
+            warehouse_code code,
+            warehouse_name_cn zhName,
+            warehouse_name_en enName
+        FROM bas_warehouse
+    </select>
+</mapper>

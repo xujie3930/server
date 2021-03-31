@@ -1,7 +1,7 @@
 package com.szmsd.delivery.controller;
 
-import com.szmsd.bas.api.domain.BasCountry;
-import com.szmsd.bas.api.feign.BasCountryFeignService;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.constant.ShipmentType;
@@ -44,7 +44,7 @@ public class DelOutboundOtherController extends BaseController {
     @Autowired
     private IHtpPricedProductClientService htpPricedProductClientService;
     @Autowired
-    private BasCountryFeignService basCountryFeignService;
+    private BasRegionFeignService basRegionFeignService;
     @Autowired
     private BasWarehouseClientService basWarehouseClientService;
     @Autowired
@@ -56,8 +56,8 @@ public class DelOutboundOtherController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundOtherInServiceDto")
     public R<List<PricedProduct>> inService(@RequestBody @Validated DelOutboundOtherInServiceDto dto) {
         // 查询国家信息
-        R<BasCountry> countryR = this.basCountryFeignService.queryByCountryCode(dto.getCountryCode());
-        BasCountry country = R.getDataAndException(countryR);
+        R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(dto.getCountryCode());
+        BasRegionSelectListVO country = R.getDataAndException(countryR);
         if (null == country) {
             throw new CommonException("999", "国家信息不存在");
         }
@@ -69,14 +69,14 @@ public class DelOutboundOtherController extends BaseController {
         // 传入参数：仓库，SKU
         PricedProductInServiceCriteria criteria = new PricedProductInServiceCriteria();
         criteria.setClientCode(dto.getClientCode());
-        criteria.setCountryName(country.getCountryName());
+        criteria.setCountryName(country.getName());
         criteria.setFromAddress(new Address(warehouse.getStreet1(),
                 warehouse.getStreet2(),
                 null,
                 warehouse.getPostcode(),
                 warehouse.getCity(),
                 warehouse.getProvince(),
-                new CountryInfo(country.getCountryCode(), null, country.getCountryNameEn(), country.getCountryName())
+                new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName())
         ));
         criteria.setIsElectriferous(ShipmentType.BATTERY.equals(this.baseProductClientService.buildShipmentType(dto.getWarehouseCode(), dto.getSkus())));
         return R.ok(this.htpPricedProductClientService.inService(criteria));

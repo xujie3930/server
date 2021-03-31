@@ -3,6 +3,7 @@ package com.szmsd.bas.api.domain.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
@@ -11,6 +12,7 @@ import java.io.Serializable;
  * @date 2020-12-16 016 9:15
  */
 @Data
+@Accessors(chain = true)
 @ApiModel(value = "BasRegionSelectListQueryDto", description = "BasRegionSelectListQueryDto信息")
 public class BasRegionSelectListQueryDto implements Serializable {
 
