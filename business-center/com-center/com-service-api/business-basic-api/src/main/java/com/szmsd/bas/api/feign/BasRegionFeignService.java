@@ -15,6 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(contextId = "BasRegionFeignService", value = ServiceNameConstants.BUSINESS_BAS, fallbackFactory = BasRegionFeignServiceFallbackFactory.class)
 public interface BasRegionFeignService {
 
-    @RequestMapping("/bas-country/queryByCountryCode")
+    @RequestMapping("/bas-region/queryByCountryCode")
     R<BasRegionSelectListVO> queryByCountryCode(@RequestParam("addressCode") String addressCode);
 }
