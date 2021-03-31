@@ -98,6 +98,7 @@
             <if test="warehouseNo != null and warehouseNo != ''">AND t.warehouse_no = #{warehouseNo}</if>
             <if test="(id == null or id == ''.toString()) and (warehouseNo == null and warehouseNo == ''.toString())"><![CDATA[AND 1 <> 1]]></if>
         </where>
+        ORDER BY t.create_time DESC
     </select>
 
     <sql id="selectListWhere">
