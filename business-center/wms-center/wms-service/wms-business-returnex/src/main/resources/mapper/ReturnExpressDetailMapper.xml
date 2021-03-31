@@ -45,20 +45,17 @@
         <include refid="Base_Column_List"/>
         from return_express_detail
         <where>
-            <if test="cm.returnSource != null and cm.returnSource != ''">
-                and return_source = #{cm.returnSource}
+            <if test="cm.returnSource != null">
+                and return_source = #{cm.returnSource.name}
             </if>
-            <if test="cm.processType != null and cm.processType != '' ">
-                and process_type = #{cm.processType}
+            <if test="cm.processType != null">
+                and process_type = #{cm.processType.name}
             </if>
-            <if test="cm.returnType != null and cm.returnType != '' ">
-                and return_type = #{cm.returnType}
-            </if>
-            <if test="cm.processMethod != null and cm.processMethod != '' ">
-                and process_method = #{cm.processMethod}
+            <if test="cm.returnType != null">
+                and return_type = #{cm.returnType.name}
             </if>
             <if test="cm.createTimeStart != null and cm.createTimeEnd != null ">
-                and create_time >= #{cm.createTimeStart} and create_time &lt;= #{cm.createTimeEnd}
+                and create_time between CONCAT(#{cm.createTimeStart},' 00:00:00') and CONCAT(#{cm.createTimeEnd},' 23:59:59')
             </if>
             <if test="cm.warehouseCode != null and cm.warehouseCode != '' ">
                 and warehouse_code = #{cm.warehouseCode}
@@ -82,6 +79,6 @@
                 </foreach>
             </if>
         </where>
-        order by update_time DESC
+        order by id DESC
     </select>
 </mapper>

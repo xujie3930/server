@@ -70,7 +70,7 @@ public class PricedProductServiceImpl implements IPricedProductService {
             fromAddress.setStreet1(warehouse.getStreet1()).setStreet2(warehouse.getStreet2());
             fromAddress.setProvince(warehouse.getProvince()).setCity(warehouse.getCity());
             fromAddress.setPostCode(warehouse.getPostcode());
-            fromAddress.setCountry(new CountryInfo(warehouse.getCountryCode(), null, null, warehouse.getCountryChineseName()));
+            fromAddress.setCountry(new CountryInfo(warehouse.getCountryCode(), null, warehouse.getCountryName(), warehouse.getCountryChineseName()));
         }
         getPricedProductsCommand.setFromAddress(fromAddress);
 

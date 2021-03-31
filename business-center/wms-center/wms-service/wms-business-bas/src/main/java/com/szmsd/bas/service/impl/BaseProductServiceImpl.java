@@ -123,13 +123,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductVO> selectBaseProductByCode(String code) {
-        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
-        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
-        BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
+    public List<BaseProductVO> selectBaseProductByCode(String code,String sellerCode) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code + "%");
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basSeller.getSellerCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", sellerCode);
         queryWrapper.eq("is_active", true);
         queryWrapper.orderByAsc("code");
         List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductVO.class);
