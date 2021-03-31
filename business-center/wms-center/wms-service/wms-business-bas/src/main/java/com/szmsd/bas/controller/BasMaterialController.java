@@ -1,5 +1,6 @@
 package com.szmsd.bas.controller;
 import com.szmsd.bas.domain.BasMaterial;
+import com.szmsd.bas.dto.BasMaterialQueryDto;
 import com.szmsd.bas.service.IBasMaterialService;
 import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.common.core.domain.R;
@@ -43,10 +44,10 @@ public class BasMaterialController extends BaseController{
       @PreAuthorize("@ss.hasPermi('BasMaterial:BasMaterial:list')")
       @GetMapping("/list")
       @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
-      public TableDataInfo list(BasMaterial basMaterial)
+      public TableDataInfo list(BasMaterialQueryDto basMaterialQueryDto)
      {
             startPage();
-            List<BasMaterial> list = basMaterialService.selectBasMaterialList(basMaterial);
+            List<BasMaterial> list = basMaterialService.selectBasMaterialList(basMaterialQueryDto);
             return getDataTable(list);
       }
 
@@ -56,9 +57,9 @@ public class BasMaterialController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BasMaterial:BasMaterial:list')")
     @GetMapping("/listBasMaterial")
     @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
-    public R<List<BasMaterial>> listBasMaterial(BasMaterial basMaterial)
+    public R<List<BasMaterial>> listBasMaterial(BasMaterialQueryDto basMaterialQueryDto)
     {
-        List<BasMaterial> list = basMaterialService.selectBasMaterialList(basMaterial);
+        List<BasMaterial> list = basMaterialService.selectBasMaterialList(basMaterialQueryDto);
         return R.ok(list);
     }
 
@@ -70,8 +71,8 @@ public class BasMaterialController extends BaseController{
      @Log(title = "模块", businessType = BusinessType.EXPORT)
      @GetMapping("/export")
      @ApiOperation(value = "导出模块列表",notes = "导出模块列表")
-     public void export(HttpServletResponse response, BasMaterial basMaterial) throws IOException {
-     List<BasMaterial> list = basMaterialService.selectBasMaterialList(basMaterial);
+     public void export(HttpServletResponse response, BasMaterialQueryDto basMaterialQueryDto) throws IOException {
+     List<BasMaterial> list = basMaterialService.selectBasMaterialList(basMaterialQueryDto);
      ExcelUtil<BasMaterial> util = new ExcelUtil<BasMaterial>(BasMaterial.class);
      util.exportExcel(response,list, "BasMaterial");
 
