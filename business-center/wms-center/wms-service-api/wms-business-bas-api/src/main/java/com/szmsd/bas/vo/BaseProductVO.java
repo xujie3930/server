@@ -5,6 +5,8 @@ import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class BaseProductVO {
     @ApiModelProperty(value = "客户（卖家）编码")
@@ -22,4 +24,26 @@ public class BaseProductVO {
     @Excel(name = "产品编码")
     @TableField("`code`")
     private String code;
+
+    @ApiModelProperty(value = "仓库测量重量g")
+    private Double weight;
+
+    @ApiModelProperty(value = "仓库测量长 cm")
+    private Double length;
+
+    @ApiModelProperty(value = "仓库测量宽 cm")
+    private Double width;
+
+    @ApiModelProperty(value = "仓库测量高 cm")
+    private Double height;
+
+    @ApiModelProperty(value = "仓库测量体积 cm3")
+    private BigDecimal volume;
+
+    @ApiModelProperty(value = "绑定专属包材产品编码")
+    private String bindCode;
+
+    @ApiModelProperty(value = "绑定专属包材产品名")
+    @Excel(name = "绑定专属包材产品名")
+    private String bindCodeName;
 }

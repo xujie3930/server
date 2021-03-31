@@ -1,16 +1,23 @@
 package com.szmsd.bas.controller;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.bas.domain.BasMaterial;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.BasMaterialQueryDto;
 import com.szmsd.bas.service.IBasMaterialService;
+import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBasSerialNumberService;
+import com.szmsd.bas.vo.BasMaterialVO;
+import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.common.security.utils.SecurityUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +45,9 @@ public class BasMaterialController extends BaseController{
      @Resource
      private IBasMaterialService basMaterialService;
 
+    @Autowired
+    private IBasSellerService basSellerService;
+
      /**
        * 查询模块列表
      */
@@ -50,6 +60,18 @@ public class BasMaterialController extends BaseController{
             List<BasMaterial> list = basMaterialService.selectBasMaterialList(basMaterialQueryDto);
             return getDataTable(list);
       }
+
+    @PreAuthorize("@ss.hasPermi('BasMaterial:BasMaterial:list')")
+    @GetMapping("/listByCode")
+    @ApiOperation(value = "通过code查询列表", notes = "通过code查询列表")
+    public TableDataInfo listByCode(String code) {
+        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
+        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
+        BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
+        startPage();
+        List<BasMaterialVO> list = basMaterialService.selectBaseMaterialByCode(code,basSeller.getSellerCode());
+        return getDataTable(list);
+    }
 
     /**
      * 查询模块列表

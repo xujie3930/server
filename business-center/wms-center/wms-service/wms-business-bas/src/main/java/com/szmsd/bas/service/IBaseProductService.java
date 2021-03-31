@@ -48,7 +48,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @param code
      * @return
      */
-    List<BaseProductVO> selectBaseProductByCode(String code);
+    List<BaseProductVO> selectBaseProductByCode(String code,String sellerCode);
 
     List<BaseProductMeasureDto> batchSKU(List<String> codes);
 
