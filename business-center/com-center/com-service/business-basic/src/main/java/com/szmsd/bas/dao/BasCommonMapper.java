@@ -17,12 +17,8 @@ public interface BasCommonMapper {
 
     List<Map<String, String>> getBasProductType();
 
-    List<Map<String, String>> getCountry();
+    List<Map<String, String>> getRegion();
 
     List<Map<String, String>> getBasSub();
-
-    List<Map<String, String>> getCity();
-
-    List<Map<String, String>> getProvince();
 
 }

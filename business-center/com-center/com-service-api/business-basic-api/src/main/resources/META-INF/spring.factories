@@ -1,5 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.szmsd.bas.api.factory.RemoteAttachmentServiceFallbackFactory,\
 com.szmsd.bas.api.factory.BasFeignServiceFallbackFactory,\
-com.szmsd.bas.api.factory.BasCountryFeignServiceFallbackFactory,\
+com.szmsd.bas.api.factory.BasRegionFeignServiceFallbackFactory,\
 com.szmsd.bas.api.factory.BasSubFeignServiceFallbackFactory
