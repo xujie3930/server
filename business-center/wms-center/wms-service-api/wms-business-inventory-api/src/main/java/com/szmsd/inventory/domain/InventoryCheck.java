@@ -24,8 +24,14 @@ public class InventoryCheck extends BaseEntity {
     @ApiModelProperty(value = "申请单号")
     private String orderNo;
 
+    @ApiModelProperty(value = "客户代码")
+    private String customCode;
+
     @ApiModelProperty(value = "sku")
     private String sku;
+
+    @ApiModelProperty(value = "仓库代码")
+    private String warehouseCode;
 
     @ApiModelProperty(value = "系统数量")
     private Integer systemQty;
@@ -36,8 +42,11 @@ public class InventoryCheck extends BaseEntity {
     @ApiModelProperty(value = "差异数量，等于盘点数量减去系统数量")
     private Integer diffQty;
 
-    @ApiModelProperty(value = "盘点时间")
+    @ApiModelProperty(value = "完成时间")
     private String checkTime;
+
+    @ApiModelProperty(value = "库存盘点审批结果")
+    private String status;
 
     @ApiModelProperty(value = "创建ID", hidden = true)
     @TableField(fill = FieldFill.INSERT)

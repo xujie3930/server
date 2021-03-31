@@ -5,6 +5,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.domain.InventoryCheck;
 import com.szmsd.inventory.domain.dto.InventoryCheckDTO;
+import com.szmsd.inventory.domain.dto.InventoryCheckQueryDTO;
 import com.szmsd.inventory.service.IInventoryCheckService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,9 +33,9 @@ public class InventoryCheckController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inventory:check:findList')")
     @GetMapping("/list")
     @ApiOperation(value = "库存盘点 - 查询列表")
-    public TableDataInfo<InventoryCheck> findList(InventoryCheckDTO inventoryCheckDTO) {
+    public TableDataInfo<InventoryCheck> findList(InventoryCheckQueryDTO inventoryCheckQueryDTO) {
         startPage();
-        List<InventoryCheck> list = iInventoryCheckService.findList(inventoryCheckDTO);
+        List<InventoryCheck> list = iInventoryCheckService.findList(inventoryCheckQueryDTO);
         return getDataTable(list);
     }
 

@@ -2,6 +2,7 @@ package com.szmsd.inventory.service;
 
 import com.szmsd.inventory.domain.InventoryCheck;
 import com.szmsd.inventory.domain.dto.InventoryCheckDTO;
+import com.szmsd.inventory.domain.dto.InventoryCheckQueryDTO;
 
 import java.util.List;
 
@@ -16,10 +17,10 @@ public interface IInventoryCheckService {
 
     /**
      * 库存盘点列表查询
-     * @param inventoryCheckDTO inventoryCheckDTO
+     * @param inventoryCheckQueryDTO inventoryCheckQueryDTO
      * @return list
      */
-    List<InventoryCheck> findList(InventoryCheckDTO inventoryCheckDTO);
+    List<InventoryCheck> findList(InventoryCheckQueryDTO inventoryCheckQueryDTO);
 
     /**
      * 查询详情
@@ -28,5 +29,10 @@ public interface IInventoryCheckService {
      */
     InventoryCheck details(int id);
 
+    /**
+     * 盘点单确认
+     * @param inventoryCheck inventoryCheck
+     * @return result
+     */
     int update(InventoryCheck inventoryCheck);
 }

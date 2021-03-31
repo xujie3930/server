@@ -6,6 +6,12 @@ import lombok.Data;
 @Data
 public class InventoryCheckDTO {
 
+    @ApiModelProperty(value = "客户代码")
+    private String customCode;
+
+    @ApiModelProperty(value = "仓库代码")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "申请单号")
     private String orderNo;
 
@@ -21,7 +27,7 @@ public class InventoryCheckDTO {
     @ApiModelProperty(value = "差异数量，等于盘点数量减去系统数量")
     private Integer diffQty;
 
-    @ApiModelProperty(value = "盘点时间")
+    @ApiModelProperty(value = "完成时间")
     private String checkTime;
 
     @ApiModelProperty(value = "备注")
