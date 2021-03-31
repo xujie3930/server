@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>vms-business-returnex</artifactId>
+    <artifactId>wms-business-returnex</artifactId>
     <name>wms-business-returnex</name>
     <description>退件服务</description>
 
@@ -90,7 +90,7 @@
 
         <dependency>
             <groupId>com.szmsd.wms</groupId>
-            <artifactId>vms-business-returnex-api</artifactId>
+            <artifactId>wms-business-returnex-api</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
