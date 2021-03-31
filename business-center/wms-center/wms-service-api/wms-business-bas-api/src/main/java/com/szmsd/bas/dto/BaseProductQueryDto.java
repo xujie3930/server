@@ -28,4 +28,7 @@ public class BaseProductQueryDto {
     @Excel(name = "产品属性编号")
     private String productAttribute;
 
+    @ApiModelProperty(value = "是否激活")
+    private Boolean isActive;
+
 }
