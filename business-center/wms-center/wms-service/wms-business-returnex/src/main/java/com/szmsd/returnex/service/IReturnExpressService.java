@@ -39,7 +39,7 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @param returnArrivalReqDTO 接收VMS仓库到件信息
      * @return 操作结果
      */
-    int saveArrivalInfoFormVms(ReturnArrivalReqDTO returnArrivalReqDTO);
+    int saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO);
 
     /**
      * 接收VMS仓库退件处理结果

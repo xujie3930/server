@@ -30,7 +30,7 @@
         <module>wms-business-finance-api</module>
         <module>wms-business-inventory-api</module>
         <module>wms-business-chargerules-api</module>
-        <module>vms-business-returnex-api</module>
+        <module>wms-business-returnex-api</module>
         <module>wms-business-exception-api</module>
     </modules>
 
@@ -74,6 +74,11 @@
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-exception-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-returnex-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
         </dependencies>
