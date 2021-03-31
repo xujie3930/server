@@ -1,7 +1,6 @@
 package com.szmsd.returnex.dto;
 
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.validator.annotation.StringLength;
 import com.szmsd.returnex.domain.BOConvert;
 import com.szmsd.returnex.enums.ReturnExpressEnums;
@@ -31,7 +30,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "主键ID")
     private Integer id;
 
-    @ApiModelProperty(value = "客户代码", example = "UID123456")
+    @ApiModelProperty(value = "客户代码", example = "UID123456", required = true)
     private String sellerCode;
 
     @ApiModelProperty(value = "退件来源[ 申请退件 VMS]", example = "RETURN_FORECAST")
@@ -45,10 +44,10 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     private String fromOrderNo;
 
     @NotEmpty(message = "预报单号不能为空")
-    @ApiModelProperty(value = "预报单号 系统生成", hidden = true)
+    @ApiModelProperty(value = "预报单号 系统生成", required = true)
     private String expectedNo;
 
-    @ApiModelProperty(value = "VMS处理单号")
+    @ApiModelProperty(value = "VMS处理单号", required = true)
     private String returnNo;
 
     @ApiModelProperty(value = "退件目标仓库编码", example = "SZ")
@@ -62,7 +61,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     /**
      * 销毁 包裹上架 拆包检查
      */
-    @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "Destroy")
+    @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "Destroy", required = true)
     private ReturnExpressEnums.ProcessTypeEnum processType;
 
     @ApiModelProperty(value = "处理方式 编码", example = "Destroy")
