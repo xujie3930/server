@@ -123,13 +123,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductVO> selectBaseProductByCode(String code) {
-        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
-        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
-        BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
+    public List<BaseProductVO> selectBaseProductByCode(String code,String sellerCode) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code + "%");
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basSeller.getSellerCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", sellerCode);
         queryWrapper.eq("is_active", true);
         queryWrapper.orderByAsc("code");
         List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductVO.class);
@@ -242,7 +239,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         if (!r.getData().getSuccess()) {
-            throw new BaseException("传wms失败" + r.getMsg());
+            throw new BaseException("传wms失败:" + r.getData().getMessage());
         }
         return baseMapper.insert(baseProduct);
     }
@@ -260,7 +257,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         ObjectUtil.fillNull(productRequest, baseProduct);
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         if (!r.getData().getSuccess()) {
-            throw new BaseException("传wms失败" + r.getMsg());
+            throw new BaseException("传wms失败:" + r.getData().getMessage());
         }
         return baseMapper.updateById(baseProductDto);
     }
@@ -281,7 +278,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             ObjectUtil.fillNull(productRequest, baseProduct);
             R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
             if (!r.getData().getSuccess()) {
-                throw new BaseException("传wms失败" + r.getMsg());
+                throw new BaseException("传wms失败:" + r.getData().getMessage());
             }
         }
         UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper();

@@ -3,6 +3,8 @@ package com.szmsd.bas.service;
 import com.szmsd.bas.domain.BasMaterial;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.dto.BasMaterialQueryDto;
+import com.szmsd.bas.vo.BasMaterialVO;
+import com.szmsd.bas.vo.BaseProductVO;
 
 import java.util.List;
 
@@ -31,6 +33,14 @@ public interface IBasMaterialService extends IService<BasMaterial> {
         * @return 模块集合
         */
         List<BasMaterial> selectBasMaterialList(BasMaterialQueryDto basMaterialQueryDto);
+
+        /**
+         * 通过code查询
+         *
+         * @param code
+         * @return
+         */
+        List<BasMaterialVO> selectBaseMaterialByCode(String code, String sellerCode);
 
         /**
         * 新增模块

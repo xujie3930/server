@@ -92,7 +92,7 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
         if (basePacking.getPId() != null) {
             R<ResponseVO> r = htpBasFeignService.createPacking(packingRequest);
             if (!r.getData().getSuccess()) {
-                throw new BaseException("传wms失败" + r.getMsg());
+                throw new BaseException("传wms失败:" + r.getData().getMessage());
             }
         }
         return baseMapper.insert(basePacking);
@@ -114,7 +114,7 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
             ObjectUtil.fillNull(packingRequest, packing);
             R<ResponseVO> r = htpBasFeignService.createPacking(packingRequest);
             if (!r.getData().getSuccess()) {
-                throw new BaseException("传wms失败" + r.getMsg());
+                throw new BaseException("传wms失败:" + r.getData().getMessage());
             }
         }
         return baseMapper.updateById(basePacking);

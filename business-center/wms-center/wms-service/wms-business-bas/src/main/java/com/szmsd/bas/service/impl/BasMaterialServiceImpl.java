@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasMaterial;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasMaterialQueryDto;
 import com.szmsd.bas.mapper.BasMaterialMapper;
 import com.szmsd.bas.service.IBasMaterialService;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.bas.util.ObjectUtil;
+import com.szmsd.bas.vo.BasMaterialVO;
+import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
@@ -80,6 +83,17 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         return baseMapper.selectList(queryWrapper);
         }
 
+    @Override
+    public List<BasMaterialVO> selectBaseMaterialByCode(String code, String sellerCode){
+        QueryWrapper<BasMaterial> queryWrapper = new QueryWrapper<>();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code + "%");
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", sellerCode);
+        queryWrapper.eq("is_active", true);
+        queryWrapper.orderByAsc("code");
+        List<BasMaterialVO> basMaterialVOS = BeanMapperUtil.mapList(super.list(queryWrapper), BasMaterialVO.class);
+        return basMaterialVOS;
+    }
+
         /**
         * 新增模块
         *
@@ -95,7 +109,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
             MaterialRequest materialRequest = BeanMapperUtil.map(basMaterial,MaterialRequest.class);
             R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
             if(!r.getData().getSuccess()){
-                throw new BaseException("传wms失败"+r.getMsg());
+                throw new BaseException("传wms失败:" + r.getData().getMessage());
             }
             return baseMapper.insert(basMaterial);
         }
@@ -113,7 +127,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
             ObjectUtil.fillNull(materialRequest,material);
             R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
             if(!r.getData().getSuccess()){
-                throw new BaseException("传wms失败"+r.getMsg());
+                throw new BaseException("传wms失败:" + r.getData().getMessage());
             }
             return baseMapper.updateById(basMaterial);
         }
@@ -133,7 +147,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
                ObjectUtil.fillNull(materialRequest,material);
                R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
                if(!r.getData().getSuccess()){
-                   throw new BaseException("传wms失败"+r.getMsg());
+                   throw new BaseException("传wms失败:" + r.getData().getMessage());
                }
            }
            UpdateWrapper<BasMaterial> updateWrapper = new UpdateWrapper();

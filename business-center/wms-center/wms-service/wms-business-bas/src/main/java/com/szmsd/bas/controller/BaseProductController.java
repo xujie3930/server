@@ -1,7 +1,10 @@
 package com.szmsd.bas.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
+import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
@@ -10,8 +13,10 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.common.security.utils.SecurityUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +44,9 @@ public class BaseProductController extends BaseController {
     @Resource
     private IBaseProductService baseProductService;
 
+    @Autowired
+    private IBasSellerService basSellerService;
+
     /**
      * 查询模块列表
      */
@@ -55,9 +63,13 @@ public class BaseProductController extends BaseController {
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/listByCode")
     @ApiOperation(value = "通过code查询列表", notes = "通过code查询列表")
-    public R<List<BaseProductVO>> listByCode(String code) {
-        List<BaseProductVO> list = baseProductService.selectBaseProductByCode(code);
-        return R.ok(list);
+    public TableDataInfo listByCode(String code) {
+        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
+        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
+        BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
+        startPage();
+        List<BaseProductVO> list = baseProductService.selectBaseProductByCode(code,basSeller.getSellerCode());
+        return getDataTable(list);
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
