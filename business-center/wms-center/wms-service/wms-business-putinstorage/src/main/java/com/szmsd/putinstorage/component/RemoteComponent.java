@@ -94,7 +94,7 @@ public class RemoteComponent {
         AssertUtil.isTrue(StringUtils.isNotEmpty(cusCode), "客户代码不能为空");
         String warehouseNo = this.genNo("INBOUND_RECEIPT_NO");
         String substring = warehouseNo.substring(2);
-        return cusCode.concat(substring);
+        return "PK" + cusCode.concat(substring);
     }
 
     /**

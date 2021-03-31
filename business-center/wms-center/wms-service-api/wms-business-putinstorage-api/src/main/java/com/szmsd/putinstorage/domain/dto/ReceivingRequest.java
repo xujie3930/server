@@ -25,4 +25,7 @@ public class ReceivingRequest {
     @ApiModelProperty(value = "上架数量")
     private Integer qty;
 
+    @ApiModelProperty(value = "仓库编号", hidden = true)
+    private String warehouseCode;
+
 }

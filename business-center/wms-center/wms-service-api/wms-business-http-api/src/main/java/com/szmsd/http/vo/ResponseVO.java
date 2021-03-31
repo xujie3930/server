@@ -56,7 +56,7 @@ public class ResponseVO implements Serializable {
         AssertUtil.isTrue(expression, () -> "RemoteRequest[" + api + "失败:" +  result.getMsg() + "]");
 
         ResponseVO data = result.getData();
-        boolean expression1 = data == null || (data != null && data.getSuccess() == new Boolean(true));
+        boolean expression1 = data == null || data.getSuccess();
         AssertUtil.isTrue(expression1, () -> "RemoteRequest[" + api + "失败:" +  getDefaultStr(data.getMessage()).concat(getDefaultStr(data.getErrors())) + "]");
     }
 
