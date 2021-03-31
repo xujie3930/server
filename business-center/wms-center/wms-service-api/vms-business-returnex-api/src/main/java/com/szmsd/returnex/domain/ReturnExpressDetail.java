@@ -1,8 +1,7 @@
 package com.szmsd.returnex.domain;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.returnex.enums.ReturnExpressEnums;
@@ -29,7 +28,7 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "主键ID")
-    @TableId(value = "id",type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     @Excel(name = "主键ID")
     private Integer id;
 
@@ -61,6 +60,7 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     @Excel(name = "预报单号")
     private String expectedNo;
 
+    @TableField(insertStrategy = FieldStrategy.NOT_EMPTY)
     @ApiModelProperty(value = "VMS处理单号")
     @Excel(name = "VMS处理单号")
     private String returnNo;
@@ -79,7 +79,7 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
 
     @ApiModelProperty(value = "退货渠道", example = "客户自选")
     @Excel(name = "退货渠道")
-    private String returnChannel;;
+    private String returnChannel;
 
     @ApiModelProperty(value = "申请处理方式编码")
     @Excel(name = "申请处理方式编码")
@@ -108,6 +108,10 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     @ApiModelProperty(value = "处理状态编码")
     @Excel(name = "处理状态编码")
     private ReturnExpressEnums.DealStatusEnum dealStatus;
+
+    @ApiModelProperty(value = "逻辑删除")
+    @TableLogic(delval = "2", value = "0")
+    private Integer delFlag;
 
     @Override
     public String toString() {

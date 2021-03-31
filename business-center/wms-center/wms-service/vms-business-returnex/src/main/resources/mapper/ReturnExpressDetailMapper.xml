@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.returnex.mapper.ReturnExpressMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.returnex.domain.ReturnExpressDetail">
+        <id column="id" property="id"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="version" property="version"/>
+        <result column="seller_code" property="sellerCode"/>
+        <result column="from_order_no" property="fromOrderNo"/>
+        <result column="scan_code" property="scanCode"/>
+        <result column="expected_no" property="expectedNo"/>
+        <result column="return_no" property="returnNo"/>
+        <result column="process_type" property="processType"/>
+        <result column="return_type" property="returnType"/>
+        <result column="return_channel" property="returnChannel"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="apply_process_method" property="applyProcessMethod"/>
+        <result column="arrival_time" property="arrivalTime"/>
+        <result column="finish_time" property="finishTime"/>
+        <result column="overdue" property="overdue"/>
+        <result column="process_remark" property="processRemark"/>
+        <result column="return_source" property="returnSource"/>
+        <result column="deal_status" property="dealStatus"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, create_by, update_by, version, seller_code, from_order_no, scan_code, expected_no, return_no, process_type, return_type, return_channel, warehouse_code, apply_process_method, arrival_time, finish_time, overdue, process_remark, return_source, deal_status
+    </sql>
+
+    <select id="selectPageList" resultType="com.szmsd.returnex.vo.ReturnExpressListVO">
+        select
+        <include refid="Base_Column_List"/>
+        from return_express_detail
+        <where>
+            <if test="cm.returnSource != null and cm.returnSource != ''">
+                and return_source = #{cm.returnSource}
+            </if>
+            <if test="cm.processType != null and cm.processType != '' ">
+                and process_type = #{cm.processType}
+            </if>
+            <if test="cm.returnType != null and cm.returnType != '' ">
+                and return_type = #{cm.returnType}
+            </if>
+            <if test="cm.processMethod != null and cm.processMethod != '' ">
+                and process_method = #{cm.processMethod}
+            </if>
+            <if test="cm.createTimeStart != null and cm.createTimeEnd != null ">
+                and create_time >= #{cm.createTimeStart} and create_time &lt;= #{cm.createTimeEnd}
+            </if>
+            <if test="cm.warehouseCode != null and cm.warehouseCode != '' ">
+                and warehouse_code = #{cm.warehouseCode}
+            </if>
+            <if test="cm.sellerCode != null and cm.sellerCode != '' ">
+                and seller_code = #{cm.sellerCode}
+            </if>
+            <if test="cm.noUserQuery != null and cm.noUserQuery == true ">
+                and seller_code is Null
+            </if>
+            <if test="cm.forecastNumberList != null and cm.forecastNumberList.size() >0 ">
+                and expected_no in
+                <foreach collection="cm.forecastNumberList" open="(" close=")" separator="," item="fno">
+                    #{fno}
+                </foreach>
+            </if>
+            <if test="cm.returnNoList != null and cm.returnNoList.size() >0 ">
+                and return_no in
+                <foreach collection="cm.returnNoList" open="(" close=")" separator="," item="rno">
+                    #{rno}
+                </foreach>
+            </if>
+        </where>
+        order by update_time DESC
+    </select>
+</mapper>

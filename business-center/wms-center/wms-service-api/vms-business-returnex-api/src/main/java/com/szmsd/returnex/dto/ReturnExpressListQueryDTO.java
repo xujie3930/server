@@ -2,8 +2,9 @@ package com.szmsd.returnex.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.returnex.enums.ReturnExpressEnums;
+import com.szmsd.common.core.web.page.PageDomain;
 import io.swagger.annotations.ApiModelProperty;
+import jodd.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-public class ReturnExpressListQueryDTO {
+public class ReturnExpressListQueryDTO extends PageDomain {
 
     @Min(value = 0, message = "数据异常")
     @ApiModelProperty(value = "主键ID")
@@ -48,6 +49,7 @@ public class ReturnExpressListQueryDTO {
     public void setForecastNumber(String forecastNumber) {
         this.forecastNumber = forecastNumber;
         Optional.ofNullable(forecastNumber)
+                .filter(StringUtil::isNotBlank)
                 .ifPresent(res -> forecastNumberList = Arrays.asList(res.split(",")));
     }
 
@@ -60,6 +62,7 @@ public class ReturnExpressListQueryDTO {
     public void setReturnNo(String returnNo) {
         this.returnNo = returnNo;
         Optional.ofNullable(returnNo)
+                .filter(StringUtil::isNotBlank)
                 .ifPresent(res -> returnNoList = Arrays.asList(res.split(",")));
     }
 
@@ -67,19 +70,19 @@ public class ReturnExpressListQueryDTO {
     private List<String> returnNoList;
 
     @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]")
-    private ReturnExpressEnums.ReturnTypeEnum returnType;
+    private String returnType;
 
     @ApiModelProperty(value = "类型[退件预报 VMS通知退件]")
-    private ReturnExpressEnums.ReturnSourceEnum returnSource;
+    private String returnSource;
 
     @ApiModelProperty(value = "退件目标仓库编码")
     private String warehouseCode;
 
     @ApiModelProperty(value = "申请处理方式编码")
-    private String applyProcessMethod;
+    private String processMethod;
 
     @ApiModelProperty(value = "处理状态编码")
-    private ReturnExpressEnums.ProcessTypeEnum processType;
+    private String processType;
 
     @ApiModelProperty(value = "无名件列表查询", hidden = true)
     private Boolean noUserQuery = false;

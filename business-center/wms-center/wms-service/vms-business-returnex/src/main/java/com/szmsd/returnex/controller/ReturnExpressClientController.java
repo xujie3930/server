@@ -11,11 +11,11 @@ import com.szmsd.returnex.service.IReturnExpressService;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @ClassName: ReturnExpressClientController
@@ -70,7 +70,8 @@ public class ReturnExpressClientController extends BaseController {
     @ApiOperation(value = "退件单列表 - 分页")
     public TableDataInfo<ReturnExpressListVO> page(@Validated @RequestBody ReturnExpressListQueryDTO queryDto) {
         startPage();
-        return getDataTable(returnExpressService.selectReturnOrderList(queryDto));
+        List<ReturnExpressListVO> returnExpressListVOS = returnExpressService.selectReturnOrderList(queryDto);
+        return getDataTable(returnExpressListVOS);
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.szmsd.returnex.service.impl;
 
-import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.feign.BasFeignService;
@@ -12,7 +11,6 @@ import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
 import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
 import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
-import com.szmsd.returnex.config.BeanCopyUtil;
 import com.szmsd.returnex.constant.ReturnExpressConstant;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
 import com.szmsd.returnex.dto.*;
@@ -98,21 +96,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Override
     public List<ReturnExpressListVO> selectReturnOrderList(ReturnExpressListQueryDTO queryDto) {
-
-        List<ReturnExpressDetail> returnExpressDetails = returnExpressMapper.selectList(Wrappers.<ReturnExpressDetail>lambdaQuery()
-                .eq(queryDto.getReturnSource() != null, ReturnExpressDetail::getReturnSource, queryDto.getReturnSource())
-                .eq(queryDto.getProcessType() != null, ReturnExpressDetail::getProcessType, queryDto.getProcessType())
-                .eq(queryDto.getReturnType() != null, ReturnExpressDetail::getReturnType, queryDto.getReturnType())
-                .eq(StringUtil.isNotBlank(queryDto.getApplyProcessMethod()), ReturnExpressDetail::getApplyProcessMethod, queryDto.getApplyProcessMethod())
-                .between(queryDto.getCreateTimeStart() != null && queryDto.getCreateTimeEnd() != null, BaseEntity::getCreateTime, queryDto.getCreateTimeStart(), queryDto.getCreateTimeEnd())
-                .eq(StringUtil.isNotBlank(queryDto.getWarehouseCode()), ReturnExpressDetail::getWarehouseCode, queryDto.getWarehouseCode())
-                .in(CollectionUtils.isNotEmpty(queryDto.getForecastNumberList()), ReturnExpressDetail::getFromOrderNo, queryDto.getForecastNumberList())
-                .in(CollectionUtils.isNotEmpty(queryDto.getReturnNoList()), ReturnExpressDetail::getReturnNo, queryDto.getReturnNoList())
-                .eq(StringUtil.isNotBlank(queryDto.getSellerCode()), ReturnExpressDetail::getSellerCode, queryDto.getSellerCode())
-                .isNull(queryDto.getNoUserQuery(), ReturnExpressDetail::getSellerCode)
-                .orderByDesc(BaseEntity::getUpdateTime)
-        );
-        return BeanCopyUtil.copyListProperties(returnExpressDetails, ReturnExpressListVO::new);
+        return returnExpressMapper.selectPageList(queryDto);
     }
 
     /**
@@ -185,6 +169,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Transactional(rollbackFor = Exception.class)
     public int saveReturnExpressDetail(ReturnExpressDetail returnExpressDetail) {
+        returnExpressDetail.setDealStatus(ReturnExpressEnums.DealStatusEnum.WMS_WAIT_RECEIVE);
         return returnExpressMapper.insert(returnExpressDetail);
     }
 
@@ -197,17 +182,19 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Override
     public int saveArrivalInfoFormVms(ReturnArrivalReqDTO returnArrivalReqDTO) {
-
+        //TODO 操作上架的需要增加对应sku库存
         // 接收到件，状态未待用户确认
         if (returnArrivalReqDTO.getExpectedNo() != null) {
             int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                     .eq(ReturnExpressDetail::getExpectedNo, returnArrivalReqDTO.getExpectedNo())
+                    .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WMS_WAIT_RECEIVE)
                     .set(ReturnExpressDetail::getReturnNo, returnArrivalReqDTO.getReturnNo())
                     .set(ReturnExpressDetail::getFromOrderNo, returnArrivalReqDTO.getFromOrderNo())
                     .set(StringUtil.isNotBlank(returnArrivalReqDTO.getExpectedNo()), ReturnExpressDetail::getExpectedNo, returnArrivalReqDTO.getExpectedNo())
                     .set(ReturnExpressDetail::getScanCode, returnArrivalReqDTO.getScanCode())
                     .set(ReturnExpressDetail::getSellerCode, returnArrivalReqDTO.getSellerCode())
                     .set(StringUtil.isNotBlank(returnArrivalReqDTO.getRemark()), BaseEntity::getRemark, returnArrivalReqDTO.getRemark())
+                    .set(ReturnExpressDetail::getArrivalTime, LocalDateTime.now())
                     .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL)
             );
             return update;
@@ -234,18 +221,18 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Transactional(rollbackFor = Exception.class)
     public int updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO) {
         log.info("接收WMS仓库退件处理结果 {}", returnProcessingReqDTO);
-        boolean finish = returnProcessingReqDTO.getProcessType().equals(ReturnExpressEnums.ProcessTypeEnum.OpenAndCheck);
-        ReturnExpressEnums.DealStatusEnum dealStatusEnum = finish ?
+        boolean needToContinue = returnProcessingReqDTO.getProcessType().equals(ReturnExpressEnums.ProcessTypeEnum.OpenAndCheck);
+        ReturnExpressEnums.DealStatusEnum dealStatusEnum = needToContinue ?
                 ReturnExpressEnums.DealStatusEnum.WAIT_PROCESSED_AFTER_UNPACKING :
-                ReturnExpressEnums.DealStatusEnum.VMS_FINISH;
+                ReturnExpressEnums.DealStatusEnum.WMS_FINISH;
 
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getReturnNo, returnProcessingReqDTO.getReturnNo())
-                .set(ReturnExpressDetail::getProcessType, returnProcessingReqDTO.getProcessType())
+                .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WMS_RECEIVED_DEAL_WAY)
                 .set(StringUtils.isNotBlank(returnProcessingReqDTO.getReturnNo()), BaseEntity::getRemark, returnProcessingReqDTO.getRemark())
                 .set(ReturnExpressDetail::getApplyProcessMethod, returnProcessingReqDTO.getProcessType())
                 .set(ReturnExpressDetail::getDealStatus, dealStatusEnum)
-                .set(finish, ReturnExpressDetail::getFinishTime, LocalDateTime.now())
+                .set(!needToContinue, ReturnExpressDetail::getFinishTime, LocalDateTime.now())
                 .last("LIMIT 1")
         );
         log.info("接收WMS仓库退件处理结果 {} - 更新条数 {}", returnProcessingReqDTO, update);
@@ -267,7 +254,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL)
-                .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.VMS_RECEIVED_DEAL_WAY)
+                .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WMS_RECEIVED_DEAL_WAY)
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
                 .set(StringUtil.isNotBlank(expressUpdateDTO.getFromOrderNo()), ReturnExpressDetail::getFromOrderNo, expressUpdateDTO.getFromOrderNo())
                 .last("LIMIT 1")

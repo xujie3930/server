@@ -1,8 +1,6 @@
 package com.szmsd.returnex.vo;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
@@ -90,21 +88,31 @@ public class ReturnExpressListVO implements Serializable {
     private String processRemark;
 
     @ApiModelProperty(value = "类型[默认：1：退件预报，2：VMS通知退件]")
-    private ReturnExpressEnums.ReturnSourceEnum returnSource;
+    private String returnSource;
+
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
 
-    public void setReturnSource(ReturnExpressEnums.ReturnSourceEnum returnSource) {
+    public void setReturnSource(String returnSource) {
         this.returnSource = returnSource;
         Optional.ofNullable(returnSource)
-                .ifPresent(x -> returnSourceStr = x.getDesc());
+                .filter(StringUtils::isNotEmpty)
+                .ifPresent(x -> returnSourceStr = ReturnExpressEnums.ReturnSourceEnum.valueOf(x).getDesc());
+
     }
 
     @ApiModelProperty(value = "处理状态编码")
     private String dealStatus;
 
-    @ApiModelProperty(value = "退货Tracking 号")
-    private String returnTracking;
+    @ApiModelProperty(value = "处理状态编码", hidden = true)
+    private String dealStatusStr;
+
+    public void setDealStatus(String dealStatus) {
+        this.dealStatus = dealStatus;
+        Optional.ofNullable(dealStatus)
+                .filter(StringUtils::isNotEmpty)
+                .ifPresent(x -> dealStatusStr = ReturnExpressEnums.DealStatusEnum.valueOf(x).getDesc());
+    }
 
     @Override
     public String toString() {

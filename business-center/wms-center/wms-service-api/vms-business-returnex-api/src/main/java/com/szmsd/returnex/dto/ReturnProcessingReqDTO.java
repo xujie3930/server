@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * @ClassName: ReturnArrivalReqDTO
@@ -41,7 +42,7 @@ public class ReturnProcessingReqDTO {
      */
     @StringLength(minLength = 1, maxLength = 50, message = "仓库退件流水号超过约定长度[1-50]")
     @NotBlank(message = "仓库退件流水号不能为空")
-    @ApiModelProperty(value = "仓库退件流水号")
+    @ApiModelProperty(value = "仓库退件流水号",required = true)
     private String returnNo;
 
     /**
@@ -51,7 +52,8 @@ public class ReturnProcessingReqDTO {
      * 拆包检查：OpenAndCheck
      * 按明细上架：PutawayBySku
      */
-    @ApiModelProperty(value = "处理方式")
+    @NotNull(message = "处理方式不能为空")
+    @ApiModelProperty(value = "处理方式",required = true)
     private ReturnExpressEnums.ProcessTypeEnum processType;
 
     @ApiModelProperty(value = "处理方式")
