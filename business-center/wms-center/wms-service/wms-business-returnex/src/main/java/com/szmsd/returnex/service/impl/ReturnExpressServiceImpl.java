@@ -63,6 +63,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     /**
      * TODO 开发使用 测试需要取消注释
+     *
      * @return
      */
     private String getSellCode() {
@@ -76,6 +77,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     /**
      * 单号生成
      * TODO 开发使用 测试需要取消注释
+     *
      * @return
      */
     public String genNo() {
@@ -97,7 +99,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Override
     public String createExpectedNo() {
-        return  genNo();
+        return genNo();
     }
 
     /**
@@ -224,6 +226,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     /**
      * 批量 新增/修改sku
+     *
      * @param list
      */
     private void addOrUpdateSkuList(List<ReturnExpressGood> list) {
@@ -283,6 +286,14 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
         // TODO 更新货物信息 货物信息未返回无法更新sku货物信息
         httpFeignClient.processingUpdate(expressUpdateDTO.convertThis(ProcessingUpdateReqDTO.class));
+        return update;
+    }
+
+    @Override
+    public int expiredUnprocessedForecastOrder() {
+        log.info("--------------更新过期未处理的预报单 开始--------------");
+        int update = returnExpressMapper.update(null, Wrappers.<ReturnExpressDetail>lambdaUpdate());
+        log.info("--------------更新过期未处理的预报单 结束--------------");
         return update;
     }
 }
