@@ -80,4 +80,11 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @return 返回结果
      */
     String createExpectedNo();
+
+    /**
+     * 过期未处理的预报单
+     *
+     * @return
+     */
+    int expiredUnprocessedForecastOrder();
 }

@@ -22,7 +22,6 @@
     <modules>
         <module>business-center</module>
         <module>szmsd-framework</module>
-        <module>business-center/wms-center/wms-service/vms-business-returnex</module>
     </modules>
 
     <properties>
