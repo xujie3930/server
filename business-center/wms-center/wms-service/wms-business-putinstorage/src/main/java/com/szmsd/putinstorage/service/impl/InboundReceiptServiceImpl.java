@@ -213,7 +213,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         CompletableFuture.runAsync(() -> {
             List<AttachmentFileDTO> documentsFile = inboundReceiptDTO.getDocumentsFile();
             if (CollectionUtils.isNotEmpty(documentsFile)) {
-                log.info("保存单证信息文件");
+                log.info("保存单证信息文件：{}", documentsFile);
                 remoteComponent.saveAttachment(warehouseNo, documentsFile, AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
             }
         });
