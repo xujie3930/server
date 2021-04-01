@@ -13,7 +13,7 @@ import java.util.List;
  * @author zhangyuyuan
  * @date 2021-03-30 15:07
  */
-public class DelOutboundWrapperContext {
+public class DelOutboundWrapperContext implements ApplicationContext {
 
     private DelOutbound delOutbound;
     private DelOutboundAddress address;

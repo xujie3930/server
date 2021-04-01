@@ -159,4 +159,9 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "承运商订单号")
     private String shipmentOrderNumber;
 
+    @ApiModelProperty(value = "预审状态")
+    private String bringVerifyState;
+
+    @ApiModelProperty(value = "出库状态")
+    private String shipmentState;
 }

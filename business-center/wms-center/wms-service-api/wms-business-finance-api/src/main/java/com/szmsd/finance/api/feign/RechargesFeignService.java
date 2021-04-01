@@ -26,10 +26,10 @@ public interface RechargesFeignService {
     R warehouseFeeDeductions(@RequestBody CustPayDTO dto);
 
     @ApiOperation(value = "冻结余额")
-    @PostMapping("/freezeBalance")
+    @PostMapping("/accountBalance/freezeBalance")
     public R freezeBalance(@RequestBody CusFreezeBalanceDTO dto);
 
     @ApiOperation(value = "解冻余额")
-    @PostMapping("/thawBalance")
+    @PostMapping("/accountBalance/thawBalance")
     public R thawBalance(@RequestBody CusFreezeBalanceDTO dto);
 }
