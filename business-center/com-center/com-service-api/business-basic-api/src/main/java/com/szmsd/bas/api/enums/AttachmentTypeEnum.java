@@ -16,6 +16,8 @@ import static com.szmsd.common.core.web.controller.BaseController.getLen;
 public enum AttachmentTypeEnum {
 
     PREFIX_TEMP("PREFIX_TEMP", "临时目录", "临时文件", ""),
+    SKU_IMAGE("SKU_IMAGE","基础信息","SKU图片","skuImage"),
+    SELLER_CERTIFICATE_DOCUMENT("SELLER_CERTIFICATE_DOCUMENT","基础信息","客户认证资料文件","sellerCertificateDocument"),
     INBOUND_RECEIPT_DOCUMENTS("INBOUND_RECEIPT", "入库单", "单证信息文件", "documents"),
     INBOUND_RECEIPT_EDITION_IMAGE("INBOUND_RECEIPT", "入库单", "对版图片", "editionImage"),
     PAYMENT_DOCUMENT("PAYMENT_DOCUMENT","汇款凭证","","paymentDocument"),
