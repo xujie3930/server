@@ -61,7 +61,7 @@ public class IInventoryCheckServiceImpl implements IInventoryCheckService {
             throw new CommonException("999", "请检查单据审核状态");
         }
         int result = inventoryCheckMapper.updateById(inventoryCheck);
-        if (InventoryStatusEnum.PASS.getCode().equals(inventoryCheck.getStatus())) {
+        if (InventoryStatusEnum.PASS.getCode() == inventoryCheck.getStatus()) {
             CountingRequest countingRequest = new CountingRequest(inventoryCheck.getWarehouseCode(),
                     inventoryCheck.getOrderNo(), inventoryCheck.getRemark(), Collections.singletonList(inventoryCheck.getSku()));
             R<ResponseVO> response = htpInventoryCheckFeignService.counting(countingRequest);

@@ -5,24 +5,24 @@ import lombok.Getter;
 @Getter
 public enum InventoryStatusEnum {
 
-    PASS("Pass", "通过"),
+    PASS(1,"Pass"),
 
-    REJECT("Reject", "不通过"),
+    REJECT(2,"Reject"),
 
-    PENDING("Pending", "待确认");
+    PENDING(3,"Pending");
 
-    private final String code;
+    private final int code;
 
     private final String name;
 
-    InventoryStatusEnum(String code, String name) {
+    InventoryStatusEnum(int code, String name) {
         this.code = code;
         this.name = name;
     }
 
-    public static boolean checkStatus(String status) {
+    public static boolean checkStatus(int status) {
         for (InventoryStatusEnum value : InventoryStatusEnum.values()) {
-            if (value.getCode().equals(status)) {
+            if (value.getCode() == status) {
                 return true;
             }
         }
