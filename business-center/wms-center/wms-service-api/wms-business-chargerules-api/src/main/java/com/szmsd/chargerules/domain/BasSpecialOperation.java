@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -27,7 +28,7 @@ public class BasSpecialOperation extends BaseEntity {
     private String operator;
 
     @ApiModelProperty(value = "操作时间")
-    private String operateOn;
+    private Date operateOn;
 
     @ApiModelProperty(value = "仓库")
     private String warehouseCode;

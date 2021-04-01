@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
@@ -43,10 +45,13 @@ public class InventoryCheck extends BaseEntity {
     private Integer diffQty;
 
     @ApiModelProperty(value = "完成时间")
-    private String checkTime;
+    private Date checkTime;
 
     @ApiModelProperty(value = "库存盘点审批结果")
-    private String status;
+    private Integer status;
+
+    @ApiModelProperty(value = "审批不通过原因")
+    private String reason;
 
     @ApiModelProperty(value = "创建ID", hidden = true)
     @TableField(fill = FieldFill.INSERT)

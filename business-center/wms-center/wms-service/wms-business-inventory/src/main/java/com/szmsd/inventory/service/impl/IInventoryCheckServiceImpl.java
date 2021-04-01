@@ -40,7 +40,6 @@ public class IInventoryCheckServiceImpl implements IInventoryCheckService {
     public int add(InventoryCheckDTO inventoryCheckDTO) {
         // 流水号规则：PD + 客户代码 + （年月日 + 5位流水）
         InventoryCheck inventoryCheck = BeanMapperUtil.map(inventoryCheckDTO, InventoryCheck.class);
-        BeanUtils.copyProperties(inventoryCheckDTO, inventoryCheck);
         inventoryCheck.setOrderNo("PD" + inventoryCheckDTO.getCustomCode() + this.serialNumberClientService.generateNumber("INVENTORY_CHECK"));
         return inventoryCheckMapper.insert(inventoryCheck);
     }
@@ -62,7 +61,7 @@ public class IInventoryCheckServiceImpl implements IInventoryCheckService {
             throw new CommonException("999", "请检查单据审核状态");
         }
         int result = inventoryCheckMapper.updateById(inventoryCheck);
-        if (InventoryStatusEnum.PASS.getCode().equals(inventoryCheck.getStatus())) {
+        if (InventoryStatusEnum.PASS.getCode() == inventoryCheck.getStatus()) {
             CountingRequest countingRequest = new CountingRequest(inventoryCheck.getWarehouseCode(),
                     inventoryCheck.getOrderNo(), inventoryCheck.getRemark(), Collections.singletonList(inventoryCheck.getSku()));
             R<ResponseVO> response = htpInventoryCheckFeignService.counting(countingRequest);
