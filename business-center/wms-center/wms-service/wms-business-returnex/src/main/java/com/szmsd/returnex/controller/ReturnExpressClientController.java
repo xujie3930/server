@@ -88,4 +88,14 @@ public class ReturnExpressClientController extends BaseController {
         return toOk(returnExpressService.updateExpressInfo(expressUpdateDTO));
     }
 
+    /**
+     * 获取退件单信息详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/getInfo/{id}")
+    @ApiOperation(value = "获取退件单信息详情")
+    public R getInfo(@PathVariable(value = "id") Long id) {
+        return R.ok(returnExpressService.getInfo(id));
+    }
 }
