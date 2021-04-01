@@ -88,9 +88,9 @@ public class ReturnExpressListVO implements Serializable {
 
 
     @ApiModelProperty(value = "目的仓库名称")
-    private String warehouseName;
+    private String warehouseCode;
     @ApiModelProperty(value = "目的仓库名称", hidden = true)
-    private String warehouseNameStr;
+    private String warehouseCodeStr;
 
 
     @Override
