@@ -14,6 +14,9 @@ public class SpecialOperationDTO implements Serializable {
     @ApiModelProperty(value = "ID")
     private Long id;
 
+    @ApiModelProperty(value = "仓库")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "操作类型")
     private String operationType;
 
