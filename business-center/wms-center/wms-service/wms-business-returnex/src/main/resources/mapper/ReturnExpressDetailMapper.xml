@@ -58,7 +58,7 @@
             <if test="cm.processType != null and cm.processType != '' ">
                 and process_type = #{cm.processType}
             </if>
-            <if test="cm.returnType != null and cm.cm.returnType != '' ">
+            <if test="cm.returnType != null and cm.returnType != '' ">
                 and return_type = #{cm.returnType}
             </if>
             <if test="cm.createTimeStart != null and cm.createTimeEnd != null ">
