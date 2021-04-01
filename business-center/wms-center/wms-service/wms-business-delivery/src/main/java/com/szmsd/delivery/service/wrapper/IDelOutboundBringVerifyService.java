@@ -4,6 +4,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.http.dto.ChargeWrapper;
 import com.szmsd.http.dto.ProblemDetails;
 import com.szmsd.http.dto.ResponseObject;
+import com.szmsd.http.dto.ShipmentOrderResult;
 
 /**
  * 提审业务
@@ -41,9 +42,9 @@ public interface IDelOutboundBringVerifyService {
      * 创建承运商物流订单（客户端）
      *
      * @param delOutboundWrapperContext delOutboundWrapperContext
-     * @return String
+     * @return ShipmentOrderResult
      */
-    String shipmentOrder(DelOutboundWrapperContext delOutboundWrapperContext);
+    ShipmentOrderResult shipmentOrder(DelOutboundWrapperContext delOutboundWrapperContext);
 
     /**
      * 创建出库单
