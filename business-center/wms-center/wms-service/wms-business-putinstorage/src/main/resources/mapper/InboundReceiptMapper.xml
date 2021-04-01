@@ -34,6 +34,7 @@
         <result column="goods_source_code" property="goodsSourceCode"/>
         <result column="tracking_number" property="trackingNumber"/>
         <result column="status" property="status"/>
+        <result column="remark" property="remark"/>
 
         <!-- 多语言字段 -->
         <result column="cus_name" property="cusName"/>
@@ -76,6 +77,7 @@
         t.goods_source_code,
         t.tracking_number,
         t.status,
+        t.remark,
 
         -- 多语言字段
         t.cus_code cus_name,

@@ -64,6 +64,9 @@ public class InboundReceiptInfoVO {
     @ApiModelProperty(value = "状态")
     private String status;
 
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
     @ApiModelProperty(value = "入库明细")
     private List<InboundReceiptDetailVO> inboundReceiptDetailVOS;
 

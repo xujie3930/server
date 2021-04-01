@@ -109,6 +109,9 @@ public class HandlerContext<T> {
                         continue;
                     }
                     Set<Object> objectSet = stringSetMap.get(field);
+                    if (CollectionUtils.isEmpty(objectSet)) {
+                        continue;
+                    }
                     Map<Object, Object> map = Collections.emptyMap();
                     for (CommonPlugin plugin : plugins) {
                         map = plugin.handlerValue(new ArrayList<>(objectSet), cp(autoFieldValue.cp(), autoFieldValue.code()), this.cacheContext);
