@@ -325,7 +325,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             return Collections.emptyList();
         }
         LambdaQueryWrapper<BaseProduct> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(BaseProduct::getWarehouseCode, conditionQueryDto.getWarehouseCode());
+        if (null != conditionQueryDto.getWarehouseCode()) {
+            queryWrapper.eq(BaseProduct::getWarehouseCode, conditionQueryDto.getWarehouseCode());
+        }
         queryWrapper.in(BaseProduct::getCode, conditionQueryDto.getSkus());
         return this.list(queryWrapper);
     }
