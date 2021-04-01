@@ -124,7 +124,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(),String.valueOf(specialOperation.getId()));
         R r = payService.pay(customCode, amount,BillEnum.PayMethod.SPECIAL_OPERATE,chargeLog);
         if(r.getCode() != 200) {
-            log.error("pay failed: {}",r.getData());
+            log.error("pay failed: {} {}",r.getData(),r.getMsg());
             throw new CommonException("999",ErrorMessageEnum.PAY_FAILED.getMessage());
         }
 
