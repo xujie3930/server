@@ -63,7 +63,7 @@ public class InboundReceiptDTO {
     @ApiModelProperty(value = "单证信息文件")
     private List<AttachmentFileDTO> documentsFile;
 
-    @ApiModelProperty(value = "状态0已取消，1待提审，2待收货，3仓库处理中，4已入库")
+    @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
     private String status;
 
 }

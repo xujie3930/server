@@ -8,12 +8,16 @@ import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasFeignService;
+import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.language.enums.LocalLanguageEnum;
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
@@ -27,6 +31,7 @@ import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -59,6 +64,10 @@ public class RemoteComponent {
     /** 库存远程服务 **/
     @Resource
     private InventoryFeignService inventoryFeignService;
+
+    /** 仓库信息 **/
+    @Resource
+    private BasWarehouseFeignService basWarehouseFeignService;
 
     /**
      * 获取登录人信息
@@ -163,6 +172,39 @@ public class RemoteComponent {
         AssertUtil.notNull(inbound, "入库请求异常");
         AssertUtil.isTrue(inbound.getCode() == HttpStatus.SUCCESS, "入库失败：" + inbound.getMsg());
         log.info("调用入库接口：操作完成");
+    }
+
+    /**
+     * 获取仓库信息
+     * @param warehouseCode
+     * @return
+     */
+    public BasWarehouse getWarehouse(String warehouseCode) {
+        R<BasWarehouse> basWarehouseR = basWarehouseFeignService.queryByWarehouseCode(warehouseCode);
+        BasWarehouse warehouse = basWarehouseR.getData();
+        AssertUtil.notNull(warehouse, "仓库信息获取失败：warehouseCode=" + warehouseCode);
+        log.info("远程接口：查询SKU, warehouseCode={}, {}", warehouseCode, warehouse);
+        return basWarehouseR.getData();
+    }
+
+
+    /**
+     * 判断入库单是否自动审核
+     * @param warehouseCode
+     * @return
+     */
+    public boolean inboundReceiptReview(String warehouseCode) {
+        try {
+            BasWarehouse warehouse = getWarehouse(warehouseCode);
+            String inboundReceiptReview = warehouse.getInboundReceiptReview();
+            LocalLanguageEnum localLanguageEnum = LocalLanguageEnum.getLocalLanguageEnum(LocalLanguageTypeEnum.INBOUND_RECEIPT_REVIEW, inboundReceiptReview);
+            LocalLanguageEnum inboundReceiptReview0 = LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0;
+            log.info(warehouse.getWarehouseNameCn() + "{}", ObjectUtils.isEmpty(localLanguageEnum) ? inboundReceiptReview0.getZhName() : localLanguageEnum.getZhName());
+            return inboundReceiptReview0.getKey().equals(inboundReceiptReview);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return false;
     }
 
 }

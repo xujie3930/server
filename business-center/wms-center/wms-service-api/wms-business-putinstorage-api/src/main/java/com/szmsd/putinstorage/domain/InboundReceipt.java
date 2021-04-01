@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
@@ -65,8 +67,20 @@ public class InboundReceipt extends BaseEntity {
     @ApiModelProperty(value = "挂号")
     private String trackingNumber;
 
-    @ApiModelProperty(value = "状态0已取消，1待提审，2待收货，3仓库处理中，4已入库")
+    @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
     private String status;
+
+    @ApiModelProperty(value = "审核人")
+    private String reviewBy;
+
+    @ApiModelProperty(value = "审核人名称")
+    private String reviewByName;
+
+    @ApiModelProperty(value = "审核时间")
+    private Date reviewTime;
+
+    @ApiModelProperty(value = "审核备注")
+    private String reviewRemark;
 
     @ApiModelProperty(value = "创建ID",hidden = true)
     @TableField(fill = FieldFill.INSERT)

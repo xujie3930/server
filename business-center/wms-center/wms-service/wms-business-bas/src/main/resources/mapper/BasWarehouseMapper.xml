@@ -14,6 +14,7 @@
         <result column="city" property="city"/>
         <result column="time_zone" property="timeZone"/>
         <result column="status" property="status"/>
+        <result column="inbound_receipt_review" property="inboundReceiptReview"/>
     </resultMap>
     
     <resultMap id="BasWarehouseInfoVO" type="com.szmsd.bas.vo.BasWarehouseInfoVO">
@@ -35,6 +36,7 @@
         <result column="time_zone" property="timeZone"/>
         <result column="contact" property="contact"/>
         <result column="status" property="status"/>
+        <result column="inbound_receipt_review" property="inboundReceiptReview"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -48,7 +50,8 @@
         t.country_display_name,
         t.city,
         t.time_zone,
-        t.status
+        t.status,
+        t.inbound_receipt_review
     </sql>
 
     <sql id="Column_List_INFO_VO">
@@ -69,7 +72,8 @@
         t.telephone,
         t.time_zone,
         t.contact,
-        t.status
+        t.status,
+        t.inbound_receipt_review
     </sql>
 
     <select id="selectListVO" parameterType="com.szmsd.bas.dto.BasWarehouseQueryDTO" resultMap="BasWarehouseVO">

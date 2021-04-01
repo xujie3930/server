@@ -7,7 +7,7 @@ import com.szmsd.http.dto.CreateReceiptRequest;
 import com.szmsd.http.dto.ReceiptDetailInfo;
 import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
-import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,17 +27,17 @@ public class RemoteRequest {
 
     /**
      * 创建入库单
-     * @param createInboundReceiptDTO
+     * @param inboundReceiptInfoVO
      */
-    public void createInboundReceipt(CreateInboundReceiptDTO createInboundReceiptDTO) {
+    public void createInboundReceipt(InboundReceiptInfoVO inboundReceiptInfoVO) {
         CreateReceiptRequest createInboundReceipt = new CreateReceiptRequest();
-        createInboundReceipt.setWarehouseCode(createInboundReceiptDTO.getWarehouseCode());
+        createInboundReceipt.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
         createInboundReceipt.setOrderType(InboundReceiptEnum.OrderType.NORMAL.getValue());
-        createInboundReceipt.setSellerCode(createInboundReceiptDTO.getCusCode());
-        createInboundReceipt.setTrackingNumber(createInboundReceiptDTO.getDeliveryNo());
-        createInboundReceipt.setRemark(createInboundReceiptDTO.getRemark());
-        createInboundReceipt.setRefOrderNo(createInboundReceiptDTO.getWarehouseNo());
-        createInboundReceipt.setDetails(createInboundReceiptDTO.getInboundReceiptDetailDTOS().stream().map(detail -> {
+        createInboundReceipt.setSellerCode(inboundReceiptInfoVO.getCusCode());
+        createInboundReceipt.setTrackingNumber(inboundReceiptInfoVO.getDeliveryNo());
+        createInboundReceipt.setRemark(inboundReceiptInfoVO.getRemark());
+        createInboundReceipt.setRefOrderNo(inboundReceiptInfoVO.getWarehouseNo());
+        createInboundReceipt.setDetails(inboundReceiptInfoVO.getInboundReceiptDetailVOS().stream().map(detail -> {
             ReceiptDetailInfo receiptDetailInfo = new ReceiptDetailInfo();
             receiptDetailInfo.setSku(detail.getSku());
             receiptDetailInfo.setQty(detail.getDeclareQty());

@@ -5,6 +5,7 @@ import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 
 import java.util.List;
 
@@ -33,5 +34,11 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     void receiving(ReceivingRequest receivingRequest);
 
     void completed(ReceivingCompletedRequest receivingCompletedRequest);
+
+    void updateStatus(String warehouseNo, InboundReceiptEnum.InboundReceiptStatus status);
+
+    void updateByWarehouseNo(InboundReceipt inboundReceipt);
+
+    void review(InboundReceiptReviewDTO inboundReceiptReviewDTO);
 }
 

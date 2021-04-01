@@ -20,6 +20,8 @@ public interface IInboundReceiptDetailService extends IService<InboundReceiptDet
 
     List<InboundReceiptDetailVO> selectList(InboundReceiptDetailQueryDTO queryDto);
 
+    List<InboundReceiptDetailVO> selectList(InboundReceiptDetailQueryDTO queryDto, boolean isContainFile);
+
     InboundReceiptDetailVO selectObject(String warehouseNo, String sku);
 
     void saveInboundReceiptDetail(List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS);

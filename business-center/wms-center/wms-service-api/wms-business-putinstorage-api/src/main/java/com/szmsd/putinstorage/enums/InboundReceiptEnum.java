@@ -32,17 +32,20 @@ public class InboundReceiptEnum {
     @Getter
     @AllArgsConstructor
     public enum InboundReceiptStatus implements InboundReceiptEnumMethods {
-
         /** 状态：已取消 **/
         CANCELLED( "0", "已取消"),
-        /** 状态：待提审 **/
-        TRANSFER( "1", "待提审"),
-        /** 状态：待收货 **/
-        TO_BE_RECEIVED( "2", "待收货"),
-        /** 状态：仓库处理中 **/
-        WAREHOUSE_PROCESSING( "3", "仓库处理中"),
-        /** 状态：已入库 **/
-        HAS_BEEN_STORED( "4", "已入库"),
+        /** 状态：初始 **/
+        INIT( "1", "初始"),
+        /** 状态：已提审 **/
+        ARRAIGNED( "2", "已提审"),
+        /** 状态：审核通过 **/
+        REVIEW_PASSED( "3", "审核通过"),
+        /** 状态：审核失败 **/
+        REVIEW_FAILURE( "-3", "审核失败"),
+        /** 状态：处理中 **/
+        PROCESSING( "4", "处理中"),
+        /** 状态：已完成 **/
+        COMPLETED( "5", "已完成"),
         ;
         private String value;
         private String value2;

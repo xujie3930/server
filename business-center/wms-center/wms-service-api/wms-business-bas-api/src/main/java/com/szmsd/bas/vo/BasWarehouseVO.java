@@ -2,6 +2,7 @@ package com.szmsd.bas.vo;
 
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -41,6 +42,11 @@ public class BasWarehouseVO {
     private String isCheckVat;
 
     @ApiModelProperty(value = "状态：0无效，1有效")
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.VALID)
     private String status;
+
+    @ApiModelProperty(value = "入库单是否人工审核：0自动审核，1人工审核")
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_REVIEW)
+    private String inboundReceiptReview;
 
 }
