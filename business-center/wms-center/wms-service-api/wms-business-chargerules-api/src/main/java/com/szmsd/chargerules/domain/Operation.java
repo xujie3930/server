@@ -25,6 +25,10 @@ public class Operation extends BaseEntity {
     @TableField
     private String operationType;
 
+    @ApiModelProperty(value = "仓库")
+    @TableField
+    private String warehouseCode;
+
     @ApiModelProperty(value = "订单类型")
     @TableField
     private String orderType;
