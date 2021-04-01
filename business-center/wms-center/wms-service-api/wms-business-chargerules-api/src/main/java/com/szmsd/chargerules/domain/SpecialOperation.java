@@ -25,6 +25,10 @@ public class SpecialOperation extends BaseEntity {
     @TableField
     private String operationType;
 
+    @ApiModelProperty(value = "仓库")
+    @TableField
+    private String warehouseCode;
+
     @ApiModelProperty(value = "首件价格")
     @TableField
     private BigDecimal firstPrice;

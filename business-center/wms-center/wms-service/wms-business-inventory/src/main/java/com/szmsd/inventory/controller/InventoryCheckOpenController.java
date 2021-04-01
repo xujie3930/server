@@ -31,7 +31,8 @@ public class InventoryCheckOpenController extends BaseController {
     @ApiOperation(value = "#C1 接收仓库盘盈盘亏（盘点也是用此接口）")
     @ApiImplicitParam(name = "dto", value = "ShipmentRequestDto", dataType = "ShipmentRequestDto")
     public R<Integer> adjust(@RequestBody @Validated AdjustRequestDto adjustRequestDto) {
-        return R.ok(this.iInventoryCheckOpenService.adjust(adjustRequestDto));
+        this.iInventoryCheckOpenService.adjust(adjustRequestDto);
+        return R.ok();
     }
 
     @Log(title = "库存盘点模块", businessType = BusinessType.INSERT)

@@ -88,20 +88,20 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     public List<BaseProduct> selectBaseProductPage(BaseProductQueryDto queryDto) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        if(StringUtils.isNotEmpty(queryDto.getCodes())){
+        if (StringUtils.isNotEmpty(queryDto.getCodes())) {
             String[] codes = queryDto.getCodes().split(",");
-            queryWrapper.in("code",codes);
+            queryWrapper.in("code", codes);
         }
-        if(StringUtils.isNotEmpty(queryDto.getSellerCodes())){
+        if (StringUtils.isNotEmpty(queryDto.getSellerCodes())) {
             String[] sellerCodes = queryDto.getSellerCodes().split(",");
-            queryWrapper.in("seller_code",sellerCodes);
+            queryWrapper.in("seller_code", sellerCodes);
         }
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
-        if(queryDto.getIsActive()!=null){
-            queryWrapper.eq("is_active",queryDto.getIsActive());
+        if (queryDto.getIsActive() != null) {
+            queryWrapper.eq("is_active", queryDto.getIsActive());
         }
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
@@ -123,7 +123,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductVO> selectBaseProductByCode(String code,String sellerCode) {
+    public List<BaseProductVO> selectBaseProductByCode(String code, String sellerCode) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code + "%");
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", sellerCode);
@@ -150,7 +150,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         log.info("更新sku测量值: {}", request);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", request.getCode());
-        if(super.count(queryWrapper)!=1){
+        if (super.count(queryWrapper) != 1) {
             throw new BaseException("sku不存在");
         }
         BigDecimal volume = new BigDecimal(request.getHeight()).multiply(new BigDecimal(request.getWidth()))
@@ -159,7 +159,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         String operationOn = request.getOperateOn();
         request.setOperateOn(null);
         BaseProduct baseProduct = BeanMapperUtil.map(request, BaseProduct.class);
-        if(StringUtils.isNotEmpty(operationOn)){
+        if (StringUtils.isNotEmpty(operationOn)) {
             try {
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 df.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -321,12 +321,13 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     private List<BaseProduct> queryConditionList(BaseProductConditionQueryDto conditionQueryDto) {
-        if (StringUtils.isEmpty(conditionQueryDto.getWarehouseCode())
-                || CollectionUtils.isEmpty(conditionQueryDto.getSkus())) {
+        if (CollectionUtils.isEmpty(conditionQueryDto.getSkus())) {
             return Collections.emptyList();
         }
         LambdaQueryWrapper<BaseProduct> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(BaseProduct::getWarehouseCode, conditionQueryDto.getWarehouseCode());
+        if (null != conditionQueryDto.getWarehouseCode()) {
+            queryWrapper.eq(BaseProduct::getWarehouseCode, conditionQueryDto.getWarehouseCode());
+        }
         queryWrapper.in(BaseProduct::getCode, conditionQueryDto.getSkus());
         return this.list(queryWrapper);
     }

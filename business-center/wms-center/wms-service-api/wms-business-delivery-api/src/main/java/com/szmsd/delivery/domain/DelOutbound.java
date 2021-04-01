@@ -156,4 +156,7 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "挂号获取方式")
     private String trackingAcquireType;
 
+    @ApiModelProperty(value = "承运商订单号")
+    private String shipmentOrderNumber;
+
 }

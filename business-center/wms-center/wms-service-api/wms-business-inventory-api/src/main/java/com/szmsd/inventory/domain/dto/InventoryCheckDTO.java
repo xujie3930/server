@@ -3,6 +3,8 @@ package com.szmsd.inventory.domain.dto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class InventoryCheckDTO {
 
@@ -11,6 +13,9 @@ public class InventoryCheckDTO {
 
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
+
+    @ApiModelProperty(value = "申请时间")
+    private Date createTime;
 
     @ApiModelProperty(value = "申请单号")
     private String orderNo;

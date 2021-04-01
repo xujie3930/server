@@ -253,6 +253,10 @@ public class HttpClientHelper {
         return execute(new HttpPost(url), headerMap, requestBody);
     }
 
+    public static FileStream httpGetStream(String url, Map<String, String> headerMap, String requestBody) {
+        return execute(new HttpGet(url), headerMap, requestBody);
+    }
+
     public static FileStream execute(HttpEntityEnclosingRequestBase request, Map<String, String> headerMap, String requestBody) {
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
@@ -282,9 +286,8 @@ public class HttpClientHelper {
      *
      * @param url         请求URL
      * @param requestBody 请求Body
-     * @param file 文件
+     * @param file        文件
      * @param headerMap   请求Header
-     * @return 响应Body
      * @return
      */
     public static HttpResponseBody httpPut(String url, String requestBody, MultipartFile file, Map<String, String> headerMap) {
@@ -296,9 +299,8 @@ public class HttpClientHelper {
      *
      * @param url         请求URL
      * @param requestBody 请求Body
-     * @param file 文件
+     * @param file        文件
      * @param headerMap   请求Header
-     * @return 响应Body
      * @return
      */
     public static HttpResponseBody httpPost(String url, String requestBody, MultipartFile file, Map<String, String> headerMap) {
@@ -340,6 +342,9 @@ public class HttpClientHelper {
     }
 
     public static void setRaw(HttpEntityEnclosingRequestBase httpEntity, String requestBody) {
+        if (null == requestBody) {
+            return;
+        }
         ByteArrayEntity byteArrayEntity = new ByteArrayEntity(requestBody.getBytes(StandardCharsets.UTF_8));
         byteArrayEntity.setContentType("application/json;charset=UTF-8");
         httpEntity.setEntity(byteArrayEntity);

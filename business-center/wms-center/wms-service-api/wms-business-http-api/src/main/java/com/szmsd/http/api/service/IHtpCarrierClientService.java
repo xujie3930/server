@@ -1,5 +1,6 @@
 package com.szmsd.http.api.service;
 
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.http.dto.CreateShipmentOrderCommand;
 import com.szmsd.http.dto.ProblemDetails;
 import com.szmsd.http.dto.ResponseObject;
@@ -18,4 +19,12 @@ public interface IHtpCarrierClientService {
      * @return ResponseObject<ShipmentOrderResult, ProblemDetails>
      */
     ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails> shipmentOrder(CreateShipmentOrderCommand command);
+
+    /**
+     * 根据订单号返回标签文件流
+     *
+     * @param orderNumber orderNumber
+     * @return FileStream
+     */
+    FileStream label(String orderNumber);
 }
