@@ -6,6 +6,7 @@ import lombok.Data;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import java.util.Date;
 
 @Data
 @ApiModel(value = "BasSpecialOperationDTO", description = "特殊操作")
@@ -15,7 +16,7 @@ public class BasSpecialOperationRequestDTO {
     private String operator;
 
     @ApiModelProperty(value = "操作时间")
-    private String operateOn;
+    private Date operateOn;
 
     @ApiModelProperty(value = "仓库")
     private String warehouseCode;

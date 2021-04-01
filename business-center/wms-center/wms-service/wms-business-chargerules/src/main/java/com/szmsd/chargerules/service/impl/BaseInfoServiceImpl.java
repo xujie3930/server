@@ -21,6 +21,7 @@ import com.szmsd.chargerules.vo.BasSpecialOperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.api.feign.HtpBasFeignService;
@@ -55,8 +56,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
     @Override
     public void add(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO) {
-        BasSpecialOperation domain = new BasSpecialOperation();
-        BeanUtils.copyProperties(basSpecialOperationRequestDTO, domain);
+        BasSpecialOperation domain = BeanMapperUtil.map(basSpecialOperationRequestDTO, BasSpecialOperation.class);
         LambdaQueryWrapper<BasSpecialOperation> query = Wrappers.lambdaQuery();
         query.eq(BasSpecialOperation::getOperationOrderNo,basSpecialOperationRequestDTO.getOperationOrderNo());
         BasSpecialOperation basSpecialOperation = baseInfoMapper.selectOne(query);

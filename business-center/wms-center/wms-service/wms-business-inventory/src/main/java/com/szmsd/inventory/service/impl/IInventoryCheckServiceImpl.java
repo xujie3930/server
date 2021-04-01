@@ -40,7 +40,6 @@ public class IInventoryCheckServiceImpl implements IInventoryCheckService {
     public int add(InventoryCheckDTO inventoryCheckDTO) {
         // 流水号规则：PD + 客户代码 + （年月日 + 5位流水）
         InventoryCheck inventoryCheck = BeanMapperUtil.map(inventoryCheckDTO, InventoryCheck.class);
-        BeanUtils.copyProperties(inventoryCheckDTO, inventoryCheck);
         inventoryCheck.setOrderNo("PD" + inventoryCheckDTO.getCustomCode() + this.serialNumberClientService.generateNumber("INVENTORY_CHECK"));
         return inventoryCheckMapper.insert(inventoryCheck);
     }
