@@ -3,7 +3,6 @@ package com.szmsd.putinstorage.domain.vo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
-import com.szmsd.common.core.language.enums.LanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -30,7 +29,7 @@ public class InboundReceiptVO {
     private String status;
 
     @ApiModelProperty(value = "状态已取消，待提审，待收货，仓库处理中，已入库")
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS, language = LanguageEnum.zhName)
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS)
     private String statusName;
 
     @ApiModelProperty(value = "送货方式名称 - 当前系统语言")
