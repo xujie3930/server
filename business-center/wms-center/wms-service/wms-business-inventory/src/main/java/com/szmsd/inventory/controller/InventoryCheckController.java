@@ -4,7 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.domain.InventoryCheck;
-import com.szmsd.inventory.domain.dto.InventoryCheckDTO;
+import com.szmsd.inventory.domain.dto.InventoryCheckDetailsDTO;
 import com.szmsd.inventory.domain.dto.InventoryCheckQueryDTO;
 import com.szmsd.inventory.service.IInventoryCheckService;
 import io.swagger.annotations.Api;
@@ -26,8 +26,8 @@ public class InventoryCheckController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inventory:check:add')")
     @PostMapping("/add")
     @ApiOperation(value = "库存盘点 - 申请盘点")
-    public R<Integer> add(@RequestBody InventoryCheckDTO inventoryCheckDTO) {
-        return R.ok(this.iInventoryCheckService.add(inventoryCheckDTO));
+    public R<Integer> add(@RequestBody List<InventoryCheckDetailsDTO> inventoryCheckDetailsList) {
+        return R.ok(this.iInventoryCheckService.add(inventoryCheckDetailsList));
     }
 
     @PreAuthorize("@ss.hasPermi('inventory:check:findList')")

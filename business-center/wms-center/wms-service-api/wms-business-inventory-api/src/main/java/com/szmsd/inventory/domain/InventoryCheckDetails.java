@@ -11,31 +11,30 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "Inventory", description = "Inventory盘点表")
-public class InventoryCheck extends BaseEntity {
+@ApiModel(value = "InventoryCheckDetails", description = "Inventory盘点详情表")
+public class InventoryCheckDetails extends BaseEntity {
 
     @ApiModelProperty(value = "主键ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    @ApiModelProperty(value = "申请单号")
+    @ApiModelProperty(value = "盘点申请单号")
     private String orderNo;
 
-    @ApiModelProperty(value = "客户代码")
-    private String customCode;
+    @ApiModelProperty(value = "sku")
+    private String sku;
 
-    @ApiModelProperty(value = "仓库代码")
-    private String warehouseCode;
+    @ApiModelProperty(value = "系统数量")
+    private Integer systemQty;
 
-    @ApiModelProperty(value = "库存盘点审批结果")
-    private Integer status;
+    @ApiModelProperty(value = "盘点数量")
+    private Integer countingQty;
 
-    @ApiModelProperty(value = "审批不通过原因")
-    private String reason;
+    @ApiModelProperty(value = "差异数量，等于盘点数量减去系统数量")
+    private Integer diffQty;
 
     @ApiModelProperty(value = "创建ID", hidden = true)
     @TableField(fill = FieldFill.INSERT)
@@ -44,6 +43,5 @@ public class InventoryCheck extends BaseEntity {
     @ApiModelProperty(value = "修改者ID", hidden = true)
     @TableField(fill = FieldFill.UPDATE)
     private String updateBy;
-
 
 }
