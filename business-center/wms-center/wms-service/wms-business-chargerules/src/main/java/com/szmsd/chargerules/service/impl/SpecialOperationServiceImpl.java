@@ -80,7 +80,7 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
     @Override
     public SpecialOperation selectOne(BasSpecialOperation basSpecialOperation) {
         QueryWrapper<SpecialOperation> where = new QueryWrapper<>();
-        if (StringUtils.isNotEmpty(basSpecialOperation.getOperationType())) {
+        if (StringUtils.isNotNull(basSpecialOperation.getOperationType())) {
             where.eq("operation_type", basSpecialOperation.getOperationType());
         }
         return specialOperationMapper.selectOne(where);

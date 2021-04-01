@@ -4,6 +4,7 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -27,6 +29,12 @@ public class PayServiceImpl implements IPayService {
     @Override
     public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Integer qty) {
         return qty == 1 ? firstPrice : new BigDecimal(qty - 1).multiply(nextPrice).add(firstPrice);
+    }
+
+    @Override
+    public BigDecimal manySkuCalculate(BigDecimal firstPrice, BigDecimal nextPrice, List<DelOutboundDetailDto> delOutboundDetailList) {
+        return delOutboundDetailList.stream().map(value -> this.calculate(firstPrice , nextPrice,
+                value.getQty().intValue())).reduce(BigDecimal::add).get();
     }
 
     @Override

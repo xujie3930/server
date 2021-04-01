@@ -19,7 +19,7 @@ public class SpecialOperation extends BaseEntity {
 
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private Integer id;
 
     @ApiModelProperty(value = "操作类型")
     @TableField

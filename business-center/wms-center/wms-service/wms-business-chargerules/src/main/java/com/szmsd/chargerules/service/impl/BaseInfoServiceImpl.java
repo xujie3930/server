@@ -98,7 +98,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
             basSpecialOperation.setCoefficient(0);
         } else {
             if (basSpecialOperation.getCoefficient() == 0) {
-                return R.failed(ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
+                throw new CommonException("999",ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
             }
         }
 
@@ -106,33 +106,34 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         OrderType factory = orderTypeFactory.getFactory(basSpecialOperation.getOrderType());
         String customCode = factory.findOrderById(basSpecialOperation.getOrderNo());
         if (StringUtils.isEmpty(customCode)) {
-            return R.failed(ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
+            throw new CommonException("999",ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
         }
 
         //修改数据
         baseInfoMapper.updateById(basSpecialOperation);
 
         //查询操作类型对应的收费配置
-        SpecialOperation specialOperation = specialOperationService.selectOne(basSpecialOperation);
+        SpecialOperation specialOperation = specialOperationService.details(basSpecialOperation.getOperationType());
         if (specialOperation == null) {
-            return R.failed(ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
+            throw new CommonException("999",ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
         }
         BigDecimal amount = payService.calculate(specialOperation.getFirstPrice(),
                 specialOperation.getNextPrice(), basSpecialOperation.getQty());
 
         //调用扣费接口扣费
-        ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(),basSpecialOperation.getOperationType());
+        ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(),String.valueOf(specialOperation.getId()));
         R r = payService.pay(customCode, amount,BillEnum.PayMethod.SPECIAL_OPERATE,chargeLog);
         if(r.getCode() != 200) {
             log.error("pay failed: {}",r.getData());
-            return R.failed(ErrorMessageEnum.PAY_FAILED.getMessage());
+            throw new CommonException("999",ErrorMessageEnum.PAY_FAILED.getMessage());
         }
 
+        // 调用WMS接口回写结果
         SpecialOperationResultRequest request = new SpecialOperationResultRequest();
         BeanUtils.copyProperties(basSpecialOperation, request);
         R<com.szmsd.http.vo.ResponseVO> responseVOR = htpBasFeignService.specialOperationResult(request);
         if (responseVOR.getCode() != 200) {
-            return R.failed(ErrorMessageEnum.UPDATE_OPERATION_TYPE_ERROR.getMessage());
+            throw new CommonException("999",ErrorMessageEnum.UPDATE_OPERATION_TYPE_ERROR.getMessage());
         }
         return R.ok();
 

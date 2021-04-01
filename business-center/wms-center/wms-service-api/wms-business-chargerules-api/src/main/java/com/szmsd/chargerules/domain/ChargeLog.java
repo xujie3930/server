@@ -37,6 +37,9 @@ public class ChargeLog extends BaseEntity {
     @ApiModelProperty(value = "操作类型")
     private String operationType;
 
+    @ApiModelProperty(value = "仓库编号")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "订单号")
     private String orderNo;
 
