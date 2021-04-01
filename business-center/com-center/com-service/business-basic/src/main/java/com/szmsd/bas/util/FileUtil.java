@@ -121,7 +121,7 @@ public class FileUtil {
         try {
             String filePath = getFilePath(fileUrl);
             filePath = filePath.split("//")[1];
-            filePath = filePath.substring(filePath.indexOf("/"), filePath.length() - 1);
+            filePath = filePath.substring(filePath.indexOf("/"));
             return filePath;
         } catch (Exception e) {
             return "";
@@ -182,10 +182,10 @@ public class FileUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(getFilePath("http://183.3.221.229:22277/bil/bil/file/image/materials/20201208/1052311294568921269.jpg"));
-        System.out.println(getFileName("http://183.3.221.229:22277/bil/bil/file/image/materials/20201208/1052311294568921269.jpg"));
-        System.out.println(getFileSuffix("http://183.3.221.229:22277/bil/bil/file/image/materials/20201208/1052311294568921269.jpg"));
-        System.out.println(getFileRelativePath("http://183.3.221.229:22277/bil/bil/file/image/materials/20201208/1052311294568921269.jpg"));
-        deleteFile("E:\\home\\jenkins\\6pl\\file\\transferOrder\\orderFile\\20201210\\1607591927669 - 副本.jpg");
+//        System.out.println(getFilePath("http://183.3.221.229:22277/bil/bil/file/image/materials/20201208/1052311294568921269.jpg"));
+//        System.out.println(getFileName("http://183.3.221.229:22277/bil/bil/file/image/materials/20201208/1052311294568921269.jpg"));
+//        System.out.println(getFileSuffix("http://183.3.221.229:22277/bil/bil/file/image/materials/20201208/1052311294568921269.jpg"));
+//        System.out.println(getFileRelativePath("http://183.3.221.136:22220/file/inboundReceipt/editionImage/20210401/timg_1617280230446.jpg"));
+//        deleteFile("E:\\home\\jenkins\\6pl\\file\\transferOrder\\orderFile\\20201210\\1607591927669 - 副本.jpg");
     }
 }
