@@ -206,7 +206,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         for (DelOutboundDetail detail : detailList) {
             skus.add(detail.getSku());
         }
-        conditionQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
+        // conditionQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
         conditionQueryDto.setSkus(skus);
         List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
         if (CollectionUtils.isEmpty(productList)) {
