@@ -108,6 +108,8 @@ public class HttpConfig {
         private String specialOperationType;
         //特殊操作结果
         private String specialOperationResult;
+        // 新增/修改发货规则（物流服务）
+        private String shipmentRule;
     }
 
     @Data

@@ -4,6 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IBasService;
+import com.szmsd.http.vo.BaseOperationResponse;
 import com.szmsd.http.vo.ResponseVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -61,5 +62,11 @@ public class BasController extends BaseController {
     public R<ResponseVO> update(@RequestBody SpecialOperationResultRequest specialOperationResultRequest) {
         ResponseVO responseVO = iBasService.update(specialOperationResultRequest);
         return responseVO != null ? R.ok(responseVO) : R.failed();
+    }
+
+    @PostMapping("/shipmentRule")
+    @ApiOperation(value = "A4 新增/修改发货规则（物流服务）")
+    public R<BaseOperationResponse> shipmentRule(@RequestBody AddShipmentRuleRequest addShipmentRuleRequest) {
+        return R.ok(iBasService.shipmentRule(addShipmentRuleRequest));
     }
 }

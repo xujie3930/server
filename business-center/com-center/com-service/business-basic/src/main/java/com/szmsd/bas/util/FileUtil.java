@@ -171,7 +171,7 @@ public class FileUtil {
         try {
             File file = new File(filePath);
             if (!file.exists()) {
-                log.info("删除失败，附件不存在");
+                log.info("删除失败，附件不存在[{}]", filePath);
                 return;
             }
             file.delete();
