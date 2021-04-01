@@ -33,15 +33,33 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
     @Resource
     private RemoteComponent remoteComponent;
 
+    /**
+     * 查询入库单明细信息 - 包含附件
+     * @param queryDto
+     * @return
+     */
     @Override
     public List<InboundReceiptDetailVO> selectList(InboundReceiptDetailQueryDTO queryDto) {
+        return selectList(queryDto, true);
+    }
+
+    /**
+     * 查询入库单明细信息
+     * @param queryDto
+     * @param isContainFile 是否包含附件
+     * @return
+     */
+    @Override
+    public List<InboundReceiptDetailVO> selectList(InboundReceiptDetailQueryDTO queryDto, boolean isContainFile) {
         List<InboundReceiptDetailVO> inboundReceiptDetailVOS = baseMapper.selectList(queryDto);
-        inboundReceiptDetailVOS.forEach(inboundReceiptDetailVO -> {
-            List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.INBOUND_RECEIPT_EDITION_IMAGE.getAttachmentType()).setBusinessNo(inboundReceiptDetailVO.getWarehouseNo()).setBusinessItemNo(inboundReceiptDetailVO.getId().toString()));
-            if (CollectionUtils.isNotEmpty(attachment)) {
-                inboundReceiptDetailVO.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
-            }
-        });
+        if (isContainFile) {
+            inboundReceiptDetailVOS.forEach(inboundReceiptDetailVO -> {
+                List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.INBOUND_RECEIPT_EDITION_IMAGE.getAttachmentType()).setBusinessNo(inboundReceiptDetailVO.getWarehouseNo()).setBusinessItemNo(inboundReceiptDetailVO.getId().toString()));
+                if (CollectionUtils.isNotEmpty(attachment)) {
+                    inboundReceiptDetailVO.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
+                }
+            });
+        }
         return inboundReceiptDetailVOS;
     }
 

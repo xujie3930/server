@@ -89,6 +89,9 @@ public class BasWarehouse extends BaseEntity {
     @ApiModelProperty(value = "状态：0无效，1有效")
     private String status;
 
+    @ApiModelProperty(value = "入库单是否人工审核：0自动审核，1人工审核")
+    private String inboundReceiptReview;
+
     @ApiModelProperty(value = "创建ID",hidden = true)
     @TableField(fill = FieldFill.INSERT)
     private String createBy;

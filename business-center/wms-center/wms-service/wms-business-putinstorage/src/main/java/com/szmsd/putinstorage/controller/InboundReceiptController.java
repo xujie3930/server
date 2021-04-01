@@ -5,10 +5,7 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
-import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
-import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
+import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -113,6 +110,14 @@ public class InboundReceiptController extends BaseController {
     @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")
     public R completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest) {
         iInboundReceiptService.completed(receivingCompletedRequest);
+        return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:review')")
+    @PostMapping("/review")
+    @ApiOperation(value = "审核", notes = "入库单审核")
+    public R review(@RequestBody InboundReceiptReviewDTO inboundReceiptReviewDTO) {
+        iInboundReceiptService.review(inboundReceiptReviewDTO);
         return R.ok();
     }
 

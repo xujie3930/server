@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
@@ -16,6 +17,7 @@ import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.mapper.InboundReceiptMapper;
 import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
+import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,6 +41,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     @Resource
     private RemoteComponent remoteComponent;
+
 
     /**
      * 入库单查询
@@ -77,15 +81,25 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         // 保存入库单
         InboundReceipt inboundReceipt = this.saveInboundReceipt(createInboundReceiptDTO);
-        createInboundReceiptDTO.setWarehouseNo(inboundReceipt.getWarehouseNo());
+        String warehouseNo = inboundReceipt.getWarehouseNo();
+        createInboundReceiptDTO.setWarehouseNo(warehouseNo);
 
         // 保存入库单明细
         List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetailDTOS();
-        inboundReceiptDetailDTOS.forEach(item -> item.setWarehouseNo(inboundReceipt.getWarehouseNo()));
+        inboundReceiptDetailDTOS.forEach(item -> item.setWarehouseNo(warehouseNo));
         iInboundReceiptDetailService.saveInboundReceiptDetail(inboundReceiptDetailDTOS);
 
-        // 第三方接口推送
-        remoteRequest.createInboundReceipt(createInboundReceiptDTO);
+        // 判断自动审核
+        boolean inboundReceiptReview = remoteComponent.inboundReceiptReview(createInboundReceiptDTO.getWarehouseCode());
+        if (inboundReceiptReview) {
+            // 审核
+            String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
+            this.review(new InboundReceiptReviewDTO().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
+
+            // 第三方接口推送
+            InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
+            remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+        }
 
         log.info("创建入库单：操作完成");
     }
@@ -130,7 +144,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         remoteRequest.cancelInboundReceipt(inboundReceiptVO.getWarehouseNo(), inboundReceiptVO.getWarehouseName());
 
         // 修改为取消状态
-        this.updateById(new InboundReceipt().setId(inboundReceiptVO.getId()).setStatus(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()));
+        this.updateStatus(warehouseNo, InboundReceiptEnum.InboundReceiptStatus.CANCELLED);
         log.info("取消入库单：操作完成");
     }
 
@@ -142,12 +156,24 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Override
     public InboundReceiptInfoVO queryInfo(String warehouseNo) {
         log.info("查询入库单详情：warehouseNo={}", warehouseNo);
+        InboundReceiptInfoVO inboundReceiptInfoVO = queryInfo(warehouseNo, true);
+        return inboundReceiptInfoVO;
+    }
+
+    /**
+     * 入库单详情
+     * @param warehouseNo
+     * @param isContainFile 是否包含明细附件
+     * @return
+     */
+    public InboundReceiptInfoVO queryInfo(String warehouseNo, boolean isContainFile) {
+        log.info("查询入库单详情：warehouseNo={}", warehouseNo);
         InboundReceiptInfoVO inboundReceiptInfoVO = baseMapper.selectInfo(null, warehouseNo);
         if (inboundReceiptInfoVO == null) {
             return null;
         }
         // 查明细
-        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = iInboundReceiptDetailService.selectList(new InboundReceiptDetailQueryDTO().setWarehouseNo(warehouseNo));
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = iInboundReceiptDetailService.selectList(new InboundReceiptDetailQueryDTO().setWarehouseNo(warehouseNo), isContainFile);
         inboundReceiptInfoVO.setInboundReceiptDetailVOS(inboundReceiptDetailVOS);
         log.info("查询入库单详情：查询完成{}", inboundReceiptDetailVOS);
         return inboundReceiptInfoVO;
@@ -173,9 +199,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         Integer beforeTotalPutQty = inboundReceiptVO.getTotalPutQty();
         InboundReceipt inboundReceipt = new InboundReceipt().setId(inboundReceiptVO.getId());
         inboundReceipt.setTotalPutQty(beforeTotalPutQty + qty);
-        // 第一次入库上架 把状态修改为 3仓库处理中
+        // 第一次入库上架 把状态修改为 3处理中
         if (beforeTotalPutQty == 0) {
-            inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.WAREHOUSE_PROCESSING.getValue());
+            inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue());
         }
         this.updateById(inboundReceipt);
 
@@ -195,13 +221,57 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Override
     public void completed(ReceivingCompletedRequest receivingCompletedRequest) {
         log.info("#B3 接收完成入库：{}",  receivingCompletedRequest);
-        InboundReceipt inboundReceipt = new InboundReceipt();
-        inboundReceipt.setWarehouseNo(receivingCompletedRequest.getOrderNo());
-        inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.HAS_BEEN_STORED.getValue());
-        this.update(inboundReceipt, new UpdateWrapper<InboundReceipt>().lambda().eq(InboundReceipt::getWarehouseNo, inboundReceipt.getWarehouseNo()));
+        updateStatus(receivingCompletedRequest.getOrderNo(), InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
         log.info("#B3 接收完成入库：操作完成");
 
     }
+
+    /**
+     * 修改状态
+     * @param warehouseNo
+     * @param status
+     */
+    @Override
+    public void updateStatus(String warehouseNo, InboundReceiptEnum.InboundReceiptStatus status) {
+        InboundReceipt inboundReceipt = new InboundReceipt();
+        inboundReceipt.setWarehouseNo(warehouseNo);
+        inboundReceipt.setStatus(status.getValue());
+        this.updateByWarehouseNo(inboundReceipt);
+        log.info("入库单{}修改状态为:{}{}", warehouseNo, status.getValue(), status.getValue2());
+    }
+
+    @Override
+    public void updateByWarehouseNo(InboundReceipt inboundReceipt) {
+        this.update(inboundReceipt, new UpdateWrapper<InboundReceipt>().lambda().eq(InboundReceipt::getWarehouseNo, inboundReceipt.getWarehouseNo()));
+    }
+
+    /**
+     * 入库单审核
+     * @param inboundReceiptReviewDTO
+     */
+    @Override
+    public void review(InboundReceiptReviewDTO inboundReceiptReviewDTO) {
+        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+        InboundReceipt inboundReceipt = new InboundReceipt();
+        String warehouseNo = inboundReceiptReviewDTO.getWarehouseNo();
+        inboundReceipt.setWarehouseNo(warehouseNo);
+        InboundReceiptEnum.InboundReceiptEnumMethods anEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.InboundReceiptStatus.class, inboundReceiptReviewDTO.getStatus());
+        inboundReceipt.setStatus(anEnum.getValue());
+        inboundReceipt.setReviewRemark(inboundReceiptReviewDTO.getReviewRemark());
+        inboundReceipt.setReviewBy(loginUserInfo.getUserId() + "");
+        inboundReceipt.setReviewBy(loginUserInfo.getUserName());
+        inboundReceipt.setReviewTime(new Date());
+        this.updateByWarehouseNo(inboundReceipt);
+        log.info("入库单审核: {},{}", anEnum.getValue2(), inboundReceipt);
+
+        // 审核通过 第三方接口推送
+        if (InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(inboundReceiptReviewDTO.getStatus())) {
+            InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
+            remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+        }
+
+    }
+
 
     /**
      * 异步保存附件
