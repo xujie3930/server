@@ -2,6 +2,7 @@ package com.szmsd.putinstorage.component;
 
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.BasCodeDto;
+import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
@@ -24,6 +25,7 @@ import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 
@@ -94,7 +96,16 @@ public class RemoteComponent {
         AssertUtil.isTrue(StringUtils.isNotEmpty(cusCode), "客户代码不能为空");
         String warehouseNo = this.genNo("INBOUND_RECEIPT_NO");
         String substring = warehouseNo.substring(2);
-        return "PK" + cusCode.concat(substring);
+
+        // 获取前缀
+        R<List<BasSub>> getsub = basFeignService.getsub(new BasSub().setSubCode("067001"));
+        if (getsub != null && CollectionUtils.isNotEmpty(getsub.getData())) {
+            String subValue = getsub.getData().get(0).getSubValue();
+            if (StringUtils.isNotEmpty(subValue)) {
+                return subValue.concat(cusCode).concat(substring);
+            }
+        }
+        return cusCode.concat(substring);
     }
 
     /**
