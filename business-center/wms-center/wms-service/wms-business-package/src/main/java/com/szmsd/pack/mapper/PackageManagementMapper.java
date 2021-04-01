@@ -2,6 +2,11 @@ package com.szmsd.pack.mapper;
 
 import com.szmsd.pack.domain.PackageManagement;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.szmsd.pack.dto.PackageMangQueryDTO;
+import com.szmsd.pack.vo.PackageMangVO;
+import io.lettuce.core.dynamic.annotation.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +18,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface PackageManagementMapper extends BaseMapper<PackageManagement> {
 
+    List<PackageMangVO> selectPackageManagementList(@Param(value = "cm") PackageMangQueryDTO packageManagement);
 }

@@ -1,10 +1,9 @@
 package com.szmsd.pack.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.szmsd.pack.domain.PackageAddress;
-import com.szmsd.pack.dto.PackageAddressAddDTO;
+import com.szmsd.pack.domain.PackageManagement;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
-import com.szmsd.pack.vo.PackageAddressVO;
+import com.szmsd.pack.vo.PackageMangVO;
 
 import java.util.List;
 
@@ -16,7 +15,7 @@ import java.util.List;
  * @author 11
  * @since 2021-04-01
  */
-public interface IPackageAddressService extends IService<PackageAddress> {
+public interface IPackageMangServeService extends IService<PackageManagement> {
 
     /**
      * 查询package - 交货管理 - 地址信息表模块
@@ -24,31 +23,31 @@ public interface IPackageAddressService extends IService<PackageAddress> {
      * @param id package - 交货管理 - 地址信息表模块ID
      * @return package - 交货管理 - 地址信息表模块
      */
-    PackageAddressVO selectPackageAddressById(String id);
+    PackageManagement selectPackageManagementById(String id);
 
     /**
      * 查询package - 交货管理 - 地址信息表模块列表
      *
-     * @param packageAddress package - 交货管理 - 地址信息表模块
+     * @param packageManagement package - 交货管理 - 地址信息表模块
      * @return package - 交货管理 - 地址信息表模块集合
      */
-    List<PackageAddressVO> selectPackageAddressList(PackageMangQueryDTO packageAddress);
+    List<PackageMangVO> selectPackageManagementList(PackageMangQueryDTO packageManagement);
 
     /**
      * 新增package - 交货管理 - 地址信息表模块
      *
-     * @param packageAddress package - 交货管理 - 地址信息表模块
+     * @param packageManagement package - 交货管理 - 地址信息表模块
      * @return 结果
      */
-    int insertPackageAddress(PackageAddressAddDTO packageAddress);
+    int insertPackageManagement(PackageManagement packageManagement);
 
     /**
      * 修改package - 交货管理 - 地址信息表模块
      *
-     * @param packageAddress package - 交货管理 - 地址信息表模块
+     * @param packageManagement package - 交货管理 - 地址信息表模块
      * @return 结果
      */
-    int updatePackageAddress(PackageAddressAddDTO packageAddress);
+    int updatePackageManagement(PackageManagement packageManagement);
 
     /**
      * 批量删除package - 交货管理 - 地址信息表模块
@@ -56,7 +55,7 @@ public interface IPackageAddressService extends IService<PackageAddress> {
      * @param ids 需要删除的package - 交货管理 - 地址信息表模块ID
      * @return 结果
      */
-    int deletePackageAddressByIds(List<String> ids);
+    int deletePackageManagementByIds(List<String> ids);
 
     /**
      * 删除package - 交货管理 - 地址信息表模块信息
@@ -64,7 +63,7 @@ public interface IPackageAddressService extends IService<PackageAddress> {
      * @param id package - 交货管理 - 地址信息表模块ID
      * @return 结果
      */
-    int deletePackageAddressById(String id);
+    int deletePackageManagementById(String id);
 
 }
 

@@ -119,4 +119,25 @@ public class ReturnExpressEnums {
         private String desc;
         private String note;
     }
+
+    /**
+     * 退件处理状态
+     */
+    @Getter
+    @AllArgsConstructor
+    public enum OverdueEnum {
+        /**
+         * sz
+         */
+        OVERDUE("1", "是"),
+        NOT_OVERDUE("0", "否");
+        private String key;
+        private String desc;
+
+        public static String getDesc(String str) {
+            return Arrays.stream(OverdueEnum.values())
+                    .filter(x -> x.getKey().equals(str))
+                    .map(OverdueEnum::getDesc).findAny().orElse("");
+        }
+    }
 }

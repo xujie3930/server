@@ -2,20 +2,25 @@ package com.szmsd.pack.service.impl;
 
 
 import com.alibaba.nacos.common.utils.CollectionUtils;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.datascope.service.AwaitUserService;
 import com.szmsd.pack.domain.PackageAddress;
 import com.szmsd.pack.dto.PackageAddressAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.mapper.PackageAddressMapper;
-import com.szmsd.pack.service.IPackageAddressService;
+import com.szmsd.pack.service.IPackageMangClientService;
+import com.szmsd.pack.service.IPackageMangServeService;
 import com.szmsd.pack.vo.PackageAddressVO;
-import org.apache.commons.lang3.StringUtils;
+import com.szmsd.pack.vo.PackageMangVO;
+import com.szmsd.system.api.domain.SysUser;
+import com.szmsd.system.api.model.UserInfo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 /**
@@ -27,8 +32,15 @@ import java.util.*;
  * @since 2021-04-01
  */
 @Service
-public class PackageAddressServiceImpl extends ServiceImpl<PackageAddressMapper, PackageAddress> implements IPackageAddressService {
+public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapper, PackageAddress> implements IPackageMangClientService {
+    @Resource
+    private AwaitUserService awaitUserService;
 
+
+    private String getSellCode() {
+        UserInfo info = awaitUserService.info();
+        return Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("用户未登录!"));
+    }
 
     /**
      * 查询package - 交货管理 - 地址信息表模块
@@ -51,10 +63,11 @@ public class PackageAddressServiceImpl extends ServiceImpl<PackageAddressMapper,
      */
     @Override
     public List<PackageAddressVO> selectPackageAddressList(PackageMangQueryDTO packageAddress) {
-        baseMapper.selectPackageAddressList(packageAddress).forEach(
-                x -> x.setShowAddr(String.join(",", x.getProvinceNameZh(), x.getCityNameZh(), x.getDistrictNameZh()))
+        List<PackageAddressVO> packageAddressVOS = baseMapper.selectPackageAddressList(packageAddress);
+        packageAddressVOS.forEach(
+                x -> x.setShowAddr(String.join(" ", x.getProvinceNameZh(), x.getCityNameZh(), x.getDistrictNameZh()))
         );
-        return baseMapper.selectPackageAddressList(packageAddress);
+        return packageAddressVOS;
     }
 
     /**
@@ -64,25 +77,29 @@ public class PackageAddressServiceImpl extends ServiceImpl<PackageAddressMapper,
      * @return 结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertPackageAddress(PackageAddressAddDTO packageAddress) {
-        changeDefaultAddr(packageAddress);
+        offDefaultAddr(packageAddress);
         return baseMapper.insert(packageAddress.convertThis(PackageAddress.class));
     }
 
     /**
-     * 修改默认地址
+     * 关闭 不为当前id 其他默认地址设置
      *
      * @param packageAddress
      */
-    private void changeDefaultAddr(PackageAddressAddDTO packageAddress) {
+    @Transactional(rollbackFor = Exception.class)
+    int offDefaultAddr(PackageAddressAddDTO packageAddress) {
         if (packageAddress.getDefaultFlag() == 1) {
-            baseMapper.update(null, Wrappers.<PackageAddress>lambdaUpdate()
+            return baseMapper.update(null, Wrappers.<PackageAddress>lambdaUpdate()
                     .eq(PackageAddress::getDelFlag, 0)
+                    .eq(PackageAddress::getDefaultFlag, 1)
                     .eq(PackageAddress::getSellerCode, packageAddress.getSellerCode())
                     .ne(packageAddress.getId() != null, PackageAddress::getId, packageAddress.getId())
                     .set(PackageAddress::getDefaultFlag, 0)
             );
         }
+        return 0;
     }
 
     /**
@@ -92,9 +109,10 @@ public class PackageAddressServiceImpl extends ServiceImpl<PackageAddressMapper,
      * @return 结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int updatePackageAddress(PackageAddressAddDTO packageAddress) {
         AssertUtil.isTrue(packageAddress.getId() != null && packageAddress.getId() > 0, "更新数据不存在");
-        changeDefaultAddr(packageAddress);
+        offDefaultAddr(packageAddress);
         return baseMapper.updateById(packageAddress.convertThis(PackageAddress.class));
     }
 
@@ -105,20 +123,21 @@ public class PackageAddressServiceImpl extends ServiceImpl<PackageAddressMapper,
      * @return 结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deletePackageAddressByIds(List<String> ids) {
         setOtherDefaultAddr(ids);
         return baseMapper.deleteBatchIds(ids);
     }
 
     /**
-     * 当删除的ids中存在默认地址，设置其他地址未默认
+     * 当删除的ids中存在默认地址，设置其他地址为 默认地址
      *
      * @param ids
      */
-    private void setOtherDefaultAddr(List<String> ids) {
-        //TODO 获取用户id
+    @Transactional(rollbackFor = Exception.class)
+    void setOtherDefaultAddr(List<String> ids) {
         baseMapper.update(null, Wrappers.<PackageAddress>lambdaUpdate()
-                .eq(PackageAddress::getSellerCode, "")
+                .eq(PackageAddress::getSellerCode, getSellCode())
                 .notIn(CollectionUtils.isNotEmpty(ids), PackageAddress::getId, ids)
                 .set(PackageAddress::getDefaultFlag, 1)
                 .last("LIMIT 1")
@@ -132,11 +151,30 @@ public class PackageAddressServiceImpl extends ServiceImpl<PackageAddressMapper,
      * @return 结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deletePackageAddressById(String id) {
         setOtherDefaultAddr(Collections.singletonList(id));
         return baseMapper.deleteById(id);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int setDefaultAddr(String id) {
+        offDefaultAddr(new PackageAddressAddDTO().setId(Integer.parseInt(id)).setDefaultFlag(1).setSellerCode(getSellCode()));
+        //设置当前id默认
+        return baseMapper.update(null, Wrappers.<PackageAddress>lambdaUpdate()
+                .eq(PackageAddress::getId, id)
+                .set(PackageAddress::getDefaultFlag, 1)
+                .last("LIMIT 1")
+        );
+    }
 
+    @Resource
+    private IPackageMangServeService packageManagementService;
+
+    @Override
+    public List<PackageMangVO> selectPackageManagementList(PackageMangQueryDTO packageMangQueryDTO) {
+        return packageManagementService.selectPackageManagementList(packageMangQueryDTO);
+    }
 }
 
