@@ -29,10 +29,12 @@ import com.szmsd.system.api.model.UserInfo;
 import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +48,9 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, ReturnExpressDetail> implements IReturnExpressService {
-
+    // 过期时间 默认：7天
+    @Value("${returnex.expirationDays:7}")
+    private Integer expirationDays;
     @Resource
     private ReturnExpressMapper returnExpressMapper;
 
@@ -68,16 +72,12 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @return
      */
     private String getSellCode() {
-        //UserInfo info = awaitUserService.info();
-        UserInfo info = new UserInfo();
-        Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException(""));
-        info.setSysUser(new SysUser().setSellerCode("User11"));
-        return "User11";
+        UserInfo info = awaitUserService.info();
+        return Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("用户未登录！"));
     }
 
     /**
      * 单号生成
-     * TODO 开发使用 测试需要取消注释
      *
      * @return
      */
@@ -167,7 +167,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     }
 
     private void checkSubmit(ReturnExpressAddDTO returnExpressAddDTO) {
-        // 校验重复条件 TODO
+        // 校验重复条件
         ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaQuery()
                 .eq(ReturnExpressDetail::getExpectedNo, returnExpressAddDTO.getExpectedNo())
                 .select(ReturnExpressDetail::getId));
@@ -290,10 +290,15 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         return update;
     }
 
+
     @Override
     public int expiredUnprocessedForecastOrder() {
         log.info("--------------更新过期未处理的预报单 开始--------------");
-        int update = returnExpressMapper.update(null, Wrappers.<ReturnExpressDetail>lambdaUpdate());
+        int update = returnExpressMapper.update(null, Wrappers.<ReturnExpressDetail>lambdaUpdate()
+                .eq(ReturnExpressDetail::getOverdue, 0)
+                .lt(BaseEntity::getUpdateTime, LocalDate.now().minusDays(expirationDays))
+                .set(ReturnExpressDetail::getOverdue, 1)
+        );
         log.info("--------------更新过期未处理的预报单 结束--------------");
         return update;
     }
