@@ -5,10 +5,12 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -110,6 +112,14 @@ public class InboundReceiptController extends BaseController {
     @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")
     public R completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest) {
         iInboundReceiptService.completed(receivingCompletedRequest);
+        return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:arraigned')")
+    @PutMapping("/arraigned/{warehouseNo}")
+    @ApiOperation(value = "提审", notes = "客户端提审")
+    public R arraigned(@PathVariable("warehouseNo") String warehouseNo) {
+        iInboundReceiptService.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.ARRAIGNED.getValue()));
         return R.ok();
     }
 
