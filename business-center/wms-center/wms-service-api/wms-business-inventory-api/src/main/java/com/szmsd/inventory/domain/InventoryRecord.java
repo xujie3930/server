@@ -26,7 +26,7 @@ public class InventoryRecord extends BaseEntity {
     @ApiModelProperty(value = "单据号")
     private String receiptNo;
 
-    @ApiModelProperty(value = "类型：1入库、2出库")
+    @ApiModelProperty(value = "类型：1入库、2出库、3冻结、4盘点")
     private String type;
 
     @ApiModelProperty(value = "sku")
