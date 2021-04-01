@@ -1,6 +1,7 @@
 package com.szmsd.delivery.controller;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.validator.ValidationSaveGroup;
 import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -72,7 +73,7 @@ public class DelOutboundController extends BaseController {
     @PostMapping("/shipment")
     @ApiOperation(value = "出库管理 - 创建", position = 300)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
-    public R<Integer> add(@RequestBody DelOutboundDto dto) {
+    public R<Integer> add(@RequestBody @Validated({ValidationSaveGroup.class}) DelOutboundDto dto) {
         return R.ok(delOutboundService.insertDelOutbound(dto));
     }
 

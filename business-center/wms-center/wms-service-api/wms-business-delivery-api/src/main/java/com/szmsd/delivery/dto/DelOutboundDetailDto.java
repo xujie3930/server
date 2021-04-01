@@ -1,5 +1,7 @@
 package com.szmsd.delivery.dto;
 
+import com.szmsd.common.core.validator.ValidationSaveGroup;
+import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -19,11 +21,11 @@ public class DelOutboundDetailDto implements Serializable {
     @ApiModelProperty(value = "ID")
     private Long id;
 
-    @NotBlank(message = "SKU不能为空")
+    @NotBlank(message = "SKU不能为空", groups = {ValidationSaveGroup.class, ValidationUpdateGroup.class})
     @ApiModelProperty(value = "SKU")
     private String sku;
 
-    @NotNull(message = "数量不能为空")
+    @NotNull(message = "数量不能为空", groups = {ValidationSaveGroup.class, ValidationUpdateGroup.class})
     @ApiModelProperty(value = "数量")
     private Long qty;
 
@@ -33,4 +35,15 @@ public class DelOutboundDetailDto implements Serializable {
     @ApiModelProperty(value = "行号")
     private Long lineNo;
 
+    @ApiModelProperty(value = "长 - 用于计算不保存")
+    private Double length;
+
+    @ApiModelProperty(value = "宽 - 用于计算不保存")
+    private Double width;
+
+    @ApiModelProperty(value = "高 - 用于计算不保存")
+    private Double height;
+
+    @ApiModelProperty(value = "重量 - 用于计算不保存")
+    private Double weight;
 }
