@@ -47,9 +47,9 @@ public class BasSpecialOperation extends BaseEntity {
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
-    @NotBlank(message = "操作类型不能为空")
-    @ApiModelProperty(value = "操作类型")
-    private String operationType;
+    @NotNull(message = "操作类型id不能为空")
+    @ApiModelProperty(value = "操作类型id")
+    private Integer operationType;
 
     @NotNull(message = "数量不能为空")
     @ApiModelProperty(value = "数量")
