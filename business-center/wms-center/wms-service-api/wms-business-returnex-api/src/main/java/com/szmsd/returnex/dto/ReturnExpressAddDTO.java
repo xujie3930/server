@@ -30,14 +30,15 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "主键ID")
     private Integer id;
 
+    @NotEmpty(message = "客户代码不能为空")
     @ApiModelProperty(value = "客户代码", example = "UID123456", required = true)
     private String sellerCode;
 
     @ApiModelProperty(value = "退件来源[ 申请退件 VMS]", example = "RETURN_FORECAST")
-    private ReturnExpressEnums.ReturnSourceEnum returnSource;
+    private String returnSource;
 
     @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]", example = "OWN_INVENTORY_RETURN")
-    private ReturnExpressEnums.ReturnTypeEnum returnType;
+    private String returnType;
 
     @StringLength(maxLength = 50, message = "原出库单号错误")
     @ApiModelProperty(value = "退件原始单号 原出库单号", example = "SF123456")
@@ -62,10 +63,10 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
      * 销毁 包裹上架 拆包检查
      */
     @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "Destroy", required = true)
-    private ReturnExpressEnums.ProcessTypeEnum processType;
+    private String processType;
 
     @ApiModelProperty(value = "处理方式 编码", example = "Destroy")
-    private ReturnExpressEnums.ApplyProcessMethodEnum applyProcessMethod;
+    private String applyProcessMethod;
 
     @ApiModelProperty(value = "备注")
     private String processRemark;

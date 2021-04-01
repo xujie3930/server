@@ -49,14 +49,13 @@ public class ReturnExpressVO {
     @Excel(name = "预报单号")
     private String expectedNo;
 
-    @TableField(insertStrategy = FieldStrategy.NOT_EMPTY)
     @ApiModelProperty(value = "VMS处理单号")
     @Excel(name = "VMS处理单号")
     private String returnNo;
 
     @ApiModelProperty(value = "申请处理方式")
     @Excel(name = "申请处理方式")
-    private ReturnExpressEnums.ProcessTypeEnum processType;
+    private String processType;
 
     @ApiModelProperty(value = "类型")
     @Excel(name = "类型")
@@ -92,11 +91,11 @@ public class ReturnExpressVO {
 
     @ApiModelProperty(value = "退件单来源[默认：1：申请退件]")
     @Excel(name = "退件单来源[默认：1：申请退件]")
-    private ReturnExpressEnums.ReturnSourceEnum returnSource;
+    private String returnSource;
 
     @ApiModelProperty(value = "处理状态编码")
     @Excel(name = "处理状态编码")
-    private ReturnExpressEnums.DealStatusEnum dealStatus;
+    private String dealStatus;
 
     @ApiModelProperty(value = "逻辑删除")
     @TableLogic(delval = "2", value = "0")
