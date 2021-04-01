@@ -53,24 +53,11 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "申请处理方式", hidden = true)
     private String processTypeStr;
 
-    public void setProcessType(String processType) {
-        this.processType = processType;
-        Optional.ofNullable(processType)
-                .filter(StringUtils::isNotEmpty)
-                .ifPresent(x -> processTypeStr = ReturnExpressEnums.ProcessTypeEnum.valueOf(x).getDesc());
-    }
 
     @ApiModelProperty(value = "退件单类型[ 自有库存退件 转运单退件 外部渠道退件]")
     private String returnType;
     @ApiModelProperty(value = "退件单类型", hidden = true)
     private String returnTypeStr;
-
-    public void setReturnType(String returnType) {
-        this.returnType = returnType;
-        Optional.ofNullable(returnType)
-                .filter(StringUtils::isNotEmpty)
-                .ifPresent(x -> returnTypeStr = ReturnExpressEnums.ReturnTypeEnum.valueOf(x).getDesc());
-    }
 
     @ApiModelProperty(value = "实际处理方式编码")
     private String applyProcessMethod;
@@ -84,13 +71,6 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "是否逾期")
     private String overdue;
 
-    public void setOverdue(String overdue) {
-        this.overdue = overdue;
-        Optional.ofNullable(overdue)
-                .filter(StringUtils::isNotEmpty)
-                .ifPresent(x -> this.overdueStr = ReturnExpressEnums.OverdueEnum.getDesc(x));
-    }
-
     @ApiModelProperty(value = "是否逾期", hidden = true)
     private String overdueStr;
     @ApiModelProperty(value = "处理备注")
@@ -102,26 +82,12 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
 
-    public void setReturnSource(String returnSource) {
-        this.returnSource = returnSource;
-        Optional.ofNullable(returnSource)
-                .filter(StringUtils::isNotEmpty)
-                .ifPresent(x -> returnSourceStr = ReturnExpressEnums.ReturnSourceEnum.valueOf(x).getDesc());
-
-    }
-
     @ApiModelProperty(value = "处理状态编码")
     private String dealStatus;
 
     @ApiModelProperty(value = "处理状态编码", hidden = true)
     private String dealStatusStr;
 
-    public void setDealStatus(String dealStatus) {
-        this.dealStatus = dealStatus;
-        Optional.ofNullable(dealStatus)
-                .filter(StringUtils::isNotEmpty)
-                .ifPresent(x -> dealStatusStr = ReturnExpressEnums.DealStatusEnum.valueOf(x).getDesc());
-    }
 
     @ApiModelProperty(value = "目的仓库名称")
     private String warehouseName;

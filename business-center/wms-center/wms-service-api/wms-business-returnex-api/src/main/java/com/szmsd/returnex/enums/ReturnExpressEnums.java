@@ -27,11 +27,12 @@ public class ReturnExpressEnums {
         /**
          *
          */
-        Destroy("销毁"),
-        PutawayByPackage("整包上架"),
-        OpenAndCheck("拆包检查"),
-        PutawayBySku("按明细上架");
+        Destroy("销毁",""),
+        PutawayByPackage("整包上架",""),
+        OpenAndCheck("拆包检查",""),
+        PutawayBySku("按明细上架","");
         private String desc;
+        private String val;
     }
 
     /**
@@ -59,10 +60,11 @@ public class ReturnExpressEnums {
         /**
          * 申请退件 预约退件
          */
-        RETURN_FORECAST(1, "退件预报"),
-        WMS_RETURN(2, "WMS通知退件");
+        RETURN_FORECAST(1, "退件预报","123"),
+        WMS_RETURN(2, "WMS通知退件","123");
         private Integer key;
         private String desc;
+        private String val;
 
         public static String getDesc(Integer key) {
             return Arrays.stream(ReturnSourceEnum.values())
@@ -109,15 +111,16 @@ public class ReturnExpressEnums {
         /**
          * sz
          */
-        WMS_WAIT_RECEIVE("处理中", "WMS待收货"),
-        WAIT_CUSTOMER_DEAL("待客户处理", "待客户反馈意见"),
-        WAIT_ASSIGNED("待指派", "待指派无主件"),
-        WAIT_PROCESSED_AFTER_UNPACKING("待客户处理", "拆包检查后待处理"),
-        WMS_RECEIVED_DEAL_WAY("处理中", "WMS接收客户处理结果"),
-        WMS_FINISH("已完成", "WMS处理完成");
+        WMS_WAIT_RECEIVE("处理中", "WMS待收货",""),
+        WAIT_CUSTOMER_DEAL("待客户处理", "待客户反馈意见",""),
+        WAIT_ASSIGNED("待指派", "待指派无主件",""),
+        WAIT_PROCESSED_AFTER_UNPACKING("待客户处理", "拆包检查后待处理",""),
+        WMS_RECEIVED_DEAL_WAY("处理中", "WMS接收客户处理结果",""),
+        WMS_FINISH("已完成", "WMS处理完成","");
 
         private String desc;
         private String note;
+        private String val;
     }
 
     /**

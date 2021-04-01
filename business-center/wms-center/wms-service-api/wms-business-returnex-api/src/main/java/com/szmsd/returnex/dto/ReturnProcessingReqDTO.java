@@ -54,7 +54,7 @@ public class ReturnProcessingReqDTO {
      */
     @NotNull(message = "处理方式不能为空")
     @ApiModelProperty(value = "处理方式",required = true)
-    private ReturnExpressEnums.ProcessTypeEnum processType;
+    private String processType;
 
     @ApiModelProperty(value = "处理方式")
     private String remark;

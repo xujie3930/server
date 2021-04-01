@@ -138,7 +138,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .isNull(ReturnExpressDetail::getSellerCode)
                 .in(ReturnExpressDetail::getId, expressAssignDTO.getIds())
                 .set(ReturnExpressDetail::getSellerCode, expressAssignDTO.getSellerCode())
-                .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL)
+                .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL.getVal())
         );
         return update;
     }
@@ -184,7 +184,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Transactional(rollbackFor = Exception.class)
     public int saveReturnExpressDetail(ReturnExpressDetail returnExpressDetail) {
-        returnExpressDetail.setDealStatus(ReturnExpressEnums.DealStatusEnum.WMS_WAIT_RECEIVE);
+        returnExpressDetail.setDealStatus(ReturnExpressEnums.DealStatusEnum.WMS_WAIT_RECEIVE.getVal());
         return returnExpressMapper.insert(returnExpressDetail);
     }
 
@@ -202,7 +202,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         if (returnArrivalReqDTO.getExpectedNo() != null) {
             int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                     .eq(ReturnExpressDetail::getExpectedNo, returnArrivalReqDTO.getExpectedNo())
-                    .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WMS_WAIT_RECEIVE)
+                    .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WMS_WAIT_RECEIVE.getVal())
                     .set(ReturnExpressDetail::getReturnNo, returnArrivalReqDTO.getReturnNo())
                     .set(ReturnExpressDetail::getFromOrderNo, returnArrivalReqDTO.getFromOrderNo())
                     .set(StringUtil.isNotBlank(returnArrivalReqDTO.getExpectedNo()), ReturnExpressDetail::getExpectedNo, returnArrivalReqDTO.getExpectedNo())
@@ -210,14 +210,14 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     .set(ReturnExpressDetail::getSellerCode, returnArrivalReqDTO.getSellerCode())
                     .set(StringUtil.isNotBlank(returnArrivalReqDTO.getRemark()), BaseEntity::getRemark, returnArrivalReqDTO.getRemark())
                     .set(ReturnExpressDetail::getArrivalTime, LocalDateTime.now())
-                    .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL)
+                    .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL.getVal())
             );
             return update;
         } else {
             // 新增无主件 状态待指派
             ReturnExpressDetail returnExpressDetail = returnArrivalReqDTO.convertThis(ReturnExpressDetail.class);
-            returnExpressDetail.setReturnSource(ReturnExpressEnums.ReturnSourceEnum.WMS_RETURN);
-            returnExpressDetail.setDealStatus(ReturnExpressEnums.DealStatusEnum.WAIT_ASSIGNED);
+            returnExpressDetail.setReturnSource(ReturnExpressEnums.ReturnSourceEnum.WMS_RETURN.getVal());
+            returnExpressDetail.setDealStatus(ReturnExpressEnums.DealStatusEnum.WAIT_ASSIGNED.getVal());
             int insert = returnExpressMapper.insert(returnExpressDetail);
             // 其他处理
             return insert;
@@ -246,17 +246,17 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Transactional(rollbackFor = Exception.class)
     public int updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO) {
         log.info("接收WMS仓库退件处理结果 {}", returnProcessingReqDTO);
-        boolean needToContinue = returnProcessingReqDTO.getProcessType().equals(ReturnExpressEnums.ProcessTypeEnum.OpenAndCheck);
+        boolean needToContinue = returnProcessingReqDTO.getProcessType().equals(ReturnExpressEnums.ProcessTypeEnum.OpenAndCheck.getVal());
         ReturnExpressEnums.DealStatusEnum dealStatusEnum = needToContinue ?
                 ReturnExpressEnums.DealStatusEnum.WAIT_PROCESSED_AFTER_UNPACKING :
                 ReturnExpressEnums.DealStatusEnum.WMS_FINISH;
 
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getReturnNo, returnProcessingReqDTO.getReturnNo())
-                .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WMS_RECEIVED_DEAL_WAY)
+                .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WMS_RECEIVED_DEAL_WAY.getVal())
                 .set(StringUtils.isNotBlank(returnProcessingReqDTO.getReturnNo()), BaseEntity::getRemark, returnProcessingReqDTO.getRemark())
                 .set(ReturnExpressDetail::getApplyProcessMethod, returnProcessingReqDTO.getProcessType())
-                .set(ReturnExpressDetail::getDealStatus, dealStatusEnum)
+                .set(ReturnExpressDetail::getDealStatus, dealStatusEnum.getVal())
                 .set(!needToContinue, ReturnExpressDetail::getFinishTime, LocalDateTime.now())
                 .last("LIMIT 1")
         );
@@ -278,8 +278,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         AssertUtil.isTrue(expressUpdateDTO.getId() != null && expressUpdateDTO.getId() > 0, "更新异常！");
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
-                .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL)
-                .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WMS_RECEIVED_DEAL_WAY)
+                .eq(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WAIT_CUSTOMER_DEAL.getVal())
+                .set(ReturnExpressDetail::getDealStatus, ReturnExpressEnums.DealStatusEnum.WMS_RECEIVED_DEAL_WAY.getVal())
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
                 .set(StringUtil.isNotBlank(expressUpdateDTO.getFromOrderNo()), ReturnExpressDetail::getFromOrderNo, expressUpdateDTO.getFromOrderNo())
                 .last("LIMIT 1")
