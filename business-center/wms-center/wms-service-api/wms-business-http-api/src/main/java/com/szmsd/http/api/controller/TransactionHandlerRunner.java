@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -13,7 +12,8 @@ import java.util.Map;
  * @author zhangyuyuan
  * @date 2021-03-10 10:00
  */
-@Component
+// @Component
+@Deprecated
 public class TransactionHandlerRunner implements ApplicationRunner {
 
     @Autowired
