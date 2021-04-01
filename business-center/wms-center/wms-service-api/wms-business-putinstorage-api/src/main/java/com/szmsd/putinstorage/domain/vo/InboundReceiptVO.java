@@ -28,7 +28,7 @@ public class InboundReceiptVO {
     @ApiModelProperty(value = "状态")
     private String status;
 
-    @ApiModelProperty(value = "状态已取消，待提审，待收货，仓库处理中，已入库")
+    @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS)
     private String statusName;
 
