@@ -11,6 +11,7 @@
         <result column="remark" property="remark"/>
         <result column="create_by" property="createBy"/>
         <result column="update_by" property="updateBy"/>
+        <result column="del_flag" property="delFlag"/>
         <result column="version" property="version"/>
         <result column="seller_code" property="sellerCode"/>
         <result column="from_order_no" property="fromOrderNo"/>
@@ -18,16 +19,22 @@
         <result column="expected_no" property="expectedNo"/>
         <result column="return_no" property="returnNo"/>
         <result column="process_type" property="processType"/>
+        <result column="process_type_str" property="processTypeStr"/>
         <result column="return_type" property="returnType"/>
+        <result column="return_type_str" property="returnTypeStr"/>
         <result column="return_channel" property="returnChannel"/>
         <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_code_str" property="warehouseCodeStr"/>
         <result column="apply_process_method" property="applyProcessMethod"/>
+        <result column="apply_process_method_str" property="applyProcessMethodStr"/>
         <result column="arrival_time" property="arrivalTime"/>
         <result column="finish_time" property="finishTime"/>
         <result column="overdue" property="overdue"/>
         <result column="process_remark" property="processRemark"/>
         <result column="return_source" property="returnSource"/>
+        <result column="return_source_str" property="returnSourceStr"/>
         <result column="deal_status" property="dealStatus"/>
+        <result column="deal_status_str" property="dealStatusStr"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -37,7 +44,7 @@
                 update_by_name,
                 update_time,
                 remark,
-            id, create_by, update_by, version, seller_code, from_order_no, scan_code, expected_no, return_no, process_type, return_type, return_channel, warehouse_code, apply_process_method, arrival_time, finish_time, overdue, process_remark, return_source, deal_status
+            id, create_by, update_by, del_flag, version, seller_code, from_order_no, scan_code, expected_no, return_no, process_type, process_type_str, return_type, return_type_str, return_channel, warehouse_code, warehouse_code_str, apply_process_method, apply_process_method_str, arrival_time, finish_time, overdue, process_remark, return_source, return_source_str, deal_status, deal_status_str
     </sql>
 
     <select id="selectPageList" resultType="com.szmsd.returnex.vo.ReturnExpressListVO">

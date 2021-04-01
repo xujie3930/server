@@ -14,14 +14,14 @@ import javax.validation.constraints.NotNull;
 
 /**
  * @ClassName: ReturnArrivalReqDTO
- * @Description: 接受VMS库存信息
+ * @Description: 接受WMS库存信息
  * @Author: 11
  * @Date: 2021/3/27 10:48
  */
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel("接受VMS仓库退件处理结果")
+@ApiModel("接受WMS仓库退件处理结果")
 public class ReturnProcessingReqDTO {
 
     /**
