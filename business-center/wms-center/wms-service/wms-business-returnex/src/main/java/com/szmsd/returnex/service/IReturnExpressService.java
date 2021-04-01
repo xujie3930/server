@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
 import com.szmsd.returnex.dto.*;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
+import com.szmsd.returnex.vo.ReturnExpressVO;
 
 import java.util.List;
 
@@ -87,4 +88,11 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @return
      */
     int expiredUnprocessedForecastOrder();
+
+    /**
+     * 获取退件单信息详情
+     * @param id
+     * @return
+     */
+    ReturnExpressVO getInfo(Long id);
 }

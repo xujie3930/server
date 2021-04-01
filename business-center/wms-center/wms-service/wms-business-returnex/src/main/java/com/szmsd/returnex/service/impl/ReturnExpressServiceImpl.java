@@ -23,6 +23,7 @@ import com.szmsd.returnex.mapper.ReturnExpressMapper;
 import com.szmsd.returnex.service.IReturnExpressGoodService;
 import com.szmsd.returnex.service.IReturnExpressService;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
+import com.szmsd.returnex.vo.ReturnExpressVO;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.model.UserInfo;
 import jodd.util.StringUtil;
@@ -295,5 +296,12 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         int update = returnExpressMapper.update(null, Wrappers.<ReturnExpressDetail>lambdaUpdate());
         log.info("--------------更新过期未处理的预报单 结束--------------");
         return update;
+    }
+
+    @Override
+    public ReturnExpressVO getInfo(Long id) {
+        ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectById(id);
+        Optional.ofNullable(returnExpressDetail).orElseThrow(() -> new BaseException("数据不存在！"));
+        return returnExpressDetail.convertThis(ReturnExpressVO.class);
     }
 }

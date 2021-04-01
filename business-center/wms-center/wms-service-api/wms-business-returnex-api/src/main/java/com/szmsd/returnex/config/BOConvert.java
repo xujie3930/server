@@ -1,4 +1,4 @@
-package com.szmsd.returnex.domain;
+package com.szmsd.returnex.config;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.json.JSONUtil;
