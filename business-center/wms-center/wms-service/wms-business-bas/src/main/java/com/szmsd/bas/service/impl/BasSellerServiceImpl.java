@@ -5,12 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.code.kaptcha.Producer;
+import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
-import com.szmsd.bas.dto.ActiveDto;
-import com.szmsd.bas.dto.BasSellerDto;
-import com.szmsd.bas.dto.BasSellerInfoDto;
-import com.szmsd.bas.dto.BasSellerSysDto;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
@@ -69,6 +69,9 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
     private IBasSellerCertificateService basSellerCertificateService;
     @Resource
     private HtpBasFeignService htpBasFeignService;
+
+    @Autowired
+    private RemoteAttachmentService remoteAttachmentService;
 
         /**
         * 查询模块
@@ -230,8 +233,9 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
             BasSellerCertificateQueryWrapper.eq("seller_code",basSeller.getSellerCode());
             List<BasSellerCertificate> basSellerCertificateList = basSellerCertificateService.list(BasSellerCertificateQueryWrapper);
+
             BasSellerInfoDto basSellerInfoDto = BeanMapperUtil.map(basSeller,BasSellerInfoDto.class);
-            basSellerInfoDto.setBasSellerCertificateList(basSellerCertificateList);
+            basSellerInfoDto.setBasSellerCertificateList(BeanMapperUtil.mapList(basSellerCertificateList, BasSellerCertificateDto.class));
             return basSellerInfoDto;
         }
 
@@ -288,6 +292,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 basSellerCertificateService.delBasSellerCertificateByPhysics(basSeller.getSellerCode());
                 basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
             }
+            // 附件信息
             return baseMapper.updateById(basSeller);
         }
 

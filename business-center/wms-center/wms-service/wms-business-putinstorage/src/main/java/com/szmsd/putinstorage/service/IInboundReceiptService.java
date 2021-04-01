@@ -23,9 +23,9 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
 
     InboundReceiptVO selectByWarehouseNo(String warehouseNo);
 
-    void create(CreateInboundReceiptDTO createInboundReceiptDTO);
+    void saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO);
 
-    InboundReceipt saveInboundReceipt(InboundReceiptDTO inboundReceiptDTO);
+    InboundReceipt saveOrUpdate(InboundReceiptDTO inboundReceiptDTO);
 
     void cancel(String warehouseNo);
 
@@ -40,5 +40,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     void updateByWarehouseNo(InboundReceipt inboundReceipt);
 
     void review(InboundReceiptReviewDTO inboundReceiptReviewDTO);
+
+    void delete(String warehouseNo);
 }
 

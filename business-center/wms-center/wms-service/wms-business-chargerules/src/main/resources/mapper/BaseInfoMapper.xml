@@ -29,7 +29,7 @@
             b.next_price
         FROM
             bas_special_operation a,cha_special_operation b
-        WHERE a.id = #{id} and a.operation_type = b.operation_type
+        WHERE a.id = #{id} and a.operation_type = b.id
     </select>
 
 </mapper>

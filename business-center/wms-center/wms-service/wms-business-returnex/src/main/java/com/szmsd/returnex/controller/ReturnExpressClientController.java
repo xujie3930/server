@@ -68,7 +68,7 @@ public class ReturnExpressClientController extends BaseController {
     //@PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
     @GetMapping("/page")
     @ApiOperation(value = "退件单列表 - 分页")
-    public TableDataInfo<ReturnExpressListVO> page(@Validated @RequestBody ReturnExpressListQueryDTO queryDto) {
+    public TableDataInfo<ReturnExpressListVO> page(@Validated ReturnExpressListQueryDTO queryDto) {
         startPage();
         List<ReturnExpressListVO> returnExpressListVOS = returnExpressService.selectReturnOrderList(queryDto);
         return getDataTable(returnExpressListVOS);
