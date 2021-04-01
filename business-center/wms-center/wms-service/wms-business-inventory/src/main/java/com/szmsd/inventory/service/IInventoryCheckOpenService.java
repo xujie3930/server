@@ -10,7 +10,7 @@ public interface IInventoryCheckOpenService {
      * @param adjustRequestDto adjustRequestDto
      * @return result
      */
-    int adjust(AdjustRequestDto adjustRequestDto);
+    boolean adjust(AdjustRequestDto adjustRequestDto);
 
     /**
      * 接收申请盘点结果

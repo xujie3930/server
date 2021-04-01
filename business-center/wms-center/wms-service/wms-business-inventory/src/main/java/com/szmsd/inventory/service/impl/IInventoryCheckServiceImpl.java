@@ -2,6 +2,7 @@ package com.szmsd.inventory.service.impl;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.http.api.feign.HtpInventoryCheckFeignService;
 import com.szmsd.http.dto.CountingRequest;
@@ -33,7 +34,7 @@ public class IInventoryCheckServiceImpl implements IInventoryCheckService {
     @Transactional
     @Override
     public int add(InventoryCheckDTO inventoryCheckDTO) {
-        InventoryCheck inventoryCheck = new InventoryCheck();
+        InventoryCheck inventoryCheck = BeanMapperUtil.map(inventoryCheckDTO, InventoryCheck.class);
         BeanUtils.copyProperties(inventoryCheckDTO, inventoryCheck);
         return inventoryCheckMapper.insert(inventoryCheck);
     }

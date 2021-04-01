@@ -18,6 +18,7 @@ public class AdjustRequestDto {
     private String operateOn;
 
     @ApiModelProperty(value = "仓库")
+    @NotBlank(message = "仓库编号不能为空")
     private String warehouseCode;
 
     @ApiModelProperty(value = "业务主键，用来做幂等校验")
