@@ -132,7 +132,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                             String trackingNo = null;
                             if (DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(pricedProductInfo.getTrackingAcquireType())) {
                                 // 创建承运商物流订单
-                                updateDelOutbound.setTrackingNo(trackingNo = this.shipmentOrder(delOutboundWrapperContext));
+                                ShipmentOrderResult shipmentOrderResult = this.shipmentOrder(delOutboundWrapperContext);
+                                updateDelOutbound.setTrackingNo(trackingNo = shipmentOrderResult.getMainTrackingNumber());
+                                updateDelOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
                             }
                             // 推单到WMS
                             updateDelOutbound.setRefOrderNo(this.shipmentCreate(delOutboundWrapperContext, trackingNo));
@@ -272,7 +274,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     @Override
-    public String shipmentOrder(DelOutboundWrapperContext delOutboundWrapperContext) {
+    public ShipmentOrderResult shipmentOrder(DelOutboundWrapperContext delOutboundWrapperContext) {
         DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
         // 查询地址信息
         DelOutboundAddress address = delOutboundWrapperContext.getAddress();
@@ -330,8 +332,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
         if (responseObjectWrapper.isSuccess()) {
             // 保存挂号
-            ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
-            return shipmentOrderResult.getMainTrackingNumber();
+            return responseObjectWrapper.getObject();
         } else {
             String exceptionMessage = this.getMessage(responseObjectWrapper.getError());
             if (StringUtils.isEmpty(exceptionMessage)) {

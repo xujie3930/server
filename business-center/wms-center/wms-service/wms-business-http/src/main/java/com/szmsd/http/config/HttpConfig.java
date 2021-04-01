@@ -166,6 +166,8 @@ public class HttpConfig {
         private String cancellation;
         // 获取可用的承运商服务名称(管理端)
         private String services;
+        // 根据订单号返回标签文件流
+        private String label;
     }
 
     @Data

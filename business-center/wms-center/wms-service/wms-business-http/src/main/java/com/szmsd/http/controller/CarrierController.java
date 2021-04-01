@@ -1,6 +1,7 @@
 package com.szmsd.http.controller;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.CreateShipmentOrderCommand;
 import com.szmsd.http.dto.ProblemDetails;
@@ -10,10 +11,7 @@ import com.szmsd.http.service.ICarrierService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author zhangyuyuan
@@ -31,5 +29,12 @@ public class CarrierController extends BaseController {
     @ApiOperation(value = "创建承运商物流订单（客户端）")
     public R<ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails>> shipmentOrder(@RequestBody CreateShipmentOrderCommand command) {
         return R.ok(carrierService.shipmentOrder(command));
+    }
+
+    @GetMapping("/label")
+    @ApiOperation(value = "根据订单号返回标签文件流")
+    public R<FileStream> label(@RequestParam String orderNumber) {
+        FileStream fileStream = carrierService.label(orderNumber);
+        return R.ok(fileStream);
     }
 }

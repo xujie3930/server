@@ -1,6 +1,7 @@
 package com.szmsd.http.api.service.impl;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.http.api.feign.HtpCarrierFeignService;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.dto.CreateShipmentOrderCommand;
@@ -23,5 +24,10 @@ public class HtpCarrierClientServiceImpl implements IHtpCarrierClientService {
     @Override
     public ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails> shipmentOrder(CreateShipmentOrderCommand command) {
         return R.getDataAndException(this.htpCarrierFeignService.shipmentOrder(command));
+    }
+
+    @Override
+    public FileStream label(String orderNumber) {
+        return R.getDataAndException(this.htpCarrierFeignService.label(orderNumber));
     }
 }
