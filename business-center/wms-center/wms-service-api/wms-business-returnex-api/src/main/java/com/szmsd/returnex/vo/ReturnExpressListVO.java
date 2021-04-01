@@ -84,6 +84,15 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "是否逾期")
     private String overdue;
 
+    public void setOverdue(String overdue) {
+        this.overdue = overdue;
+        Optional.ofNullable(overdue)
+                .filter(StringUtils::isNotEmpty)
+                .ifPresent(x -> this.overdueStr = ReturnExpressEnums.OverdueEnum.getDesc(x));
+    }
+
+    @ApiModelProperty(value = "是否逾期", hidden = true)
+    private String overdueStr;
     @ApiModelProperty(value = "处理备注")
     private String processRemark;
 
@@ -113,6 +122,13 @@ public class ReturnExpressListVO implements Serializable {
                 .filter(StringUtils::isNotEmpty)
                 .ifPresent(x -> dealStatusStr = ReturnExpressEnums.DealStatusEnum.valueOf(x).getDesc());
     }
+
+    @ApiModelProperty(value = "目的仓库名称")
+    private String warehouseName;
+
+    @ApiModelProperty(value = "目的仓库名称", hidden = true)
+    private String warehouseNameStr;
+
 
     @Override
     public String toString() {

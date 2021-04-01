@@ -1,24 +1,19 @@
-package com.szmsd.pack.dto;
-
-import java.math.BigDecimal;
+package com.szmsd.pack.vo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.szmsd.common.core.web.domain.BaseEntity;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import jodd.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import com.szmsd.common.core.annotation.Excel;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -33,7 +28,7 @@ import com.szmsd.common.core.annotation.Excel;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value = "揽件列表查询条件", description = "揽件列表查询条件")
-public class PackageMangQueryDTO extends BaseEntity {
+public class PackageMangVO extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
