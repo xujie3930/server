@@ -27,10 +27,10 @@ public class CreateShipmentOrderCommand implements Serializable {
     private String clientNumber;
 
     @ApiModelProperty(value = "收货地址")
-    private Address receiverAddress;
+    private AddressCommand receiverAddress;
 
     @ApiModelProperty(value = "退货地址")
-    private Address returnAddress;
+    private AddressCommand returnAddress;
 
     @ApiModelProperty(value = "包裹信息")
     private List<Package> packages;

@@ -6,7 +6,9 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
+import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
@@ -30,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,6 +55,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private String basedir;
     @Autowired
     private IHtpCarrierClientService htpCarrierClientService;
+    @Autowired
+    private IDelOutboundChargeService delOutboundChargeService;
 
     @Transactional
     @Override
@@ -79,47 +84,50 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             } else {
                 orderNumber = delOutbound.getShipmentOrderNumber();
             }
-            // 获取标签
-            FileStream fileStream = this.htpCarrierClientService.label(orderNumber);
-            // 保存文件
-            File file = new File(this.basedir + "/shipment/label");
-            if (!file.exists()) {
-                FileUtils.forceMkdir(file);
-            }
-            byte[] inputStream;
-            if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
-                File labelFile = new File(file.getPath() + "/" + orderNumber);
-                FileOutputStream fileOutputStream = null;
-                ByteArrayInputStream byteArrayInputStream = null;
-                try {
-                    fileOutputStream = new FileOutputStream(labelFile);
-                    byteArrayInputStream = new ByteArrayInputStream(inputStream);
-                    byte[] read = new byte[1024];
-                    if (byteArrayInputStream.read(read) != -1) {
-                        fileOutputStream.write(read);
-                    }
-                    fileOutputStream.flush();
-                    fileOutputStream.close();
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                } finally {
-                    if (null != fileOutputStream) {
+            // 处理物流规则是None
+            if (StringUtils.isNotEmpty(orderNumber)) {
+                // 获取标签
+                FileStream fileStream = this.htpCarrierClientService.label(orderNumber);
+                // 保存文件
+                File file = new File(this.basedir + "/shipment/label");
+                if (!file.exists()) {
+                    FileUtils.forceMkdir(file);
+                }
+                byte[] inputStream;
+                if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
+                    File labelFile = new File(file.getPath() + "/" + orderNumber);
+                    FileOutputStream fileOutputStream = null;
+                    ByteArrayInputStream byteArrayInputStream = null;
+                    try {
+                        fileOutputStream = new FileOutputStream(labelFile);
+                        byteArrayInputStream = new ByteArrayInputStream(inputStream);
+                        byte[] read = new byte[1024];
+                        if (byteArrayInputStream.read(read) != -1) {
+                            fileOutputStream.write(read);
+                        }
                         fileOutputStream.flush();
                         fileOutputStream.close();
-                    }
-                }
-                if (null != byteArrayInputStream) {
-                    try {
-                        String encode = Base64.encode(byteArrayInputStream);
-                        ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
-                        shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getRefOrderNo());
-                        shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
-                        shipmentLabelChangeRequestDto.setLabel(encode);
-                        this.htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     } finally {
-                        byteArrayInputStream.close();
+                        if (null != fileOutputStream) {
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+                        }
+                    }
+                    if (null != byteArrayInputStream) {
+                        try {
+                            String encode = Base64.encode(byteArrayInputStream);
+                            ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+                            shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getRefOrderNo());
+                            shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+                            shipmentLabelChangeRequestDto.setLabel(encode);
+                            this.htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                        } finally {
+                            byteArrayInputStream.close();
+                        }
                     }
                 }
             }
@@ -140,22 +148,51 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     updateDelOutbound.setCalcWeight(calcWeight.getValue());
                     updateDelOutbound.setCalcWeightUnit(calcWeight.getUnit());
                     List<ChargeItem> charges = chargeWrapper.getCharges();
-                    ChargeItem chargeItem = charges.get(0);
-                    Money money = chargeItem.getMoney();
-                    BigDecimal amount = Utils.valueOf(money.getAmount());
                     // 取消冻结费用
                     CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
                     cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
                     cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
                     cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
                     R<?> thawBalanceR = this.rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
-                    if (null == thawBalanceR || Constants.SUCCESS != thawBalanceR.getCode()) {
+                    if (null == thawBalanceR) {
                         throw new CommonException("999", "取消冻结费用失败");
                     }
+                    if (Constants.SUCCESS != thawBalanceR.getCode()) {
+                        // 异常信息
+                        String msg = thawBalanceR.getMsg();
+                        if (StringUtils.isEmpty(msg)) {
+                            msg = "取消冻结费用失败";
+                        }
+                        throw new CommonException("999", msg);
+                    }
+                    // 清除费用信息
+                    this.delOutboundChargeService.clearCharges(delOutbound.getOrderNo());
+                    // 保存新的费用信息
+                    List<DelOutboundCharge> delOutboundCharges = new ArrayList<>();
+                    // 汇总费用
+                    BigDecimal totalAmount = BigDecimal.ZERO;
+                    String totalCurrencyCode = charges.get(0).getMoney().getCurrencyCode();
+                    for (ChargeItem charge : charges) {
+                        DelOutboundCharge delOutboundCharge = new DelOutboundCharge();
+                        ChargeCategory chargeCategory = charge.getChargeCategory();
+                        delOutboundCharge.setOrderNo(delOutbound.getOrderNo());
+                        delOutboundCharge.setBillingNo(chargeCategory.getBillingNo());
+                        delOutboundCharge.setChargeNameCn(chargeCategory.getChargeNameCN());
+                        delOutboundCharge.setChargeNameEn(chargeCategory.getChargeNameEN());
+                        delOutboundCharge.setParentBillingNo(chargeCategory.getParentBillingNo());
+                        Money money = charge.getMoney();
+                        BigDecimal amount = Utils.valueOf(money.getAmount());
+                        delOutboundCharge.setAmount(amount);
+                        delOutboundCharge.setCurrencyCode(money.getCurrencyCode());
+                        delOutboundCharge.setRemark(charge.getRemark());
+                        delOutboundCharges.add(delOutboundCharge);
+                        totalAmount = totalAmount.add(amount);
+                    }
+                    this.delOutboundChargeService.saveCharges(delOutboundCharges);
                     // 冻结费用
                     CusFreezeBalanceDTO cusFreezeBalanceDTO2 = new CusFreezeBalanceDTO();
-                    cusFreezeBalanceDTO2.setAmount(amount);
-                    cusFreezeBalanceDTO2.setCurrencyCode(money.getCurrencyCode());
+                    cusFreezeBalanceDTO2.setAmount(totalAmount);
+                    cusFreezeBalanceDTO2.setCurrencyCode(totalCurrencyCode);
                     cusFreezeBalanceDTO2.setCusCode(delOutbound.getSellerCode());
                     R<?> freezeBalanceR = this.rechargesFeignService.freezeBalance(cusFreezeBalanceDTO2);
                     ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
@@ -163,13 +200,28 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
                     shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
                     shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
-                    if (null != freezeBalanceR && Constants.SUCCESS == freezeBalanceR.getCode()) {
-                        // 更新发货指令
-                        shipmentUpdateRequestDto.setIsEx(false);
-                        shipmentUpdateRequestDto.setExType(null);
-                        shipmentUpdateRequestDto.setExRemark(null);
-                        shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
-                        this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+                    if (null != freezeBalanceR) {
+                        if (Constants.SUCCESS == freezeBalanceR.getCode()) {
+                            // 更新发货指令
+                            shipmentUpdateRequestDto.setIsEx(false);
+                            shipmentUpdateRequestDto.setExType(null);
+                            shipmentUpdateRequestDto.setExRemark(null);
+                            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+                            this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+                        } else {
+                            // 异常信息
+                            String msg = freezeBalanceR.getMsg();
+                            if (StringUtils.isEmpty(msg)) {
+                                msg = "冻结费用信息失败";
+                            }
+                            shipmentUpdateRequestDto.setIsEx(true);
+                            shipmentUpdateRequestDto.setExType("FreezeBalanceError");
+                            shipmentUpdateRequestDto.setExRemark(msg);
+                            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+                            this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+                            // 异常信息
+                            throw new CommonException("999", msg);
+                        }
                     } else {
                         shipmentUpdateRequestDto.setIsEx(true);
                         shipmentUpdateRequestDto.setExType("FreezeBalanceError");
@@ -180,8 +232,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         throw new CommonException("999", "冻结费用信息失败");
                     }
                     // 更新费用信息
-                    updateDelOutbound.setAmount(amount);
-                    updateDelOutbound.setCurrencyCode(money.getCurrencyCode());
+                    updateDelOutbound.setAmount(totalAmount);
+                    updateDelOutbound.setCurrencyCode(totalCurrencyCode);
                     this.delOutboundService.updateById(updateDelOutbound);
                 }
             }
