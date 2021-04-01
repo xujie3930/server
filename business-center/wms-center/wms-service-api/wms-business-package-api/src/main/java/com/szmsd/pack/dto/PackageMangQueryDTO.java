@@ -37,9 +37,8 @@ public class PackageMangQueryDTO extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "主键ID")
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    @ApiModelProperty(value = "主键IDs")
+    private List<Integer> ids;
 
     @ApiModelProperty(value = "逻辑删除标识；2-已删除，0-未删除", hidden = true)
     private Integer delFlag = 0;

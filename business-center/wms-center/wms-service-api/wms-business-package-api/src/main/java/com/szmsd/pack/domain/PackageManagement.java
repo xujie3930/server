@@ -154,5 +154,8 @@ public class PackageManagement extends BaseEntity {
     @Excel(name = "货物类型【 0：入库，1：转运】")
     private Integer operationType;
 
+    @ApiModelProperty(value = "详细地址", required = true)
+    private String deliveryAddress;
+
 
 }
