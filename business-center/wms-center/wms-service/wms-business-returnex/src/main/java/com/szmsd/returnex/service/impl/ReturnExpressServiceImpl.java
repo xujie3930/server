@@ -159,7 +159,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         // 创建退报单 推给VMS仓库
         CreateExpectedReqDTO createExpectedReqDTO = returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class);
         createExpectedReqDTO.setRefOrderNo(returnExpressAddDTO.getFromOrderNo());
-        CreateExpectedRespVO createExpectedRespVO = httpFeignClient.expectedCreate(createExpectedReqDTO);
+        //TODO 新增远程挂了
+        //CreateExpectedRespVO createExpectedRespVO = httpFeignClient.expectedCreate(createExpectedReqDTO);
         //Optional.ofNullable(createExpectedRespVO).orElseThrow(() -> new BaseException("推送VMS仓库退单信息异常"));
         // 本地保存
 

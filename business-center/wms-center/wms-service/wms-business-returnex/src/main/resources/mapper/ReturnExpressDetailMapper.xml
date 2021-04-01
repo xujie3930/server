@@ -45,13 +45,13 @@
         <include refid="Base_Column_List"/>
         from return_express_detail
         <where>
-            <if test="cm.returnSource != null">
+            <if test="cm.returnSource != null and cm.returnSource != '' ">
                 and return_source = #{cm.returnSource}
             </if>
-            <if test="cm.processType != null">
+            <if test="cm.processType != null and cm.processType != '' ">
                 and process_type = #{cm.processType}
             </if>
-            <if test="cm.returnType != null">
+            <if test="cm.returnType != null and cm.cm.returnType != '' ">
                 and return_type = #{cm.returnType}
             </if>
             <if test="cm.createTimeStart != null and cm.createTimeEnd != null ">
