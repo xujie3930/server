@@ -40,9 +40,9 @@ public class ReturnExpressServerController extends BaseController {
      * @return 返回结果
      */
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
-    @PostMapping("/page")
+    @GetMapping("/page")
     @ApiOperation(value = "退件单列表 - 分页")
-    public TableDataInfo<ReturnExpressListVO> page(@Validated @RequestBody ReturnExpressListQueryDTO queryDto) {
+    public TableDataInfo<ReturnExpressListVO> page(@Validated ReturnExpressListQueryDTO queryDto) {
         startPage();
         return getDataTable(returnExpressService.selectReturnOrderList(queryDto));
     }
@@ -54,9 +54,9 @@ public class ReturnExpressServerController extends BaseController {
      * @return 返回结果
      */
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
-    @PostMapping("/noUserBind/page")
+    @GetMapping("/noUserBind/page")
     @ApiOperation(value = "无名件管理列表 - 分页")
-    public TableDataInfo<ReturnExpressListVO> pageForNoUserBind(@Validated @RequestBody ReturnExpressListQueryDTO queryDto) {
+    public TableDataInfo<ReturnExpressListVO> pageForNoUserBind(@Validated ReturnExpressListQueryDTO queryDto) {
         startPage();
         return getDataTable(returnExpressService.pageForNoUserBind(queryDto));
     }

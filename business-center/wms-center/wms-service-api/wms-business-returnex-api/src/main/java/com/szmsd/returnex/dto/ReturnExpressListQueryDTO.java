@@ -76,16 +76,16 @@ public class ReturnExpressListQueryDTO extends PageDomain {
     private List<String> returnNoList;
 
     @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]",example = "OWN_INVENTORY_RETURN")
-    private ReturnExpressEnums.ReturnTypeEnum returnType;
+    private String returnType;
 
     @ApiModelProperty(value = "类型[退件预报 WMS通知退件]",example = "RETURN_FORECAST")
-    private ReturnExpressEnums.ReturnSourceEnum returnSource;
+    private String returnSource;
 
     @ApiModelProperty(value = "退件目标仓库编码",example = "SZ")
     private String warehouseCode;
 
     @ApiModelProperty(value = "处理状态编码[销毁 整包上架 拆包检查 按明细上架]",example = "Destroy")
-    private ReturnExpressEnums.ProcessTypeEnum processType;
+    private String processType;
 
     @ApiModelProperty(value = "无名件列表查询", hidden = true)
     private Boolean noUserQuery = false;

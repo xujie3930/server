@@ -46,13 +46,13 @@
         from return_express_detail
         <where>
             <if test="cm.returnSource != null">
-                and return_source = #{cm.returnSource.name}
+                and return_source = #{cm.returnSource}
             </if>
             <if test="cm.processType != null">
-                and process_type = #{cm.processType.name}
+                and process_type = #{cm.processType}
             </if>
             <if test="cm.returnType != null">
-                and return_type = #{cm.returnType.name}
+                and return_type = #{cm.returnType}
             </if>
             <if test="cm.createTimeStart != null and cm.createTimeEnd != null ">
                 and create_time between CONCAT(#{cm.createTimeStart},' 00:00:00') and CONCAT(#{cm.createTimeEnd},' 23:59:59')
