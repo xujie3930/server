@@ -2,6 +2,7 @@ package com.szmsd.pack.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.pack.domain.PackageManagement;
+import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.vo.PackageMangVO;
 
@@ -39,7 +40,7 @@ public interface IPackageMangServeService extends IService<PackageManagement> {
      * @param packageManagement package - 交货管理 - 地址信息表模块
      * @return 结果
      */
-    int insertPackageManagement(PackageManagement packageManagement);
+    int insertPackageManagement(PackageMangAddDTO packageManagement);
 
     /**
      * 修改package - 交货管理 - 地址信息表模块
@@ -47,7 +48,7 @@ public interface IPackageMangServeService extends IService<PackageManagement> {
      * @param packageManagement package - 交货管理 - 地址信息表模块
      * @return 结果
      */
-    int updatePackageManagement(PackageManagement packageManagement);
+    int updatePackageManagement(PackageMangAddDTO packageManagement);
 
     /**
      * 批量删除package - 交货管理 - 地址信息表模块
@@ -57,13 +58,12 @@ public interface IPackageMangServeService extends IService<PackageManagement> {
      */
     int deletePackageManagementByIds(List<String> ids);
 
-    /**
-     * 删除package - 交货管理 - 地址信息表模块信息
-     *
-     * @param id package - 交货管理 - 地址信息表模块ID
-     * @return 结果
-     */
-    int deletePackageManagementById(String id);
 
+    /**
+     * 导出的数据修改导出状态
+     *
+     * @param ids
+     */
+    void setExportStatus(List<Integer> ids);
 }
 
