@@ -207,4 +207,13 @@ public class RemoteComponent {
         return false;
     }
 
+    /**
+     * 删除附件
+     * @param attachmentTypeEnum
+     * @param businessNo
+     */
+    public void deleteAttachment(AttachmentTypeEnum attachmentTypeEnum, String businessNo) {
+        remoteAttachmentService.deleteByBusinessNo(attachmentTypeEnum.getAttachmentType(), businessNo);
+    }
+
 }

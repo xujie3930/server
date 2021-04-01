@@ -25,6 +25,9 @@
         t.origin_code,
         t.remark
     </sql>
+    <delete id="deleteByWarehouseNo">
+        DELETE FROM inbound_receipt_detail WHERE warehouse_no = #{warehouseNo}
+    </delete>
     <select id="selectList" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO" resultMap="ReceiptDetailVO">
         SELECT <include refid="Column_List_VO"/>
         FROM inbound_receipt_detail t

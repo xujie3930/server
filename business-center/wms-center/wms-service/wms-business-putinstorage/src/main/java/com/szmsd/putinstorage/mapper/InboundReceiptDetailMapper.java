@@ -11,4 +11,5 @@ public interface InboundReceiptDetailMapper extends BaseMapper<InboundReceiptDet
 
     List<InboundReceiptDetailVO> selectList(InboundReceiptDetailQueryDTO queryDto);
 
+    void deleteByWarehouseNo(String warehouseNo);
 }

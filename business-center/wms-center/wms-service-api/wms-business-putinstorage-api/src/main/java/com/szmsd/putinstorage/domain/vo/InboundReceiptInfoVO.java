@@ -2,7 +2,6 @@ package com.szmsd.putinstorage.domain.vo;
 
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
-import com.szmsd.common.core.language.enums.LanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -68,12 +67,12 @@ public class InboundReceiptInfoVO {
     private String remark;
 
     @ApiModelProperty(value = "入库明细")
-    private List<InboundReceiptDetailVO> inboundReceiptDetailVOS;
+    private List<InboundReceiptDetailVO> inboundReceiptDetails;
 
     // --------------------多语言字段--------------------
 
     @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS, language = LanguageEnum.zhName)
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS)
     private String statusName;
 
     @ApiModelProperty(value = "客户名称 - 当前系统语言")
@@ -88,7 +87,7 @@ public class InboundReceiptInfoVO {
     private String warehouseMethodName;
 
     @ApiModelProperty(value = "类别名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB, language = LanguageEnum.zhName)
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     private String warehouseCategoryName;
 
     @ApiModelProperty(value = "送货方式名称 - 当前系统语言")

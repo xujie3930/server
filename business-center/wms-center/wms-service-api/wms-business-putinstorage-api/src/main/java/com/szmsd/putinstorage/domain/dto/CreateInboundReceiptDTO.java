@@ -15,6 +15,9 @@ import java.util.List;
 public class CreateInboundReceiptDTO extends InboundReceiptDTO {
 
     @ApiModelProperty(value = "入库明细")
-    private List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS;
+    private List<InboundReceiptDetailDTO> inboundReceiptDetails;
+
+    @ApiModelProperty(value = "要删除的入库明细id")
+    private List<String> receiptDetailIds;
 
 }

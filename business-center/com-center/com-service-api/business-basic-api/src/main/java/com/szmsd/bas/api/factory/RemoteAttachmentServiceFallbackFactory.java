@@ -43,6 +43,12 @@ public class RemoteAttachmentServiceFallbackFactory implements FallbackFactory<R
                 log.error("附件保存失败", throwable.getMessage());
                 return R.failed(ExceptionMessageEnum.FAIL);
             }
+
+            @Override
+            public R deleteByBusinessNo(String attachmentType, String businessNo) {
+                log.error("附件删除失败", throwable.getMessage());
+                return R.failed(ExceptionMessageEnum.FAIL);
+            }
         };
     }
 }
