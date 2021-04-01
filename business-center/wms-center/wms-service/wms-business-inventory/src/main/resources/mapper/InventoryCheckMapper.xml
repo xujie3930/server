@@ -5,7 +5,6 @@
     <select id="findList" resultType="com.szmsd.inventory.domain.InventoryCheck" parameterType="com.szmsd.inventory.domain.dto.InventoryCheckQueryDTO">
         select * from inventory_check
         <where>
-            status = 'Pending'
             <if test="customCode != null">
                 AND custom_code = #{customCode}
             </if>
