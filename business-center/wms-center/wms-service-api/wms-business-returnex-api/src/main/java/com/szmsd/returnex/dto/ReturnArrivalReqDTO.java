@@ -2,7 +2,7 @@ package com.szmsd.returnex.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.validator.annotation.StringLength;
-import com.szmsd.returnex.domain.BOConvert;
+import com.szmsd.returnex.config.BOConvert;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

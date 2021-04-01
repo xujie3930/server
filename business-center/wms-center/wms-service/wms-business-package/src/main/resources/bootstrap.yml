@@ -1,0 +1,11 @@
+# Tomcat
+server:
+  port: 7223
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: wms-business-package
+  profiles:
+    # 环境配置
+    active: dev

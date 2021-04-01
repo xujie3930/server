@@ -15,10 +15,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -76,5 +73,16 @@ public class ReturnExpressServerController extends BaseController {
     @ApiOperation(value = "无名件批量指派客户")
     public R assignUsersForNoUserBindBatch(@Validated @RequestBody ReturnExpressAssignDTO expressAssignDTO) {
         return toOk(returnExpressService.assignUsersForNoUserBindBatch(expressAssignDTO));
+    }
+
+    /**
+     * 获取退件单信息详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/getInfo/{id}")
+    @ApiOperation(value = "获取退件单信息详情")
+    public R getInfo(@PathVariable(value = "id") Long id) {
+        return R.ok(returnExpressService.getInfo(id));
     }
 }

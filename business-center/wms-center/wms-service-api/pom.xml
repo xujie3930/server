@@ -32,6 +32,7 @@
         <module>wms-business-chargerules-api</module>
         <module>wms-business-returnex-api</module>
         <module>wms-business-exception-api</module>
+        <module>wms-business-package-api</module>
     </modules>
 
     <dependencyManagement>
