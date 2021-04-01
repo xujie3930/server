@@ -2,6 +2,7 @@ package com.szmsd.bas.service;
 
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.bas.dto.BasSellerCertificateDto;
 import com.szmsd.bas.dto.VatQueryDto;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public interface IBasSellerCertificateService extends IService<BasSellerCertific
          * @param basSellerCertificateList
          * @return
          */
-        Boolean insertBasSellerCertificateList(List<BasSellerCertificate> basSellerCertificateList);
+        Boolean insertBasSellerCertificateList(List<BasSellerCertificateDto> basSellerCertificateList);
         /**
         * 修改模块
         *

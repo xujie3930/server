@@ -3,7 +3,6 @@ package com.szmsd.returnex.dto;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.page.PageDomain;
-import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModelProperty;
 import jodd.util.StringUtil;
 import lombok.Data;
@@ -11,12 +10,9 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.Min;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @ClassName: ReturnExpressListQueryDTO
@@ -34,10 +30,10 @@ public class ReturnExpressListQueryDTO extends PageDomain {
     private Integer id;
 
     @ApiModelProperty(value = "创建日期 开始", example = "2021-03-01")
-    private LocalDate createTimeStart;
+    private String createTimeStart;
 
     @ApiModelProperty(value = "创建日期 结束", example = "2021-03-01")
-    private LocalDate createTimeEnd;
+    private String createTimeEnd;
 
     @ApiModelProperty(value = "客户代码", example = "UID123456")
     @Excel(name = "客户代码")

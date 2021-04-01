@@ -2,11 +2,17 @@ package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.domain.BasSellerCertificate;
+import com.szmsd.bas.dto.BasSellerCertificateDto;
 import com.szmsd.bas.dto.VatQueryDto;
 import com.szmsd.bas.mapper.BasSellerCertificateMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.service.IBasSerialNumberService;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +32,11 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
 
     @Resource
     private BasSellerCertificateMapper basSellerCertificateMapper;
+    @Resource
+    private IBasSerialNumberService baseSerialNumberService;
+
     @Autowired
-    private IBasSellerService iBasSellerService;
+    private RemoteAttachmentService remoteAttachmentService;
         /**
         * 查询模块
         *
@@ -87,8 +96,16 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
      * @return
      */
     @Override
-        public Boolean insertBasSellerCertificateList(List<BasSellerCertificate> basSellerCertificateList){
-            return super.saveBatch(basSellerCertificateList);
+        public Boolean insertBasSellerCertificateList(List<BasSellerCertificateDto> basSellerCertificateList){
+
+        for(BasSellerCertificateDto b:basSellerCertificateList){
+            String imageCode = b.getSellerCode()+baseSerialNumberService.generateNumber("CERTIFICATE");
+            b.setAttachment(imageCode);
+            AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(imageCode).businessItemNo(null).fileList(b.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SELLER_CERTIFICATE_DOCUMENT).build();
+            this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+        }
+
+            return super.saveBatch(BeanMapperUtil.mapList(basSellerCertificateList,BasSellerCertificate.class));
         }
 
         /**
