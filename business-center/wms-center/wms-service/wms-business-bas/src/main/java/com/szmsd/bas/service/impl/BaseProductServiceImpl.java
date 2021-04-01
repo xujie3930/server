@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
@@ -60,6 +63,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
     @Resource
     private IBasSerialNumberService baseSerialNumberService;
+
+    @Autowired
+    private RemoteAttachmentService remoteAttachmentService;
 
 
     /**
@@ -218,7 +224,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         baseProductDto.setSellerCode(basSeller.getSellerCode());*/
-        baseProductDto.setCode("S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU"));
+       String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
+        baseProductDto.setCode(skuCode);
         //默认仓库没有验收
         baseProductDto.setWarehouseAcceptance(false);
 
@@ -241,6 +248,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         if (!r.getData().getSuccess()) {
             throw new BaseException("传wms失败:" + r.getData().getMessage());
         }
+        AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(skuCode).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
+        this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         return baseMapper.insert(baseProduct);
     }
 
