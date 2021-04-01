@@ -81,8 +81,8 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
             // 记录库存日志
             iInventoryRecordService.saveLogs(
-                LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty,
-                inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getSku(), inboundInventoryDTO.getWarehouseCode(), (inboundInventoryDTO.getQty() + "")
+                    LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty,
+                    inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getSku(), inboundInventoryDTO.getWarehouseCode(), (inboundInventoryDTO.getQty() + "")
             );
         } finally {
             lock.unlock();
@@ -125,7 +125,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             // 填充SKU属性信息
             List<String> skus = voList.stream().map(InventoryAvailableListVO::getSku).collect(Collectors.toList());
             BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
-            conditionQueryDto.setWarehouseCode(queryDto.getWarehouseCode());
+            // conditionQueryDto.setWarehouseCode(queryDto.getWarehouseCode());
             conditionQueryDto.setSkus(skus);
             List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
             Map<String, BaseProduct> productMap;
