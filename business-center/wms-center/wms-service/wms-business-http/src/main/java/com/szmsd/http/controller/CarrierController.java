@@ -33,7 +33,7 @@ public class CarrierController extends BaseController {
 
     @GetMapping("/label")
     @ApiOperation(value = "根据订单号返回标签文件流")
-    public R<FileStream> label(@RequestParam String orderNumber) {
+    public R<FileStream> label(@RequestParam("orderNumber") String orderNumber) {
         FileStream fileStream = carrierService.label(orderNumber);
         return R.ok(fileStream);
     }

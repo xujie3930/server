@@ -25,5 +25,5 @@ public interface HtpCarrierFeignService {
     R<ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails>> shipmentOrder(@RequestBody CreateShipmentOrderCommand command);
 
     @GetMapping("/api/carrier/http/label")
-    R<FileStream> label(@RequestParam String orderNumber);
+    R<FileStream> label(@RequestParam("orderNumber") String orderNumber);
 }
