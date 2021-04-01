@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.pack.mapper.PackageAddressMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.pack.domain.PackageAddress">
+        <id column="id" property="id"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="version" property="version"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="seller_code" property="sellerCode"/>
+        <result column="default_flag" property="defaultFlag"/>
+        <result column="link_user_name" property="linkUserName"/>
+        <result column="link_phone" property="linkPhone"/>
+        <result column="country_name_zh" property="countryNameZh"/>
+        <result column="country_code" property="countryCode"/>
+        <result column="country_name_en" property="countryNameEn"/>
+        <result column="province_name_zh" property="provinceNameZh"/>
+        <result column="province_code" property="provinceCode"/>
+        <result column="province_name_en" property="provinceNameEn"/>
+        <result column="city_name_zh" property="cityNameZh"/>
+        <result column="city_code" property="cityCode"/>
+        <result column="city_name_en" property="cityNameEn"/>
+        <result column="district_name_zh" property="districtNameZh"/>
+        <result column="district_code" property="districtCode"/>
+        <result column="district_name_en" property="districtNameEn"/>
+        <result column="address_zh" property="addressZh"/>
+        <result column="address_en" property="addressEn"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, create_by, update_by, version, del_flag, seller_code, default_flag, link_user_name, link_phone, country_name_zh, country_code, country_name_en, province_name_zh, province_code, province_name_en, city_name_zh, city_code, city_name_en, district_name_zh, district_code, district_name_en, address_zh, address_en
+    </sql>
+
+    <select id="selectPackageAddressList" resultType="com.szmsd.pack.vo.PackageAddressVO">
+        select
+        <include refid="Base_Column_List"/>
+        from package_address
+        <where>
+            delFalg = 0
+        </where>
+    </select>
+</mapper>

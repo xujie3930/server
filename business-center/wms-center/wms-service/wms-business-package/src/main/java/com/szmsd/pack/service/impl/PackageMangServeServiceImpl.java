@@ -3,12 +3,12 @@ package com.szmsd.pack.service.impl;
 import com.szmsd.pack.domain.PackageManagement;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.mapper.PackageManagementMapper;
-import com.szmsd.pack.service.IPackageManagementService;
+import com.szmsd.pack.service.IPackageMangServeService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.pack.vo.PackageMangVO;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.szmsd.common.core.domain.R;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -20,8 +20,10 @@ import java.util.List;
  * @since 2021-04-01
  */
 @Service
-public class PackageManagementServiceImpl extends ServiceImpl<PackageManagementMapper, PackageManagement> implements IPackageManagementService {
+public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMapper, PackageManagement> implements IPackageMangServeService {
 
+    @Resource
+    private PackageManagementMapper packageManagementMapper;
 
     /**
      * 查询package - 交货管理 - 地址信息表模块
@@ -35,8 +37,8 @@ public class PackageManagementServiceImpl extends ServiceImpl<PackageManagementM
     }
 
     @Override
-    public List<PackageManagement> selectPackageManagementList(PackageMangQueryDTO packageManagement) {
-        return null;
+    public List<PackageMangVO> selectPackageManagementList(PackageMangQueryDTO packageManagement) {
+        return packageManagementMapper.selectPackageManagementList(packageManagement);
     }
 
 

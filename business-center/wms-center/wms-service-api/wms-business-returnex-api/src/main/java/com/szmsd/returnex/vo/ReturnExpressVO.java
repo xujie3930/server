@@ -1,15 +1,20 @@
 package com.szmsd.returnex.vo;
 
+import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.common.core.language.enums.LanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
+import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -24,42 +29,76 @@ import java.util.Date;
 public class ReturnExpressVO {
 
     @ApiModelProperty(value = "主键ID")
-    private Long id;
+    @TableId(value = "id", type = IdType.AUTO)
+    @Excel(name = "主键ID")
+    private Integer id;
 
-    @ApiModelProperty(value = "入库单号")
-    private String warehouseNo;
+    @ApiModelProperty(value = "客户代码")
+    @Excel(name = "客户代码")
+    private String sellerCode;
 
-    @ApiModelProperty(value = "采购单")
-    private String orderNo;
+    @ApiModelProperty(value = "退件原始单号 原出库单号")
+    @Excel(name = "退件原始单号 原出库单号")
+    private String fromOrderNo;
 
-    @ApiModelProperty(value = "状态")
-    private String status;
+    @ApiModelProperty(value = "退件可扫描编码")
+    @Excel(name = "退件可扫描编码")
+    private String scanCode;
 
-    @ApiModelProperty(value = "状态已取消，待提审，待收货，仓库处理中，已入库")
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS, language = LanguageEnum.zhName)
-    private String statusName;
+    @ApiModelProperty(value = "预报单号")
+    @Excel(name = "预报单号")
+    private String expectedNo;
 
-    @ApiModelProperty(value = "送货方式名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
-    private String deliveryWayName;
+    @TableField(insertStrategy = FieldStrategy.NOT_EMPTY)
+    @ApiModelProperty(value = "VMS处理单号")
+    @Excel(name = "VMS处理单号")
+    private String returnNo;
 
-    @ApiModelProperty(value = "目的仓库名称 - 当前系统语言")
-    private String warehouseName;
+    @ApiModelProperty(value = "申请处理方式")
+    @Excel(name = "申请处理方式")
+    private ReturnExpressEnums.ProcessTypeEnum processType;
 
-    @ApiModelProperty(value = "入库方式名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
-    private String warehouseMethodName;
+    @ApiModelProperty(value = "类型")
+    @Excel(name = "类型")
+    private String returnType;
 
-    @ApiModelProperty(value = "合计申报数量")
-    private Integer totalDeclareQty;
+    @ApiModelProperty(value = "退件目标仓库编码")
+    @Excel(name = "退件目标仓库编码")
+    private String warehouseCode;
 
-    @ApiModelProperty(value = "到仓数量")
-    private Integer totalPutQty;
+    @ApiModelProperty(value = "退货渠道", example = "客户自选")
+    @Excel(name = "退货渠道")
+    private String returnChannel;
 
-    @ApiModelProperty(value = "客户编码")
-    private String cusCode;
+    @ApiModelProperty(value = "申请处理方式编码")
+    @Excel(name = "申请处理方式编码")
+    private String applyProcessMethod;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ApiModelProperty(value = "创建时间")
-    private Date createTime;
+    @ApiModelProperty(value = "到仓时间")
+    @Excel(name = "到仓时间")
+    private LocalDateTime arrivalTime;
+
+    @ApiModelProperty(value = "完成时间")
+    @Excel(name = "完成时间")
+    private LocalDateTime finishTime;
+
+    @ApiModelProperty(value = "是否逾期")
+    @Excel(name = "是否逾期")
+    private String overdue;
+
+    @ApiModelProperty(value = "处理备注")
+    @Excel(name = "处理备注")
+    private String processRemark;
+
+    @ApiModelProperty(value = "退件单来源[默认：1：申请退件]")
+    @Excel(name = "退件单来源[默认：1：申请退件]")
+    private ReturnExpressEnums.ReturnSourceEnum returnSource;
+
+    @ApiModelProperty(value = "处理状态编码")
+    @Excel(name = "处理状态编码")
+    private ReturnExpressEnums.DealStatusEnum dealStatus;
+
+    @ApiModelProperty(value = "逻辑删除")
+    @TableLogic(delval = "2", value = "0")
+    private Integer delFlag;
 }

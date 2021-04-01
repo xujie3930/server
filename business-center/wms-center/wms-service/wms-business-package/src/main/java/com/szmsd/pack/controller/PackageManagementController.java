@@ -9,7 +9,8 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.pack.domain.PackageManagement;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
-import com.szmsd.pack.service.IPackageManagementService;
+import com.szmsd.pack.service.IPackageMangServeService;
+import com.szmsd.pack.vo.PackageMangVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,7 +37,7 @@ import java.util.List;
 public class PackageManagementController extends BaseController {
 
     @Resource
-    private IPackageManagementService packageManagementService;
+    private IPackageMangServeService packageManagementService;
 
     /**
      * 查询package - 交货管理 - 地址信息表模块列表
@@ -46,7 +47,7 @@ public class PackageManagementController extends BaseController {
     @ApiOperation(value = "交货管理", notes = "查询package - 交货管理 - 地址信息表模块列表")
     public TableDataInfo list(PackageMangQueryDTO packageMangQueryDTO) {
         startPage();
-        List<PackageManagement> list = packageManagementService.selectPackageManagementList(packageMangQueryDTO);
+        List<PackageMangVO> list = packageManagementService.selectPackageManagementList(packageMangQueryDTO);
         return getDataTable(list);
     }
 
@@ -58,8 +59,8 @@ public class PackageManagementController extends BaseController {
     @GetMapping("/export")
     @ApiOperation(value = "导出package - 交货管理 - 地址信息表模块列表", notes = "导出package - 交货管理 - 地址信息表模块列表")
     public void export(HttpServletResponse response, PackageMangQueryDTO packageManagement) throws IOException {
-        List<PackageManagement> list = packageManagementService.selectPackageManagementList(packageManagement);
-        ExcelUtil<PackageManagement> util = new ExcelUtil<PackageManagement>(PackageManagement.class);
+        List<PackageMangVO> list = packageManagementService.selectPackageManagementList(packageManagement);
+        ExcelUtil<PackageMangVO> util = new ExcelUtil<PackageMangVO>(PackageMangVO.class);
         util.exportExcel(response, list, "PackageManagement");
 
     }
