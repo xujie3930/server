@@ -356,7 +356,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 null,
                 warehouse.getCity(),
                 warehouse.getProvince(),
-                "123456",
+                warehouse.getPostcode(),
                 warehouse.getCountryName()));
         // 包裹信息
         List<Package> packages = new ArrayList<>();
