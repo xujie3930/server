@@ -36,8 +36,8 @@ public enum LocalLanguageEnum {
     /** 入库单：人工审核 **/
     INBOUND_RECEIPT_REVIEW_1(INBOUND_RECEIPT_REVIEW, "1", "人工审核", "Manual review"),
 
-    /** 库存日志模板 **/
-    INBOUND_INVENTORY_LOG(INVENTORY_RECORD_LOGS, "INBOUND_INVENTORY_LOG", "操作人：{1}, 在{2}操作{0}[单号: {3}, SKU：{4}, 仓库编码：{5} , 数量: {6}]", "operator: {0}, in {1} operate {2}[receiptNo: {3}, SKU：{4}, warehouseCode：{5}, quantity: {5}]"),
+    /** 上架入库 **/
+    INBOUND_INVENTORY_LOG(INVENTORY_RECORD_LOGS, LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), "操作人：{0}, 在{1}操作上架入库[单号: {2}, SKU：{3}, 仓库编码：{4} , 数量: {5}]", "operator: {0}, in {1} operate put inbound inventory[receiptNo: {2}, SKU：{3}, warehouseCode：{4}, quantity: {5}]"),
 
     /** 不需要 **/
     NEED_0(NEED, "0", "不需要", "Not needed"),
@@ -54,7 +54,7 @@ public enum LocalLanguageEnum {
     /** 否 **/
     YN_N(YN, "1", "否", "N"),
     ;
-    
+
     private LocalLanguageTypeEnum typeEnum;
 
     private String key;
