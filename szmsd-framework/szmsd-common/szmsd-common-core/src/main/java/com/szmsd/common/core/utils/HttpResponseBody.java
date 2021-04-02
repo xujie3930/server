@@ -1,5 +1,7 @@
 package com.szmsd.common.core.utils;
 
+import org.apache.http.Header;
+
 /**
  * @author zhangyuyuan
  * @date 2021-03-24 13:54
@@ -65,6 +67,51 @@ public interface HttpResponseBody {
 
         public void setBody(String body) {
             this.body = body;
+        }
+    }
+
+    class HttpResponseByteArrayWrapper implements HttpResponseBody {
+        private int status;
+        private Header[] headers;
+        private byte[] byteArray;
+
+        public HttpResponseByteArrayWrapper() {
+        }
+
+        public HttpResponseByteArrayWrapper(int status, Header[] headers, byte[] byteArray) {
+            this.status = status;
+            this.headers = headers;
+            this.byteArray = byteArray;
+        }
+
+        @Override
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
+        @Override
+        public String getBody() {
+            return null;
+        }
+
+        public Header[] getHeaders() {
+            return headers;
+        }
+
+        public void setHeaders(Header[] headers) {
+            this.headers = headers;
+        }
+
+        public byte[] getByteArray() {
+            return byteArray;
+        }
+
+        public void setByteArray(byte[] byteArray) {
+            this.byteArray = byteArray;
         }
     }
 }

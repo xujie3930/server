@@ -7,34 +7,27 @@ import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
-import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
-import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
-import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
-import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
+import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
-import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpIBasClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.Package;
 import com.szmsd.http.dto.*;
-import com.szmsd.http.vo.BaseOperationResponse;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
-import com.szmsd.http.vo.PricedProductInfo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -81,12 +74,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public int bringVerify(Long id) {
-
-        /*ApplicationContext context = new DelOutboundWrapperContext();
-        BringVerifyEnum currentState = BringVerifyEnum.get("");
-        ApplicationContainer container = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
-        container.action();*/
-
         // 根据id查询出库信息
         DelOutbound delOutbound = this.delOutboundService.getById(id);
         if (Objects.isNull(delOutbound)) {
@@ -101,9 +88,18 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
             throw new CommonException("999", "单据状态不正确，不能提审");
         }
-        DelOutboundWrapperContext delOutboundWrapperContext = this.initContext(delOutbound);
+        ApplicationContext context = this.initContext(delOutbound);
+        BringVerifyEnum currentState;
+        String bringVerifyState = delOutbound.getBringVerifyState();
+        if (StringUtils.isEmpty(bringVerifyState)) {
+            currentState = BringVerifyEnum.BEGIN;
+        } else {
+            currentState = BringVerifyEnum.get(bringVerifyState);
+        }
+        new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN).action();
+        return 1;
         // 修改单据状态为提审中
-        Long id1 = delOutbound.getId();
+        /*Long id1 = delOutbound.getId();
         this.delOutboundService.updateState(id1, DelOutboundStateEnum.UNDER_REVIEW);
         try {
             // 调用接口
@@ -192,10 +188,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                             }
                         } else {
                             // 异常信息
-                            String msg = freezeBalanceR.getMsg();
-                            if (StringUtils.isEmpty(msg)) {
-                                msg = "冻结费用信息失败";
-                            }
+                            String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "冻结费用信息失败");
                             throw new CommonException("999", msg);
                         }
                     } else {
@@ -209,10 +202,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     return 1;
                 } else {
                     // 计算失败
-                    String exceptionMessage = this.getMessage(responseObject.getError());
-                    if (StringUtils.isEmpty(exceptionMessage)) {
-                        exceptionMessage = "计算包裹费用失败2";
-                    }
+                    String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "计算包裹费用失败2");
                     throw new CommonException("999", exceptionMessage);
                 }
             }
@@ -228,7 +218,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             String exceptionMessage = "提审操作失败";
             this.delOutboundService.bringVerifyFail(id1, exceptionMessage);
             throw new CommonException("999", exceptionMessage);
-        }
+        }*/
     }
 
     @Override
@@ -385,7 +375,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                 Utils.valueOfDouble(delOutbound.getWeight()), packageItems));
         createShipmentOrderCommand.setPackages(packages);
-        createShipmentOrderCommand.setCarrier(new Carrier(delOutbound.getShipmentRule()));
+        createShipmentOrderCommand.setCarrier(new Carrier(delOutbound.getShipmentService()));
         ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
         if (null == responseObjectWrapper) {
             throw new CommonException("999", "创建承运商物流订单失败");
@@ -394,10 +384,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             // 保存挂号
             return responseObjectWrapper.getObject();
         } else {
-            String exceptionMessage = this.getMessage(responseObjectWrapper.getError());
-            if (StringUtils.isEmpty(exceptionMessage)) {
-                exceptionMessage = "创建承运商物流订单失败2";
-            }
+            String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败2");
             throw new CommonException("999", exceptionMessage);
         }
     }
@@ -446,22 +433,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         } else {
             throw new CommonException("999", "创建出库单失败");
         }
-    }
-
-    private String getMessage(ProblemDetails problemDetails) {
-        String message = null;
-        if (null != problemDetails) {
-            List<ErrorDto2> errors = problemDetails.getErrors();
-            if (CollectionUtils.isNotEmpty(errors)) {
-                ErrorDto2 errorDto2 = errors.get(0);
-                if (StringUtils.isNotEmpty(errorDto2.getCode())) {
-                    message = "[" + errorDto2.getCode() + "]" + errorDto2.getMessage();
-                } else {
-                    message = errorDto2.getMessage();
-                }
-            }
-        }
-        return message;
     }
 
 }

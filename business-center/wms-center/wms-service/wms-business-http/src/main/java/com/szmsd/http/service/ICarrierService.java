@@ -24,7 +24,7 @@ public interface ICarrierService {
      * 根据订单号返回标签文件流
      *
      * @param orderNumber orderNumber
-     * @return FileStream
+     * @return ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>
      */
-    FileStream label(String orderNumber);
+    ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(String orderNumber);
 }

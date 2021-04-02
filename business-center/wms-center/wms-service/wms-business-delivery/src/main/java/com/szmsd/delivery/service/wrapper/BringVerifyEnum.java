@@ -1,8 +1,27 @@
 package com.szmsd.delivery.service.wrapper;
 
+import com.szmsd.common.core.constant.Constants;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
+import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.util.Utils;
+import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.CusFreezeBalanceDTO;
+import com.szmsd.http.api.service.IHtpIBasClientService;
+import com.szmsd.http.api.service.IHtpPricedProductClientService;
+import com.szmsd.http.dto.*;
+import com.szmsd.http.vo.BaseOperationResponse;
+import com.szmsd.http.vo.PricedProductInfo;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,7 +84,35 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         return map;
     }
 
-    static class BeginHandle implements ApplicationHandle {
+    static abstract class CommonApplicationHandle extends ApplicationHandle.AbstractApplicationHandle {
+
+        @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setId(delOutbound.getId());
+            updateDelOutbound.setBringVerifyState(currentState.name());
+            // 提审失败
+            String exceptionMessage = Utils.defaultValue(throwable.getMessage(), "提审操作失败");
+            updateDelOutbound.setExceptionMessage(exceptionMessage);
+            // PRC计费
+            updateDelOutbound.setAmount(delOutbound.getAmount());
+            updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
+            // 产品信息
+            updateDelOutbound.setTrackingAcquireType(delOutbound.getTrackingAcquireType());
+            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+            // 创建承运商物流订单
+            updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
+            updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
+            // 推单WMS
+            updateDelOutbound.setRefOrderNo(delOutbound.getRefOrderNo());
+            delOutboundService.bringVerifyFail(updateDelOutbound);
+        }
+    }
+
+    static class BeginHandle extends CommonApplicationHandle {
 
         @Override
         public ApplicationState quoState() {
@@ -74,8 +121,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public void handle(ApplicationContext context) {
-            DelOutboundWrapperContext wrapperContext = (DelOutboundWrapperContext) context;
-            DelOutbound delOutbound = wrapperContext.getDelOutbound();
 
         }
 
@@ -85,115 +130,242 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
     }
 
-    static class PrcPricingHandle implements ApplicationHandle {
+    static class PrcPricingHandle extends CommonApplicationHandle {
 
         @Override
         public ApplicationState quoState() {
-            return null;
+            return PRC_PRICING;
         }
 
         @Override
         public void handle(ApplicationContext context) {
-
+            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext);
+            if (null == responseObject) {
+                // 返回值是空的
+                throw new CommonException("999", "计算包裹费用失败");
+            } else {
+                // 判断返回值
+                if (responseObject.isSuccess()) {
+                    DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+                    // 计算成功了
+                    ChargeWrapper chargeWrapper = responseObject.getObject();
+                    DelOutbound updateDelOutbound = new DelOutbound();
+                    updateDelOutbound.setId(delOutbound.getId());
+                    // 更新：计费重，金额
+                    ShipmentChargeInfo data = chargeWrapper.getData();
+                    PricingPackageInfo packageInfo = data.getPackageInfo();
+                    Weight calcWeight = packageInfo.getCalcWeight();
+                    updateDelOutbound.setCalcWeight(calcWeight.getValue());
+                    updateDelOutbound.setCalcWeightUnit(calcWeight.getUnit());
+                    List<ChargeItem> charges = chargeWrapper.getCharges();
+                    // 保存费用信息
+                    List<DelOutboundCharge> delOutboundCharges = new ArrayList<>();
+                    // 汇总费用
+                    BigDecimal totalAmount = BigDecimal.ZERO;
+                    String totalCurrencyCode = charges.get(0).getMoney().getCurrencyCode();
+                    for (ChargeItem charge : charges) {
+                        DelOutboundCharge delOutboundCharge = new DelOutboundCharge();
+                        ChargeCategory chargeCategory = charge.getChargeCategory();
+                        delOutboundCharge.setOrderNo(delOutbound.getOrderNo());
+                        delOutboundCharge.setBillingNo(chargeCategory.getBillingNo());
+                        delOutboundCharge.setChargeNameCn(chargeCategory.getChargeNameCN());
+                        delOutboundCharge.setChargeNameEn(chargeCategory.getChargeNameEN());
+                        delOutboundCharge.setParentBillingNo(chargeCategory.getParentBillingNo());
+                        Money money = charge.getMoney();
+                        BigDecimal amount = Utils.valueOf(money.getAmount());
+                        delOutboundCharge.setAmount(amount);
+                        delOutboundCharge.setCurrencyCode(money.getCurrencyCode());
+                        delOutboundCharge.setRemark(charge.getRemark());
+                        delOutboundCharges.add(delOutboundCharge);
+                        totalAmount = totalAmount.add(amount);
+                    }
+                    // 保存出库单费用信息
+                    IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
+                    delOutboundChargeService.saveCharges(delOutboundCharges);
+                    // 更新值
+                    delOutbound.setAmount(totalAmount);
+                    delOutbound.setCurrencyCode(totalCurrencyCode);
+                } else {
+                    // 计算失败
+                    String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "计算包裹费用失败2");
+                    throw new CommonException("999", exceptionMessage);
+                }
+            }
         }
 
         @Override
         public ApplicationState nextState() {
-            return null;
+            return FREEZE_BALANCE;
         }
     }
 
-    static class FreezeBalanceHandle implements ApplicationHandle {
+    static class FreezeBalanceHandle extends CommonApplicationHandle {
 
         @Override
         public ApplicationState quoState() {
-            return null;
+            return FREEZE_BALANCE;
         }
 
         @Override
         public void handle(ApplicationContext context) {
-
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+            cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
+            cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
+            cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+            // 调用冻结费用接口
+            RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
+            R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
+            if (null != freezeBalanceR) {
+                if (Constants.SUCCESS != freezeBalanceR.getCode()) {
+                    // 异常信息
+                    String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "冻结费用信息失败2");
+                    throw new CommonException("999", msg);
+                }
+            } else {
+                // 异常信息
+                throw new CommonException("999", "冻结费用信息失败");
+            }
         }
 
         @Override
         public ApplicationState nextState() {
-            return null;
+            return PRODUCT_INFO;
         }
     }
 
-    static class ProductInfoHandle implements ApplicationHandle {
+    static class ProductInfoHandle extends CommonApplicationHandle {
 
         @Override
         public ApplicationState quoState() {
-            return null;
+            return PRODUCT_INFO;
         }
 
         @Override
         public void handle(ApplicationContext context) {
-
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            String productCode = delOutbound.getShipmentRule();
+            // 获取产品信息
+            IHtpPricedProductClientService htpPricedProductClientService = SpringUtils.getBean(IHtpPricedProductClientService.class);
+            PricedProductInfo pricedProductInfo = htpPricedProductClientService.info(productCode);
+            if (null != pricedProductInfo) {
+                delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
+                delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
+            } else {
+                // 异常信息
+                throw new CommonException("999", "查询产品[" + productCode + "]信息失败");
+            }
         }
 
         @Override
         public ApplicationState nextState() {
-            return null;
+            return SHIPMENT_RULE;
         }
     }
 
-    static class ShipmentRuleHandle implements ApplicationHandle {
+    static class ShipmentRuleHandle extends CommonApplicationHandle {
 
         @Override
         public ApplicationState quoState() {
-            return null;
+            return SHIPMENT_RULE;
         }
 
         @Override
         public void handle(ApplicationContext context) {
-
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            // 调用新增/修改发货规则
+            AddShipmentRuleRequest addShipmentRuleRequest = new AddShipmentRuleRequest();
+            addShipmentRuleRequest.setShipmentRule(delOutbound.getShipmentRule());
+            addShipmentRuleRequest.setGetLabelType(delOutbound.getTrackingAcquireType());
+            IHtpIBasClientService htpIBasClientService = SpringUtils.getBean(IHtpIBasClientService.class);
+            BaseOperationResponse baseOperationResponse = htpIBasClientService.shipmentRule(addShipmentRuleRequest);
+            if (null == baseOperationResponse || null == baseOperationResponse.getSuccess()) {
+                throw new CommonException("999", "新增/修改发货规则失败");
+            }
+            if (!baseOperationResponse.getSuccess()) {
+                String message = Utils.defaultValue(baseOperationResponse.getMessage(), "新增/修改发货规则失败");
+                throw new CommonException("999", message);
+            }
         }
 
         @Override
         public ApplicationState nextState() {
-            return null;
+            return SHIPMENT_ORDER;
         }
     }
 
-    static class ShipmentOrderHandle implements ApplicationHandle {
+    static class ShipmentOrderHandle extends CommonApplicationHandle {
 
         @Override
         public ApplicationState quoState() {
-            return null;
+            return SHIPMENT_ORDER;
         }
 
         @Override
         public void handle(ApplicationContext context) {
-
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            // 判断是否需要创建物流订单
+            if (DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType())) {
+                // 创建承运商物流订单
+                IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+                ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
+                delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
+                delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+            }
         }
 
         @Override
         public ApplicationState nextState() {
-            return null;
+            return SHIPMENT_CREATE;
         }
     }
 
-    static class ShipmentCreateHandle implements ApplicationHandle {
+    static class ShipmentCreateHandle extends CommonApplicationHandle {
 
         @Override
         public ApplicationState quoState() {
-            return null;
+            return SHIPMENT_CREATE;
         }
 
         @Override
         public void handle(ApplicationContext context) {
-
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            // 推单到WMS
+            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+            String refOrderNo = delOutboundBringVerifyService.shipmentCreate(delOutboundWrapperContext, delOutbound.getTrackingNo());
+            // 保存信息
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setId(delOutbound.getId());
+            updateDelOutbound.setBringVerifyState(END.name());
+            // PRC计费
+            updateDelOutbound.setAmount(delOutbound.getAmount());
+            updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
+            // 产品信息
+            updateDelOutbound.setTrackingAcquireType(delOutbound.getTrackingAcquireType());
+            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+            // 创建承运商物流订单
+            updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
+            updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
+            // 推单WMS
+            updateDelOutbound.setRefOrderNo(refOrderNo);
+            delOutboundService.bringVerifySuccess(updateDelOutbound);
         }
 
         @Override
         public ApplicationState nextState() {
-            return null;
+            return END;
         }
     }
 
-    static class EndHandle implements ApplicationHandle {
+    static class EndHandle extends CommonApplicationHandle {
 
         @Override
         public ApplicationState quoState() {
