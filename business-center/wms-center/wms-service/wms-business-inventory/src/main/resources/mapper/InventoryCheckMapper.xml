@@ -34,10 +34,10 @@
         from
         inventory_check a
         <where>
-            <if test="customCode != null">
+            <if test="customCode != null and customCode != ''">
                 AND a.custom_code = #{customCode}
             </if>
-            <if test="warehouseCode != null">
+            <if test="warehouseCode != null and warehouseCode != ''">
                 AND a.warehouse_code = #{warehouseCode}
             </if>
             <if test="orderNoList != null and orderNoList.size() > 0">
@@ -46,7 +46,7 @@
                     #{orderNo}
                 </foreach>
             </if>
-            <if test="createTimeStart != null and createTimeEnd != null">
+            <if test="createTimeStart != null and createTimeEnd != null and createTimeStart != '' and createTimeEnd != ''">
                 AND a.create_time >= #{createTimeStart} and a.create_time &lt;= #{createTimeEnd}
             </if>
         </where>
