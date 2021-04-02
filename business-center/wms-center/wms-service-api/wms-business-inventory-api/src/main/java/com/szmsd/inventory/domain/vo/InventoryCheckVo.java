@@ -3,6 +3,8 @@ package com.szmsd.inventory.domain.vo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.szmsd.common.core.language.annotation.FieldJsonI18n;
+import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.inventory.domain.InventoryCheckDetails;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,6 +28,7 @@ public class InventoryCheckVo {
     private String customCode;
 
     @ApiModelProperty(value = "仓库代码")
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     private String warehouseCode;
 
     @ApiModelProperty(value = "库存盘点审批结果")

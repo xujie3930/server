@@ -125,7 +125,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
      * @param customCode customCode
      */
     private void charge(BasSpecialOperation basSpecialOperation, String customCode) {
-        SpecialOperation specialOperation = specialOperationService.details(basSpecialOperation.getOperationType());
+        SpecialOperation specialOperation = specialOperationService.details(Integer.parseInt(basSpecialOperation.getOperationType()));
         if (specialOperation == null) {
             throw new CommonException("999",ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
         }
