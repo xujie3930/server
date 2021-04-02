@@ -1,6 +1,7 @@
 package com.szmsd.delivery.dto;
 
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
+import com.szmsd.common.core.validator.ValidationSaveGroup;
 import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -42,7 +43,7 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "挂号")
     private String trackingNo;
 
-    @NotBlank(message = "发货规则不能为空")
+    @NotBlank(message = "发货规则不能为空", groups = {ValidationSaveGroup.class, ValidationUpdateGroup.class})
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
 
@@ -79,11 +80,11 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "提货/快递信息")
     private String deliveryInfo;
 
-    @NotNull(message = "地址信息不能为空")
+    @NotNull(message = "地址信息不能为空", groups = {ValidationSaveGroup.class, ValidationUpdateGroup.class})
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;
 
-    @NotNull(message = "明细信息不能为空")
+    @NotNull(message = "明细信息不能为空", groups = {ValidationSaveGroup.class, ValidationUpdateGroup.class})
     @ApiModelProperty(value = "明细信息")
     private List<DelOutboundDetailDto> details;
 

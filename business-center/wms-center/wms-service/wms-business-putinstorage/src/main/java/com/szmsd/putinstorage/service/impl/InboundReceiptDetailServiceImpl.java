@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
@@ -70,24 +71,45 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
     }
 
     /**
+     * 保存、修改、删除明细单
+     * @param inboundReceiptDetailDTOS 需要保存的数据
+     * @param receiptDetailIds 需要删除的id
+     */
+    @Override
+    public void saveOrUpdate(List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS, List<String> receiptDetailIds) {
+
+        // 删除明细
+        if (CollectionUtils.isNotEmpty(receiptDetailIds)) {
+            receiptDetailIds.forEach(detailId -> {
+                InboundReceiptDetail inboundReceiptDetail = baseMapper.selectOne(new QueryWrapper<InboundReceiptDetail>().select("warehouse_no").eq("id", detailId));
+                asyncDeleteAttachment(inboundReceiptDetail.getWarehouseNo(), detailId);
+            });
+        }
+        this.removeByIds(receiptDetailIds);
+
+        // 保存明细
+        this.saveOrUpdate(inboundReceiptDetailDTOS);
+    }
+
+    /**
      * 保存入库单明细
      * @param inboundReceiptDetailDTOS
      */
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void saveInboundReceiptDetail(List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS) {
+    public void saveOrUpdate(List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS) {
         log.info("保存入库单明细：SIZE={}", inboundReceiptDetailDTOS.size());
 
         // 是否有重复的sku
         Map<String, Long> collect = inboundReceiptDetailDTOS.stream().map(InboundReceiptDetailDTO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
         collect.entrySet().forEach(item -> AssertUtil.isTrue(!(item.getValue() > 1L), "入库单明细存在重复SKU"));
 
-        inboundReceiptDetailDTOS.forEach(this::saveInboundReceiptDetail);
+        inboundReceiptDetailDTOS.forEach(this::saveOrUpdate);
         log.info("保存入库单明细：操作成功");
     }
 
     @Override
-    public InboundReceiptDetail saveInboundReceiptDetail(InboundReceiptDetailDTO inboundReceiptDetailDTO) {
+    public InboundReceiptDetail saveOrUpdate(InboundReceiptDetailDTO inboundReceiptDetailDTO) {
         log.info("保存入库单明细：{}", inboundReceiptDetailDTO);
 
         // 验证SKU
@@ -97,9 +119,15 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         AssertUtil.isTrue(declareQty > 0, "SKU[" + inboundReceiptDetailDTO.getSku() + "]申报数量不能为" + declareQty);
 
         InboundReceiptDetail inboundReceiptDetail = BeanMapperUtil.map(inboundReceiptDetailDTO, InboundReceiptDetail.class);
-        baseMapper.insert(inboundReceiptDetail);
-        // 保存附件
-        asyncAttachment(inboundReceiptDetail.getId(), inboundReceiptDetailDTO);
+        this.saveOrUpdate(inboundReceiptDetail);
+
+        if (inboundReceiptDetailDTO.getEditionImage() == null) {
+            asyncDeleteAttachment(inboundReceiptDetailDTO.getWarehouseNo(), inboundReceiptDetail.getId() + "");
+        } else {
+            // 保存附件
+            asyncAttachment(inboundReceiptDetail.getId(), inboundReceiptDetailDTO);
+        }
+
         return inboundReceiptDetail;
     }
 
@@ -120,6 +148,39 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
     }
 
     /**
+     * 删除入库明细单 物理删除
+     * @param warehouseNo
+     */
+    @Override
+    public void deleteByWarehouseNo(String warehouseNo) {
+        log.info("删除入库明细单：warehouseNo={}", warehouseNo);
+        baseMapper.deleteByWarehouseNo(warehouseNo);
+        log.info("删除入库明细单：删除完成");
+    }
+
+    /**
+     * 删除入库明细单、附件 物理删除
+     * @param warehouseNo
+     */
+    @Override
+    public void deleteAndFileByWarehouseNo(String warehouseNo) {
+        this.deleteByWarehouseNo(warehouseNo);
+        asyncDeleteAttachment(warehouseNo, null);
+    }
+
+    /**
+     * 异步删除附件
+     * @param warehouseNo
+     */
+    private void asyncDeleteAttachment(String warehouseNo, String warehouseItemNo) {
+        CompletableFuture.runAsync(() -> {
+            AttachmentTypeEnum inboundReceiptDocuments = AttachmentTypeEnum.INBOUND_RECEIPT_EDITION_IMAGE;
+            log.info("删除入库单[{}]{}", warehouseNo, inboundReceiptDocuments.getAttachmentType());
+            remoteComponent.deleteAttachment(inboundReceiptDocuments, warehouseNo, warehouseItemNo);
+        });
+    }
+
+    /**
      * 异步保存附件
      * 空对象不会调用远程接口，空数组会删除所对应的附件
      * @param inboundReceiptDetailId
@@ -129,8 +190,9 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         CompletableFuture.runAsync(() -> {
             AttachmentFileDTO editionImage = inboundReceiptDetail.getEditionImage();
             if (editionImage != null) {
-                log.info("保存单证信息文件");
-                remoteComponent.saveAttachment(inboundReceiptDetail.getWarehouseNo(), inboundReceiptDetailId.toString(), Arrays.asList(editionImage), AttachmentTypeEnum.INBOUND_RECEIPT_EDITION_IMAGE);
+                AttachmentTypeEnum inboundReceiptEditionImage = AttachmentTypeEnum.INBOUND_RECEIPT_EDITION_IMAGE;
+                log.info("保存{}[{}]", inboundReceiptEditionImage.getAttachmentType(), editionImage);
+                remoteComponent.saveAttachment(inboundReceiptDetail.getWarehouseNo(), inboundReceiptDetailId.toString(), Arrays.asList(editionImage), inboundReceiptEditionImage);
             }
         });
     }

@@ -113,6 +113,7 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
     @Transactional
     public void saveAndUpdate(BasAttachmentDTO basAttachmentDto) {
         String businessNo = basAttachmentDto.getBusinessNo();
+        String businessItemNo = basAttachmentDto.getBusinessItemNo();
         AssertUtil.isTrue(StringUtils.isNotEmpty(businessNo), ExceptionMessageEnum.CANNOTBENULL, "businessNo");
         AttachmentTypeEnum attachmentTypeEnum = basAttachmentDto.getAttachmentTypeEnum();
         AssertUtil.notNull(attachmentTypeEnum, ExceptionMessageEnum.CANNOTBENULL, "attachmentTypeEnum");
@@ -122,7 +123,7 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
         List<Integer> updates = ListUtils.emptyIfNull(fileList).stream().filter(e -> e.getId() != null).map(BasAttachmentDataDTO::getId).collect(Collectors.toList());
 
         // 查询已有
-        BasAttachmentQueryDTO basAttachmentQueryDto = new BasAttachmentQueryDTO().setBusinessNo(businessNo).setAttachmentType(attachmentTypeEnum.getAttachmentType());
+        BasAttachmentQueryDTO basAttachmentQueryDto = new BasAttachmentQueryDTO().setBusinessNo(businessNo).setBusinessItemNo(businessItemNo).setAttachmentType(attachmentTypeEnum.getAttachmentType());
         List<BasAttachment> basAttachments = selectList(basAttachmentQueryDto);
         List<Integer> alreadyIds = ListUtils.emptyIfNull(basAttachments).stream().map(BasAttachment::getId).collect(Collectors.toList());
         alreadyIds.removeAll(updates);
@@ -160,9 +161,9 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
      * 根据业务编号删除文件
      */
     @Override
-    public void deleteByBusinessNo(String businessNo, String attachmentType) {
+    public void deleteByBusinessNo(String businessNo, String businessItemNo, String attachmentType) {
         log.info("附件删除businessNo：{}, attachmentType: {}", businessNo, attachmentType);
-        List<BasAttachment> basAttachments = this.selectList(new BasAttachmentQueryDTO().setBusinessNo(businessNo).setAttachmentType(attachmentType));
+        List<BasAttachment> basAttachments = this.selectList(new BasAttachmentQueryDTO().setBusinessNo(businessNo).setBusinessItemNo(businessItemNo).setAttachmentType(attachmentType));
         basAttachments.forEach(item -> {
             baseMapper.deleteById(item.getId());
             FileUtil.deleteFile(item.getAttachmentPath() + "/" + item.getAttachmentName() + item.getAttachmentFormat());

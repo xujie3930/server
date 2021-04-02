@@ -53,10 +53,10 @@ public class InboundReceiptController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
-    @PostMapping("/receipt/create")
-    @ApiOperation(value = "创建", notes = "入库管理 - 新增 - 提交")
-    public R create(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
-        iInboundReceiptService.create(createInboundReceiptDTO);
+    @PostMapping("/receipt/saveOrUpdate")
+    @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
+    public R saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
+        iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
         return R.ok();
     }
 
@@ -128,6 +128,14 @@ public class InboundReceiptController extends BaseController {
     @ApiOperation(value = "审核", notes = "入库单审核")
     public R review(@RequestBody InboundReceiptReviewDTO inboundReceiptReviewDTO) {
         iInboundReceiptService.review(inboundReceiptReviewDTO);
+        return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:delete')")
+    @DeleteMapping("/delete/{warehouseNo}")
+    @ApiOperation(value = "删除", notes = "物理删除")
+    public R delete(@PathVariable("warehouseNo") String warehouseNo) {
+        iInboundReceiptService.delete(warehouseNo);
         return R.ok();
     }
 

@@ -12,11 +12,13 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
+import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
+import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
@@ -25,10 +27,12 @@ import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
+import com.szmsd.http.api.service.IHtpIBasClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.Package;
 import com.szmsd.http.dto.*;
+import com.szmsd.http.vo.BaseOperationResponse;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import com.szmsd.http.vo.PricedProductInfo;
 import org.apache.commons.collections4.CollectionUtils;
@@ -70,9 +74,19 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IHtpOutboundClientService htpOutboundClientService;
     @Autowired
     private IHtpCarrierClientService htpCarrierClientService;
+    @Autowired
+    private IDelOutboundChargeService delOutboundChargeService;
+    @Autowired
+    private IHtpIBasClientService htpIBasClientService;
 
     @Override
     public int bringVerify(Long id) {
+
+        /*ApplicationContext context = new DelOutboundWrapperContext();
+        BringVerifyEnum currentState = BringVerifyEnum.get("");
+        ApplicationContainer container = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
+        container.action();*/
+
         // 根据id查询出库信息
         DelOutbound delOutbound = this.delOutboundService.getById(id);
         if (Objects.isNull(delOutbound)) {
@@ -111,44 +125,86 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     updateDelOutbound.setCalcWeight(calcWeight.getValue());
                     updateDelOutbound.setCalcWeightUnit(calcWeight.getUnit());
                     List<ChargeItem> charges = chargeWrapper.getCharges();
-                    ChargeItem chargeItem = charges.get(0);
-                    Money money = chargeItem.getMoney();
-                    BigDecimal amount = Utils.valueOf(money.getAmount());
+                    // 保存费用信息
+                    List<DelOutboundCharge> delOutboundCharges = new ArrayList<>();
+                    // 汇总费用
+                    BigDecimal totalAmount = BigDecimal.ZERO;
+                    String totalCurrencyCode = charges.get(0).getMoney().getCurrencyCode();
+                    for (ChargeItem charge : charges) {
+                        DelOutboundCharge delOutboundCharge = new DelOutboundCharge();
+                        ChargeCategory chargeCategory = charge.getChargeCategory();
+                        delOutboundCharge.setOrderNo(delOutbound.getOrderNo());
+                        delOutboundCharge.setBillingNo(chargeCategory.getBillingNo());
+                        delOutboundCharge.setChargeNameCn(chargeCategory.getChargeNameCN());
+                        delOutboundCharge.setChargeNameEn(chargeCategory.getChargeNameEN());
+                        delOutboundCharge.setParentBillingNo(chargeCategory.getParentBillingNo());
+                        Money money = charge.getMoney();
+                        BigDecimal amount = Utils.valueOf(money.getAmount());
+                        delOutboundCharge.setAmount(amount);
+                        delOutboundCharge.setCurrencyCode(money.getCurrencyCode());
+                        delOutboundCharge.setRemark(charge.getRemark());
+                        delOutboundCharges.add(delOutboundCharge);
+                        totalAmount = totalAmount.add(amount);
+                    }
+                    this.delOutboundChargeService.saveCharges(delOutboundCharges);
                     // 冻结费用
                     CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
-                    cusFreezeBalanceDTO.setAmount(amount);
-                    cusFreezeBalanceDTO.setCurrencyCode(money.getCurrencyCode());
+                    cusFreezeBalanceDTO.setAmount(totalAmount);
+                    cusFreezeBalanceDTO.setCurrencyCode(totalCurrencyCode);
                     cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
                     R<?> freezeBalanceR = this.rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
-                    if (null != freezeBalanceR && Constants.SUCCESS == freezeBalanceR.getCode()) {
-                        // 获取产品信息
-                        String productCode = data.getProductCode();
-                        PricedProductInfo pricedProductInfo = this.htpPricedProductClientService.info(productCode);
-                        if (null != pricedProductInfo) {
-                            // 保存获取挂号方式
-                            updateDelOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
-                            // 保存发货服务名称
-                            updateDelOutbound.setShipmentService(pricedProductInfo.getService());
-                            String trackingNo = null;
-                            if (DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(pricedProductInfo.getTrackingAcquireType())) {
-                                // 创建承运商物流订单
-                                ShipmentOrderResult shipmentOrderResult = this.shipmentOrder(delOutboundWrapperContext);
-                                updateDelOutbound.setTrackingNo(trackingNo = shipmentOrderResult.getMainTrackingNumber());
-                                updateDelOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                    if (null != freezeBalanceR) {
+                        if (Constants.SUCCESS == freezeBalanceR.getCode()) {
+                            // 获取产品信息
+                            String productCode = data.getProductCode();
+                            PricedProductInfo pricedProductInfo = this.htpPricedProductClientService.info(productCode);
+                            if (null != pricedProductInfo) {
+                                // 保存获取挂号方式
+                                updateDelOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
+                                String trackingNo = null;
+                                // 调用新增/修改发货规则
+                                AddShipmentRuleRequest addShipmentRuleRequest = new AddShipmentRuleRequest();
+                                addShipmentRuleRequest.setShipmentRule(productCode);
+                                addShipmentRuleRequest.setGetLabelType(pricedProductInfo.getTrackingAcquireType());
+                                BaseOperationResponse baseOperationResponse = this.htpIBasClientService.shipmentRule(addShipmentRuleRequest);
+                                if (null == baseOperationResponse || null == baseOperationResponse.getSuccess()) {
+                                    throw new CommonException("999", "新增/修改发货规则失败");
+                                }
+                                if (!baseOperationResponse.getSuccess()) {
+                                    String message = baseOperationResponse.getMessage();
+                                    if (StringUtils.isEmpty(message)) {
+                                        message = "新增/修改发货规则失败";
+                                    }
+                                    throw new CommonException("999", message);
+                                }
+                                // 判断是否需要创建物流订单
+                                if (DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(pricedProductInfo.getTrackingAcquireType())) {
+                                    // 创建承运商物流订单
+                                    ShipmentOrderResult shipmentOrderResult = this.shipmentOrder(delOutboundWrapperContext);
+                                    updateDelOutbound.setTrackingNo(trackingNo = shipmentOrderResult.getMainTrackingNumber());
+                                    updateDelOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                                }
+                                // 推单到WMS
+                                updateDelOutbound.setRefOrderNo(this.shipmentCreate(delOutboundWrapperContext, trackingNo));
+                            } else {
+                                // 异常信息
+                                throw new CommonException("999", "查询产品[" + productCode + "]信息失败");
                             }
-                            // 推单到WMS
-                            updateDelOutbound.setRefOrderNo(this.shipmentCreate(delOutboundWrapperContext, trackingNo));
                         } else {
                             // 异常信息
-                            throw new CommonException("999", "查询产品[" + productCode + "]信息失败");
+                            String msg = freezeBalanceR.getMsg();
+                            if (StringUtils.isEmpty(msg)) {
+                                msg = "冻结费用信息失败";
+                            }
+                            throw new CommonException("999", msg);
                         }
                     } else {
                         // 异常信息
                         throw new CommonException("999", "冻结费用信息失败");
                     }
                     // 计算提审成功
-                    updateDelOutbound.setAmount(amount);
-                    updateDelOutbound.setCurrencyCode(money.getCurrencyCode());
+                    updateDelOutbound.setAmount(totalAmount);
+                    updateDelOutbound.setCurrencyCode(totalCurrencyCode);
                     this.delOutboundService.bringVerifySuccess(updateDelOutbound);
                     return 1;
                 } else {
@@ -292,22 +348,26 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentOrderCommand.setReferenceNumber(String.valueOf(delOutbound.getId()));
         createShipmentOrderCommand.setOrderNumber(delOutbound.getOrderNo());
         createShipmentOrderCommand.setClientNumber(delOutbound.getSellerCode());
-        createShipmentOrderCommand.setReceiverAddress(new Address(address.getStreet1(),
+        createShipmentOrderCommand.setReceiverAddress(new AddressCommand(address.getConsignee(),
+                address.getPhoneNo(),
+                address.getEmail(),
+                address.getStreet1(),
                 address.getStreet2(),
                 address.getStreet3(),
-                address.getPostCode(),
                 address.getCity(),
                 address.getStateOrProvince(),
-                new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName())
-        ));
-        createShipmentOrderCommand.setReturnAddress(new Address(warehouse.getStreet1(),
+                address.getPostCode(),
+                country.getEnName()));
+        createShipmentOrderCommand.setReturnAddress(new AddressCommand(warehouse.getContact(),
+                warehouse.getTelephone(),
+                null,
+                warehouse.getStreet1(),
                 warehouse.getStreet2(),
                 null,
-                warehouse.getPostcode(),
                 warehouse.getCity(),
                 warehouse.getProvince(),
-                new CountryInfo(warehouse.getCountryCode(), null, warehouse.getCountryName(), warehouse.getCountryChineseName())
-        ));
+                "123456",
+                warehouse.getCountryName()));
         // 包裹信息
         List<Package> packages = new ArrayList<>();
         List<PackageItem> packageItems = new ArrayList<>();
@@ -325,7 +385,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                 Utils.valueOfDouble(delOutbound.getWeight()), packageItems));
         createShipmentOrderCommand.setPackages(packages);
-        createShipmentOrderCommand.setCarrier(new Carrier(delOutbound.getShipmentService()));
+        createShipmentOrderCommand.setCarrier(new Carrier(delOutbound.getShipmentRule()));
         ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
         if (null == responseObjectWrapper) {
             throw new CommonException("999", "创建承运商物流订单失败");
@@ -373,8 +433,16 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setIsFirst(delOutbound.getIsFirst());
         createShipmentRequestDto.setNewSKU(delOutbound.getNewSku());
         CreateShipmentResponseVO createShipmentResponseVO = this.htpOutboundClientService.shipmentCreate(createShipmentRequestDto);
-        if (null != createShipmentResponseVO && null != createShipmentResponseVO.getSuccess() && createShipmentResponseVO.getSuccess()) {
-            return createShipmentResponseVO.getOrderNo();
+        if (null != createShipmentResponseVO && null != createShipmentResponseVO.getSuccess()) {
+            if (createShipmentResponseVO.getSuccess()) {
+                return createShipmentResponseVO.getOrderNo();
+            } else {
+                String message = createShipmentResponseVO.getMessage();
+                if (StringUtils.isEmpty(message)) {
+                    message = "创建出库单失败";
+                }
+                throw new CommonException("999", message);
+            }
         } else {
             throw new CommonException("999", "创建出库单失败");
         }

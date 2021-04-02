@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -73,21 +74,21 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      */
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void create(CreateInboundReceiptDTO createInboundReceiptDTO) {
+    public void saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO) {
         log.info("创建入库单：{}", createInboundReceiptDTO);
 
         Integer totalDeclareQty = createInboundReceiptDTO.getTotalDeclareQty();
         AssertUtil.isTrue(totalDeclareQty > 0, "合计申报数量不能为" + totalDeclareQty);
 
         // 保存入库单
-        InboundReceipt inboundReceipt = this.saveInboundReceipt(createInboundReceiptDTO);
+        InboundReceipt inboundReceipt = this.saveOrUpdate((InboundReceiptDTO) createInboundReceiptDTO);
         String warehouseNo = inboundReceipt.getWarehouseNo();
         createInboundReceiptDTO.setWarehouseNo(warehouseNo);
 
         // 保存入库单明细
-        List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetailDTOS();
+        List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetails();
         inboundReceiptDetailDTOS.forEach(item -> item.setWarehouseNo(warehouseNo));
-        iInboundReceiptDetailService.saveInboundReceiptDetail(inboundReceiptDetailDTOS);
+        iInboundReceiptDetailService.saveOrUpdate(inboundReceiptDetailDTOS, createInboundReceiptDTO.getReceiptDetailIds());
 
         // 判断自动审核
         boolean inboundReceiptReview = remoteComponent.inboundReceiptReview(createInboundReceiptDTO.getWarehouseCode());
@@ -110,7 +111,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      * @return
      */
     @Override
-    public InboundReceipt saveInboundReceipt(InboundReceiptDTO inboundReceiptDTO) {
+    public InboundReceipt saveOrUpdate(InboundReceiptDTO inboundReceiptDTO) {
         log.info("保存入库单：{}", inboundReceiptDTO);
 
         InboundReceipt inboundReceipt = BeanMapperUtil.map(inboundReceiptDTO, InboundReceipt.class);
@@ -120,7 +121,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             warehouseNo = remoteComponent.getWarehouseNo(inboundReceiptDTO.getCusCode());
         }
         inboundReceipt.setWarehouseNo(warehouseNo);
-        baseMapper.insert(inboundReceipt);
+        this.saveOrUpdate(inboundReceipt);
 
         // 保存附件
         asyncAttachment(warehouseNo, inboundReceiptDTO);
@@ -174,7 +175,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         }
         // 查明细
         List<InboundReceiptDetailVO> inboundReceiptDetailVOS = iInboundReceiptDetailService.selectList(new InboundReceiptDetailQueryDTO().setWarehouseNo(warehouseNo), isContainFile);
-        inboundReceiptInfoVO.setInboundReceiptDetailVOS(inboundReceiptDetailVOS);
+        inboundReceiptInfoVO.setInboundReceiptDetails(inboundReceiptDetailVOS);
         log.info("查询入库单详情：查询完成{}", inboundReceiptDetailVOS);
         return inboundReceiptInfoVO;
     }
@@ -272,6 +273,42 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     }
 
+    /**
+     * 删除入库单 物理删除
+     * @param warehouseNo
+     */
+    @Override
+    @Transactional(rollbackFor = Throwable.class)
+    public void delete(String warehouseNo) {
+        log.info("删除入库单, warehouseNo={}", warehouseNo);
+        InboundReceiptVO inboundReceiptVO = this.selectByWarehouseNo(warehouseNo);
+        AssertUtil.notNull(inboundReceiptVO, "入库单[" + warehouseNo + "]不存在");
+        List<String> statues = Arrays.asList(InboundReceiptEnum.InboundReceiptStatus.INIT.getValue(), InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE.getValue());
+        String status = inboundReceiptVO.getStatus();
+        String statusName = InboundReceiptEnum.InboundReceiptEnumMethods.getValue2(InboundReceiptEnum.InboundReceiptStatus.class, status);
+        AssertUtil.isTrue(statues.contains(status), "入库单[" + warehouseNo + "]" + statusName + "不能删除");
+        baseMapper.deleteById(inboundReceiptVO.getId());
+
+        // 删除明细
+        iInboundReceiptDetailService.deleteAndFileByWarehouseNo(warehouseNo);
+
+        // 删除附件
+        asyncDeleteAttachment(warehouseNo);
+    }
+
+
+    /**
+     * 异步删除附件
+     * @param warehouseNo
+     */
+    private void asyncDeleteAttachment(String warehouseNo) {
+        CompletableFuture.runAsync(() -> {
+            AttachmentTypeEnum inboundReceiptDocuments = AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS;
+            log.info("删除入库单[{}]{}", warehouseNo, inboundReceiptDocuments.getAttachmentType());
+            remoteComponent.deleteAttachment(inboundReceiptDocuments, warehouseNo, null);
+        });
+    }
+
 
     /**
      * 异步保存附件
@@ -282,7 +319,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     private void asyncAttachment(String warehouseNo, InboundReceiptDTO inboundReceiptDTO) {
         CompletableFuture.runAsync(() -> {
             List<AttachmentFileDTO> documentsFile = inboundReceiptDTO.getDocumentsFile();
-            if (CollectionUtils.isNotEmpty(documentsFile)) {
+            if (documentsFile != null) {
                 log.info("保存单证信息文件：{}", documentsFile);
                 remoteComponent.saveAttachment(warehouseNo, documentsFile, AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
             }

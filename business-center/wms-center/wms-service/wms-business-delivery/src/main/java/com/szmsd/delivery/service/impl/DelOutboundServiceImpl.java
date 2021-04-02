@@ -31,6 +31,9 @@ import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.util.PackageInfo;
+import com.szmsd.delivery.util.PackageUtil;
+import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.ShipmentCancelRequestDto;
@@ -171,6 +174,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         // 计算发货类型
         delOutbound.setShipmentType(this.buildShipmentType(dto));
+        // 计算包裹大小
+        this.countPackageSize(delOutbound, dto);
         // 保存出库单
         int insert = baseMapper.insert(delOutbound);
         if (insert == 0) {
@@ -184,6 +189,27 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(delOutbound.getOrderNo()).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
         this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         return insert;
+    }
+
+    /**
+     * 计算包裹大小
+     *
+     * @param delOutbound delOutbound
+     * @param dto         dto
+     */
+    private void countPackageSize(DelOutbound delOutbound, DelOutboundDto dto) {
+        double weight = 0.0;
+        List<DelOutboundDetailDto> details = dto.getDetails();
+        List<PackageInfo> packageInfoList = new ArrayList<>();
+        for (DelOutboundDetailDto detail : details) {
+            weight += Utils.defaultValue(detail.getWeight());
+            packageInfoList.add(new PackageInfo(detail.getLength(), detail.getWidth(), detail.getHeight()));
+        }
+        delOutbound.setWeight(weight);
+        PackageInfo packageInfo = PackageUtil.count(packageInfoList);
+        delOutbound.setLength(packageInfo.getLength());
+        delOutbound.setWidth(packageInfo.getWidth());
+        delOutbound.setHeight(packageInfo.getHeight());
     }
 
     private String buildShipmentType(DelOutboundDto dto) {
@@ -288,6 +314,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 附件信息
         AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(delOutbound.getOrderNo()).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
         this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+        // 计算包裹大小
+        this.countPackageSize(inputDelOutbound, dto);
         // 更新
         return baseMapper.updateById(inputDelOutbound);
     }
@@ -540,6 +568,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public void bringVerifySuccess(DelOutbound delOutbound) {
         delOutbound.setState(DelOutboundStateEnum.DELIVERED.getCode());
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
+        // 清空异常信息
+        delOutbound.setExceptionMessage("");
         this.updateById(delOutbound);
     }
 }

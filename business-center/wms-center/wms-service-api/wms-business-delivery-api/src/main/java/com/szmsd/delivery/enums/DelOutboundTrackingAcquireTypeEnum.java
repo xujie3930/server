@@ -3,11 +3,13 @@ package com.szmsd.delivery.enums;
 import java.util.Objects;
 
 /**
+ *
  * @author zhangyuyuan
  * @date 2021-03-05 16:48
  */
 public enum DelOutboundTrackingAcquireTypeEnum {
 
+    NONE("None", "不获取"),
     ORDER_SUPPLIER("OrderSupplier", "下单后供应商获取"),
     WAREHOUSE_SUPPLIER("WarehouseSupplier", "核重后供应商获取"),
 

@@ -65,9 +65,10 @@ public interface IBasAttachmentService extends IService<BasAttachment> {
      * 根据业务编号删除文件
      *
      * @param businessNo
+     * @param businessItemNo
      * @param attachmentType
      */
-    void deleteByBusinessNo(String businessNo, String attachmentType);
+    void deleteByBusinessNo(String businessNo, String businessItemNo, String attachmentType);
 
     void saveAndUpdate(BasAttachmentDTO basAttachmentDTO);
 }

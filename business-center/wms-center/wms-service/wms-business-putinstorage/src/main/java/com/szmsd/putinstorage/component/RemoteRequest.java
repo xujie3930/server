@@ -37,7 +37,7 @@ public class RemoteRequest {
         createInboundReceipt.setTrackingNumber(inboundReceiptInfoVO.getDeliveryNo());
         createInboundReceipt.setRemark(inboundReceiptInfoVO.getRemark());
         createInboundReceipt.setRefOrderNo(inboundReceiptInfoVO.getWarehouseNo());
-        createInboundReceipt.setDetails(inboundReceiptInfoVO.getInboundReceiptDetailVOS().stream().map(detail -> {
+        createInboundReceipt.setDetails(inboundReceiptInfoVO.getInboundReceiptDetails().stream().map(detail -> {
             ReceiptDetailInfo receiptDetailInfo = new ReceiptDetailInfo();
             receiptDetailInfo.setSku(detail.getSku());
             receiptDetailInfo.setQty(detail.getDeclareQty());

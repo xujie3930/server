@@ -112,6 +112,7 @@
         <if test="deliveryWayCode != null and deliveryWayCode != ''">AND t.delivery_way_code = #{deliveryWayCode}</if>
         <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
         <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>
+        <if test="warehouseMethodCode != null and warehouseMethodCode != ''">AND t.warehouse_method_code = #{warehouseMethodCode}</if>
     </sql>
 
 </mapper>

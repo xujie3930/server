@@ -1,8 +1,6 @@
 package com.szmsd.returnex.vo;
 
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,7 +8,6 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 /**
  * @ClassName: ReturnExpressVO
@@ -59,8 +56,10 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "退件单类型", hidden = true)
     private String returnTypeStr;
 
-    @ApiModelProperty(value = "实际处理方式编码")
+    @ApiModelProperty(value = "实际处理方式编码", hidden = true)
     private String applyProcessMethod;
+    @ApiModelProperty(value = "实际处理方式编码", hidden = true)
+    private String applyProcessMethodStr;
 
     @ApiModelProperty(value = "到仓时间")
     private LocalDateTime arrivalTime;
@@ -73,27 +72,25 @@ public class ReturnExpressListVO implements Serializable {
 
     @ApiModelProperty(value = "是否逾期", hidden = true)
     private String overdueStr;
+
     @ApiModelProperty(value = "处理备注")
     private String processRemark;
 
     @ApiModelProperty(value = "类型[默认：1：退件预报，2：VMS通知退件]")
     private String returnSource;
-
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
 
     @ApiModelProperty(value = "处理状态编码")
     private String dealStatus;
-
     @ApiModelProperty(value = "处理状态编码", hidden = true)
     private String dealStatusStr;
 
 
     @ApiModelProperty(value = "目的仓库名称")
-    private String warehouseName;
-
+    private String warehouseCode;
     @ApiModelProperty(value = "目的仓库名称", hidden = true)
-    private String warehouseNameStr;
+    private String warehouseCodeStr;
 
 
     @Override

@@ -143,7 +143,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Override
     public R warehouseFeeDeductions(CustPayDTO dto) {
-        if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
+        if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         if(dto.getPayType()==null){
@@ -158,7 +158,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R freezeBalance(CusFreezeBalanceDTO cfbDTO) {
         CustPayDTO dto=new CustPayDTO();
         BeanUtils.copyProperties(cfbDTO,dto);
-        if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
+        if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         dto.setPayType(BillEnum.PayType.FREEZE);
@@ -172,7 +172,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R thawBalance(CusFreezeBalanceDTO cfbDTO) {
         CustPayDTO dto=new CustPayDTO();
         BeanUtils.copyProperties(cfbDTO,dto);
-        if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
+        if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         dto.setPayType(BillEnum.PayType.FREEZE);

@@ -11,7 +11,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import java.util.Date;
 
 @Data
 @Accessors(chain = true)
@@ -29,23 +28,8 @@ public class InventoryCheck extends BaseEntity {
     @ApiModelProperty(value = "客户代码")
     private String customCode;
 
-    @ApiModelProperty(value = "sku")
-    private String sku;
-
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
-
-    @ApiModelProperty(value = "系统数量")
-    private Integer systemQty;
-
-    @ApiModelProperty(value = "盘点数量")
-    private Integer countingQty;
-
-    @ApiModelProperty(value = "差异数量，等于盘点数量减去系统数量")
-    private Integer diffQty;
-
-    @ApiModelProperty(value = "完成时间")
-    private Date checkTime;
 
     @ApiModelProperty(value = "库存盘点审批结果")
     private Integer status;

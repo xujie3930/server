@@ -41,7 +41,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:add')")
     @Log(title = "新增地址", businessType = BusinessType.INSERT)
     @PostMapping("/address/add")
-    @ApiOperation(value = "新增地址", notes = "新增地址")
+    @ApiOperation(value = "地址管理-新增地址", notes = "新增地址")
     public R add(@RequestBody PackageAddressAddDTO packageAddress) {
         return toOk(packageAddressService.insertPackageAddress(packageAddress));
     }
@@ -51,7 +51,7 @@ public class PackageMangClientController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:list')")
     @GetMapping("/address/list")
-    @ApiOperation(value = "地址信息表模块列表", notes = "地址信息列表")
+    @ApiOperation(value = "地址管理-列表", notes = "地址信息列表")
     public TableDataInfo addressList(PackageMangQueryDTO packageAddress) {
         startPage();
         List<PackageAddressVO> list = packageAddressService.selectPackageAddressList(packageAddress);
@@ -64,7 +64,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:export')")
     @Log(title = "交货管理", businessType = BusinessType.EXPORT)
     @GetMapping("/address/export")
-    @ApiOperation(value = "地址导出", notes = "导出package - 交货管理 - 地址信息表模块列表")
+    @ApiOperation(value = "地址管理-导出", notes = "导出package - 交货管理 - 地址信息表模块列表")
     public void export(HttpServletResponse response, PackageMangQueryDTO packageAddress) throws IOException {
         List<PackageAddressVO> list = packageAddressService.selectPackageAddressList(packageAddress);
         ExcelUtil<PackageAddressVO> util = new ExcelUtil<PackageAddressVO>(PackageAddressVO.class);
@@ -77,7 +77,7 @@ public class PackageMangClientController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:query')")
     @GetMapping(value = "address/getInfo/{id}")
-    @ApiOperation(value = "查询地址详情", notes = "获取package - 交货管理 - 地址信息表模块详细信息")
+    @ApiOperation(value = "地址管理-查询地址详情", notes = "获取package - 交货管理 - 地址信息表模块详细信息")
     public R getInfo(@PathVariable("id") String id) {
         return R.ok(packageAddressService.selectPackageAddressById(id));
     }
@@ -89,7 +89,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:edit')")
     @Log(title = "交货管理", businessType = BusinessType.UPDATE)
     @PutMapping("address/edit")
-    @ApiOperation(value = "修改地址", notes = "修改package - 交货管理 - 地址信息表模块")
+    @ApiOperation(value = "地址管理-修改地址", notes = "修改package - 交货管理 - 地址信息表模块")
     public R edit(@RequestBody PackageAddressAddDTO packageAddress) {
         return toOk(packageAddressService.updatePackageAddress(packageAddress));
     }
@@ -100,7 +100,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:remove')")
     @Log(title = "交货管理", businessType = BusinessType.DELETE)
     @DeleteMapping("address/remove")
-    @ApiOperation(value = "批量删除地址", notes = "删除package - 交货管理 - 地址信息表模块")
+    @ApiOperation(value = "地址管理-批量删除地址", notes = "删除package - 交货管理 - 地址信息表模块")
     public R remove(@RequestBody List<String> ids) {
         return toOk(packageAddressService.deletePackageAddressByIds(ids));
     }
@@ -111,7 +111,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:remove')")
     @Log(title = "交货管理", businessType = BusinessType.DELETE)
     @DeleteMapping("address/remove/{id}")
-    @ApiOperation(value = "删除地址", notes = "删除package - 交货管理 - 地址信息表模块")
+    @ApiOperation(value = "地址管理-删除地址", notes = "删除package - 交货管理 - 地址信息表模块")
     public R remove(@PathVariable(value = "id") String id) {
         return toOk(packageAddressService.deletePackageAddressById(id));
     }
@@ -121,8 +121,8 @@ public class PackageMangClientController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:update')")
     @Log(title = "交货管理", businessType = BusinessType.UPDATE)
-    @DeleteMapping("address/setDefaultAddr/{id}")
-    @ApiOperation(value = "设置默认地址", notes = "设置默认地址当前id未默认地址")
+    @PutMapping("address/setDefaultAddr/{id}")
+    @ApiOperation(value = "地址管理-设置默认地址", notes = "设置默认地址当前id未默认地址")
     public R setDefaultAddr(@PathVariable(value = "id") String id) {
         return toOk(packageAddressService.setDefaultAddr(id));
     }
@@ -132,7 +132,7 @@ public class PackageMangClientController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:list')")
     @GetMapping("/package/list")
-    @ApiOperation(value = "揽件列表", notes = "揽件列表查询")
+    @ApiOperation(value = "揽件列表-列表", notes = "揽件列表查询")
     public TableDataInfo packageList(PackageMangQueryDTO packageMangQueryDTO) {
         startPage();
         List<PackageMangVO> list = packageAddressService.selectPackageManagementList(packageMangQueryDTO);
