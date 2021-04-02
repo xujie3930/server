@@ -190,6 +190,24 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+            super.errorHandler(context, throwable, currentState);
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+            shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+            shipmentUpdateRequestDto.setIsEx(true);
+            shipmentUpdateRequestDto.setExType("ShipmentOrderError");
+            shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "创建承运商物流订单失败"));
+            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+            htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+        }
+
+        @Override
         public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
@@ -219,6 +237,24 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             shipmentTrackingChangeRequestDto.setTrackingNo(delOutbound.getTrackingNo());
             IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
             htpOutboundClientService.shipmentTracking(shipmentTrackingChangeRequestDto);
+        }
+
+        @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+            super.errorHandler(context, throwable, currentState);
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+            shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+            shipmentUpdateRequestDto.setIsEx(true);
+            shipmentUpdateRequestDto.setExType("ShipmentTrackingError");
+            shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "更新挂号失败"));
+            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+            htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
         }
 
         @Override
@@ -281,6 +317,24 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+            super.errorHandler(context, throwable, currentState);
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+            shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+            shipmentUpdateRequestDto.setIsEx(true);
+            shipmentUpdateRequestDto.setExType("LabelError");
+            shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "获取标签文件流失败"));
+            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+            htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+        }
+
+        @Override
         public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
@@ -329,6 +383,24 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+            super.errorHandler(context, throwable, currentState);
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+            shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+            shipmentUpdateRequestDto.setIsEx(true);
+            shipmentUpdateRequestDto.setExType("ShipmentLabelError");
+            shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "读取标签文件失败"));
+            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+            htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+        }
+
+        @Override
         public ApplicationState nextState() {
             return THAW_BALANCE;
         }
@@ -366,6 +438,24 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 清除费用信息
             IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
             delOutboundChargeService.clearCharges(delOutbound.getOrderNo());
+        }
+
+        @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+            super.errorHandler(context, throwable, currentState);
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+            shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+            shipmentUpdateRequestDto.setIsEx(true);
+            shipmentUpdateRequestDto.setExType("ThawBalanceError");
+            shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "取消冻结费用失败"));
+            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+            htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
         }
 
         @Override
@@ -434,6 +524,24 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     throw new CommonException("999", exceptionMessage);
                 }
             }
+        }
+
+        @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+            super.errorHandler(context, throwable, currentState);
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+            shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+            shipmentUpdateRequestDto.setIsEx(true);
+            shipmentUpdateRequestDto.setExType("PrcPricingError");
+            shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "计算包裹费用失败"));
+            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+            htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
         }
 
         @Override
@@ -536,6 +644,24 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             delOutboundService.shipmentSuccess(updateDelOutbound);
+        }
+
+        @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+            super.errorHandler(context, throwable, currentState);
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+            shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+            shipmentUpdateRequestDto.setIsEx(true);
+            shipmentUpdateRequestDto.setExType("ShipmentShippingError");
+            shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "更新发货指令失败"));
+            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+            htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
         }
 
         @Override
