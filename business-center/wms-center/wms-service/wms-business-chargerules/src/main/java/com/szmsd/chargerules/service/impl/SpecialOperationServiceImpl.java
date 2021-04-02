@@ -62,7 +62,7 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
             specialOperationRequest.setUnit(specialOperation.getUnit());
             R<ResponseVO> response = htpBasFeignService.specialOperationType(specialOperationRequest);
             if (response.getCode() != 200) {
-                log.error("specialOperationType() 传wms失败: {},response.getMsg()");
+                log.error("specialOperationType() 传wms失败: {}",response.getMsg());
                 throw new CommonException("999", "新增/修改特殊操作类型失败");
             }
         }

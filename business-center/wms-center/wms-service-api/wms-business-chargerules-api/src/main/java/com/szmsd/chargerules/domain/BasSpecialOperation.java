@@ -49,7 +49,7 @@ public class BasSpecialOperation extends BaseEntity {
 
     @NotNull(message = "操作类型id不能为空")
     @ApiModelProperty(value = "操作类型id")
-    private Integer operationType;
+    private String operationType;
 
     @NotNull(message = "数量不能为空")
     @ApiModelProperty(value = "数量")
