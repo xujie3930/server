@@ -149,9 +149,9 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         return MessageFormat.format(logs, s.toArray());
     }
 
-    public static void main(String[] args) {
-        System.out.println(getLogs("8", "8", "2", "3", "4", "5", "6"));
-    }
+//    public static void main(String[] args) {
+//        System.out.println(getLogs("8", "8", "2", "3", "4", "5", "6"));
+//    }
 
 }
 
