@@ -13,11 +13,10 @@ import com.szmsd.http.dto.CountingRequest;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.domain.InventoryCheck;
 import com.szmsd.inventory.domain.InventoryCheckDetails;
-import com.szmsd.inventory.domain.dto.InventoryCheckDTO;
 import com.szmsd.inventory.domain.dto.InventoryCheckDetailsDTO;
 import com.szmsd.inventory.domain.dto.InventoryCheckQueryDTO;
+import com.szmsd.inventory.domain.vo.InventoryCheckVo;
 import com.szmsd.inventory.enums.InventoryStatusEnum;
-import com.szmsd.inventory.mapper.InventoryCheckDetailsMapper;
 import com.szmsd.inventory.mapper.InventoryCheckMapper;
 import com.szmsd.inventory.service.IInventoryCheckDetailsService;
 import com.szmsd.inventory.service.IInventoryCheckService;
@@ -26,8 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -60,15 +57,15 @@ public class IInventoryCheckServiceImpl extends ServiceImpl<InventoryCheckMapper
             // 流水号规则：PD + 客户代码 + （年月日 + 5位流水）
             String orderNo = "PD" + customCode + serialNumberClientService.generateNumber("INVENTORY_CHECK");
             inventoryCheck.setOrderNo(orderNo);
-            saveDetails(value,orderNo);
+            saveDetails(value, orderNo);
             inventoryCheckMapper.insert(inventoryCheck);
         });
         return 1;
     }
 
-    private void saveDetails(List<InventoryCheckDetailsDTO> value,String orderNo) {
+    private void saveDetails(List<InventoryCheckDetailsDTO> value, String orderNo) {
         List<InventoryCheckDetails> inventoryCheckDetails = BeanMapperUtil.mapList(value, InventoryCheckDetails.class);
-        BeanUtils.copyProperties(value,inventoryCheckDetails);
+        BeanUtils.copyProperties(value, inventoryCheckDetails);
         for (InventoryCheckDetails inventoryCheckDetail : inventoryCheckDetails) {
             inventoryCheckDetail.setOrderNo(orderNo);
         }
@@ -76,13 +73,13 @@ public class IInventoryCheckServiceImpl extends ServiceImpl<InventoryCheckMapper
     }
 
     @Override
-    public List<InventoryCheck> findList(InventoryCheckQueryDTO inventoryCheckQueryDTO) {
+    public List<InventoryCheckVo> findList(InventoryCheckQueryDTO inventoryCheckQueryDTO) {
         return inventoryCheckMapper.findList(inventoryCheckQueryDTO);
     }
 
     @Override
-    public InventoryCheck details(int id) {
-        return inventoryCheckMapper.selectById(id);
+    public InventoryCheckVo details(int id) {
+        return inventoryCheckMapper.findDetails(id);
     }
 
     @Transactional
@@ -92,11 +89,11 @@ public class IInventoryCheckServiceImpl extends ServiceImpl<InventoryCheckMapper
             throw new CommonException("999", "请检查单据审核状态");
         }
         InventoryCheck checkStatus = inventoryCheckMapper.selectById(inventoryCheck.getId());
-        if(checkStatus.getStatus() == 1) {
+        if (checkStatus.getStatus() == 1) {
             throw new CommonException("999", "该单据已审核通过，请勿重复提交");
         }
         LambdaQueryWrapper<InventoryCheckDetails> query = Wrappers.lambdaQuery();
-        query.eq(InventoryCheckDetails::getOrderNo,checkStatus.getOrderNo());
+        query.eq(InventoryCheckDetails::getOrderNo, checkStatus.getOrderNo());
         List<InventoryCheckDetails> list = inventoryCheckDetailsService.list(query);
         int result = inventoryCheckMapper.updateById(inventoryCheck);
         if (InventoryStatusEnum.PASS.getCode() == inventoryCheck.getStatus()) {
