@@ -31,14 +31,11 @@ public class PricedZone {
     @ApiModelProperty("发出地国家")
     private String fromCountry;
 
-
     @ApiModelProperty("发出地城市")
     private String fromCity;
 
-
     @ApiModelProperty("发出地州/省")
     private String fromProvince;
-
 
     @ApiModelProperty("发出地邮编规则，如（*, 100-102）")
     private String fromPostCode;

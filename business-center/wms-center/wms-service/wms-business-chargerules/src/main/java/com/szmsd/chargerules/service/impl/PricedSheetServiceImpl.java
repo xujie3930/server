@@ -3,10 +3,7 @@ package com.szmsd.chargerules.service.impl;
 import com.szmsd.chargerules.dto.PricedSheetDTO;
 import com.szmsd.chargerules.dto.ProductSheetGradeDTO;
 import com.szmsd.chargerules.service.IPricedSheetService;
-import com.szmsd.chargerules.vo.PackageLimitVO;
-import com.szmsd.chargerules.vo.PricedProductSheetVO;
-import com.szmsd.chargerules.vo.PricedSheetInfoVO;
-import com.szmsd.chargerules.vo.PricedVolumeWeightVO;
+import com.szmsd.chargerules.vo.*;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.FileStream;
@@ -17,6 +14,7 @@ import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -163,6 +161,59 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         ChangeSheetGradeCommand changeSheetGradeCommand = BeanMapperUtil.map(productSheetGradeDTO, ChangeSheetGradeCommand.class);
         R<ResponseVO> responseVOR = htpPricedProductFeignService.grade(changeSheetGradeCommand);
         ResponseVO.resultAssert(responseVOR, "修改一个计价产品信息的报价表对应的等级和生效时间段");
+    }
+
+    /**
+     * 根据报价表编号获取产品报价表信息
+     * https://pricedproduct-internalapi-external.dsloco.com/api/sheets/{sheetCode}
+     * @param sheetCode
+     * @return
+     */
+    @Override
+    public PricedSheetExcelInfoVO excelInfo(String sheetCode) {
+        R<PricedSheet> info = htpPricedSheetFeignService.info(sheetCode);
+        PricedSheet data = info.getData();
+        PricedSheetExcelInfoVO vo = new PricedSheetExcelInfoVO().setSheetCode(sheetCode);
+        if (data == null) {
+            return vo;
+        }
+        List<PricedZoneVO> zones = BeanMapperUtil.mapList(data.getZones(), PricedZoneVO.class);
+        vo.setZones(zones);
+
+        List<PricedChargeVO> charges = data.getCharges().stream().map(charge -> {
+            PricedChargeVO chargeVO = new PricedChargeVO();
+            chargeVO.setZone(charge.getZone());
+            chargeVO.setMinWeight(charge.getMinWeight());
+            chargeVO.setMaxWeight(charge.getMaxWeight());
+            ChargeFormula formula = charge.getFormula();
+            BeanUtils.copyProperties(formula, chargeVO);
+            return chargeVO;
+        }).collect(Collectors.toList());
+        vo.setCharges(charges);
+
+        List<PricedSurchargeVO> surcharges = data.getSurcharges().stream().map(surcharge -> {
+            PricedSurchargeVO surchargeVO = new PricedSurchargeVO();
+            BeanUtils.copyProperties(surcharge, surchargeVO);
+
+            PackageLimit packageLimit = surcharge.getPackageLimit();
+            BeanUtils.copyProperties(packageLimit, surchargeVO);
+
+            Packing minPackingLimit = packageLimit.getMinPackingLimit();
+            surchargeVO.setMinPackingLimitStr(minPackingLimit.getLength() + "*" + minPackingLimit.getWidth() + "*" + minPackingLimit.getHeight());
+            Packing packingLimit = packageLimit.getPackingLimit();
+            surchargeVO.setPackingLimitStr(packingLimit.getLength() + "*" + packingLimit.getWidth() + "*" + packingLimit.getHeight());
+
+            ChargeFormula formula = surcharge.getFormula();
+            BeanUtils.copyProperties(formula, surchargeVO);
+
+            return surchargeVO;
+        }).collect(Collectors.toList());
+        vo.setSurcharges(surcharges);
+
+        List<PricedAddressFilterVO> addressFilter = BeanMapperUtil.mapList(data.getAddressFilter(), PricedAddressFilterVO.class);
+        vo.setAddressFilter(addressFilter);
+
+        return vo;
     }
 
     private static <T> void refactor(PricedSheetDTO pricedSheetDTO, T t) {
