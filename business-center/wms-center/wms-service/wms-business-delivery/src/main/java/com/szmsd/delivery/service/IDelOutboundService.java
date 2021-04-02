@@ -133,7 +133,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     void updateState(Long id, DelOutboundStateEnum stateEnum);
 
     /**
-     * 修改单据异常描述
+     * 提审失败
      *
      * @param id               id
      * @param exceptionMessage exceptionMessage
@@ -141,10 +141,31 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     void bringVerifyFail(Long id, String exceptionMessage);
 
     /**
+     * 提审失败
+     *
+     * @param delOutbound delOutbound
+     */
+    void bringVerifyFail(DelOutbound delOutbound);
+
+    /**
      * 提审成功
      *
      * @param delOutbound delOutbound
      */
     void bringVerifySuccess(DelOutbound delOutbound);
+
+    /**
+     * 出库失败
+     *
+     * @param delOutbound delOutbound
+     */
+    void shipmentFail(DelOutbound delOutbound);
+
+    /**
+     * 出库成功
+     *
+     * @param delOutbound delOutbound
+     */
+    void shipmentSuccess(DelOutbound delOutbound);
 }
 

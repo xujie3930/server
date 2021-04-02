@@ -1,5 +1,7 @@
 package com.szmsd.delivery.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.math.BigDecimal;
 
 /**
@@ -37,5 +39,12 @@ public final class Utils {
             return 0.0;
         }
         return value;
+    }
+
+    public static String defaultValue(String text, String defaultText) {
+        if (StringUtils.isEmpty(text)) {
+            return defaultText;
+        }
+        return text;
     }
 }

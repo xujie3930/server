@@ -5,20 +5,20 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * spring工具类 方便在非spring管理环境中获取bean
  * 
  * @author szmsd
  */
-public final class SpringUtils implements BeanFactoryPostProcessor
+public final class SpringUtils implements BeanFactoryPostProcessor, ApplicationContextAware
 {
 
     /** Spring应用上下文环境 */
     private static ConfigurableListableBeanFactory beanFactory;
+    private static ApplicationContext applicationContext;
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException
@@ -112,5 +112,29 @@ public final class SpringUtils implements BeanFactoryPostProcessor
     public static <T> T getAopProxy(T invoker)
     {
         return (T) AopContext.currentProxy();
+    }
+
+    /**
+     * 获取配置属性
+     * @param key key
+     * @return String
+     */
+    public static String getProperty(String key) {
+        return applicationContext.getEnvironment().getProperty(key);
+    }
+
+    /**
+     * 获取配置属性
+     * @param key key
+     * @param defaultValue defaultValue
+     * @return String
+     */
+    public static String getProperty(String key, String defaultValue) {
+        return applicationContext.getEnvironment().getProperty(key, defaultValue);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        SpringUtils.applicationContext = applicationContext;
     }
 }

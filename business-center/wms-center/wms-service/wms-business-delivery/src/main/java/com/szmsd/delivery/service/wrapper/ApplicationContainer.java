@@ -41,7 +41,14 @@ public class ApplicationContainer {
                 throw new RuntimeException("[" + this.currentState.name() + "] handle is null");
             }
             if (handle.condition(context)) {
-                handle.handle(context);
+                try {
+                    handle.handle(context);
+                } catch (Exception e) {
+                    // 处理错误异常
+                    handle.errorHandler(context, e, this.currentState);
+                    // 往上抛出异常
+                    throw e;
+                }
             }
             this.currentState = handle.nextState();
         }

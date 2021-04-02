@@ -12,6 +12,7 @@ import com.szmsd.http.service.ICarrierService;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 
 /**
@@ -39,7 +40,22 @@ public class CarrierServiceImpl extends AbstractCarrierServiceHttpRequest implem
     }
 
     @Override
-    public FileStream label(String orderNumber) {
-        return httpGetFile(MessageFormat.format(httpConfig.getCarrierService().getLabel(), orderNumber), null);
+    public ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(String orderNumber) {
+        HttpResponseBody httpResponseBody = httpGetFile(MessageFormat.format(httpConfig.getCarrierService().getLabel(), orderNumber), null);
+        ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> responseObject = new ResponseObject.ResponseObjectWrapper<>();
+        if (httpResponseBody instanceof HttpResponseBody.HttpResponseByteArrayWrapper) {
+            HttpResponseBody.HttpResponseByteArrayWrapper httpResponseByteArrayWrapper = (HttpResponseBody.HttpResponseByteArrayWrapper) httpResponseBody;
+            if (HttpStatus.SC_OK == httpResponseByteArrayWrapper.getStatus()) {
+                responseObject.setSuccess(true);
+                FileStream fileStream = new FileStream();
+                fileStream.setInputStream(httpResponseByteArrayWrapper.getByteArray());
+                responseObject.setObject(fileStream);
+            } else {
+                byte[] byteArray = httpResponseByteArrayWrapper.getByteArray();
+                String text = new String(byteArray, StandardCharsets.UTF_8);
+                responseObject.setError(JSON.parseObject(text, ProblemDetails.class));
+            }
+        }
+        return responseObject;
     }
 }

@@ -3,6 +3,7 @@ package com.szmsd.common.core.utils;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Consts;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -249,15 +250,15 @@ public class HttpClientHelper {
         return new HttpResponseBody.HttpResponseBodyEmpty();
     }
 
-    public static FileStream httpPostStream(String url, Map<String, String> headerMap, String requestBody) {
+    public static HttpResponseBody httpPostStream(String url, Map<String, String> headerMap, String requestBody) {
         return execute(new HttpPost(url), headerMap, requestBody);
     }
 
-    public static FileStream httpGetStream(String url, Map<String, String> headerMap, String requestBody) {
+    public static HttpResponseBody httpGetStream(String url, Map<String, String> headerMap, String requestBody) {
         return execute(new HttpGet(url), headerMap, requestBody);
     }
 
-    public static FileStream execute(HttpEntityEnclosingRequestBase request, Map<String, String> headerMap, String requestBody) {
+    public static HttpResponseBody execute(HttpEntityEnclosingRequestBase request, Map<String, String> headerMap, String requestBody) {
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
         try {
@@ -265,10 +266,15 @@ public class HttpClientHelper {
             setHeader(request, headerMap);
             setRaw(request, requestBody);
             response = httpClient.execute(request);
+            int status = response.getStatusLine().getStatusCode();
             HttpEntity entity = response.getEntity();
+            Header[] headers = null;
+            byte[] byteArray = null;
             if (entity != null) {
-                return new FileStream().setInputStream(IOUtils.toByteArray(entity.getContent())).setContentDisposition(response.getHeaders("Content-Disposition")[0].getValue());
+                headers = response.getAllHeaders();
+                byteArray = IOUtils.toByteArray(entity.getContent());
             }
+            return new HttpResponseBody.HttpResponseByteArrayWrapper(status, headers, byteArray);
         } catch (Exception e) {
             try {
                 if (null != response)
@@ -278,7 +284,7 @@ public class HttpClientHelper {
             }
             log.error(e.getMessage(), e);
         }
-        return null;
+        return new HttpResponseBody.HttpResponseBodyEmpty();
     }
 
     /**

@@ -27,7 +27,7 @@ public class HtpCarrierClientServiceImpl implements IHtpCarrierClientService {
     }
 
     @Override
-    public FileStream label(String orderNumber) {
+    public ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(String orderNumber) {
         return R.getDataAndException(this.htpCarrierFeignService.label(orderNumber));
     }
 }

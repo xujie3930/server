@@ -45,6 +45,7 @@ import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -552,7 +553,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return baseMapper.getDelOutboundAndDetailsList(queryWrapper);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void bringVerifyFail(Long id, String exceptionMessage) {
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
@@ -563,12 +564,37 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.update(updateWrapper);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void bringVerifyFail(DelOutbound delOutbound) {
+        delOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
+        delOutbound.setExceptionState(DelOutboundExceptionStateEnum.ABNORMAL.getCode());
+        this.updateById(delOutbound);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void bringVerifySuccess(DelOutbound delOutbound) {
         delOutbound.setState(DelOutboundStateEnum.DELIVERED.getCode());
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         // 清空异常信息
+        delOutbound.setExceptionMessage("");
+        this.updateById(delOutbound);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void shipmentFail(DelOutbound delOutbound) {
+        delOutbound.setState(DelOutboundStateEnum.DELIVERED.getCode());
+        delOutbound.setExceptionState(DelOutboundExceptionStateEnum.ABNORMAL.getCode());
+        this.updateById(delOutbound);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void shipmentSuccess(DelOutbound delOutbound) {
+        delOutbound.setState(DelOutboundStateEnum.PROCESSING.getCode());
+        delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         delOutbound.setExceptionMessage("");
         this.updateById(delOutbound);
     }
