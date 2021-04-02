@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DelOutboundPackageQueueTimer {
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
@@ -22,6 +21,7 @@ public class DelOutboundPackageQueueTimer {
     // 秒域 分域 时域 日域 月域 周域 年域
     @Scheduled(cron = "0 * * * * ?")
     public void worker() {
+
 
     }
 }

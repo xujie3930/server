@@ -1,7 +1,7 @@
 package com.szmsd.delivery.mapper;
 
-import com.szmsd.delivery.domain.DelOutboundPackageQueue;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.szmsd.delivery.domain.DelOutboundPackageQueue;
 
 /**
  * <p>

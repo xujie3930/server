@@ -105,6 +105,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
             inventoryAvailableQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            inventoryAvailableQueryDto.setCusCode(delOutbound.getSellerCode());
             inventoryAvailableQueryDto.setSkus(skus);
             List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
             Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
