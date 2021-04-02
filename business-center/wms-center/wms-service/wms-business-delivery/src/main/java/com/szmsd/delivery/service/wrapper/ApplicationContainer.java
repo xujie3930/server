@@ -40,7 +40,7 @@ public class ApplicationContainer {
             if (null == handle) {
                 throw new RuntimeException("[" + this.currentState.name() + "] handle is null");
             }
-            if (handle.condition(context)) {
+            if (handle.condition(context, this.currentState)) {
                 try {
                     handle.handle(context);
                 } catch (Exception e) {

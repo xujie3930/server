@@ -71,6 +71,42 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         }
     }
 
+    @Transactional
+    @Override
+    public R update(BasSpecialOperation basSpecialOperation) {
+
+        this.checkStatus(basSpecialOperation);
+
+        String customCode = this.getCustomCode(basSpecialOperation);
+
+        //修改数据
+        this.updateBasSpecialOperation(basSpecialOperation);
+
+        //查询操作类型对应的收费配置
+        this.charge(basSpecialOperation, customCode);
+
+        // 调用WMS接口回写结果
+        this.sendResult(basSpecialOperation);
+
+        return R.ok();
+
+    }
+
+    /**
+     * 修改数据
+     * @param basSpecialOperation basSpecialOperation
+     */
+    private void updateBasSpecialOperation(BasSpecialOperation basSpecialOperation) {
+        LambdaUpdateWrapper<BasSpecialOperation> update = Wrappers.lambdaUpdate();
+        update.set(BasSpecialOperation::getCoefficient, basSpecialOperation.getCoefficient())
+                .set(BasSpecialOperation::getStatus, basSpecialOperation.getStatus())
+                .set(BasSpecialOperation::getReason, basSpecialOperation.getReason())
+                .set(BasSpecialOperation::getRemark, basSpecialOperation.getRemark())
+                .set(BasSpecialOperation::getOmsRemark, basSpecialOperation.getOmsRemark())
+                .eq(BasSpecialOperation::getId, basSpecialOperation.getId());
+        this.update(update);
+    }
+
     @Override
     public List<BasSpecialOperation> list(BasSpecialOperationRequestDTO dto) {
         QueryWrapper<BasSpecialOperation> where = new QueryWrapper<>();
@@ -86,26 +122,6 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         return baseInfoMapper.selectList(where);
     }
 
-    @Transactional
-    @Override
-    public R update(BasSpecialOperation basSpecialOperation) {
-
-        this.checkStatus(basSpecialOperation);
-
-        String customCode = this.getCustomCode(basSpecialOperation);
-
-        //修改数据
-        baseInfoMapper.updateById(basSpecialOperation);
-
-        //查询操作类型对应的收费配置
-        this.charge(basSpecialOperation, customCode);
-
-        // 调用WMS接口回写结果
-        this.sendResult(basSpecialOperation);
-        return R.ok();
-
-    }
-
     /**
      * 调用WMS接口回写数据
      * @param basSpecialOperation basSpecialOperation
@@ -115,7 +131,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         BeanUtils.copyProperties(basSpecialOperation, request);
         R<com.szmsd.http.vo.ResponseVO> responseVOR = htpBasFeignService.specialOperationResult(request);
         if (responseVOR.getCode() != 200) {
-            throw new CommonException("999",ErrorMessageEnum.UPDATE_OPERATION_TYPE_ERROR.getMessage());
+            throw new CommonException("999", ErrorMessageEnum.UPDATE_OPERATION_TYPE_ERROR.getMessage());
         }
     }
 
@@ -127,17 +143,17 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     private void charge(BasSpecialOperation basSpecialOperation, String customCode) {
         SpecialOperation specialOperation = specialOperationService.selectOne(basSpecialOperation);
         if (specialOperation == null) {
-            throw new CommonException("999",ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
+            throw new CommonException("999", ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
         }
         BigDecimal amount = payService.calculate(specialOperation.getFirstPrice(),
                 specialOperation.getNextPrice(), basSpecialOperation.getQty());
 
         //调用扣费接口扣费
-        ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(),basSpecialOperation.getOperationType());
-        R r = payService.pay(customCode, amount,BillEnum.PayMethod.SPECIAL_OPERATE,chargeLog);
-        if(r.getCode() != 200) {
-            log.error("pay failed: {} {}",r.getData(),r.getMsg());
-            throw new CommonException("999",ErrorMessageEnum.PAY_FAILED.getMessage());
+        ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType());
+        R r = payService.pay(customCode, amount, BillEnum.PayMethod.SPECIAL_OPERATE, chargeLog);
+        if (r.getCode() != 200) {
+            log.error("pay failed: {} {}", r.getData(), r.getMsg());
+            throw new CommonException("999", ErrorMessageEnum.PAY_FAILED.getMessage());
         }
     }
 
@@ -150,7 +166,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         OrderType factory = orderTypeFactory.getFactory(basSpecialOperation.getOrderType());
         String customCode = factory.findOrderById(basSpecialOperation.getOrderNo());
         if (StringUtils.isEmpty(customCode)) {
-            throw new CommonException("999",ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
+            throw new CommonException("999", ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
         }
         return customCode;
     }
@@ -161,12 +177,12 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
      */
     private void checkStatus(BasSpecialOperation basSpecialOperation) {
         if (!SpecialOperationStatusEnum.checkStatus(basSpecialOperation.getStatus())) {
-            throw new CommonException("999",ErrorMessageEnum.STATUS_RESULT.getMessage());
+            throw new CommonException("999", ErrorMessageEnum.STATUS_RESULT.getMessage());
         }
 
         BasSpecialOperation check = baseInfoMapper.selectById(basSpecialOperation.getId());
-        if(SpecialOperationStatusEnum.PASS.getStatus().equals(check.getStatus())) {
-            throw new CommonException("999",ErrorMessageEnum.DUPLICATE_APPLY.getMessage());
+        if (SpecialOperationStatusEnum.PASS.getStatus().equals(check.getStatus())) {
+            throw new CommonException("999", ErrorMessageEnum.DUPLICATE_APPLY.getMessage());
         }
 
         //审批不通过->系数设为0 审批通过->系数必须大于0
@@ -174,7 +190,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
             basSpecialOperation.setCoefficient(0);
         } else {
             if (basSpecialOperation.getCoefficient() == 0) {
-                throw new CommonException("999",ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
+                throw new CommonException("999", ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
             }
         }
     }
@@ -182,7 +198,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     @Override
     public BasSpecialOperationVo details(int id) {
         BasSpecialOperationVo basSpecialOperationVo = baseInfoMapper.selectDetailsById(id);
-        if(Objects.isNull(basSpecialOperationVo)) throw new CommonException("999","未找到该操作类型对应的收费规则");
+        if (Objects.isNull(basSpecialOperationVo)) throw new CommonException("999", "未找到该操作类型对应的收费规则");
         return basSpecialOperationVo;
     }
 
