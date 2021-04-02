@@ -93,10 +93,10 @@ public class BasAttachmentController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('bas:attachment:save')")
-    @DeleteMapping("/deleteByBusinessNo/{attachmentType}/{businessNo}")
+    @DeleteMapping("/deleteByBusinessNo")
     @ApiOperation(value = "删除 - 多个 - bas:attachment:publish", notes = "保存附件表")
-    public R deleteByBusinessNo(@PathVariable("attachmentType") String attachmentType, @PathVariable("businessNo") String businessNo) {
-        basAttachmentService.deleteByBusinessNo(businessNo, attachmentType);
+    public R deleteByBusinessNo(@RequestBody BasAttachmentDTO basAttachmentDTO) {
+        basAttachmentService.deleteByBusinessNo(basAttachmentDTO.getBusinessNo(), basAttachmentDTO.getBusinessItemNo(), basAttachmentDTO.getAttachmentTypeEnum().getAttachmentType());
         return R.ok();
     }
 

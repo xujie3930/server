@@ -50,11 +50,10 @@ public interface RemoteAttachmentService {
 
     /**
      * 删除附件
-     * @param attachmentType
-     * @param businessNo
+     * @param attachmentDTO
      * @return
      */
-    @DeleteMapping("/bas-attachment/deleteByBusinessNo/{attachmentType}/{businessNo}")
-    R deleteByBusinessNo(@PathVariable("attachmentType") String attachmentType, @PathVariable("businessNo") String businessNo);
+    @DeleteMapping("/bas-attachment/deleteByBusinessNo")
+    R deleteByBusinessNo(@RequestBody AttachmentDTO attachmentDTO);
 
 }

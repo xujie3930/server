@@ -88,8 +88,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         // 保存入库单明细
         List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetails();
         inboundReceiptDetailDTOS.forEach(item -> item.setWarehouseNo(warehouseNo));
-        iInboundReceiptDetailService.removeByIds(createInboundReceiptDTO.getReceiptDetailIds());
-        iInboundReceiptDetailService.saveOrUpdateInboundReceiptDetail(inboundReceiptDetailDTOS);
+        iInboundReceiptDetailService.saveOrUpdate(inboundReceiptDetailDTOS, createInboundReceiptDTO.getReceiptDetailIds());
 
         // 判断自动审核
         boolean inboundReceiptReview = remoteComponent.inboundReceiptReview(createInboundReceiptDTO.getWarehouseCode());
@@ -306,7 +305,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         CompletableFuture.runAsync(() -> {
             AttachmentTypeEnum inboundReceiptDocuments = AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS;
             log.info("删除入库单[{}]{}", warehouseNo, inboundReceiptDocuments.getAttachmentType());
-            remoteComponent.deleteAttachment(inboundReceiptDocuments, warehouseNo);
+            remoteComponent.deleteAttachment(inboundReceiptDocuments, warehouseNo, null);
         });
     }
 
@@ -320,7 +319,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     private void asyncAttachment(String warehouseNo, InboundReceiptDTO inboundReceiptDTO) {
         CompletableFuture.runAsync(() -> {
             List<AttachmentFileDTO> documentsFile = inboundReceiptDTO.getDocumentsFile();
-            if (CollectionUtils.isNotEmpty(documentsFile)) {
+            if (documentsFile != null) {
                 log.info("保存单证信息文件：{}", documentsFile);
                 remoteComponent.saveAttachment(warehouseNo, documentsFile, AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
             }
