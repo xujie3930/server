@@ -8,6 +8,8 @@ import com.szmsd.chargerules.mapper.ChargeLogMapper;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.common.core.utils.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -17,6 +19,7 @@ public class ChargeLogServiceImpl implements IChargeLogService {
     @Resource
     private ChargeLogMapper chargeLogMapper;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public int save(ChargeLog chargeLog) {
         return chargeLogMapper.insert(chargeLog);
