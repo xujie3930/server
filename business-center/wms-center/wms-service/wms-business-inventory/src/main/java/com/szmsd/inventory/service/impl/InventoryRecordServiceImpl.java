@@ -120,38 +120,27 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
     }
 
     private static String getLogs(String type, String... placeholder) {
-        LocalLanguageEnum logsType = LocalLanguageEnum.getLocalLanguageEnum(LocalLanguageTypeEnum.INVENTORY_RECORD_TYPE, type);
-        if (logsType == null) {
+        LocalLanguageEnum localLanguageEnum = LocalLanguageEnum.getLocalLanguageEnum(LocalLanguageTypeEnum.INVENTORY_RECORD_LOGS, type);
+        if (localLanguageEnum == null) {
             log.error("没有维护[{}]枚举语言[{}]", "INVENTORY_RECORD_LOGS", type);
-        } else {
-            type = logsType.getZhName();
+            return "";
         }
         String len = ServletUtils.getHeaders("Langr");
         if (StringUtils.isEmpty(len)) {
             len = "zh";
         }
-
-        LocalLanguageEnum logsEnum = LocalLanguageEnum.INBOUND_INVENTORY_LOG;
-        String logs = logsEnum.getZhName();
+        String logs = localLanguageEnum.getZhName();
         switch (len) {
             case "en":
-                if (logsType != null) {
-                    type = logsType.getEhName();
-                }
-                logs = logsEnum.getEhName();
+                logs = localLanguageEnum.getEhName();
                 break;
         }
-        List<String> s = new ArrayList<>();
-        s.add(type);
-        for (String v : placeholder) {
-            s.add(v);
+        switch (localLanguageEnum) {
+            case INBOUND_INVENTORY_LOG:
+                return MessageFormat.format(logs, placeholder);
         }
-        return MessageFormat.format(logs, s.toArray());
+        return logs;
     }
-
-//    public static void main(String[] args) {
-//        System.out.println(getLogs("8", "8", "2", "3", "4", "5", "6"));
-//    }
 
 }
 
