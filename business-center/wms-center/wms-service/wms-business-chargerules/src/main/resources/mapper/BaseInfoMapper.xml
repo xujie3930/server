@@ -2,9 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.chargerules.mapper.BaseInfoMapper">
 
-    <select id="selectDetailsById" resultType="com.szmsd.chargerules.vo.BasSpecialOperationVo">
-        SELECT
-            a.id,
+    <sql id="basSpecialOperationSql">
+        a.id,
             a.operator,
             a.operate_on,
             a.warehouse_code,
@@ -12,7 +11,7 @@
             a.operation_order_no,
             a.order_no,
             a.order_type,
-            a.operation_type,
+            b.operation_type,
             a.qty,
             a.coefficient,
             a.unit,
@@ -27,9 +26,22 @@
             a.remark,
             b.first_price,
             b.next_price
+    </sql>
+
+    <select id="selectDetailsById" resultType="com.szmsd.chargerules.vo.BasSpecialOperationVo">
+        SELECT
+            <include refid="basSpecialOperationSql"/>
         FROM
             bas_special_operation a,cha_special_operation b
         WHERE a.id = #{id} and a.operation_type = b.id
+    </select>
+
+    <select id="selectList" resultType="com.szmsd.chargerules.vo.BasSpecialOperationVo">
+        SELECT
+            <include refid="basSpecialOperationSql"/>
+        FROM
+            bas_special_operation a,cha_special_operation b
+        WHERE a.operation_type = b.id
     </select>
 
 </mapper>
