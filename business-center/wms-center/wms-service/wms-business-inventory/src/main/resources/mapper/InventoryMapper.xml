@@ -41,7 +41,7 @@
         t.total_outbound,
         sku.init_weight sku_weight,
         sku.init_length sku_length,
-        sku.sku_width sku_width,
+        sku.init_width sku_width,
         sku.init_height sku_height,
         sku.product_attribute_name sku_property_name,
         sku.declared_value sku_declared_value,
