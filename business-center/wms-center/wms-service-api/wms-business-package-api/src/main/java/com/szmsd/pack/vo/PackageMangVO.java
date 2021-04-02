@@ -2,6 +2,7 @@ package com.szmsd.pack.vo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,10 +26,10 @@ import java.util.Optional;
  * @since 2021-04-01
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Accessors(chain = true)
 @ApiModel(value = "揽件列表查询条件", description = "揽件列表查询条件")
-public class PackageMangVO extends BaseEntity {
+public class PackageMangVO {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,22 +40,11 @@ public class PackageMangVO extends BaseEntity {
     @ApiModelProperty(value = "逻辑删除标识；2-已删除，0-未删除", hidden = true)
     private Integer delFlag = 0;
 
+    @Excel(name = "单号")
     @ApiModelProperty(value = "订单号")
     private String orderNo;
 
-    public void setOrderNo(String orderNo) {
-        this.orderNo = orderNo;
-        Optional.ofNullable(orderNo)
-                .filter(StringUtil::isNotBlank)
-                .map(x -> x.replace(" ", ","))
-                .map(x -> x.replace("，", ","))
-                .map(x -> x.replace(";", ","))
-                .ifPresent(res -> orderNoList = Arrays.asList(res.split(",")));
-    }
-
-    @ApiModelProperty(value = "订单号", hidden = true)
-    private List<String> orderNoList;
-
+    @Excel(name = "客户代码")
     @ApiModelProperty(value = "客户代码")
     private String sellerCode;
 
@@ -66,5 +56,36 @@ public class PackageMangVO extends BaseEntity {
 
     @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
     private Integer exportType;
+
+    @Excel(name = "地址")
+    @ApiModelProperty(value = "详细地址", required = true)
+    private String deliveryAddress;
+
+    @ApiModelProperty(value = "联系人姓名")
+    @Excel(name = "联系人")
+    private String linkUserName;
+
+    @ApiModelProperty(value = "联系电话")
+    @Excel(name = "联系电话")
+    private String linkPhone;
+
+    @ApiModelProperty(value = "期望收货日期")
+    @Excel(name = "收货时间")
+    private LocalDate expectedDeliveryTime;
+
+    @ApiModelProperty(value = "揽件数量")
+    @Excel(name = "收货数量")
+    private Integer packageNum;
+
+    @ApiModelProperty(value = "货物类型【 0：入库，1：转运】")
+    @Excel(name = "货物类型")
+    private Integer operationType;
+
+    private String operationTypeStr;
+
+    @Excel(name = "备注")
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
 
 }

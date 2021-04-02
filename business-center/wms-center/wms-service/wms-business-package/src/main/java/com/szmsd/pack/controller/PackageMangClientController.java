@@ -121,7 +121,7 @@ public class PackageMangClientController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:update')")
     @Log(title = "交货管理", businessType = BusinessType.UPDATE)
-    @DeleteMapping("address/setDefaultAddr/{id}")
+    @PutMapping("address/setDefaultAddr/{id}")
     @ApiOperation(value = "地址管理-设置默认地址", notes = "设置默认地址当前id未默认地址")
     public R setDefaultAddr(@PathVariable(value = "id") String id) {
         return toOk(packageAddressService.setDefaultAddr(id));

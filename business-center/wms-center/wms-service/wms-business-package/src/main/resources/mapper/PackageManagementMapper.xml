@@ -53,20 +53,22 @@
         select
         <include refid="Base_Column_List"/>
         from package_management
-        <if test="cm.orderNoList != null and cm.orderNoList.size() > 0">
-            and order_no in
-            <foreach collection="cm.orderNoList" open="(" close=")" separator="," item="item">
-                #{item}
-            </foreach>
-        </if>
-        <if test="cm.sellerCode != null and cm.sellerCode != '' ">
-            and seller_code = #{cm.sellerCode}
-        </if>
-        <if test="cm.submitTimeStart != null and cm.submitTimeEnd != null ">
-            and submit_time between CONCAT(#{cm.submitTimeStart},' 00:00:00') and CONCAT(#{submitTimeEnd},' 23:59:59')
-        </if>
-        <if test="cm.exportType != null and cm.exportType != '' ">
-            and export_type = #{cm.exportType}
-        </if>
+        <where>
+            <!--<if test="cm.orderNoList != null and cm.orderNoList.size() > 0">
+                and order_no in
+                <foreach collection="cm.orderNoList" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="cm.sellerCode != null and cm.sellerCode != '' ">
+                and seller_code = #{cm.sellerCode}
+            </if>
+            <if test="cm.submitTimeStart != null and cm.submitTimeEnd != null ">
+                and submit_time between CONCAT(#{cm.submitTimeStart},' 00:00:00') and CONCAT(#{cm.submitTimeEnd},' 23:59:59')
+            </if>-->
+            <if test="cm.exportType != null and cm.exportType != '' ">
+                and export_type = #{cm.exportType}
+            </if>
+        </where>
     </select>
 </mapper>

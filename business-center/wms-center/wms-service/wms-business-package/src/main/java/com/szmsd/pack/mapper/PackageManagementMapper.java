@@ -4,7 +4,7 @@ import com.szmsd.pack.domain.PackageManagement;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.vo.PackageMangVO;
-import io.lettuce.core.dynamic.annotation.Param;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 

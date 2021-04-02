@@ -25,7 +25,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode
 @Accessors(chain = true)
 @ApiModel(value = "package - 交货管理 - 地址信息表", description = "PackageAddress对象")
-public class PackageAddressVO{
+public class PackageAddressVO {
 
     @ApiModelProperty(value = "主键ID")
     @TableId(value = "id", type = IdType.AUTO)
@@ -33,8 +33,26 @@ public class PackageAddressVO{
     private Integer id;
 
     @ApiModelProperty(value = "是否未默认地址：0：非默认。1：默认")
-    @Excel(name = "是否未默认地址：0：非默认。1：默认")
     private Integer defaultFlag;
+
+    public void setDefaultFlag(Integer defaultFlag) {
+        this.defaultFlag = defaultFlag;
+        switch (defaultFlag) {
+            case 0:
+                defaultFlagStr = "否";
+                break;
+            case 1:
+                defaultFlagStr = "是";
+                break;
+            default:
+                defaultFlagStr = "否";
+        }
+    }
+
+    @ApiModelProperty(value = "是否未默认地址：0：非默认。1：默认")
+    @Excel(name = "是否是默认地址")
+    private String defaultFlagStr;
+
 
     @ApiModelProperty(value = "联系人姓名")
     @Excel(name = "联系人姓名")
@@ -49,11 +67,9 @@ public class PackageAddressVO{
     private String provinceNameZh;
 
     @ApiModelProperty(value = "省 - 简码")
-    @Excel(name = "省 - 简码")
     private String provinceCode;
 
     @ApiModelProperty(value = "省 - 英文名")
-    @Excel(name = "省 - 英文名")
     private String provinceNameEn;
 
     @ApiModelProperty(value = "市 - 名称")
@@ -61,11 +77,9 @@ public class PackageAddressVO{
     private String cityNameZh;
 
     @ApiModelProperty(value = "市 - 简码")
-    @Excel(name = "市 - 简码")
     private String cityCode;
 
     @ApiModelProperty(value = "市 - 英文名")
-    @Excel(name = "市 - 英文名")
     private String cityNameEn;
 
     @ApiModelProperty(value = "区 - 名称")
@@ -73,22 +87,22 @@ public class PackageAddressVO{
     private String districtNameZh;
 
     @ApiModelProperty(value = "区 - 简码")
-    @Excel(name = "区 - 简码")
     private String districtCode;
 
     @ApiModelProperty(value = "区 - 英文名")
-    @Excel(name = "区 - 英文名")
     private String districtNameEn;
 
     @ApiModelProperty(value = "具体地址 - 中文名")
-    @Excel(name = "具体地址 - 中文名")
     private String addressZh;
 
     @ApiModelProperty(value = "具体地址 - 英文名")
-    @Excel(name = "具体地址 - 英文名")
     private String addressEn;
 
-    @ApiModelProperty(value = "列表展示-详细地址",notes = "详细地址由新建时的：省+市+区+具体地址 拼成")
-    @Excel(name = "具体地址 - 英文名")
+    @ApiModelProperty(value = "列表展示-详细地址", notes = "详细地址由新建时的：省+市+区+具体地址 拼成")
+    @Excel(name = "详细地址")
     private String showAddr;
+
+    public void setShowAddr() {
+        this.showAddr = String.join(" ", this.getProvinceNameZh(), this.getCityNameZh(), this.getDistrictNameZh(), this.getAddressZh());
+    }
 }

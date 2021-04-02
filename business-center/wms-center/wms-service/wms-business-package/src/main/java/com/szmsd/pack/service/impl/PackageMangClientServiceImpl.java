@@ -33,9 +33,12 @@ import java.util.*;
  */
 @Service
 public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapper, PackageAddress> implements IPackageMangClientService {
+
     @Resource
     private AwaitUserService awaitUserService;
 
+    @Resource
+    private IPackageMangServeService packageManagementService;
 
     private String getSellCode() {
         UserInfo info = awaitUserService.info();
@@ -52,7 +55,9 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     public PackageAddressVO selectPackageAddressById(String id) {
         PackageAddress packageAddress = baseMapper.selectById(id);
         Optional.ofNullable(packageAddress).orElseThrow(() -> new BaseException("数据不存在！"));
-        return packageAddress.convertThis(PackageAddressVO.class);
+        PackageAddressVO packageAddressVO = packageAddress.convertThis(PackageAddressVO.class);
+        packageAddressVO.setShowAddr();
+        return packageAddressVO;
     }
 
     /**
@@ -63,11 +68,9 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
      */
     @Override
     public List<PackageAddressVO> selectPackageAddressList(PackageMangQueryDTO packageAddress) {
-        List<PackageAddressVO> packageAddressVOS = baseMapper.selectPackageAddressList(packageAddress);
-        packageAddressVOS.forEach(
-                x -> x.setShowAddr(String.join(" ", x.getProvinceNameZh(), x.getCityNameZh(), x.getDistrictNameZh()))
-        );
-        return packageAddressVOS;
+        List<PackageAddressVO> packageAddressVoList = baseMapper.selectPackageAddressList(packageAddress);
+        packageAddressVoList.forEach(PackageAddressVO::setShowAddr);
+        return packageAddressVoList;
     }
 
     /**
@@ -80,6 +83,15 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     @Transactional(rollbackFor = Exception.class)
     public int insertPackageAddress(PackageAddressAddDTO packageAddress) {
         offDefaultAddr(packageAddress);
+        //第一次新增 默认 设置为默认地址
+        Integer integer = baseMapper.selectCount(Wrappers.<PackageAddress>lambdaQuery()
+                .eq(PackageAddress::getSellerCode, getSellCode())
+                .eq(PackageAddress::getDelFlag, 0)
+                .eq(PackageAddress::getDefaultFlag, 1)
+        );
+        if (integer == 0) {
+            packageAddress.setDefaultFlag(1);
+        }
         return baseMapper.insert(packageAddress.convertThis(PackageAddress.class));
     }
 
@@ -89,9 +101,9 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
      * @param packageAddress
      */
     @Transactional(rollbackFor = Exception.class)
-    int offDefaultAddr(PackageAddressAddDTO packageAddress) {
+    void offDefaultAddr(PackageAddressAddDTO packageAddress) {
         if (packageAddress.getDefaultFlag() == 1) {
-            return baseMapper.update(null, Wrappers.<PackageAddress>lambdaUpdate()
+             baseMapper.update(null, Wrappers.<PackageAddress>lambdaUpdate()
                     .eq(PackageAddress::getDelFlag, 0)
                     .eq(PackageAddress::getDefaultFlag, 1)
                     .eq(PackageAddress::getSellerCode, packageAddress.getSellerCode())
@@ -99,7 +111,6 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
                     .set(PackageAddress::getDefaultFlag, 0)
             );
         }
-        return 0;
     }
 
     /**
@@ -157,6 +168,9 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
         return baseMapper.deleteById(id);
     }
 
+    /**
+     * 设置默认地址
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int setDefaultAddr(String id) {
@@ -169,9 +183,9 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
         );
     }
 
-    @Resource
-    private IPackageMangServeService packageManagementService;
-
+    /**
+     * 查询package - 交货管理 - 地址信息表模块列表
+     */
     @Override
     public List<PackageMangVO> selectPackageManagementList(PackageMangQueryDTO packageMangQueryDTO) {
         return packageManagementService.selectPackageManagementList(packageMangQueryDTO);
