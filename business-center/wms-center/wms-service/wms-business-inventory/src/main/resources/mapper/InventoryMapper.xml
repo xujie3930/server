@@ -15,8 +15,9 @@
         <result column="freeze_inventory" property="freezeInventory"/>
         <result column="total_inbound" property="totalInbound"/>
         <result column="total_outbound" property="totalOutbound"/>
-        <result column="sku_length" property="skuLength"/>
         <result column="sku_weight" property="skuWeight"/>
+        <result column="sku_length" property="skuLength"/>
+        <result column="sku_width" property="skuWidth"/>
         <result column="sku_height" property="skuHeight"/>
         <result column="sku_property_name" property="skuPropertyName"/>
         <result column="sku_declared_value" property="skuDeclaredValue"/>
@@ -38,8 +39,9 @@
         t.freeze_inventory,
         t.total_inbound,
         t.total_outbound,
-        sku.init_length sku_length,
         sku.init_weight sku_weight,
+        sku.init_length sku_length,
+        sku.init_width sku_width,
         sku.init_height sku_height,
         sku.product_attribute_name sku_property_name,
         sku.declared_value sku_declared_value,
