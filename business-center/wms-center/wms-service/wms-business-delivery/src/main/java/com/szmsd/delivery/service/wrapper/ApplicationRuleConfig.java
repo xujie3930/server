@@ -27,8 +27,6 @@ public final class ApplicationRuleConfig {
         // 提审配置 - 销毁出库
         Set<String> bringVerifyDestroySet = new HashSet<>();
         bringVerifyDestroySet.add(BringVerifyEnum.BEGIN.name());
-        bringVerifyDestroySet.add(BringVerifyEnum.PRODUCT_INFO.name());
-        bringVerifyDestroySet.add(BringVerifyEnum.SHIPMENT_RULE.name());
         bringVerifyDestroySet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
         bringVerifyDestroySet.add(BringVerifyEnum.END.name());
         bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.DESTROY.getCode(), bringVerifyDestroySet);
