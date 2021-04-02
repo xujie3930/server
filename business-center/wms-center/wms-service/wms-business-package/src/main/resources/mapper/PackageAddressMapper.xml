@@ -48,7 +48,8 @@
         <include refid="Base_Column_List"/>
         from package_address
         <where>
-            delFalg = 0
+            del_flag = 0
         </where>
+        ORDER BY default_flag DESC
     </select>
 </mapper>

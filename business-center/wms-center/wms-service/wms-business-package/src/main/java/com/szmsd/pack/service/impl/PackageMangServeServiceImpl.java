@@ -1,6 +1,7 @@
 package com.szmsd.pack.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.pack.domain.PackageManagement;
 import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -38,7 +40,9 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
      */
     @Override
     public PackageManagement selectPackageManagementById(String id) {
-        return baseMapper.selectById(id);
+        PackageManagement packageManagement = baseMapper.selectById(id);
+        Optional.ofNullable(packageManagement).orElseThrow(() -> new BaseException("数据不存在"));
+        return packageManagement;
     }
 
     @Override

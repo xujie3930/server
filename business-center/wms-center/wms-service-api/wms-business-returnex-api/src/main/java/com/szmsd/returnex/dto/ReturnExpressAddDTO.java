@@ -34,15 +34,15 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "客户代码", example = "UID123456", required = true)
     private String sellerCode;
 
-    @ApiModelProperty(value = "退件来源[ 申请退件 VMS]", example = "RETURN_FORECAST")
+    @ApiModelProperty(value = "退件来源[ 申请退件 VMS]", example = "068001")
     private String returnSource;
 
-    @ApiModelProperty(value = "退件来源[ 申请退件 VMS]", example = "RETURN_FORECAST")
+    @ApiModelProperty(value = "退件来源[ 申请退件 VMS]", example = "WMS退件")
     private String returnSourceStr;
 
-    @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]", example = "OWN_INVENTORY_RETURN")
+    @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]", example = "070003")
     private String returnType;
-    @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]", example = "OWN_INVENTORY_RETURN")
+    @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]", example = "外部渠道退件")
     private String returnTypeStr;
     @StringLength(maxLength = 50, message = "原出库单号错误")
     @ApiModelProperty(value = "退件原始单号 原出库单号", example = "SF123456")
@@ -67,7 +67,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     /**
      * 销毁 包裹上架 拆包检查
      */
-    @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "Destroy", required = true)
+    @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "068002", required = true)
     private String processType;
     @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "销毁", required = true)
     private String processTypeStr;

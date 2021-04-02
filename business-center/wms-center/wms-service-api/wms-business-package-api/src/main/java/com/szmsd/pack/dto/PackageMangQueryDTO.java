@@ -30,10 +30,10 @@ import com.szmsd.common.core.annotation.Excel;
  * @since 2021-04-01
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Accessors(chain = true)
 @ApiModel(value = "揽件列表查询条件", description = "揽件列表查询条件")
-public class PackageMangQueryDTO extends BaseEntity {
+public class PackageMangQueryDTO{
 
     private static final long serialVersionUID = 1L;
 
