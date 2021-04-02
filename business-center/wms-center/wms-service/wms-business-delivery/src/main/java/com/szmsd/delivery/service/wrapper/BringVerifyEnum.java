@@ -91,7 +91,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public boolean condition(ApplicationContext context, ApplicationState currentState) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            DelOutboundOrderTypeEnum orderTypeEnum = DelOutboundOrderTypeEnum.valueOf(delOutbound.getOrderType());
+            DelOutboundOrderTypeEnum orderTypeEnum = DelOutboundOrderTypeEnum.get(delOutbound.getOrderType());
+            if (null == orderTypeEnum) {
+                throw new CommonException("999", "不存在的类型[" + delOutbound.getOrderType() + "]");
+            }
             boolean condition = ApplicationRuleConfig.bringVerifyCondition(orderTypeEnum, currentState.name());
             if (condition) {
                 return otherCondition(context, currentState);
