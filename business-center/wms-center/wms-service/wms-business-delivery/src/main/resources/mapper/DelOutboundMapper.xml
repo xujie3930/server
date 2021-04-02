@@ -4,7 +4,6 @@
 
     <resultMap id="outboundDetailsListMap" type="com.szmsd.delivery.vo.DelOutboundDetailListVO">
         <result property="createTime" column="create_time" />
-        <result property="updateTime" column="update_time" />
         <result property="remark" column="remark" />
         <result property="orderNo" column="order_no" />
         <result property="warehouseCode" column="warehouse_code" />
@@ -49,7 +48,6 @@
     <select id="getDelOutboundAndDetailsList" resultMap="outboundDetailsListMap">
         SELECT
             a.`create_time`,
-            a.`update_time`,
             a.`remark`,
             a.`order_no`,
             a.`warehouse_code`,
