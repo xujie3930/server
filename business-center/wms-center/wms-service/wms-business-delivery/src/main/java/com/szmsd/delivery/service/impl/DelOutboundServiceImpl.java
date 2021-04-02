@@ -465,8 +465,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("999", "出库单集合不能为空");
         }
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
+        // 条件
+        if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
+            updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
+        }
         updateWrapper.in(DelOutbound::getOrderNo, dto.getShipmentList());
+        // 赋值
         updateWrapper.set(DelOutbound::getOperationType, dto.getOperationType());
         updateWrapper.set(DelOutbound::getOperationTime, dto.getOperationTime());
         updateWrapper.set(DelOutbound::getRemark, dto.getRemark());
