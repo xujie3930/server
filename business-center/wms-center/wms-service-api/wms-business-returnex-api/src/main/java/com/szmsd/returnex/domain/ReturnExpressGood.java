@@ -72,6 +72,10 @@ public class ReturnExpressGood extends BaseEntity {
     @Excel(name = "SKU处理备注")
     private String processRemark;
 
+    @ApiModelProperty(value = "逻辑删除")
+    @Excel(name = "逻辑删除")
+    private String delFlag;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

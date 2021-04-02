@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 /**
  * @ClassName: ReturnArrivalReqDTO
@@ -83,6 +84,8 @@ public class ReturnArrivalReqDTO implements BOConvert {
     private String remark;
 
     //TODO 未返回收到的货物
+    @ApiModelProperty(value = "商品sku列表数据")
+    private List<ReturnExpressGoodAddDTO> goodList;
 
 
     @Override

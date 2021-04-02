@@ -1,21 +1,15 @@
 package com.szmsd.returnex.vo;
 
-import com.baomidou.mybatisplus.annotation.*;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.common.core.language.annotation.FieldJsonI18n;
-import com.szmsd.common.core.language.constant.RedisLanguageTable;
-import com.szmsd.common.core.language.enums.LanguageEnum;
-import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
-import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.List;
 
 /**
  * @ClassName: ReturnExpressVO
@@ -115,5 +109,8 @@ public class ReturnExpressVO {
     @ApiModelProperty(value = "处理状态编码")
     @Excel(name = "处理状态编码")
     private String dealStatusStr;
+
+    @ApiModelProperty(value = "处理状态编码")
+    List<ReturnExpressGoodVO> goodList;
 
 }

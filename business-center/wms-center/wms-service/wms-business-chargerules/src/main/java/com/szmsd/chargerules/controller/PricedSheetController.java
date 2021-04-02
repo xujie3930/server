@@ -4,6 +4,7 @@ import com.szmsd.chargerules.dto.PricedSheetDTO;
 import com.szmsd.chargerules.dto.ProductSheetGradeDTO;
 import com.szmsd.chargerules.service.IPricedSheetService;
 import com.szmsd.chargerules.vo.PricedProductSheetVO;
+import com.szmsd.chargerules.vo.PricedSheetExcelInfoVO;
 import com.szmsd.chargerules.vo.PricedSheetInfoVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
@@ -42,6 +43,14 @@ public class PricedSheetController extends BaseController {
     @ApiOperation(value = "根据报价表编号获取产品报价表信息")
     public R<PricedSheetInfoVO> info(@PathVariable("sheetCode") String sheetCode) {
         PricedSheetInfoVO info = iPricedSheetService.info(sheetCode);
+        return R.ok(info);
+    }
+
+    @PreAuthorize("@ss.hasPermi('sheets:info')")
+    @GetMapping("/excel/info/{sheetCode}")
+    @ApiOperation(value = "报价表信息", notes = "excel内容")
+    public R<PricedSheetExcelInfoVO> excelInfo(@PathVariable("sheetCode") String sheetCode) {
+        PricedSheetExcelInfoVO info = iPricedSheetService.excelInfo(sheetCode);
         return R.ok(info);
     }
 

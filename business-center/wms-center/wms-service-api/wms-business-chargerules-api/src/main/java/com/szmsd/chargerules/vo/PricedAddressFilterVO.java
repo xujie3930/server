@@ -1,4 +1,4 @@
-package com.szmsd.http.vo;
+package com.szmsd.chargerules.vo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -7,8 +7,8 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "PricedAddressFilter", description = "地址过滤")
-public class PricedAddressFilter {
+@ApiModel(value = "PricedAddressFilterVO", description = "地址限制")
+public class PricedAddressFilterVO {
 
     @ApiModelProperty("地址限制类型")
     private String addressFilterType;
@@ -16,8 +16,11 @@ public class PricedAddressFilter {
     @ApiModelProperty("物流节点")
     private String toNodeFilter;
 
-    @ApiModelProperty("国家")
-    private String countryFilter;
+    @ApiModelProperty("收件人")
+    private String recipientFilter;
+
+    @ApiModelProperty("街道 - 地址")
+    private String streetFilter;
 
     @ApiModelProperty("城市")
     private String cityFilter;
@@ -25,13 +28,9 @@ public class PricedAddressFilter {
     @ApiModelProperty("省")
     private String provinceFilter;
 
-    @ApiModelProperty("地址")
-    private String streetFilter;
-
-    @ApiModelProperty("收件人")
-    private String recipientFilter;
+    @ApiModelProperty("国家")
+    private String countryFilter;
 
     @ApiModelProperty("邮编")
     private String postCodeFilter;
-
 }
