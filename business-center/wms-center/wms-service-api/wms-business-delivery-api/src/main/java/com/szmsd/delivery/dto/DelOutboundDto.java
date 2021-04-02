@@ -43,7 +43,7 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "挂号")
     private String trackingNo;
 
-    @NotBlank(message = "发货规则不能为空", groups = {ValidationSaveGroup.class, ValidationUpdateGroup.class})
+    @NotBlank(message = "发货规则不能为空")
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
 
@@ -80,7 +80,7 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "提货/快递信息")
     private String deliveryInfo;
 
-    @NotNull(message = "地址信息不能为空", groups = {ValidationSaveGroup.class, ValidationUpdateGroup.class})
+    @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;
 
