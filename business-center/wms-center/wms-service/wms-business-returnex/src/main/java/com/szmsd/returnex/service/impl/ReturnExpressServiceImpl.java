@@ -12,12 +12,10 @@ import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.datascope.service.AwaitUserService;
 import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
 import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
-import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
 import com.szmsd.returnex.config.ConfigStatus;
 import com.szmsd.returnex.constant.ReturnExpressConstant;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
-import com.szmsd.returnex.domain.ReturnExpressGood;
 import com.szmsd.returnex.dto.*;
 import com.szmsd.returnex.enums.ReturnExpressEnums;
 import com.szmsd.returnex.mapper.ReturnExpressMapper;
@@ -30,7 +28,6 @@ import com.szmsd.system.api.model.UserInfo;
 import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,6 +151,11 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Override
     public int insertReturnExpressDetail(ReturnExpressAddDTO returnExpressAddDTO) {
         checkSubmit(returnExpressAddDTO);
+
+        if (StringUtils.isBlank(returnExpressAddDTO.getExpectedNo())){
+            String expectedNo = createExpectedNo();
+            returnExpressAddDTO.setExpectedNo(expectedNo);
+        }
         // 创建退报单 推给VMS仓库
         CreateExpectedReqDTO createExpectedReqDTO = returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class);
         createExpectedReqDTO.setRefOrderNo(returnExpressAddDTO.getFromOrderNo());
@@ -223,16 +225,6 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         }
 
     }
-
-    /**
-     * 批量 新增/修改sku
-     *
-     * @param list
-     */
-    private void addOrUpdateSkuList(List<ReturnExpressGood> list) {
-        returnExpressGoodService.saveOrUpdateBatch(list);
-    }
-
 
     /**
      * 接收VMS仓库退件处理结果
@@ -312,6 +304,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     public ReturnExpressVO getInfo(Long id) {
         ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectById(id);
         Optional.ofNullable(returnExpressDetail).orElseThrow(() -> new BaseException("数据不存在！"));
-        return returnExpressDetail.convertThis(ReturnExpressVO.class);
+        ReturnExpressVO returnExpressVO = returnExpressDetail.convertThis(ReturnExpressVO.class);
+        returnExpressGoodService.queryGoodListByExId(returnExpressVO.getId());
+        return returnExpressVO;
     }
 }

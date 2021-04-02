@@ -3,16 +3,17 @@ package com.szmsd.returnex.dto;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.validator.annotation.StringLength;
 import com.szmsd.returnex.config.BOConvert;
-import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @ClassName: ReturnExpressAddDTO
@@ -48,7 +49,6 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "退件原始单号 原出库单号", example = "SF123456")
     private String fromOrderNo;
 
-    @NotEmpty(message = "预报单号不能为空")
     @ApiModelProperty(value = "预报单号 系统生成", required = true)
     private String expectedNo;
 
@@ -72,13 +72,17 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "销毁", required = true)
     private String processTypeStr;
 
-    @ApiModelProperty(value = "处理方式 编码", example = "Destroy",hidden = true)
+    @ApiModelProperty(value = "处理方式 编码", example = "Destroy", hidden = true)
     private String applyProcessMethod;
-    @ApiModelProperty(value = "处理方式 编码", example = "Destroy",hidden = true)
+    @ApiModelProperty(value = "处理方式 编码", example = "Destroy", hidden = true)
     private String applyProcessMethodStr;
 
     @ApiModelProperty(value = "备注")
     private String processRemark;
+
+    @Valid
+    @ApiModelProperty(value = "商品sku列表数据")
+    private List<ReturnExpressGoodAddDTO> goodList;
 
 
     @Override
