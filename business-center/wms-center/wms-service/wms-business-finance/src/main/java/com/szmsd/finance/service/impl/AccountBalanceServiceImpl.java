@@ -98,7 +98,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public R preOnlineIncome(CustPayDTO dto) {
-        if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
+        if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         RechargesRequestDTO rechargesRequestDTO=new RechargesRequestDTO();
@@ -240,7 +240,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R offlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
-        if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
+        if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         dto.setPayType(BillEnum.PayType.INCOME);
@@ -257,10 +257,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public R balanceExchange(CustPayDTO dto) {
-        if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
+        if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
-        if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode2(),dto.getAmount())){
+        if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode2(),dto.getAmount())){
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
         dto.setPayType(BillEnum.PayType.EXCHANGE);
@@ -313,7 +313,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public R withdraw(CustPayDTO dto) {
-        if(!checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
+        if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
 //        fillCustInfo(loginUser,dto);
