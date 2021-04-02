@@ -90,29 +90,41 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     @Override
     public R update(BasSpecialOperation basSpecialOperation) {
 
-        if (!SpecialOperationStatusEnum.checkStatus(basSpecialOperation.getStatus())) {
-            return R.failed(ErrorMessageEnum.STATUS_RESULT.getMessage());
-        }
-        //审批不通过->系数设为0 审批通过->系数必须大于0
-        if (basSpecialOperation.getStatus().equals(SpecialOperationStatusEnum.REJECT.getStatus())) {
-            basSpecialOperation.setCoefficient(0);
-        } else {
-            if (basSpecialOperation.getCoefficient() == 0) {
-                throw new CommonException("999",ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
-            }
-        }
+        this.checkStatus(basSpecialOperation);
 
-        //校验单号是否存在
-        OrderType factory = orderTypeFactory.getFactory(basSpecialOperation.getOrderType());
-        String customCode = factory.findOrderById(basSpecialOperation.getOrderNo());
-        if (StringUtils.isEmpty(customCode)) {
-            throw new CommonException("999",ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
-        }
+        String customCode = this.getCustomCode(basSpecialOperation);
 
         //修改数据
         baseInfoMapper.updateById(basSpecialOperation);
 
         //查询操作类型对应的收费配置
+        this.charge(basSpecialOperation, customCode);
+
+        // 调用WMS接口回写结果
+        this.sendResult(basSpecialOperation);
+        return R.ok();
+
+    }
+
+    /**
+     * 调用WMS接口回写数据
+     * @param basSpecialOperation basSpecialOperation
+     */
+    private void sendResult(BasSpecialOperation basSpecialOperation) {
+        SpecialOperationResultRequest request = new SpecialOperationResultRequest();
+        BeanUtils.copyProperties(basSpecialOperation, request);
+        R<com.szmsd.http.vo.ResponseVO> responseVOR = htpBasFeignService.specialOperationResult(request);
+        if (responseVOR.getCode() != 200) {
+            throw new CommonException("999",ErrorMessageEnum.UPDATE_OPERATION_TYPE_ERROR.getMessage());
+        }
+    }
+
+    /**
+     * 根据收费规则计算应扣费用并扣费
+     * @param basSpecialOperation basSpecialOperation
+     * @param customCode customCode
+     */
+    private void charge(BasSpecialOperation basSpecialOperation, String customCode) {
         SpecialOperation specialOperation = specialOperationService.details(basSpecialOperation.getOperationType());
         if (specialOperation == null) {
             throw new CommonException("999",ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
@@ -127,16 +139,44 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
             log.error("pay failed: {} {}",r.getData(),r.getMsg());
             throw new CommonException("999",ErrorMessageEnum.PAY_FAILED.getMessage());
         }
+    }
 
-        // 调用WMS接口回写结果
-        SpecialOperationResultRequest request = new SpecialOperationResultRequest();
-        BeanUtils.copyProperties(basSpecialOperation, request);
-        R<com.szmsd.http.vo.ResponseVO> responseVOR = htpBasFeignService.specialOperationResult(request);
-        if (responseVOR.getCode() != 200) {
-            throw new CommonException("999",ErrorMessageEnum.UPDATE_OPERATION_TYPE_ERROR.getMessage());
+    /**
+     * 获取客户id
+     * @param basSpecialOperation basSpecialOperation
+     * @return customCode
+     */
+    private String getCustomCode(BasSpecialOperation basSpecialOperation) {
+        OrderType factory = orderTypeFactory.getFactory(basSpecialOperation.getOrderType());
+        String customCode = factory.findOrderById(basSpecialOperation.getOrderNo());
+        if (StringUtils.isEmpty(customCode)) {
+            throw new CommonException("999",ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
         }
-        return R.ok();
+        return customCode;
+    }
 
+    /**
+     * 校验Status
+     * @param basSpecialOperation basSpecialOperation
+     */
+    private void checkStatus(BasSpecialOperation basSpecialOperation) {
+        if (!SpecialOperationStatusEnum.checkStatus(basSpecialOperation.getStatus())) {
+            throw new CommonException("999",ErrorMessageEnum.STATUS_RESULT.getMessage());
+        }
+
+        BasSpecialOperation check = baseInfoMapper.selectById(basSpecialOperation.getId());
+        if(SpecialOperationStatusEnum.PASS.getStatus().equals(check.getStatus())) {
+            throw new CommonException("999",ErrorMessageEnum.DUPLICATE_APPLY.getMessage());
+        }
+
+        //审批不通过->系数设为0 审批通过->系数必须大于0
+        if (basSpecialOperation.getStatus().equals(SpecialOperationStatusEnum.REJECT.getStatus())) {
+            basSpecialOperation.setCoefficient(0);
+        } else {
+            if (basSpecialOperation.getCoefficient() == 0) {
+                throw new CommonException("999",ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
+            }
+        }
     }
 
     @Override

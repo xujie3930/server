@@ -14,6 +14,8 @@ public enum ErrorMessageEnum {
 
     PAY_FAILED("扣款失败"),
 
+    DUPLICATE_APPLY("审批通过的单请勿重复提交"),
+
     UPDATE_OPERATION_TYPE_ERROR("更新远程特殊操作结果失败");
 
     private final String message;
