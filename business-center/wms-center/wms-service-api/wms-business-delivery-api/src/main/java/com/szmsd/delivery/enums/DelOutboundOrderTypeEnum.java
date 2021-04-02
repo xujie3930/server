@@ -35,6 +35,15 @@ public enum DelOutboundOrderTypeEnum {
         return null;
     }
 
+    public static String getCode(String name) {
+        for (DelOutboundOrderTypeEnum anEnum : DelOutboundOrderTypeEnum.values()) {
+            if (anEnum.getName().equals(name)) {
+                return anEnum.getCode();
+            }
+        }
+        return null;
+    }
+
     public static boolean has(String code) {
         return Objects.nonNull(get(code));
     }
