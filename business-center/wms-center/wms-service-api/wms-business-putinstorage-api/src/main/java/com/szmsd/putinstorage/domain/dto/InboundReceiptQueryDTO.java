@@ -39,6 +39,9 @@ public class InboundReceiptQueryDTO {
     @ApiModelProperty(value = "结束时间 - 由接口调用方定义")
     private String endTime;
 
+    @ApiModelProperty(value = "入库方式编码")
+    private String warehouseMethodCode;
+
     @Getter
     @AllArgsConstructor
     public enum TimeType {
