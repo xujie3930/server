@@ -103,9 +103,13 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         @Override
         public int insertBasMaterial(BasMaterial basMaterial)
         {
+            QueryWrapper<BasMaterial> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("code",basMaterial.getCode());
+            if(super.count(queryWrapper)==1){
+                throw new BaseException("包材编码重复");
+            }
             basMaterial.setCategory("包材");
             basMaterial.setIsActive(true);
-            basMaterial.setCode("WL"+basMaterial.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
             MaterialRequest materialRequest = BeanMapperUtil.map(basMaterial,MaterialRequest.class);
             R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
             if(!r.getData().getSuccess()){

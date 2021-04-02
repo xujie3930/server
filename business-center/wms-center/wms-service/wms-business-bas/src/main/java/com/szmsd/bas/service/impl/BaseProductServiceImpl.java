@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.domain.BasMaterial;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
@@ -216,6 +217,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     @Transactional
     public int insertBaseProduct(BaseProductDto baseProductDto) {
+        QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("code",baseProductDto.getCode());
+        if(super.count(queryWrapper)==1){
+            throw new BaseException("sku编码重复");
+        }
         //默认激活
         baseProductDto.setIsActive(true);
         baseProductDto.setCategory("SKU");
@@ -248,8 +254,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         if (!r.getData().getSuccess()) {
             throw new BaseException("传wms失败:" + r.getData().getMessage());
         }
-        AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(skuCode).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
-        this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+        if(CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())){
+            AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProductDto.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
+            this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+        }
         return baseMapper.insert(baseProduct);
     }
 
@@ -264,6 +272,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         BaseProduct baseProduct = super.getById(baseProductDto.getId());
         ObjectUtil.fillNull(productRequest, baseProduct);
+        if(CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())){
+            AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProduct.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
+            this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+        }
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         if (!r.getData().getSuccess()) {
             throw new BaseException("传wms失败:" + r.getData().getMessage());

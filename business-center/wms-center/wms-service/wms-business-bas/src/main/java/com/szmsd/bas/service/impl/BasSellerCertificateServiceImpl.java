@@ -13,6 +13,7 @@ import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -99,10 +100,12 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         public Boolean insertBasSellerCertificateList(List<BasSellerCertificateDto> basSellerCertificateList){
 
         for(BasSellerCertificateDto b:basSellerCertificateList){
-            String imageCode = b.getSellerCode()+baseSerialNumberService.generateNumber("CERTIFICATE");
-            b.setAttachment(imageCode);
-            AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(imageCode).businessItemNo(null).fileList(b.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SELLER_CERTIFICATE_DOCUMENT).build();
-            this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+            if(CollectionUtils.isNotEmpty(b.getDocumentsFiles())){
+                String imageCode = b.getSellerCode()+baseSerialNumberService.generateNumber("CERTIFICATE");
+                b.setAttachment(imageCode);
+                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(imageCode).businessItemNo(null).fileList(b.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SELLER_CERTIFICATE_DOCUMENT).build();
+                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+            }
         }
 
             return super.saveBatch(BeanMapperUtil.mapList(basSellerCertificateList,BasSellerCertificate.class));
