@@ -23,13 +23,11 @@ public interface ApplicationHandle {
     /**
      * 条件
      *
-     * @param context context
+     * @param context      context
+     * @param currentState currentState
      * @return boolean
      */
-    default boolean condition(ApplicationContext context) {
-        return true;
-    }
-
+    boolean condition(ApplicationContext context, ApplicationState currentState);
 
     /**
      * 次态
@@ -47,7 +45,11 @@ public interface ApplicationHandle {
      */
     void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState);
 
+    /**
+     * 对错误处理进行处理
+     */
     abstract class AbstractApplicationHandle implements ApplicationHandle {
+
         @Override
         public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
 

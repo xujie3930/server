@@ -6,6 +6,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -85,6 +86,29 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     }
 
     static abstract class CommonApplicationHandle extends ApplicationHandle.AbstractApplicationHandle {
+
+        @Override
+        public boolean condition(ApplicationContext context, ApplicationState currentState) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOrderTypeEnum orderTypeEnum = DelOutboundOrderTypeEnum.valueOf(delOutbound.getOrderType());
+            boolean condition = ApplicationRuleConfig.bringVerifyCondition(orderTypeEnum, currentState.name());
+            if (condition) {
+                return otherCondition(context, currentState);
+            }
+            return false;
+        }
+
+        /**
+         * 子级处理条件
+         *
+         * @param context      context
+         * @param currentState currentState
+         * @return boolean
+         */
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            return true;
+        }
 
         @Override
         public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
