@@ -30,7 +30,6 @@ public interface ApplicationHandle {
         return true;
     }
 
-    ;
 
     /**
      * 次态
@@ -40,8 +39,18 @@ public interface ApplicationHandle {
     ApplicationState nextState();
 
     /**
-     * 快照
+     * 错误处理
+     *
+     * @param context      context
+     * @param throwable    throwable
+     * @param currentState currentState
      */
-    default void snapshot() {
+    void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState);
+
+    abstract class AbstractApplicationHandle implements ApplicationHandle {
+        @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+
+        }
     }
 }

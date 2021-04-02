@@ -45,9 +45,14 @@ public enum LocalLanguageEnum {
     NEED_1(NEED, "1", "需要", "needed"),
 
     /** 无效 **/
-    VALID_0(NEED, "0", "无效", "Invalid"),
+    VALID_0(VALID, "0", "无效", "Invalid"),
     /** 有效 **/
-    VALID_1(NEED, "1", "有效", "Effective"),
+    VALID_1(VALID, "1", "有效", "Effective"),
+
+    /** 是 **/
+    YN_Y(YN, "0", "是", "Y"),
+    /** 否 **/
+    YN_N(YN, "1", "否", "N"),
     ;
     
     private LocalLanguageTypeEnum typeEnum;

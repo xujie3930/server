@@ -9,6 +9,8 @@ import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.event.EventUtil;
 import com.szmsd.http.event.RequestLogEvent;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.http.Header;
 import org.slf4j.MDC;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.multipart.MultipartFile;
@@ -100,12 +102,33 @@ public abstract class AbstractHttpRequest {
         Map<String, String> headerMap = getHeaderMap();
         Date requestTime = new Date();
         String requestBody = JSON.toJSONString(object);
-        FileStream responseBody = HttpClientHelper.httpPostStream(url, headerMap, requestBody);
+        // 调用获取文件流的方法
+        FileStream responseBody = null;
+        HttpResponseBody httpResponseBody = HttpClientHelper.httpPostStream(url, headerMap, requestBody);
+        if (httpResponseBody instanceof HttpResponseBody.HttpResponseByteArrayWrapper) {
+            responseBody = new FileStream();
+            HttpResponseBody.HttpResponseByteArrayWrapper httpResponseByteArrayWrapper = (HttpResponseBody.HttpResponseByteArrayWrapper) httpResponseBody;
+            Header[] headers = httpResponseByteArrayWrapper.getHeaders();
+            byte[] byteArray = httpResponseByteArrayWrapper.getByteArray();
+            if (ArrayUtils.isNotEmpty(headers)) {
+                for (Header header : headers) {
+                    if (null == header) {
+                        continue;
+                    }
+                    if ("Content-Disposition".equals(header.getName())) {
+                        responseBody.setContentDisposition(header.getValue());
+                    }
+                }
+            }
+            if (null != byteArray) {
+                responseBody.setInputStream(byteArray);
+            }
+        }
         addLog(url, "POST", headerMap, requestBody, requestTime, "FileInputStream");
         return responseBody;
     }
 
-    FileStream httpGetFile(String api, Object object) {
+    HttpResponseBody httpGetFile(String api, Object object) {
         String url = getUrl() + api;
         Map<String, String> headerMap = getHeaderMap();
         Date requestTime = new Date();
@@ -113,9 +136,9 @@ public abstract class AbstractHttpRequest {
         if (null != object) {
             requestBody = JSON.toJSONString(object);
         }
-        FileStream responseBody = HttpClientHelper.httpPostStream(url, headerMap, requestBody);
+        HttpResponseBody httpResponseBody = HttpClientHelper.httpGetStream(url, headerMap, requestBody);
         addLog(url, "POST", headerMap, requestBody, requestTime, "FileInputStream");
-        return responseBody;
+        return httpResponseBody;
     }
 
     String httpPostMuFile(String api, Object object, MultipartFile file, String... pathVariable) {

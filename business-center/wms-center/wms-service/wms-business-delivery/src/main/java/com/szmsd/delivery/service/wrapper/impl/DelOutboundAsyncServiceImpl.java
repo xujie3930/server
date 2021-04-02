@@ -1,25 +1,13 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
-import cn.hutool.core.codec.Base64;
-import com.szmsd.common.core.constant.Constants;
-import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.domain.DelOutboundCharge;
-import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
-import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
-import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
-import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
-import com.szmsd.delivery.util.Utils;
+import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.finance.api.feign.RechargesFeignService;
-import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
-import com.szmsd.http.dto.*;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * @author zhangyuyuan
@@ -63,6 +46,19 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     public int shipmentPacking(Long id) {
         // 获取新的出库单信息
         DelOutbound delOutbound = this.delOutboundService.getById(id);
+        if (Objects.isNull(delOutbound)) {
+            throw new CommonException("999", "单据不存在");
+        }
+        ApplicationContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
+        ShipmentEnum currentState;
+        String shipmentState = delOutbound.getShipmentState();
+        if (StringUtils.isEmpty(shipmentState)) {
+            currentState = ShipmentEnum.BEGIN;
+        } else {
+            currentState = ShipmentEnum.get(shipmentState);
+        }
+        new ApplicationContainer(context, currentState, ShipmentEnum.END, ShipmentEnum.BEGIN).action();
+        /*
         DelOutbound updateDelOutbound = new DelOutbound();
         updateDelOutbound.setId(id);
         try {
@@ -87,47 +83,57 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             // 处理物流规则是None
             if (StringUtils.isNotEmpty(orderNumber)) {
                 // 获取标签
-                FileStream fileStream = this.htpCarrierClientService.label(orderNumber);
-                // 保存文件
-                File file = new File(this.basedir + "/shipment/label");
-                if (!file.exists()) {
-                    FileUtils.forceMkdir(file);
-                }
-                byte[] inputStream;
-                if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
-                    File labelFile = new File(file.getPath() + "/" + orderNumber);
-                    FileOutputStream fileOutputStream = null;
-                    ByteArrayInputStream byteArrayInputStream = null;
-                    try {
-                        fileOutputStream = new FileOutputStream(labelFile);
-                        byteArrayInputStream = new ByteArrayInputStream(inputStream);
-                        byte[] read = new byte[1024];
-                        if (byteArrayInputStream.read(read) != -1) {
-                            fileOutputStream.write(read);
+                ResponseObject<FileStream, ProblemDetails> responseObject = this.htpCarrierClientService.label(orderNumber);
+                if (null != responseObject) {
+                    if (responseObject.isSuccess()) {
+                        FileStream fileStream = responseObject.getObject();
+                        // 保存文件
+                        File file = new File(this.basedir + "/shipment/label");
+                        if (!file.exists()) {
+                            FileUtils.forceMkdir(file);
                         }
-                        fileOutputStream.flush();
-                        fileOutputStream.close();
-                    } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
-                    } finally {
-                        if (null != fileOutputStream) {
-                            fileOutputStream.flush();
-                            fileOutputStream.close();
+
+                        byte[] inputStream;
+                        if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
+                            File labelFile = new File(file.getPath() + "/" + orderNumber);
+                            FileOutputStream fileOutputStream = null;
+                            ByteArrayInputStream byteArrayInputStream = null;
+                            try {
+                                fileOutputStream = new FileOutputStream(labelFile);
+                                byteArrayInputStream = new ByteArrayInputStream(inputStream);
+                                byte[] read = new byte[1024];
+                                if (byteArrayInputStream.read(read) != -1) {
+                                    fileOutputStream.write(read);
+                                }
+                                fileOutputStream.flush();
+                                fileOutputStream.close();
+                            } catch (Exception e) {
+                                logger.error(e.getMessage(), e);
+                            } finally {
+                                if (null != fileOutputStream) {
+                                    fileOutputStream.flush();
+                                    fileOutputStream.close();
+                                }
+                            }
+                            if (null != byteArrayInputStream) {
+                                try {
+                                    String encode = Base64.encode(byteArrayInputStream);
+                                    ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+                                    shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getRefOrderNo());
+                                    shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+                                    shipmentLabelChangeRequestDto.setLabel(encode);
+                                    this.htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
+                                } catch (Exception e) {
+                                    logger.error(e.getMessage(), e);
+                                } finally {
+                                    byteArrayInputStream.close();
+                                }
+                            }
                         }
-                    }
-                    if (null != byteArrayInputStream) {
-                        try {
-                            String encode = Base64.encode(byteArrayInputStream);
-                            ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
-                            shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getRefOrderNo());
-                            shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
-                            shipmentLabelChangeRequestDto.setLabel(encode);
-                            this.htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
-                        } catch (Exception e) {
-                            logger.error(e.getMessage(), e);
-                        } finally {
-                            byteArrayInputStream.close();
-                        }
+                    } else {
+                        // 计算失败
+                        String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "获取标签文件流失败");
+                        throw new CommonException("999", exceptionMessage);
                     }
                 }
             }
@@ -235,6 +241,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     updateDelOutbound.setAmount(totalAmount);
                     updateDelOutbound.setCurrencyCode(totalCurrencyCode);
                     this.delOutboundService.updateById(updateDelOutbound);
+                } else {
+                    // 计算失败
+                    String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "计算包裹费用失败2");
+                    throw new CommonException("999", exceptionMessage);
                 }
             }
         } catch (CommonException e) {
@@ -249,7 +259,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             String exceptionMessage = "提审操作失败";
             this.delOutboundService.bringVerifyFail(id, exceptionMessage);
             throw new CommonException("999", exceptionMessage);
-        }
+        }*/
         return 1;
     }
 }

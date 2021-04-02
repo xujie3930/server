@@ -26,6 +26,9 @@ public enum LocalLanguageTypeEnum {
     NEED,
 
     /** 是否有效 **/
-    VALID
+    VALID,
+
+    /** 是否 **/
+    YN,
     ;
 }

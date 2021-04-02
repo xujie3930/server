@@ -39,6 +39,7 @@ public class BasWarehouseVO {
     private Integer address;
 
     @ApiModelProperty(value = "VAT")
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.YN)
     private String isCheckVat;
 
     @ApiModelProperty(value = "状态：0无效，1有效")

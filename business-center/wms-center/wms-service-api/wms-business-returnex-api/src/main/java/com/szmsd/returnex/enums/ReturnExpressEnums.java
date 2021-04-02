@@ -10,6 +10,7 @@ import java.util.Arrays;
  * @Author: 11
  * @Date: 2021/3/27 16:36
  */
+@Deprecated
 public class ReturnExpressEnums {
 
     /**
@@ -40,6 +41,7 @@ public class ReturnExpressEnums {
      */
     @Getter
     @AllArgsConstructor
+    @Deprecated
     public enum ApplyProcessMethodEnum {
         /**
          * TODO 未定
@@ -56,6 +58,7 @@ public class ReturnExpressEnums {
      */
     @Getter
     @AllArgsConstructor
+    @Deprecated
     public enum ReturnSourceEnum {
         /**
          * 申请退件 预约退件
@@ -78,6 +81,7 @@ public class ReturnExpressEnums {
      */
     @Getter
     @AllArgsConstructor
+    @Deprecated
     public enum ReturnTypeEnum {
         /**
          * 自有库存退件 转运单退件 外部渠道退件
@@ -93,6 +97,7 @@ public class ReturnExpressEnums {
      */
     @Getter
     @AllArgsConstructor
+    @Deprecated
     public enum WarehouseEnum {
         /**
          * sz
@@ -107,6 +112,7 @@ public class ReturnExpressEnums {
      */
     @Getter
     @AllArgsConstructor
+    @Deprecated
     public enum DealStatusEnum {
         /**
          * sz
@@ -128,6 +134,7 @@ public class ReturnExpressEnums {
      */
     @Getter
     @AllArgsConstructor
+    @Deprecated
     public enum OverdueEnum {
         /**
          * sz
