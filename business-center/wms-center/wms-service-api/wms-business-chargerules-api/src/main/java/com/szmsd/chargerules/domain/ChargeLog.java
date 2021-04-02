@@ -49,6 +49,9 @@ public class ChargeLog extends BaseEntity {
     @ApiModelProperty(value = "是否成功")
     private Boolean success;
 
+    @ApiModelProperty(value = "信息")
+    private String message;
+
     @ApiModelProperty(value = "版本号")
     private Long version;
 
