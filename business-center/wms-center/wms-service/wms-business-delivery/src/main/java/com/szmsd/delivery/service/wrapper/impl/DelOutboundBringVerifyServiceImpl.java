@@ -12,6 +12,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
@@ -223,7 +224,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 查询地址信息
         DelOutboundAddress address = this.delOutboundAddressService.getByOrderNo(orderNo);
         if (null == address) {
-            throw new CommonException("999", "收货地址信息不存在");
+            // 普通出口需要收货地址
+            if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())) {
+                throw new CommonException("999", "收货地址信息不存在");
+            }
         }
         // 查询sku信息
         List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
@@ -236,10 +240,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             throw new CommonException("999", "仓库信息不存在");
         }
         // 查询国家信息，收货地址所在的国家
-        R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(address.getCountryCode());
-        BasRegionSelectListVO country = R.getDataAndException(countryR);
-        if (null == country) {
-            throw new CommonException("999", "国家信息不存在");
+        BasRegionSelectListVO country = null;
+        if (null != address) {
+            R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(address.getCountryCode());
+            country = R.getDataAndException(countryR);
+            if (null == country) {
+                throw new CommonException("999", "国家信息不存在");
+            }
         }
         // 查询sku信息
         BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
@@ -403,9 +410,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setPackingRule(delOutbound.getPackingRule());
         createShipmentRequestDto.setRemark(delOutbound.getRemark());
         createShipmentRequestDto.setRefOrderNo(delOutbound.getOrderNo());
-        createShipmentRequestDto.setAddress(new ShipmentAddressDto(address.getConsignee(),
-                address.getCountryCode(), country.getName(), address.getZone(), address.getStateOrProvince(), address.getCity(),
-                address.getStreet1(), address.getStreet2(), address.getStreet3(), address.getPostCode(), address.getPhoneNo(), address.getEmail()));
+        if (null != address) {
+            createShipmentRequestDto.setAddress(new ShipmentAddressDto(address.getConsignee(),
+                    address.getCountryCode(), country.getName(), address.getZone(), address.getStateOrProvince(), address.getCity(),
+                    address.getStreet1(), address.getStreet2(), address.getStreet3(), address.getPostCode(), address.getPhoneNo(), address.getEmail()));
+        }
         List<ShipmentDetailInfoDto> details = new ArrayList<>();
         for (DelOutboundDetail detail : detailList) {
             details.add(new ShipmentDetailInfoDto(detail.getSku(), detail.getQty(), detail.getNewLabelCode()));
@@ -415,16 +424,17 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setIsFirst(delOutbound.getIsFirst());
         createShipmentRequestDto.setNewSKU(delOutbound.getNewSku());
         CreateShipmentResponseVO createShipmentResponseVO = this.htpOutboundClientService.shipmentCreate(createShipmentRequestDto);
-        if (null != createShipmentResponseVO && null != createShipmentResponseVO.getSuccess()) {
-            if (createShipmentResponseVO.getSuccess()) {
-                return createShipmentResponseVO.getOrderNo();
-            } else {
-                String message = createShipmentResponseVO.getMessage();
-                if (StringUtils.isEmpty(message)) {
-                    message = "创建出库单失败";
+        if (null != createShipmentResponseVO) {
+            if (null != createShipmentResponseVO.getSuccess()) {
+                if (createShipmentResponseVO.getSuccess()) {
+                    return createShipmentResponseVO.getOrderNo();
+                } else {
+                    String message = Utils.defaultValue(createShipmentResponseVO.getMessage(), "创建出库单失败2");
+                    throw new CommonException("999", message);
                 }
-                throw new CommonException("999", message);
             }
+            String message = Utils.defaultValue(createShipmentResponseVO.getErrors(), "创建出库单失败3");
+            throw new CommonException("999", message);
         } else {
             throw new CommonException("999", "创建出库单失败");
         }
