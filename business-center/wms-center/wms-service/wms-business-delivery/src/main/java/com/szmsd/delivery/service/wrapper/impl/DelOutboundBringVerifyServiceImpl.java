@@ -12,7 +12,6 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
@@ -78,10 +77,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         DelOutbound delOutbound = this.delOutboundService.getById(id);
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("999", "单据不存在");
-        }
-        // 可以提审的单据类型：正常出库
-        if (!(DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType()))) {
-            throw new CommonException("999", "单据类型不正确，不能提审");
         }
         // 可以提审的状态：待提审，审核失败
         if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
