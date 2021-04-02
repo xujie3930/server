@@ -43,7 +43,7 @@
         t.after_total_outbound,
         t.operate_on,
         t.remark logs,
-        <![CDATA[ CONCAT(t.type, "&", t.placeholder) logs_language ]]>
+        <![CDATA[ CONCAT(t.type, "&", t.type, t.placeholder) logs_language ]]>
     </sql>
     <select id="selectList" parameterType="com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO" resultMap="InventoryRecordVO">
         SELECT <include refid="Column_List_VO"/>
