@@ -2,9 +2,9 @@ package com.szmsd.finance.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.PreRecharge;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.dto.PreRechargeAuditDTO;
@@ -87,7 +87,10 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             custPayDTO.setCusName(preRecharge.getCusName());
             custPayDTO.setCurrencyCode(preRecharge.getCurrencyCode());
             custPayDTO.setCurrencyName(preRecharge.getCurrencyName());
-            accountBalanceService.offlineIncome(custPayDTO);
+            R r = accountBalanceService.offlineIncome(custPayDTO);
+            if (Constants.SUCCESS != r.getCode()) {
+                return r;
+            }
         }
         preRecharge.setVerifyRemark(dto.getVerifyRemark());
         preRecharge.setVerifyDate(new Date());
