@@ -552,9 +552,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundDetailListVO> getDelOutboundDetailsList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        if (StringUtils.isNotBlank(queryDto.getOrderType())) {
-            queryWrapper.eq("a.order_type", queryDto.getOrderType());
-        }
+        queryWrapper.eq("a.order_type", queryDto.getOrderType());
+        queryWrapper.eq("a.warehouse_code", queryDto.getWarehouseCode());
         return baseMapper.getDelOutboundAndDetailsList(queryWrapper);
     }
 

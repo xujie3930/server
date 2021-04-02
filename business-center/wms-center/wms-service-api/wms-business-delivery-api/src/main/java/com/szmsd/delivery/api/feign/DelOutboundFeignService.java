@@ -66,6 +66,6 @@ public interface DelOutboundFeignService {
      * @param queryDto queryDto
      * @return List<DelOutboundDetailListVO>
      */
-    @GetMapping("/api/outbound/getDelOutboundDetailsList")
+    @PostMapping("/api/outbound/getDelOutboundDetailsList")
     R<List<DelOutboundDetailListVO>> getDelOutboundDetailsList(@RequestBody DelOutboundListQueryDto queryDto);
 }
