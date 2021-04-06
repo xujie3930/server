@@ -16,11 +16,7 @@ import java.util.List;
 @ApiModel(value = "DelOutboundBringVerifyDto", description = "DelOutboundBringVerifyDto对象")
 public class DelOutboundBringVerifyDto implements Serializable {
 
-    @NotNull(message = "ID不能为空")
-    @ApiModelProperty(value = "ID")
-    private Long id;
-
-    @NotNull(message = "ID不能为空")
+    @NotNull(message = "IDS不能为空")
     @ApiModelProperty(value = "IDS")
     private List<Long> ids;
 }
