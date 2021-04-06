@@ -6,10 +6,12 @@ import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.finance.enums.BillEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -43,48 +45,71 @@ public class Shipment extends OrderType {
         if(info.getCode() == 200 && info.getData() != null) {
             return info.getData().getCustomCode();
         }
-        log.error("checkOrderExist error: {}",info.getData());
+        log.error("findOrderById error: {}",info.getData());
         return null;
     }
 
     @Override
     public void operationPay(Operation operation) {
+        String orderType = DelOutboundOrderTypeEnum.getCode(operation.getOperationType());
+        if(StringUtils.isNull(orderType)) {
+            log.error("operationPay() failed: 出库单未找到对应的操作类型, operationType: {}", operation.getOperationType());
+            return;
+        }
         DelOutboundListQueryDto delOutbound = new DelOutboundListQueryDto();
-        delOutbound.setOrderType(operation.getOperationType());
+        delOutbound.setOrderType(orderType);
+        delOutbound.setWarehouseCode(operation.getWarehouseCode());
         R<List<DelOutboundDetailListVO>> rList = delOutboundFeignService.getDelOutboundDetailsList(delOutbound);
         if (rList.getCode() != 200 || CollectionUtils.isEmpty(rList.getData())) {
-            log.error("getDelOutboundDetailsList() failed: {} {}", rList.getMsg(), rList.getData());
+            log.error("operationPay() failed: {} {}", rList.getMsg(), rList.getData());
             return;
         }
         calculate(operation, rList);
     }
 
+    /**
+     * 计算费用
+     * @param operation operation
+     * @param rList list
+     */
     private void calculate(Operation operation, R<List<DelOutboundDetailListVO>> rList) {
         for (DelOutboundDetailListVO datum : rList.getData()) {
             List<DelOutboundDetailDto> details = datum.getDetails();
             if (CollectionUtils.isEmpty(details)) {
-                log.error("pay() {}","出库单对应的详情信息未找到");
+                log.error("calculate() {}","出库单对应的详情信息未找到");
             }
-            int count = details.stream().mapToInt(detail -> detail.getQty().intValue()).sum();
-            BigDecimal amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), count);
-            log.info("orderNo: {} orderType: {} count: {} amount: {}", datum.getOrderNo(), datum.getOrderType(), count, amount);
+            BigDecimal amount;
+            if(operation.isManySku()) {
+                amount = payService.manySkuCalculate(operation.getFirstPrice(), operation.getNextPrice(), details);
+            } else {
+                int count = details.stream().mapToInt(detail -> detail.getQty().intValue()).sum();
+                amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), count);
+            }
+            log.info("orderNo: {} orderType: {} amount: {}", datum.getOrderNo(), datum.getOrderType(), amount);
             pay(datum, amount);
         }
     }
 
+    /**
+     * 支付费用记录
+     * @param datum datum
+     * @param amount amount
+     */
     private void pay(DelOutboundDetailListVO datum, BigDecimal amount) {
         ChargeLogDto chargeLogDto = new ChargeLogDto(datum.getOrderNo(),
                 BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName(),datum.getOrderType(), true);
         ChargeLog exist = chargeLogService.selectLog(chargeLogDto);
-        if (Objects.isNull(exist)) {
+        if (Objects.nonNull(exist)) {
             log.info("该单已经扣过费, chargeLogDto: {}", chargeLogDto);
             return;
         }
+        DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(datum.getOrderType());
+        if(delOutboundOrderTypeEnum != null) datum.setOrderType(delOutboundOrderTypeEnum.getName());
         ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType());
         R resultPay = payService.pay(datum.getCustomCode(), amount, BillEnum.PayMethod.BUSINESS_OPERATE, chargeLog);
-        if (resultPay.getCode() != 200) {
-            log.error("executeOperation() pay failed.. msg: {},data: {}", resultPay.getMsg(), resultPay.getData());
-        }
+        if (resultPay.getCode() != 200)
+            log.error("pay() pay failed.. msg: {},data: {}", resultPay.getMsg(), resultPay.getData());
+
     }
 
 }
