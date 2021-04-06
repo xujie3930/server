@@ -30,8 +30,13 @@ public final class ApplicationRuleConfig {
         bringVerifyDestroySet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
         bringVerifyDestroySet.add(BringVerifyEnum.END.name());
         bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.DESTROY.getCode(), bringVerifyDestroySet);
-        // 提审配置 - 自提出库 （和销毁出库配置一样）
-        bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.SELF_PICK.getCode(), bringVerifyDestroySet);
+        // 提审配置 - 自提出库
+        Set<String> bringVerifySelfPickSet = new HashSet<>();
+        bringVerifySelfPickSet.add(BringVerifyEnum.BEGIN.name());
+        bringVerifySelfPickSet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
+        bringVerifySelfPickSet.add(BringVerifyEnum.SHIPMENT_LABEL.name());
+        bringVerifySelfPickSet.add(BringVerifyEnum.END.name());
+        bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.SELF_PICK.getCode(), bringVerifySelfPickSet);
         // 出库配置 - 销毁出库
         Set<String> shipmentDestroySet = new HashSet<>();
         shipmentDestroySet.add(ShipmentEnum.BEGIN.name());
