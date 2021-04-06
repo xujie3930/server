@@ -150,9 +150,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Override
     public int insertReturnExpressDetail(ReturnExpressAddDTO returnExpressAddDTO) {
+        returnExpressAddDTO.setSellerCode(getSellCode());
         checkSubmit(returnExpressAddDTO);
 
-        if (StringUtils.isBlank(returnExpressAddDTO.getExpectedNo())){
+        if (StringUtils.isBlank(returnExpressAddDTO.getExpectedNo())) {
             String expectedNo = createExpectedNo();
             returnExpressAddDTO.setExpectedNo(expectedNo);
         }
@@ -272,6 +273,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Transactional(rollbackFor = Exception.class)
     public int updateExpressInfo(ReturnExpressAddDTO expressUpdateDTO) {
         log.info("更新退单信息 req:{}", expressUpdateDTO);
+        expressUpdateDTO.setSellerCode(getSellCode());
         AssertUtil.isTrue(expressUpdateDTO.getId() != null && expressUpdateDTO.getId() > 0, "更新异常！");
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
