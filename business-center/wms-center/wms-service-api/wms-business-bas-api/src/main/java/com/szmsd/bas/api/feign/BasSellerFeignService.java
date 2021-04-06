@@ -14,4 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface BasSellerFeignService {
     @PostMapping(value = "/bas/seller/getSellerCode")
     R<String> getSellerCode(@RequestBody BasSeller basSeller);
+    @PostMapping(value = "/bas/seller/getLoginSellerCode")
+    R<String> getLoginSellerCode();
 }

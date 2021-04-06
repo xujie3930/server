@@ -65,6 +65,18 @@ public class BasSellerController extends BaseController{
         return r;
     }
 
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
+    @PostMapping("/getLoginSellerCode")
+    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    public R<String> getLoginSellerCode()
+    {
+        R r = new R();
+        r.setCode(200);
+        r.setData(basSellerService.getLoginSellerCode());
+        r.setMsg("SUCCESS");
+        return r;
+    }
+
 
     /**
     * 导出模块列表

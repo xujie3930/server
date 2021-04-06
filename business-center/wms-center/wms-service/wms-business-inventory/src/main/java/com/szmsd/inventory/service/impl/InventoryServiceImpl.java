@@ -232,7 +232,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         Inventory updateInventory = new Inventory();
         updateInventory.setWarehouseCode(inventory.getWarehouseCode());
         updateInventory.setSku(inventory.getSku());
-        updateInventory.setTotalInbound(inventory.getTotalInbound());
+        updateInventory.setTotalInventory(inventory.getTotalInventory());
         updateInventory.setAvailableInventory(inventory.getAvailableInventory());
         updateInventory.setFreezeInventory(inventory.getFreezeInventory());
         updateInventory.setTotalInbound(inventory.getTotalInbound());
