@@ -17,16 +17,22 @@ CREATE TABLE `return_express_detail` (
      `expected_no` varchar(60) DEFAULT NULL COMMENT '预报单号',
      `return_no` varchar(60) DEFAULT NULL COMMENT 'VMS处理单号',
      `process_type` varchar(50) DEFAULT NULL COMMENT '申请处理方式',
+     `process_type_str` varchar(50) DEFAULT NULL COMMENT '申请处理方式str',
      `return_type` varchar(20) DEFAULT NULL COMMENT '退件类型[ 自有库存退件 转运单退件 外部渠道退件]',
+     `return_type_str` varchar(20) DEFAULT NULL COMMENT '退件类型str[ 自有库存退件 转运单退件 外部渠道退件]',
      `return_channel` varchar(255) DEFAULT NULL COMMENT '退货渠道',
      `warehouse_code` varchar(50) DEFAULT NULL COMMENT '退件目标仓库编码',
+     `warehouse_code_str` varchar(50) DEFAULT NULL COMMENT '退件目标仓库Str',
      `apply_process_method` varchar(50) DEFAULT NULL COMMENT 'VMS仓库使用处理方式',
+     `apply_process_method_str` varchar(50) DEFAULT NULL COMMENT 'VMS仓库使用处理方式Str',
      `arrival_time` datetime DEFAULT NULL COMMENT '到仓时间',
      `finish_time` datetime DEFAULT NULL COMMENT '完成时间',
      `overdue` varchar(255) DEFAULT '0' COMMENT '是否逾期',
      `process_remark` varchar(500) DEFAULT NULL COMMENT '处理备注',
      `return_source` varchar(50) DEFAULT '1' COMMENT '退件单来源[申请退件，vms退件]',
+     `return_source_str` varchar(50) DEFAULT '1' COMMENT '退件单来源Str[申请退件，vms退件]',
      `deal_status` varchar(255) DEFAULT NULL COMMENT '处理状态编码',
+     `deal_status_str` varchar(255) DEFAULT NULL COMMENT '处理状态编码Str',
      PRIMARY KEY (`id`) USING BTREE,
      UNIQUE KEY `uni_expected_no` (`expected_no`),
      UNIQUE KEY `uni_return_no` (`return_no`)
@@ -52,3 +58,4 @@ CREATE TABLE `return_express_good` (
        `del_flag` int(2) NOT NULL DEFAULT '0' COMMENT '逻辑删除标识；2-已删除，0-未删除',
        PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='return_express - 退货单sku详情表';
+

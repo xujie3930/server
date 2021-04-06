@@ -14,6 +14,7 @@ import com.szmsd.pack.vo.PackageMangVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -42,7 +43,7 @@ public class PackageMangClientController extends BaseController {
     @Log(title = "新增地址", businessType = BusinessType.INSERT)
     @PostMapping("/address/add")
     @ApiOperation(value = "地址管理-新增地址", notes = "新增地址")
-    public R add(@RequestBody PackageAddressAddDTO packageAddress) {
+    public R add(@Validated @RequestBody PackageAddressAddDTO packageAddress) {
         return toOk(packageAddressService.insertPackageAddress(packageAddress));
     }
 
@@ -52,7 +53,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:list')")
     @GetMapping("/address/list")
     @ApiOperation(value = "地址管理-列表", notes = "地址信息列表")
-    public TableDataInfo addressList(PackageMangQueryDTO packageAddress) {
+    public TableDataInfo addressList(@Validated PackageMangQueryDTO packageAddress) {
         startPage();
         List<PackageAddressVO> list = packageAddressService.selectPackageAddressList(packageAddress);
         return getDataTable(list);
@@ -65,7 +66,7 @@ public class PackageMangClientController extends BaseController {
     @Log(title = "交货管理", businessType = BusinessType.EXPORT)
     @GetMapping("/address/export")
     @ApiOperation(value = "地址管理-导出", notes = "导出package - 交货管理 - 地址信息表模块列表")
-    public void export(HttpServletResponse response, PackageMangQueryDTO packageAddress) throws IOException {
+    public void export(HttpServletResponse response,@Validated PackageMangQueryDTO packageAddress) throws IOException {
         List<PackageAddressVO> list = packageAddressService.selectPackageAddressList(packageAddress);
         ExcelUtil<PackageAddressVO> util = new ExcelUtil<PackageAddressVO>(PackageAddressVO.class);
         util.exportExcel(response, list, "PackageAddress");
@@ -90,7 +91,7 @@ public class PackageMangClientController extends BaseController {
     @Log(title = "交货管理", businessType = BusinessType.UPDATE)
     @PutMapping("address/edit")
     @ApiOperation(value = "地址管理-修改地址", notes = "修改package - 交货管理 - 地址信息表模块")
-    public R edit(@RequestBody PackageAddressAddDTO packageAddress) {
+    public R edit(@Validated @RequestBody PackageAddressAddDTO packageAddress) {
         return toOk(packageAddressService.updatePackageAddress(packageAddress));
     }
 
@@ -133,7 +134,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:list')")
     @GetMapping("/package/list")
     @ApiOperation(value = "揽件列表-列表", notes = "揽件列表查询")
-    public TableDataInfo packageList(PackageMangQueryDTO packageMangQueryDTO) {
+    public TableDataInfo packageList(@Validated PackageMangQueryDTO packageMangQueryDTO) {
         startPage();
         List<PackageMangVO> list = packageAddressService.selectPackageManagementList(packageMangQueryDTO);
         return getDataTable(list);

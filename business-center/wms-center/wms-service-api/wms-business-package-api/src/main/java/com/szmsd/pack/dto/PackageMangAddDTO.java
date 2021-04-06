@@ -45,7 +45,7 @@ public class PackageMangAddDTO implements BOConvert {
     @Excel(name = "订单号")
     private String orderNo;
 
-    @NotBlank(message = "请先登录用户")
+    //@NotBlank(message = "请先登录用户")
     @ApiModelProperty(value = "用户code", required = true)
     @Excel(name = "用户code")
     private String sellerCode;
@@ -127,6 +127,9 @@ public class PackageMangAddDTO implements BOConvert {
     @ApiModelProperty(value = "货物类型【 0：入库，1：转运】")
     @Excel(name = "货物类型【 0：入库，1：转运】")
     private Integer operationType;
+
+    @ApiModelProperty(value = "备注")
+    private String remake;
 
 
 }

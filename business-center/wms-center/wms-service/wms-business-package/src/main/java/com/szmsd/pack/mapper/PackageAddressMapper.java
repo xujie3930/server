@@ -4,6 +4,7 @@ import com.szmsd.pack.domain.PackageAddress;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.vo.PackageAddressVO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -17,5 +18,5 @@ import java.util.List;
  */
 public interface PackageAddressMapper extends BaseMapper<PackageAddress> {
 
-    List<PackageAddressVO> selectPackageAddressList(PackageMangQueryDTO packageAddress);
+    List<PackageAddressVO> selectPackageAddressList(@Param(value = "cm") PackageMangQueryDTO packageAddress);
 }
