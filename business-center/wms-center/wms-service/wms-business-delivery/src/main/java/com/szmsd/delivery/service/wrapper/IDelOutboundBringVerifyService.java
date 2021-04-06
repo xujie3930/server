@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service.wrapper;
 
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.http.dto.ChargeWrapper;
 import com.szmsd.http.dto.ProblemDetails;
 import com.szmsd.http.dto.ResponseObject;
@@ -17,10 +18,10 @@ public interface IDelOutboundBringVerifyService {
     /**
      * 提审
      *
-     * @param id id
+     * @param dto dto
      * @return int
      */
-    int bringVerify(Long id);
+    int bringVerify(DelOutboundBringVerifyDto dto);
 
     /**
      * 初始化

@@ -12,6 +12,7 @@ import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.datascope.service.AwaitUserService;
 import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
 import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
+import com.szmsd.returnex.api.feign.client.IBasFeignClientService;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
 import com.szmsd.returnex.config.ConfigStatus;
 import com.szmsd.returnex.constant.ReturnExpressConstant;
@@ -23,8 +24,6 @@ import com.szmsd.returnex.service.IReturnExpressGoodService;
 import com.szmsd.returnex.service.IReturnExpressService;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
-import com.szmsd.system.api.domain.SysUser;
-import com.szmsd.system.api.model.UserInfo;
 import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -63,6 +62,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     private BasFeignService basFeignService;
 
     @Resource
+    private IBasFeignClientService iBasFeignClientService;
+
+    @Resource
     private ConfigStatus configStatus;
 
     /**
@@ -72,9 +74,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     private String getSellCode() {
         // UserInfo info = awaitUserService.info();
-        UserInfo info =  new UserInfo();
-        info.setSysUser(new SysUser().setSellerCode("test01"));
-        return Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("用户未登录！"));
+        String loginSellerCode = iBasFeignClientService.getLoginSellerCode();
+        return Optional.ofNullable(loginSellerCode).orElse("");
     }
 
     /**
@@ -140,6 +141,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .in(ReturnExpressDetail::getId, expressAssignDTO.getIds())
                 .set(ReturnExpressDetail::getSellerCode, expressAssignDTO.getSellerCode())
                 .set(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
+                .set(ReturnExpressDetail::getDealStatusStr, configStatus.getDealStatus().getWaitCustomerDealStr())
         );
         return update;
     }
@@ -186,6 +188,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Transactional(rollbackFor = Exception.class)
     public int saveReturnExpressDetail(ReturnExpressDetail returnExpressDetail) {
         returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWmsWaitReceive());
+        returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWmsWaitReceiveStr());
         return returnExpressMapper.insert(returnExpressDetail);
     }
 
@@ -281,6 +284,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
                 .set(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsReceivedDealWay())
+                .set(ReturnExpressDetail::getDealStatusStr, configStatus.getDealStatus().getWmsReceivedDealWayStr())
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
                 .set(StringUtil.isNotBlank(expressUpdateDTO.getFromOrderNo()), ReturnExpressDetail::getFromOrderNo, expressUpdateDTO.getFromOrderNo())
                 .last("LIMIT 1")

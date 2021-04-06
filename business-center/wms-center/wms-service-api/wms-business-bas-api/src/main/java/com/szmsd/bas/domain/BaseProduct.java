@@ -45,28 +45,24 @@ public class BaseProduct extends BaseEntity {
     private String delFlag;
 
     @ApiModelProperty(value = "产品名称")
-    @Excel(name = "名称")
+    @Excel(name = "产品名称")
     private String productName;
 
     @ApiModelProperty(value = "产品编码")
-    @Excel(name = "编码")
+    @Excel(name = "sku编号")
     @TableField("`code`")
     private String code;
 
     @ApiModelProperty(value = "初始重量g")
-    @Excel(name = "初始重量g")
     private Double initWeight;
 
     @ApiModelProperty(value = "初始长 cm")
-    @Excel(name = "初始长 cm")
     private Double initLength;
 
     @ApiModelProperty(value = "初始宽 cm")
-    @Excel(name = "初始宽 cm")
     private Double initWidth;
 
     @ApiModelProperty(value = "初始高 cm")
-    @Excel(name = "初始高 cm")
     private Double initHeight;
 
     @ApiModelProperty(value = "是否激活")
@@ -79,7 +75,6 @@ public class BaseProduct extends BaseEntity {
     private String suffix;
 
     @ApiModelProperty(value = "初始体积 cm3")
-    @Excel(name = "初始体积 cm3")
     private BigDecimal initVolume;
 
     @ApiModelProperty(value = "客户（卖家）编码")
