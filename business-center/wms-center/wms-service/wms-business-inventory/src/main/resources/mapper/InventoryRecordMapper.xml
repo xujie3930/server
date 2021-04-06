@@ -53,6 +53,9 @@
             <if test="type != null and type != ''">AND t.type = #{type}</if>
             <if test="sku != null and sku != ''">AND t.sku = #{sku}</if>
             <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
+            <if test="operator != null and operator != ''">AND t.operator = #{operator}</if>
+            <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
+            <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>
         </where>
         ORDER BY operate_on DESC
     </select>
