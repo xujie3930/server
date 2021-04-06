@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @author zhangyuyuan
  * @date 2021-04-02 11:45
  */
-@Component
+// @Component
 public class DelOutboundPackageQueueTimer {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
