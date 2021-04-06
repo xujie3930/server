@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @Author: 11
  * @Date: 2021/3/27 14:05
  */
-@FeignClient(contextId = "feignClient.IReturnExpressFeignService",value = "wms-business-returnex", fallbackFactory = ReturnExpressFeignFallback.class)
+@FeignClient(contextId = "FeignClient.IReturnExpressFeignService",value = "wms-business-returnex", fallbackFactory = ReturnExpressFeignFallback.class)
 public interface IReturnExpressFeignService {
 
     /**

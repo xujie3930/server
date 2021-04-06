@@ -502,7 +502,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 inventoryOperateListDto.setWarehouseCode(delOutbound.getWarehouseCode());
                 inventoryOperateListDto.setOperateList(operateList);
                 // 扣减库存
-                this.inventoryFeignClientService.unDeductionAndDeduction(inventoryOperateListDto);
+                this.inventoryFeignClientService.deduction(inventoryOperateListDto);
                 // 扣减费用
                 CustPayDTO custPayDTO = new CustPayDTO();
                 custPayDTO.setCusCode(delOutbound.getSellerCode());

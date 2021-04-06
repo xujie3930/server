@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.Date;
-
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "InventoryRecordVO", description = "InventoryRecordVO库存日志")
@@ -59,6 +57,9 @@ public class InventoryRecordVO {
 
     @ApiModelProperty(value = "之后原总出库")
     private Integer afterTotalOutbound;
+
+    @ApiModelProperty(value = "操作人姓名")
+    private String operator;
 
     @ApiModelProperty(value = "操作时间")
     private String operateOn;

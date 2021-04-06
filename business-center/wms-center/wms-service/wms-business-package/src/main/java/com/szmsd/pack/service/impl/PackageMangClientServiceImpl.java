@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.datascope.service.AwaitUserService;
+import com.szmsd.pack.api.feign.client.IBasFeignClientService;
 import com.szmsd.pack.domain.PackageAddress;
 import com.szmsd.pack.dto.PackageAddressAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
@@ -15,13 +16,13 @@ import com.szmsd.pack.service.IPackageMangClientService;
 import com.szmsd.pack.service.IPackageMangServeService;
 import com.szmsd.pack.vo.PackageAddressVO;
 import com.szmsd.pack.vo.PackageMangVO;
-import com.szmsd.system.api.domain.SysUser;
-import com.szmsd.system.api.model.UserInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -40,11 +41,19 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     @Resource
     private IPackageMangServeService packageManagementService;
 
+    @Resource
+    private IBasFeignClientService iBasFeignClientService;
+
+
+    /**
+     * 获取用户sellerCode
+     *
+     * @return
+     */
     private String getSellCode() {
         //UserInfo info = awaitUserService.info();
-        UserInfo info =  new UserInfo();
-        info.setSysUser(new SysUser().setSellerCode("test1"));
-        return Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("用户未登录!"));
+        String loginSellerCode = iBasFeignClientService.getLoginSellerCode();
+        return Optional.ofNullable(loginSellerCode).orElse("");
     }
 
     /**
