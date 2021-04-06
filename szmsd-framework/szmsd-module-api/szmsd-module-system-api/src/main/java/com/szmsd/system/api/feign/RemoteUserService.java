@@ -47,6 +47,9 @@ public interface RemoteUserService {
     @PostMapping(value = "/user/getNameByNickName")
     R<SysUser> getNameByNickName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType);
 
+    @PostMapping(value = "/user/getNameByUserName")
+    R<SysUser> getNameByUserName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType);
+
     /**
      * 新增用户
      */

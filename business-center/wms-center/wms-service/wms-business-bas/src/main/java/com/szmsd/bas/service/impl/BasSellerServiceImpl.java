@@ -37,6 +37,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.annotation.Resource;
@@ -117,6 +118,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         * @param dto 模块
         * @return 结果
         */
+        @Transactional
         @Override
         public R<Boolean> insertBasSeller(HttpServletRequest request, BasSellerDto dto)
         {
@@ -176,19 +178,21 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 return r;
             }
             BasSeller basSeller = BeanMapperUtil.map(dto, BasSeller.class);
-            basSeller.setState(false);
-            basSeller.setIsActive(false);
+            basSeller.setState(true);
+            basSeller.setIsActive(true);
             basSeller.setEmail(basSeller.getInitEmail());
 
             //查询客户经理
             if(StringUtils.isNotEmpty(dto.getServiceManagerName())){
                 SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
-                sysUserByTypeAndUserType.setNickName(dto.getServiceManagerName());
-                R result = remoteUserService.getNameByNickName(sysUserByTypeAndUserType);
+                sysUserByTypeAndUserType.setUsername(dto.getServiceManagerName());
+                sysUserByTypeAndUserType.setUserType("00");
+                R result = remoteUserService.getNameByUserName(sysUserByTypeAndUserType);
+                basSeller.setServiceManagerName(null);
                 if(result.getCode()==200){
                     SysUser sysUser = (SysUser)result.getData();
-                    basSeller.setServiceManager(sysUser.getUserName());
-                    basSeller.setServiceManagerName(sysUser.getNickName());
+                    basSeller.setServiceManager(sysUser.getUserId().toString());
+                    basSeller.setServiceManagerName(sysUser.getUserName());
                 }
             }
             //注册到系统用户表
@@ -207,8 +211,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             sysUserDto.setSellerCode(dto.getSellerCode());
             R sysUserResult = remoteUserService.baseCopyUserAdd(sysUserDto);
             if(sysUserResult.getCode() == -200){
-                r.setData(false);
-                r.setMsg(sysUserResult.getMsg());
+                throw new BaseException("用户注册失败");
             }
             //注册到wms
             SellerRequest sellerRequest = BeanMapperUtil.map(dto,SellerRequest.class);

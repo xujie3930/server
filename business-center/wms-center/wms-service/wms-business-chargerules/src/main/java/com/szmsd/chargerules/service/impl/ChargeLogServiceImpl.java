@@ -28,18 +28,10 @@ public class ChargeLogServiceImpl implements IChargeLogService {
     @Override
     public ChargeLog selectLog(ChargeLogDto chargeLogDto) {
         LambdaQueryWrapper<ChargeLog> query = Wrappers.lambdaQuery();
-        if (StringUtils.isNotBlank(chargeLogDto.getOrderNo())) {
-            query.eq(ChargeLog::getOrderNo, chargeLogDto.getOrderNo());
-        }
-        if (StringUtils.isNotBlank(chargeLogDto.getPayMethod())) {
-            query.eq(ChargeLog::getPayMethod, chargeLogDto.getPayMethod());
-        }
-        if (StringUtils.isNotBlank(chargeLogDto.getOperationType())) {
-            query.eq(ChargeLog::getOperationType, chargeLogDto.getOperationType());
-        }
-        if (StringUtils.isNotNull(chargeLogDto.getSuccess())) {
-            query.eq(ChargeLog::getSuccess, chargeLogDto.getSuccess());
-        }
+        query.eq(ChargeLog::getOrderNo, chargeLogDto.getOrderNo());
+        query.eq(ChargeLog::getPayMethod, chargeLogDto.getPayMethod());
+        query.eq(ChargeLog::getOperationType, chargeLogDto.getOperationType());
+        query.eq(ChargeLog::getSuccess, chargeLogDto.getSuccess());
         return chargeLogMapper.selectOne(query);
     }
 }

@@ -154,6 +154,19 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         return flag?R.ok():R.failed("余额不足");
     }
 
+    @Transactional
+    @Override
+    public R feeDeductions(CustPayDTO dto) {
+        if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+        }
+        dto.setPayType(BillEnum.PayType.PAYMENT);
+        AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
+        boolean flag=abstractPayFactory.updateBalance(dto);
+        return flag?R.ok():R.failed("余额不足");
+    }
+
+    @Transactional
     @Override
     public R freezeBalance(CusFreezeBalanceDTO cfbDTO) {
         CustPayDTO dto=new CustPayDTO();
@@ -168,6 +181,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         return flag?R.ok():R.failed("可用余额不足以冻结");
     }
 
+    @Transactional
     @Override
     public R thawBalance(CusFreezeBalanceDTO cfbDTO) {
         CustPayDTO dto=new CustPayDTO();

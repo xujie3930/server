@@ -45,7 +45,7 @@ public class InboundReceiptQueryDTO {
     @Getter
     @AllArgsConstructor
     public enum TimeType {
-        /** 创建提单 **/
+        /** 入库单创建时间 **/
         CR("t.create_time"),
         ;
         private String field;

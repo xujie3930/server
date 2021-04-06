@@ -35,6 +35,8 @@ import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.*;
+import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.ShipmentCancelRequestDto;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -76,6 +78,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private IHtpOutboundClientService htpOutboundClientService;
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
+    @Autowired
+    private RechargesFeignService rechargesFeignService;
 
     /**
      * 查询出库单模块
@@ -461,7 +465,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional
     @Override
     public int shipmentOperationType(ShipmentRequestDto dto) {
-        if (CollectionUtils.isEmpty(dto.getShipmentList())) {
+        List<String> orderNos = dto.getShipmentList();
+        if (CollectionUtils.isEmpty(orderNos)) {
             throw new CommonException("999", "出库单集合不能为空");
         }
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
@@ -469,7 +474,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
         }
-        updateWrapper.in(DelOutbound::getOrderNo, dto.getShipmentList());
+        updateWrapper.in(DelOutbound::getOrderNo, orderNos);
         // 赋值
         updateWrapper.set(DelOutbound::getOperationType, dto.getOperationType());
         updateWrapper.set(DelOutbound::getOperationTime, dto.getOperationTime());
@@ -480,7 +485,31 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         // 仓库已发货
         else if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
+            // 订单完成
             updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.COMPLETED.getCode());
+            Set<String> orderNoSet = new HashSet<>(orderNos);
+            for (String orderNo : orderNoSet) {
+                // 查询出库单信息
+                DelOutbound delOutbound = this.getByOrderNo(orderNo);
+                // 查询明细
+                List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
+                InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
+                List<InventoryOperateDto> operateList = new ArrayList<>();
+                for (DelOutboundDetail detail : details) {
+                    operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+                }
+                inventoryOperateListDto.setInvoiceNo(orderNo);
+                inventoryOperateListDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                inventoryOperateListDto.setOperateList(operateList);
+                // 扣减库存
+                this.inventoryFeignClientService.unDeductionAndDeduction(inventoryOperateListDto);
+                // 扣减费用
+                CustPayDTO custPayDTO = new CustPayDTO();
+                custPayDTO.setCusCode(delOutbound.getSellerCode());
+                custPayDTO.setCurrencyCode(delOutbound.getCurrencyCode());
+                custPayDTO.setAmount(delOutbound.getAmount());
+                this.rechargesFeignService.feeDeductions(custPayDTO);
+            }
         }
         return this.baseMapper.update(null, updateWrapper);
     }
@@ -601,6 +630,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         delOutbound.setExceptionMessage("");
         this.updateById(delOutbound);
+    }
+
+    @Override
+    public DelOutbound getByOrderNo(String orderNo) {
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
+        return this.getOne(queryWrapper);
     }
 }
 

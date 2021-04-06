@@ -196,6 +196,20 @@ public class SysUserController extends BaseController {
     }
 
     /**
+     * feign获取当前用户信息
+     */
+    @PostMapping("/getNameByUserName")
+    @ApiOperation(httpMethod = "POST", value = "获取当前用户信息")
+    public R<SysUser> getNameByUserName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType) {
+        SysUser sysUser = userService.selectUserByUserName(sysUserByTypeAndUserType.getUsername(), sysUserByTypeAndUserType.getUserType());
+        if (sysUser!=null) {
+            return R.ok(sysUser);
+        }else{
+            return R.failed("没有查询到结果");
+        }
+    }
+
+    /**
      * 登录获取用户信息
      *
      * @return 用户信息

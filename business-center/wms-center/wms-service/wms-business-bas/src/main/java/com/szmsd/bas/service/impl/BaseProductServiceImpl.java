@@ -217,6 +217,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     @Transactional
     public int insertBaseProduct(BaseProductDto baseProductDto) {
+        if(StringUtils.isEmpty(baseProductDto.getCode())) {
+            String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
+            baseProductDto.setCode(skuCode);
+        }
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code",baseProductDto.getCode());
         if(super.count(queryWrapper)==1){
@@ -225,13 +229,6 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         //默认激活
         baseProductDto.setIsActive(true);
         baseProductDto.setCategory("SKU");
-        //卖家编码
-       /* QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
-        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
-        BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
-        baseProductDto.setSellerCode(basSeller.getSellerCode());*/
-       String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
-        baseProductDto.setCode(skuCode);
         //默认仓库没有验收
         baseProductDto.setWarehouseAcceptance(false);
 

@@ -33,6 +33,12 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
             }
 
             @Override
+            public R feeDeductions(CustPayDTO dto) {
+                log.info("费扣款失败，服务调用降级");
+                return R.failed();
+            }
+
+            @Override
             public R freezeBalance(CusFreezeBalanceDTO dto) {
                 log.info("冻结余额失败，服务调用降级");
                 return R.failed();
