@@ -144,7 +144,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             throw new CommonException("999", "查询SKU信息失败");
         }
         // 查询sku包材信息
-        List<String> bindCodeList = new ArrayList<>();
+        /*List<String> bindCodeList = new ArrayList<>();
         for (BaseProduct baseProduct : productList) {
             if (StringUtils.isEmpty(baseProduct.getBindCode())) {
                 continue;
@@ -156,8 +156,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             conditionQueryDto = new BaseProductConditionQueryDto();
             conditionQueryDto.setSkus(bindCodeList);
             packingList = this.basePackingClientService.queryPackingList(conditionQueryDto);
-        }
-        return new DelOutboundWrapperContext(delOutbound, address, detailList, warehouse, country, productList, packingList);
+        }*/
+        return new DelOutboundWrapperContext(delOutbound, address, detailList, warehouse, country, productList, null);
     }
 
     @Override
