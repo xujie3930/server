@@ -29,6 +29,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
+import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.util.PackageInfo;
@@ -80,6 +81,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private RemoteAttachmentService remoteAttachmentService;
     @Autowired
     private RechargesFeignService rechargesFeignService;
+    @Autowired
+    private IDelOutboundCompletedService delOutboundCompletedService;
 
     /**
      * 查询出库单模块
@@ -485,31 +488,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         // 仓库已发货
         else if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
-            // 订单完成
-            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.COMPLETED.getCode());
-            Set<String> orderNoSet = new HashSet<>(orderNos);
-            for (String orderNo : orderNoSet) {
-                // 查询出库单信息
-                DelOutbound delOutbound = this.getByOrderNo(orderNo);
-                // 查询明细
-                List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
-                InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
-                List<InventoryOperateDto> operateList = new ArrayList<>();
-                for (DelOutboundDetail detail : details) {
-                    operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
-                }
-                inventoryOperateListDto.setInvoiceNo(orderNo);
-                inventoryOperateListDto.setWarehouseCode(delOutbound.getWarehouseCode());
-                inventoryOperateListDto.setOperateList(operateList);
-                // 扣减库存
-                this.inventoryFeignClientService.deduction(inventoryOperateListDto);
-                // 扣减费用
-                CustPayDTO custPayDTO = new CustPayDTO();
-                custPayDTO.setCusCode(delOutbound.getSellerCode());
-                custPayDTO.setCurrencyCode(delOutbound.getCurrencyCode());
-                custPayDTO.setAmount(delOutbound.getAmount());
-                this.rechargesFeignService.feeDeductions(custPayDTO);
-            }
+            // 增加出库单已完成记录
+            this.delOutboundCompletedService.add(orderNos);
         }
         return this.baseMapper.update(null, updateWrapper);
     }
@@ -637,6 +617,39 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
         return this.getOne(queryWrapper);
+    }
+
+    @Transactional
+    @Override
+    public void completed(String orderNo) {
+        DelOutbound delOutbound = this.getByOrderNo(orderNo);
+        if (null == delOutbound) {
+            return;
+        }
+        // 订单完成
+        if (DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())) {
+            return;
+        }
+        // 查询明细
+        List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
+        InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
+        List<InventoryOperateDto> operateList = new ArrayList<>();
+        for (DelOutboundDetail detail : details) {
+            operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+        }
+        inventoryOperateListDto.setInvoiceNo(orderNo);
+        inventoryOperateListDto.setWarehouseCode(delOutbound.getWarehouseCode());
+        inventoryOperateListDto.setOperateList(operateList);
+        // 扣减库存
+        this.inventoryFeignClientService.deduction(inventoryOperateListDto);
+        // 扣减费用
+        CustPayDTO custPayDTO = new CustPayDTO();
+        custPayDTO.setCusCode(delOutbound.getSellerCode());
+        custPayDTO.setCurrencyCode(delOutbound.getCurrencyCode());
+        custPayDTO.setAmount(delOutbound.getAmount());
+        this.rechargesFeignService.feeDeductions(custPayDTO);
+        // 更新出库单状态为已完成
+        this.updateState(delOutbound.getId(), DelOutboundStateEnum.COMPLETED);
     }
 }
 

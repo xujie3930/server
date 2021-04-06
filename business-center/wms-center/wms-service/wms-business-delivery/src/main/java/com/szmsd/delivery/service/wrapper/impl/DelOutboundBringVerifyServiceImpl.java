@@ -12,6 +12,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
@@ -73,27 +74,35 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IHtpIBasClientService htpIBasClientService;
 
     @Override
-    public int bringVerify(Long id) {
+    public int bringVerify(DelOutboundBringVerifyDto dto) {
+        List<Long> ids = dto.getIds();
+        if (CollectionUtils.isEmpty(ids)) {
+            return 0;
+        }
         // 根据id查询出库信息
-        DelOutbound delOutbound = this.delOutboundService.getById(id);
-        if (Objects.isNull(delOutbound)) {
-            throw new CommonException("999", "单据不存在");
+        List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
+        if (CollectionUtils.isEmpty(delOutboundList)) {
+            for (DelOutbound delOutbound : delOutboundList) {
+                if (Objects.isNull(delOutbound)) {
+                    throw new CommonException("999", "单据不存在");
+                }
+                // 可以提审的状态：待提审，审核失败
+                if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
+                        || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
+                    throw new CommonException("999", "单据状态不正确，不能提审");
+                }
+                ApplicationContext context = this.initContext(delOutbound);
+                BringVerifyEnum currentState;
+                String bringVerifyState = delOutbound.getBringVerifyState();
+                if (StringUtils.isEmpty(bringVerifyState)) {
+                    currentState = BringVerifyEnum.BEGIN;
+                } else {
+                    currentState = BringVerifyEnum.get(bringVerifyState);
+                }
+                new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN).action();
+            }
         }
-        // 可以提审的状态：待提审，审核失败
-        if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
-                || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
-            throw new CommonException("999", "单据状态不正确，不能提审");
-        }
-        ApplicationContext context = this.initContext(delOutbound);
-        BringVerifyEnum currentState;
-        String bringVerifyState = delOutbound.getBringVerifyState();
-        if (StringUtils.isEmpty(bringVerifyState)) {
-            currentState = BringVerifyEnum.BEGIN;
-        } else {
-            currentState = BringVerifyEnum.get(bringVerifyState);
-        }
-        new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN).action();
-        return 1;
+        return delOutboundList.size();
         // 修改单据状态为提审中
         /*Long id1 = delOutbound.getId();
         this.delOutboundService.updateState(id1, DelOutboundStateEnum.UNDER_REVIEW);

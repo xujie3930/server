@@ -175,5 +175,12 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return DelOutbound
      */
     DelOutbound getByOrderNo(String orderNo);
+
+    /**
+     * 出库单完成
+     *
+     * @param orderNo orderNo
+     */
+    void completed(String orderNo);
 }
 
