@@ -38,10 +38,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -206,6 +203,21 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             return R.failed("有效sku编码为空");
         }
         return R.ok(super.getOne(queryWrapper));
+    }
+
+    @Override
+    public List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto){
+        List<BaseProduct> list = selectBaseProductPage(queryDto);
+        List<BaseProductExportDto> exportList = BeanMapperUtil.mapList(list,BaseProductExportDto.class);
+        Iterator<BaseProductExportDto> iterable = exportList.iterator();
+        int count = 1;
+        while (iterable.hasNext()){
+            BaseProductExportDto b = iterable.next();
+            b.setNo(count++);
+            b.setWarehouseAcceptanceValue(b.getWarehouseAcceptance()==true ? "是": "否");
+        }
+
+        return exportList;
     }
 
     /**

@@ -78,6 +78,8 @@ public interface IBaseProductService extends IService<BaseProduct> {
      */
     R<BaseProduct> getSku(BaseProduct baseProduct);
 
+    List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto);
+
     /**
      * 新增模块
      *
