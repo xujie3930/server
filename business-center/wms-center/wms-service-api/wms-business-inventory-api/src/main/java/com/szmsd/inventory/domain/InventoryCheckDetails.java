@@ -36,6 +36,9 @@ public class InventoryCheckDetails extends BaseEntity {
     @ApiModelProperty(value = "差异数量，等于盘点数量减去系统数量")
     private Integer diffQty;
 
+    @ApiModelProperty(value = "盘点时间")
+    private String checkTime;
+
     @ApiModelProperty(value = "创建ID", hidden = true)
     @TableField(fill = FieldFill.INSERT)
     private String createBy;

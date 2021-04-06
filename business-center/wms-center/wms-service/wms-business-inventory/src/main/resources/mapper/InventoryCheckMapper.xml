@@ -8,7 +8,6 @@
         <result column="order_no" property="orderNo" />
         <result column="custom_code" property="customCode" />
         <result column="warehouse_code" property="warehouseCode" />
-        <result column="check_time" property="checkTime" />
         <result column="status" property="status" />
         <result column="reason" property="reason" />
         <result column="remark" property="remark" />
@@ -16,7 +15,7 @@
     </resultMap>
 
     <select id="selectInventoryCheckDetails" resultType="com.szmsd.inventory.domain.InventoryCheckDetails">
-        select b.sku, b.system_qty, b.counting_qty, b.diff_qty from inventory_check a
+        select b.sku, b.system_qty, b.counting_qty, b.diff_qty, b.check_time from inventory_check a
         left join inventory_check_details b on a.order_no = b.order_no where b.order_no = #{orderNo}
     </select>
 
@@ -27,7 +26,6 @@
         a.order_no,
         a.custom_code,
         a.warehouse_code,
-        a.check_time,
         a.status,
         a.reason,
         a.remark
@@ -66,7 +64,6 @@
             a.order_no,
             a.custom_code,
             a.warehouse_code,
-            a.check_time,
             a.status,
             a.reason,
             a.remark

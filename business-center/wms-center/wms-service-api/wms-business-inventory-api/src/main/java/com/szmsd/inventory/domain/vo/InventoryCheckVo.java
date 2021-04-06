@@ -44,10 +44,6 @@ public class InventoryCheckVo {
     @ApiModelProperty(value = "创建时间")
     private String createTime;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ApiModelProperty(value = "盘点时间")
-    private String checkTime;
-
     @ApiModelProperty(value = "详情")
     private List<InventoryCheckDetails> list;
 
