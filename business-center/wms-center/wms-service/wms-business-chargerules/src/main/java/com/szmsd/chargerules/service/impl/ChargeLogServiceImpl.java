@@ -6,12 +6,12 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.mapper.ChargeLogMapper;
 import com.szmsd.chargerules.service.IChargeLogService;
-import com.szmsd.common.core.utils.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 public class ChargeLogServiceImpl implements IChargeLogService {
@@ -33,5 +33,12 @@ public class ChargeLogServiceImpl implements IChargeLogService {
         query.eq(ChargeLog::getOperationType, chargeLogDto.getOperationType());
         query.eq(ChargeLog::getSuccess, chargeLogDto.getSuccess());
         return chargeLogMapper.selectOne(query);
+    }
+
+    @Override
+    public List<ChargeLog> selectPage(ChargeLogDto chargeLogDto) {
+        LambdaQueryWrapper<ChargeLog> query = Wrappers.lambdaQuery();
+        query.eq(ChargeLog::getOrderNo,chargeLogDto.getOrderNo());
+        return chargeLogMapper.selectList(query);
     }
 }
