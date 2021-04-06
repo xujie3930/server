@@ -1,7 +1,14 @@
 package com.szmsd.pack.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.bas.api.domain.BasCodeDto;
+import com.szmsd.bas.api.feign.BasFeignService;
+import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.datascope.service.AwaitUserService;
+import com.szmsd.pack.constant.PackageConstant;
 import com.szmsd.pack.domain.PackageManagement;
 import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
@@ -9,8 +16,11 @@ import com.szmsd.pack.mapper.PackageManagementMapper;
 import com.szmsd.pack.service.IPackageMangServeService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.pack.vo.PackageMangVO;
+import com.szmsd.system.api.domain.SysUser;
+import com.szmsd.system.api.model.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -31,6 +41,35 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
 
     @Resource
     private PackageManagementMapper packageManagementMapper;
+    @Resource
+    private BasFeignService basFeignService;
+
+    @Resource
+    private AwaitUserService awaitUserService;
+
+
+    private String getSellCode() {
+        UserInfo info = awaitUserService.info();
+        return Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("用户未登录!"));
+    }
+
+    /**
+     * 单号生成
+     *
+     * @return
+     */
+    public String genNo() {
+        String code = PackageConstant.GENERATE_CODE;
+        String appId = PackageConstant.GENERATE_APP_ID;
+        log.info("调用自动生成单号：code={}", code);
+        R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId(appId).setCode(code));
+        AssertUtil.notNull(r, "单号生成失败");
+        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
+        String s = r.getData().get(0);
+        log.info("调用自动生成单号：调用完成, {}-{}", code, s);
+        return s;
+    }
+
 
     /**
      * 查询package - 交货管理 - 地址信息表模块
@@ -59,6 +98,8 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
      */
     @Override
     public int insertPackageManagement(PackageMangAddDTO packageManagement) {
+        packageManagement.setOrderNo(genNo());
+        packageManagement.setSellerCode(getSellCode());
         return baseMapper.insert(packageManagement.convertThis(PackageManagement.class));
     }
 
@@ -68,14 +109,19 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
      * @param packageManagement package - 交货管理 - 地址信息表模块
      * @return 结果
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int updatePackageManagement(PackageMangAddDTO packageManagement) {
+        AssertUtil.isTrue(null != packageManagement.getId(), "请选中修改的数据！");
         PackageManagement updateInfo = packageManagement.convertThis(PackageManagement.class);
-        return packageManagementMapper.update(updateInfo, Wrappers.<PackageManagement>lambdaUpdate()
+        int update = packageManagementMapper.update(updateInfo, Wrappers.<PackageManagement>lambdaUpdate()
                 .eq(PackageManagement::getId, updateInfo.getId())
                 .eq(PackageManagement::getExportType, 0)
-                .set(PackageManagement::getDelFlag, 2)
                 .set(PackageManagement::getSubmitTime, LocalDateTime.now()));
+        if (update != 1) {
+            throw new BaseException("已经导出暂不支持修改");
+        }
+        return update;
 
     }
 

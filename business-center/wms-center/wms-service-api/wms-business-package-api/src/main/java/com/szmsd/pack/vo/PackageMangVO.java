@@ -12,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -44,18 +45,31 @@ public class PackageMangVO {
     @ApiModelProperty(value = "订单号")
     private String orderNo;
 
+    //@Excel(name = "创建时间")
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime submitTime;
+
     @Excel(name = "客户代码")
     @ApiModelProperty(value = "客户代码")
     private String sellerCode;
 
-    @ApiModelProperty(value = "创建时间-开始")
-    private LocalDate submitTimeStart;
-
-    @ApiModelProperty(value = "创建时间-结束")
-    private LocalDate submitTimeEnd;
-
     @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
     private Integer exportType;
+
+    @Excel(name = "是否导出")
+    @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
+    private String exportTypeStr;
+
+    public void setExportType(Integer exportType) {
+        this.exportType = exportType;
+        if (null != exportType) {
+            if (exportType == 0) {
+                exportTypeStr = "未导出";
+            } else {
+                exportTypeStr = "已导出";
+            }
+        }
+    }
 
     @Excel(name = "地址")
     @ApiModelProperty(value = "详细地址", required = true)
@@ -80,6 +94,17 @@ public class PackageMangVO {
     @ApiModelProperty(value = "货物类型【 0：入库，1：转运】")
     @Excel(name = "货物类型")
     private Integer operationType;
+
+    public void setOperationType(Integer operationType) {
+        this.operationType = operationType;
+        if (null != operationType) {
+            if (operationType == 0) {
+                operationTypeStr = "入库";
+            } else {
+                operationTypeStr = "转运";
+            }
+        }
+    }
 
     private String operationTypeStr;
 

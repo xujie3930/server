@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.system.api.model.UserInfo;
 import feign.hystrix.FallbackFactory;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -39,6 +40,10 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             }
             @Override
             public R<SysUser> getNameByNickName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType){
+                return null;
+            }
+            @Override
+            public R<SysUser> getNameByUserName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType){
                 return null;
             }
 

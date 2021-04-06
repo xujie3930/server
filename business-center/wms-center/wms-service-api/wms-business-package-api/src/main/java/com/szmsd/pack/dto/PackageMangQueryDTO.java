@@ -1,24 +1,17 @@
 package com.szmsd.pack.dto;
 
-import java.math.BigDecimal;
-
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.szmsd.common.core.web.domain.BaseEntity;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import jodd.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import com.szmsd.common.core.annotation.Excel;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -62,11 +55,21 @@ public class PackageMangQueryDTO{
     @ApiModelProperty(value = "客户代码")
     private String sellerCode;
 
+    @DateTimeFormat( pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "创建时间-开始")
     private LocalDate submitTimeStart;
 
+    @DateTimeFormat( pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "创建时间-结束")
     private LocalDate submitTimeEnd;
+
+    @DateTimeFormat( pattern = "yyyy-MM-dd")
+    @ApiModelProperty(value = "截至揽收时间-开始")
+    private LocalDate expectedDeliveryTimeStart;
+
+    @DateTimeFormat( pattern = "yyyy-MM-dd")
+    @ApiModelProperty(value = "截至揽收时间-结束")
+    private LocalDate expectedDeliveryTimeEnd;
 
     @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
     private Integer exportType;

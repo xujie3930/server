@@ -185,12 +185,14 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             //查询客户经理
             if(StringUtils.isNotEmpty(dto.getServiceManagerName())){
                 SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
-                sysUserByTypeAndUserType.setNickName(dto.getServiceManagerName());
-                R result = remoteUserService.getNameByNickName(sysUserByTypeAndUserType);
+                sysUserByTypeAndUserType.setUsername(dto.getServiceManagerName());
+                sysUserByTypeAndUserType.setUserType("00");
+                R result = remoteUserService.getNameByUserName(sysUserByTypeAndUserType);
+                basSeller.setServiceManagerName(null);
                 if(result.getCode()==200){
                     SysUser sysUser = (SysUser)result.getData();
-                    basSeller.setServiceManager(sysUser.getUserName());
-                    basSeller.setServiceManagerName(sysUser.getNickName());
+                    basSeller.setServiceManager(sysUser.getUserId().toString());
+                    basSeller.setServiceManagerName(sysUser.getUserName());
                 }
             }
             //注册到系统用户表
