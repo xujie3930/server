@@ -31,7 +31,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "主键ID")
     private Integer id;
 
-    @NotEmpty(message = "客户代码不能为空")
+    //@NotEmpty(message = "客户代码不能为空")
     @ApiModelProperty(value = "客户代码", example = "UID123456", required = true)
     private String sellerCode;
 
