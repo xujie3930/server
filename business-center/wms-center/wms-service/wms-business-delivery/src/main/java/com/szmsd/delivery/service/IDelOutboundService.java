@@ -167,5 +167,13 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param delOutbound delOutbound
      */
     void shipmentSuccess(DelOutbound delOutbound);
+
+    /**
+     * 根据单号查询
+     *
+     * @param orderNo orderNo
+     * @return DelOutbound
+     */
+    DelOutbound getByOrderNo(String orderNo);
 }
 

@@ -43,7 +43,6 @@ public class BasWarehouseVO {
     private String isCheckVat;
 
     @ApiModelProperty(value = "状态：0无效，1有效")
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.VALID)
     private String status;
 
     @ApiModelProperty(value = "入库单是否人工审核：0自动审核，1人工审核")

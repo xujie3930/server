@@ -35,6 +35,8 @@ public interface IAccountBalanceService {
 
     R warehouseFeeDeductions(CustPayDTO dto);
 
+    R feeDeductions(CustPayDTO dto);
+
     R freezeBalance(CusFreezeBalanceDTO dto);
 
     R thawBalance(CusFreezeBalanceDTO dto);
