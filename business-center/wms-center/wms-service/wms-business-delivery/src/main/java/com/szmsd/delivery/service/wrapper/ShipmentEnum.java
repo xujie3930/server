@@ -148,6 +148,14 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             delOutboundService.shipmentFail(updateDelOutbound);
+            // 冻结费用失败 - OutboundNoMoney
+            // 其余的都归类为 - OutboundGetTrackingFailed
+            String exType;
+            if (FREEZE_BALANCE.equals(currentState)) {
+                exType = "OutboundNoMoney";
+            } else {
+                exType = "OutboundGetTrackingFailed";
+            }
             // 更新消息到WMS
             ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
             shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
@@ -155,7 +163,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
             shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
             shipmentUpdateRequestDto.setIsEx(true);
-            shipmentUpdateRequestDto.setExType(currentState.name());
+            shipmentUpdateRequestDto.setExType(exType);
             shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "操作失败"));
             shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
             IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
