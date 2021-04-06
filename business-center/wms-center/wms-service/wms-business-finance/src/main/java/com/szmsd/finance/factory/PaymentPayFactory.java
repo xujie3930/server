@@ -30,7 +30,11 @@ public class PaymentPayFactory extends AbstractPayFactory {
 
     @Override
     public BalanceDTO calculateBalance(BalanceDTO oldBalance, BigDecimal changeAmount) {
+        // 可用
         oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().subtract(changeAmount));
+        // 冻结
+        oldBalance.setFreezeBalance(oldBalance.getFreezeBalance().subtract(changeAmount));
+        // 总余额
         oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(changeAmount));
         return oldBalance;
     }

@@ -90,6 +90,13 @@ public class AccountBalanceController extends FssBaseController {
         return accountBalanceService.warehouseFeeDeductions(dto);
     }
 
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:feeDeductions')")
+    @ApiOperation(value = "费用扣除")
+    @PostMapping("/feeDeductions")
+    public R feeDeductions(@RequestBody CustPayDTO dto){
+        return accountBalanceService.feeDeductions(dto);
+    }
+
     @PreAuthorize("@ss.hasPermi('ExchangeRate:freezeBalance')")
     @ApiOperation(value = "冻结余额")
     @PostMapping("/freezeBalance")
