@@ -176,8 +176,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 return r;
             }
             BasSeller basSeller = BeanMapperUtil.map(dto, BasSeller.class);
-            basSeller.setState(false);
-            basSeller.setIsActive(false);
+            basSeller.setState(true);
+            basSeller.setIsActive(true);
             basSeller.setEmail(basSeller.getInitEmail());
 
             //查询客户经理
