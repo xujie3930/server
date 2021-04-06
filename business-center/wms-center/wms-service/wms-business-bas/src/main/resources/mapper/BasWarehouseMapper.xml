@@ -44,7 +44,7 @@
         t.id,
         t.warehouse_code,
         t.warehouse_code warehouse_name,
-        '' address,
+        <![CDATA[ CONCAT(t.country_display_name, t.province, t.city, t.street1, t.street2) address, ]]>
         t.is_check_vat,
         t.country_code,
         t.country_display_name,
@@ -75,6 +75,9 @@
         t.status,
         t.inbound_receipt_review
     </sql>
+    <delete id="deleteWarehouseCus">
+        DELETE FROM bas_warehouse_cus WHERE warehouse_code = #{warehouseCode}
+    </delete>
 
     <select id="selectListVO" parameterType="com.szmsd.bas.dto.BasWarehouseQueryDTO" resultMap="BasWarehouseVO">
         SELECT <include refid="Column_List_VO"/>

@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
 @TableName("bas_warehouse_cus")
 public class BasWarehouseCus {
 
-    @ApiModelProperty(value = "仓库编码")
+    @ApiModelProperty(value = "仓库编码", hidden = true)
     private String warehouseCode;
 
     @ApiModelProperty(value = "客户代码")

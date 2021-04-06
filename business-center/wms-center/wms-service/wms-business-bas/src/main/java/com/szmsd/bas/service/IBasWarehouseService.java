@@ -2,11 +2,7 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BasWarehouse;
-import com.szmsd.bas.domain.BasWarehouseCus;
-import com.szmsd.bas.dto.AddWarehouseRequest;
-import com.szmsd.bas.dto.BasWarehouseQueryDTO;
-import com.szmsd.bas.dto.BasWarehouseStatusChangeDTO;
-import com.szmsd.bas.dto.WarehouseKvDTO;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BasWarehouseInfoVO;
 import com.szmsd.bas.vo.BasWarehouseVO;
 
@@ -28,7 +24,7 @@ public interface IBasWarehouseService extends IService<BasWarehouse> {
 
     BasWarehouseInfoVO queryInfo(String warehouseCode);
 
-    void saveWarehouseCus(List<BasWarehouseCus> basWarehouseCusList);
+    void saveWarehouseCus(BasWarehouseCusDTO basWarehouseCusDTO);
 
     void statusChange(BasWarehouseStatusChangeDTO basWarehouseStatusChangeDTO);
 
