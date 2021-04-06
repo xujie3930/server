@@ -145,8 +145,9 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         if (specialOperation == null) {
             throw new CommonException("999", ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
         }
-        BigDecimal amount = payService.calculate(specialOperation.getFirstPrice(),
+        BigDecimal baseAmount = payService.calculate(specialOperation.getFirstPrice(),
                 specialOperation.getNextPrice(), basSpecialOperation.getQty());
+        BigDecimal amount = baseAmount.multiply(new BigDecimal(basSpecialOperation.getCoefficient()));
 
         //调用扣费接口扣费
         ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType());
