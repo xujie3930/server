@@ -16,6 +16,10 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
             public  R<String> getSellerCode(@RequestBody BasSeller basSeller){
                 return R.convertResultJson(throwable);
             }
+            @Override
+            public R<String> getLoginSellerCode(){
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

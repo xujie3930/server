@@ -344,6 +344,17 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
            return seller.getSellerCode();
        }
 
+    @Override
+    public String getLoginSellerCode(){
+        QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
+        if(SecurityUtils.getLoginUser()==null||SecurityUtils.getLoginUser().getUsername()==null){
+            throw  new BaseException("无法获取当前登录用户信息");
+        }
+        queryWrapper.eq("user_name",SecurityUtils.getLoginUser().getUsername());
+        BasSeller seller = super.getOne(queryWrapper);
+        return seller.getSellerCode();
+    }
+
         /**
         * 删除模块信息
         *
