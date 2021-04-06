@@ -76,7 +76,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
         // 根据id查询出库信息
         List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
-        if (CollectionUtils.isEmpty(delOutboundList)) {
+        if (CollectionUtils.isNotEmpty(delOutboundList)) {
             for (DelOutbound delOutbound : delOutboundList) {
                 if (Objects.isNull(delOutbound)) {
                     throw new CommonException("999", "单据不存在");
