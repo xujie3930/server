@@ -230,8 +230,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         baseProductDto.setSellerCode(basSeller.getSellerCode());*/
-       String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
-        baseProductDto.setCode(skuCode);
+       /*String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
+        baseProductDto.setCode(skuCode);*/
         //默认仓库没有验收
         baseProductDto.setWarehouseAcceptance(false);
 
