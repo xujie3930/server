@@ -1,5 +1,10 @@
 package com.szmsd.delivery.service.wrapper;
 
+import cn.hutool.core.codec.Base64;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -14,11 +19,17 @@ import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpIBasClientService;
+import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.BaseOperationResponse;
 import com.szmsd.http.vo.PricedProductInfo;
+import com.szmsd.http.vo.ResponseVO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +67,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     // #6 推单WMS
     SHIPMENT_CREATE,
 
+    // #7 更新标签
+    SHIPMENT_LABEL,
+
     /**
      * 结束
      */
@@ -81,6 +95,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         map.put(SHIPMENT_RULE.name(), new ShipmentRuleHandle());
         map.put(SHIPMENT_ORDER.name(), new ShipmentOrderHandle());
         map.put(SHIPMENT_CREATE.name(), new ShipmentCreateHandle());
+        map.put(SHIPMENT_LABEL.name(), new ShipmentLabelHandle());
         map.put(END.name(), new EndHandle());
         return map;
     }
@@ -384,6 +399,73 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 推单WMS
             updateDelOutbound.setRefOrderNo(refOrderNo);
             delOutboundService.bringVerifySuccess(updateDelOutbound);
+        }
+
+        @Override
+        public ApplicationState nextState() {
+            return SHIPMENT_LABEL;
+        }
+    }
+
+    static class ShipmentLabelHandle extends CommonApplicationHandle {
+        @Override
+        public ApplicationState quoState() {
+            return SHIPMENT_LABEL;
+        }
+
+        @Override
+        public void handle(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            // 查询上传文件信息
+            RemoteAttachmentService remoteAttachmentService = SpringUtils.getBean(RemoteAttachmentService.class);
+            BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+            basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
+            basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+            R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+            if (null == listR || null == listR.getData()) {
+                return;
+            }
+            List<BasAttachment> attachmentList = listR.getData();
+            if (CollectionUtils.isEmpty(attachmentList)) {
+                return;
+            }
+            BasAttachment attachment = attachmentList.get(0);
+            String filePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
+            File labelFile = new File(filePath);
+            if (!labelFile.exists()) {
+                throw new CommonException("999", "标签文件不存在");
+            }
+            try {
+                byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
+                String encode = Base64.encode(byteArray);
+                ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+                shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
+                shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+                shipmentLabelChangeRequestDto.setLabel(encode);
+                IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+                ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
+                if (null == responseVO || null == responseVO.getSuccess()) {
+                    throw new CommonException("999", "更新标签失败");
+                }
+                if (!responseVO.getSuccess()) {
+                    throw new CommonException("999", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
+                }
+            } catch (IOException e) {
+                throw new CommonException("999", "读取标签文件失败");
+            }
+        }
+
+        @Override
+        public boolean condition(ApplicationContext context, ApplicationState currentState) {
+            boolean condition = super.condition(context, currentState);
+            if (condition) {
+                DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+                DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+                // 自提出库
+                return DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType());
+            }
+            return false;
         }
 
         @Override
