@@ -55,7 +55,6 @@ public class BasWarehouseInfoVO {
     private String postcode;
 
     @ApiModelProperty(value = "是否需要VAT：0不需要，1需要")
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.NEED)
     private String isCheckVat;
 
     @ApiModelProperty(value = "电话")
@@ -68,7 +67,6 @@ public class BasWarehouseInfoVO {
     private String contact;
 
     @ApiModelProperty(value = "状态：0无效，1有效")
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.VALID)
     private String status;
 
     @ApiModelProperty(value = "入库单是否人工审核：0自动审核，1人工审核")
@@ -78,7 +76,13 @@ public class BasWarehouseInfoVO {
     @ApiModelProperty(value = "白名单")
     private List<BasWarehouseCus> whiteCusList;
 
+    @ApiModelProperty(value = "白名单,号隔开")
+    private String whiteCus;
+
     @ApiModelProperty(value = "黑名单")
     private List<BasWarehouseCus> blackCusList;
+
+    @ApiModelProperty(value = "黑名单,号隔开")
+    private String blackCus;
 
 }

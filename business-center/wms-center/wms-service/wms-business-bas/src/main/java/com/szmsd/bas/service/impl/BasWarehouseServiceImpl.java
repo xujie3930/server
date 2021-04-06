@@ -8,10 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.component.RemoteComponent;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BasWarehouseCus;
-import com.szmsd.bas.dto.AddWarehouseRequest;
-import com.szmsd.bas.dto.BasWarehouseQueryDTO;
-import com.szmsd.bas.dto.BasWarehouseStatusChangeDTO;
-import com.szmsd.bas.dto.WarehouseKvDTO;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BasWarehouseMapper;
 import com.szmsd.bas.service.IBasWarehouseService;
 import com.szmsd.bas.vo.BasWarehouseInfoVO;
@@ -78,10 +75,17 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
         }
         // 查询黑白名单客户
         List<BasWarehouseCus> basWarehouseCusList = baseMapper.selectWarehouseCus(warehouseCode, null);
-        List<BasWarehouseCus> collect0 = basWarehouseCusList.stream().filter(item -> "0".equals(item.getExpress())).collect(Collectors.toList());
-        basWarehouseInfoVO.setBlackCusList(collect0);
-        List<BasWarehouseCus> collect1 = basWarehouseCusList.stream().filter(item -> "1".equals(item.getExpress())).collect(Collectors.toList());
-        basWarehouseInfoVO.setWhiteCusList(collect1);
+        // 黑名单
+        List<BasWarehouseCus> blackCusList = basWarehouseCusList.stream().filter(item -> "0".equals(item.getExpress())).collect(Collectors.toList());
+        basWarehouseInfoVO.setBlackCusList(blackCusList);
+        String blackCus = blackCusList.stream().map(BasWarehouseCus::getCusCode).collect(Collectors.joining(","));
+        basWarehouseInfoVO.setBlackCus(blackCus);
+        // 白名单
+        List<BasWarehouseCus> whiteCusList = basWarehouseCusList.stream().filter(item -> "1".equals(item.getExpress())).collect(Collectors.toList());
+        basWarehouseInfoVO.setWhiteCusList(whiteCusList);
+        String whiteCus = whiteCusList.stream().map(BasWarehouseCus::getCusCode).collect(Collectors.joining(","));
+        basWarehouseInfoVO.setWhiteCus(whiteCus);
+
         log.info("查询仓库详情：查询完成{}", basWarehouseInfoVO);
         return basWarehouseInfoVO;
     }
@@ -89,18 +93,23 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
     /**
      * 更新仓库客户黑白名单
      *
-     * @param basWarehouseCusList
+     * @param basWarehouseCusDTO
      */
     @Override
-    public void saveWarehouseCus(List<BasWarehouseCus> basWarehouseCusList) {
-        log.info("更新仓库客户黑白名单：{}", basWarehouseCusList);
+    public void saveWarehouseCus(BasWarehouseCusDTO basWarehouseCusDTO) {
+        log.info("更新仓库客户黑白名单：{}", basWarehouseCusDTO);
+        String warehouseCode = basWarehouseCusDTO.getWarehouseCode();
+        baseMapper.deleteWarehouseCus(warehouseCode);
+        List<BasWarehouseCus> basWarehouseCusList = basWarehouseCusDTO.getWarehouseCusList();
+        if (CollectionUtils.isEmpty(basWarehouseCusList)) {
+            log.info("清空黑白名单, warehouseCode={}", warehouseCode);
+            return;
+        }
         SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
-        basWarehouseCusList.forEach(item -> {
-            item.setCreateBy(loginUserInfo.getUserId() + "");
-            item.setCreateByName(loginUserInfo.getUserName());
-        });
+        basWarehouseCusList.forEach(item -> item.setCreateBy(loginUserInfo.getUserId() + "").setCreateByName(loginUserInfo.getUserName()));
         basWarehouseCusList.forEach(item -> {
             try {
+                item.setWarehouseCode(warehouseCode);
                 baseMapper.insertWarehouseCus(item);
             } catch (Exception e) {
                 // 唯一索引 warehouseCode cusCode
