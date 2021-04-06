@@ -104,6 +104,9 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
         public int insertBasMaterial(BasMaterial basMaterial)
         {
             QueryWrapper<BasMaterial> queryWrapper = new QueryWrapper<>();
+            if(StringUtils.isEmpty(basMaterial.getCode())){
+                basMaterial.setCode("WL"+basMaterial.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
+            }
             queryWrapper.eq("code",basMaterial.getCode());
             if(super.count(queryWrapper)==1){
                 throw new BaseException("包材编码重复");
