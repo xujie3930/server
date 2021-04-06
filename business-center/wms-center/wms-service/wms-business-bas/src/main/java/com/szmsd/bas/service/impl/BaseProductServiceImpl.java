@@ -9,7 +9,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
-import com.szmsd.bas.domain.BasMaterial;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
@@ -206,15 +205,15 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto){
+    public List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto) {
         List<BaseProduct> list = selectBaseProductPage(queryDto);
-        List<BaseProductExportDto> exportList = BeanMapperUtil.mapList(list,BaseProductExportDto.class);
+        List<BaseProductExportDto> exportList = BeanMapperUtil.mapList(list, BaseProductExportDto.class);
         Iterator<BaseProductExportDto> iterable = exportList.iterator();
         int count = 1;
-        while (iterable.hasNext()){
+        while (iterable.hasNext()) {
             BaseProductExportDto b = iterable.next();
             b.setNo(count++);
-            b.setWarehouseAcceptanceValue(b.getWarehouseAcceptance()==true ? "是": "否");
+            b.setWarehouseAcceptanceValue(b.getWarehouseAcceptance() == true ? "是" : "否");
         }
 
         return exportList;
@@ -229,13 +228,13 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     @Transactional
     public int insertBaseProduct(BaseProductDto baseProductDto) {
-        if(StringUtils.isEmpty(baseProductDto.getCode())) {
+        if (StringUtils.isEmpty(baseProductDto.getCode())) {
             String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
             baseProductDto.setCode(skuCode);
         }
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("code",baseProductDto.getCode());
-        if(super.count(queryWrapper)==1){
+        queryWrapper.eq("code", baseProductDto.getCode());
+        if (super.count(queryWrapper) == 1) {
             throw new BaseException("sku编码重复");
         }
         //默认激活
@@ -264,7 +263,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         if (!r.getData().getSuccess()) {
             throw new BaseException("传wms失败:" + r.getData().getMessage());
         }
-        if(CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())){
+        if (CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())) {
             AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProductDto.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         }
@@ -282,7 +281,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         BaseProduct baseProduct = super.getById(baseProductDto.getId());
         ObjectUtil.fillNull(productRequest, baseProduct);
-        if(CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())){
+        if (CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())) {
             AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProduct.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         }

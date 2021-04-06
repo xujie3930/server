@@ -2,6 +2,7 @@ package com.szmsd.delivery.service.wrapper;
 
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.domain.BasWarehouse;
+import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
@@ -21,6 +22,7 @@ public class DelOutboundWrapperContext implements ApplicationContext {
     private BasWarehouse warehouse;
     private BasRegionSelectListVO country;
     private List<BaseProduct> productList;
+    private List<BasePacking> packingList;
 
     public DelOutboundWrapperContext() {
     }
@@ -34,9 +36,10 @@ public class DelOutboundWrapperContext implements ApplicationContext {
         this.country = country;
     }
 
-    public DelOutboundWrapperContext(DelOutbound delOutbound, DelOutboundAddress address, List<DelOutboundDetail> detailList, BasWarehouse warehouse, BasRegionSelectListVO country, List<BaseProduct> productList) {
+    public DelOutboundWrapperContext(DelOutbound delOutbound, DelOutboundAddress address, List<DelOutboundDetail> detailList, BasWarehouse warehouse, BasRegionSelectListVO country, List<BaseProduct> productList, List<BasePacking> packingList) {
         this(delOutbound, address, detailList, warehouse, country);
         this.productList = productList;
+        this.packingList = packingList;
     }
 
     public DelOutbound getDelOutbound() {
@@ -85,5 +88,13 @@ public class DelOutboundWrapperContext implements ApplicationContext {
 
     public void setProductList(List<BaseProduct> productList) {
         this.productList = productList;
+    }
+
+    public List<BasePacking> getPackingList() {
+        return packingList;
+    }
+
+    public void setPackingList(List<BasePacking> packingList) {
+        this.packingList = packingList;
     }
 }
