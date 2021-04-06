@@ -1,6 +1,7 @@
 package com.szmsd.pack.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.common.core.constant.HttpStatus;
@@ -8,16 +9,14 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.datascope.service.AwaitUserService;
+import com.szmsd.pack.api.feign.client.IBasFeignClientService;
 import com.szmsd.pack.constant.PackageConstant;
 import com.szmsd.pack.domain.PackageManagement;
 import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.mapper.PackageManagementMapper;
 import com.szmsd.pack.service.IPackageMangServeService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.pack.vo.PackageMangVO;
-import com.szmsd.system.api.domain.SysUser;
-import com.szmsd.system.api.model.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,13 +46,21 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
     @Resource
     private AwaitUserService awaitUserService;
 
+    @Resource
+    private IBasFeignClientService iBasFeignClientService;
 
+
+    /**
+     * 获取用户sellerCode
+     *
+     * @return
+     */
     private String getSellCode() {
-//        UserInfo info = awaitUserService.info();
-        UserInfo info =  new UserInfo();
-        info.setSysUser(new SysUser().setSellerCode("test01"));
-        return Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("用户未登录!"));
+        //UserInfo info = awaitUserService.info();
+        String loginSellerCode = iBasFeignClientService.getLoginSellerCode();
+        return Optional.ofNullable(loginSellerCode).orElse("");
     }
+
 
     /**
      * 单号生成

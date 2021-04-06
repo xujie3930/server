@@ -6,9 +6,6 @@ import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
 import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
 import com.szmsd.http.vo.returnex.ProcessingUpdateRespVO;
 import com.szmsd.returnex.api.feign.serivice.facotry.HttpFeignServiceFallback;
-import com.szmsd.returnex.api.feign.serivice.facotry.ReturnExpressFeignFallback;
-import com.szmsd.returnex.dto.ReturnArrivalReqDTO;
-import com.szmsd.returnex.dto.ReturnProcessingReqDTO;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @Author: 11
  * @Date: 2021/3/27 14:21
  */
-@FeignClient(contextId = "feignClient.IHttpFeignService",value = "wms-business-http", fallbackFactory = HttpFeignServiceFallback.class)
+@FeignClient(contextId = "FeignClient.IHttpFeignService",value = "wms-business-http", fallbackFactory = HttpFeignServiceFallback.class)
 public interface IHttpFeignService {
 
     /**
