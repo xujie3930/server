@@ -71,7 +71,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @return
      */
     private String getSellCode() {
-        UserInfo info = awaitUserService.info();
+        // UserInfo info = awaitUserService.info();
+        UserInfo info =  new UserInfo();
+        info.setSysUser(new SysUser().setSellerCode("test01"));
         return Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("用户未登录！"));
     }
 
