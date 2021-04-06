@@ -19,4 +19,6 @@ public interface BasWarehouseMapper extends BaseMapper<BasWarehouse> {
     List<BasWarehouseCus> selectWarehouseCus(@Param("warehouseCode") String warehouseCode, @Param("cusCode") String cusCode);
 
     void insertWarehouseCus(BasWarehouseCus basWarehouseCusList);
+
+    void deleteWarehouseCus(String warehouseCode);
 }

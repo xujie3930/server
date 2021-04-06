@@ -49,7 +49,7 @@ public class PackageManagementController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:list')")
     @GetMapping("/list")
     @ApiOperation(value = "交货管理-揽收列表", notes = "查询package - 交货管理 - 地址信息表模块列表")
-    public TableDataInfo list(PackageMangQueryDTO packageMangQueryDTO) {
+    public TableDataInfo list(@Validated PackageMangQueryDTO packageMangQueryDTO) {
         startPage();
         List<PackageMangVO> list = packageManagementService.selectPackageManagementList(packageMangQueryDTO);
         return getDataTable(list);
@@ -62,7 +62,7 @@ public class PackageManagementController extends BaseController {
     @Log(title = "交货管理", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     @ApiOperation(value = "交货管理-揽收列表导出", notes = "导出package - 交货管理 - 地址信息表模块列表")
-    public void export(HttpServletResponse response, PackageMangQueryDTO packageManagement) throws IOException {
+    public void export(HttpServletResponse response,@Validated PackageMangQueryDTO packageManagement) throws IOException {
         AssertUtil.isTrue(CollectionUtils.isNotEmpty(packageManagement.getIds()), "请选择导出的数据列");
         List<PackageMangVO> list = packageManagementService.selectPackageManagementList(packageManagement);
         packageManagementService.setExportStatus(packageManagement.getIds());

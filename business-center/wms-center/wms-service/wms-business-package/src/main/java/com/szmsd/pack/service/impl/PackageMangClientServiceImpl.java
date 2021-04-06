@@ -41,7 +41,9 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     private IPackageMangServeService packageManagementService;
 
     private String getSellCode() {
-        UserInfo info = awaitUserService.info();
+        //UserInfo info = awaitUserService.info();
+        UserInfo info =  new UserInfo();
+        info.setSysUser(new SysUser().setSellerCode("test1"));
         return Optional.ofNullable(info).map(UserInfo::getSysUser).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("用户未登录!"));
     }
 
@@ -68,6 +70,7 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
      */
     @Override
     public List<PackageAddressVO> selectPackageAddressList(PackageMangQueryDTO packageAddress) {
+        packageAddress.setSellerCode(getSellCode());
         List<PackageAddressVO> packageAddressVoList = baseMapper.selectPackageAddressList(packageAddress);
         packageAddressVoList.forEach(PackageAddressVO::setShowAddr);
         return packageAddressVoList;
@@ -82,6 +85,7 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertPackageAddress(PackageAddressAddDTO packageAddress) {
+        packageAddress.setSellerCode(getSellCode());
         offDefaultAddr(packageAddress);
         //第一次新增 默认 设置为默认地址
         Integer integer = baseMapper.selectCount(Wrappers.<PackageAddress>lambdaQuery()
@@ -102,8 +106,8 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
      */
     @Transactional(rollbackFor = Exception.class)
     void offDefaultAddr(PackageAddressAddDTO packageAddress) {
-        if (packageAddress.getDefaultFlag() == 1) {
-             baseMapper.update(null, Wrappers.<PackageAddress>lambdaUpdate()
+        if (null != packageAddress.getDefaultFlag() && packageAddress.getDefaultFlag() == 1) {
+            baseMapper.update(null, Wrappers.<PackageAddress>lambdaUpdate()
                     .eq(PackageAddress::getDelFlag, 0)
                     .eq(PackageAddress::getDefaultFlag, 1)
                     .eq(PackageAddress::getSellerCode, packageAddress.getSellerCode())
@@ -123,6 +127,7 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     @Transactional(rollbackFor = Exception.class)
     public int updatePackageAddress(PackageAddressAddDTO packageAddress) {
         AssertUtil.isTrue(packageAddress.getId() != null && packageAddress.getId() > 0, "更新数据不存在");
+        packageAddress.setSellerCode(getSellCode());
         offDefaultAddr(packageAddress);
         return baseMapper.updateById(packageAddress.convertThis(PackageAddress.class));
     }
@@ -176,7 +181,7 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     public int setDefaultAddr(String id) {
         offDefaultAddr(new PackageAddressAddDTO().setId(Integer.parseInt(id)).setDefaultFlag(1).setSellerCode(getSellCode()));
         //设置当前id默认
-        return baseMapper.update(null, Wrappers.<PackageAddress>lambdaUpdate()
+        return baseMapper.update(new PackageAddress(), Wrappers.<PackageAddress>lambdaUpdate()
                 .eq(PackageAddress::getId, id)
                 .set(PackageAddress::getDefaultFlag, 1)
                 .last("LIMIT 1")
@@ -188,6 +193,7 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
      */
     @Override
     public List<PackageMangVO> selectPackageManagementList(PackageMangQueryDTO packageMangQueryDTO) {
+        packageMangQueryDTO.setSellerCode(getSellCode());
         return packageManagementService.selectPackageManagementList(packageMangQueryDTO);
     }
 }
