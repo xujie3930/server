@@ -289,6 +289,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         * @return 结果
         */
         @Override
+        @Transactional
         public int updateBasSeller(BasSellerInfoDto basSellerInfoDto) throws IllegalAccessException {
             //查询表中信息
             QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();

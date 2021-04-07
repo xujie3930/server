@@ -229,17 +229,24 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Transactional
     public int insertBaseProduct(BaseProductDto baseProductDto) {
         if (StringUtils.isEmpty(baseProductDto.getCode())) {
-            String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
-            baseProductDto.setCode(skuCode);
+            if("SKU".equals(baseProductDto.getCategory())){
+                String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
+                baseProductDto.setCode(skuCode);
+            }else{
+                baseProductDto.setCode("WL"+baseProductDto.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
+            }
+        }else{
+            if(baseProductDto.getCode().length()<2){
+                throw new BaseException(baseProductDto.getCategory()+"编码长度不能小于两个字符");
+            }
         }
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", baseProductDto.getCode());
         if (super.count(queryWrapper) == 1) {
-            throw new BaseException("sku编码重复");
+            throw new BaseException(baseProductDto.getCategory()+"编码重复");
         }
         //默认激活
         baseProductDto.setIsActive(true);
-        baseProductDto.setCategory("SKU");
         //默认仓库没有验收
         baseProductDto.setWarehouseAcceptance(false);
 
