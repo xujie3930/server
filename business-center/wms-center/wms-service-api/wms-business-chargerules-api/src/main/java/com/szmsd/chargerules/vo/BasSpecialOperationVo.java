@@ -51,8 +51,8 @@ public class BasSpecialOperationVo {
     @ApiModelProperty(value = "oms备注")
     private String omsRemark;
 
-    @ApiModelProperty(value = "状态（审核结果）")
-    private String status;
+    @ApiModelProperty(value = "状态（审核结果）通过：1、不通过：2、待审批：3")
+    private Integer status;
 
     @ApiModelProperty(value = "首件价格")
     private BigDecimal firstPrice;

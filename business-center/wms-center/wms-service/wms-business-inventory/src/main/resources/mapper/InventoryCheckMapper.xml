@@ -32,6 +32,7 @@
         from
         inventory_check a
         <where>
+            status = 3
             <if test="customCode != null and customCode != ''">
                 AND a.custom_code = #{customCode}
             </if>

@@ -35,9 +35,9 @@ public class BaseInfoController extends BaseController {
 
     @GetMapping("/specialOperation/list")
     @ApiOperation(value = "特殊操作待办 - 分页查询")
-    public TableDataInfo<BasSpecialOperation> list(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO) {
+    public TableDataInfo<BasSpecialOperationVo> list(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO) {
         startPage();
-        List<BasSpecialOperation> list = baseInfoService.list(basSpecialOperationRequestDTO);
+        List<BasSpecialOperationVo> list = baseInfoService.list(basSpecialOperationRequestDTO);
         return getDataTable(list);
     }
 
