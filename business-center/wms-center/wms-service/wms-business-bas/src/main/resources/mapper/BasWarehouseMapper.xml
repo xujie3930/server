@@ -31,6 +31,7 @@
         <result column="city" property="city"/>
         <result column="street1" property="street1"/>
         <result column="street2" property="street2"/>
+        <result column="address" property="address"/>
         <result column="postcode" property="postcode"/>
         <result column="telephone" property="telephone"/>
         <result column="time_zone" property="timeZone"/>
@@ -68,6 +69,7 @@
         t.city,
         t.street1,
         t.street2,
+        <![CDATA[ CONCAT(t.country_display_name, t.province, t.city, t.street1, t.street2) address, ]]>
         t.postcode,
         t.telephone,
         t.time_zone,

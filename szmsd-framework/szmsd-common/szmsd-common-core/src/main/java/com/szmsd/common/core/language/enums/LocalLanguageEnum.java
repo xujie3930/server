@@ -42,7 +42,7 @@ public enum LocalLanguageEnum {
     /** 不需要 **/
     NEED_0(NEED, "0", "不需要", "Not needed"),
     /** 需要 **/
-    NEED_1(NEED, "1", "需要", "needed"),
+    NEED_1(NEED, "1", "需要", "Needed"),
 
     /** 无效 **/
     VALID_0(VALID, "0", "无效", "Invalid"),
