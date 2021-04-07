@@ -2,4 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.delivery.mapper.DelOutboundCompletedMapper">
 
+    <update id="updateRecord">
+        update del_outbound_completed
+        set state = #{state},
+        handle_size = handle_size + 1,
+        next_handle_time = date_add(now(), interval 5 * handle_size minute)
+        where id = #{id}
+    </update>
+
 </mapper>

@@ -13,4 +13,11 @@ import com.szmsd.delivery.domain.DelOutboundCompleted;
  */
 public interface DelOutboundCompletedMapper extends BaseMapper<DelOutboundCompleted> {
 
+    /**
+     * 修改单据
+     *
+     * @param completed completed
+     * @return int
+     */
+    int updateRecord(DelOutboundCompleted completed);
 }

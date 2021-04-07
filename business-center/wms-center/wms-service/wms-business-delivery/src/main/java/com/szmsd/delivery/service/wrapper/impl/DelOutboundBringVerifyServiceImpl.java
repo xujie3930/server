@@ -6,7 +6,6 @@ import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
-import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
@@ -319,16 +318,29 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     address.getCountryCode(), country.getName(), address.getZone(), address.getStateOrProvince(), address.getCity(),
                     address.getStreet1(), address.getStreet2(), address.getStreet3(), address.getPostCode(), address.getPhoneNo(), address.getEmail()));
         }
-        List<ShipmentDetailInfoDto> details = new ArrayList<>();
+        // 处理包材或sku明细重复的问题
+        Map<String, ShipmentDetailInfoDto> shipmentDetailInfoDtoMap = new HashMap<>();
         for (DelOutboundDetail detail : detailList) {
-            details.add(new ShipmentDetailInfoDto(detail.getSku(), detail.getQty(), detail.getNewLabelCode()));
+            String sku = detail.getSku();
+            if (shipmentDetailInfoDtoMap.containsKey(sku)) {
+                shipmentDetailInfoDtoMap.get(sku).addQty(detail.getQty());
+            } else {
+                shipmentDetailInfoDtoMap.put(sku, new ShipmentDetailInfoDto(sku, detail.getQty(), detail.getNewLabelCode()));
+            }
             // 获取sku详细信息
             BaseProduct baseProduct = productMap.get(detail.getSku());
-            if (StringUtils.isNotEmpty(baseProduct.getBindCode())) {
+            String bindCode = baseProduct.getBindCode();
+            // 判断sku是否存在包材
+            if (StringUtils.isNotEmpty(bindCode)) {
                 // 存在包材，增加包材信息
-                details.add(new ShipmentDetailInfoDto(baseProduct.getBindCode(), detail.getQty(), detail.getNewLabelCode()));
+                if (shipmentDetailInfoDtoMap.containsKey(bindCode)) {
+                    shipmentDetailInfoDtoMap.get(bindCode).addQty(detail.getQty());
+                } else {
+                    shipmentDetailInfoDtoMap.put(bindCode, new ShipmentDetailInfoDto(bindCode, detail.getQty(), detail.getNewLabelCode()));
+                }
             }
         }
+        List<ShipmentDetailInfoDto> details = new ArrayList<>(shipmentDetailInfoDtoMap.values());
         createShipmentRequestDto.setDetails(details);
         createShipmentRequestDto.setIsPackingByRequired(delOutbound.getIsPackingByRequired());
         createShipmentRequestDto.setIsFirst(delOutbound.getIsFirst());

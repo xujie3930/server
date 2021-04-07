@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 
 /**
  * <p>
@@ -60,5 +62,13 @@ public class DelOutboundCompleted extends BaseEntity {
     @Excel(name = "处理状态")
     private String state;
 
+    @ApiModelProperty(value = "操作类型，开始处理：Processing，已发货：Shipped，已取消：Canceled")
+    @Excel(name = "操作类型，开始处理：Processing，已发货：Shipped，已取消：Canceled")
+    private String operationType;
 
+    @ApiModelProperty(value = "处理次数")
+    private Integer handleSize;
+
+    @ApiModelProperty(value = "下一次处理时间")
+    private Date nextHandleTime;
 }
