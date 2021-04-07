@@ -1,21 +1,17 @@
 package com.szmsd.pack.vo;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import jodd.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
 
 /**
@@ -128,4 +124,45 @@ public class PackageMangVO {
     private String remark;
 
 
+    @ApiModelProperty(value = "省 - 名称")
+    private String provinceNameZh;
+
+    @ApiModelProperty(value = "省 - 简码", hidden = true)
+    private String provinceCode;
+
+    @ApiModelProperty(value = "省 - 英文名", hidden = true)
+    private String provinceNameEn;
+
+    @ApiModelProperty(value = "市 - 名称")
+    private String cityNameZh;
+
+    @ApiModelProperty(value = "市 - 简码", hidden = true)
+    private String cityCode;
+
+    @ApiModelProperty(value = "市 - 英文名", hidden = true)
+    private String cityNameEn;
+
+    @ApiModelProperty(value = "区 - 名称")
+    private String districtNameZh;
+
+    @ApiModelProperty(value = "区 - 简码", hidden = true)
+    private String districtCode;
+
+    @ApiModelProperty(value = "区 - 英文名", hidden = true)
+    private String districtNameEn;
+
+    @ApiModelProperty(value = "具体地址 - 中文名")
+    private String addressZh;
+
+    @ApiModelProperty(value = "选中的地址")
+    private String showChoose;
+
+    public void setShowChoose() {
+        this.showChoose = String.join(" ",provinceNameZh,cityNameZh,districtNameZh);
+    }
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }

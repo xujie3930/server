@@ -90,7 +90,9 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
     public PackageMangVO selectPackageManagementById(String id) {
         PackageManagement packageManagement = baseMapper.selectById(id);
         Optional.ofNullable(packageManagement).orElseThrow(() -> new BaseException("数据不存在"));
-        return packageManagement.convertThis(PackageMangVO.class);
+        PackageMangVO packageMangVO = packageManagement.convertThis(PackageMangVO.class);
+        packageMangVO.setShowChoose();
+        return packageMangVO;
     }
 
     @Override
