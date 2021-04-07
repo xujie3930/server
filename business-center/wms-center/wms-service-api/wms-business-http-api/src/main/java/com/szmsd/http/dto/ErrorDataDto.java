@@ -1,5 +1,6 @@
 package com.szmsd.http.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class ErrorDataDto implements Serializable {
     private String ticketId;
 
     @ApiModelProperty(value = "错误发生时间")
+    @JSONField(format = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private Date utcDateTime;
 
     @ApiModelProperty(value = "请求的URI")
