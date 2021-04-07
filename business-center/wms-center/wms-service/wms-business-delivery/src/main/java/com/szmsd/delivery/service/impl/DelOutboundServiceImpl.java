@@ -383,21 +383,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.inventoryFeignClientService.freeze(operateListDto);
     }
 
-    private void unFreeze(String invoiceNo, String warehouseCode, List<DelOutboundDetail> details) {
-        if (CollectionUtils.isEmpty(details)) {
-            return;
-        }
-        InventoryOperateListDto operateListDto = new InventoryOperateListDto();
-        operateListDto.setInvoiceNo(invoiceNo);
-        operateListDto.setWarehouseCode(warehouseCode);
-        List<InventoryOperateDto> operateList = new ArrayList<>();
-        for (DelOutboundDetail detail : details) {
-            operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
-        }
-        operateListDto.setOperateList(operateList);
-        this.inventoryFeignClientService.unFreeze(operateListDto);
-    }
-
     /**
      * 批量删除出库单模块
      *
@@ -411,7 +396,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return 0;
         }
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.select(DelOutbound::getOrderNo);
+        queryWrapper.select(DelOutbound::getOrderNo, DelOutbound::getWarehouseCode, DelOutbound::getState);
         queryWrapper.in(DelOutbound::getId, ids);
         List<DelOutbound> list = this.list(queryWrapper);
         if (CollectionUtils.isEmpty(list)) {
@@ -422,8 +407,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         DelOutbound delOutbound = list.get(0);
         Map<String, String> warehouseMap = new HashMap<>();
-        for (int i = 1; i < list.size(); i++) {
-            DelOutbound delOutbound1 = list.get(i);
+        for (DelOutbound delOutbound1 : list) {
+            // 只能删除待提审，提审失败的单据
+            if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound1.getState())
+                    || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound1.getState()))) {
+                throw new CommonException("999", "只能删除待提审，提审失败的单据");
+            }
             if (!delOutbound.getWarehouseCode().equals(delOutbound1.getWarehouseCode())) {
                 throw new CommonException("999", "只能批量删除同一仓库下的出库单");
             }
@@ -436,8 +425,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.delOutboundAddressService.remove(addressLambdaQueryWrapper);
         // 取消冻结
         for (String orderNo : orderNos) {
-            List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
-            this.unFreeze(orderNo, warehouseMap.get(orderNo), detailList);
+            this.unFreeze(orderNo, warehouseMap.get(orderNo));
         }
         // 删除明细
         LambdaQueryWrapper<DelOutboundDetail> detailLambdaQueryWrapper = Wrappers.lambdaQuery();
@@ -447,11 +435,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (i != ids.size()) {
             throw new CommonException("999", "操作记录异常，请刷新后再试");
         }
-        // 调用wms取消出库单接口
-        ShipmentCancelRequestDto requestDto = new ShipmentCancelRequestDto();
-        requestDto.setWarehouseCode(delOutbound.getWarehouseCode());
-        requestDto.setOrderNoList(orderNos);
-        this.htpOutboundClientService.shipmentDelete(requestDto);
         // 返回处理结果
         return i;
     }
@@ -852,11 +835,38 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         List<String> orderNos = new ArrayList<>();
         String warehouseCode = outboundList.get(0).getWarehouseCode();
+        List<String> reviewedList = new ArrayList<>();
         for (DelOutbound outbound : outboundList) {
-            orderNos.add(outbound.getOrderNo());
             if (!warehouseCode.equals(outbound.getWarehouseCode())) {
                 throw new CommonException("999", "只能同一个仓库下的出库单");
             }
+            // 处理已完成，已取消的
+            if (DelOutboundStateEnum.COMPLETED.getCode().equals(outbound.getState())
+                    || DelOutboundStateEnum.CANCELLED.getCode().equals(outbound.getState())) {
+                // 已完成，已取消的单据不做处理
+                continue;
+            }
+            // 处理未提审，提审失败的
+            if (DelOutboundStateEnum.REVIEWED.getCode().equals(outbound.getState())
+                    || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(outbound.getState())) {
+                // 未提审的，提审失败的
+                reviewedList.add(outbound.getOrderNo());
+                continue;
+            }
+            // 通知WMS处理的
+            orderNos.add(outbound.getOrderNo());
+        }
+        // 判断有没有处理未提审，提审失败的
+        if (CollectionUtils.isNotEmpty(reviewedList)) {
+            // 修改状态未已取消
+            LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
+            updateWrapper.in(DelOutbound::getOrderNo, reviewedList);
+            this.update(updateWrapper);
+        }
+        // 判断是否需要WMS处理
+        if (CollectionUtils.isEmpty(orderNos)) {
+            return 1;
         }
         // 通知WMS取消单据
         ShipmentCancelRequestDto shipmentCancelRequestDto = new ShipmentCancelRequestDto();
