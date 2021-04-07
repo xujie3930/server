@@ -10,6 +10,7 @@ import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
+import com.szmsd.delivery.dto.DelOutboundCanceledDto;
 import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -100,6 +101,14 @@ public class DelOutboundController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundBringVerifyDto")
     public R<Integer> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto) {
         return R.ok(delOutboundBringVerifyService.bringVerify(dto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:canceled')")
+    @PostMapping("/canceled")
+    @ApiOperation(value = "出库管理 - 取消", position = 700)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundCanceledDto")
+    public R<Integer> canceled(@RequestBody @Validated DelOutboundCanceledDto dto) {
+        return R.ok(this.delOutboundService.canceled(dto));
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")

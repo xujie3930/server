@@ -26,4 +26,13 @@ public class ShipmentDetailInfoDto implements Serializable {
 
     @ApiModelProperty(value = "指定编码")
     private String newLabelCode;
+
+    /**
+     * 数量运算
+     *
+     * @param qty qty
+     */
+    public void addQty(long qty) {
+        this.qty = this.qty + qty;
+    }
 }
