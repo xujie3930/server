@@ -282,7 +282,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProduct.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         }
-        baseProduct.setProductImage(baseProductDto.getProductImageBase64());
+        productRequest.setProductImage(baseProductDto.getProductImageBase64());
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         if (!r.getData().getSuccess()) {
             throw new BaseException("传wms失败:" + r.getData().getMessage());
