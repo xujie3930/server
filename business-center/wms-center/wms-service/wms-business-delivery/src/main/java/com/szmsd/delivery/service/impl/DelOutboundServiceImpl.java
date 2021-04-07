@@ -13,7 +13,10 @@ import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
+import com.szmsd.common.core.constant.Constants;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
@@ -37,15 +40,20 @@ import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
-import com.szmsd.http.dto.ShipmentCancelRequestDto;
+import com.szmsd.http.dto.*;
+import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -64,6 +72,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOutbound> implements IDelOutboundService {
+    private Logger logger = LoggerFactory.getLogger(DelOutboundServiceImpl.class);
 
     @Autowired
     private IDelOutboundAddressService delOutboundAddressService;
@@ -83,6 +92,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private RechargesFeignService rechargesFeignService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
+    @Autowired
+    private IHtpCarrierClientService htpCarrierClientService;
 
     /**
      * 查询出库单模块
@@ -489,7 +500,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 仓库已发货
         else if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
             // 增加出库单已完成记录
-            this.delOutboundCompletedService.add(orderNos);
+            this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.SHIPPED.getCode());
+        }
+        // 仓库取消
+        else if (DelOutboundOperationTypeEnum.CANCELED.getCode().equals(dto.getOperationType())) {
+            // 增加出库单已取消记录
+            this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
         }
         return this.baseMapper.update(null, updateWrapper);
     }
@@ -515,22 +531,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
-    public int underReview(DelOutboundUnderReviewDto dto) {
-
-        // 验证状态
-
-        // 计算PRC价格，获取供应商
-
-        // 获取挂号，获取标签
-
-        // 调用WMS创建出库单
-
-        // 保存WMS返回的出库单号，更新出库单状态
-
-        return 0;
-    }
-
-    @Override
     public DelOutbound selectDelOutboundByOrderId(String orderId) {
         LambdaQueryWrapper<DelOutbound> query = Wrappers.lambdaQuery();
         query.eq(DelOutbound::getOrderNo, orderId);
@@ -539,14 +539,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("999", "单据不存在");
         }
         return delOutbound;
-    }
-
-    @Transactional
-    @Override
-    public int bringVerify(Long id) {
-
-
-        return 0;
     }
 
     @Transactional
@@ -575,6 +567,26 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getExceptionMessage, exceptionMessage);
         updateWrapper.eq(DelOutbound::getId, id);
         this.update(updateWrapper);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void exceptionMessage(Long id, String exceptionMessage) {
+        DelOutbound modifyDelOutbound = new DelOutbound();
+        modifyDelOutbound.setId(id);
+        modifyDelOutbound.setExceptionState(DelOutboundExceptionStateEnum.ABNORMAL.getCode());
+        modifyDelOutbound.setExceptionMessage(exceptionMessage);
+        this.updateById(modifyDelOutbound);
+    }
+
+    @Transactional
+    @Override
+    public void exceptionFix(Long id) {
+        DelOutbound modifyDelOutbound = new DelOutbound();
+        modifyDelOutbound.setId(id);
+        modifyDelOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
+        modifyDelOutbound.setExceptionMessage("");
+        this.updateById(modifyDelOutbound);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -622,6 +634,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional
     @Override
     public void completed(String orderNo) {
+        // 处理阶段
+        // 1.扣减库存              DE
+        // 2.扣减费用              FEE_DE
+        // 3.更新状态为已完成       MODIFY
+        // 4.完成                  END
         DelOutbound delOutbound = this.getByOrderNo(orderNo);
         if (null == delOutbound) {
             return;
@@ -630,6 +647,73 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())) {
             return;
         }
+        // 获取到处理状态
+        String completedState = delOutbound.getCompletedState();
+        try {
+            // 空值默认处理
+            if (StringUtils.isEmpty(completedState)) {
+                // 执行扣减库存
+                this.deduction(orderNo, delOutbound.getWarehouseCode());
+                completedState = "FEE_DE";
+            }
+            if ("FEE_DE".equals(completedState)) {
+                // 扣减费用
+                CustPayDTO custPayDTO = new CustPayDTO();
+                custPayDTO.setCusCode(delOutbound.getSellerCode());
+                custPayDTO.setCurrencyCode(delOutbound.getCurrencyCode());
+                custPayDTO.setAmount(delOutbound.getAmount());
+                R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
+                if (null == r || Constants.SUCCESS != r.getCode()) {
+                    throw new CommonException("999", "扣减费用失败");
+                }
+                completedState = "MODIFY";
+            }
+            if ("MODIFY".equals(completedState)) {
+                // 更新出库单状态为已完成
+                this.updateState(delOutbound.getId(), DelOutboundStateEnum.COMPLETED);
+                // 处理异常修复
+                if (DelOutboundExceptionStateEnum.ABNORMAL.getCode().equals(delOutbound.getExceptionState())) {
+                    this.exceptionFix(delOutbound.getId());
+                }
+                completedState = "END";
+            }
+        } catch (Exception e) {
+            this.logger.error(e.getMessage(), e);
+            // 记录异常
+            SpringUtils.getAopProxy(this).exceptionMessage(delOutbound.getId(), e.getMessage());
+            // 抛异常
+            throw e;
+        } finally {
+            // 记录处理状态
+            SpringUtils.getAopProxy(this).updateCompletedState(delOutbound.getId(), completedState);
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void updateCompletedState(Long id, String completedState) {
+        DelOutbound modifyDelOutbound = new DelOutbound();
+        modifyDelOutbound.setId(id);
+        modifyDelOutbound.setCompletedState(completedState);
+        this.updateById(modifyDelOutbound);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void updateCancelledState(Long id, String cancelledState) {
+        DelOutbound modifyDelOutbound = new DelOutbound();
+        modifyDelOutbound.setId(id);
+        modifyDelOutbound.setCancelledState(cancelledState);
+        this.updateById(modifyDelOutbound);
+    }
+
+    /**
+     * 扣减库存
+     *
+     * @param orderNo       orderNo
+     * @param warehouseCode warehouseCode
+     */
+    private void deduction(String orderNo, String warehouseCode) {
         // 查询明细
         List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
         InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
@@ -638,18 +722,159 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
         }
         inventoryOperateListDto.setInvoiceNo(orderNo);
-        inventoryOperateListDto.setWarehouseCode(delOutbound.getWarehouseCode());
+        inventoryOperateListDto.setWarehouseCode(warehouseCode);
         inventoryOperateListDto.setOperateList(operateList);
         // 扣减库存
-        this.inventoryFeignClientService.deduction(inventoryOperateListDto);
-        // 扣减费用
-        CustPayDTO custPayDTO = new CustPayDTO();
-        custPayDTO.setCusCode(delOutbound.getSellerCode());
-        custPayDTO.setCurrencyCode(delOutbound.getCurrencyCode());
-        custPayDTO.setAmount(delOutbound.getAmount());
-        this.rechargesFeignService.feeDeductions(custPayDTO);
-        // 更新出库单状态为已完成
-        this.updateState(delOutbound.getId(), DelOutboundStateEnum.COMPLETED);
+        Integer deduction = this.inventoryFeignClientService.deduction(inventoryOperateListDto);
+        if (null == deduction || deduction < 1) {
+            throw new CommonException("999", "扣减库存失败");
+        }
+    }
+
+    /**
+     * 取消冻结
+     *
+     * @param orderNo       orderNo
+     * @param warehouseCode warehouseCode
+     */
+    private void unFreeze(String orderNo, String warehouseCode) {
+        // 查询明细
+        List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
+        InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
+        List<InventoryOperateDto> operateList = new ArrayList<>();
+        for (DelOutboundDetail detail : details) {
+            operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+        }
+        inventoryOperateListDto.setInvoiceNo(orderNo);
+        inventoryOperateListDto.setWarehouseCode(warehouseCode);
+        inventoryOperateListDto.setOperateList(operateList);
+        // 取消冻结
+        Integer deduction = this.inventoryFeignClientService.unFreeze(inventoryOperateListDto);
+        if (null == deduction || deduction < 1) {
+            throw new CommonException("999", "取消冻结库存失败");
+        }
+    }
+
+    @Transactional
+    @Override
+    public void cancelled(String orderNo) {
+        // 处理阶段
+        // 1.取消冻结库存                                 UN_FREEZE
+        // 2.取消冻结费用                                 UN_FEE
+        // 3.如果是，下单后供应商获取，需要取消承运商物流订单 UN_CARRIER
+        // 4.更新状态为已取消                              MODIFY
+        // 5.完成                                         END
+        DelOutbound delOutbound = this.getByOrderNo(orderNo);
+        if (null == delOutbound) {
+            return;
+        }
+        // 订单完成
+        if (DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())) {
+            return;
+        }
+        // 订单取消
+        if (DelOutboundStateEnum.CANCELLED.getCode().equals(delOutbound.getState())) {
+            return;
+        }
+        // 获取到处理状态
+        String cancelledState = delOutbound.getCancelledState();
+        try {
+            if (StringUtils.isEmpty(cancelledState)) {
+                this.unFreeze(orderNo, delOutbound.getWarehouseCode());
+                cancelledState = "UN_FEE";
+            }
+            if ("UN_FEE".equals(cancelledState)) {
+                // 存在费用
+                if (null != delOutbound.getAmount() && delOutbound.getAmount().doubleValue() > 0.0D) {
+                    CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                    cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
+                    cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
+                    cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                    R<?> thawBalanceR = this.rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                    if (null == thawBalanceR) {
+                        throw new CommonException("999", "取消冻结费用失败");
+                    }
+                    if (Constants.SUCCESS != thawBalanceR.getCode()) {
+                        throw new CommonException("999", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
+                    }
+                }
+                cancelledState = "UN_CARRIER";
+            }
+            if ("UN_CARRIER".equals(cancelledState)) {
+                CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
+                command.setReferenceNumber(String.valueOf(delOutbound.getId()));
+                List<CancelShipmentOrder> cancelShipmentOrders = new ArrayList<>();
+                cancelShipmentOrders.add(new CancelShipmentOrder(delOutbound.getShipmentOrderNumber(), delOutbound.getTrackingNo()));
+                command.setCancelShipmentOrders(cancelShipmentOrders);
+                ResponseObject<CancelShipmentOrderBatchResult, ErrorDataDto> responseObject = this.htpCarrierClientService.cancellation(command);
+                if (null == responseObject || !responseObject.isSuccess()) {
+                    throw new CommonException("999", "取消承运商物流订单失败");
+                }
+                CancelShipmentOrderBatchResult cancelShipmentOrderBatchResult = responseObject.getObject();
+                List<CancelShipmentOrderResult> cancelOrders = cancelShipmentOrderBatchResult.getCancelOrders();
+                for (CancelShipmentOrderResult cancelOrder : cancelOrders) {
+                    if (!cancelOrder.isSuccess()) {
+                        throw new CommonException("999", "取消承运商物流订单失败2");
+                    }
+                }
+                cancelledState = "MODIFY";
+            }
+            if ("MODIFY".equals(cancelledState)) {
+                // 更新出库单状态
+                this.updateState(delOutbound.getId(), DelOutboundStateEnum.CANCELLED);
+                // 处理异常修复
+                if (DelOutboundExceptionStateEnum.ABNORMAL.getCode().equals(delOutbound.getExceptionState())) {
+                    this.exceptionFix(delOutbound.getId());
+                }
+                cancelledState = "END";
+            }
+        } catch (Exception e) {
+            this.logger.error(e.getMessage(), e);
+            // 记录异常
+            SpringUtils.getAopProxy(this).exceptionMessage(delOutbound.getId(), e.getMessage());
+            // 抛异常
+            throw e;
+        } finally {
+            SpringUtils.getAopProxy(this).updateCancelledState(delOutbound.getId(), cancelledState);
+        }
+    }
+
+    @Transactional
+    @Override
+    public int canceled(DelOutboundCanceledDto dto) {
+        List<Long> ids = dto.getIds();
+        if (CollectionUtils.isEmpty(ids)) {
+            return 0;
+        }
+        List<DelOutbound> outboundList = this.listByIds(ids);
+        if (CollectionUtils.isEmpty(outboundList)) {
+            return 0;
+        }
+        List<String> orderNos = new ArrayList<>();
+        String warehouseCode = outboundList.get(0).getWarehouseCode();
+        for (DelOutbound outbound : outboundList) {
+            orderNos.add(outbound.getOrderNo());
+            if (!warehouseCode.equals(outbound.getWarehouseCode())) {
+                throw new CommonException("999", "只能同一个仓库下的出库单");
+            }
+        }
+        // 通知WMS取消单据
+        ShipmentCancelRequestDto shipmentCancelRequestDto = new ShipmentCancelRequestDto();
+        shipmentCancelRequestDto.setOrderNoList(orderNos);
+        shipmentCancelRequestDto.setWarehouseCode(warehouseCode);
+        shipmentCancelRequestDto.setRemark("");
+        ResponseVO responseVO = this.htpOutboundClientService.shipmentDelete(shipmentCancelRequestDto);
+        if (null == responseVO || null == responseVO.getSuccess()) {
+            throw new CommonException("999", "取消出库单失败");
+        }
+        if (!responseVO.getSuccess()) {
+            throw new CommonException("999", Utils.defaultValue(responseVO.getMessage(), "取消出库单失败2"));
+        }
+        // 通知取消出库单
+        // WMS那边会调用修改状态的接口
+        // 修改状态的接口里面会处理取消的出库单逻辑
+        // this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
+        return 1;
     }
 }
 

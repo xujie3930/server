@@ -3,10 +3,7 @@ package com.szmsd.http.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.controller.BaseController;
-import com.szmsd.http.dto.CreateShipmentOrderCommand;
-import com.szmsd.http.dto.ProblemDetails;
-import com.szmsd.http.dto.ResponseObject;
-import com.szmsd.http.dto.ShipmentOrderResult;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.service.ICarrierService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,6 +26,12 @@ public class CarrierController extends BaseController {
     @ApiOperation(value = "创建承运商物流订单（客户端）")
     public R<ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails>> shipmentOrder(@RequestBody CreateShipmentOrderCommand command) {
         return R.ok(carrierService.shipmentOrder(command));
+    }
+
+    @PostMapping("/cancellation")
+    @ApiOperation(value = "创建承运商物流订单（客户端）")
+    public R<ResponseObject.ResponseObjectWrapper<CancelShipmentOrderBatchResult, ErrorDataDto>> cancellation(@RequestBody CancelShipmentOrderCommand command) {
+        return R.ok(carrierService.cancellation(command));
     }
 
     @GetMapping("/label")

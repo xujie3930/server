@@ -21,7 +21,7 @@ public interface IBasFeignService {
      * @param
      * @return
      */
-    @PostMapping("/getLoginSellerCode")
+    @PostMapping("/bas/seller/getLoginSellerCode")
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
     R<String> getLoginSellerCode();
 }

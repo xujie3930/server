@@ -93,14 +93,6 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     int shipmentContainers(ShipmentContainersRequestDto dto);
 
     /**
-     * 出库管理 - 出库提审
-     *
-     * @param dto dto
-     * @return int
-     */
-    int underReview(DelOutboundUnderReviewDto dto);
-
-    /**
      * 根据订单id查询出库单
      *
      * @param orderId orderId
@@ -117,14 +109,6 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     List<DelOutboundDetailListVO> getDelOutboundDetailsList(DelOutboundListQueryDto queryDto);
 
     /**
-     * 提审
-     *
-     * @param id id
-     * @return int
-     */
-    int bringVerify(Long id);
-
-    /**
      * 修改单据状态
      *
      * @param id        id
@@ -139,6 +123,21 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param exceptionMessage exceptionMessage
      */
     void bringVerifyFail(Long id, String exceptionMessage);
+
+    /**
+     * 异常信息
+     *
+     * @param id               id
+     * @param exceptionMessage exceptionMessage
+     */
+    void exceptionMessage(Long id, String exceptionMessage);
+
+    /**
+     * 异常修复
+     *
+     * @param id id
+     */
+    void exceptionFix(Long id);
 
     /**
      * 提审失败
@@ -182,5 +181,36 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param orderNo orderNo
      */
     void completed(String orderNo);
+
+    /**
+     * 修改完成状态
+     *
+     * @param id             id
+     * @param completedState completedState
+     */
+    void updateCompletedState(Long id, String completedState);
+
+    /**
+     * 出库单取消
+     *
+     * @param orderNo orderNo
+     */
+    void cancelled(String orderNo);
+
+    /**
+     * 修改取消状态
+     *
+     * @param id             id
+     * @param cancelledState cancelledState
+     */
+    void updateCancelledState(Long id, String cancelledState);
+
+    /**
+     * 取消出库单
+     *
+     * @param dto dto
+     * @return int
+     */
+    int canceled(DelOutboundCanceledDto dto);
 }
 

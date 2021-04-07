@@ -62,12 +62,13 @@ public class PackageManagementController extends BaseController {
     @Log(title = "交货管理", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     @ApiOperation(value = "交货管理-揽收列表导出", notes = "导出package - 交货管理 - 地址信息表模块列表")
-    public void export(HttpServletResponse response,@Validated PackageMangQueryDTO packageManagement) throws IOException {
+    public void export(HttpServletResponse response, @Validated PackageMangQueryDTO packageManagement) throws IOException {
         AssertUtil.isTrue(CollectionUtils.isNotEmpty(packageManagement.getIds()), "请选择导出的数据列");
+        packageManagement.setExportType(0);
         List<PackageMangVO> list = packageManagementService.selectPackageManagementList(packageManagement);
         packageManagementService.setExportStatus(packageManagement.getIds());
         ExcelUtil<PackageMangVO> util = new ExcelUtil<PackageMangVO>(PackageMangVO.class);
-        util.exportExcel(response, list, "PackageManagement-" + LocalDate.now());
+        util.exportExcel(response, list, "揽收列表-" + LocalDate.now());
 
     }
 

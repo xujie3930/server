@@ -130,7 +130,7 @@ public class PackageMangAddDTO implements BOConvert {
     private Integer operationType;
 
     @ApiModelProperty(value = "备注")
-    private String remake;
+    private String remark;
 
 
 }

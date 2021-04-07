@@ -4,10 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.fallback.HtpCarrierFeignFallback;
-import com.szmsd.http.dto.CreateShipmentOrderCommand;
-import com.szmsd.http.dto.ProblemDetails;
-import com.szmsd.http.dto.ResponseObject;
-import com.szmsd.http.dto.ShipmentOrderResult;
+import com.szmsd.http.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +20,9 @@ public interface HtpCarrierFeignService {
 
     @PostMapping("/api/carrier/http/shipmentOrder")
     R<ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails>> shipmentOrder(@RequestBody CreateShipmentOrderCommand command);
+
+    @PostMapping("/api/carrier/http/cancellation")
+    R<ResponseObject.ResponseObjectWrapper<CancelShipmentOrderBatchResult, ErrorDataDto>> cancellation(@RequestBody CancelShipmentOrderCommand command);
 
     @GetMapping("/api/carrier/http/label")
     R<ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>> label(@RequestParam("orderNumber") String orderNumber);

@@ -46,8 +46,10 @@ public class PackageMangVO {
     private String orderNo;
 
     //@Excel(name = "创建时间")
-    @ApiModelProperty(value = "创建时间")
     private LocalDateTime submitTime;
+
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime createTime;
 
     @Excel(name = "客户代码")
     @ApiModelProperty(value = "客户代码")
@@ -56,7 +58,6 @@ public class PackageMangVO {
     @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
     private Integer exportType;
 
-    @Excel(name = "是否导出")
     @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
     private String exportTypeStr;
 
@@ -84,15 +85,28 @@ public class PackageMangVO {
     private String linkPhone;
 
     @ApiModelProperty(value = "期望收货日期")
-    @Excel(name = "收货时间")
     private LocalDate expectedDeliveryTime;
+
+    @Excel(name = "收货时间")
+    private LocalDate deliveryTime;
 
     @ApiModelProperty(value = "揽件数量")
     @Excel(name = "收货数量")
     private Integer packageNum;
 
+    @ApiModelProperty(value = "实际揽收数量")
+    //@Excel(name = "实际揽收数量")
+    private Integer receivePackageNum;
+
+    @ApiModelProperty(value = "司机姓名")
+    @Excel(name = "司机姓名")
+    private String driverName;
+
+    @ApiModelProperty(value = "司机号码")
+    @Excel(name = "司机号码")
+    private String driverPhone;
+
     @ApiModelProperty(value = "货物类型【 0：入库，1：转运】")
-    @Excel(name = "货物类型")
     private Integer operationType;
 
     public void setOperationType(Integer operationType) {
@@ -106,6 +120,7 @@ public class PackageMangVO {
         }
     }
 
+    @ApiModelProperty(value = "货物类型【 0：入库，1：转运】")
     private String operationTypeStr;
 
     @Excel(name = "备注")

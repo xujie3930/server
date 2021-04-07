@@ -37,6 +37,9 @@
         <result column="export_time" property="exportTime"/>
         <result column="delivery_time" property="deliveryTime"/>
         <result column="expected_delivery_time" property="expectedDeliveryTime"/>
+        <result column="receive_package_num" property="receivePackageNum"/>
+        <result column="driver_name" property="driverName"/>
+        <result column="driver_phone" property="driverPhone"/>
         <result column="package_num" property="packageNum"/>
         <result column="operation_type" property="operationType"/>
     </resultMap>
@@ -48,7 +51,7 @@
                 update_by_name,
                 update_time,
                 remark,
-            id, create_by, update_by, version, del_flag, order_no, seller_code, link_user_name, link_phone, country_name_zh, country_code, country_name_en, province_name_zh, province_code, province_name_en, city_name_zh, city_code, city_name_en, district_name_zh, district_code, district_name_en, address_zh, delivery_address, address_en, submit_time, export_type, export_time, delivery_time, expected_delivery_time, package_num, operation_type
+            id, create_by, update_by, version, del_flag, order_no, seller_code, link_user_name, link_phone, country_name_zh, country_code, country_name_en, province_name_zh, province_code, province_name_en, city_name_zh, city_code, city_name_en, district_name_zh, district_code, district_name_en, address_zh, delivery_address, address_en, submit_time, export_type, export_time, delivery_time, expected_delivery_time, receive_package_num, driver_name, driver_phone, package_num, operation_type
     </sql>
 
     <select id="selectPackageManagementList" resultType="com.szmsd.pack.vo.PackageMangVO">
@@ -80,6 +83,8 @@
             <if test="cm.exportType != null ">
                 and export_type = #{cm.exportType}
             </if>
+            and del_flag = 0
         </where>
+        order by id desc
     </select>
 </mapper>

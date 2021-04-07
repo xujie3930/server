@@ -10,6 +10,7 @@ import com.szmsd.common.datascope.service.AwaitUserService;
 import com.szmsd.pack.api.feign.client.IBasFeignClientService;
 import com.szmsd.pack.domain.PackageAddress;
 import com.szmsd.pack.dto.PackageAddressAddDTO;
+import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.mapper.PackageAddressMapper;
 import com.szmsd.pack.service.IPackageMangClientService;
@@ -204,6 +205,26 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     public List<PackageMangVO> selectPackageManagementList(PackageMangQueryDTO packageMangQueryDTO) {
         packageMangQueryDTO.setSellerCode(getSellCode());
         return packageManagementService.selectPackageManagementList(packageMangQueryDTO);
+    }
+
+    @Override
+    public PackageMangVO selectPackageManagementById(String id) {
+        return packageManagementService.selectPackageManagementById(id);
+    }
+
+    @Override
+    public int insertPackageManagement(PackageMangAddDTO packageManagement) {
+        return packageManagementService.insertPackageManagement(packageManagement);
+    }
+
+    @Override
+    public int updatePackageManagement(PackageMangAddDTO packageManagement) {
+        return packageManagementService.updatePackageManagement(packageManagement);
+    }
+
+    @Override
+    public int deletePackageManagementByIds(List<String> ids) {
+        return packageManagementService.deletePackageManagementByIds(ids);
     }
 }
 
