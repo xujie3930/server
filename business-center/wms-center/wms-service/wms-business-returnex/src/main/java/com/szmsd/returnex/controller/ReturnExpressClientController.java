@@ -70,7 +70,7 @@ public class ReturnExpressClientController extends BaseController {
     @ApiOperation(value = "退件单列表 - 分页")
     public TableDataInfo<ReturnExpressListVO> page(@Validated ReturnExpressListQueryDTO queryDto) {
         startPage();
-        List<ReturnExpressListVO> returnExpressListVOS = returnExpressService.selectReturnOrderList(queryDto);
+        List<ReturnExpressListVO> returnExpressListVOS = returnExpressService.selectClientReturnOrderList(queryDto);
         return getDataTable(returnExpressListVOS);
     }
 

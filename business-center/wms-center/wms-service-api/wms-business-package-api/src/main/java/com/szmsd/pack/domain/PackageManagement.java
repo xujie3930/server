@@ -122,6 +122,10 @@ public class PackageManagement extends BaseEntity {
     @Excel(name = "具体地址 - 中文名")
     private String addressZh;
 
+    @ApiModelProperty(value = "实际揽收地址")
+    @Excel(name = "实际揽收地址")
+    private String deliveryAddress;
+
     @ApiModelProperty(value = "具体地址 - 英文名")
     @Excel(name = "具体地址 - 英文名")
     private String addressEn;
@@ -146,6 +150,18 @@ public class PackageManagement extends BaseEntity {
     @Excel(name = "期望收货日期")
     private LocalDate expectedDeliveryTime;
 
+    @ApiModelProperty(value = "实际揽收数量")
+    @Excel(name = "实际揽收数量")
+    private Integer receivePackageNum;
+
+    @ApiModelProperty(value = "司机姓名")
+    @Excel(name = "司机姓名")
+    private String driverName;
+
+    @ApiModelProperty(value = "司机号码")
+    @Excel(name = "司机号码")
+    private String driverPhone;
+
     @ApiModelProperty(value = "揽件数量")
     @Excel(name = "揽件数量")
     private Integer packageNum;
@@ -153,9 +169,5 @@ public class PackageManagement extends BaseEntity {
     @ApiModelProperty(value = "货物类型【 0：入库，1：转运】")
     @Excel(name = "货物类型【 0：入库，1：转运】")
     private Integer operationType;
-
-    @ApiModelProperty(value = "详细地址", required = true)
-    private String deliveryAddress;
-
 
 }

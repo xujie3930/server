@@ -95,4 +95,6 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @return
      */
     ReturnExpressVO getInfo(Long id);
+
+    List<ReturnExpressListVO> selectClientReturnOrderList(ReturnExpressListQueryDTO queryDto);
 }

@@ -105,6 +105,12 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         return genNo();
     }
 
+    @Override
+    public List<ReturnExpressListVO> selectClientReturnOrderList(ReturnExpressListQueryDTO queryDto) {
+        queryDto.setSellerCode(getSellCode());
+        return selectReturnOrderList(queryDto);
+    }
+
     /**
      * 退件单列表 - 分页
      *
