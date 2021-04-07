@@ -255,11 +255,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProduct.setLength(baseProduct.getInitLength());
         baseProduct.setHeight(baseProduct.getInitHeight());
         baseProduct.setVolume(baseProduct.getInitVolume());
-        //传oms修改字段
-        BaseProductOms baseProductOms = BeanMapperUtil.map(baseProductDto, BaseProductOms.class);
-        //base64图片
-        baseProductOms.setProductImage(baseProductDto.getProductImageBase64());
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
+        productRequest.setProductImage(baseProductDto.getProductImageBase64());
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         if (!r.getData().getSuccess()) {
             throw new BaseException("传wms失败:" + r.getData().getMessage());
