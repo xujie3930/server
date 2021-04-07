@@ -99,6 +99,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             String[] sellerCodes = queryDto.getSellerCodes().split(",");
             queryWrapper.in("seller_code", sellerCodes);
         }
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", queryDto.getCategory());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
@@ -118,6 +119,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seller_code", basSeller.getSellerCode());
         queryWrapper.eq("is_active", true);
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", queryDto.getCategory());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
@@ -128,6 +130,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     public List<BaseProductVO> selectBaseProductByCode(String code, String sellerCode) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", sellerCode);
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code + "%");
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", sellerCode);
         queryWrapper.eq("is_active", true);
@@ -153,6 +156,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         log.info("更新sku测量值: {}", request);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", request.getCode());
+        queryWrapper.eq("category", "SKU");
         if (super.count(queryWrapper) != 1) {
             throw new BaseException("sku不存在");
         }
@@ -184,6 +188,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     public List<BaseProduct> listSku(BaseProduct baseProduct) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", baseProduct.getCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", baseProduct.getCategory());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", baseProduct.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", baseProduct.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", baseProduct.getProductAttribute());
@@ -338,7 +343,6 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     public R<Boolean> checkSkuValidToDelivery(BaseProduct baseProduct) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", baseProduct.getCode());
-        queryWrapper.eq("category", "SKU");
         queryWrapper.eq("is_active", true);
         //查询是否有SKU
         int count = super.count(queryWrapper);

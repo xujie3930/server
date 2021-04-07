@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -63,13 +64,23 @@ public class BaseProductController extends BaseController {
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/listByCode")
     @ApiOperation(value = "通过code查询列表", notes = "通过code查询列表")
-    public TableDataInfo listByCode(String code) {
+    public TableDataInfo listByCode(String code,String category) {
         QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         startPage();
         List<BaseProductVO> list = baseProductService.selectBaseProductByCode(code,basSeller.getSellerCode());
         return getDataTable(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:add')")
+    @Log(title = "模块", businessType = BusinessType.INSERT)
+    @PostMapping("import")
+    @ApiOperation(value = "导入产品模块", notes = "导入产品模块")
+    public R importData(MultipartFile file) throws Exception {
+        ExcelUtil<BaseProductImportDto> util = new ExcelUtil<BaseProductImportDto>(BaseProductImportDto.class);
+        List<BaseProductImportDto> userList = util.importExcel(file.getInputStream());
+        return R.ok();
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
