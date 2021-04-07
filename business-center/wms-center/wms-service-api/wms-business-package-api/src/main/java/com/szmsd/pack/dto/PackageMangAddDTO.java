@@ -3,20 +3,20 @@ package com.szmsd.pack.dto;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.pack.config.BOConvert;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import java.math.BigDecimal;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 
 /**
@@ -114,11 +114,12 @@ public class PackageMangAddDTO implements BOConvert {
     @Excel(name = "提交时间")
     private LocalDateTime submitTime = LocalDateTime.now();
 
-
-    @NotBlank(message = "期望收货日期不能为空")
+    @FutureOrPresent(message = "期望收货日期不能为过去时间")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @NotNull(message = "期望收货日期不能为空")
     @ApiModelProperty(value = "期望收货日期", required = true)
     @Excel(name = "期望收货日期")
-    private String expectedDeliveryTime;
+    private LocalDate expectedDeliveryTime;
 
     @ApiModelProperty(value = "揽件数量")
     @Excel(name = "揽件数量")
