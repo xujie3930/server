@@ -7,7 +7,9 @@ import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.mapper.OperationMapper;
 import com.szmsd.chargerules.service.IOperationService;
+import com.szmsd.chargerules.vo.OperationVo;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +35,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     }
 
     @Override
-    public List<Operation> listPage(OperationDTO dto) {
+    public List<OperationVo> listPage(OperationDTO dto) {
         LambdaQueryWrapper<Operation> where = Wrappers.lambdaQuery();
         if(StringUtils.isNotEmpty(dto.getOperationType())) {
             where.eq(Operation::getOperationType,dto.getOperationType());
@@ -44,12 +46,13 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         if(StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             where.eq(Operation::getWarehouseCode,dto.getWarehouseCode());
         }
-        return operationMapper.selectList(where);
+        return BeanMapperUtil.mapList(operationMapper.selectList(where), OperationVo.class);
     }
 
     @Override
-    public Operation details(int id) {
-        return operationMapper.selectById(id);
+    public OperationVo details(int id) {
+        Operation operation = operationMapper.selectById(id);
+        return operation != null ? BeanMapperUtil.map(operation,OperationVo.class) : null;
     }
 
 

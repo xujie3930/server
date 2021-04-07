@@ -131,7 +131,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     public List<BaseProductVO> selectBaseProductByCode(String code, String sellerCode,String category) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", category);
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code + "%");
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code);
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", sellerCode);
         queryWrapper.eq("is_active", true);
         queryWrapper.orderByAsc("code");
