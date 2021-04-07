@@ -22,6 +22,7 @@ import com.szmsd.returnex.enums.ReturnExpressEnums;
 import com.szmsd.returnex.mapper.ReturnExpressMapper;
 import com.szmsd.returnex.service.IReturnExpressGoodService;
 import com.szmsd.returnex.service.IReturnExpressService;
+import com.szmsd.returnex.vo.ReturnExpressGoodVO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
 import jodd.util.StringUtil;
@@ -286,9 +287,13 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         log.info("更新退单信息 req:{}", expressUpdateDTO);
         expressUpdateDTO.setSellerCode(getSellCode());
         AssertUtil.isTrue(expressUpdateDTO.getId() != null && expressUpdateDTO.getId() > 0, "更新异常！");
+        // TODO 更新货物信息 货物信息未返回无法更新sku货物信息
+        httpFeignClient.processingUpdate(expressUpdateDTO.convertThis(ProcessingUpdateReqDTO.class));
+
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
+
                 .set(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsReceivedDealWay())
                 .set(ReturnExpressDetail::getDealStatusStr, configStatus.getDealStatus().getWmsReceivedDealWayStr())
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
@@ -296,8 +301,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .last("LIMIT 1")
         );
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
-        // TODO 更新货物信息 货物信息未返回无法更新sku货物信息
-        httpFeignClient.processingUpdate(expressUpdateDTO.convertThis(ProcessingUpdateReqDTO.class));
+        returnExpressGoodService.addOrUpdateGoodInfoBatch(expressUpdateDTO.getGoodList(),expressUpdateDTO.getId());
         return update;
     }
 
@@ -319,7 +323,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectById(id);
         Optional.ofNullable(returnExpressDetail).orElseThrow(() -> new BaseException("数据不存在！"));
         ReturnExpressVO returnExpressVO = returnExpressDetail.convertThis(ReturnExpressVO.class);
-        returnExpressGoodService.queryGoodListByExId(returnExpressVO.getId());
+        returnExpressVO.setGoodList(returnExpressGoodService.queryGoodListByExId(returnExpressVO.getId()));
         return returnExpressVO;
     }
 }
