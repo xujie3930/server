@@ -1,11 +1,7 @@
 package com.szmsd.bas.controller;
 
 import com.szmsd.bas.domain.BasWarehouse;
-import com.szmsd.bas.domain.BasWarehouseCus;
-import com.szmsd.bas.dto.AddWarehouseRequest;
-import com.szmsd.bas.dto.BasWarehouseQueryDTO;
-import com.szmsd.bas.dto.BasWarehouseStatusChangeDTO;
-import com.szmsd.bas.dto.WarehouseKvDTO;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasWarehouseService;
 import com.szmsd.bas.vo.BasWarehouseInfoVO;
 import com.szmsd.bas.vo.BasWarehouseVO;
@@ -61,8 +57,8 @@ public class BasWarehouseController extends BaseController {
     @PreAuthorize("@ss.hasPermi('bas:warehouse:savewarehousecus')")
     @PutMapping("/saveWarehouseCus")
     @ApiOperation(value = "更新仓库客户黑白名单", notes = "更新仓库客户黑白名单")
-    public R saveWarehouseCus(@RequestBody List<BasWarehouseCus> basWarehouseCusList) {
-        basWarehouseService.saveWarehouseCus(basWarehouseCusList);
+    public R saveWarehouseCus(@RequestBody BasWarehouseCusDTO basWarehouseCusDTO) {
+        basWarehouseService.saveWarehouseCus(basWarehouseCusDTO);
         return R.ok();
     }
 

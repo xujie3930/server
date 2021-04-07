@@ -36,7 +36,7 @@ public class BasWarehouseVO {
     private Integer timeZone;
 
     @ApiModelProperty(value = "地址")
-    private Integer address;
+    private String address;
 
     @ApiModelProperty(value = "VAT")
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.YN)

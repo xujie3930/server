@@ -85,11 +85,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         //查询操作类型对应的收费配置
         this.charge(basSpecialOperation, customCode);
 
-        // 调用WMS接口回写结果
-        this.sendResult(basSpecialOperation);
-
         return R.ok();
-
     }
 
     /**
@@ -145,16 +141,21 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         if (specialOperation == null) {
             throw new CommonException("999", ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
         }
-        BigDecimal baseAmount = payService.calculate(specialOperation.getFirstPrice(),
-                specialOperation.getNextPrice(), basSpecialOperation.getQty());
-        BigDecimal amount = baseAmount.multiply(new BigDecimal(basSpecialOperation.getCoefficient()));
+        if(SpecialOperationStatusEnum.PASS.getStatus().equals(basSpecialOperation.getStatus())) {
+            BigDecimal baseAmount = payService.calculate(specialOperation.getFirstPrice(),
+                    specialOperation.getNextPrice(), basSpecialOperation.getQty());
+            BigDecimal amount = baseAmount.multiply(new BigDecimal(basSpecialOperation.getCoefficient()));
 
-        //调用扣费接口扣费
-        ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType());
-        R r = payService.pay(customCode, amount, BillEnum.PayMethod.SPECIAL_OPERATE, chargeLog);
-        if (r.getCode() != 200) {
-            log.error("pay failed: {} {}", r.getData(), r.getMsg());
-            throw new CommonException("999", ErrorMessageEnum.PAY_FAILED.getMessage());
+            //调用扣费接口扣费
+            ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType());
+            R r = payService.pay(customCode, amount, BillEnum.PayMethod.SPECIAL_OPERATE, chargeLog);
+            if (r.getCode() != 200) {
+                log.error("pay failed: {} {}", r.getData(), r.getMsg());
+                throw new CommonException("999", ErrorMessageEnum.PAY_FAILED.getMessage());
+            }
+
+            // 调用WMS接口回写结果
+            this.sendResult(basSpecialOperation);
         }
     }
 
@@ -190,7 +191,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         if (basSpecialOperation.getStatus().equals(SpecialOperationStatusEnum.REJECT.getStatus())) {
             basSpecialOperation.setCoefficient(0);
         } else {
-            if (basSpecialOperation.getCoefficient() == 0) {
+            if (basSpecialOperation.getCoefficient() <= 0) {
                 throw new CommonException("999", ErrorMessageEnum.COEFFICIENT_IS_ZERO.getMessage());
             }
         }

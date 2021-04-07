@@ -1,16 +1,19 @@
 package com.szmsd.inventory.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
+import com.szmsd.inventory.domain.InventoryCheckDetails;
 import com.szmsd.inventory.domain.InventoryCounting;
 import com.szmsd.inventory.domain.dto.AdjustRequestDto;
 import com.szmsd.inventory.domain.dto.CountingRequestDto;
 import com.szmsd.inventory.mapper.IInventoryCheckOpenMapper;
+import com.szmsd.inventory.mapper.InventoryCheckDetailsMapper;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryCheckOpenService;
 import com.szmsd.inventory.service.IInventoryRecordService;
@@ -25,7 +28,10 @@ import javax.annotation.Resource;
 
 @Slf4j
 @Service
-public class IInventoryCheckOpenServiceImpl implements IInventoryCheckOpenService {
+public class InventoryCheckOpenServiceImpl implements IInventoryCheckOpenService {
+
+    @Resource
+    private InventoryCheckDetailsMapper inventoryCheckDetailsMapper;
 
     @Resource
     private IInventoryCheckOpenMapper iInventoryCheckOpenMapper;
@@ -88,6 +94,13 @@ public class IInventoryCheckOpenServiceImpl implements IInventoryCheckOpenServic
     public int counting(CountingRequestDto countingRequestDto) {
         InventoryCounting inventoryCounting = new InventoryCounting();
         BeanUtils.copyProperties(countingRequestDto, inventoryCounting);
+        LambdaUpdateWrapper<InventoryCheckDetails> update = Wrappers.lambdaUpdate();
+        update.eq(InventoryCheckDetails::getOrderNo,countingRequestDto.getOrderNo());
+        update.eq(InventoryCheckDetails::getSku,countingRequestDto.getSku());
+        update.set(InventoryCheckDetails::getSystemQty,countingRequestDto.getSystemQty());
+        update.set(InventoryCheckDetails::getCountingQty,countingRequestDto.getCountingQty());
+        update.set(InventoryCheckDetails::getDiffQty,countingRequestDto.getDiffQty());
+        inventoryCheckDetailsMapper.update(null,update);
         return iInventoryCheckOpenMapper.insert(inventoryCounting);
     }
 }

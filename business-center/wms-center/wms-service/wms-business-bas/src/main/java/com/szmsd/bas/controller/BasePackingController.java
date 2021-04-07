@@ -1,23 +1,25 @@
 package com.szmsd.bas.controller;
+
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingQueryDto;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.service.IBasSerialNumberService;
-import org.springframework.security.access.prepost.PreAuthorize;
-import com.szmsd.common.core.domain.R;
-import org.springframework.web.bind.annotation.*;
 import com.szmsd.bas.service.IBasePackingService;
-import com.szmsd.common.log.annotation.Log;
-import com.szmsd.common.core.web.page.TableDataInfo;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
+import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import io.swagger.annotations.Api;
-import java.util.List;
-import java.io.IOException;
-import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
-import com.szmsd.common.core.web.controller.BaseController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -120,4 +122,10 @@ public class BasePackingController extends BaseController{
     return R.ok(basePackingService.deleteBasePackingByIds(ids));
     }
 
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:queryPackingList')")
+    @PostMapping("/queryPackingList")
+    @ApiOperation(value = "根据仓库，SKU查询产品信息")
+    public R<List<BasePacking>> queryPackingList(@RequestBody BaseProductConditionQueryDto conditionQueryDto) {
+        return R.ok(this.basePackingService.queryPackingList(conditionQueryDto));
+    }
 }

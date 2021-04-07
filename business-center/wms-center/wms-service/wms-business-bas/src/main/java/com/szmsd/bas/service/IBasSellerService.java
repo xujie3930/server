@@ -46,6 +46,13 @@ public interface IBasSellerService extends IService<BasSeller> {
         String getSellerCode(BasSeller basSeller);
 
         /**
+         * 查询sellerCode
+         * @param
+         * @return
+         */
+        String getLoginSellerCode();
+
+        /**
         * 新增模块
         *
         * @param dto 模块

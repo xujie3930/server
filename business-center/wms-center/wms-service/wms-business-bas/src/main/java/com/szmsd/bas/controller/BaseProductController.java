@@ -119,9 +119,9 @@ public class BaseProductController extends BaseController {
     @GetMapping("/export")
     @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
     public void export(HttpServletResponse response, BaseProductQueryDto queryDto) throws IOException {
-        List<BaseProduct> list = baseProductService.selectBaseProductPage(queryDto);
-        ExcelUtil<BaseProduct> util = new ExcelUtil<BaseProduct>(BaseProduct.class);
-        util.exportExcel(response, list, "BaseProduct");
+        List<BaseProductExportDto> list = baseProductService.exportProduceList(queryDto);
+        ExcelUtil<BaseProductExportDto> util = new ExcelUtil<BaseProductExportDto>(BaseProductExportDto.class);
+        util.exportExcel(response, list, "sku导出");
 
     }
 

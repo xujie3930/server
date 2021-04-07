@@ -3,6 +3,8 @@ package com.szmsd.chargerules.service;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.ChargeLogDto;
 
+import java.util.List;
+
 public interface IChargeLogService {
 
     /**
@@ -19,4 +21,10 @@ public interface IChargeLogService {
      */
     ChargeLog selectLog(ChargeLogDto chargeLogDto);
 
+    /**
+     * 查询日志
+     * @param chargeLogDto chargeLogDto
+     * @return List
+     */
+    List<ChargeLog> selectPage(ChargeLogDto chargeLogDto);
 }
