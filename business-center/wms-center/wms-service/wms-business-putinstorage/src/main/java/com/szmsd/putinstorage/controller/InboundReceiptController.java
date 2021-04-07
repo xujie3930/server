@@ -1,5 +1,8 @@
 package com.szmsd.putinstorage.controller;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
@@ -20,6 +23,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,6 +81,27 @@ public class InboundReceiptController extends BaseController {
     public R<InboundReceiptInfoVO> info(@PathVariable("warehouseNo") String warehouseNo) {
         InboundReceiptInfoVO inboundReceiptInfoVO = iInboundReceiptService.queryInfo(warehouseNo);
         return R.ok(inboundReceiptInfoVO);
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
+    @GetMapping("/receipt/exportTemplate")
+    @ApiOperation(value = "导出模板", notes = "入库管理 - 新增 - 下载模板")
+    public void exportTemplate(HttpServletResponse response) {
+        try (ExcelWriter excel = cn.hutool.poi.excel.ExcelUtil.getWriter();
+             ServletOutputStream out = response.getOutputStream()) {
+            List<String> row1 = CollUtil.newArrayList("SKU", "申报品名", "申报数量", "原产品编码", "备注");
+            List<List<String>> rows = CollUtil.newArrayList(row1, new ArrayList<>());
+            excel.write(rows, true);
+            //response为HttpServletResponse对象
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition" , "attachment;filename=" + new String("入库单SKU导入".getBytes("gb2312"), "ISO8859-1" )  + ".xls");
+            excel.flush(out);
+            //此处记得关闭输出Servlet流
+            IoUtil.close(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
