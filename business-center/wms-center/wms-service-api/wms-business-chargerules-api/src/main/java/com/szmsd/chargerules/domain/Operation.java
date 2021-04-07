@@ -1,6 +1,8 @@
 package com.szmsd.chargerules.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.szmsd.common.core.language.annotation.FieldJsonI18n;
+import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -29,6 +31,7 @@ public class Operation extends BaseEntity {
     @TableField
     private boolean manySku;
 
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "仓库")
     @TableField
     private String warehouseCode;
