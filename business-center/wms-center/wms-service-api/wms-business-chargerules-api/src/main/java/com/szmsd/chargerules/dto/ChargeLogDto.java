@@ -43,10 +43,11 @@ public class ChargeLogDto extends BaseEntity {
     @ApiModelProperty(value = "是否成功")
     private Boolean success;
 
-    public ChargeLogDto(String orderNo, String payMethod, String operationType, Boolean success) {
+    public ChargeLogDto(String orderNo, String payMethod, String operationType, String warehouseCode, Boolean success) {
         this.orderNo = orderNo;
         this.payMethod = payMethod;
         this.operationType = operationType;
+        this.warehouseCode = warehouseCode;
         this.success = success;
     }
 }

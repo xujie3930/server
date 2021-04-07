@@ -97,7 +97,7 @@ public class Shipment extends OrderType {
      */
     private void pay(DelOutboundDetailListVO datum, BigDecimal amount) {
         ChargeLogDto chargeLogDto = new ChargeLogDto(datum.getOrderNo(),
-                BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName(),datum.getOrderType(), true);
+                BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName(),datum.getOrderType(), datum.getWarehouseCode(),true);
         ChargeLog exist = chargeLogService.selectLog(chargeLogDto);
         if (Objects.nonNull(exist)) {
             log.info("该单已经扣过费, chargeLogDto: {}", chargeLogDto);
@@ -105,7 +105,7 @@ public class Shipment extends OrderType {
         }
         DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(datum.getOrderType());
         if(delOutboundOrderTypeEnum != null) datum.setOrderType(delOutboundOrderTypeEnum.getName());
-        ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType());
+        ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType(), datum.getWarehouseCode());
         R resultPay = payService.pay(datum.getCustomCode(), amount, BillEnum.PayMethod.BUSINESS_OPERATE, chargeLog);
         if (resultPay.getCode() != 200)
             log.error("pay() pay failed.. msg: {},data: {}", resultPay.getMsg(), resultPay.getData());
