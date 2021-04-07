@@ -53,7 +53,7 @@ CREATE TABLE `return_express_good` (
        `sku_number` int(11) NOT NULL COMMENT 'SKU到库数量',
        `warehouse_qty` int(11) DEFAULT NULL COMMENT '仓库实际上架数量',
        `putaway_qty` int(11) DEFAULT NULL COMMENT '上架数量',
-       `putaway_sku` int(11) DEFAULT NULL COMMENT '新上架编码',
+       `putaway_sku` varchar(255) DEFAULT NULL COMMENT '新上架编码',
        `process_remark` varchar(255) DEFAULT NULL COMMENT 'SKU处理备注',
        `del_flag` int(2) NOT NULL DEFAULT '0' COMMENT '逻辑删除标识；2-已删除，0-未删除',
        PRIMARY KEY (`id`) USING BTREE

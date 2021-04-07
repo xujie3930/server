@@ -166,6 +166,7 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
                 .eq(PackageAddress::getSellerCode, getSellCode())
                 .notIn(CollectionUtils.isNotEmpty(ids), PackageAddress::getId, ids)
                 .set(PackageAddress::getDefaultFlag, 1)
+                .orderByDesc(PackageAddress::getDefaultFlag)
                 .last("LIMIT 1")
         );
     }

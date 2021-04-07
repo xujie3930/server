@@ -49,7 +49,7 @@ public class PackageManagementController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:list')")
     @GetMapping("/list")
     @ApiOperation(value = "交货管理-揽收列表", notes = "查询package - 交货管理 - 地址信息表模块列表")
-    public TableDataInfo list(@Validated PackageMangQueryDTO packageMangQueryDTO) {
+    public TableDataInfo<PackageMangVO> list(@Validated PackageMangQueryDTO packageMangQueryDTO) {
         startPage();
         List<PackageMangVO> list = packageManagementService.selectPackageManagementList(packageMangQueryDTO);
         return getDataTable(list);
@@ -78,7 +78,7 @@ public class PackageManagementController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:query')")
     @GetMapping(value = "getInfo/{id}")
     @ApiOperation(value = "交货管理-查询详情", notes = "获取package - 交货管理 - 地址信息表模块详细信息")
-    public R getInfo(@PathVariable("id") String id) {
+    public R<PackageMangVO> getInfo(@PathVariable("id") String id) {
         return R.ok(packageManagementService.selectPackageManagementById(id));
     }
 
@@ -89,7 +89,7 @@ public class PackageManagementController extends BaseController {
     @Log(title = "交货管理", businessType = BusinessType.INSERT)
     @PostMapping("add")
     @ApiOperation(value = "交货管理-上门揽件【新增】", notes = "交货管理-上门揽件【新增】")
-    public R add(@Validated @RequestBody PackageMangAddDTO packageManagement) {
+    public R<Integer> add(@Validated @RequestBody PackageMangAddDTO packageManagement) {
         return toOk(packageManagementService.insertPackageManagement(packageManagement));
     }
 
@@ -100,7 +100,7 @@ public class PackageManagementController extends BaseController {
     @Log(title = "交货管理", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = "交货管理-编辑", notes = "交货管理-编辑")
-    public R edit(@Validated @RequestBody PackageMangAddDTO packageManagement) {
+    public R<Integer> edit(@Validated @RequestBody PackageMangAddDTO packageManagement) {
         return toOk(packageManagementService.updatePackageManagement(packageManagement));
     }
 
