@@ -4,23 +4,23 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 
 public enum SpecialOperationStatusEnum {
 
-    PASS("Pass","通过"),
+    PASS(1,"Pass"),
 
-    REJECT("Reject","不通过"),
+    REJECT(2,"Reject"),
 
-    PENDING("Pending","待确认");
+    PENDING(3,"Pending");
 
     @EnumValue
-    private final String status;
+    private final Integer status;
 
     private final String statusName;
 
-    SpecialOperationStatusEnum(String status,String statusName) {
+    SpecialOperationStatusEnum(Integer status,String statusName) {
         this.status = status;
         this.statusName = statusName;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
@@ -28,11 +28,11 @@ public enum SpecialOperationStatusEnum {
         return statusName;
     }
 
-    public static Boolean checkStatus(String status) {
+    public static Boolean checkStatus(Integer status) {
         return get(status) != null;
     }
 
-    public static SpecialOperationStatusEnum get(String code) {
+    public static SpecialOperationStatusEnum get(Integer code) {
         for (SpecialOperationStatusEnum statusEnum : SpecialOperationStatusEnum.values()) {
             if (statusEnum.getStatus().equals(code)) {
                 return statusEnum;

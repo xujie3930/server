@@ -12,7 +12,7 @@ public interface IBaseInfoService {
 
     void add(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO);
 
-    List<BasSpecialOperation> list(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO);
+    List<BasSpecialOperationVo> list(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO);
 
     R update(BasSpecialOperation basSpecialOperation);
 

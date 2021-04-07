@@ -104,7 +104,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     }
 
     @Override
-    public List<BasSpecialOperation> list(BasSpecialOperationRequestDTO dto) {
+    public List<BasSpecialOperationVo> list(BasSpecialOperationRequestDTO dto) {
         QueryWrapper<BasSpecialOperation> where = new QueryWrapper<>();
         if (StringUtils.isNotEmpty(dto.getOperationType())) {
             where.eq("operation_order_no", dto.getOperationType());
@@ -115,7 +115,8 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         if (StringUtils.isNotEmpty(dto.getOperationType())) {
             where.eq("operation_type", dto.getOperationType());
         }
-        return baseInfoMapper.selectList(where);
+        where.eq("status",SpecialOperationStatusEnum.PENDING.getStatus());
+        return baseInfoMapper.selectPageList(where);
     }
 
     /**
