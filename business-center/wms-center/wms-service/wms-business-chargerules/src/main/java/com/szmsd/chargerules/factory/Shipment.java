@@ -1,10 +1,10 @@
 package com.szmsd.chargerules.factory;
 
 import com.szmsd.chargerules.domain.ChargeLog;
-import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IPayService;
+import com.szmsd.chargerules.vo.OperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
@@ -50,7 +50,7 @@ public class Shipment extends OrderType {
     }
 
     @Override
-    public void operationPay(Operation operation) {
+    public void operationPay(OperationVo operation) {
         String orderType = DelOutboundOrderTypeEnum.getCode(operation.getOperationType());
         if(StringUtils.isNull(orderType)) {
             log.error("operationPay() failed: 出库单未找到对应的操作类型, operationType: {}", operation.getOperationType());
@@ -72,7 +72,7 @@ public class Shipment extends OrderType {
      * @param operation operation
      * @param rList list
      */
-    private void calculate(Operation operation, R<List<DelOutboundDetailListVO>> rList) {
+    private void calculate(OperationVo operation, R<List<DelOutboundDetailListVO>> rList) {
         for (DelOutboundDetailListVO datum : rList.getData()) {
             List<DelOutboundDetailDto> details = datum.getDetails();
             if (CollectionUtils.isEmpty(details)) {

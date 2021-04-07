@@ -3,6 +3,7 @@ package com.szmsd.chargerules.controller;
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.service.IOperationService;
+import com.szmsd.chargerules.vo.OperationVo;
 import com.szmsd.chargerules.vo.OrderTypeLabelVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -43,16 +44,16 @@ public class OperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('Operation:Operation:list')")
     @ApiOperation(value = "业务计费逻辑 - 分页查询")
     @GetMapping("/list")
-    public TableDataInfo<Operation> listPage(OperationDTO dto){
+    public TableDataInfo<OperationVo> listPage(OperationDTO dto){
         startPage();
-        List<Operation> list = operationService.listPage(dto);
+        List<OperationVo> list = operationService.listPage(dto);
         return getDataTable(list);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:details')")
     @ApiOperation(value = "业务计费逻辑 - 详情")
     @GetMapping("/details/{id}")
-    public R<Operation> details(@PathVariable int id) {
+    public R<OperationVo> details(@PathVariable int id) {
         return R.ok(operationService.details(id));
     }
 
