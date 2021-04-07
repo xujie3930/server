@@ -3,6 +3,7 @@ package com.szmsd.chargerules.service;
 
 import com.szmsd.chargerules.domain.WarehouseOperation;
 import com.szmsd.chargerules.dto.WarehouseOperationDTO;
+import com.szmsd.chargerules.vo.WarehouseOperationVo;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,7 +14,7 @@ public interface IWarehouseOperationService {
 
     int update(WarehouseOperation dto);
 
-    List<WarehouseOperation> listPage(WarehouseOperationDTO dto);
+    List<WarehouseOperationVo> listPage(WarehouseOperationDTO dto);
 
     /**
      * 仓储服务计费
@@ -30,5 +31,5 @@ public interface IWarehouseOperationService {
      * @param id id
      * @return WarehouseOperation
      */
-    WarehouseOperation details(int id);
+    WarehouseOperationVo details(int id);
 }

@@ -33,6 +33,9 @@ public class PackageMangQueryDTO{
     @ApiModelProperty(value = "主键IDs")
     private List<Integer> ids;
 
+    @ApiModelProperty(value = "联系人")
+    private String linkUserName;
+
     @ApiModelProperty(value = "逻辑删除标识；2-已删除，0-未删除", hidden = true)
     private Integer delFlag = 0;
 

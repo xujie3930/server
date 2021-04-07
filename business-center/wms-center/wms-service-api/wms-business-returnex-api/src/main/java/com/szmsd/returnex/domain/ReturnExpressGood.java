@@ -66,7 +66,7 @@ public class ReturnExpressGood extends BaseEntity {
 
     @ApiModelProperty(value = "新上架编码")
     @Excel(name = "新上架编码")
-    private Integer putawaySku;
+    private String putawaySku;
 
     @ApiModelProperty(value = "SKU处理备注")
     @Excel(name = "SKU处理备注")

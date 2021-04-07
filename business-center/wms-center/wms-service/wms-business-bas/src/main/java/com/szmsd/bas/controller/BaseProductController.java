@@ -69,7 +69,7 @@ public class BaseProductController extends BaseController {
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
         startPage();
-        List<BaseProductVO> list = baseProductService.selectBaseProductByCode(code,basSeller.getSellerCode());
+        List<BaseProductVO> list = baseProductService.selectBaseProductByCode(code,basSeller.getSellerCode(),category);
         return getDataTable(list);
     }
 

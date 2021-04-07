@@ -54,7 +54,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:list')")
     @GetMapping("/address/list")
     @ApiOperation(value = "地址管理-列表", notes = "地址信息列表")
-    public TableDataInfo addressList(@Validated PackageMangQueryDTO packageAddress) {
+    public TableDataInfo<PackageAddressVO> addressList(@Validated PackageMangQueryDTO packageAddress) {
         startPage();
         List<PackageAddressVO> list = packageMangClientService.selectPackageAddressList(packageAddress);
         return getDataTable(list);
@@ -80,7 +80,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageAddress:PackageAddress:query')")
     @GetMapping(value = "address/getInfo/{id}")
     @ApiOperation(value = "地址管理-查询地址详情", notes = "获取package - 交货管理 - 地址信息表模块详细信息")
-    public R getInfo(@PathVariable("id") String id) {
+    public R<PackageAddressVO> getInfo(@PathVariable("id") String id) {
         return R.ok(packageMangClientService.selectPackageAddressById(id));
     }
 
@@ -135,7 +135,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:list')")
     @GetMapping("/package/list")
     @ApiOperation(value = "揽件列表-列表", notes = "揽件列表查询")
-    public TableDataInfo packageList(@Validated PackageMangQueryDTO packageMangQueryDTO) {
+    public TableDataInfo<PackageMangVO> packageList(@Validated PackageMangQueryDTO packageMangQueryDTO) {
         startPage();
         List<PackageMangVO> list = packageMangClientService.selectPackageManagementList(packageMangQueryDTO);
         return getDataTable(list);
@@ -148,7 +148,7 @@ public class PackageMangClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:query')")
     @GetMapping(value = "getInfo/{id}")
     @ApiOperation(value = "交货管理-查询详情", notes = "获取package - 交货管理 - 地址信息表模块详细信息")
-    public R selectPackageManagementById(@PathVariable("id") String id) {
+    public R<PackageMangVO> selectPackageManagementById(@PathVariable("id") String id) {
         return R.ok(packageMangClientService.selectPackageManagementById(id));
     }
 

@@ -2,7 +2,6 @@ package com.szmsd.chargerules.runnable;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.chargerules.domain.ChargeLog;
-import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.domain.WarehouseOperation;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.enums.OrderTypeEnum;
@@ -12,6 +11,7 @@ import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IOperationService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
+import com.szmsd.chargerules.vo.OperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.finance.enums.BillEnum;
@@ -71,8 +71,8 @@ public class RunnableExecute {
                 for (OrderTypeEnum type : types) {
                     operationDTO.setOrderType(type.getNameEn());
                     // 查询出每个订单类型对应的所有操作类型
-                    List<Operation> operations = operationService.listPage(operationDTO);
-                    for (Operation operation : operations) {
+                    List<OperationVo> operations = operationService.listPage(operationDTO);
+                    for (OperationVo operation : operations) {
                         OrderType factory = orderTypeFactory.getFactory(type.getNameEn());
                         factory.operationPay(operation);
                     }
