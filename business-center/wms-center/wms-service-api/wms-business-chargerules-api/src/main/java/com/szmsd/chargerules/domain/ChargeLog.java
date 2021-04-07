@@ -63,8 +63,13 @@ public class ChargeLog extends BaseEntity {
     @ApiModelProperty(value = "修改人")
     private String updateBy;
 
-    public ChargeLog(String orderNo, String operationType) {
+    public ChargeLog(String warehouseCode) {
+        this.warehouseCode = warehouseCode;
+    }
+
+    public ChargeLog(String orderNo, String operationType, String warehouseCode) {
         this.operationType = operationType;
         this.orderNo = orderNo;
+        this.warehouseCode = warehouseCode;
     }
 }
