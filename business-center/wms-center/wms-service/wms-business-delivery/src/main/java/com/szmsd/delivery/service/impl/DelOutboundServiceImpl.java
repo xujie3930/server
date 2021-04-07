@@ -778,20 +778,24 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 cancelledState = "UN_CARRIER";
             }
             if ("UN_CARRIER".equals(cancelledState)) {
-                CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
-                command.setReferenceNumber(String.valueOf(delOutbound.getId()));
-                List<CancelShipmentOrder> cancelShipmentOrders = new ArrayList<>();
-                cancelShipmentOrders.add(new CancelShipmentOrder(delOutbound.getShipmentOrderNumber(), delOutbound.getTrackingNo()));
-                command.setCancelShipmentOrders(cancelShipmentOrders);
-                ResponseObject<CancelShipmentOrderBatchResult, ErrorDataDto> responseObject = this.htpCarrierClientService.cancellation(command);
-                if (null == responseObject || !responseObject.isSuccess()) {
-                    throw new CommonException("999", "取消承运商物流订单失败");
-                }
-                CancelShipmentOrderBatchResult cancelShipmentOrderBatchResult = responseObject.getObject();
-                List<CancelShipmentOrderResult> cancelOrders = cancelShipmentOrderBatchResult.getCancelOrders();
-                for (CancelShipmentOrderResult cancelOrder : cancelOrders) {
-                    if (!cancelOrder.isSuccess()) {
-                        throw new CommonException("999", "取消承运商物流订单失败2");
+                String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
+                String trackingNo = delOutbound.getTrackingNo();
+                if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
+                    CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
+                    command.setReferenceNumber(String.valueOf(delOutbound.getId()));
+                    List<CancelShipmentOrder> cancelShipmentOrders = new ArrayList<>();
+                    cancelShipmentOrders.add(new CancelShipmentOrder(shipmentOrderNumber, trackingNo));
+                    command.setCancelShipmentOrders(cancelShipmentOrders);
+                    ResponseObject<CancelShipmentOrderBatchResult, ErrorDataDto> responseObject = this.htpCarrierClientService.cancellation(command);
+                    if (null == responseObject || !responseObject.isSuccess()) {
+                        throw new CommonException("999", "取消承运商物流订单失败");
+                    }
+                    CancelShipmentOrderBatchResult cancelShipmentOrderBatchResult = responseObject.getObject();
+                    List<CancelShipmentOrderResult> cancelOrders = cancelShipmentOrderBatchResult.getCancelOrders();
+                    for (CancelShipmentOrderResult cancelOrder : cancelOrders) {
+                        if (!cancelOrder.isSuccess()) {
+                            throw new CommonException("999", "取消承运商物流订单失败2");
+                        }
                     }
                 }
                 cancelledState = "MODIFY";
