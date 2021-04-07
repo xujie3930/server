@@ -7,6 +7,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.pack.dto.PackageAddressAddDTO;
+import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.service.IPackageMangClientService;
 import com.szmsd.pack.vo.PackageAddressVO;
@@ -34,7 +35,7 @@ import java.util.List;
 public class PackageMangClientController extends BaseController {
 
     @Resource
-    private IPackageMangClientService packageAddressService;
+    private IPackageMangClientService packageMangClientService;
 
     /**
      * 新增地址
@@ -44,7 +45,7 @@ public class PackageMangClientController extends BaseController {
     @PostMapping("/address/add")
     @ApiOperation(value = "地址管理-新增地址", notes = "新增地址")
     public R add(@Validated @RequestBody PackageAddressAddDTO packageAddress) {
-        return toOk(packageAddressService.insertPackageAddress(packageAddress));
+        return toOk(packageMangClientService.insertPackageAddress(packageAddress));
     }
 
     /**
@@ -55,7 +56,7 @@ public class PackageMangClientController extends BaseController {
     @ApiOperation(value = "地址管理-列表", notes = "地址信息列表")
     public TableDataInfo addressList(@Validated PackageMangQueryDTO packageAddress) {
         startPage();
-        List<PackageAddressVO> list = packageAddressService.selectPackageAddressList(packageAddress);
+        List<PackageAddressVO> list = packageMangClientService.selectPackageAddressList(packageAddress);
         return getDataTable(list);
     }
 
@@ -67,7 +68,7 @@ public class PackageMangClientController extends BaseController {
     @GetMapping("/address/export")
     @ApiOperation(value = "地址管理-导出", notes = "导出package - 交货管理 - 地址信息表模块列表")
     public void export(HttpServletResponse response,@Validated PackageMangQueryDTO packageAddress) throws IOException {
-        List<PackageAddressVO> list = packageAddressService.selectPackageAddressList(packageAddress);
+        List<PackageAddressVO> list = packageMangClientService.selectPackageAddressList(packageAddress);
         ExcelUtil<PackageAddressVO> util = new ExcelUtil<PackageAddressVO>(PackageAddressVO.class);
         util.exportExcel(response, list, "PackageAddress");
 
@@ -80,7 +81,7 @@ public class PackageMangClientController extends BaseController {
     @GetMapping(value = "address/getInfo/{id}")
     @ApiOperation(value = "地址管理-查询地址详情", notes = "获取package - 交货管理 - 地址信息表模块详细信息")
     public R getInfo(@PathVariable("id") String id) {
-        return R.ok(packageAddressService.selectPackageAddressById(id));
+        return R.ok(packageMangClientService.selectPackageAddressById(id));
     }
 
 
@@ -92,7 +93,7 @@ public class PackageMangClientController extends BaseController {
     @PutMapping("address/edit")
     @ApiOperation(value = "地址管理-修改地址", notes = "修改package - 交货管理 - 地址信息表模块")
     public R edit(@Validated @RequestBody PackageAddressAddDTO packageAddress) {
-        return toOk(packageAddressService.updatePackageAddress(packageAddress));
+        return toOk(packageMangClientService.updatePackageAddress(packageAddress));
     }
 
     /**
@@ -102,8 +103,8 @@ public class PackageMangClientController extends BaseController {
     @Log(title = "交货管理", businessType = BusinessType.DELETE)
     @DeleteMapping("address/remove")
     @ApiOperation(value = "地址管理-批量删除地址", notes = "删除package - 交货管理 - 地址信息表模块")
-    public R remove(@RequestBody List<String> ids) {
-        return toOk(packageAddressService.deletePackageAddressByIds(ids));
+    public R deletePackageAddressByIds(@RequestBody List<String> ids) {
+        return toOk(packageMangClientService.deletePackageAddressByIds(ids));
     }
 
     /**
@@ -113,8 +114,8 @@ public class PackageMangClientController extends BaseController {
     @Log(title = "交货管理", businessType = BusinessType.DELETE)
     @DeleteMapping("address/remove/{id}")
     @ApiOperation(value = "地址管理-删除地址", notes = "删除package - 交货管理 - 地址信息表模块")
-    public R remove(@PathVariable(value = "id") String id) {
-        return toOk(packageAddressService.deletePackageAddressById(id));
+    public R deletePackageAddressById(@PathVariable(value = "id") String id) {
+        return toOk(packageMangClientService.deletePackageAddressById(id));
     }
 
     /**
@@ -125,7 +126,7 @@ public class PackageMangClientController extends BaseController {
     @PutMapping("address/setDefaultAddr/{id}")
     @ApiOperation(value = "地址管理-设置默认地址", notes = "设置默认地址当前id未默认地址")
     public R setDefaultAddr(@PathVariable(value = "id") String id) {
-        return toOk(packageAddressService.setDefaultAddr(id));
+        return toOk(packageMangClientService.setDefaultAddr(id));
     }
 
     /**
@@ -136,8 +137,52 @@ public class PackageMangClientController extends BaseController {
     @ApiOperation(value = "揽件列表-列表", notes = "揽件列表查询")
     public TableDataInfo packageList(@Validated PackageMangQueryDTO packageMangQueryDTO) {
         startPage();
-        List<PackageMangVO> list = packageAddressService.selectPackageManagementList(packageMangQueryDTO);
+        List<PackageMangVO> list = packageMangClientService.selectPackageManagementList(packageMangQueryDTO);
         return getDataTable(list);
+    }
+
+
+    /**
+     * 获取package - 交货管理 - 地址信息表模块详细信息
+     */
+    @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:query')")
+    @GetMapping(value = "getInfo/{id}")
+    @ApiOperation(value = "交货管理-查询详情", notes = "获取package - 交货管理 - 地址信息表模块详细信息")
+    public R selectPackageManagementById(@PathVariable("id") String id) {
+        return R.ok(packageMangClientService.selectPackageManagementById(id));
+    }
+
+    /**
+     * 新增package - 交货管理 - 地址信息表模块
+     */
+    @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:add')")
+    @Log(title = "交货管理", businessType = BusinessType.INSERT)
+    @PostMapping("add")
+    @ApiOperation(value = "交货管理-上门揽件【新增】", notes = "交货管理-上门揽件【新增】")
+    public R add(@Validated @RequestBody PackageMangAddDTO packageManagement) {
+        return toOk(packageMangClientService.insertPackageManagement(packageManagement));
+    }
+
+    /**
+     * 修改package - 交货管理 - 地址信息表模块
+     */
+    @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:edit')")
+    @Log(title = "交货管理", businessType = BusinessType.UPDATE)
+    @PutMapping("edit")
+    @ApiOperation(value = "交货管理-编辑", notes = "交货管理-编辑")
+    public R edit(@Validated @RequestBody PackageMangAddDTO packageManagement) {
+        return toOk(packageMangClientService.updatePackageManagement(packageManagement));
+    }
+
+    /**
+     * 删除package - 交货管理 - 地址信息表模块
+     */
+    @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:remove')")
+    @Log(title = "交货管理", businessType = BusinessType.DELETE)
+    @DeleteMapping("remove")
+    @ApiOperation(value = "交货管理-删除揽件", notes = "交货管理-删除揽件")
+    public R remove(@RequestBody List<String> ids) {
+        return toOk(packageMangClientService.deletePackageManagementByIds(ids));
     }
 
 }

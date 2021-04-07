@@ -9,6 +9,7 @@ import java.util.Date;
 import java.time.LocalDate;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.szmsd.pack.config.BOConvert;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -29,7 +30,7 @@ import com.szmsd.common.core.annotation.Excel;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value = "package - 交货管理 - 地址信息表", description = "PackageManagement对象")
-public class PackageManagement extends BaseEntity {
+public class PackageManagement extends BaseEntity implements BOConvert {
 
     private static final long serialVersionUID = 1L;
 

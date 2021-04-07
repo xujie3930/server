@@ -24,7 +24,7 @@ public interface IPackageMangServeService extends IService<PackageManagement> {
      * @param id package - 交货管理 - 地址信息表模块ID
      * @return package - 交货管理 - 地址信息表模块
      */
-    PackageManagement selectPackageManagementById(String id);
+    PackageMangVO selectPackageManagementById(String id);
 
     /**
      * 查询package - 交货管理 - 地址信息表模块列表

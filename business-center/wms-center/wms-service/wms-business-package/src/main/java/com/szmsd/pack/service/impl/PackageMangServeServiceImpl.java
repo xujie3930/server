@@ -87,10 +87,10 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
      * @return package - 交货管理 - 地址信息表模块
      */
     @Override
-    public PackageManagement selectPackageManagementById(String id) {
+    public PackageMangVO selectPackageManagementById(String id) {
         PackageManagement packageManagement = baseMapper.selectById(id);
         Optional.ofNullable(packageManagement).orElseThrow(() -> new BaseException("数据不存在"));
-        return packageManagement;
+        return packageManagement.convertThis(PackageMangVO.class);
     }
 
     @Override

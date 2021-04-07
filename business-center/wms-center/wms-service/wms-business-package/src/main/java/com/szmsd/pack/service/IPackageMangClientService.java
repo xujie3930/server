@@ -3,6 +3,7 @@ package com.szmsd.pack.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.pack.domain.PackageAddress;
 import com.szmsd.pack.dto.PackageAddressAddDTO;
+import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.vo.PackageAddressVO;
 import com.szmsd.pack.vo.PackageMangVO;
@@ -70,5 +71,13 @@ public interface IPackageMangClientService extends IService<PackageAddress> {
     int setDefaultAddr(String id);
 
     List<PackageMangVO> selectPackageManagementList(PackageMangQueryDTO packageMangQueryDTO);
+
+    PackageMangVO selectPackageManagementById(String id);
+
+    int insertPackageManagement(PackageMangAddDTO packageManagement);
+
+    int updatePackageManagement(PackageMangAddDTO packageManagement);
+
+    int deletePackageManagementByIds(List<String> ids);
 }
 
