@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 @ApiModel(value = "FreightCalculationVO", description = "运费测算列表")
 public class FreightCalculationVO {
 
-    @ApiModelProperty(value = "发货渠道")
-    private String shippingChannel;
+    @ApiModelProperty(value = "产品代码")
+    private String productCode;
 
     @ApiModelProperty(value = "计费重量")
     private BigDecimal calcWeight;

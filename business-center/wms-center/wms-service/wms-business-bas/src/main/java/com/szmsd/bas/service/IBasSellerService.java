@@ -37,6 +37,14 @@ public interface IBasSellerService extends IService<BasSeller> {
         */
         List<BasSellerSysDto> selectBasSellerList(BasSeller basSeller);
 
+        /**
+         * 查询模块列表
+         *
+         * @param basSeller 模块
+         * @return 模块集合
+         */
+        List<BasSellerSysDto> getBasSellerList(BasSeller basSeller);
+
 
         /**
          * 查询sellerCode

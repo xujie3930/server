@@ -45,13 +45,22 @@ public class BasSellerController extends BaseController{
      */
       @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
       @GetMapping("/list")
-      @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+      @ApiOperation(value = "分页查询模块列表",notes = "分页查询模块列表")
       public TableDataInfo list(BasSeller basSeller)
      {
             startPage();
             List<BasSellerSysDto> list = basSellerService.selectBasSellerList(basSeller);
             return getDataTable(list);
       }
+
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
+    @GetMapping("/listSeller")
+    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    public R<List<BasSellerSysDto>> listSeller(BasSeller basSeller)
+    {
+        List<BasSellerSysDto> list = basSellerService.getBasSellerList(basSeller);
+        return R.ok(list);
+    }
 
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
     @PostMapping("/getSellerCode")
