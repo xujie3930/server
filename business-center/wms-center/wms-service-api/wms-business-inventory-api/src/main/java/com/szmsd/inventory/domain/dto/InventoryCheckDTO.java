@@ -14,9 +14,6 @@ public class InventoryCheckDTO {
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "完成时间")
-    private String checkTime;
-
     @ApiModelProperty(value = "详情")
     private List<InventoryCheckDetailsDTO> inventoryCheckDetailsList;
 

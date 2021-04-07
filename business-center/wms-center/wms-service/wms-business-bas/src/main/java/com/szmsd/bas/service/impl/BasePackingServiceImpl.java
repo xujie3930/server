@@ -1,10 +1,13 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingQueryDto;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.mapper.BasePackingMapper;
 import com.szmsd.bas.service.IBasePackingService;
 import com.szmsd.bas.util.ObjectUtil;
@@ -15,9 +18,11 @@ import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.PackingRequest;
 import com.szmsd.http.vo.ResponseVO;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -83,9 +88,9 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
     @Override
     public int insertBasePacking(BasePacking basePacking) {
         QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("code",basePacking.getCode());
-        int count  = super.count(queryWrapper);
-        if(count!=0){
+        queryWrapper.eq("code", basePacking.getCode());
+        int count = super.count(queryWrapper);
+        if (count != 0) {
             throw new BaseException("物料编码重复，请更换之后重新提交");
         }
         PackingRequest packingRequest = BeanMapperUtil.map(basePacking, PackingRequest.class);
@@ -142,6 +147,21 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
         return baseMapper.deleteById(id);
     }
 
-
+    @Override
+    public List<BasePacking> queryPackingList(BaseProductConditionQueryDto conditionQueryDto) {
+        if (CollectionUtils.isEmpty(conditionQueryDto.getSkus())) {
+            return Collections.emptyList();
+        }
+        LambdaQueryWrapper<BasePacking> queryWrapper = Wrappers.lambdaQuery();
+        if (null != conditionQueryDto.getWarehouseCode()) {
+            queryWrapper.eq(BasePacking::getWarehouseCode, conditionQueryDto.getWarehouseCode());
+        }
+        queryWrapper.in(BasePacking::getCode, conditionQueryDto.getSkus());
+        List<BasePacking> list = this.list(queryWrapper);
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        return list;
+    }
 }
 
