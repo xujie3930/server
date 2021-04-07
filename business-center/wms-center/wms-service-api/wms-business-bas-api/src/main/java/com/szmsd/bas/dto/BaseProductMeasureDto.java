@@ -14,6 +14,9 @@ public class BaseProductMeasureDto {
     @TableField("`code`")
     private String code;
 
+    @ApiModelProperty(value = "类型")
+    private String category;
+
     @ApiModelProperty(value = "初始重量g")
     @Excel(name = "初始重量g")
     private Double initWeight;

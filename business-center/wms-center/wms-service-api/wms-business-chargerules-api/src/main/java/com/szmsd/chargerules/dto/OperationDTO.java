@@ -29,6 +29,9 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "续件价格")
     private BigDecimal nextPrice;
 
+    @ApiModelProperty(value = "是否多SKU")
+    private boolean manySku;
+
     @ApiModelProperty(value = "计费单位")
     private String unit;
 

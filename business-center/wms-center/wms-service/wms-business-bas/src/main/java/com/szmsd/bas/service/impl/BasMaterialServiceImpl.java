@@ -106,6 +106,10 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
             QueryWrapper<BasMaterial> queryWrapper = new QueryWrapper<>();
             if(StringUtils.isEmpty(basMaterial.getCode())){
                 basMaterial.setCode("WL"+basMaterial.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
+            }else{
+                if(basMaterial.getCode().length()<2){
+                    throw new BaseException("sku编码长度不能小于两个字符");
+                }
             }
             queryWrapper.eq("code",basMaterial.getCode());
             if(super.count(queryWrapper)==1){
