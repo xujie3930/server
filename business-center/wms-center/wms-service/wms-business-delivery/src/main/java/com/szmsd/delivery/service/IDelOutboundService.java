@@ -5,6 +5,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 
@@ -212,5 +213,15 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return int
      */
     int canceled(DelOutboundCanceledDto dto);
+
+    /**
+     * sku导入
+     *
+     * @param warehouseCode warehouseCode
+     * @param sellerCode    sellerCode
+     * @param dtoList       dtoList
+     * @return List<DelOutboundDetailVO>
+     */
+    List<DelOutboundDetailVO> importDetail(String warehouseCode, String sellerCode, List<DelOutboundDetailImportDto> dtoList);
 }
 
