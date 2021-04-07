@@ -31,6 +31,7 @@ public class ChargeLogServiceImpl implements IChargeLogService {
         query.eq(ChargeLog::getOrderNo, chargeLogDto.getOrderNo());
         query.eq(ChargeLog::getPayMethod, chargeLogDto.getPayMethod());
         query.eq(ChargeLog::getOperationType, chargeLogDto.getOperationType());
+        query.eq(ChargeLog::getWarehouseCode, chargeLogDto.getWarehouseCode());
         query.eq(ChargeLog::getSuccess, chargeLogDto.getSuccess());
         return chargeLogMapper.selectOne(query);
     }

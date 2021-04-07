@@ -148,7 +148,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
             BigDecimal amount = baseAmount.multiply(new BigDecimal(basSpecialOperation.getCoefficient()));
 
             //调用扣费接口扣费
-            ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType());
+            ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType(), basSpecialOperation.getWarehouseCode());
             R r = payService.pay(customCode, amount, BillEnum.PayMethod.SPECIAL_OPERATE, chargeLog);
             if (r.getCode() != 200) {
                 log.error("pay failed: {} {}", r.getData(), r.getMsg());

@@ -113,7 +113,7 @@ public class RunnableExecute {
                         int days = Integer.parseInt(datePoor.substring(0, datePoor.indexOf("天")));
                         // 根据存放天数、存放体积计算应收取的费用
                         BigDecimal amount = warehouseOperationService.charge(days, skuVolume.getVolume(), warehouseOperation.getWarehouseCode(), warehouseOperations);
-                        R resultPay = payService.pay(skuVolume.getCusCode(), amount, BillEnum.PayMethod.WAREHOUSE_RENT, new ChargeLog());
+                        R resultPay = payService.pay(skuVolume.getCusCode(), amount, BillEnum.PayMethod.WAREHOUSE_RENT, new ChargeLog(warehouseOperation.getWarehouseCode()));
                         if (resultPay.getCode() != 200) {
                             log.error("executeOperation() pay failed.. msg: {},data: {}", resultPay.getMsg(), resultPay.getData());
                         }
