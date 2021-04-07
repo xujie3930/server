@@ -13,4 +13,18 @@ public interface IDelOutboundAsyncService {
      * @return int
      */
     int shipmentPacking(Long id);
+
+    /**
+     * 出库单完成
+     *
+     * @param orderNo orderNo
+     */
+    void completed(String orderNo);
+
+    /**
+     * 出库单取消
+     *
+     * @param orderNo orderNo
+     */
+    void cancelled(String orderNo);
 }

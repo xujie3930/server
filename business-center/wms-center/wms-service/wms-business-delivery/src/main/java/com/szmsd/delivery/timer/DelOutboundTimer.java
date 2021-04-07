@@ -7,6 +7,7 @@ import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ public class DelOutboundTimer {
     private IDelOutboundService delOutboundService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
+    @Autowired
+    private IDelOutboundAsyncService delOutboundAsyncService;
 
     /**
      * 处理完成的单据
@@ -68,7 +71,7 @@ public class DelOutboundTimer {
     }
 
     private void handleCompleted(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo) -> this.delOutboundService.completed(orderNo));
+        this.handle(queryWrapper, (orderNo) -> this.delOutboundAsyncService.completed(orderNo));
     }
 
     /**
@@ -109,7 +112,7 @@ public class DelOutboundTimer {
     }
 
     public void handleCancelled(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, orderNo -> this.delOutboundService.cancelled(orderNo));
+        this.handle(queryWrapper, orderNo -> this.delOutboundAsyncService.cancelled(orderNo));
     }
 
     /**

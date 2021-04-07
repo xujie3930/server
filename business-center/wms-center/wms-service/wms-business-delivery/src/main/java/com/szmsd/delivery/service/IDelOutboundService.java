@@ -177,26 +177,12 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     DelOutbound getByOrderNo(String orderNo);
 
     /**
-     * 出库单完成
-     *
-     * @param orderNo orderNo
-     */
-    void completed(String orderNo);
-
-    /**
      * 修改完成状态
      *
      * @param id             id
      * @param completedState completedState
      */
     void updateCompletedState(Long id, String completedState);
-
-    /**
-     * 出库单取消
-     *
-     * @param orderNo orderNo
-     */
-    void cancelled(String orderNo);
 
     /**
      * 修改取消状态
