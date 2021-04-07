@@ -128,9 +128,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductVO> selectBaseProductByCode(String code, String sellerCode) {
+    public List<BaseProductVO> selectBaseProductByCode(String code, String sellerCode,String category) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", sellerCode);
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", category);
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code + "%");
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", sellerCode);
         queryWrapper.eq("is_active", true);
@@ -233,6 +233,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     @Transactional
     public int insertBaseProduct(BaseProductDto baseProductDto) {
+
         if (StringUtils.isEmpty(baseProductDto.getCode())) {
             if("SKU".equals(baseProductDto.getCategory())){
                 String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
@@ -245,6 +246,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 throw new BaseException(baseProductDto.getCategory()+"编码长度不能小于两个字符");
             }
         }
+        //判断填的值是否符合需求
+
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", baseProductDto.getCode());
         if (super.count(queryWrapper) == 1) {
