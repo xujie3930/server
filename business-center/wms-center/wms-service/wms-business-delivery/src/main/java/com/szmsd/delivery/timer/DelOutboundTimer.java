@@ -129,6 +129,6 @@ public class DelOutboundTimer {
         queryWrapper.lt(DelOutboundCompleted::getHandleSize, 3);
         // 处理时间大于等于当前时间的
         queryWrapper.ge(DelOutboundCompleted::getNextHandleTime, new Date());
-        this.handleCompleted(queryWrapper);
+        this.handleCancelled(queryWrapper);
     }
 }
