@@ -91,7 +91,7 @@ public class PricedProductServiceImpl implements IPricedProductService {
         }
         List<FreightCalculationVO> result = listR.getData().stream().map(directServiceFeeData -> {
             FreightCalculationVO freightCalculationVO = new FreightCalculationVO();
-            freightCalculationVO.setShippingChannel(directServiceFeeData.getShippingChannel());
+            freightCalculationVO.setProductCode(directServiceFeeData.getProductCode());
             freightCalculationVO.setCalcWeight(directServiceFeeData.getCalcWeight().getValue());
             freightCalculationVO.setCalcType(directServiceFeeData.getCalcType());
             freightCalculationVO.setTotalAmount(directServiceFeeData.getChargeItems().getTotalAmount());
