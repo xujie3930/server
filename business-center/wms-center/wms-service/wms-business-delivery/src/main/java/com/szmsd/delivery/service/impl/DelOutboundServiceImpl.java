@@ -20,8 +20,6 @@ import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
-import com.szmsd.common.security.domain.LoginUser;
-import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
@@ -177,10 +175,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public int insertDelOutbound(DelOutboundDto dto) {
         if (!DelOutboundOrderTypeEnum.has(dto.getOrderType())) {
             throw new CommonException("999", "订单类型不存在");
-        }
-        LoginUser loginUser = SecurityUtils.getLoginUser();
-        if (Objects.isNull(loginUser)) {
-            throw new CommonException("999", "获取登录用户信息失败");
         }
         DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
         // 生成出库单号
@@ -885,6 +879,33 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 修改状态的接口里面会处理取消的出库单逻辑
         // this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
         return 1;
+    }
+
+    @Override
+    public List<DelOutboundDetailVO> importDetail(String warehouseCode, String sellerCode, List<DelOutboundDetailImportDto> dtoList) {
+        // 查询sku
+        List<String> skus = dtoList.stream().map(DelOutboundDetailImportDto::getSku).distinct().collect(Collectors.toList());
+        InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
+        inventoryAvailableQueryDto.setWarehouseCode(warehouseCode);
+        inventoryAvailableQueryDto.setCusCode(sellerCode);
+        inventoryAvailableQueryDto.setSkus(skus);
+        List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+        Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(availableList)) {
+            for (InventoryAvailableListVO vo : availableList) {
+                availableMap.put(vo.getSku(), vo);
+            }
+        }
+        List<DelOutboundDetailVO> voList = new ArrayList<>();
+        for (DelOutboundDetailImportDto dto : dtoList) {
+            InventoryAvailableListVO available = availableMap.get(dto.getSku());
+            if (null != available) {
+                DelOutboundDetailVO vo = BeanMapperUtil.map(available, DelOutboundDetailVO.class);
+                vo.setQty(dto.getQty());
+                voList.add(vo);
+            }
+        }
+        return voList;
     }
 }
 

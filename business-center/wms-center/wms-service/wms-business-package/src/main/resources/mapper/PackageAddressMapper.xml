@@ -52,6 +52,9 @@
             <if test="cm.sellerCode != null and cm.sellerCode != ''">
                 and seller_code = #{cm.sellerCode}
             </if>
+            <if test="cm.linkUserName != null and cm.linkUserName != ''">
+                and link_user_name = #{cm.linkUserName}
+            </if>
         </where>
         ORDER BY default_flag DESC
     </select>

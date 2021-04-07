@@ -1,5 +1,6 @@
 package com.szmsd.returnex.vo;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -40,9 +41,14 @@ public class ReturnExpressGoodVO {
 
     @ApiModelProperty(value = "新上架编码")
     @Excel(name = "新上架编码")
-    private Integer putawaySku;
+    private String putawaySku;
 
     @ApiModelProperty(value = "SKU处理备注")
     @Excel(name = "SKU处理备注")
     private String processRemark;
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }

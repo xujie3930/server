@@ -1,5 +1,6 @@
 package com.szmsd.returnex.vo;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
@@ -110,7 +111,11 @@ public class ReturnExpressVO {
     @Excel(name = "处理状态编码")
     private String dealStatusStr;
 
-    @ApiModelProperty(value = "处理状态编码")
+    @ApiModelProperty(value = "商品列表")
     List<ReturnExpressGoodVO> goodList;
 
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }

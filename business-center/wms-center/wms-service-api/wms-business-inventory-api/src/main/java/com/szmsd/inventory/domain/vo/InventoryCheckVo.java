@@ -28,8 +28,11 @@ public class InventoryCheckVo {
     private String customCode;
 
     @ApiModelProperty(value = "仓库代码")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     private String warehouseCode;
+
+    @ApiModelProperty(value = "仓库名称")
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+    private String warehouseName;
 
     @ApiModelProperty(value = "库存盘点审批结果")
     private Integer status;
@@ -47,6 +50,8 @@ public class InventoryCheckVo {
     @ApiModelProperty(value = "详情")
     private List<InventoryCheckDetails> list;
 
-
+    public String getWarehouseName() {
+        return warehouseCode;
+    }
 
 }
