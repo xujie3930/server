@@ -5,12 +5,11 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
-import com.szmsd.returnex.dto.ReturnArrivalReqDTO;
 import com.szmsd.returnex.dto.ReturnExpressAssignDTO;
 import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
-import com.szmsd.returnex.dto.ReturnProcessingReqDTO;
 import com.szmsd.returnex.service.IReturnExpressService;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
+import com.szmsd.returnex.vo.ReturnExpressVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -82,7 +81,7 @@ public class ReturnExpressServerController extends BaseController {
      */
     @GetMapping("/getInfo/{id}")
     @ApiOperation(value = "获取退件单信息详情")
-    public R getInfo(@PathVariable(value = "id") Long id) {
+    public R<ReturnExpressVO> getInfo(@PathVariable(value = "id") Long id) {
         return R.ok(returnExpressService.getInfo(id));
     }
 }

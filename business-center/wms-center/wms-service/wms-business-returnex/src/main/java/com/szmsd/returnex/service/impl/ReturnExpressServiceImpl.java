@@ -287,9 +287,6 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         log.info("更新退单信息 req:{}", expressUpdateDTO);
         expressUpdateDTO.setSellerCode(getSellCode());
         AssertUtil.isTrue(expressUpdateDTO.getId() != null && expressUpdateDTO.getId() > 0, "更新异常！");
-        // TODO 更新货物信息 货物信息未返回无法更新sku货物信息
-        httpFeignClient.processingUpdate(expressUpdateDTO.convertThis(ProcessingUpdateReqDTO.class));
-
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
@@ -302,6 +299,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         );
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
         returnExpressGoodService.addOrUpdateGoodInfoBatch(expressUpdateDTO.getGoodList(),expressUpdateDTO.getId());
+        // TODO 更新货物信息 货物信息未返回无法更新sku货物信息
+        httpFeignClient.processingUpdate(expressUpdateDTO.convertThis(ProcessingUpdateReqDTO.class));
         return update;
     }
 
