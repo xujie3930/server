@@ -41,6 +41,9 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         if(StringUtils.isNotEmpty(dto.getOrderType())) {
             where.eq(Operation::getOrderType,dto.getOrderType());
         }
+        if(StringUtils.isNotEmpty(dto.getWarehouseCode())) {
+            where.eq(Operation::getWarehouseCode,dto.getWarehouseCode());
+        }
         return operationMapper.selectList(where);
     }
 
