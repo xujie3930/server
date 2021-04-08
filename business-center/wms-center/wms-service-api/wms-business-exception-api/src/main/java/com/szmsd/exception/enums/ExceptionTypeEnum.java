@@ -3,21 +3,21 @@ package com.szmsd.exception.enums;
 import java.util.Objects;
 
 public enum ExceptionTypeEnum {
-    LABELNOTMATCHED("Inbound-LabelNotMatched","入库-标签不符"),
-    GOODSUNIDENTIFED("Inbound-GoodsUnidentifed","入库-裸货无对版信息"),
-    UNSAFE("Inbound-Unsafe","入库-安检不合格"),
-    GOODSDAMAGED("Inbound-GoodsDamaged","入库-破损"),
-    LESSTHANEXPECTEDQTY("Inbound-LessThanExpectedQty","入库-少货"),
-    CANNOTPACKASREQUIRED("Outbound-CanNotPackAsRequired","出库-无法按要求装箱"),
-    MULTILABEL("Outbound-MultiLabel","出库-多标签件"),
-    NOMONEY("Outbound-NoMoney","出库-欠费件"),
-    EXPRESSDATAMISSING("Outbound-ExpressDataMissing","出库-快递资料不全"),
-    ORDERDUPLICATE("Outbound-OrderDuplicate","出库-出库单号重复"),
-    GOODSNOTFOUND("Outbound-GoodsNotFound","出库-仓库找不到货物"),
-    OVERSIZE("Outbound-OverSize","出库-超规格件"),
-    OVERWEIGHT("Outbound-OverWeight","出库-超重件"),
-    BADPACKAGE("Outbound-BadPackage","出库-包装不符"),
-    GETTRACKINGFAILED("Outbound-GetTrackingFailed","出库-获取挂号失败"),
+    LABELNOTMATCHED("InboundLabelNotMatched","入库-标签不符"),
+    GOODSUNIDENTIFED("InboundGoodsUnidentifed","入库-裸货无对版信息"),
+    UNSAFE("InboundUnsafe","入库-安检不合格"),
+    GOODSDAMAGED("InboundGoodsDamaged","入库-破损"),
+    LESSTHANEXPECTEDQTY("InboundLessThanExpectedQty","入库-少货"),
+    CANNOTPACKASREQUIRED("OutboundCanNotPackAsRequired","出库-无法按要求装箱"),
+    MULTILABEL("OutboundMultiLabel","出库-多标签件"),
+    NOMONEY("OutboundNoMoney","出库-欠费件"),
+    EXPRESSDATAMISSING("OutboundExpressDataMissing","出库-快递资料不全"),
+    ORDERDUPLICATE("OutboundOrderDuplicate","出库-出库单号重复"),
+    GOODSNOTFOUND("OutboundGoodsNotFound","出库-仓库找不到货物"),
+    OVERSIZE("OutboundOverSize","出库-超规格件"),
+    OVERWEIGHT("OutboundOverWeight","出库-超重件"),
+    BADPACKAGE("OutboundBadPackage","出库-包装不符"),
+    GETTRACKINGFAILED("OutboundGetTrackingFailed","出库-获取挂号失败"),
     ;
 
     private final String code;

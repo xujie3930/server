@@ -293,6 +293,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      */
     @Override
     public int updateBaseProduct(BaseProductDto baseProductDto) throws IllegalAccessException {
+        verifyBaseProduct(baseProductDto);
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         BaseProduct baseProduct = super.getById(baseProductDto.getId());
         ObjectUtil.fillNull(productRequest, baseProduct);
