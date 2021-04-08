@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,9 +45,9 @@ public class OperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('Operation:Operation:list')")
     @ApiOperation(value = "业务计费逻辑 - 分页查询")
     @GetMapping("/list")
-    public TableDataInfo<OperationVo> listPage(OperationDTO dto){
+    public TableDataInfo<Operation> listPage(OperationDTO dto) throws InvocationTargetException, IllegalAccessException {
         startPage();
-        List<OperationVo> list = operationService.listPage(dto);
+        List<Operation> list = operationService.listPage(dto);
         return getDataTable(list);
     }
 

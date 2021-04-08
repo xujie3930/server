@@ -35,7 +35,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     }
 
     @Override
-    public List<OperationVo> listPage(OperationDTO dto) {
+    public List<Operation> listPage(OperationDTO dto) {
         LambdaQueryWrapper<Operation> where = Wrappers.lambdaQuery();
         if(StringUtils.isNotEmpty(dto.getOperationType())) {
             where.eq(Operation::getOperationType,dto.getOperationType());
@@ -46,7 +46,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         if(StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             where.eq(Operation::getWarehouseCode,dto.getWarehouseCode());
         }
-        return BeanMapperUtil.mapList(operationMapper.selectList(where), OperationVo.class);
+        return operationMapper.selectList(where);
     }
 
     @Override

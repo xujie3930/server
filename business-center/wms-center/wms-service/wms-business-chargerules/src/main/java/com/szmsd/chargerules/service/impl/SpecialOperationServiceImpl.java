@@ -9,11 +9,9 @@ import com.szmsd.chargerules.domain.SpecialOperation;
 import com.szmsd.chargerules.dto.SpecialOperationDTO;
 import com.szmsd.chargerules.mapper.SpecialOperationMapper;
 import com.szmsd.chargerules.service.ISpecialOperationService;
-import com.szmsd.chargerules.vo.SpecialOperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationRequest;
 import com.szmsd.http.vo.ResponseVO;
@@ -73,7 +71,7 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
     }
 
     @Override
-    public List<SpecialOperationVo> listPage(SpecialOperationDTO dto) {
+    public List<SpecialOperation> listPage(SpecialOperationDTO dto) {
         LambdaQueryWrapper<SpecialOperation> where = Wrappers.lambdaQuery();
         if (StringUtils.isNotEmpty(dto.getOperationType())) {
             where.eq(SpecialOperation::getOperationType, dto.getOperationType());
@@ -81,7 +79,7 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
         if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             where.eq(SpecialOperation::getWarehouseCode, dto.getWarehouseCode());
         }
-        return BeanMapperUtil.mapList(specialOperationMapper.selectList(where),SpecialOperationVo.class);
+        return specialOperationMapper.selectList(where);
     }
 
     @Override
@@ -94,9 +92,8 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
     }
 
     @Override
-    public SpecialOperationVo details(int id) {
-        SpecialOperation specialOperation = specialOperationMapper.selectById(id);
-        return specialOperation != null ? BeanMapperUtil.map(specialOperation, SpecialOperationVo.class) : null;
+    public SpecialOperation details(int id) {
+        return specialOperationMapper.selectById(id);
     }
 
 }

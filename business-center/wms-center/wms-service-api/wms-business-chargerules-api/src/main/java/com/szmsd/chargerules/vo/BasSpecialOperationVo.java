@@ -1,5 +1,8 @@
 package com.szmsd.chargerules.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.szmsd.common.core.language.annotation.FieldJsonI18n;
+import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -23,6 +26,11 @@ public class BasSpecialOperationVo {
 
     @ApiModelProperty(value = "仓库")
     private String warehouseCode;
+
+    @TableField(exist = false)
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+    @ApiModelProperty(value = "仓库名称")
+    private String warehouseName;
 
     @ApiModelProperty(value = "业务主键，用来做幂等校验")
     private String transactionId;
@@ -59,5 +67,9 @@ public class BasSpecialOperationVo {
 
     @ApiModelProperty(value = "续件价格")
     private BigDecimal nextPrice;
+
+    public String getWarehouseName() {
+        return warehouseCode;
+    }
 
 }

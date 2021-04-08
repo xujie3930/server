@@ -28,7 +28,7 @@ public interface IOperationService {
      * @param dto dto
      * @return List<Operation>
      */
-    List<OperationVo> listPage(OperationDTO dto);
+    List<Operation> listPage(OperationDTO dto);
 
     /**
      * 根据id查询详情
