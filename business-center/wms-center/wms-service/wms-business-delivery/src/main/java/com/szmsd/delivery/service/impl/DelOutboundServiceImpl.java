@@ -680,6 +680,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
             updateWrapper.in(DelOutbound::getOrderNo, reviewedList);
             this.update(updateWrapper);
+            // 取消冻结的数据
+            for (String orderNo : reviewedList) {
+                this.unFreeze(orderNo, warehouseCode);
+            }
         }
         // 判断是否需要WMS处理
         if (CollectionUtils.isEmpty(orderNos)) {
