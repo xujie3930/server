@@ -57,5 +57,9 @@
             id, create_by, update_by, del_flag, product_name, code, init_weight, init_length, init_width, init_height, is_active, product_image, suffix, init_volume, seller_code, product_name_chinese, declared_value, product_attribute, product_attribute_name, electrified_mode, electrified_mode_name, battery_packaging, battery_packaging_name, have_packing_material, bind_code, suggest_packing_material, suggest_packing_material_name, begin_price, end_price, product_description, product_introduct_address, type, warehouse_acceptance, attribute1, attribute2, attribute3, attribute4, attribute5
         </sql>
 
+    <delete id="delBaseProductByPhysics">
+        delete from base_product where id in #{ids}
+    </delete>
+
 
 </mapper>
