@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.constant.ProductConstant;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
@@ -159,7 +160,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         log.info("更新sku测量值: {}", request);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", request.getCode());
-        queryWrapper.eq("category", "SKU");
+        queryWrapper.eq("category", ProductConstant.SKU);
         if (super.count(queryWrapper) != 1) {
             throw new BaseException("sku不存在");
         }
@@ -238,8 +239,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     public int insertBaseProduct(BaseProductDto baseProductDto) {
 
         if (StringUtils.isEmpty(baseProductDto.getCode())) {
-            if("SKU".equals(baseProductDto.getCategory())){
-                String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("SKU");
+            if(ProductConstant.SKU.equals(baseProductDto.getCategory())){
+                String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber(ProductConstant.SKU);
                 baseProductDto.setCode(skuCode);
             }else{
                 baseProductDto.setCode("WL"+baseProductDto.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
@@ -293,6 +294,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      */
     @Override
     public int updateBaseProduct(BaseProductDto baseProductDto) throws IllegalAccessException {
+        BaseProduct bp = super.getById(baseProductDto.getId());
+        if(bp.getCategory().equals(ProductConstant.SKU)){
+            baseProductDto.setCategory(ProductConstant.SKU);
+        }
         verifyBaseProduct(baseProductDto);
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         BaseProduct baseProduct = super.getById(baseProductDto.getId());
@@ -321,7 +326,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         for(Long l:ids){
             QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("id",l);
-            queryWrapper.eq("category","包材");
+            queryWrapper.eq("category",ProductConstant.BC);
             if(super.count(queryWrapper)==1){
                 BaseProduct baseProduct = super.getById(l);
                 QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
@@ -413,8 +418,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     private void verifyBaseProduct(BaseProductDto baseProductDto){
+
         //判断填的值是否符合需求
-        if("SKU".equals(baseProductDto.getCategory())) {
+
+        if(ProductConstant.SKU.equals(baseProductDto.getCategory())) {
             if (StringUtils.isNotEmpty(baseProductDto.getProductAttribute())) {
                 if ("059004".equals(baseProductDto.getProductAttribute())) {
                     if (StringUtils.isEmpty(baseProductDto.getElectrifiedMode()) || StringUtils.isEmpty(baseProductDto.getBatteryPackaging())) {
