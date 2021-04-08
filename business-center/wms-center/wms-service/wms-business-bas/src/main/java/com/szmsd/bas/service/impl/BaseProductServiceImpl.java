@@ -64,6 +64,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
 
+    @Resource
+    private BaseProductMapper baseProductMapper;
+
 
     /**
      * 查询模块
@@ -246,8 +249,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 throw new BaseException(baseProductDto.getCategory()+"编码长度不能小于两个字符");
             }
         }
-        //判断填的值是否符合需求
-
+        //验证 填写信息
+        verifyBaseProduct(baseProductDto);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", baseProductDto.getCode());
         if (super.count(queryWrapper) == 1) {
@@ -312,7 +315,25 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      * @return 结果
      */
     @Override
-    public boolean deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException {
+    public Integer deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException {
+        StringBuilder s = null;
+        for(Long l:ids){
+            QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("id",l);
+            queryWrapper.eq("category","包材");
+            if(super.count(queryWrapper)==1){
+                BaseProduct baseProduct = super.getById(l);
+                QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
+                queryWrapper1.eq("bind_code",baseProduct.getCode());
+                if(super.count(queryWrapper1)!=0){
+                    s.append(baseProduct.getCode()+",");
+                }
+            }
+        }
+
+        if(s!=null){
+            throw new BaseException(s+"绑定sku不能删除");
+        }
         //传删除给WMS
         for (Long id : ids) {
             ProductRequest productRequest = new ProductRequest();
@@ -324,11 +345,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 throw new BaseException("传wms失败:" + r.getData().getMessage());
             }
         }
-        UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper();
-        updateWrapper.in("id", ids);
-        updateWrapper.set("is_active", false);
 
-        return super.update(updateWrapper);
+
+        return baseProductMapper.delBaseProductByPhysics(ids);
     }
 
     /**
@@ -390,6 +409,33 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             return Collections.emptyList();
         }
         return list;
+    }
+
+    private void verifyBaseProduct(BaseProductDto baseProductDto){
+        //判断填的值是否符合需求
+        if("SKU".equals(baseProductDto.getCategory())) {
+            if (StringUtils.isNotEmpty(baseProductDto.getProductAttribute())) {
+                if ("059004".equals(baseProductDto.getProductAttribute())) {
+                    if (StringUtils.isEmpty(baseProductDto.getElectrifiedMode()) || StringUtils.isEmpty(baseProductDto.getBatteryPackaging())) {
+                        throw new BaseException("未填写带电信息");
+                    }
+                } else {
+                    if (StringUtils.isNotEmpty(baseProductDto.getElectrifiedMode()) || StringUtils.isNotEmpty(baseProductDto.getBatteryPackaging())) {
+                        throw new BaseException("请勿填写带电信息");
+                    }
+                }
+
+                if (baseProductDto.getHavePackingMaterial() == true) {
+                    if (StringUtils.isEmpty(baseProductDto.getSuggestPackingMaterialCode())) {
+                        throw new BaseException("未填写附带包材");
+                    }
+                } else {
+                    if (StringUtils.isNotEmpty(baseProductDto.getSuggestPackingMaterialCode())) {
+                        throw new BaseException("请勿填写附带包材");
+                    }
+                }
+            }
+        }
     }
 }
 

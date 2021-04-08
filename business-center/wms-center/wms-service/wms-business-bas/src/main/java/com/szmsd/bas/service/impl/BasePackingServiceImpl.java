@@ -133,6 +133,11 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
      */
     @Override
     public int deleteBasePackingByIds(List<Long> ids) {
+        QueryWrapper queryWrapper = new QueryWrapper();
+        for(Long l:ids){
+
+        }
+
         return baseMapper.deleteBatchIds(ids);
     }
 
