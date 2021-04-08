@@ -50,9 +50,8 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     }
 
     @Override
-    public OperationVo details(int id) {
-        Operation operation = operationMapper.selectById(id);
-        return operation != null ? BeanMapperUtil.map(operation,OperationVo.class) : null;
+    public Operation details(int id) {
+        return operationMapper.selectById(id);
     }
 
 

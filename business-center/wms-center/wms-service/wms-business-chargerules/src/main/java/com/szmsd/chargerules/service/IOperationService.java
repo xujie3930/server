@@ -35,5 +35,5 @@ public interface IOperationService {
      * @param id id
      * @return Operation
      */
-    OperationVo details(int id);
+    Operation details(int id);
 }
