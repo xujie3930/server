@@ -60,7 +60,7 @@
     </resultMap>
 
     <sql id="selectUserVo">
-        select u.user_id, u.site_code, u.user_name, u.nick_name,u.user_type,u.openid, u.email, u.avatar, u.phonenumber, u.password,u.spear_password, u.service_product,u.sex, u.status, u.del_flag, u.login_ip, u.login_date, u.create_by,u.create_by_name, u.create_time, u.remark,
+        select u.user_id, u.site_code, u.user_name, u.nick_name,u.user_type,u.openid, u.email, u.avatar, u.phonenumber, u.password,u.spear_password, u.service_product,u.sex, u.status, u.del_flag, u.login_ip, u.login_date, u.create_by,u.create_by_name, u.create_time, u.remark,u.seller_code,
         d.id,d.site_code, d.parent_id, d.site_name_chinese, d.order_num, d.leader, d.status as site_status,d.type_code,d.type_name,d.fin_center_site_code,d.fin_center_site_name, d.id as site_id ,d.sorting_code
         from sys_user u
 		    left join sys_site d on u.site_code = d.site_code
