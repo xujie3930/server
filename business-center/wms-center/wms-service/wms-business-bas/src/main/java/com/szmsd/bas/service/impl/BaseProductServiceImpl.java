@@ -316,7 +316,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      */
     @Override
     public Integer deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException {
-        StringBuilder s = null;
+        StringBuilder s = new StringBuilder("");
         for(Long l:ids){
             QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("id",l);
@@ -331,8 +331,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }
         }
 
-        if(s!=null){
-            throw new BaseException(s+"绑定sku不能删除");
+        if(!s.equals("")){
+            throw new BaseException("包材:"+s+"绑定sku不能删除");
         }
         //传删除给WMS
         for (Long id : ids) {
