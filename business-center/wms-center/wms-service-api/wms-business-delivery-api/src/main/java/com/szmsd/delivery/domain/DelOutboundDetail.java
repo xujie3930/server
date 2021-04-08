@@ -59,4 +59,7 @@ public class DelOutboundDetail extends BaseEntity {
 
     @ApiModelProperty(value = "行号")
     private Long lineNo;
+
+    @ApiModelProperty(value = "绑定专属包材产品编码")
+    private String bindCode;
 }

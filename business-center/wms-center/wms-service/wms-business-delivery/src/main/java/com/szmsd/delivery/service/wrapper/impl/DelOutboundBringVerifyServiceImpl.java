@@ -64,8 +64,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IHtpOutboundClientService htpOutboundClientService;
     @Autowired
     private IHtpCarrierClientService htpCarrierClientService;
-    @Autowired
-    private BasePackingClientService basePackingClientService;
 
     @Override
     public int bringVerify(DelOutboundBringVerifyDto dto) {
