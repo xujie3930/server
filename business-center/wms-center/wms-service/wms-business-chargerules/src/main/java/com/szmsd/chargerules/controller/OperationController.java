@@ -60,9 +60,9 @@ public class OperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('Operation:Operation:getOrderTypeList')")
     @ApiOperation(value = "业务计费逻辑 - 查询订单类型")
     @GetMapping("/getOrderTypeList")
-    public List<OrderTypeLabelVo> getOrderTypeList() {
-        DelOutboundOrderTypeEnum[] values = DelOutboundOrderTypeEnum.values();
-        return Arrays.stream(values).map(value -> new OrderTypeLabelVo(value.getCode(),value.getName())).collect(Collectors.toList());
+    public R<List<OrderTypeLabelVo>> getOrderTypeList() {
+        return R.ok(Arrays.stream(DelOutboundOrderTypeEnum.values()).map(value ->
+                new OrderTypeLabelVo(value.getCode(), value.getName())).collect(Collectors.toList()));
     }
 
 }
