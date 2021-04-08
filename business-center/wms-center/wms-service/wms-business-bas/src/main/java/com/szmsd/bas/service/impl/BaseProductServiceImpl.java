@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.constant.ProductConstant;
 import com.szmsd.bas.domain.BasSeller;
@@ -67,6 +68,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
     @Resource
     private BaseProductMapper baseProductMapper;
+
+    @Resource
+    private BasSubFeignService basSubFeignService;
 
 
     /**
@@ -156,11 +160,30 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
+    public void  importBaseProduct(List<BaseProductImportDto> list)
+    {
+
+        //判断是否必填
+        verifyBaseProductRequired(list);
+        for(BaseProductImportDto b:list)
+        {
+            b.setHavePackingMaterial(b.getHavePackingMaterialName().equals("是")?true:false);
+        }
+        List<BaseProduct> baseProductList = BeanMapperUtil.mapList(list,BaseProduct.class);
+        for(BaseProduct b:baseProductList)
+        {
+            b.setCategory(ProductConstant.SKU_NAME);
+            b.setCategoryCode(ProductConstant.SKU);
+        }
+
+    }
+
+    @Override
     public void measuringProduct(MeasuringProductRequest request) {
         log.info("更新sku测量值: {}", request);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", request.getCode());
-        queryWrapper.eq("category", ProductConstant.SKU);
+        queryWrapper.eq("category", ProductConstant.SKU_NAME);
         if (super.count(queryWrapper) != 1) {
             throw new BaseException("sku不存在");
         }
@@ -239,8 +262,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     public int insertBaseProduct(BaseProductDto baseProductDto) {
 
         if (StringUtils.isEmpty(baseProductDto.getCode())) {
-            if(ProductConstant.SKU.equals(baseProductDto.getCategory())){
-                String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber(ProductConstant.SKU);
+            if(ProductConstant.SKU_NAME.equals(baseProductDto.getCategory())){
+                String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber(ProductConstant.SKU_NAME);
                 baseProductDto.setCode(skuCode);
             }else{
                 baseProductDto.setCode("WL"+baseProductDto.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
@@ -295,8 +318,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     public int updateBaseProduct(BaseProductDto baseProductDto) throws IllegalAccessException {
         BaseProduct bp = super.getById(baseProductDto.getId());
-        if(bp.getCategory().equals(ProductConstant.SKU)){
-            baseProductDto.setCategory(ProductConstant.SKU);
+        if(bp.getCategory().equals(ProductConstant.SKU_NAME)){
+            baseProductDto.setCategory(ProductConstant.SKU_NAME);
         }
         verifyBaseProduct(baseProductDto);
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
@@ -326,7 +349,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         for(Long l:ids){
             QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("id",l);
-            queryWrapper.eq("category",ProductConstant.BC);
+            queryWrapper.eq("category",ProductConstant.BC_NAME);
             if(super.count(queryWrapper)==1){
                 BaseProduct baseProduct = super.getById(l);
                 QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
@@ -337,7 +360,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }
         }
 
-        if(!s.equals("")){
+        if(!s.toString().equals("")){
             throw new BaseException("包材:"+s+"绑定sku不能删除");
         }
         //传删除给WMS
@@ -421,7 +444,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         //判断填的值是否符合需求
 
-        if(ProductConstant.SKU.equals(baseProductDto.getCategory())) {
+        if(ProductConstant.SKU_NAME.equals(baseProductDto.getCategory())) {
             if (StringUtils.isNotEmpty(baseProductDto.getProductAttribute())) {
                 if ("059004".equals(baseProductDto.getProductAttribute())) {
                     if (StringUtils.isEmpty(baseProductDto.getElectrifiedMode()) || StringUtils.isEmpty(baseProductDto.getBatteryPackaging())) {
@@ -434,16 +457,112 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 }
 
                 if (baseProductDto.getHavePackingMaterial() == true) {
-                    if (StringUtils.isEmpty(baseProductDto.getSuggestPackingMaterialCode())) {
+                    if (StringUtils.isEmpty(baseProductDto.getBindCode())) {
                         throw new BaseException("未填写附带包材");
                     }
                 } else {
-                    if (StringUtils.isNotEmpty(baseProductDto.getSuggestPackingMaterialCode())) {
+                    if (StringUtils.isNotEmpty(baseProductDto.getBindCode())) {
                         throw new BaseException("请勿填写附带包材");
                     }
                 }
             }
         }
     }
+
+    private void verifyBaseProductRequired(List<BaseProductImportDto> list)
+    {
+
+        StringBuilder s1 = new StringBuilder("");
+
+        int count = 1;
+        for(BaseProductImportDto b:list)
+        {
+            StringBuilder s = new StringBuilder("");
+            if(StringUtils.isEmpty(b.getCode()))
+            {
+
+                s.append("SKU未填写，");
+            }else{
+                if(b.getCode().length()<2){
+
+                    s.append("SKU长度小于两字符，");
+                }
+
+            }
+            if(StringUtils.isEmpty(b.getProductName()))
+            {
+
+                s.append("申报品名未填写,");
+            }
+            if(StringUtils.isEmpty(b.getProductAttributeName()))
+            {
+
+                s.append("产品属性未填写,");
+            }else{
+                if ("带电".equals(b.getProductAttributeName())) {
+                    if (StringUtils.isEmpty(b.getElectrifiedModeName()) || StringUtils.isEmpty(b.getBatteryPackagingName())) {
+                        s.append("未填写带电信息,");
+                    }
+                } else {
+                    if (StringUtils.isEmpty(b.getElectrifiedModeName()) || StringUtils.isEmpty(b.getBatteryPackagingName())) {
+                        s.append("不能填写带电信息,");
+                    }
+                }
+            }
+            if(StringUtils.isEmpty(b.getHavePackingMaterialName()))
+            {
+                s.append("是否自备包材未填写,");
+            }else{
+                if ("是".equals(b.getHavePackingMaterialName())) {
+                    if (StringUtils.isEmpty(b.getBindCodeName())) {
+                        throw new BaseException("未填写附带包材，");
+                    }
+                } else {
+                    if (StringUtils.isNotEmpty(b.getBindCodeName())) {
+                        throw new BaseException("不能填写附带包材，");
+                    }
+                }
+            }
+            if(StringUtils.isEmpty(b.getSuggestPackingMaterial()))
+            {
+                s.append("物流包装要未填写,");
+            }
+            if(b.getInitLength()==null)
+            {
+                s.append("长未填写,");
+            }
+            if(b.getInitHeight()==null)
+            {
+                s.append("高未填写,");
+            }
+            if(b.getInitWeight()==null)
+            {
+                s.append("重量未填写,");
+            }
+            if(b.getInitWidth()==null)
+            {
+                s.append("宽未填写,");
+            }
+            if(b.getInitWidth()==null)
+            {
+                s.append("宽未填写,");
+            }
+            if(b.getDeclaredValue()==null)
+            {
+                s.append("申报价值未填写,");
+            }
+            if(b.getProductDescription().length()<10){
+                s.append("产品说明超过十个字符,");
+            }
+            if(!s.toString().equals("")){
+                s1.append("第"+count+"条数据："+s+"\r\n");
+            }
+            count++;
+        }
+        if(!s1.toString().equals("")){
+            throw new BaseException(s1.toString());
+        }
+    }
+
 }
 

@@ -73,7 +73,10 @@ public class BaseProductImportDto {
 
     @ApiModelProperty(value = "是否自备包材")
     @Excel(name = "是否自备包材" ,type = Excel.Type.IMPORT)
-    private Boolean havePackingMaterialName;
+    private String havePackingMaterialName;
+
+    @ApiModelProperty(value = "是否自备包材")
+    private Boolean havePackingMaterial;
 
 
 
