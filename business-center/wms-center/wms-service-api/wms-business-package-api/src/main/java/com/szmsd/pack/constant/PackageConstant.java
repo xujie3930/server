@@ -17,4 +17,10 @@ public final class PackageConstant {
      * 揽件生成规则配置的 appid
      */
     public final static String GENERATE_APP_ID = "ck1";
+
+
+    /**
+     * 揽件生成规则配置的 code
+     */
+    public final static String LS_PREFIX = "LS";
 }
