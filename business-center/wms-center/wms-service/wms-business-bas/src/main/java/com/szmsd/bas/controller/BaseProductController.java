@@ -80,6 +80,7 @@ public class BaseProductController extends BaseController {
     public R importData(MultipartFile file) throws Exception {
         ExcelUtil<BaseProductImportDto> util = new ExcelUtil<BaseProductImportDto>(BaseProductImportDto.class);
         List<BaseProductImportDto> userList = util.importExcel(file.getInputStream());
+        
         return R.ok();
     }
 

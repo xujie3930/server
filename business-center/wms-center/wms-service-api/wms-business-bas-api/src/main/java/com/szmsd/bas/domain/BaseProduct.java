@@ -138,8 +138,11 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "产品介绍地址")
     private String productIntroductAddress;
 
-    @ApiModelProperty(value = "sku")
+    @ApiModelProperty(value = "类别")
     private String category;
+
+    @ApiModelProperty(value = "类别编码")
+    private String categoryCode;
 
     @ApiModelProperty(value = "是否仓库验收")
     private Boolean warehouseAcceptance;
