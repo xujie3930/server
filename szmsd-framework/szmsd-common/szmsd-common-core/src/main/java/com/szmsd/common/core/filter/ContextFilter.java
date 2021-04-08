@@ -38,7 +38,7 @@ public class ContextFilter implements Filter {
         // requestId
         String requestId = MDC.get("TID");
         if (StringUtils.isBlank(requestId)) {
-            requestId = UUIDUtil.suuid();
+            requestId = UUIDUtil.uuid();
             MDC.put("TID", requestId);
         }
 
