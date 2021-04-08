@@ -12,6 +12,9 @@ import java.math.BigDecimal;
 @ApiModel(value = "WarehouseOperationVo", description = "仓储业务操作")
 public class WarehouseOperationVo {
 
+    @ApiModelProperty(value = "id")
+    private Integer id;
+
     @ApiModelProperty(value = "仓库编码")
     private String warehouseCode;
 
