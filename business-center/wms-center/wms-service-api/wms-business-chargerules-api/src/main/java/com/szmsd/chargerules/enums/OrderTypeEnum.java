@@ -18,4 +18,13 @@ public enum OrderTypeEnum {
         this.nameCn = nameCn;
     }
 
+    public static String get(String nameEn) {
+        for (OrderTypeEnum orderTypeEnum : OrderTypeEnum.values()) {
+            if (orderTypeEnum.getNameEn().equals(nameEn)) {
+                return orderTypeEnum.getNameCn();
+            }
+        }
+        return null;
+    }
+
 }

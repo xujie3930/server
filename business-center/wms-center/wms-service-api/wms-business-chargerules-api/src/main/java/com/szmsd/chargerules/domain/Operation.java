@@ -1,9 +1,11 @@
 package com.szmsd.chargerules.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.common.core.web.domain.BaseEntity;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -27,6 +29,10 @@ public class Operation extends BaseEntity {
     @TableField
     private String operationType;
 
+    @ApiModelProperty(value = "操作类型名称")
+    @TableField(exist = false)
+    private String operationTypeName;
+
     @ApiModelProperty(value = "是否多SKU")
     @TableField
     private boolean manySku;
@@ -43,6 +49,10 @@ public class Operation extends BaseEntity {
     @ApiModelProperty(value = "订单类型")
     @TableField
     private String orderType;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "订单类型名称")
+    private String orderTypeName;
 
     @ApiModelProperty(value = "首件价格")
     @TableField
@@ -67,4 +77,17 @@ public class Operation extends BaseEntity {
     public String getWarehouseName() {
         return warehouseCode;
     }
+
+    public String getOperationTypeName() {
+        DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(this.operationType);
+        if (delOutboundOrderTypeEnum != null) {
+            return delOutboundOrderTypeEnum.getName();
+        }
+        return null;
+    }
+
+    public String getOrderTypeName() {
+        return OrderTypeEnum.get(this.orderType);
+    }
+
 }
