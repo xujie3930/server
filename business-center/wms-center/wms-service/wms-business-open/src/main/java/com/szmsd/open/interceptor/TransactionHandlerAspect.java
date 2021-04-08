@@ -79,8 +79,11 @@ public class TransactionHandlerAspect {
                         try {
                             // 执行业务操作
                             result = proceed(point);
-                            // 执行成功
-                            this.opnTransactionService.onRep(currentContext.getRequestId());
+                            ResponseVO responseVO = (ResponseVO) result;
+                            if (responseVO.getSuccess()) {
+                                // 执行成功
+                                this.opnTransactionService.onRep(currentContext.getRequestId());
+                            }
                         } catch (CommonException e) {
                             logger.error(e.getMessage(), e);
                             result = ResponseVO.failed(e.getMessage());
@@ -107,6 +110,7 @@ public class TransactionHandlerAspect {
 
     /**
      * 执行业务操作
+     *
      * @param point
      * @return
      * @throws Throwable

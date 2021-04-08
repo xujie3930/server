@@ -15,12 +15,12 @@ import java.io.Serializable;
 public class ResponseVO implements Serializable {
 
     @ApiModelProperty(value = "是否执行成功")
-    private Boolean success;
+    private boolean success;
 
     @ApiModelProperty(value = "返回消息")
     private String message;
 
-    public ResponseVO(Boolean success, String message) {
+    public ResponseVO(boolean success, String message) {
         this.success = success;
         this.message = message;
     }
@@ -40,11 +40,16 @@ public class ResponseVO implements Serializable {
         return new ResponseVO(false, message == null ? null : message.replaceAll("(?s)(运行时异常:)(?=.*\\1)", ""));
     }
 
-    public Boolean getSuccess() {
+    public static <T> ResponseVO unknown(R<T> r) {
+        boolean flag = r.getCode() == HttpStatus.SUCCESS;
+        return flag ? ok() : failed(r.getMsg());
+    }
+
+    public boolean getSuccess() {
         return success;
     }
 
-    public void setSuccess(Boolean success) {
+    public void setSuccess(boolean success) {
         this.success = success;
     }
 
@@ -54,11 +59,6 @@ public class ResponseVO implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public static <T> ResponseVO unknown(R<T> r) {
-        boolean flag = r.getCode() == HttpStatus.SUCCESS;
-        return flag ? ok() : failed(r.getMsg());
     }
 
 }
