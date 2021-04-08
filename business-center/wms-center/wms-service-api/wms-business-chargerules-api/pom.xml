@@ -20,10 +20,17 @@
 
     <!-- szmsd Common Core-->
     <dependencies>
+
         <dependency>
             <groupId>com.szmsd</groupId>
             <artifactId>szmsd-common-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-delivery-api</artifactId>
+        </dependency>
+
     </dependencies>
 
 
