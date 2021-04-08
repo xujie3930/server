@@ -35,6 +35,9 @@ public class DelOutboundDetailDto implements Serializable {
     @ApiModelProperty(value = "行号")
     private Long lineNo;
 
+    @ApiModelProperty(value = "绑定专属包材产品编码")
+    private String bindCode;
+
     @ApiModelProperty(value = "长 - 用于计算不保存")
     private Double length;
 

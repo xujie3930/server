@@ -26,4 +26,13 @@ public class InventoryOperateDto implements Serializable {
 
     @ApiModelProperty(value = "库存")
     private Integer num;
+
+    /**
+     * 数量运算
+     *
+     * @param qty qty
+     */
+    public void addQty(int qty) {
+        this.num = this.num + qty;
+    }
 }

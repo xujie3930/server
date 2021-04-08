@@ -331,19 +331,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         operateListDto.setInvoiceNo(invoiceNo);
         operateListDto.setWarehouseCode(warehouseCode);
         if (CollectionUtils.isNotEmpty(details)) {
-            List<InventoryOperateDto> unOperateList = new ArrayList<>();
+            Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
             for (DelOutboundDetail detail : details) {
-                unOperateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+                DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
             }
+            List<InventoryOperateDto> unOperateList = new ArrayList<>(inventoryOperateDtoMap.values());
             operateListDto.setUnOperateList(unOperateList);
         }
         if (CollectionUtils.isNotEmpty(detailDtos)) {
-            List<InventoryOperateDto> operateList = new ArrayList<>();
+            Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
             long lineNo = 1L;
             for (DelOutboundDetailDto detail : detailDtos) {
                 detail.setLineNo(lineNo++);
-                operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+                DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
             }
+            List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
             operateListDto.setOperateList(operateList);
         }
         this.inventoryFeignClientService.unFreezeAndFreeze(operateListDto);
@@ -356,12 +358,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         InventoryOperateListDto operateListDto = new InventoryOperateListDto();
         operateListDto.setInvoiceNo(invoiceNo);
         operateListDto.setWarehouseCode(warehouseCode);
-        List<InventoryOperateDto> operateList = new ArrayList<>();
         long lineNo = 1L;
+        Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
         for (DelOutboundDetailDto detail : details) {
             detail.setLineNo(lineNo++);
-            operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+            DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
         }
+        List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
         operateListDto.setOperateList(operateList);
         this.inventoryFeignClientService.freeze(operateListDto);
     }
@@ -625,12 +628,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 查询明细
         List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
         InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
-        List<InventoryOperateDto> operateList = new ArrayList<>();
+        Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
         for (DelOutboundDetail detail : details) {
-            operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+            DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
         }
         inventoryOperateListDto.setInvoiceNo(orderNo);
         inventoryOperateListDto.setWarehouseCode(warehouseCode);
+        List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
         inventoryOperateListDto.setOperateList(operateList);
         // 取消冻结
         Integer deduction = this.inventoryFeignClientService.unFreeze(inventoryOperateListDto);
