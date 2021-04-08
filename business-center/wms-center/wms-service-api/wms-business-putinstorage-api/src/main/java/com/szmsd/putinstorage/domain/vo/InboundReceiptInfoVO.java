@@ -80,6 +80,7 @@ public class InboundReceiptInfoVO {
     private String cusName;
 
     @ApiModelProperty(value = "目的仓库名称 - 当前系统语言")
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     private String warehouseName;
 
     @ApiModelProperty(value = "入库方式名称 - 当前系统语言")

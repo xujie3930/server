@@ -5,6 +5,7 @@ import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BasWarehouseInfoVO;
 import com.szmsd.bas.vo.BasWarehouseVO;
+import com.szmsd.system.api.domain.SysUser;
 
 import java.util.List;
 
@@ -33,6 +34,8 @@ public interface IBasWarehouseService extends IService<BasWarehouse> {
     List<WarehouseKvDTO> selectCusInboundWarehouse();
 
     boolean vailCusWarehouse(String warehouseCode);
+
+    boolean vailCusWarehouse(String warehouseCode, SysUser user);
 
     /**
      * 根据仓库编码查询仓库信息

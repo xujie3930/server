@@ -265,8 +265,22 @@ public class SysUserController extends BaseController {
         map.put("roles", roleService.selectRoleAll());
 //        map.put("posts", postService.selectPostAll());
         if (StringUtils.isNotNull(userId)) {
-
-            map.put("user", userService.selectUserById(userId));
+            SysUser sysUser = userService.selectUserById(userId);
+            if(sysUser!=null){
+                SysUserSellerDto sysUserDto = BeanMapperUtil.map(sysUser,SysUserSellerDto.class);
+                //查询sellerCode
+                if(sysUserDto.getUserType().equals("01")){
+                    BasSeller basSeller = new BasSeller();
+                    basSeller.setUserName(sysUserDto.getUserName());
+                    R<String> r = basSellerFeignService.getSellerCode(basSeller);
+                    if(StringUtils.isNotEmpty(r.getData())){
+                        sysUserDto.setSellerCode(r.getData());
+                    }
+                }
+                map.put("user",sysUserDto);
+            }else{
+                map.put("user",sysUser);
+            }
 //            map.put("postIds", postService.selectPostListByUserId(userId));
             map.put("roleIds", roleService.selectRoleListByUserId(userId));
         }
