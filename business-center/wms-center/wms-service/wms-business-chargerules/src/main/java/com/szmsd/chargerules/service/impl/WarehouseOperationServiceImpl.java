@@ -9,9 +9,7 @@ import com.szmsd.chargerules.dto.WarehouseOperationDTO;
 import com.szmsd.chargerules.enums.ErrorMessageEnum;
 import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
-import com.szmsd.chargerules.vo.WarehouseOperationVo;
 import com.szmsd.common.core.exception.web.BaseException;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -40,12 +38,12 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
     }
 
     @Override
-    public List<WarehouseOperationVo> listPage(WarehouseOperationDTO dto) {
+    public List<WarehouseOperation> listPage(WarehouseOperationDTO dto) {
         LambdaQueryWrapper<WarehouseOperation> where = Wrappers.lambdaQuery();
         if(StringUtils.isNotBlank(dto.getWarehouseCode())) {
             where.eq(WarehouseOperation::getWarehouseCode,dto.getWarehouseCode());
         }
-        return BeanMapperUtil.mapList(warehouseOperationMapper.selectList(where),WarehouseOperationVo.class);
+        return warehouseOperationMapper.selectList(where);
     }
 
     @Override
@@ -62,9 +60,8 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
     }
 
     @Override
-    public WarehouseOperationVo details(int id) {
-        WarehouseOperation warehouseOperation = warehouseOperationMapper.selectById(id);
-        return warehouseOperation != null ? BeanMapperUtil.map(warehouseOperation, WarehouseOperationVo.class) : null;
+    public WarehouseOperation details(int id) {
+        return warehouseOperationMapper.selectById(id);
     }
 
 }

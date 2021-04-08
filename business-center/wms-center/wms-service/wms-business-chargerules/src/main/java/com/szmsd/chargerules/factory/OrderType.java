@@ -1,11 +1,11 @@
 package com.szmsd.chargerules.factory;
 
-import com.szmsd.chargerules.vo.OperationVo;
+import com.szmsd.chargerules.domain.Operation;
 
 public abstract class OrderType {
 
     public abstract String findOrderById(String orderNo);
 
-    public abstract void operationPay(OperationVo operation);
+    public abstract void operationPay(Operation operation);
 
 }

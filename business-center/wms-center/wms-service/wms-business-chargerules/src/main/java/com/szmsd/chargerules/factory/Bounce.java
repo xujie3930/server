@@ -1,6 +1,6 @@
 package com.szmsd.chargerules.factory;
 
-import com.szmsd.chargerules.vo.OperationVo;
+import com.szmsd.chargerules.domain.Operation;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,7 +15,7 @@ public class Bounce extends OrderType {
     }
 
     @Override
-    public void operationPay(OperationVo operation) {
+    public void operationPay(Operation operation) {
 
     }
 

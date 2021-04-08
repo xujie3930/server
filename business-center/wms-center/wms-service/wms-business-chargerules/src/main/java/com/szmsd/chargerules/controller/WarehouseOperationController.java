@@ -3,7 +3,6 @@ package com.szmsd.chargerules.controller;
 import com.szmsd.chargerules.domain.WarehouseOperation;
 import com.szmsd.chargerules.dto.WarehouseOperationDTO;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
-import com.szmsd.chargerules.vo.WarehouseOperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -40,16 +39,16 @@ public class WarehouseOperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('WarehouseOperation:WarehouseOperation:list')")
     @ApiOperation(value = "仓储业务计费规则 - 分页查询")
     @GetMapping("/list")
-    public TableDataInfo<WarehouseOperationVo> listPage(WarehouseOperationDTO dto){
+    public TableDataInfo<WarehouseOperation> listPage(WarehouseOperationDTO dto){
         startPage();
-        List<WarehouseOperationVo> list = warehouseOperationService.listPage(dto);
+        List<WarehouseOperation> list = warehouseOperationService.listPage(dto);
         return getDataTable(list);
     }
 
     @PreAuthorize("@ss.hasPermi('WarehouseOperation:WarehouseOperation:details')")
     @ApiOperation(value = "仓储业务计费规则 - 详情")
     @GetMapping("/details/{id}")
-    public R<WarehouseOperationVo> details(@PathVariable int id) {
+    public R<WarehouseOperation> details(@PathVariable int id) {
         return R.ok(warehouseOperationService.details(id));
     }
 
