@@ -246,7 +246,7 @@ public class SysUserController extends BaseController {
      * 根据用户编号获取详细信息
      */
     @GetMapping(value = {"/queryGetInfoByUserId/{userId}"})
-    @ApiOperation(httpMethod = "GET", value = "根据用户编号获取详细信息")
+    @ApiOperation(httpMethod = "GET", value = "根据用户编号获取详细信息1")
     public R<SysUser> queryGetInfoByUserId(@PathVariable(value = "userId") Long userId) {
         SysUser sysUser = userService.selectUserById(userId);
         return R.ok(sysUser);
