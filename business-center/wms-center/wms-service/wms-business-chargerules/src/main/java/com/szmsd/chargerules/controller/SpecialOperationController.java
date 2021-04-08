@@ -3,7 +3,6 @@ package com.szmsd.chargerules.controller;
 import com.szmsd.chargerules.domain.SpecialOperation;
 import com.szmsd.chargerules.dto.SpecialOperationDTO;
 import com.szmsd.chargerules.service.ISpecialOperationService;
-import com.szmsd.chargerules.vo.SpecialOperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -40,16 +39,16 @@ public class SpecialOperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('SpecialOperation:SpecialOperation:list')")
     @ApiOperation(value = "特殊操作计费规则 - 分页查询")
     @GetMapping("/list")
-    public TableDataInfo<SpecialOperationVo> listPage(SpecialOperationDTO dto){
+    public TableDataInfo<SpecialOperation> listPage(SpecialOperationDTO dto){
         startPage();
-        List<SpecialOperationVo> list = specialOperationService.listPage(dto);
+        List<SpecialOperation> list = specialOperationService.listPage(dto);
         return getDataTable(list);
     }
 
     @PreAuthorize("@ss.hasPermi('SpecialOperation:SpecialOperation:details')")
     @ApiOperation(value = "特殊操作计费规则 - 详情")
     @GetMapping("/details/{id}")
-    public R<SpecialOperationVo> details(@PathVariable int id) {
+    public R<SpecialOperation> details(@PathVariable int id) {
         return R.ok(specialOperationService.details(id));
     }
 

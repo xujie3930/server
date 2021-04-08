@@ -23,10 +23,14 @@ public class WarehouseOperation extends BaseEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "仓库")
     @TableField
     private String warehouseCode;
+
+    @TableField(exist = false)
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+    @ApiModelProperty(value = "仓库名称")
+    private String warehouseName;
 
     @ApiModelProperty(value = "计费天数")
     @TableField
@@ -47,5 +51,9 @@ public class WarehouseOperation extends BaseEntity {
     @TableField(fill = FieldFill.UPDATE)
     @ApiModelProperty(value = "修改人")
     private String updateBy;
+
+    public String getWarehouseName() {
+        return warehouseCode;
+    }
 
 }

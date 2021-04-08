@@ -1,6 +1,6 @@
 package com.szmsd.chargerules.factory;
 
-import com.szmsd.chargerules.vo.OperationVo;
+import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
@@ -30,7 +30,7 @@ public class Receipt extends OrderType {
     }
 
     @Override
-    public void operationPay(OperationVo operation) {
+    public void operationPay(Operation operation) {
 
     }
 

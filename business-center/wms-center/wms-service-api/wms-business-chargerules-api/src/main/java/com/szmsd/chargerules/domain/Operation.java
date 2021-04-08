@@ -31,10 +31,14 @@ public class Operation extends BaseEntity {
     @TableField
     private boolean manySku;
 
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "仓库")
     @TableField
     private String warehouseCode;
+
+    @TableField(exist = false)
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+    @ApiModelProperty(value = "仓库名称")
+    private String warehouseName;
 
     @ApiModelProperty(value = "订单类型")
     @TableField
@@ -60,4 +64,7 @@ public class Operation extends BaseEntity {
     @ApiModelProperty(value = "修改人")
     private String updateBy;
 
+    public String getWarehouseName() {
+        return warehouseCode;
+    }
 }

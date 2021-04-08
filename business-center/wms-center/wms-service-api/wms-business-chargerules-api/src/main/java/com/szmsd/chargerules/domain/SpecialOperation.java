@@ -27,10 +27,14 @@ public class SpecialOperation extends BaseEntity {
     @TableField
     private String operationType;
 
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "仓库")
     @TableField
     private String warehouseCode;
+
+    @TableField(exist = false)
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+    @ApiModelProperty(value = "仓库名称")
+    private String warehouseName;
 
     @ApiModelProperty(value = "首件价格")
     @TableField
@@ -51,5 +55,9 @@ public class SpecialOperation extends BaseEntity {
     @TableField(fill = FieldFill.UPDATE)
     @ApiModelProperty(value = "修改人")
     private String updateBy;
+
+    public String getWarehouseName() {
+        return warehouseCode;
+    }
 
 }
