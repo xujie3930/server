@@ -246,7 +246,7 @@ public class SysUserController extends BaseController {
      * 根据用户编号获取详细信息
      */
     @GetMapping(value = {"/queryGetInfoByUserId/{userId}"})
-    @ApiOperation(httpMethod = "GET", value = "根据用户编号获取详细信息")
+    @ApiOperation(httpMethod = "GET", value = "根据用户编号获取详细信息1")
     public R<SysUser> queryGetInfoByUserId(@PathVariable(value = "userId") Long userId) {
         SysUser sysUser = userService.selectUserById(userId);
         return R.ok(sysUser);
@@ -266,22 +266,8 @@ public class SysUserController extends BaseController {
 //        map.put("posts", postService.selectPostAll());
         if (StringUtils.isNotNull(userId)) {
             SysUser sysUser = userService.selectUserById(userId);
-            if(sysUser!=null){
-                SysUserSellerDto sysUserDto = BeanMapperUtil.map(sysUser,SysUserSellerDto.class);
-                //查询sellerCode
-                if(sysUserDto.getUserType().equals("01")){
-                    BasSeller basSeller = new BasSeller();
-                    basSeller.setUserName(sysUserDto.getUserName());
-                    R<String> r = basSellerFeignService.getSellerCode(basSeller);
-                    if(StringUtils.isNotEmpty(r.getData())){
-                        sysUserDto.setSellerCode(r.getData());
-                    }
-                }
-                map.put("user",sysUserDto);
-            }else{
-                map.put("user",sysUser);
-            }
-//            map.put("postIds", postService.selectPostListByUserId(userId));
+            map.put("user",sysUser);
+//           map.put("postIds", postService.selectPostListByUserId(userId));
             map.put("roleIds", roleService.selectRoleListByUserId(userId));
         }
         return R.ok(map);
