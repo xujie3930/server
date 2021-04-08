@@ -9,6 +9,7 @@ import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
@@ -26,9 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author zhangyuyuan
@@ -139,12 +138,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 查询明细
         List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
         InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
-        List<InventoryOperateDto> operateList = new ArrayList<>();
+        Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
         for (DelOutboundDetail detail : details) {
-            operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+            DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
         }
         inventoryOperateListDto.setInvoiceNo(orderNo);
         inventoryOperateListDto.setWarehouseCode(warehouseCode);
+        List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
         inventoryOperateListDto.setOperateList(operateList);
         // 扣减库存
         Integer deduction = this.inventoryFeignClientService.deduction(inventoryOperateListDto);
@@ -250,12 +250,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 查询明细
         List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
         InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
-        List<InventoryOperateDto> operateList = new ArrayList<>();
+        Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
         for (DelOutboundDetail detail : details) {
-            operateList.add(new InventoryOperateDto(String.valueOf(detail.getLineNo()), detail.getSku(), Math.toIntExact(detail.getQty())));
+            DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
         }
         inventoryOperateListDto.setInvoiceNo(orderNo);
         inventoryOperateListDto.setWarehouseCode(warehouseCode);
+        List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
         inventoryOperateListDto.setOperateList(operateList);
         // 取消冻结
         Integer deduction = this.inventoryFeignClientService.unFreeze(inventoryOperateListDto);
@@ -263,4 +264,5 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             throw new CommonException("999", "取消冻结库存失败");
         }
     }
+
 }

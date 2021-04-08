@@ -54,7 +54,7 @@ public class OperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('Operation:Operation:details')")
     @ApiOperation(value = "业务计费逻辑 - 详情")
     @GetMapping("/details/{id}")
-    public R<OperationVo> details(@PathVariable int id) {
+    public R<Operation> details(@PathVariable int id) {
         return R.ok(operationService.details(id));
     }
 

@@ -31,7 +31,7 @@
         t.id,
         t.sku,
         sku.product_name sku_name,
-        'SKU' sku_category_name,
+        sku.category sku_category_name,
         t.warehouse_code,
         t.warehouse_code warehouse_name,
         t.total_inventory,
