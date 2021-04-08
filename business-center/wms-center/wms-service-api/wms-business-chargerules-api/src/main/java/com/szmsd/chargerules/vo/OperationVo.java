@@ -12,6 +12,9 @@ import java.math.BigDecimal;
 @ApiModel(value = "OperationVo", description = "业务操作")
 public class OperationVo {
 
+    @ApiModelProperty(value = "id")
+    private Integer id;
+
     @ApiModelProperty(value = "操作类型")
     private String operationType;
 
