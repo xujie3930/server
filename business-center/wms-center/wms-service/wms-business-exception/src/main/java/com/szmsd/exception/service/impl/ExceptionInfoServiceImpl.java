@@ -103,6 +103,12 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                 exceptionInfo.setOperateOn(d);
             }
             //赋值
+            if(ExceptionTypeEnum.get(exceptionInfo.getExceptionType())==null){
+                throw new BaseException("没有查找到对应异常类型");
+            }
+            if(OrderTypeEnum.get(exceptionInfo.getOrderType())==null){
+                throw new BaseException("没有查找到对应订单类型");
+            }
             exceptionInfo.setExceptionTypeName(ExceptionTypeEnum.get(exceptionInfo.getExceptionType()).getName());
             exceptionInfo.setOrderTypeName(OrderTypeEnum.get(exceptionInfo.getOrderType()).getName());
             exceptionInfo.setState(false);
