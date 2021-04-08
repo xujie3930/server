@@ -112,9 +112,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
-        if (queryDto.getIsActive() != null) {
+       /* if (queryDto.getIsActive() != null) {
             queryWrapper.eq("is_active", queryDto.getIsActive());
-        }
+        }*/
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
     }
@@ -344,25 +344,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
      * @return 结果
      */
     @Override
-    public Integer deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException {
-        StringBuilder s = new StringBuilder("");
-        for(Long l:ids){
-            QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("id",l);
-            queryWrapper.eq("category",ProductConstant.BC_NAME);
-            if(super.count(queryWrapper)==1){
-                BaseProduct baseProduct = super.getById(l);
-                QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
-                queryWrapper1.eq("bind_code",baseProduct.getCode());
-                if(super.count(queryWrapper1)!=0){
-                    s.append(baseProduct.getCode()+",");
-                }
-            }
-        }
-
-        if(!s.toString().equals("")){
-            throw new BaseException("包材:"+s+"绑定sku不能删除");
-        }
+    public Boolean deleteBaseProductByIds(List<Long> ids) throws IllegalAccessException {
         //传删除给WMS
         for (Long id : ids) {
             ProductRequest productRequest = new ProductRequest();
@@ -374,9 +356,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 throw new BaseException("传wms失败:" + r.getData().getMessage());
             }
         }
-
-
-        return baseProductMapper.delBaseProductByPhysics(ids);
+        UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper();
+        updateWrapper.in("id", ids);
+        updateWrapper.set("is_active", false);
+        return super.update(updateWrapper);
     }
 
     /**
