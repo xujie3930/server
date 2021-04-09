@@ -138,6 +138,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setShipmentState(currentState.name());
             // 出库失败
             String exceptionMessage = Utils.defaultValue(throwable.getMessage(), "出库操作失败");
+            exceptionMessage = StringUtils.substring(exceptionMessage, 0, 255);
             updateDelOutbound.setExceptionMessage(exceptionMessage);
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());

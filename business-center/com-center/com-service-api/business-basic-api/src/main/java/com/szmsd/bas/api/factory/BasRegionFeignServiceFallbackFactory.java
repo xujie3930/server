@@ -1,10 +1,13 @@
 package com.szmsd.bas.api.factory;
 
+import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -16,6 +19,11 @@ public class BasRegionFeignServiceFallbackFactory implements FallbackFactory<Bas
     @Override
     public BasRegionFeignService create(Throwable throwable) {
         return new BasRegionFeignService() {
+            @Override
+            public R<List<BasRegionSelectListVO>> countryList(BasRegionSelectListQueryDto queryDto) {
+                return R.convertResultJson(throwable);
+            }
+
             @Override
             public R<BasRegionSelectListVO> queryByCountryCode(String addressCode) {
                 return R.convertResultJson(throwable);

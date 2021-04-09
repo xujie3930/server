@@ -26,6 +26,8 @@ import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.imported.ImportContext;
+import com.szmsd.delivery.imported.ImportResult;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.util.PackageInfo;
@@ -786,6 +788,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
             }
         });
+    }
+
+    @Override
+    public ImportResult delOutboundImport(ImportContext context) {
+        return null;
     }
 }
 

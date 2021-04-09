@@ -2,11 +2,13 @@ package com.szmsd.bas.api.factory;
 
 import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.feign.BasSubFeignService;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhangyuyuan
@@ -21,6 +23,11 @@ public class BasSubFeignServiceFallbackFactory implements FallbackFactory<BasSub
             @Override
             public List<BasSub> listApi(String mainCode, String subValue) {
                 return null;
+            }
+
+            @Override
+            public R<Map<String, List<BasSubWrapperVO>>> getSub(String code) {
+                return R.convertResultJson(throwable);
             }
 
 //            @Override

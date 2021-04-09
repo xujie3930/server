@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.imported.ImportContext;
+import com.szmsd.delivery.imported.ImportResult;
 import com.szmsd.delivery.vo.*;
 
 import java.util.List;
@@ -209,9 +211,18 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
     /**
      * 查询出库单费用详情
+     *
      * @param queryDto queryDto
      * @return list
      */
     List<DelOutboundChargeListVO> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto);
+
+    /**
+     * 出库单导入
+     *
+     * @param context context
+     * @return ImportResultVO
+     */
+    ImportResult delOutboundImport(ImportContext context);
 }
 
