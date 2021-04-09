@@ -114,7 +114,7 @@ public class BasSellerController extends BaseController{
     }
 
     /**
-    * 新增模块
+    * 卖家注册模块 EmailCodeValid切面校验邮箱验证码
     */
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:add')")
     @Log(title = "模块", businessType = BusinessType.INSERT)

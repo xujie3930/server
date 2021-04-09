@@ -35,6 +35,7 @@
             o.calc_weight,
             o.calc_weight_unit,
             o.amount,
+            o.currency_code,
             o.exception_message,
             o.custom_code,
             o.create_by_name,
