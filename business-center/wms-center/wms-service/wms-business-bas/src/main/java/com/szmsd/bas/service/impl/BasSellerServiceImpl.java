@@ -261,7 +261,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                     List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
                             .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SELLER_CERTIFICATE_DOCUMENT.getAttachmentType()).setBusinessNo(b.getAttachment()).setBusinessItemNo(null)).getData());
                     if (CollectionUtils.isNotEmpty(attachment)) {
-                        b.setDocumentsFiles(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
+                        List<AttachmentFileDTO> documentsFiles = new ArrayList();
+                        for(BasAttachment a:attachment){
+                            documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
+                        }
+                        b.setDocumentsFiles(documentsFiles);
                     }
                 }
                 });
