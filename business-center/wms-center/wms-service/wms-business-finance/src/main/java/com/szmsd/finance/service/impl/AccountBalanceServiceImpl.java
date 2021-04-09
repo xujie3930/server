@@ -64,6 +64,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if(StringUtils.isNotEmpty(dto.getCusCode())) {
             queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
         }
+        if(StringUtils.isNotEmpty(dto.getCurrencyCode())) {
+            queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
+        }
         return accountBalanceMapper.listPage(queryWrapper);
     }
 
