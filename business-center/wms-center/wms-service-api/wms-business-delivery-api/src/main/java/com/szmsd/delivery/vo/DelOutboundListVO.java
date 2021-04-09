@@ -66,6 +66,9 @@ public class DelOutboundListVO implements Serializable {
     @ApiModelProperty(value = "费用")
     private BigDecimal amount;
 
+    @ApiModelProperty(value = "币种")
+    private String currencyCode;
+
     @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "066", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "异常状态")
     private String exceptionState;

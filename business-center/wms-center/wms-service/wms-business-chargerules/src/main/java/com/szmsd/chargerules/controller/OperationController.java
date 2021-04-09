@@ -38,7 +38,7 @@ public class OperationController extends BaseController {
             save = operationService.save(dto);
         } catch (DuplicateKeyException e) {
             log.error(e.getMessage(), e);
-            return R.failed("操作类型+仓库不能重复");
+            return R.failed("操作类型+仓库+是否多SKU不能重复");
         }
         return toOk(save);
     }
