@@ -349,6 +349,13 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            return StringUtils.isNotEmpty(delOutbound.getShipmentOrderNumber());
+        }
+
+        @Override
         public ApplicationState nextState() {
             return THAW_BALANCE;
         }
