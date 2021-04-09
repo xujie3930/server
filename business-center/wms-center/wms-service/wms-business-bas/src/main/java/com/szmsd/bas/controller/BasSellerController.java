@@ -5,6 +5,7 @@ import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.bas.dto.BasSellerSysDto;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -107,7 +108,7 @@ public class BasSellerController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:query')")
     @GetMapping(value = "getInfo/{userName}")
     @ApiOperation(value = "获取模块详细信息",notes = "获取模块详细信息")
-    public R<BasSellerInfoDto> getInfo(@PathVariable("userName") String userName)
+    public R<BasSellerInfoVO> getInfo(@PathVariable("userName") String userName)
     {
     return R.ok(basSellerService.selectBasSeller(userName));
     }

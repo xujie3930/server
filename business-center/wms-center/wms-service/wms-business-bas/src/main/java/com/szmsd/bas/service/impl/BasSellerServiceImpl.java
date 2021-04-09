@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.code.kaptcha.Producer;
+import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.domain.BasSeller;
@@ -15,6 +17,8 @@ import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.util.ObjectUtil;
+import com.szmsd.bas.vo.BasSellerCertificateVO;
+import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
@@ -28,12 +32,14 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SellerRequest;
 import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.feign.RemoteUserService;
 import com.szmsd.system.api.model.UserInfo;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -45,6 +51,7 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -240,7 +247,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
 
         @Override
-        public BasSellerInfoDto selectBasSeller(String userName){
+        public BasSellerInfoVO selectBasSeller(String userName){
             QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("user_name",userName);
             BasSeller basSeller = super.getOne(queryWrapper);
@@ -248,10 +255,20 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
             BasSellerCertificateQueryWrapper.eq("seller_code",basSeller.getSellerCode());
             List<BasSellerCertificate> basSellerCertificateList = basSellerCertificateService.list(BasSellerCertificateQueryWrapper);
+            List<BasSellerCertificateVO> basSellerCertificateVOS = BeanMapperUtil.mapList(basSellerCertificateList,BasSellerCertificateVO.class);
+            basSellerCertificateVOS.forEach(b -> {
+                if(b.getAttachment()!=null){
+                    List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
+                            .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SELLER_CERTIFICATE_DOCUMENT.getAttachmentType()).setBusinessNo(b.getAttachment()).setBusinessItemNo(null)).getData());
+                    if (CollectionUtils.isNotEmpty(attachment)) {
+                        b.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
+                    }
+                }
+                });
 
-            BasSellerInfoDto basSellerInfoDto = BeanMapperUtil.map(basSeller,BasSellerInfoDto.class);
-            basSellerInfoDto.setBasSellerCertificateList(BeanMapperUtil.mapList(basSellerCertificateList, BasSellerCertificateDto.class));
-            return basSellerInfoDto;
+            BasSellerInfoVO basSellerInfoVO = BeanMapperUtil.map(basSeller,BasSellerInfoVO.class);
+            basSellerInfoVO.setBasSellerCertificateList(basSellerCertificateVOS);
+            return basSellerInfoVO;
         }
 
     /**

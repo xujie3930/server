@@ -6,6 +6,7 @@ import com.szmsd.bas.dto.ActiveDto;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerInfoDto;
 import com.szmsd.bas.dto.BasSellerSysDto;
+import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.domain.R;
 
 import javax.servlet.http.HttpServletRequest;
@@ -73,7 +74,7 @@ public interface IBasSellerService extends IService<BasSeller> {
          * @param userName
          * @return
          */
-        BasSellerInfoDto selectBasSeller(String userName);
+        BasSellerInfoVO selectBasSeller(String userName);
 
         /**
          * 获取验证码
