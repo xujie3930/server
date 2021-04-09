@@ -9,6 +9,6 @@ spring:
     name: wms-business-exception
   profiles:
     # 环境配置
-    active: test
+    active: dev
   main:
     allow-bean-definition-overriding: true
