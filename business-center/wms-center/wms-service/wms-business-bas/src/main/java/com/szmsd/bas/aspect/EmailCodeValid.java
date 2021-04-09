@@ -36,7 +36,7 @@ public class EmailCodeValid {
     @Before(value = "pointCut()")
     private void before(JoinPoint point) {
         BasSellerDto seller = (BasSellerDto) point.getArgs()[1];
-        String email = seller.getEmail();
+        String email = seller.getInitEmail();
         String key = varCode.name().concat("-").concat(email);
         String cacheObject = redisService.getCacheObject(key);
         AssertUtil.isTrue(StringUtils.isNotEmpty(cacheObject), "邮箱验证码已过期，请重新获取");
@@ -48,7 +48,7 @@ public class EmailCodeValid {
     private void after(JoinPoint point, R<Boolean> retValue) {
         if (retValue != null && retValue.getData() != null && retValue.getData()) {
             BasSellerDto seller = (BasSellerDto) point.getArgs()[1];
-            String email = seller.getEmail();
+            String email = seller.getInitEmail();
             String key = varCode.name().concat("-").concat(email);
             redisService.deleteObject(key);
             log.info("after ---> 验证删除,  email={}");
