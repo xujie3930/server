@@ -9,5 +9,5 @@ import lombok.Data;
 public class BasSellerCertificateVO extends BasSellerCertificate {
 
     @ApiModelProperty(value = "对版图片")
-    private AttachmentFileDTO editionImage;
+    private AttachmentFileDTO documentsFiles;
 }
