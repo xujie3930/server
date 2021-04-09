@@ -51,13 +51,13 @@ public class Shipment extends OrderType {
 
     @Override
     public void operationPay(Operation operation) {
-        String orderType = DelOutboundOrderTypeEnum.getCode(operation.getOperationType());
-        if(StringUtils.isNull(orderType)) {
-            log.error("operationPay() failed: 出库单未找到对应的操作类型, operationType: {}", operation.getOperationType());
-            return;
-        }
+//        String orderType = DelOutboundOrderTypeEnum.getCode(operation.getOperationType());
+//        if(StringUtils.isNull(orderType)) {
+//            log.error("operationPay() failed: 出库单未找到对应的操作类型, operationType: {}", operation.getOperationType());
+//            return;
+//        }
         DelOutboundListQueryDto delOutbound = new DelOutboundListQueryDto();
-        delOutbound.setOrderType(orderType);
+        delOutbound.setOrderType(operation.getOperationType());
         delOutbound.setWarehouseCode(operation.getWarehouseCode());
         R<List<DelOutboundDetailListVO>> rList = delOutboundFeignService.getDelOutboundDetailsList(delOutbound);
         if (rList.getCode() != 200 || CollectionUtils.isEmpty(rList.getData())) {
