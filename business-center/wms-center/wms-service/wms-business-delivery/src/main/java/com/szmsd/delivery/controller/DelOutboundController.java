@@ -179,12 +179,12 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.getDelOutboundDetailsList(queryDto));
     }
 
-    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:getDelOutboundCharge')")
-    @GetMapping("/getDelOutboundCharge")
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundCharge')")
+    @GetMapping("/delOutboundCharge/page")
     @ApiOperation(value = "出库管理 - 按条件查询出库单及费用详情", position = 10000)
-    public R<TableDataInfo<DelOutboundChargeListVO>> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto) {
+    public TableDataInfo<DelOutboundChargeListVO> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto) {
         startPage();
-        return R.ok(getDataTable(delOutboundService.getDelOutboundCharge(queryDto)));
+        return getDataTable(delOutboundService.getDelOutboundCharge(queryDto));
     }
 
 }
