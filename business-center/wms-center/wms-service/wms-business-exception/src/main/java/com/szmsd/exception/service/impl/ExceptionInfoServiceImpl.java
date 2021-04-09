@@ -2,11 +2,15 @@ package com.szmsd.exception.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.exception.domain.ExceptionInfo;
+import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.ExceptionInfoQueryDto;
 import com.szmsd.exception.dto.NewExceptionRequest;
 import com.szmsd.exception.dto.ProcessExceptionRequest;
@@ -46,7 +50,11 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
 
     @Resource
     private HtpExceptionFeignService htpExceptionFeignService;
-        /**
+
+    @Autowired
+    private RemoteAttachmentService remoteAttachmentService;
+
+    /**
         * 查询模块
         *
         * @param id 模块ID
@@ -143,7 +151,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         * @return 结果
         */
         @Override
-        public int updateExceptionInfo(ExceptionInfo exceptionInfo)
+        public int updateExceptionInfo(ExceptionInfoDto exceptionInfo)
         {
             ExceptionInfo exception =  super.getById(exceptionInfo.getId());
             ExceptionProcessRequest exceptionProcessRequest = BeanMapperUtil.map(exceptionInfo,ExceptionProcessRequest.class);
@@ -155,6 +163,10 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             }
             exceptionInfo.setProcessTypeName(ProcessTypeEnum.get(exceptionInfo.getProcessType()).getName());
             exceptionInfo.setDeal(true);
+            if (CollectionUtils.isNotEmpty(exceptionInfo.getDocumentsFiles())) {
+                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(exception.getExceptionNo()).businessItemNo(null).fileList(exceptionInfo.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
+                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+            }
             return baseMapper.updateById(exceptionInfo);
         }
 
