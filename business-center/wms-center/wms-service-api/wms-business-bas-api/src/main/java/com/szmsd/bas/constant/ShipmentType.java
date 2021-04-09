@@ -31,25 +31,30 @@ public final class ShipmentType {
     public static final String POWDER = "Powder";
 
     /**
+     * 磁铁
+     */
+    public static final String MAGNET = "Magnet";
+
+    /**
      * 返回最高的状态
-     * 电池 > 液体 > 粉末 > 普货
+     * 电池 > 液体 > 粉末 > 磁铁 > 普货
      *
      * @param collections collections
      * @return String
      */
     public static String highest(Collection<String> collections) {
-        return get(collections, new String[]{BATTERY, LIQUID, POWDER}, GENERAL_CARGO);
+        return get(collections, new String[]{BATTERY, LIQUID, POWDER, MAGNET}, GENERAL_CARGO);
     }
 
     /**
      * 返回最低的状态
-     * 普货 > 粉末 > 液体 > 电池
+     * 普货 > 磁铁 > 粉末 > 液体 > 电池
      *
      * @param collections collections
      * @return String
      */
     public static String lowest(Collection<String> collections) {
-        return get(collections, new String[]{GENERAL_CARGO, POWDER, LIQUID}, BATTERY);
+        return get(collections, new String[]{GENERAL_CARGO, MAGNET, POWDER, LIQUID}, BATTERY);
     }
 
     /**
