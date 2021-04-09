@@ -158,8 +158,16 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             exceptionProcessRequest.setWarehouseCode(exception.getWarehouseCode());
             exceptionProcessRequest.setExceptionNo(exception.getExceptionNo());
             R<ResponseVO> r = htpExceptionFeignService.processing(exceptionProcessRequest);
-            if(!r.getData().getSuccess()){
-                throw new BaseException("传wms失败" + r.getData().getMessage());
+            if(r.getData().getSuccess()==null){
+                if(r.getData().getErrors()!=null)
+                {
+                    throw new BaseException("传wms失败" + r.getData().getErrors());
+                }
+            }else{
+                if(!r.getData().getSuccess())
+                {
+                    throw new BaseException("传wms失败" + r.getData().getMessage());
+                }
             }
             exceptionInfo.setProcessTypeName(ProcessTypeEnum.get(exceptionInfo.getProcessType()).getName());
             exceptionInfo.setDeal(true);
