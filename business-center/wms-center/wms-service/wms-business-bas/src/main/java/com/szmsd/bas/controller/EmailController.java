@@ -2,6 +2,7 @@ package com.szmsd.bas.controller;
 
 import com.szmsd.bas.enums.EmailEnum;
 import com.szmsd.bas.util.EmailUtil;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.redis.service.RedisService;
@@ -36,7 +37,7 @@ public class EmailController extends BaseController {
     @PreAuthorize("@ss.hasPermi('bas:email:sendvercode')")
     @GetMapping("/sendVerCode/{email}")
     @ApiOperation(value = "发送验证码", notes = "发送验证码")
-    public void sendVerCode(@PathVariable("email") String email) {
+    public R sendVerCode(@PathVariable("email") String email) {
         boolean isEmail = EmailUtil.isEmail(email);
         AssertUtil.isTrue(isEmail, "请填写正确的邮箱格式");
         EmailEnum varCode = EmailEnum.VAR_CODE;
@@ -56,6 +57,7 @@ public class EmailController extends BaseController {
                 log.error("邮件发送失败，请稍后重试, {}, {}", email, e.getMessage());
             }
         }, executors);
+        return R.ok();
     }
 
 }
