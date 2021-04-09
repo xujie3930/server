@@ -68,4 +68,34 @@
         ${ew.customSqlSegment}
     </select>
 
+    <select id="selectDelOutboundList" resultType="com.szmsd.delivery.vo.DelOutboundChargeListVO" parameterType="com.szmsd.delivery.dto.DelOutboundChargeQueryDto">
+        SELECT
+            t.id,
+            t.order_no,
+            t.create_time,
+            (SELECT a.country FROM del_outbound_address a WHERE a.order_no = t.order_no LIMIT 1) AS country,
+            t.shipment_rule,
+            t.tracking_no,
+            t.weight,
+            t.amount,
+            t.completed_state,
+            t.remark
+        FROM
+            del_outbound t
+        <where>
+            <if test="no != null and no != ''">
+                AND (t.order_no = #{no} or t.tracking_no = #{no})
+            </if>
+            <if test="shipmentRule != null and shipmentRule != ''">
+                AND t.shipment_rule = #{shipmentRule}
+            </if>
+            <if test="orderTimeStart != null and orderTimeStart != ''">
+                AND t.create_time >= #{orderTimeStart}
+            </if>
+            <if test="orderTimeEnd != null and orderTimeEnd != ''">
+                AND t.create_time &lt;= #{orderTimeEnd}
+            </if>
+        </where>
+    </select>
+
 </mapper>

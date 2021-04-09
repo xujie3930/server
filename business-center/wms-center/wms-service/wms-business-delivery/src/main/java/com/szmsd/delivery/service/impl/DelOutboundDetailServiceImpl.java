@@ -2,6 +2,7 @@ package com.szmsd.delivery.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.domain.DelOutboundDetail;
@@ -41,7 +42,10 @@ public class DelOutboundDetailServiceImpl extends ServiceImpl<DelOutboundDetailM
      */
     @Override
     public List<DelOutboundDetail> selectDelOutboundDetailList(DelOutboundDetail delOutboundDetail) {
-        QueryWrapper<DelOutboundDetail> where = new QueryWrapper<DelOutboundDetail>();
+        QueryWrapper<DelOutboundDetail> where = new QueryWrapper<>();
+        if(StringUtils.isNotBlank(delOutboundDetail.getOrderNo())) {
+            where.eq("order_no",delOutboundDetail.getOrderNo());
+        }
         return baseMapper.selectList(where);
     }
 

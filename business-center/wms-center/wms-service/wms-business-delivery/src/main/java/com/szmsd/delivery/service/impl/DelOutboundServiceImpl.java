@@ -19,6 +19,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
+import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
@@ -26,10 +27,7 @@ import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
-import com.szmsd.delivery.service.IDelOutboundAddressService;
-import com.szmsd.delivery.service.IDelOutboundCompletedService;
-import com.szmsd.delivery.service.IDelOutboundDetailService;
-import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
@@ -43,6 +41,7 @@ import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +80,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private RemoteAttachmentService remoteAttachmentService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
+    @Autowired
+    private IDelOutboundChargeService delOutboundChargeService;
 
     /**
      * 查询出库单模块
@@ -737,6 +738,54 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
         }
         return voList;
+    }
+
+    @Override
+    public List<DelOutboundChargeListVO> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto) {
+        List<DelOutboundChargeListVO> list = baseMapper.selectDelOutboundList(queryDto);
+        for (DelOutboundChargeListVO delOutboundChargeListVO : list) {
+            String orderNo = delOutboundChargeListVO.getOrderNo();
+
+            List<DelOutboundDetail> delOutboundDetails = delOutboundDetailService.selectDelOutboundDetailList(new DelOutboundDetail().setOrderNo(orderNo));
+            //计算数量 = 多个SKU的数量+包材（1个）
+            delOutboundChargeListVO.setQty(ListUtils.emptyIfNull(delOutboundDetails).stream().map(value -> StringUtils.isBlank(value.getBindCode())
+                    ? value.getQty() : value.getQty() + 1).reduce(Long::sum).orElse(0L));
+
+            List<DelOutboundCharge> delOutboundCharges = delOutboundChargeService.listCharges(orderNo);
+
+            this.setAmount(delOutboundChargeListVO, delOutboundCharges);
+        }
+        return list;
+    }
+
+    /**
+     * 查询物流基础费、偏远地区费、超大附加费、燃油附加费
+     *
+     * @param delOutboundChargeListVO delOutboundChargeListVO
+     * @param delOutboundCharges      delOutboundCharges
+     */
+    private void setAmount(DelOutboundChargeListVO delOutboundChargeListVO, List<DelOutboundCharge> delOutboundCharges) {
+        ListUtils.emptyIfNull(delOutboundCharges).forEach(item -> {
+            String chargeNameEn = item.getChargeNameEn();
+            if (chargeNameEn != null) {
+                switch (chargeNameEn) {
+                    case "Base Shipping Fee":
+                        delOutboundChargeListVO.setBaseShippingFee(item.getAmount());
+                        break;
+                    case "Remote Area Surcharge":
+                        delOutboundChargeListVO.setRemoteAreaSurcharge(item.getAmount());
+                        break;
+                    case "Over-Size Surcharge":
+                        delOutboundChargeListVO.setOverSizeSurcharge(item.getAmount());
+                        break;
+                    case "Fuel Charge":
+                        delOutboundChargeListVO.setFuelCharge(item.getAmount());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
     }
 }
 

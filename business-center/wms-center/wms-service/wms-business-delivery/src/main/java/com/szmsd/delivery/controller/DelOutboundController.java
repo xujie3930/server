@@ -19,10 +19,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
-import com.szmsd.delivery.vo.DelOutboundDetailVO;
-import com.szmsd.delivery.vo.DelOutboundListVO;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.*;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -180,6 +177,14 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 按条件查询出库单及详情", position = 10000)
     public R<List<DelOutboundDetailListVO>> getDelOutboundDetailsList(@RequestBody DelOutboundListQueryDto queryDto) {
         return R.ok(delOutboundService.getDelOutboundDetailsList(queryDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:getDelOutboundCharge')")
+    @GetMapping("/getDelOutboundCharge")
+    @ApiOperation(value = "出库管理 - 按条件查询出库单及费用详情", position = 10000)
+    public R<TableDataInfo<DelOutboundChargeListVO>> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto) {
+        startPage();
+        return R.ok(getDataTable(delOutboundService.getDelOutboundCharge(queryDto)));
     }
 
 }
