@@ -85,6 +85,8 @@ public class Shipment extends OrderType {
                 int count = details.stream().mapToInt(detail -> detail.getQty().intValue()).sum();
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), count);
             }
+            DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(datum.getOrderType());
+            if(delOutboundOrderTypeEnum != null) datum.setOrderType(delOutboundOrderTypeEnum.getName());
             log.info("orderNo: {} orderType: {} amount: {}", datum.getOrderNo(), datum.getOrderType(), amount);
             pay(datum, amount);
         }
@@ -103,8 +105,6 @@ public class Shipment extends OrderType {
             log.info("该单已经扣过费, chargeLogDto: {}", chargeLogDto);
             return;
         }
-        DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(datum.getOrderType());
-        if(delOutboundOrderTypeEnum != null) datum.setOrderType(delOutboundOrderTypeEnum.getName());
         ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType(), datum.getWarehouseCode());
         R resultPay = payService.pay(datum.getCustomCode(), amount, BillEnum.PayMethod.BUSINESS_OPERATE, chargeLog);
         if (resultPay.getCode() != 200)

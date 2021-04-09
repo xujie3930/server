@@ -8,6 +8,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +26,15 @@ public class WarehouseOperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('WarehouseOperation:WarehouseOperation:add')")
     @ApiOperation(value = "仓储业务计费规则 - 保存")
     @PostMapping("/save")
-    public R save(@RequestBody WarehouseOperationDTO dto){
-        return toOk(warehouseOperationService.save(dto));
+    public R save(@RequestBody WarehouseOperationDTO dto) {
+        int save = 0;
+        try {
+            save = warehouseOperationService.save(dto);
+        } catch (DuplicateKeyException e) {
+            log.error(e.getMessage(), e);
+            R.failed("仓库+计费天数不能重复");
+        }
+        return toOk(save);
     }
 
     @PreAuthorize("@ss.hasPermi('WarehouseOperation:WarehouseOperation:edit')")
@@ -39,7 +47,7 @@ public class WarehouseOperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('WarehouseOperation:WarehouseOperation:list')")
     @ApiOperation(value = "仓储业务计费规则 - 分页查询")
     @GetMapping("/list")
-    public TableDataInfo<WarehouseOperation> listPage(WarehouseOperationDTO dto){
+    public TableDataInfo<WarehouseOperation> listPage(WarehouseOperationDTO dto) {
         startPage();
         List<WarehouseOperation> list = warehouseOperationService.listPage(dto);
         return getDataTable(list);
