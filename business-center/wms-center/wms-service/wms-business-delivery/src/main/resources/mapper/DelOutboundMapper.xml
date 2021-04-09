@@ -89,6 +89,9 @@
             <if test="shipmentRule != null and shipmentRule != ''">
                 AND t.shipment_rule = #{shipmentRule}
             </if>
+            <if test="customCode != null and customCode != ''">
+                AND t.custom_code = #{customCode}
+            </if>
             <if test="orderTimeStart != null and orderTimeStart != ''">
                 AND t.create_time >= #{orderTimeStart}
             </if>
