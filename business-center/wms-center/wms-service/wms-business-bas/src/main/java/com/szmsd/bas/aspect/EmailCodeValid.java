@@ -50,7 +50,7 @@ public class EmailCodeValid {
             BasSellerDto seller = (BasSellerDto) point.getArgs()[1];
             String email = seller.getInitEmail();
             String key = varCode.name().concat("-").concat(email);
-            log.info("after ---> 验证删除,  email={}");
+            log.info("after ---> email={}, 邮箱验证成功", email);
             redisService.deleteObject(key);
         }
     }
