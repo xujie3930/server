@@ -114,10 +114,6 @@ public class ExceptionInfo extends BaseEntity {
     @Excel(name = "是否处理")
     private Boolean deal;
 
-    @ApiModelProperty(value = "附件")
-    @Excel(name = "附件")
-    private String appendix;
-
     @ApiModelProperty(value = "处理人")
     @Excel(name = "处理人")
     private String dealName;

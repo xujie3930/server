@@ -3,6 +3,7 @@ package com.szmsd.exception.service;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.exception.domain.ExceptionInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.ExceptionInfoQueryDto;
 import com.szmsd.exception.dto.NewExceptionRequest;
 import com.szmsd.exception.dto.ProcessExceptionRequest;
@@ -64,7 +65,7 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
         * @param exceptionInfo 模块
         * @return 结果
         */
-        int updateExceptionInfo(ExceptionInfo exceptionInfo);
+        int updateExceptionInfo(ExceptionInfoDto exceptionInfo);
 
         /**
         * 批量删除模块

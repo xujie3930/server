@@ -1,4 +1,5 @@
 package com.szmsd.exception.controller;
+import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.ExceptionInfoQueryDto;
 import com.szmsd.exception.dto.NewExceptionRequest;
 import com.szmsd.exception.dto.ProcessExceptionRequest;
@@ -109,7 +110,7 @@ public class ExceptionInfoController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块",notes = "修改模块")
-    public R edit(@RequestBody ExceptionInfo exceptionInfo)
+    public R edit(@RequestBody ExceptionInfoDto exceptionInfo)
     {
     return toOk(exceptionInfoService.updateExceptionInfo(exceptionInfo));
     }
