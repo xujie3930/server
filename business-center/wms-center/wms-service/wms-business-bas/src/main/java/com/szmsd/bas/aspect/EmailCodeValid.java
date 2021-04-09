@@ -39,9 +39,9 @@ public class EmailCodeValid {
         String email = seller.getInitEmail();
         String key = varCode.name().concat("-").concat(email);
         String cacheObject = redisService.getCacheObject(key);
+        log.info("before ---> 进入切面验证邮箱验证码, email={}, cacheCode={}, input={}", email, cacheObject, seller.getEmailCaptcha());
         AssertUtil.isTrue(StringUtils.isNotEmpty(cacheObject), "邮箱验证码已过期，请重新获取");
         AssertUtil.isTrue(StringUtils.equals(cacheObject, seller.getEmailCaptcha()), "邮箱验证码错误");
-        log.info("before ---> 进入切面验证邮箱验证码, email={}, cacheCode={}, input={}", email, cacheObject, seller.getEmailCaptcha());
     }
 
     @AfterReturning(pointcut = "pointCut()", returning = "retValue")
@@ -50,8 +50,8 @@ public class EmailCodeValid {
             BasSellerDto seller = (BasSellerDto) point.getArgs()[1];
             String email = seller.getInitEmail();
             String key = varCode.name().concat("-").concat(email);
-            redisService.deleteObject(key);
             log.info("after ---> 验证删除,  email={}");
+            redisService.deleteObject(key);
         }
     }
 
