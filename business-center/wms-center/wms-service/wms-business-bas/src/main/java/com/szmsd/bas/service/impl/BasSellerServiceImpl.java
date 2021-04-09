@@ -321,8 +321,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 throw new BaseException("传wms失败:"+r.getData().getMessage());
             }
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
+            basSellerCertificateService.delBasSellerCertificateByPhysics(basSeller.getSellerCode());
             if(CollectionUtils.isNotEmpty(basSellerInfoDto.getBasSellerCertificateList())) {
-                basSellerCertificateService.delBasSellerCertificateByPhysics(basSeller.getSellerCode());
                 basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
             }
             // 附件信息
