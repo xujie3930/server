@@ -30,11 +30,23 @@ public class ImportValidationContainer<T> {
                 || CollectionUtils.isEmpty(this.validationList)) {
             return ImportResult.buildSuccess();
         }
+        boolean isBreak = false;
+        for (ImportValidation<T> validation : this.validationList) {
+            if (!validation.before()) {
+                isBreak = true;
+            }
+        }
+        if (isBreak) {
+            return ImportResult.buildFail(this.importContext.getMessageList());
+        }
         for (int i = 0; i < dataList.size(); i++) {
             T object = dataList.get(i);
             for (ImportValidation<T> validation : this.validationList) {
                 validation.valid(i + 1, object);
             }
+        }
+        for (ImportValidation<T> validation : this.validationList) {
+            validation.after();
         }
         if (CollectionUtils.isEmpty(this.importContext.getMessageList())) {
             return ImportResult.buildSuccess();

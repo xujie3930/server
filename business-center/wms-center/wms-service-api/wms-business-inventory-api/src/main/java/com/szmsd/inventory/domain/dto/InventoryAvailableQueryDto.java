@@ -22,6 +22,9 @@ public class InventoryAvailableQueryDto implements Serializable {
     @ApiModelProperty(value = "sku")
     private String sku;
 
+    @ApiModelProperty(value = "sku")
+    private String eqSku;
+
     @ApiModelProperty(value = "skus")
     private List<String> skus;
 }

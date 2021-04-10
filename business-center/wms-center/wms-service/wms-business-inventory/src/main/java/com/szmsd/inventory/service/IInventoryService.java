@@ -7,6 +7,7 @@ import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
+import com.szmsd.inventory.domain.vo.InventoryVO;
 
 import java.util.List;
 
@@ -23,6 +24,30 @@ public interface IInventoryService extends IService<Inventory> {
      * @return InventoryAvailableDto
      */
     List<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto);
+
+    /**
+     * 根据仓库编码，SKU查询可用库存
+     *
+     * @param queryDto queryDto
+     * @return InventoryAvailableListVO
+     */
+    InventoryAvailableListVO queryOnlyAvailable(InventoryAvailableQueryDto queryDto);
+
+    /**
+     * 查询SKU信息
+     *
+     * @param queryDto queryDto
+     * @return List<InventoryVO>
+     */
+    List<InventoryVO> querySku(InventoryAvailableQueryDto queryDto);
+
+    /**
+     * 查询SKU信息
+     *
+     * @param queryDto queryDto
+     * @return InventoryVO
+     */
+    InventoryVO queryOnlySku(InventoryAvailableQueryDto queryDto);
 
     /**
      * 冻结库存

@@ -1,9 +1,6 @@
 package com.szmsd.inventory.api.factory;
 
-import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
@@ -11,6 +8,7 @@ import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
+import com.szmsd.inventory.domain.vo.InventoryVO;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
@@ -32,16 +30,23 @@ public class InventoryFeignFallback implements FallbackFactory<InventoryFeignSer
             }
 
             @Override
-            public TableDataInfo<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto) {
-                if (null == throwable) {
-                    return null;
-                }
-                if (throwable instanceof CommonException) {
-                    CommonException commonException = (CommonException) throwable;
-                    throw new CommonException("" + Constants.FAIL, commonException.getMessage());
-                } else {
-                    throw new CommonException("" + Constants.FAIL, throwable.getMessage());
-                }
+            public R<List<InventoryAvailableListVO>> queryAvailableList(InventoryAvailableQueryDto queryDto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<InventoryAvailableListVO> queryOnlyAvailable(InventoryAvailableQueryDto queryDto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<InventoryVO>> querySku(InventoryAvailableQueryDto queryDto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<InventoryVO> queryOnlySku(InventoryAvailableQueryDto queryDto) {
+                return R.convertResultJson(throwable);
             }
 
             @Override
