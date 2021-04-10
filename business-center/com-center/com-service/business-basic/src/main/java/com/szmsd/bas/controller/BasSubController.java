@@ -65,6 +65,26 @@ public class BasSubController extends BaseController {
         return basSubService.selectBasSubList(new BasSub(mainCode,subValue));
     }
 
+
+    @ApiOperation(value = "根据code查询子类别（下拉框）")
+    @RequestMapping("/getSubList")
+    public R<Map<String, String>> getSubList(@RequestParam("code") String code) {
+        QueryWrapper<BasSub> queryWrapper = Wrappers.query();
+        queryWrapper.select("main_code", "sub_code", "sub_value", "sub_name", "sub_name_en");
+        queryWrapper.eq("main_code", code);
+        List<BasSub> list = this.basSubService.list(queryWrapper);
+        Map<String, String> map;
+        if (CollectionUtils.isEmpty(list)) {
+            map = Collections.emptyMap();
+        } else {
+            map = new HashMap<>();
+            for (BasSub basSub : list) {
+                    map.put(basSub.getSubName(), basSub.getSubValue());
+                }
+            }
+        return R.ok(map);
+    }
+
     @ApiOperation(value = "根据code查询子类别（下拉框）")
     @RequestMapping("/getSub")
     public R<Map<String, List<BasSubWrapperVO>>> getSub(@RequestParam("code") String code) {
@@ -96,7 +116,6 @@ public class BasSubController extends BaseController {
         }
         return R.ok(map);
     }
-
     @ApiOperation(value = "根据name，code查询子类别（下拉框）", notes = "根据name，code查询子类别列表（下拉框）")
     @GetMapping("/getSubName")
     public R list(String code, String name) {

@@ -52,6 +52,10 @@ public interface IBaseProductService extends IService<BaseProduct> {
 
     List<BaseProductMeasureDto> batchSKU(List<String> codes);
 
+    /**
+     * 导入sku
+     * @param list
+     */
     void importBaseProduct(List<BaseProductImportDto> list);
 
     void measuringProduct(MeasuringProductRequest measuringProductRequest);

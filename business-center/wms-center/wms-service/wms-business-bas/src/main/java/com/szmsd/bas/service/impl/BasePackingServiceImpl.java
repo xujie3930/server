@@ -59,6 +59,7 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
     @Override
     public List<BasePacking> selectBasePackingList(BasePacking basePacking) {
         QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<BasePacking>();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "name", basePacking.getName());
         return baseMapper.selectList(queryWrapper);
     }
 

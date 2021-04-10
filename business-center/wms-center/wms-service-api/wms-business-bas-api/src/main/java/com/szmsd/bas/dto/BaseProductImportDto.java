@@ -49,22 +49,37 @@ public class BaseProductImportDto {
     @Excel(name = "产品属性" ,type = Excel.Type.IMPORT)
     private String productAttributeName;
 
+    @ApiModelProperty(value = "产品属性")
+    private String productAttribute;
+
 
     @ApiModelProperty(value = "电池类型")
     @Excel(name = "电池类型" ,type = Excel.Type.IMPORT)
     private String electrifiedModeName;
 
+    @ApiModelProperty(value = "电池类型")
+    private String electrifiedMode;
+
     @ApiModelProperty(value = "电池包装")
     @Excel(name = "电池包装" ,type = Excel.Type.IMPORT)
     private String batteryPackagingName;
 
+    @ApiModelProperty(value = "电池包装")
+    private String batteryPackaging;
+
     @ApiModelProperty(value = "自备包材条码")
     @Excel(name = "自备包材条码" ,type = Excel.Type.IMPORT)
+    private String bindCode;
+
+    @ApiModelProperty(value = "自备包材条码")
     private String bindCodeName;
 
     @ApiModelProperty(value = "物流包装要求")
     @Excel(name = "物流包装要求" ,type = Excel.Type.IMPORT)
     private String suggestPackingMaterial;
+
+    @ApiModelProperty(value = "物流包装要求")
+    private String suggestPackingMaterialCode;
 
 
     @ApiModelProperty(value = "产品说明")

@@ -31,6 +31,7 @@ public interface IBasSubService extends IService<BasSub> {
      */
     public List<BasSub> selectBasSubList(BasSub basSub);
 
+
     /**
      * 新增模块
      *

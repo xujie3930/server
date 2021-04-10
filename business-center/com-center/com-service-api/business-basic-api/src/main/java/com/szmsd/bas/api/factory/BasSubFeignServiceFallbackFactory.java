@@ -6,6 +6,7 @@ import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,14 @@ public class BasSubFeignServiceFallbackFactory implements FallbackFactory<BasSub
                 return null;
             }
 
+
             @Override
             public R<Map<String, List<BasSubWrapperVO>>> getSub(String code) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<Map<String,String>> getSubList(@RequestParam("code") String code){
                 return R.convertResultJson(throwable);
             }
 
