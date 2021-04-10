@@ -227,13 +227,5 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      */
     List<QueryChargeVO> getDelOutboundCharge(QueryChargeDto queryDto);
 
-    /**
-     * 出库单导入
-     *
-     * @param context context
-     * @return ImportResultVO
-     */
-    ImportResult delOutboundImport(ImportContext context);
-
 }
 
