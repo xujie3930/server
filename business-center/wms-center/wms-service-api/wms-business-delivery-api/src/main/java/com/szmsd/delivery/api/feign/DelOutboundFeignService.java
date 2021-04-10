@@ -1,6 +1,7 @@
 package com.szmsd.delivery.api.feign;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -9,6 +10,8 @@ import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.dto.ShipmentRequestDto;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.finance.dto.QueryChargeDto;
+import com.szmsd.finance.vo.QueryChargeVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,4 +71,13 @@ public interface DelOutboundFeignService {
      */
     @PostMapping("/api/outbound/getDelOutboundDetailsList")
     R<List<DelOutboundDetailListVO>> getDelOutboundDetailsList(@RequestBody DelOutboundListQueryDto queryDto);
+
+    /**
+     * 出库费用查询
+     * @param queryDto queryDto
+     * @return pageList
+     */
+    @PostMapping("/api/outbound/delOutboundCharge/page")
+    R<TableDataInfo<QueryChargeVO>> getDelOutboundCharge(@RequestBody QueryChargeDto queryDto);
+
 }

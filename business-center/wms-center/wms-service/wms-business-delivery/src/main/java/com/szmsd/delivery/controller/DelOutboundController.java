@@ -29,6 +29,8 @@ import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
+import com.szmsd.finance.dto.QueryChargeDto;
+import com.szmsd.finance.vo.QueryChargeVO;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -305,11 +307,11 @@ public class DelOutboundController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundCharge')")
-    @GetMapping("/delOutboundCharge/page")
+    @PostMapping("/delOutboundCharge/page")
     @ApiOperation(value = "出库管理 - 按条件查询出库单及费用详情", position = 10000)
-    public TableDataInfo<DelOutboundChargeListVO> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto) {
+    public R<TableDataInfo<QueryChargeVO>> getDelOutboundCharge(@RequestBody QueryChargeDto queryDto) {
         startPage();
-        return getDataTable(delOutboundService.getDelOutboundCharge(queryDto));
+        return R.ok(getDataTable(delOutboundService.getDelOutboundCharge(queryDto)));
     }
 
 }

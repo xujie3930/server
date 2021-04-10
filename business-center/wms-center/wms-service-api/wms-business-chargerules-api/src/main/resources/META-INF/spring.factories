@@ -1,5 +1,7 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.chargerules.api.service.impl.SpecialOperationClientServiceImpl,\
-  com.szmsd.chargerules.api.feign.factory.SpecialOperationFeignFallback
+  com.szmsd.chargerules.api.feign.factory.SpecialOperationFeignFallback,\
+  com.szmsd.chargerules.api.service.impl.ChargeServiceImpl,\
+  com.szmsd.chargerules.api.feign.factory.ChargeFeignFallback
 
   

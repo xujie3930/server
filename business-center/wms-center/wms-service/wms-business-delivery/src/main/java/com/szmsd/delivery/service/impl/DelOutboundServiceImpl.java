@@ -32,6 +32,8 @@ import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.*;
+import com.szmsd.finance.dto.QueryChargeDto;
+import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.ShipmentCancelRequestDto;
 import com.szmsd.http.vo.ResponseVO;
@@ -754,19 +756,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
-    public List<DelOutboundChargeListVO> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto) {
-        List<DelOutboundChargeListVO> list = baseMapper.selectDelOutboundList(queryDto);
-        for (DelOutboundChargeListVO delOutboundChargeListVO : list) {
-            String orderNo = delOutboundChargeListVO.getOrderNo();
+    public List<QueryChargeVO> getDelOutboundCharge(QueryChargeDto queryDto) {
+        List<QueryChargeVO> list = baseMapper.selectDelOutboundList(queryDto);
+        for (QueryChargeVO queryChargeVO : list) {
+            String orderNo = queryChargeVO.getOrderNo();
 
             List<DelOutboundDetail> delOutboundDetails = delOutboundDetailService.selectDelOutboundDetailList(new DelOutboundDetail().setOrderNo(orderNo));
             //计算数量 = 多个SKU的数量+包材（1个）
-            delOutboundChargeListVO.setQty(ListUtils.emptyIfNull(delOutboundDetails).stream().map(value -> StringUtils.isBlank(value.getBindCode())
+            queryChargeVO.setQty(ListUtils.emptyIfNull(delOutboundDetails).stream().map(value -> StringUtils.isBlank(value.getBindCode())
                     ? value.getQty() : value.getQty() + 1).reduce(Long::sum).orElse(0L));
 
             List<DelOutboundCharge> delOutboundCharges = delOutboundChargeService.listCharges(orderNo);
 
-            this.setAmount(delOutboundChargeListVO, delOutboundCharges);
+            this.setAmount(queryChargeVO, delOutboundCharges);
         }
         return list;
     }
@@ -774,25 +776,25 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     /**
      * 查询物流基础费、偏远地区费、超大附加费、燃油附加费
      *
-     * @param delOutboundChargeListVO delOutboundChargeListVO
+     * @param queryChargeVO delOutboundChargeListVO
      * @param delOutboundCharges      delOutboundCharges
      */
-    private void setAmount(DelOutboundChargeListVO delOutboundChargeListVO, List<DelOutboundCharge> delOutboundCharges) {
+    private void setAmount(QueryChargeVO queryChargeVO, List<DelOutboundCharge> delOutboundCharges) {
         ListUtils.emptyIfNull(delOutboundCharges).forEach(item -> {
             String chargeNameEn = item.getChargeNameEn();
             if (chargeNameEn != null) {
                 switch (chargeNameEn) {
                     case "Base Shipping Fee":
-                        delOutboundChargeListVO.setBaseShippingFee(item.getAmount());
+                        queryChargeVO.setBaseShippingFee(item.getAmount());
                         break;
                     case "Remote Area Surcharge":
-                        delOutboundChargeListVO.setRemoteAreaSurcharge(item.getAmount());
+                        queryChargeVO.setRemoteAreaSurcharge(item.getAmount());
                         break;
                     case "Over-Size Surcharge":
-                        delOutboundChargeListVO.setOverSizeSurcharge(item.getAmount());
+                        queryChargeVO.setOverSizeSurcharge(item.getAmount());
                         break;
                     case "Fuel Charge":
-                        delOutboundChargeListVO.setFuelCharge(item.getAmount());
+                        queryChargeVO.setFuelCharge(item.getAmount());
                         break;
                     default:
                         break;
