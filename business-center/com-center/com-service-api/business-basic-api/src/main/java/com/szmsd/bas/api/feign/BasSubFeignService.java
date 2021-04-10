@@ -32,4 +32,8 @@ public interface BasSubFeignService {
     @ApiOperation(value = "根据code查询子类别（下拉框）")
     @RequestMapping("/bas-sub/getSub")
     R<Map<String, List<BasSubWrapperVO>>> getSub(@RequestParam("code") String code);
+
+    @ApiOperation(value = "根据code查询子类别（下拉框）")
+    @RequestMapping("/bas-sub/getSubList")
+    R<Map<String, String>> getSubList(@RequestParam("code") String code);
 }

@@ -6,17 +6,22 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.enums.BaseMainEnum;
 import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.constant.ProductConstant;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BaseProductMapper;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBasSerialNumberService;
+import com.szmsd.bas.service.IBasePackingService;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BaseProductVO;
@@ -40,7 +45,10 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static java.math.BigDecimal.ROUND_HALF_UP;
 
 /**
  * <p>
@@ -71,6 +79,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
     @Resource
     private BasSubFeignService basSubFeignService;
+
+    @Autowired
+    private IBasePackingService basePackingService;
+
+    private static final String  regex = "^[a-z0-9A-Z]+$";
 
 
     /**
@@ -164,17 +177,35 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     {
 
         //判断是否必填
-        verifyBaseProductRequired(list);
+        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
+        basSellerQueryWrapper.eq("user_name",SecurityUtils.getLoginUser().getUsername());
+        BasSeller seller = basSellerService.getOne(basSellerQueryWrapper);
+        verifyBaseProductRequired(list,seller.getSellerCode());
         for(BaseProductImportDto b:list)
         {
             b.setHavePackingMaterial(b.getHavePackingMaterialName().equals("是")?true:false);
         }
         List<BaseProduct> baseProductList = BeanMapperUtil.mapList(list,BaseProduct.class);
+
         for(BaseProduct b:baseProductList)
         {
             b.setCategory(ProductConstant.SKU_NAME);
             b.setCategoryCode(ProductConstant.SKU);
+            b.setSellerCode(seller.getSellerCode());
+            b.setInitHeight(new BigDecimal(b.getInitHeight()).setScale(2,ROUND_HALF_UP).doubleValue());
+            b.setInitLength(new BigDecimal(b.getInitLength()).setScale(2,ROUND_HALF_UP).doubleValue());
+            b.setInitWidth(new BigDecimal(b.getInitWidth()).setScale(2,ROUND_HALF_UP).doubleValue());
+            b.setInitWeight(new BigDecimal(b.getInitWeight()).setScale(2,ROUND_HALF_UP).doubleValue());
+            b.setHeight(b.getInitHeight());
+            b.setLength(b.getInitLength());
+            b.setWidth(b.getInitWidth());
+            b.setWeight(b.getInitWeight());
+            b.setInitVolume(new BigDecimal(b.getInitHeight()*b.getInitLength()*b.getInitWidth()).setScale(2,ROUND_HALF_UP));
+            b.setVolume(b.getInitVolume());
+            b.setIsActive(true);
+            b.setWarehouseAcceptance(false);
         }
+        super.saveBatch(baseProductList);
 
     }
 
@@ -429,7 +460,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         if(ProductConstant.SKU_NAME.equals(baseProductDto.getCategory())) {
             if (StringUtils.isNotEmpty(baseProductDto.getProductAttribute())) {
-                if ("059004".equals(baseProductDto.getProductAttribute())) {
+                if ("Battery".equals(baseProductDto.getProductAttribute())) {
                     if (StringUtils.isEmpty(baseProductDto.getElectrifiedMode()) || StringUtils.isEmpty(baseProductDto.getBatteryPackaging())) {
                         throw new BaseException("未填写带电信息");
                     }
@@ -452,11 +483,20 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         }
     }
 
-    private void verifyBaseProductRequired(List<BaseProductImportDto> list)
+    private void verifyBaseProductRequired(List<BaseProductImportDto> list,String sellerCode)
     {
 
         StringBuilder s1 = new StringBuilder("");
-
+        BasePacking basePacking = new BasePacking();
+        BaseProduct baseProduct = new BaseProduct();
+        //查询包材
+        QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("category",ProductConstant.BC_NAME);
+        queryWrapper.eq("seller_code",sellerCode);
+        //查询主子类别
+        Map<String, String> typeMap= basSubFeignService.getSubList(BaseMainEnum.SKU_TYPE.getCode()).getData();
+        Map<String, String> eleMap= basSubFeignService.getSubList(BaseMainEnum.SKU_ELE.getCode()).getData();
+        Map<String, String> elePackageMap= basSubFeignService.getSubList(BaseMainEnum.SKU_ELEPACKAGE.getCode()).getData();
         int count = 1;
         for(BaseProductImportDto b:list)
         {
@@ -466,6 +506,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
                 s.append("SKU未填写，");
             }else{
+                if(!Pattern.matches(regex, b.getCode()))
+                {
+                    s.append("SKU不允许出现除了数字字母之外的其它字符，");
+                }
                 if(b.getCode().length()<2){
 
                     s.append("SKU长度小于两字符，");
@@ -484,12 +528,42 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }else{
                 if ("带电".equals(b.getProductAttributeName())) {
                     if (StringUtils.isEmpty(b.getElectrifiedModeName()) || StringUtils.isEmpty(b.getBatteryPackagingName())) {
-                        s.append("未填写带电信息,");
+                        s.append("未填写完整带电信息,");
+                    }else{
+
+                        if(!eleMap.isEmpty()){
+                            if(eleMap.containsKey(b.getElectrifiedModeName())){
+                                b.setElectrifiedMode(eleMap.get(b.getElectrifiedModeName()));
+                            }else{
+                                s.append("未找到对应电池类型，");
+                            }
+                        }else{
+                            s.append("未找到对应电池类型，");
+                        }
+
+                        if(!elePackageMap.isEmpty()){
+                            if(elePackageMap.containsKey(b.getBatteryPackagingName())){
+                                b.setBatteryPackaging(elePackageMap.get(b.getBatteryPackagingName()));
+                            }else{
+                                s.append("未找到对应电池包装，");
+                            }
+                        }else{
+                            s.append("未找到对应电池包装，");
+                        }
                     }
                 } else {
-                    if (StringUtils.isEmpty(b.getElectrifiedModeName()) || StringUtils.isEmpty(b.getBatteryPackagingName())) {
+                    if (!StringUtils.isEmpty(b.getElectrifiedModeName()) || !StringUtils.isEmpty(b.getBatteryPackagingName())) {
                         s.append("不能填写带电信息,");
                     }
+                }
+                if(!typeMap.isEmpty()){
+                    if(typeMap.containsKey(b.getProductAttributeName())){
+                        b.setProductAttribute(typeMap.get(b.getProductAttributeName()));
+                    }else{
+                        s.append("未找到对应产品属性，");
+                    }
+                }else{
+                    s.append("未找到对应产品属性，");
                 }
             }
             if(StringUtils.isEmpty(b.getHavePackingMaterialName()))
@@ -497,18 +571,35 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 s.append("是否自备包材未填写,");
             }else{
                 if ("是".equals(b.getHavePackingMaterialName())) {
-                    if (StringUtils.isEmpty(b.getBindCodeName())) {
-                        throw new BaseException("未填写附带包材，");
+                    if (StringUtils.isEmpty(b.getBindCode())) {
+                        s.append("未填写附带包材，");
+                    }else{
+                        queryWrapper.eq("code",b.getBindCode());
+                        baseProduct = super.getOne(queryWrapper);
+                        if(baseProduct!=null){
+                            b.setBindCodeName(baseProduct.getProductName());
+                        }else{
+                            s.append("未找到附带包材信息，");
+                        }
                     }
+
                 } else {
-                    if (StringUtils.isNotEmpty(b.getBindCodeName())) {
-                        throw new BaseException("不能填写附带包材，");
+                    if (StringUtils.isNotEmpty(b.getBindCode())) {
+                        s.append("不能填写附带包材，");
                     }
                 }
             }
             if(StringUtils.isEmpty(b.getSuggestPackingMaterial()))
             {
-                s.append("物流包装要未填写,");
+                s.append("物流包装未填写,");
+            }else{
+                basePacking.setName(b.getSuggestPackingMaterial());
+                List<BasePacking> basePackings = basePackingService.selectBasePackingList(basePacking);
+                if(CollectionUtils.isNotEmpty(basePackings)){
+                    b.setSuggestPackingMaterialCode(basePackings.get(0).getCode());
+                }else{
+                    s.append("未找到对应的物流包装,");
+                }
             }
             if(b.getInitLength()==null)
             {
@@ -534,7 +625,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             {
                 s.append("申报价值未填写,");
             }
-            if(b.getProductDescription().length()<10){
+            if(b.getProductDescription().length()>10){
                 s.append("产品说明超过十个字符,");
             }
             if(!s.toString().equals("")){
@@ -546,6 +637,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             throw new BaseException(s1.toString());
         }
     }
+
 
 }
 

@@ -104,9 +104,9 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
             if(CollectionUtils.isNotEmpty(b.getDocumentsFiles())){
                 String imageCode;
                 if(StringUtils.isNotEmpty(b.getAttachment())){
-                    imageCode = b.getSellerCode()+baseSerialNumberService.generateNumber("CERTIFICATE");
-                }else{
                     imageCode = b.getAttachment();
+                }else{
+                    imageCode = b.getSellerCode()+baseSerialNumberService.generateNumber("CERTIFICATE");
                 }
                 b.setAttachment(imageCode);
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(imageCode).businessItemNo(null).fileList(b.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SELLER_CERTIFICATE_DOCUMENT).build();
