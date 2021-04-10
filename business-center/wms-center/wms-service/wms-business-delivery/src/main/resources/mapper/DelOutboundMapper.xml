@@ -68,7 +68,7 @@
         ${ew.customSqlSegment}
     </select>
 
-    <select id="selectDelOutboundList" resultType="com.szmsd.delivery.vo.DelOutboundChargeListVO" parameterType="com.szmsd.delivery.dto.DelOutboundChargeQueryDto">
+    <select id="selectDelOutboundList" resultType="com.szmsd.finance.vo.QueryChargeVO" parameterType="com.szmsd.finance.dto.QueryChargeDto">
         SELECT
             t.id,
             t.order_no,

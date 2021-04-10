@@ -34,6 +34,10 @@
             <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-finance-api</artifactId>
+        </dependency>
 
     </dependencies>
 

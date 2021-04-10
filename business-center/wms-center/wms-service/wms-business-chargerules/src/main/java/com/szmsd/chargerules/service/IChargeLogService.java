@@ -2,6 +2,8 @@ package com.szmsd.chargerules.service;
 
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.ChargeLogDto;
+import com.szmsd.finance.dto.QueryChargeDto;
+import com.szmsd.finance.vo.QueryChargeVO;
 
 import java.util.List;
 
@@ -27,4 +29,6 @@ public interface IChargeLogService {
      * @return List
      */
     List<ChargeLog> selectPage(ChargeLogDto chargeLogDto);
+
+    List<QueryChargeVO> selectChargeLogList(QueryChargeDto queryDto);
 }

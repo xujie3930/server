@@ -4,7 +4,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.imported.ImportContext;
+import com.szmsd.delivery.imported.ImportResult;
 import com.szmsd.delivery.vo.*;
+import com.szmsd.finance.dto.QueryChargeDto;
+import com.szmsd.finance.vo.QueryChargeVO;
 
 import java.util.List;
 
@@ -221,6 +225,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param queryDto queryDto
      * @return list
      */
-    List<DelOutboundChargeListVO> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto);
+    List<QueryChargeVO> getDelOutboundCharge(QueryChargeDto queryDto);
+
 }
 

@@ -1,4 +1,4 @@
-package com.szmsd.delivery.dto;
+package com.szmsd.finance.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,7 +8,10 @@ import java.io.Serializable;
 
 @Data
 @ApiModel(value = "DelOutboundChargeQueryDto", description = "DelOutboundChargeQueryDto对象")
-public class DelOutboundChargeQueryDto implements Serializable {
+public class QueryChargeDto implements Serializable {
+
+    @ApiModelProperty(value = "查询费用类型 0：出库费 1：操作费")
+    private int queryType;
 
     @ApiModelProperty(value = "客户编码")
     private String customCode;
