@@ -12,6 +12,7 @@ import com.szmsd.bas.mapper.BasSellerCertificateMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBasSerialNumberService;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +102,12 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
 
         for(BasSellerCertificateDto b:basSellerCertificateList){
             if(CollectionUtils.isNotEmpty(b.getDocumentsFiles())){
-                String imageCode = b.getSellerCode()+baseSerialNumberService.generateNumber("CERTIFICATE");
+                String imageCode;
+                if(StringUtils.isNotEmpty(b.getAttachment())){
+                    imageCode = b.getSellerCode()+baseSerialNumberService.generateNumber("CERTIFICATE");
+                }else{
+                    imageCode = b.getAttachment();
+                }
                 b.setAttachment(imageCode);
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(imageCode).businessItemNo(null).fileList(b.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SELLER_CERTIFICATE_DOCUMENT).build();
                 this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
