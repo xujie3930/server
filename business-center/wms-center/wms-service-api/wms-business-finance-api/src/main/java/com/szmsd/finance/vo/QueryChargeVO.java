@@ -1,4 +1,4 @@
-package com.szmsd.delivery.vo;
+package com.szmsd.finance.vo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Data
 @ApiModel(value = "DelOutboundChargeListVO", description = "DelOutboundChargeListVO对象")
-public class DelOutboundChargeListVO implements Serializable {
+public class QueryChargeVO implements Serializable {
 
     @ApiModelProperty(value = "ID")
     private Long id;

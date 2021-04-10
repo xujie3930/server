@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.chargerules.mapper.ChargeLogMapper">
 
-    <select id="selectChargeLogList" resultType="com.szmsd.delivery.vo.DelOutboundChargeListVO" parameterType="com.szmsd.delivery.dto.DelOutboundChargeQueryDto">
+    <select id="selectChargeLogList" resultType="com.szmsd.finance.vo.QueryChargeVO" parameterType="com.szmsd.finance.dto.QueryChargeDto">
         SELECT id,create_time,order_no,qty,amount,remark FROM cha_log
         <where>
             success = true

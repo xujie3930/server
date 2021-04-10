@@ -2,12 +2,12 @@ package com.szmsd.chargerules.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.chargerules.domain.ChargeLog;
-import com.szmsd.delivery.dto.DelOutboundChargeQueryDto;
-import com.szmsd.delivery.vo.DelOutboundChargeListVO;
+import com.szmsd.finance.dto.QueryChargeDto;
+import com.szmsd.finance.vo.QueryChargeVO;
 
 import java.util.List;
 
 public interface ChargeLogMapper extends BaseMapper<ChargeLog> {
 
-    List<DelOutboundChargeListVO> selectChargeLogList(DelOutboundChargeQueryDto queryDto);
+    List<QueryChargeVO> selectChargeLogList(QueryChargeDto queryDto);
 }
