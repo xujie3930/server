@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.chargerules.mapper.ChargeLogMapper">
+
+    <select id="selectChargeLogList" resultType="com.szmsd.finance.vo.QueryChargeVO" parameterType="com.szmsd.finance.dto.QueryChargeDto">
+        SELECT id,create_time,order_no,qty,amount,remark FROM cha_log
+        <where>
+            success = true
+            <if test="no != null and no != ''">
+                AND order_no = #{no}
+            </if>
+            <if test="customCode != null and customCode != ''">
+                AND custom_code = #{customCode}
+            </if>
+            <if test="orderTimeStart != null and orderTimeStart != ''">
+                AND create_time >= #{orderTimeStart}
+            </if>
+            <if test="orderTimeEnd != null and orderTimeEnd != ''">
+                AND create_time &lt;= #{orderTimeEnd}
+            </if>
+        </where>
+    </select>
+
+</mapper>

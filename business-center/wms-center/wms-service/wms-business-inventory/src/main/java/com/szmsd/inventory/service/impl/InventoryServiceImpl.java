@@ -16,6 +16,7 @@ import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
+import com.szmsd.inventory.domain.vo.InventoryVO;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
@@ -107,26 +108,32 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         return baseMapper.selectListVO(inventorySkuQueryDTO);
     }
 
+    private void handlerQueryWrapper(QueryWrapper<InventoryAvailableQueryDto> queryWrapper, InventoryAvailableQueryDto queryDto) {
+        queryWrapper.eq("warehouse_code", queryDto.getWarehouseCode());
+        queryWrapper.eq("cus_code", queryDto.getCusCode());
+        if (StringUtils.isNotEmpty(queryDto.getSku())) {
+            queryWrapper.like("sku", queryDto.getSku());
+        }
+        if (StringUtils.isNotEmpty(queryDto.getEqSku())) {
+            queryWrapper.eq("sku", queryDto.getEqSku());
+        }
+        if (CollectionUtils.isNotEmpty(queryDto.getSkus())) {
+            queryWrapper.in("sku", queryDto.getSkus());
+        }
+    }
+
     @Override
     public List<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto) {
         if (StringUtils.isEmpty(queryDto.getWarehouseCode())) {
             return Collections.emptyList();
         }
         QueryWrapper<InventoryAvailableQueryDto> queryWrapper = Wrappers.query();
-        queryWrapper.eq("warehouse_code", queryDto.getWarehouseCode());
-        queryWrapper.eq("cus_code", queryDto.getCusCode());
-        if (StringUtils.isNotEmpty(queryDto.getSku())) {
-            queryWrapper.like("sku", queryDto.getSku());
-        }
-        if (CollectionUtils.isNotEmpty(queryDto.getSkus())) {
-            queryWrapper.in("sku", queryDto.getSkus());
-        }
+        this.handlerQueryWrapper(queryWrapper, queryDto);
         List<InventoryAvailableListVO> voList = this.baseMapper.queryAvailableList(queryWrapper);
         if (CollectionUtils.isNotEmpty(voList)) {
             // 填充SKU属性信息
             List<String> skus = voList.stream().map(InventoryAvailableListVO::getSku).collect(Collectors.toList());
             BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
-            // conditionQueryDto.setWarehouseCode(queryDto.getWarehouseCode());
             conditionQueryDto.setSkus(skus);
             List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
             Map<String, BaseProduct> productMap;
@@ -136,27 +143,73 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                 productMap = Collections.emptyMap();
             }
             for (InventoryAvailableListVO vo : voList) {
-                BaseProduct product = productMap.get(vo.getSku());
-                if (null == product) {
-                    continue;
-                }
-                vo.setCode(product.getCode());
-                vo.setProductName(product.getProductName());
-                vo.setInitWeight(product.getInitWeight());
-                vo.setInitLength(product.getInitLength());
-                vo.setInitWidth(product.getInitWidth());
-                vo.setInitHeight(product.getInitHeight());
-                vo.setInitVolume(product.getInitVolume());
-                vo.setWeight(product.getWeight());
-                vo.setLength(product.getLength());
-                vo.setWidth(product.getWidth());
-                vo.setHeight(product.getHeight());
-                vo.setVolume(product.getVolume());
-                vo.setBindCode(product.getBindCode());
-                vo.setBindCodeName(product.getBindCodeName());
+                this.setFieldValue(vo, productMap.get(vo.getSku()));
             }
         }
         return voList;
+    }
+
+    @Override
+    public InventoryAvailableListVO queryOnlyAvailable(InventoryAvailableQueryDto queryDto) {
+        if (StringUtils.isEmpty(queryDto.getWarehouseCode())) {
+            return null;
+        }
+        QueryWrapper<InventoryAvailableQueryDto> queryWrapper = Wrappers.query();
+        this.handlerQueryWrapper(queryWrapper, queryDto);
+        InventoryAvailableListVO vo = this.baseMapper.queryOnlyAvailable(queryWrapper);
+        if (Objects.nonNull(vo)) {
+            // 填充SKU属性信息
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            conditionQueryDto.setSkus(Collections.singletonList(vo.getSku()));
+            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            Map<String, BaseProduct> productMap;
+            if (CollectionUtils.isNotEmpty(productList)) {
+                productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            } else {
+                productMap = Collections.emptyMap();
+            }
+            this.setFieldValue(vo, productMap.get(vo.getSku()));
+        }
+        return vo;
+    }
+
+    private void setFieldValue(InventoryAvailableListVO vo, BaseProduct product) {
+        if (Objects.nonNull(product)) {
+            vo.setCode(product.getCode());
+            vo.setProductName(product.getProductName());
+            vo.setInitWeight(product.getInitWeight());
+            vo.setInitLength(product.getInitLength());
+            vo.setInitWidth(product.getInitWidth());
+            vo.setInitHeight(product.getInitHeight());
+            vo.setInitVolume(product.getInitVolume());
+            vo.setWeight(product.getWeight());
+            vo.setLength(product.getLength());
+            vo.setWidth(product.getWidth());
+            vo.setHeight(product.getHeight());
+            vo.setVolume(product.getVolume());
+            vo.setBindCode(product.getBindCode());
+            vo.setBindCodeName(product.getBindCodeName());
+        }
+    }
+
+    @Override
+    public List<InventoryVO> querySku(InventoryAvailableQueryDto queryDto) {
+        if (StringUtils.isEmpty(queryDto.getWarehouseCode())) {
+            return Collections.emptyList();
+        }
+        QueryWrapper<InventoryAvailableQueryDto> queryWrapper = Wrappers.query();
+        this.handlerQueryWrapper(queryWrapper, queryDto);
+        return this.baseMapper.querySku(queryWrapper);
+    }
+
+    @Override
+    public InventoryVO queryOnlySku(InventoryAvailableQueryDto queryDto) {
+        if (StringUtils.isEmpty(queryDto.getWarehouseCode())) {
+            return null;
+        }
+        QueryWrapper<InventoryAvailableQueryDto> queryWrapper = Wrappers.query();
+        this.handlerQueryWrapper(queryWrapper, queryDto);
+        return this.baseMapper.queryOnlySku(queryWrapper);
     }
 
     @Transactional
