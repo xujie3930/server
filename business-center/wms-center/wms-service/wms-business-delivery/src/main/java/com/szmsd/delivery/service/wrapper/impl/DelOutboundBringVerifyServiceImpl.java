@@ -3,7 +3,6 @@ package com.szmsd.delivery.service.wrapper.impl;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
-import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
@@ -91,7 +90,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 } else {
                     currentState = BringVerifyEnum.get(bringVerifyState);
                 }
-                new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN).action();
+                ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
+                applicationContainer.action();
             }
         }
         return delOutboundList.size();
@@ -282,6 +282,26 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         } else {
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败2");
             throw new CommonException("999", exceptionMessage);
+        }
+    }
+
+    @Override
+    public void cancellation(String referenceNumber, String shipmentOrderNumber, String trackingNo) {
+        CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
+        command.setReferenceNumber(referenceNumber);
+        List<CancelShipmentOrder> cancelShipmentOrders = new ArrayList<>();
+        cancelShipmentOrders.add(new CancelShipmentOrder(shipmentOrderNumber, trackingNo));
+        command.setCancelShipmentOrders(cancelShipmentOrders);
+        ResponseObject<CancelShipmentOrderBatchResult, ErrorDataDto> responseObject = this.htpCarrierClientService.cancellation(command);
+        if (null == responseObject || !responseObject.isSuccess()) {
+            throw new CommonException("999", "取消承运商物流订单失败");
+        }
+        CancelShipmentOrderBatchResult cancelShipmentOrderBatchResult = responseObject.getObject();
+        List<CancelShipmentOrderResult> cancelOrders = cancelShipmentOrderBatchResult.getCancelOrders();
+        for (CancelShipmentOrderResult cancelOrder : cancelOrders) {
+            if (!cancelOrder.isSuccess()) {
+                throw new CommonException("999", "取消承运商物流订单失败2");
+            }
         }
     }
 

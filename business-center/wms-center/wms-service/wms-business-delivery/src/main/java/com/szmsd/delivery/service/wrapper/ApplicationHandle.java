@@ -21,6 +21,13 @@ public interface ApplicationHandle {
     void handle(ApplicationContext context);
 
     /**
+     * 回滚
+     *
+     * @param context context
+     */
+    void rollback(ApplicationContext context);
+
+    /**
      * 条件
      *
      * @param context      context
@@ -49,6 +56,11 @@ public interface ApplicationHandle {
      * 对错误处理进行处理
      */
     abstract class AbstractApplicationHandle implements ApplicationHandle {
+
+        @Override
+        public void rollback(ApplicationContext context) {
+
+        }
 
         @Override
         public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {

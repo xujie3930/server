@@ -211,6 +211,20 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public void rollback(ApplicationContext context) {
+            // 取消承运商物流订单
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
+            String trackingNo = delOutbound.getTrackingNo();
+            if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
+                String referenceNumber = String.valueOf(delOutbound.getId());
+                IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+                delOutboundBringVerifyService.cancellation(referenceNumber, shipmentOrderNumber, trackingNo);
+            }
+        }
+
+        @Override
         public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
