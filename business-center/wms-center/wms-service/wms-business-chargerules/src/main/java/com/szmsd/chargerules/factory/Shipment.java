@@ -78,11 +78,12 @@ public class Shipment extends OrderType {
             if (CollectionUtils.isEmpty(details)) {
                 log.error("calculate() {}","出库单对应的详情信息未找到");
             }
-            BigDecimal amount;
+            BigDecimal amount = BigDecimal.ZERO;
             int count = 0;
-            if(operation.isManySku()) {
+            if(operation.isManySku() && details.size() > 1) { // 配置为单SKU并且出库单SKU为单个
                 amount = payService.manySkuCalculate(operation.getFirstPrice(), operation.getNextPrice(), details);
-            } else {
+            }
+            if(!operation.isManySku() && details.size() == 1) { // 配置为多SKU并且出库单SKU为多个
                 count = details.stream().mapToInt(detail -> detail.getQty().intValue()).sum();
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), count);
             }
