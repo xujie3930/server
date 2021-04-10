@@ -17,7 +17,6 @@ import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
-import com.szmsd.http.dto.*;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
@@ -67,7 +66,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         } else {
             currentState = ShipmentEnum.get(shipmentState);
         }
-        new ApplicationContainer(context, currentState, ShipmentEnum.END, ShipmentEnum.BEGIN).action();
+        ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, ShipmentEnum.END, ShipmentEnum.BEGIN);
+        applicationContainer.action();
         return 1;
     }
 
@@ -219,22 +219,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
                     String trackingNo = delOutbound.getTrackingNo();
                     if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(shipmentOrderNumber) && com.szmsd.common.core.utils.StringUtils.isNotEmpty(trackingNo)) {
-                        CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
-                        command.setReferenceNumber(String.valueOf(delOutbound.getId()));
-                        List<CancelShipmentOrder> cancelShipmentOrders = new ArrayList<>();
-                        cancelShipmentOrders.add(new CancelShipmentOrder(shipmentOrderNumber, trackingNo));
-                        command.setCancelShipmentOrders(cancelShipmentOrders);
-                        ResponseObject<CancelShipmentOrderBatchResult, ErrorDataDto> responseObject = this.htpCarrierClientService.cancellation(command);
-                        if (null == responseObject || !responseObject.isSuccess()) {
-                            throw new CommonException("999", "取消承运商物流订单失败");
-                        }
-                        CancelShipmentOrderBatchResult cancelShipmentOrderBatchResult = responseObject.getObject();
-                        List<CancelShipmentOrderResult> cancelOrders = cancelShipmentOrderBatchResult.getCancelOrders();
-                        for (CancelShipmentOrderResult cancelOrder : cancelOrders) {
-                            if (!cancelOrder.isSuccess()) {
-                                throw new CommonException("999", "取消承运商物流订单失败2");
-                            }
-                        }
+                        String referenceNumber = String.valueOf(delOutbound.getId());
+                        this.delOutboundBringVerifyService.cancellation(referenceNumber, shipmentOrderNumber, trackingNo);
                     }
                 }
                 cancelledState = "MODIFY";

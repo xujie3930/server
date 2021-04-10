@@ -53,4 +53,34 @@ public class ApplicationContainer {
             this.currentState = handle.nextState();
         }
     }
+
+    /**
+     * do rollback
+     */
+    public void rollback() {
+        if (null == this.currentState) {
+            throw new RuntimeException("currentState cannot be null");
+        }
+        if (null == this.endState) {
+            throw new RuntimeException("endState cannot be null");
+        }
+        // end state != next state
+        while (!this.endState.equals(this.currentState)) {
+            ApplicationHandle handle = this.handleMap.get(this.currentState.name());
+            if (null == handle) {
+                throw new RuntimeException("[" + this.currentState.name() + "] handle is null");
+            }
+            if (handle.condition(context, this.currentState)) {
+                try {
+                    handle.rollback(context);
+                } catch (Exception e) {
+                    // 处理错误异常
+                    handle.errorHandler(context, e, this.currentState);
+                    // 往上抛出异常
+                    throw e;
+                }
+            }
+            this.currentState = handle.quoState();
+        }
+    }
 }

@@ -29,7 +29,7 @@ public class CarrierController extends BaseController {
     }
 
     @PostMapping("/cancellation")
-    @ApiOperation(value = "创建承运商物流订单（客户端）")
+    @ApiOperation(value = "取消承运商物流订单（客户端）")
     public R<ResponseObject.ResponseObjectWrapper<CancelShipmentOrderBatchResult, ErrorDataDto>> cancellation(@RequestBody CancelShipmentOrderCommand command) {
         return R.ok(carrierService.cancellation(command));
     }
