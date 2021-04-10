@@ -5,6 +5,8 @@ import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.delivery.dto.DelOutboundChargeQueryDto;
+import com.szmsd.delivery.vo.DelOutboundChargeListVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +31,14 @@ public class ChargeLogController extends BaseController {
         startPage();
         List<ChargeLog> chargeLog = chargeLogService.selectPage(chargeLogDto);
         return getDataTable(chargeLog);
+    }
+
+    @GetMapping("/operationCharge/page")
+    @ApiOperation(value = "扣费日志 - 查询操作费用")
+    public TableDataInfo<DelOutboundChargeListVO> getPage(DelOutboundChargeQueryDto queryDto) {
+        startPage();
+        List<DelOutboundChargeListVO> list = chargeLogService.selectChargeLogList(queryDto);
+        return getDataTable(list);
     }
 
 }

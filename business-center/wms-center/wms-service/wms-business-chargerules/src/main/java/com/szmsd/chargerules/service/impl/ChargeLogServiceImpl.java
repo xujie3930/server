@@ -6,6 +6,8 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.mapper.ChargeLogMapper;
 import com.szmsd.chargerules.service.IChargeLogService;
+import com.szmsd.delivery.dto.DelOutboundChargeQueryDto;
+import com.szmsd.delivery.vo.DelOutboundChargeListVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,5 +43,10 @@ public class ChargeLogServiceImpl implements IChargeLogService {
         LambdaQueryWrapper<ChargeLog> query = Wrappers.lambdaQuery();
         query.eq(ChargeLog::getOrderNo,chargeLogDto.getOrderNo());
         return chargeLogMapper.selectList(query);
+    }
+
+    @Override
+    public List<DelOutboundChargeListVO> selectChargeLogList(DelOutboundChargeQueryDto queryDto) {
+        return chargeLogMapper.selectChargeLogList(queryDto);
     }
 }
