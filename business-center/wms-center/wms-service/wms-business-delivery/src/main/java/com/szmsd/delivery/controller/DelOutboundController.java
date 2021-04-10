@@ -215,6 +215,10 @@ public class DelOutboundController extends BaseController {
                 inputStream = resource.getInputStream();
             }
             outputStream = response.getOutputStream();
+            //response为HttpServletResponse对象
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition", "attachment;filename=" + new String("DM出库（正常，自提，销毁）模板".getBytes("gb2312"), "ISO8859-1") + ".xls");
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
