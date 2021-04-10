@@ -598,7 +598,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void shipmentFail(DelOutbound delOutbound) {
-        delOutbound.setState(DelOutboundStateEnum.DELIVERED.getCode());
+        delOutbound.setState(DelOutboundStateEnum.PROCESSING.getCode());
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.ABNORMAL.getCode());
         this.updateById(delOutbound);
     }
