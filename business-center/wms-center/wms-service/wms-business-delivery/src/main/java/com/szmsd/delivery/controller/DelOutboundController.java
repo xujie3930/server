@@ -5,6 +5,11 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
+import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.api.feign.BasRegionFeignService;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
@@ -17,11 +22,15 @@ import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.imported.*;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.vo.*;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -32,9 +41,11 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 出库管理
@@ -47,11 +58,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/outbound")
 public class DelOutboundController extends BaseController {
+    private Logger logger = LoggerFactory.getLogger(DelOutboundController.class);
 
     @Autowired
     private IDelOutboundService delOutboundService;
     @Autowired
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
+    @Autowired
+    private BasSubClientService basSubClientService;
+    @Autowired
+    private BasRegionFeignService basRegionFeignService;
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/page")
@@ -167,9 +183,54 @@ public class DelOutboundController extends BaseController {
             }
             return R.ok(delOutboundService.importDetail(warehouseCode, sellerCode, dtoList));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return R.failed("文件解析异常");
         }
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundImport')")
+    @PostMapping("/delOutboundImport")
+    @ApiOperation(value = "出库管理 - 列表 - 出库单导入", position = 1000)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "form", dataType = "String", name = "sellerCode", value = "客户编码", required = true),
+            @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
+    })
+    public R<ImportResult> delOutboundImport(@RequestParam("sellerCode") String sellerCode, HttpServletRequest request) {
+        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
+        MultipartFile file = multipartHttpServletRequest.getFile("file");
+        AssertUtil.notNull(file, "上传文件不存在");
+        AssertUtil.isTrue(StringUtils.isNotEmpty(sellerCode), "客户编码不能为空");
+        try {
+            byte[] byteArray = IOUtils.toByteArray(file.getInputStream());
+            DefaultAnalysisEventListener<DelOutboundImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
+            if (defaultAnalysisEventListener.isError()) {
+                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
+            }
+            DefaultAnalysisEventListener<DelOutboundDetailImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDetailImportDto2.class, 1, 1);
+            if (defaultAnalysisEventListener1.isError()) {
+                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
+            }
+            // 查询出库类型数据
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063");
+            List<BasSubWrapperVO> subList = listMap.get("063");
+            // 查询国家数据
+            R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
+            List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
+            // 初始化导入上下文
+            DelOutboundImportContext importContext = new DelOutboundImportContext(defaultAnalysisEventListener.getList(), subList, countryList);
+            // 初始化外联导入上下文
+            DelOutboundOuterContext outerContext = new DelOutboundOuterContext();
+            // 初始化导入验证容器
+            ImportResult importResult = new ImportValidationContainer<>(importContext, ImportValidation.build(new DelOutboundImportValidation(outerContext, importContext))).valid();
+            // 验证导入结果
+            if (!importResult.isStatus()) {
+                return R.ok(importResult);
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            return R.ok(ImportResult.buildFail(ImportMessage.build(e.getMessage())));
+        }
+        return R.ok();
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
@@ -179,12 +240,12 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.getDelOutboundDetailsList(queryDto));
     }
 
-    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:getDelOutboundCharge')")
-    @GetMapping("/getDelOutboundCharge")
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundCharge')")
+    @GetMapping("/delOutboundCharge/page")
     @ApiOperation(value = "出库管理 - 按条件查询出库单及费用详情", position = 10000)
-    public R<TableDataInfo<DelOutboundChargeListVO>> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto) {
+    public TableDataInfo<DelOutboundChargeListVO> getDelOutboundCharge(DelOutboundChargeQueryDto queryDto) {
         startPage();
-        return R.ok(getDataTable(delOutboundService.getDelOutboundCharge(queryDto)));
+        return getDataTable(delOutboundService.getDelOutboundCharge(queryDto));
     }
 
 }

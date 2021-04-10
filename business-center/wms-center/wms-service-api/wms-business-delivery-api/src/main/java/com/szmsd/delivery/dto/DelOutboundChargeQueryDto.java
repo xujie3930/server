@@ -10,6 +10,9 @@ import java.io.Serializable;
 @ApiModel(value = "DelOutboundChargeQueryDto", description = "DelOutboundChargeQueryDto对象")
 public class DelOutboundChargeQueryDto implements Serializable {
 
+    @ApiModelProperty(value = "客户编码")
+    private String customCode;
+
     @ApiModelProperty(value = "处理号/挂号/出库单号")
     private String no;
 

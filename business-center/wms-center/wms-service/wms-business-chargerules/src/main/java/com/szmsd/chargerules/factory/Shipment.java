@@ -79,16 +79,17 @@ public class Shipment extends OrderType {
                 log.error("calculate() {}","出库单对应的详情信息未找到");
             }
             BigDecimal amount;
+            int count = 0;
             if(operation.isManySku()) {
                 amount = payService.manySkuCalculate(operation.getFirstPrice(), operation.getNextPrice(), details);
             } else {
-                int count = details.stream().mapToInt(detail -> detail.getQty().intValue()).sum();
+                count = details.stream().mapToInt(detail -> detail.getQty().intValue()).sum();
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), count);
             }
             DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(datum.getOrderType());
             if(delOutboundOrderTypeEnum != null) datum.setOrderType(delOutboundOrderTypeEnum.getName());
             log.info("orderNo: {} orderType: {} amount: {}", datum.getOrderNo(), datum.getOrderType(), amount);
-            pay(datum, amount);
+            pay(datum, amount, count);
         }
     }
 
@@ -97,7 +98,7 @@ public class Shipment extends OrderType {
      * @param datum datum
      * @param amount amount
      */
-    private void pay(DelOutboundDetailListVO datum, BigDecimal amount) {
+    private void pay(DelOutboundDetailListVO datum, BigDecimal amount,int count) {
         ChargeLogDto chargeLogDto = new ChargeLogDto(datum.getOrderNo(),
                 BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName(),datum.getOrderType(), datum.getWarehouseCode(),true);
         ChargeLog exist = chargeLogService.selectLog(chargeLogDto);
@@ -105,7 +106,7 @@ public class Shipment extends OrderType {
             log.info("该单已经扣过费, chargeLogDto: {}", chargeLogDto);
             return;
         }
-        ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType(), datum.getWarehouseCode());
+        ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType(), datum.getWarehouseCode(),count);
         R resultPay = payService.pay(datum.getCustomCode(), amount, BillEnum.PayMethod.BUSINESS_OPERATE, chargeLog);
         if (resultPay.getCode() != 200)
             log.error("pay() pay failed.. msg: {},data: {}", resultPay.getMsg(), resultPay.getData());
