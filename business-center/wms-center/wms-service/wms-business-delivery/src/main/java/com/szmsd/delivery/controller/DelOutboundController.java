@@ -27,10 +27,13 @@ import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.imported.*;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
-import com.szmsd.delivery.vo.*;
-import com.szmsd.inventory.api.service.InventoryFeignClientService;
+import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
+import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
+import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -299,6 +302,14 @@ public class DelOutboundController extends BaseController {
         }
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:handler')")
+    @PostMapping("/handler")
+    @ApiOperation(value = "出库管理 - 处理", position = 1200)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundHandlerDto")
+    public R<Integer> handler(@RequestBody @Validated DelOutboundHandlerDto dto) {
+        return R.ok(this.delOutboundService.handler(dto));
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/getDelOutboundDetailsList")
     @ApiOperation(value = "出库管理 - 按条件查询出库单及详情", position = 10000)
@@ -308,7 +319,7 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundCharge')")
     @PostMapping("/delOutboundCharge/page")
-    @ApiOperation(value = "出库管理 - 按条件查询出库单及费用详情", position = 10000)
+    @ApiOperation(value = "出库管理 - 按条件查询出库单及费用详情", position = 10100)
     public R<TableDataInfo<QueryChargeVO>> getDelOutboundCharge(@RequestBody QueryChargeDto queryDto) {
         startPage();
         return R.ok(getDataTable(delOutboundService.getDelOutboundCharge(queryDto)));

@@ -28,6 +28,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
+import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
@@ -84,6 +85,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private IDelOutboundCompletedService delOutboundCompletedService;
     @Autowired
     private IDelOutboundChargeService delOutboundChargeService;
+    @Autowired
+    private IDelOutboundAsyncService delOutboundAsyncService;
 
     /**
      * 查询出库单模块
@@ -731,6 +734,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_PROCESSING.getCode());
         updateWrapper.in(DelOutbound::getOrderNo, orderNos);
         return this.baseMapper.update(null, updateWrapper);
+    }
+
+    @Override
+    public int handler(DelOutboundHandlerDto dto) {
+        List<Long> ids = dto.getIds();
+        // 参数ids为空，直接返回
+        if (CollectionUtils.isEmpty(ids)) {
+            return 0;
+        }
+        int result = 0;
+        for (Long id : ids) {
+            result = result + this.delOutboundAsyncService.shipmentPacking(id);
+        }
+        return result;
     }
 
     @Override
