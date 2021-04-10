@@ -4,9 +4,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.imported.ImportContext;
-import com.szmsd.delivery.imported.ImportResult;
-import com.szmsd.delivery.vo.*;
+import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
+import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 
@@ -208,6 +209,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return int
      */
     int canceled(DelOutboundCanceledDto dto);
+
+    /**
+     * 处理出库单
+     *
+     * @param dto dto
+     * @return int
+     */
+    int handler(DelOutboundHandlerDto dto);
 
     /**
      * sku导入

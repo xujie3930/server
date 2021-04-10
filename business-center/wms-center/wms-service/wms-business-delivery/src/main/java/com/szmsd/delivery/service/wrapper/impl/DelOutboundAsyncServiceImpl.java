@@ -58,6 +58,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("999", "单据不存在");
         }
+        // 只处理状态为【PROCESSING】的记录
+        if (!DelOutboundStateEnum.PROCESSING.getCode().equals(delOutbound.getState())) {
+            return 0;
+        }
         ApplicationContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
         ShipmentEnum currentState;
         String shipmentState = delOutbound.getShipmentState();
