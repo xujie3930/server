@@ -21,5 +21,5 @@ public class DelOutboundDetailImportDto2 implements Serializable {
     private String sku;
 
     @ApiModelProperty(value = "数量")
-    private Long qty;
+    private Integer qty;
 }

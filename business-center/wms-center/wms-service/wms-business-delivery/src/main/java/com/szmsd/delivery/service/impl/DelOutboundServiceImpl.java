@@ -26,8 +26,6 @@ import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.imported.ImportContext;
-import com.szmsd.delivery.imported.ImportResult;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.util.PackageInfo;
@@ -168,6 +166,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (!DelOutboundOrderTypeEnum.has(dto.getOrderType())) {
             throw new CommonException("999", "订单类型不存在");
         }
+        return this.createDelOutbound(dto);
+    }
+
+    private int createDelOutbound(DelOutboundDto dto) {
         DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
         // 生成出库单号
         // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
@@ -195,6 +197,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(delOutbound.getOrderNo()).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
         this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         return insert;
+    }
+
+    @Override
+    public int insertDelOutbounds(List<DelOutboundDto> dtoList) {
+        int result = 0;
+        for (DelOutboundDto dto : dtoList) {
+            result += this.createDelOutbound(dto);
+        }
+        return result;
     }
 
     /**
@@ -790,9 +801,5 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         });
     }
 
-    @Override
-    public ImportResult delOutboundImport(ImportContext context) {
-        return null;
-    }
 }
 

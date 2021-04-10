@@ -1,7 +1,6 @@
 package com.szmsd.inventory.api.feign;
 
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.api.BusinessInventoryInterface;
 import com.szmsd.inventory.api.factory.InventoryFeignFallback;
 import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
@@ -10,6 +9,7 @@ import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
+import com.szmsd.inventory.domain.vo.InventoryVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,8 +25,17 @@ public interface InventoryFeignService {
     @PostMapping("/inventory/skuVolume")
     R<List<InventorySkuVolumeVO>> querySkuVolume(@RequestBody InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO);
 
-    @PostMapping("/inventory/queryAvailableList")
-    TableDataInfo<InventoryAvailableListVO> queryAvailableList(@RequestBody InventoryAvailableQueryDto queryDto);
+    @PostMapping("/inventory/queryAvailableList2")
+    R<List<InventoryAvailableListVO>> queryAvailableList(@RequestBody InventoryAvailableQueryDto queryDto);
+
+    @PostMapping("/inventory/queryOnlyAvailable")
+    R<InventoryAvailableListVO> queryOnlyAvailable(@RequestBody InventoryAvailableQueryDto queryDto);
+
+    @PostMapping("/inventory/querySku")
+    R<List<InventoryVO>> querySku(@RequestBody InventoryAvailableQueryDto queryDto);
+
+    @PostMapping("/inventory/queryOnlySku")
+    R<InventoryVO> queryOnlySku(@RequestBody InventoryAvailableQueryDto queryDto);
 
     @PostMapping("/inventory/freeze")
     R<Integer> freeze(@RequestBody InventoryOperateListDto operateListDto);

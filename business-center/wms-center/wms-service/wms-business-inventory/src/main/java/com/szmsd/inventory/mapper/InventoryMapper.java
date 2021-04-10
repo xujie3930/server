@@ -8,6 +8,7 @@ import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
+import com.szmsd.inventory.domain.vo.InventoryVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -20,7 +21,31 @@ public interface InventoryMapper extends BaseMapper<Inventory> {
      * 根据仓库编码，SKU查询可用库存
      *
      * @param queryWrapper queryWrapper
-     * @return InventoryAvailableDto
+     * @return List<InventoryAvailableListVO>
      */
     List<InventoryAvailableListVO> queryAvailableList(@Param(Constants.WRAPPER) Wrapper<InventoryAvailableQueryDto> queryWrapper);
+
+    /**
+     * 根据仓库编码，SKU查询可用库存
+     *
+     * @param queryWrapper queryWrapper
+     * @return InventoryAvailableListVO
+     */
+    InventoryAvailableListVO queryOnlyAvailable(@Param(Constants.WRAPPER) Wrapper<InventoryAvailableQueryDto> queryWrapper);
+
+    /**
+     * 查询SKU信息
+     *
+     * @param queryWrapper queryWrapper
+     * @return List<InventoryVO>
+     */
+    List<InventoryVO> querySku(@Param(Constants.WRAPPER) Wrapper<InventoryAvailableQueryDto> queryWrapper);
+
+    /**
+     * 查询SKU信息
+     *
+     * @param queryWrapper queryWrapper
+     * @return InventoryVO
+     */
+    InventoryVO queryOnlySku(@Param(Constants.WRAPPER) Wrapper<InventoryAvailableQueryDto> queryWrapper);
 }

@@ -2,6 +2,7 @@ package com.szmsd.delivery.imported;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author zhangyuyuan
@@ -18,6 +19,8 @@ public interface CacheContext<K, V> {
     V remove(K k);
 
     void clear();
+
+    Set<K> keySet();
 
     /**
      * cache context
@@ -48,6 +51,11 @@ public interface CacheContext<K, V> {
         @Override
         public void clear() {
             this.map.clear();
+        }
+
+        @Override
+        public Set<K> keySet() {
+            return this.map.keySet();
         }
     }
 }

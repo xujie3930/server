@@ -15,5 +15,12 @@ public interface ImportValidation<T> {
         return new ArrayList<>(Arrays.asList(validations));
     }
 
+    default boolean before() {
+        return true;
+    }
+
     void valid(int rowIndex, T object);
+
+    default void after() {
+    }
 }

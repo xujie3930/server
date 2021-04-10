@@ -65,4 +65,8 @@ public class InventoryAvailableListVO {
 
     @ApiModelProperty(value = "绑定专属包材产品名")
     private String bindCodeName;
+
+    public void subAvailableInventory(int num) {
+        this.availableInventory = this.availableInventory - num;
+    }
 }

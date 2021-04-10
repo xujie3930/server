@@ -73,4 +73,19 @@
         ${ew.customSqlSegment}
     </select>
 
+    <select id="queryOnlyAvailable" resultType="com.szmsd.inventory.domain.vo.InventoryAvailableListVO">
+        select warehouse_code, sku, total_inventory, available_inventory from inventory
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="querySku" resultType="com.szmsd.inventory.domain.vo.InventoryVO">
+        select warehouse_code, sku, total_inventory, available_inventory from inventory
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="queryOnlySku" resultType="com.szmsd.inventory.domain.vo.InventoryVO">
+        select warehouse_code, sku, total_inventory, available_inventory from inventory
+        ${ew.customSqlSegment}
+    </select>
+
 </mapper>

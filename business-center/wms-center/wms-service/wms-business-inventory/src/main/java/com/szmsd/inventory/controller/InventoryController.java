@@ -4,10 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.domain.dto.*;
-import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
-import com.szmsd.inventory.domain.vo.InventoryRecordVO;
-import com.szmsd.inventory.domain.vo.InventorySkuVO;
-import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
+import com.szmsd.inventory.domain.vo.*;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
 import com.szmsd.inventory.service.IInventoryWrapperService;
@@ -70,10 +67,38 @@ public class InventoryController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('inbound:queryAvailableList')")
     @PostMapping("/queryAvailableList")
-    @ApiOperation(value = "根据仓库编码，SKU查询可用库存", notes = "根据仓库编码，SKU查询可用库存")
+    @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 分页")
     public TableDataInfo<InventoryAvailableListVO> queryAvailableList(@RequestBody InventoryAvailableQueryDto queryDto) {
         startPage();
         return getDataTable(this.inventoryService.queryAvailableList(queryDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:queryAvailableList2')")
+    @PostMapping("/queryAvailableList2")
+    @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 不分页")
+    public R<List<InventoryAvailableListVO>> queryAvailableList2(@RequestBody InventoryAvailableQueryDto queryDto) {
+        return R.ok(this.inventoryService.queryAvailableList(queryDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:queryOnlyAvailable')")
+    @PostMapping("/queryOnlyAvailable")
+    @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 单条")
+    public R<InventoryAvailableListVO> queryOnlyAvailable(@RequestBody InventoryAvailableQueryDto queryDto) {
+        return R.ok(this.inventoryService.queryOnlyAvailable(queryDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:querySku')")
+    @PostMapping("/querySku")
+    @ApiOperation(value = "查询SKU信息")
+    public R<List<InventoryVO>> querySku(@RequestBody InventoryAvailableQueryDto queryDto) {
+        return R.ok(this.inventoryService.querySku(queryDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:queryOnlySku')")
+    @PostMapping("/queryOnlySku")
+    @ApiOperation(value = "查询SKU信息")
+    public R<InventoryVO> queryOnlySku(@RequestBody InventoryAvailableQueryDto queryDto) {
+        return R.ok(this.inventoryService.queryOnlySku(queryDto));
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:freeze')")
