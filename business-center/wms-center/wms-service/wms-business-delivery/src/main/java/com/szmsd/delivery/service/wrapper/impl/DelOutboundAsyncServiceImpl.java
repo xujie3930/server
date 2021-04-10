@@ -102,15 +102,17 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
                 fee = false;
             }
-            if ("FEE_DE".equals(completedState) && fee) {
-                // 扣减费用
-                CustPayDTO custPayDTO = new CustPayDTO();
-                custPayDTO.setCusCode(delOutbound.getSellerCode());
-                custPayDTO.setCurrencyCode(delOutbound.getCurrencyCode());
-                custPayDTO.setAmount(delOutbound.getAmount());
-                R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
-                if (null == r || Constants.SUCCESS != r.getCode()) {
-                    throw new CommonException("999", "扣减费用失败");
+            if ("FEE_DE".equals(completedState)) {
+                if (fee) {
+                    // 扣减费用
+                    CustPayDTO custPayDTO = new CustPayDTO();
+                    custPayDTO.setCusCode(delOutbound.getSellerCode());
+                    custPayDTO.setCurrencyCode(delOutbound.getCurrencyCode());
+                    custPayDTO.setAmount(delOutbound.getAmount());
+                    R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
+                    if (null == r || Constants.SUCCESS != r.getCode()) {
+                        throw new CommonException("999", "扣减费用失败");
+                    }
                 }
                 completedState = "MODIFY";
             }
@@ -193,41 +195,45 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
                 fee = false;
             }
-            if ("UN_FEE".equals(cancelledState) && fee) {
-                // 存在费用
-                if (null != delOutbound.getAmount() && delOutbound.getAmount().doubleValue() > 0.0D) {
-                    CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
-                    cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
-                    cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
-                    cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
-                    R<?> thawBalanceR = this.rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
-                    if (null == thawBalanceR) {
-                        throw new CommonException("999", "取消冻结费用失败");
-                    }
-                    if (Constants.SUCCESS != thawBalanceR.getCode()) {
-                        throw new CommonException("999", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
+            if ("UN_FEE".equals(cancelledState)) {
+                if (fee) {
+                    // 存在费用
+                    if (null != delOutbound.getAmount() && delOutbound.getAmount().doubleValue() > 0.0D) {
+                        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                        cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
+                        cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
+                        cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                        R<?> thawBalanceR = this.rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                        if (null == thawBalanceR) {
+                            throw new CommonException("999", "取消冻结费用失败");
+                        }
+                        if (Constants.SUCCESS != thawBalanceR.getCode()) {
+                            throw new CommonException("999", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
+                        }
                     }
                 }
                 cancelledState = "UN_CARRIER";
             }
-            if ("UN_CARRIER".equals(cancelledState) && fee) {
-                String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
-                String trackingNo = delOutbound.getTrackingNo();
-                if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(shipmentOrderNumber) && com.szmsd.common.core.utils.StringUtils.isNotEmpty(trackingNo)) {
-                    CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
-                    command.setReferenceNumber(String.valueOf(delOutbound.getId()));
-                    List<CancelShipmentOrder> cancelShipmentOrders = new ArrayList<>();
-                    cancelShipmentOrders.add(new CancelShipmentOrder(shipmentOrderNumber, trackingNo));
-                    command.setCancelShipmentOrders(cancelShipmentOrders);
-                    ResponseObject<CancelShipmentOrderBatchResult, ErrorDataDto> responseObject = this.htpCarrierClientService.cancellation(command);
-                    if (null == responseObject || !responseObject.isSuccess()) {
-                        throw new CommonException("999", "取消承运商物流订单失败");
-                    }
-                    CancelShipmentOrderBatchResult cancelShipmentOrderBatchResult = responseObject.getObject();
-                    List<CancelShipmentOrderResult> cancelOrders = cancelShipmentOrderBatchResult.getCancelOrders();
-                    for (CancelShipmentOrderResult cancelOrder : cancelOrders) {
-                        if (!cancelOrder.isSuccess()) {
-                            throw new CommonException("999", "取消承运商物流订单失败2");
+            if ("UN_CARRIER".equals(cancelledState)) {
+                if (fee) {
+                    String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
+                    String trackingNo = delOutbound.getTrackingNo();
+                    if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(shipmentOrderNumber) && com.szmsd.common.core.utils.StringUtils.isNotEmpty(trackingNo)) {
+                        CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
+                        command.setReferenceNumber(String.valueOf(delOutbound.getId()));
+                        List<CancelShipmentOrder> cancelShipmentOrders = new ArrayList<>();
+                        cancelShipmentOrders.add(new CancelShipmentOrder(shipmentOrderNumber, trackingNo));
+                        command.setCancelShipmentOrders(cancelShipmentOrders);
+                        ResponseObject<CancelShipmentOrderBatchResult, ErrorDataDto> responseObject = this.htpCarrierClientService.cancellation(command);
+                        if (null == responseObject || !responseObject.isSuccess()) {
+                            throw new CommonException("999", "取消承运商物流订单失败");
+                        }
+                        CancelShipmentOrderBatchResult cancelShipmentOrderBatchResult = responseObject.getObject();
+                        List<CancelShipmentOrderResult> cancelOrders = cancelShipmentOrderBatchResult.getCancelOrders();
+                        for (CancelShipmentOrderResult cancelOrder : cancelOrders) {
+                            if (!cancelOrder.isSuccess()) {
+                                throw new CommonException("999", "取消承运商物流订单失败2");
+                            }
                         }
                     }
                 }
