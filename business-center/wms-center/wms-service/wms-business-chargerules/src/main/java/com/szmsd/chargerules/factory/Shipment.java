@@ -89,8 +89,10 @@ public class Shipment extends OrderType {
             }
             DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(datum.getOrderType());
             if(delOutboundOrderTypeEnum != null) datum.setOrderType(delOutboundOrderTypeEnum.getName());
-            log.info("orderNo: {} orderType: {} amount: {}", datum.getOrderNo(), datum.getOrderType(), amount);
-            pay(datum, amount, count);
+            log.info("orderNo: {} orderType: {} isManySku: {} amount: {}", datum.getOrderNo(), datum.getOrderType(),operation.isManySku(), amount);
+            if(amount.compareTo(BigDecimal.ZERO) > 0) {
+                pay(datum, amount, count);
+            }
         }
     }
 
