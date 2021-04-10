@@ -480,15 +480,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getRemark, dto.getRemark());
         // 仓库开始处理
         if (DelOutboundOperationTypeEnum.PROCESSING.getCode().equals(dto.getOperationType())) {
-            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_PROCESSING.getCode());
         }
         // 仓库已发货
         else if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_COMPLETED.getCode());
             // 增加出库单已完成记录
             this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.SHIPPED.getCode());
         }
         // 仓库取消
         else if (DelOutboundOperationTypeEnum.CANCELED.getCode().equals(dto.getOperationType())) {
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELLED.getCode());
             // 增加出库单已取消记录
             this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
         }
@@ -501,6 +503,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
         updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
+        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
         updateWrapper.set(DelOutbound::getPackingMaterial, dto.getPackingMaterial());
         updateWrapper.set(DelOutbound::getLength, dto.getLength());
         updateWrapper.set(DelOutbound::getWidth, dto.getWidth());
@@ -603,7 +606,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void shipmentSuccess(DelOutbound delOutbound) {
-        delOutbound.setState(DelOutboundStateEnum.PROCESSING.getCode());
+        delOutbound.setState(DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode());
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         delOutbound.setExceptionMessage("");
         this.updateById(delOutbound);
@@ -663,9 +666,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public int canceled(DelOutboundCanceledDto dto) {
         List<Long> ids = dto.getIds();
+        // 参数ids为空，直接返回
         if (CollectionUtils.isEmpty(ids)) {
             return 0;
         }
+        // 根据ids查询单据为空，直接返回
         List<DelOutbound> outboundList = this.listByIds(ids);
         if (CollectionUtils.isEmpty(outboundList)) {
             return 0;
@@ -707,7 +712,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         // 判断是否需要WMS处理
         if (CollectionUtils.isEmpty(orderNos)) {
-            return 1;
+            return reviewedList.size();
         }
         // 通知WMS取消单据
         ShipmentCancelRequestDto shipmentCancelRequestDto = new ShipmentCancelRequestDto();
@@ -721,11 +726,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (!responseVO.getSuccess()) {
             throw new CommonException("999", Utils.defaultValue(responseVO.getMessage(), "取消出库单失败2"));
         }
-        // 通知取消出库单
-        // WMS那边会调用修改状态的接口
-        // 修改状态的接口里面会处理取消的出库单逻辑
-        // this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
-        return 1;
+        // 修改单据状态为【仓库取消中】
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_PROCESSING.getCode());
+        updateWrapper.in(DelOutbound::getOrderNo, orderNos);
+        return this.baseMapper.update(null, updateWrapper);
     }
 
     @Override
@@ -776,8 +781,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     /**
      * 查询物流基础费、偏远地区费、超大附加费、燃油附加费
      *
-     * @param queryChargeVO delOutboundChargeListVO
-     * @param delOutboundCharges      delOutboundCharges
+     * @param queryChargeVO      delOutboundChargeListVO
+     * @param delOutboundCharges delOutboundCharges
      */
     private void setAmount(QueryChargeVO queryChargeVO, List<DelOutboundCharge> delOutboundCharges) {
         ListUtils.emptyIfNull(delOutboundCharges).forEach(item -> {
