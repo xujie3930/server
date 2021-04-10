@@ -6,6 +6,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -95,7 +96,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 this.deduction(orderNo, delOutbound.getWarehouseCode());
                 completedState = "FEE_DE";
             }
-            if ("FEE_DE".equals(completedState)) {
+            // 销毁，自提不扣物流费用
+            boolean fee = true;
+            if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                fee = false;
+            }
+            if ("FEE_DE".equals(completedState) && fee) {
                 // 扣减费用
                 CustPayDTO custPayDTO = new CustPayDTO();
                 custPayDTO.setCusCode(delOutbound.getSellerCode());
@@ -180,7 +187,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 this.unFreeze(orderNo, delOutbound.getWarehouseCode());
                 cancelledState = "UN_FEE";
             }
-            if ("UN_FEE".equals(cancelledState)) {
+            // 销毁，自提不扣物流费用
+            boolean fee = true;
+            if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                fee = false;
+            }
+            if ("UN_FEE".equals(cancelledState) && fee) {
                 // 存在费用
                 if (null != delOutbound.getAmount() && delOutbound.getAmount().doubleValue() > 0.0D) {
                     CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
@@ -197,7 +210,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 }
                 cancelledState = "UN_CARRIER";
             }
-            if ("UN_CARRIER".equals(cancelledState)) {
+            if ("UN_CARRIER".equals(cancelledState) && fee) {
                 String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
                 String trackingNo = delOutbound.getTrackingNo();
                 if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(shipmentOrderNumber) && com.szmsd.common.core.utils.StringUtils.isNotEmpty(trackingNo)) {
