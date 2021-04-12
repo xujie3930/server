@@ -173,6 +173,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
+    @Transactional
     public void  importBaseProduct(List<BaseProductImportDto> list)
     {
 
@@ -204,6 +205,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             b.setVolume(b.getInitVolume());
             b.setIsActive(true);
             b.setWarehouseAcceptance(false);
+            ProductRequest productRequest = BeanMapperUtil.map(b, ProductRequest.class);
+            R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+            if (!r.getData().getSuccess()) {
+                throw new BaseException("传wms失败:" + r.getData().getMessage());
+            }
         }
         super.saveBatch(baseProductList);
 
@@ -513,6 +519,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 if(b.getCode().length()<2){
 
                     s.append("SKU长度小于两字符，");
+                }
+                QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
+                queryWrapper.eq("code", b.getCode());
+                if (super.count(queryWrapper) == 1) {
+                    s.append(b.getCode()+"编码重复");
                 }
 
             }
