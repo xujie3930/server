@@ -12,6 +12,7 @@ import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -20,6 +21,7 @@ import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.security.utils.SecurityUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -86,6 +88,9 @@ public class BaseProductController extends BaseController {
     public R importData(MultipartFile file) throws Exception {
         ExcelUtil<BaseProductImportDto> util = new ExcelUtil<BaseProductImportDto>(BaseProductImportDto.class);
         List<BaseProductImportDto> userList = util.importExcel(file.getInputStream());
+        if(CollectionUtils.isEmpty(userList)){
+            throw new BaseException("导入内容为空");
+        }
         baseProductService.importBaseProduct(userList);
         return R.ok();
     }

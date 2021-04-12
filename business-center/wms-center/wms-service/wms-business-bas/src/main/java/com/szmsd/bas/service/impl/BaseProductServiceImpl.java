@@ -540,7 +540,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
                 queryWrapper.eq("code", b.getCode());
                 if (super.count(queryWrapper) == 1) {
-                    s.append(b.getCode()+"编码重复");
+                    s.append(b.getCode()+"编码重复,");
                 }
 
             }
