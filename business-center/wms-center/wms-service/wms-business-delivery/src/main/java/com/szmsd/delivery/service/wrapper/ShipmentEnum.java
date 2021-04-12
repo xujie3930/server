@@ -12,6 +12,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
@@ -289,7 +290,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     FileStream fileStream = responseObject.getObject();
                     String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
                     // 保存文件
-                    File file = new File(basedir + "/shipment/label");
+                    // 单据类型/年/月/日/单据号
+                    String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
+                    File file = new File(basedir + "/shipment/label/" + labelBizPath);
                     if (!file.exists()) {
                         try {
                             FileUtils.forceMkdir(file);
@@ -339,7 +342,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
-            File labelFile = new File(basedir + "/shipment/label/" + delOutbound.getShipmentOrderNumber());
+            String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
+            File labelFile = new File(basedir + "/shipment/label/" + labelBizPath + "/" + delOutbound.getShipmentOrderNumber());
             if (!labelFile.exists()) {
                 throw new CommonException("999", "标签文件不存在");
             }
