@@ -207,7 +207,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             String orderNumber = shipmentOrderResult.getOrderNumber();
             // 返回值
             delOutbound.setTrackingNo(trackingNo);
-            delOutbound.setOrderNo(orderNumber);
+            delOutbound.setShipmentOrderNumber(orderNumber);
         }
 
         @Override
