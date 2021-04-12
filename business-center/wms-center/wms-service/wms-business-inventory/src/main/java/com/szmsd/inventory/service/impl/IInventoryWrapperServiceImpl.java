@@ -9,6 +9,8 @@ import com.szmsd.inventory.service.LockerUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RedissonClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import java.util.function.BiFunction;
  */
 @Service
 public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
+    private final Logger logger = LoggerFactory.getLogger(IInventoryWrapperServiceImpl.class);
 
     @Value("${spring.application.name}")
     private String applicationName;
@@ -144,26 +147,35 @@ public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
         if (StringUtils.isEmpty(invoiceNo)
                 || StringUtils.isEmpty(warehouseCode)
                 || CollectionUtils.isEmpty(freezeList)) {
-            return 0;
+            throw new CommonException("999", "参数不全");
         }
         Stack<InventoryOperateDto> stack = new Stack<>();
         int count = 0;
-        for (InventoryOperateDto dto : freezeList) {
-            if (consumer.apply(dto, operateListDto) > 0) {
-                count++;
-                stack.push(dto);
-            } else {
-                break;
+        try {
+            for (InventoryOperateDto dto : freezeList) {
+                try {
+                    if (consumer.apply(dto, operateListDto) > 0) {
+                        // 操作成功++
+                        count++;
+                        // 操作成功的记录起来，当其中一个失败的时候，做回滚操作
+                        stack.push(dto);
+                    } else {
+                        throw new CommonException("999", "[" + dto.getSku() + "]库存操作失败");
+                    }
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    // 异常up
+                    throw e;
+                }
             }
-        }
-        if (count != freezeList.size()) {
+            return count;
+        } catch (Exception e) {
             // 开始回滚
             while (!stack.empty()) {
                 rollbackConsumer.apply(stack.pop(), operateListDto);
             }
-            throw new CommonException("999", "操作失败");
-        } else {
-            return count;
+            // up
+            throw e;
         }
     }
 

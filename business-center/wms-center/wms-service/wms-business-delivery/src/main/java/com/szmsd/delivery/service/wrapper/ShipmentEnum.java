@@ -142,7 +142,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setExceptionMessage(exceptionMessage);
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
-            updateDelOutbound.setOrderNo(delOutbound.getOrderNo());
+            updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
             // 冻结费用
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
@@ -207,7 +207,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             String orderNumber = shipmentOrderResult.getOrderNumber();
             // 返回值
             delOutbound.setTrackingNo(trackingNo);
-            delOutbound.setOrderNo(orderNumber);
+            delOutbound.setShipmentOrderNumber(orderNumber);
         }
 
         @Override

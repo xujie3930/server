@@ -504,7 +504,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public int shipmentPacking(ShipmentPackingMaterialRequestDto dto) {
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
+        if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
+            updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
+        }
         updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
         updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
         updateWrapper.set(DelOutbound::getPackingMaterial, dto.getPackingMaterial());
