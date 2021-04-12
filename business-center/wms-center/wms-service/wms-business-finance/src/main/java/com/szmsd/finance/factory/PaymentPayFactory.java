@@ -33,7 +33,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
         // 可用
         oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().subtract(changeAmount));
         // 冻结
-        oldBalance.setFreezeBalance(oldBalance.getFreezeBalance().subtract(changeAmount));
+        oldBalance.setFreezeBalance(oldBalance.getFreezeBalance().add(changeAmount));
         // 总余额
         oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(changeAmount));
         return oldBalance;
