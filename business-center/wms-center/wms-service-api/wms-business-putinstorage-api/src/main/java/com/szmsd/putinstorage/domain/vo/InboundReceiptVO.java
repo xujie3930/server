@@ -36,6 +36,9 @@ public class InboundReceiptVO {
     @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     private String deliveryWayName;
 
+    @ApiModelProperty(value = "目的仓库代码")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "目的仓库名称 - 当前系统语言")
     @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     private String warehouseName;

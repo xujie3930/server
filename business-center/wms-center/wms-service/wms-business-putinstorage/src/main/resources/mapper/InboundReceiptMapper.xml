@@ -10,6 +10,7 @@
         <result column="status" property="status"/>
         <result column="status_name" property="statusName"/>
         <result column="delivery_way_name" property="deliveryWayName"/>
+        <result column="warehouse_code" property="warehouseCode"/>
         <result column="warehouse_name" property="warehouseName"/>
         <result column="warehouse_method_name" property="warehouseMethodName"/>
         <result column="total_declare_qty" property="totalDeclareQty"/>
@@ -52,6 +53,7 @@
         t.status,
         t.status status_name,
         t.delivery_way_code delivery_way_name,
+        t.warehouse_code warehouse_code,
         t.warehouse_code warehouse_name,
         t.warehouse_method_code warehouse_method_name,
         t.total_declare_qty,
