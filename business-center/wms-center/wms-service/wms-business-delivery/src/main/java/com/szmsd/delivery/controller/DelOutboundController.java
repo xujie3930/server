@@ -159,7 +159,7 @@ public class DelOutboundController extends BaseController {
             //此处记得关闭输出Servlet流
             IoUtil.close(out);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 

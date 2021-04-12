@@ -1,5 +1,8 @@
 package com.szmsd.delivery.service.wrapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 
 /**
@@ -7,6 +10,7 @@ import java.util.Map;
  * @date 2021-04-01 16:49
  */
 public class ApplicationContainer {
+    private final Logger logger = LoggerFactory.getLogger(ApplicationContainer.class);
 
     // handle map
     private final Map<String, ApplicationHandle> handleMap;
@@ -44,6 +48,7 @@ public class ApplicationContainer {
                 try {
                     handle.handle(context);
                 } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
                     // 处理错误异常
                     handle.errorHandler(context, e, this.currentState);
                     // 往上抛出异常
@@ -74,6 +79,7 @@ public class ApplicationContainer {
                 try {
                     handle.rollback(context);
                 } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
                     // 处理错误异常
                     handle.errorHandler(context, e, this.currentState);
                     // 往上抛出异常
