@@ -1,5 +1,8 @@
 package com.szmsd.finance.vo;
 
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -50,8 +53,12 @@ public class QueryChargeVO implements Serializable {
     @ApiModelProperty(value = "燃油费")
     private BigDecimal fuelCharge = BigDecimal.ZERO;
 
-    @ApiModelProperty(value = "单据完成处理状态")
-    private String completedState;
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "065", cp = BasSubValueCommonParameter.class)
+    @ApiModelProperty(value = "单据状态")
+    private String state;
+
+    @ApiModelProperty(value = "单据状态名称")
+    private String stateName;
 
     @ApiModelProperty(value = "备注")
     private String remark;

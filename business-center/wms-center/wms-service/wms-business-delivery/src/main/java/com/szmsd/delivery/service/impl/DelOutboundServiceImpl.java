@@ -52,6 +52,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -733,7 +734,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         // 修改单据状态为【仓库取消中】
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_PROCESSING.getCode());
+        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELING.getCode());
         updateWrapper.in(DelOutbound::getOrderNo, orderNos);
         return this.baseMapper.update(null, updateWrapper);
     }
