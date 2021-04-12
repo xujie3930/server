@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
@@ -268,7 +269,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                 || StringUtils.isEmpty(sku)
                 || Objects.isNull(num)
                 || num < 1) {
-            return 0;
+            throw new CommonException("999", "参数不全2");
         }
         LambdaQueryWrapper<Inventory> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(Inventory::getWarehouseCode, warehouseCode);
@@ -276,11 +277,11 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         queryWrapperConsumer.accept(queryWrapper);
         List<Inventory> list = this.list(queryWrapper);
         if (CollectionUtils.isEmpty(list)) {
-            return 0;
+            throw new CommonException("999", "[" + sku + "]库存不足");
         }
         Inventory inventory = list.get(0);
         if (null == inventory) {
-            return 0;
+            throw new CommonException("999", "[" + sku + "]库存不存在");
         }
         Inventory updateInventory = new Inventory();
         updateInventory.setWarehouseCode(inventory.getWarehouseCode());
@@ -293,9 +294,11 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         updateInventory.setId(inventory.getId());
         updateConsumer.accept(updateInventory);
         int update = baseMapper.updateById(updateInventory);
-        if (update > 0) {
-            iInventoryRecordService.saveLogs(type.getKey(), inventory, updateInventory, invoiceNo, null, null, num, "");
+        if (update < 1) {
+            throw new CommonException("999", "[" + sku + "]库存操作失败");
         }
+        // 添加日志
+        iInventoryRecordService.saveLogs(type.getKey(), inventory, updateInventory, invoiceNo, null, null, num, "");
         return update;
     }
 
