@@ -15,19 +15,28 @@ public class DelOutboundCacheImportContext extends ImportContext<DelOutboundImpo
 
     protected CacheContext<String, String> orderTypeCache;
     protected CacheContext<String, String> countryCache;
+    protected CacheContext<String, String> deliveryMethodCache;
 
-    public DelOutboundCacheImportContext(List<DelOutboundImportDto> dataList, List<BasSubWrapperVO> subList, List<BasRegionSelectListVO> countryList) {
+    public DelOutboundCacheImportContext(List<DelOutboundImportDto> dataList,
+                                         List<BasSubWrapperVO> orderTypeList,
+                                         List<BasRegionSelectListVO> countryList,
+                                         List<BasSubWrapperVO> deliveryMethodList) {
         super(dataList);
         this.orderTypeCache = new MapCacheContext<>();
         this.countryCache = new MapCacheContext<>();
-        if (CollectionUtils.isNotEmpty(subList)) {
-            for (BasSubWrapperVO sub : subList) {
-                this.orderTypeCache.put(sub.getSubName(), sub.getSubValue());
+        if (CollectionUtils.isNotEmpty(orderTypeList)) {
+            for (BasSubWrapperVO vo : orderTypeList) {
+                this.orderTypeCache.put(vo.getSubName(), vo.getSubValue());
             }
         }
         if (CollectionUtils.isNotEmpty(countryList)) {
             for (BasRegionSelectListVO country : countryList) {
                 this.countryCache.put(country.getName(), country.getAddressCode());
+            }
+        }
+        if (CollectionUtils.isNotEmpty(deliveryMethodList)) {
+            for (BasSubWrapperVO vo : deliveryMethodList) {
+                this.deliveryMethodCache.put(vo.getSubName(), vo.getSubValue());
             }
         }
     }

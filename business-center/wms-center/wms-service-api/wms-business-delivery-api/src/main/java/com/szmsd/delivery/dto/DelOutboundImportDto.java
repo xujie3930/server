@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author zhangyuyuan
@@ -49,6 +50,12 @@ public class DelOutboundImportDto implements Serializable {
 
     @ApiModelProperty(value = "联系方式")
     private String phoneNo;
+
+    @ApiModelProperty(value = "提货方式")
+    private String deliveryMethodName;
+
+    @ApiModelProperty(value = "提货时间")
+    private Date deliveryTime;
 
     @ApiModelProperty(value = "自提人")
     private String deliveryAgent;

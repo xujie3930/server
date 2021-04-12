@@ -27,7 +27,10 @@ import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.imported.*;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
-import com.szmsd.delivery.vo.*;
+import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
+import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -259,14 +262,15 @@ public class DelOutboundController extends BaseController {
                 return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
             }
             // 查询出库类型数据
-            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063");
-            List<BasSubWrapperVO> subList = listMap.get("063");
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,058");
+            List<BasSubWrapperVO> orderTypeList = listMap.get("063");
+            List<BasSubWrapperVO> deliveryMethodList = listMap.get("058");
             // 查询国家数据
             R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
             List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
             // 初始化导入上下文
             List<DelOutboundImportDto> dataList = defaultAnalysisEventListener.getList();
-            DelOutboundImportContext importContext = new DelOutboundImportContext(dataList, subList, countryList);
+            DelOutboundImportContext importContext = new DelOutboundImportContext(dataList, orderTypeList, countryList, deliveryMethodList);
             // 初始化外联导入上下文
             DelOutboundOuterContext outerContext = new DelOutboundOuterContext();
             // 初始化导入验证容器
@@ -287,7 +291,7 @@ public class DelOutboundController extends BaseController {
                 return R.ok(importResult1);
             }
             // 获取导入的数据
-            List<DelOutboundDto> dtoList = new DelOutboundImportContainer(dataList, subList, countryList, detailList, importValidationData, sellerCode).get();
+            List<DelOutboundDto> dtoList = new DelOutboundImportContainer(dataList, orderTypeList, countryList, deliveryMethodList, detailList, importValidationData, sellerCode).get();
             // 批量新增
             this.delOutboundService.insertDelOutbounds(dtoList);
             // 返回成功的结果

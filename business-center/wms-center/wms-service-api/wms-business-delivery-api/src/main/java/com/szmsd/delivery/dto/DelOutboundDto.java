@@ -10,6 +10,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -72,7 +73,7 @@ public class DelOutboundDto implements Serializable {
     private String deliveryMethod;
 
     @ApiModelProperty(value = "提货时间")
-    private String deliveryTime;
+    private Date deliveryTime;
 
     @ApiModelProperty(value = "提货商/快递商")
     private String deliveryAgent;

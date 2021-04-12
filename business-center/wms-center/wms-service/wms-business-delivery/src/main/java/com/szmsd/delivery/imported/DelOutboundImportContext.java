@@ -12,7 +12,10 @@ import java.util.List;
  */
 public class DelOutboundImportContext extends DelOutboundCacheImportContext {
 
-    public DelOutboundImportContext(List<DelOutboundImportDto> dataList, List<BasSubWrapperVO> subList, List<BasRegionSelectListVO> countryList) {
-        super(dataList, subList, countryList);
+    public DelOutboundImportContext(List<DelOutboundImportDto> dataList,
+                                    List<BasSubWrapperVO> orderTypeList,
+                                    List<BasRegionSelectListVO> countryList,
+                                    List<BasSubWrapperVO> deliveryMethodList) {
+        super(dataList, orderTypeList, countryList, deliveryMethodList);
     }
 }
