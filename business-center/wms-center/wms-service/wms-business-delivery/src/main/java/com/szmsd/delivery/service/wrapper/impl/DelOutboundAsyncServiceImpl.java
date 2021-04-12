@@ -16,7 +16,6 @@ import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
@@ -47,8 +46,6 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private InventoryFeignClientService inventoryFeignClientService;
     @Autowired
     private RechargesFeignService rechargesFeignService;
-    @Autowired
-    private IHtpCarrierClientService htpCarrierClientService;
 
     @Transactional
     @Override
