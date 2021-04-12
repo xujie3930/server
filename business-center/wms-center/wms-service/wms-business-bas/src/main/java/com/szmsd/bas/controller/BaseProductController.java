@@ -1,6 +1,10 @@
 package com.szmsd.bas.controller;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.bas.constant.ProductConstant;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
@@ -22,8 +26,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -76,12 +82,22 @@ public class BaseProductController extends BaseController {
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:add')")
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("import")
-    @ApiOperation(value = "导入产品模块", notes = "导入产品模块")
+    @ApiOperation(value = "导入产品", notes = "导入产品")
     public R importData(MultipartFile file) throws Exception {
         ExcelUtil<BaseProductImportDto> util = new ExcelUtil<BaseProductImportDto>(BaseProductImportDto.class);
         List<BaseProductImportDto> userList = util.importExcel(file.getInputStream());
         baseProductService.importBaseProduct(userList);
         return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:add')")
+    @Log(title = "模块", businessType = BusinessType.INSERT)
+    @GetMapping("importTemplate")
+    @ApiOperation(value = "导入模板下载", notes = "导入模板下载")
+    public void importTemplate(HttpServletResponse response) throws Exception {
+        ExcelUtil<BaseProductImportTemplateDto> util = new ExcelUtil<BaseProductImportTemplateDto>(BaseProductImportTemplateDto.class);
+        List<BaseProductImportTemplateDto> list = new ArrayList<>();
+        util.exportExcel(response, list, "sku导入模板");
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
@@ -131,6 +147,7 @@ public class BaseProductController extends BaseController {
     @GetMapping("/export")
     @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
     public void export(HttpServletResponse response, BaseProductQueryDto queryDto) throws IOException {
+        queryDto.setCategory(ProductConstant.SKU_NAME);
         List<BaseProductExportDto> list = baseProductService.exportProduceList(queryDto);
         ExcelUtil<BaseProductExportDto> util = new ExcelUtil<BaseProductExportDto>(BaseProductExportDto.class);
         util.exportExcel(response, list, "sku导出");

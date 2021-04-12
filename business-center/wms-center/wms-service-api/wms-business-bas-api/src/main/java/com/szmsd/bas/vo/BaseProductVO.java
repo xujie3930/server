@@ -1,11 +1,14 @@
 package com.szmsd.bas.vo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class BaseProductVO {
@@ -46,4 +49,7 @@ public class BaseProductVO {
     @ApiModelProperty(value = "绑定专属包材产品名")
     @Excel(name = "绑定专属包材产品名")
     private String bindCodeName;
+
+    @ApiModelProperty(value = "文件信息")
+    private List<AttachmentFileDTO> documentsFiles;
 }

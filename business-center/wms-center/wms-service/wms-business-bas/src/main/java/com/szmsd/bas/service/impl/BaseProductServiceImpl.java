@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.enums.BaseMainEnum;
 import com.szmsd.bas.api.feign.BasSubFeignService;
@@ -34,8 +36,10 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -157,6 +161,19 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         queryWrapper.eq("is_active", true);
         queryWrapper.orderByAsc("code");
         List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductVO.class);
+        baseProductVOList.forEach(b -> {
+            if(b.getCode()!=null){
+                List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
+                        .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(b.getCode()).setBusinessItemNo(null)).getData());
+                if (CollectionUtils.isNotEmpty(attachment)) {
+                    List<AttachmentFileDTO> documentsFiles = new ArrayList();
+                    for(BasAttachment a:attachment){
+                        documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
+                    }
+                    b.setDocumentsFiles(documentsFiles);
+                }
+            }
+        });
         return baseProductVOList;
     }
 
