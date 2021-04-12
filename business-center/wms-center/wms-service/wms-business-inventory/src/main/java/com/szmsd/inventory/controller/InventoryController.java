@@ -51,9 +51,9 @@ public class InventoryController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('inventory:page')")
-    @PostMapping("/export")
+    @GetMapping("/export")
     @ApiOperation(value = "导出", notes = "库存管理 - 导出")
-    public TableDataInfo<InventorySkuVO> export(@RequestBody InventorySkuQueryDTO inventorySkuQueryDTO, HttpServletResponse response) {
+    public TableDataInfo<InventorySkuVO> export(InventorySkuQueryDTO inventorySkuQueryDTO, HttpServletResponse response) {
         List<InventorySkuVO> list = inventoryService.selectList(inventorySkuQueryDTO);
         ExcelUtil<InventorySkuVO> util = new ExcelUtil<>(InventorySkuVO.class);
         util.exportExcel(response, list, "产品库存_" + DateUtils.dateTimeNow());
