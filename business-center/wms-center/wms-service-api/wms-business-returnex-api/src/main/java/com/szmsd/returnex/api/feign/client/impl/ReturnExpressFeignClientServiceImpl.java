@@ -1,5 +1,6 @@
 package com.szmsd.returnex.api.feign.client.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.returnex.api.feign.client.IReturnExpressFeignClientService;
 import com.szmsd.returnex.api.feign.serivice.IReturnExpressFeignService;
@@ -32,7 +33,8 @@ public class ReturnExpressFeignClientServiceImpl implements IReturnExpressFeignC
      */
     @Override
     public int saveArrivalInfoFormVms(ReturnArrivalReqDTO returnArrivalReqDTO) {
-        return  R.getDataAndException(iReturnExpressFeignService.saveArrivalInfoFormVms(returnArrivalReqDTO));
+        log.info("接受WMS仓库数据 {}", JSONObject.toJSONString(returnArrivalReqDTO));
+        return R.getDataAndException(iReturnExpressFeignService.saveArrivalInfoFormVms(returnArrivalReqDTO));
     }
 
     /**
@@ -44,6 +46,7 @@ public class ReturnExpressFeignClientServiceImpl implements IReturnExpressFeignC
      */
     @Override
     public int updateProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
+        log.info("接收VMS仓库退件处理结果 {}", JSONObject.toJSONString(returnProcessingReqDTO));
         return R.getDataAndException(iReturnExpressFeignService.updateProcessingInfoFromVms(returnProcessingReqDTO));
     }
 }
