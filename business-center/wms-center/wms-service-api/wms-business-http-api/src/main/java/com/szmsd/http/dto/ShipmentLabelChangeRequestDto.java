@@ -1,5 +1,6 @@
 package com.szmsd.http.dto;
 
+import com.szmsd.http.annotation.LogIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value = "ShipmentLabelChangeRequestDto", description = "ShipmentLabelChangeRequestDto对象")
+@LogIgnore({"label"})
 public class ShipmentLabelChangeRequestDto implements Serializable {
 
     @ApiModelProperty(value = "订单号")
