@@ -4,6 +4,11 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
+import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
+import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
+import com.szmsd.http.vo.returnex.ProcessingUpdateRespVO;
+import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
 import com.szmsd.returnex.dto.ReturnArrivalReqDTO;
 import com.szmsd.returnex.dto.ReturnProcessingReqDTO;
 import com.szmsd.returnex.service.IReturnExpressService;
@@ -24,7 +29,7 @@ import javax.annotation.Resource;
  * @Author: 11
  * @Date: 2021/3/26 11:42
  */
-@Api(tags = {"退货服务-OPEN VMS"})
+@Api(tags = {"退货服务-OPEN WMS"})
 @RestController
 @RequestMapping("/api/return")
 public class ReturnExpressOpenController extends BaseController {
@@ -60,6 +65,37 @@ public class ReturnExpressOpenController extends BaseController {
     @ApiOperation(value = "接收仓库退件-到货", notes = "/api/return/arrival #G1-接收仓库退件到货")
     public R saveArrivalInfoFormWms(@Validated @RequestBody ReturnArrivalReqDTO returnArrivalReqDTO) {
         return toOk(returnExpressService.saveArrivalInfoFormWms(returnArrivalReqDTO));
+    }
+
+    @Resource
+    private IHttpFeignClientService httpFeignClient;
+
+    /**
+     * 创建退件预报
+     * /api/return/expected #F1-VMS 创建退件预报
+     *
+     * @param expectedReqDTO 创建
+     * @return 返回结果
+     */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:query')")
+    @PostMapping("/expectedCreate")
+    @ApiOperation(value = "WMS-创建退件单", notes = "/api/return/expected #F1-VMS 创建退件预报 WMS-创建退件单")
+    public void expectedCreate(@RequestBody CreateExpectedReqDTO expectedReqDTO) {
+        CreateExpectedRespVO createExpectedRespVO = httpFeignClient.expectedCreate(expectedReqDTO);
+    }
+
+    /**
+     * 接收客户提供的处理方式
+     * /api/return/processing #F2-VMS 接收客户提供的处理方式
+     *
+     * @param processingUpdateReqDTO 更新数据
+     * @return 返回结果
+     */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:query')")
+    @PostMapping("/processingUpdate")
+    @ApiOperation(value = "WMS-接收客户提供的处理方式", notes = "/api/return/processing #F2-WMS 接收客户提供的处理方式")
+    public void processingUpdate(@RequestBody ProcessingUpdateReqDTO processingUpdateReqDTO) {
+        ProcessingUpdateRespVO processingUpdateRespVO = httpFeignClient.processingUpdate(processingUpdateReqDTO);
     }
 
 }

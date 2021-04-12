@@ -12,6 +12,7 @@ import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,6 @@ import java.util.List;
  * @Author: 11
  * @Date: 2021/3/26 11:42
  */
-//@PreAuthorize("@ss.hasPermi('ReturnExpressDetail:*:*')")
 @Api(tags = {"退货服务-客户端"})
 @RestController
 @RequestMapping("/client/return/express")
@@ -38,7 +38,7 @@ public class ReturnExpressClientController extends BaseController {
      *
      * @return 返回结果
      */
-    //@PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:add')")
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:add')")
     @GetMapping("/createExpectedNo")
     @ApiOperation(value = "新增退件单-生成预报单号")
     public R<String> createExpectedNo() {
@@ -52,7 +52,7 @@ public class ReturnExpressClientController extends BaseController {
      * @param returnExpressAddDTO 新增
      * @return 返回结果
      */
-    //@PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:add')")
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:add')")
     @PostMapping("/add")
     @Log(title = "退货服务模块", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增退件单-创建退报单")
@@ -66,7 +66,7 @@ public class ReturnExpressClientController extends BaseController {
      * @param queryDto 查询条件
      * @return 返回结果
      */
-    //@PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
     @GetMapping("/page")
     @ApiOperation(value = "退件单列表 - 分页")
     public TableDataInfo<ReturnExpressListVO> page(@Validated ReturnExpressListQueryDTO queryDto) {
@@ -81,7 +81,7 @@ public class ReturnExpressClientController extends BaseController {
      * @param expressUpdateDTO 更新条件
      * @return 返回结果
      */
-    //@PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
     @PostMapping("/update")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "更新退件单信息")
@@ -94,6 +94,7 @@ public class ReturnExpressClientController extends BaseController {
      * @param id
      * @return
      */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:query')")
     @GetMapping("/getInfo/{id}")
     @ApiOperation(value = "获取退件单信息详情")
     public R<ReturnExpressVO> getInfo(@PathVariable(value = "id") Long id) {

@@ -22,7 +22,6 @@ import com.szmsd.returnex.enums.ReturnExpressEnums;
 import com.szmsd.returnex.mapper.ReturnExpressMapper;
 import com.szmsd.returnex.service.IReturnExpressGoodService;
 import com.szmsd.returnex.service.IReturnExpressService;
-import com.szmsd.returnex.vo.ReturnExpressGoodVO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
 import jodd.util.StringUtil;
@@ -76,6 +75,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     private String getSellCode() {
         // UserInfo info = awaitUserService.info();
         String loginSellerCode = iBasFeignClientService.getLoginSellerCode();
+        //String loginSellerCode = "A932";
         return Optional.ofNullable(loginSellerCode).orElse("");
     }
 
@@ -168,12 +168,23 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             String expectedNo = createExpectedNo();
             returnExpressAddDTO.setExpectedNo(expectedNo);
         }
+        handleExpectedCreate(returnExpressAddDTO);
+        // 本地保存
+        return saveReturnExpressDetail(returnExpressAddDTO.convertThis(ReturnExpressDetail.class));
+    }
+
+    /**
+     * 调用wms 创建退件单
+     *
+     * @param returnExpressAddDTO
+     */
+    private void handleExpectedCreate(ReturnExpressAddDTO returnExpressAddDTO) {
         // 创建退报单 推给VMS仓库
         CreateExpectedReqDTO createExpectedReqDTO = returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class);
         createExpectedReqDTO.setRefOrderNo(returnExpressAddDTO.getFromOrderNo());
+        //需要转换 处理方式
+        createExpectedReqDTO.setProcessType(ReturnExpressEnums.WMSProcessTypeEnum.getWMSProcessTypeStr(returnExpressAddDTO.getProcessTypeStr()));
         httpFeignClient.expectedCreate(createExpectedReqDTO);
-        // 本地保存
-        return saveReturnExpressDetail(returnExpressAddDTO.convertThis(ReturnExpressDetail.class));
     }
 
     private void checkSubmit(ReturnExpressAddDTO returnExpressAddDTO) {
@@ -298,7 +309,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .last("LIMIT 1")
         );
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
-        returnExpressGoodService.addOrUpdateGoodInfoBatch(expressUpdateDTO.getGoodList(),expressUpdateDTO.getId());
+        returnExpressGoodService.addOrUpdateGoodInfoBatch(expressUpdateDTO.getGoodList(), expressUpdateDTO.getId());
         // TODO 更新货物信息 货物信息未返回无法更新sku货物信息
         httpFeignClient.processingUpdate(expressUpdateDTO.convertThis(ProcessingUpdateReqDTO.class));
         return update;
