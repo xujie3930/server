@@ -22,8 +22,14 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
     private final ImportValidationData importValidationData;
     private final String sellerCode;
 
-    public DelOutboundImportContainer(List<DelOutboundImportDto> dataList, List<BasSubWrapperVO> subList, List<BasRegionSelectListVO> countryList, List<DelOutboundDetailImportDto2> detailList, ImportValidationData importValidationData, String sellerCode) {
-        super(dataList, subList, countryList);
+    public DelOutboundImportContainer(List<DelOutboundImportDto> dataList,
+                                      List<BasSubWrapperVO> orderTypeList,
+                                      List<BasRegionSelectListVO> countryList,
+                                      List<BasSubWrapperVO> deliveryMethodList,
+                                      List<DelOutboundDetailImportDto2> detailList,
+                                      ImportValidationData importValidationData,
+                                      String sellerCode) {
+        super(dataList, orderTypeList, countryList, deliveryMethodList);
         this.detailList = detailList;
         this.detailMapList = this.detailToMapList();
         this.importValidationData = importValidationData;
@@ -41,6 +47,8 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
             outboundDto.setSellerCode(this.sellerCode);
             outboundDto.setShipmentRule(dto.getShipmentRule());
             outboundDto.setRemark(dto.getRemark());
+            outboundDto.setDeliveryMethod(super.deliveryMethodCache.get(dto.getDeliveryMethodName()));
+            outboundDto.setDeliveryTime(dto.getDeliveryTime());
             outboundDto.setDeliveryAgent(dto.getDeliveryAgent());
             outboundDto.setDeliveryInfo(dto.getDeliveryInfo());
             outboundDto.setAddress(this.buildAddress(dto));

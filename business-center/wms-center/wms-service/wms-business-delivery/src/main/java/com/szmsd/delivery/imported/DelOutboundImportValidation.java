@@ -109,10 +109,23 @@ public class DelOutboundImportValidation implements ImportValidation<DelOutbound
 
         @Override
         public void valid(int rowIndex, DelOutboundImportDto object) {
+            // 提货方式不能为空
+            String deliveryMethodName = object.getDeliveryMethodName();
+            if (this.importContext.isEmpty(deliveryMethodName, rowIndex, 13, null, "提货方式不能为空")) {
+                return;
+            }
+            String deliveryMethod = this.getDeliveryMethod(deliveryMethodName);
+            this.importContext.isEmpty(deliveryMethod, rowIndex, 13, deliveryMethodName, "提货方式不存在");
+            // 提货日期不能为空
+            this.importContext.isNull(object.getDeliveryTime(), rowIndex, 14, null, "预计提货时间不能为空");
             // 自提人不能为空
             this.importContext.isEmpty(object.getDeliveryAgent(), rowIndex, 13, null, "自提人不能为空");
             // 提货人联系方式/快递单号不能为空
             this.importContext.isEmpty(object.getDeliveryInfo(), rowIndex, 14, null, "提货人联系方式/快递单号不能为空");
+        }
+
+        public String getDeliveryMethod(String deliveryMethodName) {
+            return this.importContext.deliveryMethodCache.get(deliveryMethodName);
         }
     }
 }
