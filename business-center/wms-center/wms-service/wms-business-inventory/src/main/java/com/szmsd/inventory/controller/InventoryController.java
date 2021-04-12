@@ -1,6 +1,8 @@
 package com.szmsd.inventory.controller;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.domain.dto.*;
@@ -16,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Api(tags = {"库存"})
@@ -44,6 +47,16 @@ public class InventoryController extends BaseController {
     public TableDataInfo<InventorySkuVO> page(InventorySkuQueryDTO inventorySkuQueryDTO) {
         startPage();
         List<InventorySkuVO> list = inventoryService.selectList(inventorySkuQueryDTO);
+        return getDataTable(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('inventory:page')")
+    @PostMapping("/export")
+    @ApiOperation(value = "导出", notes = "库存管理 - 导出")
+    public TableDataInfo<InventorySkuVO> export(@RequestBody InventorySkuQueryDTO inventorySkuQueryDTO, HttpServletResponse response) {
+        List<InventorySkuVO> list = inventoryService.selectList(inventorySkuQueryDTO);
+        ExcelUtil<InventorySkuVO> util = new ExcelUtil<>(InventorySkuVO.class);
+        util.exportExcel(response, list, "产品库存_" + DateUtils.dateTimeNow());
         return getDataTable(list);
     }
 
