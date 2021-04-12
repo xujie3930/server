@@ -56,7 +56,7 @@ public abstract class AbstractHttpRequest {
             throw new CommonException("999", "未处理的请求方式");
         }
         String logRequestBody;
-        if (object.getClass().isAnnotationPresent(LogIgnore.class)) {
+        if (null != object && object.getClass().isAnnotationPresent(LogIgnore.class)) {
             LogIgnore logIgnore = object.getClass().getAnnotation(LogIgnore.class);
             SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
             filter.getExcludes().addAll(Arrays.asList(logIgnore.value()));
