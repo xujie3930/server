@@ -206,16 +206,18 @@ public class DelOutboundController extends BaseController {
         // 先去模板目录中获取模板
         // 模板目录中没有模板再从项目中获取模板
         String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery");
-        String filePath = "/template/DM出库（正常，自提，销毁）模板.xls";
+        String filePath = "/template/DM.xls";
         File file = new File(basedir + "/" + filePath);
         InputStream inputStream = null;
         ServletOutputStream outputStream = null;
         try {
             if (file.exists()) {
                 inputStream = new FileInputStream(file);
+                response.setHeader("File-Source", "local");
             } else {
                 Resource resource = new ClassPathResource(filePath);
                 inputStream = resource.getInputStream();
+                response.setHeader("File-Source", "resource");
             }
             outputStream = response.getOutputStream();
             //response为HttpServletResponse对象
