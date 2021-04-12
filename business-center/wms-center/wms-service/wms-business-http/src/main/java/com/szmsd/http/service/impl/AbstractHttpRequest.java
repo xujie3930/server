@@ -1,10 +1,12 @@
 package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
+import com.szmsd.http.annotation.LogIgnore;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.event.EventUtil;
@@ -53,7 +55,16 @@ public abstract class AbstractHttpRequest {
         } else {
             throw new CommonException("999", "未处理的请求方式");
         }
-        addLog(url, httpMethod.name(), headerMap, requestBody, requestTime, responseBody.getBody());
+        String logRequestBody;
+        if (object.getClass().isAnnotationPresent(LogIgnore.class)) {
+            LogIgnore logIgnore = object.getClass().getAnnotation(LogIgnore.class);
+            SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+            filter.getExcludes().addAll(Arrays.asList(logIgnore.value()));
+            logRequestBody = JSON.toJSONString(object, filter);
+        } else {
+            logRequestBody = requestBody;
+        }
+        addLog(url, httpMethod.name(), headerMap, logRequestBody, requestTime, responseBody.getBody());
         return responseBody;
     }
 
