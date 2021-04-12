@@ -78,7 +78,7 @@
             t.tracking_no,
             t.weight,
             t.amount,
-            t.completed_state,
+            t.state,
             t.remark
         FROM
             del_outbound t
