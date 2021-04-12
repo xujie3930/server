@@ -354,12 +354,14 @@ public class ExcelUtil<T> {
                 zipOut.close();
                 response.setContentType("application/x-msdownload");
                 response.setCharacterEncoding("UTF-8");
-                response.setHeader("Content-Disposition", "attachment;filename=" + checkFileName(this.sheetName + ".zip"));
+                String excelName = URLEncoder.encode( this.sheetName, "UTF-8");
+                response.setHeader("Content-Disposition", "attachment;filename=" + checkFileName(excelName + ".zip"));
                 inputStream = new FileInputStream(tempZipFile);
             } else {
                 response.setContentType("application/vnd.ms-excel");
                 response.setCharacterEncoding("utf-8");
-                response.setHeader("Content-Disposition", "attachment;filename=" + this.sheetName + ".xls");
+                String excelName = URLEncoder.encode( this.sheetName, "UTF-8");
+                response.setHeader("Content-Disposition", "attachment;filename=" + excelName + ".xls");
                 inputStream = new FileInputStream(tempXlsFile);
             }
             outputStream = response.getOutputStream();
@@ -522,7 +524,7 @@ public class ExcelUtil<T> {
         // 如果设置了combo属性则本列只能选择不能输入
         if (attr.combo().length > 0) {
             // 这里默认设了2-101列只能选择不能输入.
-            setXSSFValidation(sheet, attr.combo(), 1, 100, column, column);
+            setXSSFValidation(sheet, attr.combo(), 1, 10000, column, column);
         }
     }
 
