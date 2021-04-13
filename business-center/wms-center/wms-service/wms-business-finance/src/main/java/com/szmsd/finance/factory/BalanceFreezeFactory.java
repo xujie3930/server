@@ -71,4 +71,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     public BalanceDTO calculateBalance(BalanceDTO oldBalance, BigDecimal changeAmount) {
         return null;
     }
+
+    @Override
+    public BalanceDTO calculateBalanceNoFreeze(BalanceDTO oldBalance, BigDecimal changeAmount) {
+        return null;
+    }
 }

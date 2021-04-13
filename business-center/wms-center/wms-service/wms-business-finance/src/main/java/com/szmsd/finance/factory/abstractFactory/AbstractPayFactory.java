@@ -71,6 +71,35 @@ public abstract class AbstractPayFactory {
         return false;
     }
 
+    @Transactional
+    public boolean updateBalanceNoFreeze(CustPayDTO dto) {
+        String key = "cky-fss-balance-no-freeze" + dto.getCurrencyCode() + ":" + dto.getCusCode();
+        RLock lock = redissonClient.getLock(key);
+        try {
+            if (lock.tryLock(time, unit)) {
+                BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
+                BigDecimal changeAmount = dto.getAmount();
+                //余额不足
+                if (dto.getPayType() == BillEnum.PayType.PAYMENT && oldBalance.getCurrentBalance().compareTo(changeAmount) < 0) {
+                    return false;
+                }
+                BalanceDTO result = this.calculateBalanceNoFreeze(oldBalance, changeAmount);
+                setBalance(dto.getCusCode(), dto.getCurrencyCode(), result);
+                recordOpLog(dto, result.getCurrentBalance());
+            }
+            return true;
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
+            log.info("获取余额异常，加锁失败");
+            log.info("异常信息:" + e.getMessage());
+        } finally {
+            if (lock.isLocked()) {
+                lock.unlock();
+            }
+        }
+        return false;
+    }
+
     public void recordOpLog(CustPayDTO dto,BigDecimal result){
         AccountBalanceChange accountBalanceChange=new AccountBalanceChange();
         BeanUtils.copyProperties(dto,accountBalanceChange);
@@ -104,5 +133,7 @@ public abstract class AbstractPayFactory {
     }
 
     public abstract BalanceDTO calculateBalance(BalanceDTO oldBalance,BigDecimal changeAmount);
+
+    public abstract BalanceDTO calculateBalanceNoFreeze(BalanceDTO oldBalance,BigDecimal changeAmount);
 
 }

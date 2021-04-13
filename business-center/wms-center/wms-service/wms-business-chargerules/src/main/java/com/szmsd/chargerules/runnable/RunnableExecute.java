@@ -89,7 +89,7 @@ public class RunnableExecute {
     /**
      * 定时任务：储存仓租计价扣费；每周日晚上8点执行
      */
-//    @Scheduled(cron = "0 0 20 * * 7")
+    @Scheduled(cron = "0 0 20 * * 7")
 //    @Scheduled(cron = "0/60 * * * * *")
     public void executeWarehouse() {
         log.info("executeWarehouse() start...");

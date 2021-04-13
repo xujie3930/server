@@ -34,7 +34,7 @@ public class BillEnum implements Serializable {
 
     public enum PayMethod implements IEnum<String> {
         /**
-         * 线下充值
+         * 在线充值
          */
         ONLINE_INCOME("01","在线充值"),
         /**
@@ -50,7 +50,7 @@ public class BillEnum implements Serializable {
          */
         EXCHANGE_PAYMENT("04","汇率转换扣款"),
         /**
-         * 汇率转换扣款
+         * 提现
          */
         WITHDRAW_PAYMENT("05","提现"),
         /**
@@ -66,11 +66,11 @@ public class BillEnum implements Serializable {
          */
         WAREHOUSE_RENT("08","仓租"),
         /**
-         * 仓租
+         * 余额冻结
          */
         BALANCE_FREEZE("09","余额冻结"),
         /**
-         * 仓租
+         * 余额解冻
          */
         BALANCE_THAW("10","余额解冻")
         ;
