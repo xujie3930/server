@@ -6,7 +6,7 @@ import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
@@ -59,6 +59,8 @@ public class Shipment extends OrderType {
         DelOutboundListQueryDto delOutbound = new DelOutboundListQueryDto();
         delOutbound.setOrderType(operation.getOperationType());
         delOutbound.setWarehouseCode(operation.getWarehouseCode());
+        delOutbound.setUpdateTime(DateUtils.getPastDate(1));
+        delOutbound.setState("COMPLETED");
         R<List<DelOutboundDetailListVO>> rList = delOutboundFeignService.getDelOutboundDetailsList(delOutbound);
         if (rList.getCode() != 200 || CollectionUtils.isEmpty(rList.getData())) {
             log.error("operationPay() failed: {} {}", rList.getMsg(), rList.getData());

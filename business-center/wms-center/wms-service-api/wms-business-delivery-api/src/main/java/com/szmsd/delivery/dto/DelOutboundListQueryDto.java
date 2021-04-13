@@ -40,4 +40,7 @@ public class DelOutboundListQueryDto implements Serializable {
 
     @ApiModelProperty(value = "创建时间")
     private String[] createTimes;
+
+    @ApiModelProperty(value = "修改时间")
+    private String updateTime;
 }

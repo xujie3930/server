@@ -549,6 +549,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("a.order_type", queryDto.getOrderType());
         queryWrapper.eq("a.warehouse_code", queryDto.getWarehouseCode());
+        if(StringUtils.isNotBlank(queryDto.getState())){
+            queryWrapper.eq("a.state", queryDto.getState());
+        }
+        if(StringUtils.isNotBlank(queryDto.getUpdateTime())){
+            queryWrapper.ge("a.update_time", queryDto.getUpdateTime());
+        }
         return baseMapper.getDelOutboundAndDetailsList(queryWrapper);
     }
 
