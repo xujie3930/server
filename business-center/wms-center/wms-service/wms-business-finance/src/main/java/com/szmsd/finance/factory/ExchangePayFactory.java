@@ -81,4 +81,9 @@ public class ExchangePayFactory extends AbstractPayFactory {
         oldBalance.setTotalBalance(oldBalance.getTotalBalance().add(changeAmount));
         return oldBalance;
     }
+
+    @Override
+    public BalanceDTO calculateBalanceNoFreeze(BalanceDTO oldBalance, BigDecimal changeAmount) {
+        return null;
+    }
 }

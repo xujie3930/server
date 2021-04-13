@@ -153,7 +153,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             return R.failed("支付类型为空");
         }
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
-        boolean flag=abstractPayFactory.updateBalance(dto);
+        boolean flag=abstractPayFactory.updateBalanceNoFreeze(dto);
         return flag?R.ok():R.failed("余额不足");
     }
 
@@ -201,7 +201,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Override
     public BalanceDTO getBalance(String cusCode, String currencyCode) {
-        QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper();
+        QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cus_code",cusCode);
         queryWrapper.eq("currency_code",currencyCode);
         AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);

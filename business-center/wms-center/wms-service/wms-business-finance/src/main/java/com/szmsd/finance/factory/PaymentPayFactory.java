@@ -38,4 +38,14 @@ public class PaymentPayFactory extends AbstractPayFactory {
         oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(changeAmount));
         return oldBalance;
     }
+
+    @Override
+    public BalanceDTO calculateBalanceNoFreeze(BalanceDTO oldBalance, BigDecimal changeAmount) {
+        // 可用
+        oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().subtract(changeAmount));
+        // 总余额
+        oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(changeAmount));
+
+        return oldBalance;
+    }
 }
