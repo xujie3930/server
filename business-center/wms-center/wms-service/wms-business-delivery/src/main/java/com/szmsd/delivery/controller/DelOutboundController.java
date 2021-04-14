@@ -258,6 +258,10 @@ public class DelOutboundController extends BaseController {
             if (defaultAnalysisEventListener.isError()) {
                 return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
             }
+            List<DelOutboundImportDto> dataList = defaultAnalysisEventListener.getList();
+            if (CollectionUtils.isEmpty(dataList)) {
+                return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
+            }
             // 初始化读取第二个sheet页的数据
             DefaultAnalysisEventListener<DelOutboundDetailImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDetailImportDto2.class, 1, 1);
             if (defaultAnalysisEventListener1.isError()) {
@@ -271,7 +275,6 @@ public class DelOutboundController extends BaseController {
             R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
             List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
             // 初始化导入上下文
-            List<DelOutboundImportDto> dataList = defaultAnalysisEventListener.getList();
             DelOutboundImportContext importContext = new DelOutboundImportContext(dataList, orderTypeList, countryList, deliveryMethodList);
             // 初始化外联导入上下文
             DelOutboundOuterContext outerContext = new DelOutboundOuterContext();
