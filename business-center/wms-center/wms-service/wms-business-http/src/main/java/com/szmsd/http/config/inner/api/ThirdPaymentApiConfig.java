@@ -32,7 +32,7 @@ public class ThirdPaymentApiConfig implements ApiConfig {
         this.callback = callback;
     }
 
-    static class Recharges {
+    public static class Recharges {
         // 线上充值请求接口
         private String recharges;
 
@@ -45,7 +45,7 @@ public class ThirdPaymentApiConfig implements ApiConfig {
         }
     }
 
-    static class Callback {
+    public static class Callback {
         // 回调通知地址
         private String notifyUrl;
 
