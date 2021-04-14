@@ -54,6 +54,14 @@ public class HtpRequestLog extends BaseEntity {
     @Excel(name = "跟踪ID")
     private String traceId;
 
+    @ApiModelProperty(value = "仓库编码")
+    @Excel(name = "仓库编码")
+    private String warehouseCode;
+
+    @ApiModelProperty(value = "请求组名称")
+    @Excel(name = "请求组名称")
+    private String requestUrlGroup;
+
     @ApiModelProperty(value = "请求路径")
     @Excel(name = "请求路径")
     private String requestUri;

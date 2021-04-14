@@ -16,6 +16,9 @@ import java.io.Serializable;
 @LogIgnore({"label"})
 public class ShipmentLabelChangeRequestDto implements Serializable {
 
+    @ApiModelProperty(value = "仓库代码")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "订单号")
     private String orderNo;
 

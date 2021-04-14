@@ -18,6 +18,9 @@ public class CusFreezeBalanceDTO {
     @ApiModelProperty(value = "币种编码")
     private String currencyCode;
 
+    @ApiModelProperty(value = "单号")
+    private String no;
+
     @ApiModelProperty(value = "金额")
     @NotNull
     @DecimalMin(value = "0")

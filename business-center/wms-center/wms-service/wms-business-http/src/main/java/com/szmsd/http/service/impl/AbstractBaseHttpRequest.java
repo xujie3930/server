@@ -8,6 +8,7 @@ import java.util.Map;
  * @author zhangyuyuan
  * @date 2021-03-10 16:20
  */
+@Deprecated
 public abstract class AbstractBaseHttpRequest extends AbstractHttpRequest {
 
     public AbstractBaseHttpRequest(HttpConfig httpConfig) {

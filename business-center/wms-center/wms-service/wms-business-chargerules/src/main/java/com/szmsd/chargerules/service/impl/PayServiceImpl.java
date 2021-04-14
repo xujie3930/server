@@ -45,6 +45,7 @@ public class PayServiceImpl implements IPayService {
         custPayDTO.setPayMethod(payMethod);
         custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
         custPayDTO.setAmount(amount);
+        custPayDTO.setNo(chargeLog.getOrderNo());
 
         chargeLog.setCustomCode(customCode);
         chargeLog.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());

@@ -57,6 +57,9 @@ public class AccountBalanceChange extends FssBaseEntity {
     @ApiModelProperty(value = "当前余额")
     private BigDecimal currentBalance;
 
+    @ApiModelProperty(value = "单号")
+    private String no;
+
     public String getPayMethodName(){
         return payMethod.getPaymentName();
     }

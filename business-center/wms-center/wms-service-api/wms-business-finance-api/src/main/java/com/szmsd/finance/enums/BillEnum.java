@@ -72,7 +72,11 @@ public class BillEnum implements Serializable {
         /**
          * 余额解冻
          */
-        BALANCE_THAW("10","余额解冻")
+        BALANCE_THAW("10","余额解冻"),
+        /**
+         * 费用扣除
+         */
+        BALANCE_DEDUCTIONS("11","费用扣除"),
         ;
 
 
