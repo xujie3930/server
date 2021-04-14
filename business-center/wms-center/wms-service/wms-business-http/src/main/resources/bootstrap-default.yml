@@ -1,55 +1,6 @@
 com:
   szmsd:
     http:
-      # 路径组
-      url-group:
-        url-a:
-          wms:
-            headers:
-              UserId: oms
-              Password: 666
-            url: https://wms-open-api.dsloco.com
-          priced-product:
-            url: https://wms-open-api.dsloco.com
-          carrier-service:
-            url: https://carrierservice-api-admin-external.dsloco.com
-          product-remote-area:
-            url: https://api-productremotearea-external.dsloco.com
-          third-payment:
-            headers:
-              Authorization: Bearer YTY0ZWI3NWYtYjU1MC00YzUyLTk5Y2ItOTk3NzAzZTQyMjA5
-            url: https://carrierservice-api-admin-external.dsloco.com
-        url-b:
-          wms:
-            headers:
-              UserId: oms
-              Password: 666
-            url: https://wms-open-api.dsloco.com
-          priced-product:
-            url: https://wms-open-api.dsloco.com
-          carrier-service:
-            url: https://carrierservice-api-admin-external.dsloco.com
-          product-remote-area:
-            url: https://api-productremotearea-external.dsloco.com
-          third-payment:
-            headers:
-              Authorization: Bearer YTY0ZWI3NWYtYjU1MC00YzUyLTk5Y2ItOTk3NzAzZTQyMjA5
-            url: https://carrierservice-api-admin-external.dsloco.com
-      # 仓库组
-      warehouse-group:
-        warehouse-a:
-          - SZ
-          - GZ
-        warehouse-b:
-          - BJ
-          - TJ
-      # 仓库路径映射组
-      mapper-group:
-        warehouse-a: url-a
-        warehouse-b: url-b
-      # 默认映射组，在仓库路径映射组没有找到时使用
-      default-url-group: url-a
-      # 默认api配置，在路径组下可以单独配置
       default-api-config:
         wms:
           base-info:
