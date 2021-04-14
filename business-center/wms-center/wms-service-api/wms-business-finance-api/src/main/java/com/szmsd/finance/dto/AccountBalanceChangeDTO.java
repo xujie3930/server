@@ -42,6 +42,9 @@ public class AccountBalanceChangeDTO implements Serializable {
     @ApiModelProperty(value = "当前余额")
     private BigDecimal currentBalance;
 
+    @ApiModelProperty(value = "单号")
+    private String no;
+
     @ApiModelProperty(value = "开始时间")
     private String beginTime;
 

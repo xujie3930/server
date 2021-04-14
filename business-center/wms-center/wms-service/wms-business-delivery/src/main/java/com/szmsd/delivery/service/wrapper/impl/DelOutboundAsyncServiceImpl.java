@@ -16,6 +16,7 @@ import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
@@ -110,6 +111,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     custPayDTO.setCusCode(delOutbound.getSellerCode());
                     custPayDTO.setCurrencyCode(delOutbound.getCurrencyCode());
                     custPayDTO.setAmount(delOutbound.getAmount());
+                    custPayDTO.setNo(delOutbound.getOrderNo());
+                    custPayDTO.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
                     R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
                     if (null == r || Constants.SUCCESS != r.getCode()) {
                         throw new CommonException("999", "扣减费用失败");
@@ -204,6 +207,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
                         cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
                         cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                        cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
                         R<?> thawBalanceR = this.rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
                         if (null == thawBalanceR) {
                             throw new CommonException("999", "取消冻结费用失败");

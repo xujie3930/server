@@ -258,6 +258,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
             cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
             cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+            cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
             // 调用冻结费用接口
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
             R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);

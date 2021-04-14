@@ -85,6 +85,7 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
             custPayDTO.setCusName(preWithdraw.getCusName());
             custPayDTO.setCurrencyCode(preWithdraw.getCurrencyCode());
             custPayDTO.setCurrencyName(preWithdraw.getCurrencyName());
+            custPayDTO.setNo(preWithdraw.getSerialNo());
             accountBalanceService.withdraw(custPayDTO);
         }
         preWithdraw.setVerifyRemark(dto.getVerifyRemark());
