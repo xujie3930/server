@@ -90,6 +90,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if(StringUtils.isNotEmpty(dto.getEndTime())){
             queryWrapper.le(AccountBalanceChange::getCreateTime,dto.getEndTime());
         }
+        if(StringUtils.isNotEmpty(dto.getNo())) {
+            queryWrapper.eq(AccountBalanceChange::getNo,dto.getNo());
+        }
         queryWrapper.orderByDesc(AccountBalanceChange::getCreateTime);
         return accountBalanceChangeMapper.recordListPage(queryWrapper);
     }
@@ -153,7 +156,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             return R.failed("支付类型为空");
         }
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
-        boolean flag=abstractPayFactory.updateBalanceNoFreeze(dto);
+        boolean flag=abstractPayFactory.updateBalance(dto);
         return flag?R.ok():R.failed("余额不足");
     }
 
@@ -163,6 +166,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if(checkPayInfo(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
+        dto.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
         dto.setPayType(BillEnum.PayType.PAYMENT);
         AbstractPayFactory abstractPayFactory=payFactoryBuilder.build(dto.getPayType());
         boolean flag=abstractPayFactory.updateBalance(dto);

@@ -34,6 +34,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 return false;
             }
             setBalance(dto.getCusCode(),dto.getCurrencyCode(),balance);
+            recordOpLog(dto,balance.getCurrentBalance());
             return true;
         }catch(Exception e){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
@@ -64,7 +65,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
     @Override
     protected void setOpLogAmount(AccountBalanceChange accountBalanceChange, BigDecimal amount) {
-
+        accountBalanceChange.setAmountChange(amount);
     }
 
     @Override
@@ -72,8 +73,4 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         return null;
     }
 
-    @Override
-    public BalanceDTO calculateBalanceNoFreeze(BalanceDTO oldBalance, BigDecimal changeAmount) {
-        return null;
-    }
 }

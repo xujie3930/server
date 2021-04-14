@@ -55,6 +55,9 @@ public class CustPayDTO {
     @ApiModelProperty(value = "银联银行代码")
     private String bankCode;
 
+    @ApiModelProperty(value = "单号")
+    private String no;
+
     @ApiModelProperty(value = "充值说明")
     private String remark;
 }
