@@ -10,6 +10,7 @@ import java.util.Map;
  * @Author: 11
  * @Date: 2021/3/27 13:34
  */
+@Deprecated
 public abstract class AbstractReturnExpressReq extends AbstractHttpRequest {
 
     public AbstractReturnExpressReq(HttpConfig httpConfig) {

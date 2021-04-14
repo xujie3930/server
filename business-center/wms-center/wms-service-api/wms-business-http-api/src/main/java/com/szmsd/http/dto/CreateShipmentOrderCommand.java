@@ -17,6 +17,9 @@ import java.util.List;
 @ApiModel(value = "CreateShipmentOrderCommand", description = "CreateShipmentOrderCommand对象")
 public class CreateShipmentOrderCommand implements Serializable {
 
+    @ApiModelProperty(value = "仓库代码")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "业务流水号")
     private String referenceNumber;
 

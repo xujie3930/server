@@ -1,0 +1,127 @@
+com:
+  szmsd:
+    http:
+      # 路径组
+      url-group:
+        url-a:
+          wms:
+            headers:
+              UserId: oms
+              Password: 666
+            url: https://wms-open-api.dsloco.com
+          priced-product:
+            url: https://wms-open-api.dsloco.com
+          carrier-service:
+            url: https://carrierservice-api-admin-external.dsloco.com
+          product-remote-area:
+            url: https://api-productremotearea-external.dsloco.com
+          third-payment:
+            headers:
+              Authorization: Bearer YTY0ZWI3NWYtYjU1MC00YzUyLTk5Y2ItOTk3NzAzZTQyMjA5
+            url: https://carrierservice-api-admin-external.dsloco.com
+        url-b:
+          wms:
+            headers:
+              UserId: oms
+              Password: 666
+            url: https://wms-open-api.dsloco.com
+          priced-product:
+            url: https://wms-open-api.dsloco.com
+          carrier-service:
+            url: https://carrierservice-api-admin-external.dsloco.com
+          product-remote-area:
+            url: https://api-productremotearea-external.dsloco.com
+          third-payment:
+            headers:
+              Authorization: Bearer YTY0ZWI3NWYtYjU1MC00YzUyLTk5Y2ItOTk3NzAzZTQyMjA5
+            url: https://carrierservice-api-admin-external.dsloco.com
+      # 仓库组
+      warehouse-group:
+        warehouse-a:
+          - SZ
+          - GZ
+        warehouse-b:
+          - BJ
+          - TJ
+      # 仓库路径映射组
+      mapper-group:
+        warehouse-a: url-a
+        warehouse-b: url-b
+      # 默认映射组，在仓库路径映射组没有找到时使用
+      default-url-group: url-a
+      # 默认api配置，在路径组下可以单独配置
+      default-api-config:
+        wms:
+          base-info:
+            seller: /api/base/sellers
+            packings: /api/base/packings
+            products: /api/base/products
+            shipment-rule: /api/base/shipmentrule
+            inspection: /api/base/products/inspection
+            operation-type: /api/base/spcecialOperation/type
+            operation-result: /api/base/spcecialOperation/result
+          exception:
+            processing: /api/exception/processing
+          inbound:
+            create: /api/inbound/receipt
+            cancel: /api/inbound/receipt
+          inventory:
+            listing: /api/inventory/listing
+            counting: /api/inventory/counting
+          outbound:
+            create: /api/outbound/shipment
+            cancel: /api/outbound/shipment
+            tracking: /api/outbound/shipment/tracking
+            label: /api/outbound/shipment/label
+            shipping: /api/outbound/shipment/shipping
+          returned:
+            expected: /api/return/expected
+            processing: /api/return/processing
+        priced-product:
+          priced-grade:
+            grades: /api/grades
+            create: /api/grades
+            page-result: /api/grades/pageResult
+            update: /api/grades/{0}
+            delete: /api/grades/{0}
+            update-default: /api/grades/{0}/default
+          priced-product:
+            page-result: /api/products/pageResult
+            in-service: /api/products/inService
+            key-value-pairs: /api/products/keyValuePairs
+            products: /api/products/{0}
+            update: /api/products/{0}
+            create: /api/products
+            update-grade: /api/products/{0}/{1}/Grade
+            pricing: /api/products/Pricing
+            pricing-batch: /api/products/PricingBatch
+            priced-products: /api/products/PricedProducts
+            export-file: /api/products/exportFile
+          priced-sheet:
+            sheets: /api/sheets/{0}
+            update: /api/sheets/{0}
+            create: /api/sheets
+            imported: /api/sheets/{0}/import
+            import-file: /api/sheets/{0}/importFile
+            export-file: /api/sheets/exportFile
+        carrier-service:
+          shipment-order:
+            services: /api/v1/carrierService/shipmentOrders/services
+            create: /api/v1/carrierService/shipmentOrder
+            searching: /api/v1/carrierService/shipmentOrders/searching
+            cancellation: /api/v1/carrierService/shipmentOrders/cancellation
+            cancellation-searching: /api/v1/carrierService/shipmentOrders/cancellation/searching
+            labels-merging: /api/v1/carrierService/shipmentOrders/labels/merging
+            label: /api/v1/carrierService/shipmentOrders/{0}/label
+        product-remote-area:
+          remote-area-template:
+            page-result: /api/productremotearea/pageResult
+            get: /api/productremotearea/{0}
+            export-file: /api/productremotearea/exportFile
+            import-file: /api/productremotearea/importFile
+            remote-template-rule: /api/productremotearea/remoteTemplateRule
+        third-payment:
+          recharges:
+            recharges: /msd/v1/recharges
+          callback:
+            notify-url: /wms-open/api/recharge/rechargeCallback

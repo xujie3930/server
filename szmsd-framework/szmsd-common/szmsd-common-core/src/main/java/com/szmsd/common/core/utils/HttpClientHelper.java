@@ -1,6 +1,7 @@
 package com.szmsd.common.core.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Consts;
 import org.apache.http.Header;
@@ -41,7 +42,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.net.ssl.*;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -213,6 +216,28 @@ public class HttpClientHelper {
      * @return 响应Body
      */
     public static HttpResponseBody httpGet(String url, String requestBody, Map<String, String> headerMap) {
+        // get参数兼容
+        if (null != requestBody) {
+            StringBuilder paramsBuilder = new StringBuilder();
+            if (url.lastIndexOf("?") == -1) {
+                paramsBuilder.append("?");
+            }
+            JSONObject jsonObject = JSON.parseObject(requestBody);
+            if (null != jsonObject) {
+                for (String key : jsonObject.keySet()) {
+                    try {
+                        paramsBuilder.append(key)
+                                .append("=")
+                                .append(URLEncoder.encode(jsonObject.getString(key), "utf-8"))
+                                .append("&");
+                    } catch (UnsupportedEncodingException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+                paramsBuilder.deleteCharAt(paramsBuilder.length() - 1);
+                url = url + paramsBuilder.toString();
+            }
+        }
         return execute(new HttpGet(url), requestBody, headerMap);
     }
 

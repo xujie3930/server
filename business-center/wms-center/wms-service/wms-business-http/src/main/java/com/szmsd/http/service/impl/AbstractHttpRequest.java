@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
  * @author zhangyuyuan
  * @date 2021-03-09 14:00
  */
+@Deprecated
 public abstract class AbstractHttpRequest {
 
     protected HttpConfig httpConfig;
