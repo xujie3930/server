@@ -18,6 +18,11 @@ public class UrlConfig {
      */
     private String url;
 
+    /**
+     * 回调路径
+     */
+    private String callback;
+
     public Map<String, String> getHeaders() {
         return headers;
     }
@@ -34,4 +39,11 @@ public class UrlConfig {
         this.url = url;
     }
 
+    public String getCallback() {
+        return callback;
+    }
+
+    public void setCallback(String callback) {
+        this.callback = callback;
+    }
 }

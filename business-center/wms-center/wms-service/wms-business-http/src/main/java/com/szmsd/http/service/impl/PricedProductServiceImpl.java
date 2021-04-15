@@ -9,6 +9,7 @@ import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IPricedProductService;
+import com.szmsd.http.service.http.SaaSPricedProductRequest;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.*;
 import org.apache.http.HttpStatus;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest implements IPricedProductService {
+public class PricedProductServiceImpl extends SaaSPricedProductRequest implements IPricedProductService {
 
     public PricedProductServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);
@@ -25,43 +26,43 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
 
     @Override
     public List<DirectServiceFeeData> pricedProducts(GetPricedProductsCommand getPricedProductsCommand) {
-        return JSON.parseArray(httpPost(httpConfig.getPricedProduct().getPricedProducts(), getPricedProductsCommand), DirectServiceFeeData.class);
+        return JSON.parseArray(httpPost("", "pricedProduct.pricedProducts", getPricedProductsCommand), DirectServiceFeeData.class);
     }
 
     @Override
     public List<KeyValuePair> keyValuePairs() {
-        return JSON.parseArray(httpPost(httpConfig.getPricedProduct().getKeyValuePairs(), null), KeyValuePair.class);
+        return JSON.parseArray(httpPost("SZ", "pricedProduct.keyValuePairs", null), KeyValuePair.class);
     }
 
     @Override
     public PageVO<PricedProduct> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria) {
-        return JSON.parseObject(httpPost(httpConfig.getPricedProduct().getPageResult(), pricedProductSearchCriteria), new TypeReference<PageVO<PricedProduct>>() {
+        return JSON.parseObject(httpPost("", "pricedProduct.pageResult", pricedProductSearchCriteria), new TypeReference<PageVO<PricedProduct>>() {
         });
     }
 
     @Override
     public ResponseVO create(CreatePricedProductCommand createPricedProductCommand) {
-        return JSON.parseObject(httpPost(httpConfig.getPricedProduct().getProducts(), createPricedProductCommand), ResponseVO.class);
+        return JSON.parseObject(httpPost("", "pricedProduct.create", createPricedProductCommand), ResponseVO.class);
     }
 
     @Override
     public PricedProductInfo getInfo(String productCode) {
-        return JSON.parseObject(httpGet(httpConfig.getPricedProduct().getProducts(), null, productCode), PricedProductInfo.class);
+        return JSON.parseObject(httpGet("", "pricedProduct.products", null, productCode), PricedProductInfo.class);
     }
 
     @Override
     public ResponseVO update(UpdatePricedProductCommand updatePricedProductCommand) {
-        return JSON.parseObject(httpPut(httpConfig.getPricedProduct().getProducts(), updatePricedProductCommand, updatePricedProductCommand.getCode()), ResponseVO.class);
+        return JSON.parseObject(httpPut("", "pricedProduct.update", updatePricedProductCommand, updatePricedProductCommand.getCode()), ResponseVO.class);
     }
 
     @Override
     public FileStream exportFile(PricedProductCodesCriteria pricedProductCodesCriteria) {
-        return httpPostFile(httpConfig.getPricedProduct().getExportFile(), pricedProductCodesCriteria);
+        return httpPostFile("", "pricedProduct.exportFile", pricedProductCodesCriteria);
     }
 
     @Override
     public ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command) {
-        HttpResponseBody responseBody = httpPostBody(httpConfig.getPricedProduct().getPricing(), command);
+        HttpResponseBody responseBody = httpPostBody("", "pricedProduct.pricing", command);
         ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> responseObject = new ResponseObject.ResponseObjectWrapper<>();
         if (HttpStatus.SC_OK == responseBody.getStatus()) {
             responseObject.setSuccess(true);
@@ -74,7 +75,7 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
 
     @Override
     public ResponseVO grade(ChangeSheetGradeCommand changeSheetGradeCommand) {
-        String text = httpPut(httpConfig.getPricedProduct().getProducts(), changeSheetGradeCommand, changeSheetGradeCommand.getProductCode(), changeSheetGradeCommand.getSheetCode(), httpConfig.getPricedProduct().getGrade());
+        String text = httpPut("", "pricedGrade.grades", changeSheetGradeCommand, changeSheetGradeCommand.getProductCode(), changeSheetGradeCommand.getSheetCode());
         if ("true".equalsIgnoreCase(text)) {
             return null;
         }
@@ -83,6 +84,6 @@ public class PricedProductServiceImpl extends AbstractPricedProductHttpRequest i
 
     @Override
     public List<PricedProduct> inService(PricedProductInServiceCriteria criteria) {
-        return JSONArray.parseArray(httpPost(httpConfig.getPricedProduct().getInService(), criteria), PricedProduct.class);
+        return JSONArray.parseArray(httpPost("", "pricedProduct.inService", criteria), PricedProduct.class);
     }
 }

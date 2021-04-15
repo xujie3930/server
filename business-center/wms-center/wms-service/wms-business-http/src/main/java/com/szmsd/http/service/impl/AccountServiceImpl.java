@@ -3,20 +3,18 @@ package com.szmsd.http.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.http.config.HttpConfig;
+import com.szmsd.http.config.inner.api.ThirdPaymentApiConfig;
 import com.szmsd.http.dto.recharges.RechargesRequestDTO;
 import com.szmsd.http.service.IAccountService;
+import com.szmsd.http.service.http.ThirdPaymentRequest;
 import com.szmsd.http.vo.RechargesResponseVo;
-import org.apache.commons.collections.map.HashedMap;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author liulei
  */
 @Service
-public class AccountServiceImpl extends AbstractBaseHttpRequest implements IAccountService {
+public class AccountServiceImpl extends ThirdPaymentRequest implements IAccountService {
 
     public AccountServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);
@@ -24,30 +22,20 @@ public class AccountServiceImpl extends AbstractBaseHttpRequest implements IAcco
 
     @Override
     public RechargesResponseVo onlineRecharge(RechargesRequestDTO dto) {
-        dto.setNotifyUrl(httpConfig.getNotifyUrl());
-        if(StringUtils.isEmpty(dto.getBankCode())){
+        ThirdPaymentApiConfig.Callback thirdPayment = httpConfig.getDefaultApiConfig().getThirdPayment().getCallback();
+        dto.setNotifyUrl(thirdPayment.getNotifyUrl());
+        if (StringUtils.isEmpty(dto.getBankCode())) {
             dto.setBankCode("");
         }
-        if(StringUtils.isEmpty(dto.getRemark())){
+        if (StringUtils.isEmpty(dto.getRemark())) {
             dto.setRemark("");
         }
-        return JSON.parseObject(httpPost("", dto), RechargesResponseVo.class);
+        return JSON.parseObject(httpPost("", "", dto), RechargesResponseVo.class);
     }
 
     @Override
     public RechargesResponseVo rechargeResult(String rechargeNo) {
-        return JSON.parseObject(httpPost("/", rechargeNo), RechargesResponseVo.class);
+        return JSON.parseObject(httpPost("", "/", rechargeNo), RechargesResponseVo.class);
     }
 
-    @Override
-    public String getUrl(){
-        return httpConfig.getThirdPayment();
-    }
-
-    @Override
-    Map<String, String> getHeaderMap() {
-        Map<String,String> headerMap=new HashMap<String,String>();
-        headerMap.put("Authorization","Bearer "+httpConfig.getRechargeToken());
-        return headerMap;
-    }
 }

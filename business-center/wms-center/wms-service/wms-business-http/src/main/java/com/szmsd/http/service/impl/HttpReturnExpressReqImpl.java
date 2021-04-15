@@ -5,6 +5,7 @@ import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
 import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
 import com.szmsd.http.service.IHttpReturnExpressService;
+import com.szmsd.http.service.http.WmsRequest;
 import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
 import com.szmsd.http.vo.returnex.ProcessingUpdateRespVO;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
  * @Date: 2021/3/27 9:57
  */
 @Service
-public class HttpReturnExpressReqImpl extends AbstractReturnExpressReq implements IHttpReturnExpressService {
+public class HttpReturnExpressReqImpl extends WmsRequest implements IHttpReturnExpressService {
 
     public HttpReturnExpressReqImpl(HttpConfig httpConfig) {
         super(httpConfig);
@@ -30,7 +31,7 @@ public class HttpReturnExpressReqImpl extends AbstractReturnExpressReq implement
      */
     @Override
     public CreateExpectedRespVO expectedCreate(CreateExpectedReqDTO expectedReqDTO) {
-        return JSON.parseObject(httpPost(httpConfig.getReturnExpressConfig().getExpectedCreate(), expectedReqDTO), CreateExpectedRespVO.class);
+        return JSON.parseObject(httpPost("", "returned.expected", expectedReqDTO), CreateExpectedRespVO.class);
     }
 
     /**
@@ -42,6 +43,6 @@ public class HttpReturnExpressReqImpl extends AbstractReturnExpressReq implement
      */
     @Override
     public ProcessingUpdateRespVO processingUpdate(ProcessingUpdateReqDTO processingUpdateReqDTO) {
-        return JSON.parseObject(httpPut(httpConfig.getReturnExpressConfig().getProcessingUpdate(), processingUpdateReqDTO), ProcessingUpdateRespVO.class);
+        return JSON.parseObject(httpPut("", "returned.processing", processingUpdateReqDTO), ProcessingUpdateRespVO.class);
     }
 }
