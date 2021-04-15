@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.http.mapper.HtpConfigMapper">
+
+    <select id="selectHtpUrl" resultType="java.util.Map">
+        SELECT * FROM htp_url
+    </select>
+    <select id="selectHtpUrlGroup" resultType="java.util.Map">
+        SELECT * FROM htp_url_group
+    </select>
+    <select id="selectHtpWarehouse" resultType="java.util.Map">
+        SELECT * FROM htp_warehouse
+    </select>
+    <select id="selectHtpWarehouseGroup" resultType="java.util.Map">
+        SELECT * FROM htp_warehouse_group
+    </select>
+    <select id="selectHtpWarehouseUrlGroup" resultType="java.util.Map">
+        SELECT * FROM htp_warehouse_url_group
+    </select>
+    <select id="selectDefaultHtpUrlGroup" resultType="java.util.Map">
+        SELECT * FROM htp_url_group WHERE `default` = '1'
+    </select>
+</mapper>

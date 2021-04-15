@@ -18,8 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 
 @Api(tags = {"邮件模块"})
 @RestController
@@ -32,7 +31,8 @@ public class EmailController extends BaseController {
     @Resource
     private RedisService redisService;
 
-    private ExecutorService executors = Executors.newFixedThreadPool(10);
+    @Resource
+    private Executor asyncTaskExecutor;
 
     @PreAuthorize("@ss.hasPermi('bas:email:sendvercode')")
     @GetMapping("/sendVerCode/{email}")
@@ -56,7 +56,7 @@ public class EmailController extends BaseController {
                 redisService.deleteObject(key);
                 log.error("邮件发送失败，请稍后重试, {}, {}", email, e.getMessage());
             }
-        }, executors);
+        }, asyncTaskExecutor);
         return R.ok();
     }
 

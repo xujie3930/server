@@ -24,6 +24,7 @@ public class DelOutboundCacheImportContext extends ImportContext<DelOutboundImpo
         super(dataList);
         this.orderTypeCache = new MapCacheContext<>();
         this.countryCache = new MapCacheContext<>();
+        this.deliveryMethodCache = new MapCacheContext<>();
         if (CollectionUtils.isNotEmpty(orderTypeList)) {
             for (BasSubWrapperVO vo : orderTypeList) {
                 this.orderTypeCache.put(vo.getSubName(), vo.getSubValue());

@@ -8,13 +8,14 @@ import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.RemoteAreaTemplateIdCriteria;
 import com.szmsd.http.dto.RemoteAreaTemplateSearchCriteria;
 import com.szmsd.http.service.IRemoteAreaTemplateService;
+import com.szmsd.http.service.http.SaaSProductRemoteAreaRequest;
 import com.szmsd.http.vo.ImportResult;
 import com.szmsd.http.vo.RemoteAreaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-public class RemoteAreaTemplateServiceImpl extends AbstractProductRemoteAreaHttpRequest implements IRemoteAreaTemplateService {
+public class RemoteAreaTemplateServiceImpl extends SaaSProductRemoteAreaRequest implements IRemoteAreaTemplateService {
 
     public RemoteAreaTemplateServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);
@@ -22,17 +23,17 @@ public class RemoteAreaTemplateServiceImpl extends AbstractProductRemoteAreaHttp
 
     @Override
     public PageVO<RemoteAreaTemplate> pageResult(RemoteAreaTemplateSearchCriteria remoteAreaTemplateSearchCriteria) {
-        return JSON.parseObject(httpPost(httpConfig.getRemoteAreaTemplate().getPageResult(), remoteAreaTemplateSearchCriteria), new TypeReference<PageVO<RemoteAreaTemplate>>() {
+        return JSON.parseObject(httpPost("", "remoteAreaTemplate.pageResult", remoteAreaTemplateSearchCriteria), new TypeReference<PageVO<RemoteAreaTemplate>>() {
         });
     }
 
     @Override
     public ImportResult importFile(MultipartFile file) {
-        return JSON.parseObject(httpPostMuFile(httpConfig.getRemoteAreaTemplate().getImportFile(), null, file), ImportResult.class);
+        return JSON.parseObject(httpPostMuFile("", "remoteAreaTemplate.importFile", null, file), ImportResult.class);
     }
 
     @Override
     public FileStream exportFile(RemoteAreaTemplateIdCriteria remoteAreaTemplateIdCriteria) {
-        return httpPostFile(httpConfig.getRemoteAreaTemplate().getExportFile(), remoteAreaTemplateIdCriteria);
+        return httpPostFile("", "remoteAreaTemplate.exportFile", remoteAreaTemplateIdCriteria);
     }
 }

@@ -14,6 +14,9 @@ import java.io.Serializable;
 @ApiModel(value = "ShipmentTrackingChangeRequestDto", description = "ShipmentTrackingChangeRequestDto对象")
 public class ShipmentTrackingChangeRequestDto implements Serializable {
 
+    @ApiModelProperty(value = "仓库代码")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "订单号")
     private String orderNo;
 

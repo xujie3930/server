@@ -21,6 +21,9 @@ import java.util.List;
 @Accessors(chain = true)
 public class CancelShipmentOrderCommand implements Serializable {
 
+    @ApiModelProperty(value = "仓库代码")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "请求唯一标识，可以使用GUID")
     private String referenceNumber;
 
