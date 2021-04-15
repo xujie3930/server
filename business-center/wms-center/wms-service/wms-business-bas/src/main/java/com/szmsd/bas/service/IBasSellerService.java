@@ -2,12 +2,10 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BasSeller;
-import com.szmsd.bas.dto.ActiveDto;
-import com.szmsd.bas.dto.BasSellerDto;
-import com.szmsd.bas.dto.BasSellerInfoDto;
-import com.szmsd.bas.dto.BasSellerSysDto;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -36,7 +34,7 @@ public interface IBasSellerService extends IService<BasSeller> {
         * @param basSeller 模块
         * @return 模块集合
         */
-        List<BasSellerSysDto> selectBasSellerList(BasSeller basSeller);
+        TableDataInfo<BasSellerSysDto> selectBasSellerList(BasSellerQueryDto basSeller);
 
         /**
          * 查询模块列表

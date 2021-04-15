@@ -28,6 +28,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SellerRequest;
@@ -100,7 +101,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         * @return 模块
         */
         @Override
-        public List<BasSellerSysDto> selectBasSellerList(BasSeller basSeller)
+        public TableDataInfo<BasSellerSysDto> selectBasSellerList(BasSellerQueryDto basSeller)
         {
         QueryWrapper<BasSeller> where = new QueryWrapper<BasSeller>();
         if(basSeller.getIsActive()!=null){
@@ -108,6 +109,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "seller_code", basSeller.getSellerCode());
         QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"user_name",basSeller.getUserName());
+        int count = super.count(where);
+            where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());
         List<BasSellerSysDto> basSellerSysDtos = BeanMapperUtil.mapList(baseMapper.selectList(where),BasSellerSysDto.class);
         for(BasSellerSysDto b:basSellerSysDtos){
             SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
@@ -116,7 +119,9 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             UserInfo userInfo= remoteUserService.getUserInfo(sysUserByTypeAndUserType).getData();
             b.setSysId(userInfo.getSysUser().getUserId());
         }
-        return basSellerSysDtos;
+            TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
+            table.setCode(200);
+            return table;
         }
 
         @Override

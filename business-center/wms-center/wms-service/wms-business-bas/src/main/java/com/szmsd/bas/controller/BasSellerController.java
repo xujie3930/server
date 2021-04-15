@@ -1,9 +1,6 @@
 package com.szmsd.bas.controller;
 import com.szmsd.bas.domain.BasSeller;
-import com.szmsd.bas.dto.ActiveDto;
-import com.szmsd.bas.dto.BasSellerDto;
-import com.szmsd.bas.dto.BasSellerInfoDto;
-import com.szmsd.bas.dto.BasSellerSysDto;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.domain.R;
@@ -47,11 +44,9 @@ public class BasSellerController extends BaseController{
       @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
       @GetMapping("/list")
       @ApiOperation(value = "分页查询模块列表",notes = "分页查询模块列表")
-      public TableDataInfo list(BasSeller basSeller)
+      public TableDataInfo list(BasSellerQueryDto basSeller)
      {
-            startPage();
-            List<BasSellerSysDto> list = basSellerService.selectBasSellerList(basSeller);
-            return getDataTable(list);
+            return basSellerService.selectBasSellerList(basSeller);
       }
 
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
@@ -96,9 +91,9 @@ public class BasSellerController extends BaseController{
      @GetMapping("/export")
      @ApiOperation(value = "导出模块列表",notes = "导出模块列表")
      public void export(HttpServletResponse response, BasSeller basSeller) throws IOException {
-     List<BasSellerSysDto> list = basSellerService.selectBasSellerList(basSeller);
+     /*List<BasSellerSysDto> list = basSellerService.selectBasSellerList(basSeller);
      ExcelUtil<BasSellerSysDto> util = new ExcelUtil<BasSellerSysDto>(BasSellerSysDto.class);
-        util.exportExcel(response,list, "BasSeller");
+        util.exportExcel(response,list, "BasSeller");*/
 
      }
 
