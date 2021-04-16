@@ -80,20 +80,28 @@ abstract class AbstractRequest {
         if (null == httpUrlType) {
             throw new CommonException("999", "http url type cant be null");
         }
+        UrlConfig urlConfig = null;
         switch (httpUrlType) {
             case WMS:
-                return urlGroupConfig.getWms();
+                urlConfig = urlGroupConfig.getWms();
+                break;
             case THIRD_PAYMENT:
-                return urlGroupConfig.getThirdPayment();
+                urlConfig = urlGroupConfig.getThirdPayment();
+                break;
             case PRICED_PRODUCT:
-                return urlGroupConfig.getPricedProduct();
+                urlConfig = urlGroupConfig.getPricedProduct();
+                break;
             case CARRIER_SERVICE:
-                return urlGroupConfig.getCarrierService();
+                urlConfig = urlGroupConfig.getCarrierService();
+                break;
             case PRODUCT_REMOTE_AREA:
-                return urlGroupConfig.getProductRemoteArea();
-            default:
-                throw new CommonException("999", "[" + httpUrlType.name() + "]未配置");
+                urlConfig = urlGroupConfig.getProductRemoteArea();
+                break;
         }
+        if (null == urlConfig) {
+            throw new CommonException("999", "[" + httpUrlType.name() + "]未配置");
+        }
+        return urlConfig;
     }
 
     ApiConfig getApiConfig(UrlConfig urlConfig) {
