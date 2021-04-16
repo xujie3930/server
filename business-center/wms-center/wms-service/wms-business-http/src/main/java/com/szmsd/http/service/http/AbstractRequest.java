@@ -14,14 +14,18 @@ import com.szmsd.http.config.inner.api.ApiConfig;
 import com.szmsd.http.config.inner.url.UrlApiConfig;
 import com.szmsd.http.config.inner.url.UrlConfig;
 import com.szmsd.http.domain.HtpRequestLog;
+import com.szmsd.http.domain.HtpUrlGroup;
+import com.szmsd.http.enums.HttpUrlType;
 import com.szmsd.http.event.EventUtil;
 import com.szmsd.http.event.RequestLogEvent;
+import com.szmsd.http.service.IHtpConfigService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.Header;
 import org.slf4j.MDC;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -33,6 +37,9 @@ import java.util.Set;
  * @date 2021-04-13 15:03
  */
 abstract class AbstractRequest {
+
+    @Resource
+    private IHtpConfigService iHtpConfigService;
 
     protected HttpConfig httpConfig;
 
@@ -61,7 +68,7 @@ abstract class AbstractRequest {
                 urlGroupName = this.httpConfig.getMapperGroup().get(matchWarehouseGroupName);
             }
         }
-        if (this.isEmpty(urlGroupName)) {
+        if (this.isEmpty(urlGroupName) && this.isEmpty(warehouseCode)) {
             // 获取默认映射
             urlGroupName = this.httpConfig.getDefaultUrlGroup();
         }
@@ -99,7 +106,8 @@ abstract class AbstractRequest {
                 break;
         }
         if (null == urlConfig) {
-            throw new CommonException("999", "[" + httpUrlType.name() + "]未配置");
+            HtpUrlGroup htpUrlGroup = iHtpConfigService.selectHtpUrlGroup(urlGroupName);
+            throw new CommonException("999", htpUrlGroup.getGroupName() + "的[" + HttpUrlType.valueOf(httpUrlType.name()).getKey() + "]服务未配置");
         }
         return urlConfig;
     }

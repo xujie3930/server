@@ -22,8 +22,8 @@ public class HtpRemoteAreaTemplateFeignFallback implements FallbackFactory<HtpRe
         log.error("{}服务调用失败：{}", BusinessHttpInterface.SERVICE_NAME, throwable.getMessage());
         return new HtpRemoteAreaTemplateFeignService() {
             @Override
-            public PageVO<RemoteAreaTemplate> pageResult(RemoteAreaTemplateSearchCriteria remoteAreaTemplateSearchCriteria) {
-                return PageVO.empty();
+            public R<PageVO<RemoteAreaTemplate>> pageResult(RemoteAreaTemplateSearchCriteria remoteAreaTemplateSearchCriteria) {
+                return R.convertResultJson(throwable);
             }
 
             @Override

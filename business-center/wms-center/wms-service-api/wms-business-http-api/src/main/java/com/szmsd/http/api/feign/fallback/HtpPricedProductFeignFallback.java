@@ -32,8 +32,8 @@ public class HtpPricedProductFeignFallback implements FallbackFactory<HtpPricedP
             }
 
             @Override
-            public PageVO pageResult(PricedProductSearchCriteria pricedProductSearchCriteria) {
-                return PageVO.empty();
+            public R<PageVO<PricedProduct>> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria) {
+                return R.convertResultJson(throwable);
             }
 
             @Override
