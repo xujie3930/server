@@ -50,9 +50,9 @@ public enum LocalLanguageEnum {
     VALID_1(VALID, "1", "有效", "Effective"),
 
     /** 是 **/
-    YN_Y(YN, "0", "是", "Y"),
+    YN_Y(YN, "0", "否", "N"),
     /** 否 **/
-    YN_N(YN, "1", "否", "N"),
+    YN_N(YN, "1", "是", "Y"),
     ;
 
     private LocalLanguageTypeEnum typeEnum;
