@@ -99,6 +99,15 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
     }
 
     /**
+     * 查询最近一次部署
+     * @return
+     */
+    @Override
+    public HtpDeployLog selectLastDeployLog() {
+        return htpConfigMapper.selectLastDeployLog();
+    }
+
+    /**
      * 地址组集合
      * @return
      */

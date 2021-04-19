@@ -35,6 +35,14 @@
         <result column="url_group_name" property="urlGroupName"/>
     </resultMap>
 
+    <resultMap id="HtpDeployLog" type="com.szmsd.http.domain.HtpDeployLog">
+        <id column="id" property="id"/>
+        <result column="content" property="content"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
     <insert id="saveHtpUrlGroup" parameterType="com.szmsd.http.domain.HtpUrlGroup">
         INSERT INTO htp_url_group
         (group_id, group_name, default_flag, create_by, create_by_name)
@@ -171,5 +179,8 @@
     </select>
     <select id="selectDefaultHtpUrlGroup" resultMap="HtpUrlGroup">
         SELECT * FROM htp_url_group WHERE `default_flag` = '1'
+    </select>
+    <select id="selectLastDeployLog" resultMap="HtpDeployLog">
+        SELECT * FROM htp_deploy_log ORDER BY create_time DESC LIMIT 1
     </select>
 </mapper>

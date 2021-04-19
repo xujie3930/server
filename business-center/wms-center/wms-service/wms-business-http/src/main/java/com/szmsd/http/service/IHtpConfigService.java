@@ -10,6 +10,8 @@ public interface IHtpConfigService {
 
     void saveDeployLog(String content, String remark);
 
+    HtpDeployLog selectLastDeployLog();
+
     List<HtpUrlGroup> selectHtpUrlGroup();
 
     HtpUrlGroup selectHtpUrlGroup(String groupId);

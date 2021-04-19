@@ -27,6 +27,13 @@ public class HtpConfigController extends BaseController {
         return R.ok();
     }
 
+    @GetMapping("/deploy/queryLastDeployLog")
+    @ApiOperation(value = "查询最近一次部署记录")
+    public R<HtpDeployLog> queryLastDeployLog() {
+        HtpDeployLog htpDeployLog = htpConfigService.selectLastDeployLog();
+        return R.ok(htpDeployLog);
+    }
+
     @GetMapping("/htpUrlGroup/query")
     @ApiOperation(value = "查询地址组")
     public R<List<HtpUrlGroup>> queryHtpUrlGroup() {

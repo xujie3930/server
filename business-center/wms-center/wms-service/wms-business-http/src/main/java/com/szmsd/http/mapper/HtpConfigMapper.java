@@ -43,4 +43,7 @@ public interface HtpConfigMapper extends BaseMapper {
     void saveDeployLog(HtpDeployLog htpDeployLog);
 
     void deleteHtpWarehouse(@Param("groupId") String groupId, @Param("warehouseCode") String warehouseCode);
+
+    HtpDeployLog selectLastDeployLog();
+
 }
