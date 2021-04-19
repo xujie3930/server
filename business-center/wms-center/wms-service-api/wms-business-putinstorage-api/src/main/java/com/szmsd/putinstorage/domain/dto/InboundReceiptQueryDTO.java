@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "InboundReceiptQueryDTO", description = "入库查询入参")
@@ -15,8 +17,14 @@ public class InboundReceiptQueryDTO {
     @ApiModelProperty(value = "入库单号")
     private String warehouseNo;
 
+    @ApiModelProperty(value = "入库单号", hidden = true)
+    private List<String> warehouseNoList;
+
     @ApiModelProperty(value = "采购单")
     private String orderNo;
+
+    @ApiModelProperty(value = "采购单", hidden = true)
+    private List<String> orderNoList;
 
     @ApiModelProperty(value = "目的仓库编码")
     private String warehouseCode;

@@ -32,9 +32,9 @@ public class PricedProductController extends BaseController {
 
     @PostMapping("/pageResult")
     @ApiOperation(value = "分页查询产品列表，返回指定页面的数据，以及统计总记录数")
-    public PageVO<PricedProduct> pageResult(@RequestBody PricedProductSearchCriteria pricedProductSearchCriteria) {
+    public R<PageVO<PricedProduct>> pageResult(@RequestBody PricedProductSearchCriteria pricedProductSearchCriteria) {
         PageVO<PricedProduct> pageResult = iPricedProductService.pageResult(pricedProductSearchCriteria);
-        return pageResult == null ? PageVO.empty() : pageResult;
+        return pageResult == null ? R.ok(PageVO.empty()) : R.ok(pageResult);
     }
 
     @GetMapping("/keyValuePairs")

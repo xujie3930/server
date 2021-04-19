@@ -29,9 +29,9 @@ public class RemoteAreaTemplateController extends BaseController {
 
     @PostMapping("/pageResult")
     @ApiOperation(value = "分页查询地址库模板列表，返回指定页面的数据，以及统计总记录数")
-    public PageVO<RemoteAreaTemplate> pageResult(@RequestBody RemoteAreaTemplateSearchCriteria remoteAreaTemplateSearchCriteria) {
+    public R<PageVO<RemoteAreaTemplate>> pageResult(@RequestBody RemoteAreaTemplateSearchCriteria remoteAreaTemplateSearchCriteria) {
         PageVO<RemoteAreaTemplate> pageResult = iRemoteAreaTemplateService.pageResult(remoteAreaTemplateSearchCriteria);
-        return pageResult == null ? PageVO.empty() : pageResult;
+        return pageResult == null ? R.ok(PageVO.empty()) : R.ok(pageResult);
     }
 
     @PostMapping(value = "/importFile", headers = "content-type=multipart/form-data")

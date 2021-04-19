@@ -23,7 +23,7 @@ public interface HtpPricedProductFeignService {
     R<List<KeyValuePair>> keyValuePairs();
 
     @PostMapping("/api/products/http/pageResult")
-    PageVO pageResult(@RequestBody PricedProductSearchCriteria pricedProductSearchCriteria);
+    R<PageVO<PricedProduct>> pageResult(@RequestBody PricedProductSearchCriteria pricedProductSearchCriteria);
 
     @PostMapping("/api/products/http/create")
     R<ResponseVO> create(@RequestBody CreatePricedProductCommand createPricedProductCommand);
