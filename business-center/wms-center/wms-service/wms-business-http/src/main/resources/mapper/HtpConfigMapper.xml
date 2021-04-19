@@ -2,22 +2,185 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.http.mapper.HtpConfigMapper">
 
-    <select id="selectHtpUrl" resultType="java.util.Map">
-        SELECT * FROM htp_url
+    <resultMap id="HtpUrl" type="com.szmsd.http.domain.HtpUrl">
+        <result column="group_id" property="groupId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="service_id" property="serviceId"/>
+        <result column="headers" property="headers"/>
+        <result column="url" property="url"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <resultMap id="HtpUrlGroup" type="com.szmsd.http.domain.HtpUrlGroup">
+        <id column="group_id" property="groupId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="default_flag" property="defaultFlag"/>
+    </resultMap>
+
+    <resultMap id="HtpWarehouse" type="com.szmsd.http.domain.HtpWarehouse">
+        <result column="group_id" property="groupId"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_name" property="warehouseName"/>
+    </resultMap>
+
+    <resultMap id="HtpWarehouseGroup" type="com.szmsd.http.domain.HtpWarehouseGroup">
+        <id column="group_id" property="groupId"/>
+        <result column="group_name" property="groupName"/>
+    </resultMap>
+
+    <resultMap id="HtpWarehouseUrlGroup" type="com.szmsd.http.domain.HtpWarehouseUrlGroup">
+        <result column="warehouse_group_id" property="warehouseGroupId"/>
+        <result column="warehouse_group_name" property="warehouseGroupName"/>
+        <result column="url_group_id" property="urlGroupId"/>
+        <result column="url_group_name" property="urlGroupName"/>
+    </resultMap>
+
+    <resultMap id="HtpDeployLog" type="com.szmsd.http.domain.HtpDeployLog">
+        <id column="id" property="id"/>
+        <result column="content" property="content"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="saveHtpUrlGroup" parameterType="com.szmsd.http.domain.HtpUrlGroup">
+        INSERT INTO htp_url_group
+        (group_id, group_name, default_flag, create_by, create_by_name)
+        VALUES
+        (#{groupId}, #{groupName}, #{defaultFlag}, #{createBy}, #{createByName})
+    </insert>
+    <update id="updateHtpUrlGroup" parameterType="com.szmsd.http.domain.HtpUrlGroup">
+        UPDATE htp_url_group
+        <set>
+            <if test="groupName != null and groupName != ''">group_name = #{groupName},</if>
+            <if test="defaultFlag != null and defaultFlag != ''">default_flag = #{defaultFlag},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateByName != null and updateByName != ''">update_by_name = #{updateByName},</if>
+        </set>
+        <where>
+            <if test="groupId != null and groupId != ''">group_id = #{groupId}</if>
+        </where>
+    </update>
+
+    <insert id="saveHtpUrl" parameterType="com.szmsd.http.domain.HtpUrl">
+        INSERT INTO htp_url
+        (group_id, service_id, headers, url, remark, create_by, create_by_name)
+        VALUES
+        (#{groupId}, #{serviceId}, #{headers, jdbcType=VARCHAR}, #{url}, #{remark}, #{createBy}, #{createByName})
+    </insert>
+    <update id="updateHtpUrl" parameterType="com.szmsd.http.domain.HtpUrl">
+        UPDATE htp_url
+        <set>
+            <if test="headers != null and headers != ''">headers = #{headers, jdbcType=VARCHAR},</if>
+            <if test="url != null and url != ''">url = #{url},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateByName != null and updateByName != ''">update_by_name = #{updateByName},</if>
+            remark = #{remark}
+        </set>
+        WHERE group_id = #{groupId} AND service_id = #{serviceId}
+    </update>
+
+    <insert id="saveHtpWarehouseGroup" parameterType="com.szmsd.http.domain.HtpWarehouseGroup">
+        INSERT INTO htp_warehouse_group
+        (group_id, group_name, create_by, create_by_name)
+        VALUES
+        (#{groupId}, #{groupName}, #{createBy}, #{createByName})
+       </insert>
+    <update id="updateHtpWarehouseGroup" parameterType="com.szmsd.http.domain.HtpWarehouseGroup">
+        UPDATE htp_warehouse_group
+        <set>
+            <if test="groupName != null and groupName != ''">group_name = #{groupName},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateByName != null and updateByName != ''">update_by_name = #{updateByName},</if>
+        </set>
+        WHERE group_id = #{groupId}
+    </update>
+
+    <insert id="saveWarehouse" parameterType="com.szmsd.http.domain.HtpWarehouse">
+        INSERT INTO htp_warehouse
+        (group_id, warehouse_code)
+        VALUES
+        (#{groupId}, #{warehouseCode})
+    </insert>
+    <delete id="deleteHtpWarehouse">
+        DELETE FROM htp_warehouse WHERE group_id = #{groupId} AND warehouse_code = #{warehouseCode}
+    </delete>
+    <delete id="deleteHtpWarehouseByWarehouseCode">
+        DELETE FROM htp_warehouse WHERE warehouse_code = #{warehouseCode}
+    </delete>
+
+    <delete id="deleteHtpWarehouseUrlGroupBywarehouseGroupId">
+        DELETE FROM htp_warehouse_url_group WHERE warehouse_group_id = #{warehouseGroupId}
+    </delete>
+    <insert id="saveHtpWarehouseUrlGroup" parameterType="com.szmsd.http.domain.HtpWarehouseUrlGroup">
+        INSERT INTO htp_warehouse_url_group
+        (warehouse_group_id, url_group_id)
+        VALUES
+        (#{warehouseGroupId}, #{urlGroupId})
+    </insert>
+    <insert id="saveDeployLog" parameterType="com.szmsd.http.domain.HtpDeployLog">
+        INSERT INTO htp_deploy_log
+        (create_by, create_by_name, content, remark)
+        VALUES
+        (#{createBy}, #{createByName}, #{content}, #{remark})
+    </insert>
+
+    <select id="selectHtpUrl" resultMap="HtpUrl">
+        SELECT
+        htp_url.group_id,
+        htp_url.service_id,
+        htp_url.headers,
+        htp_url.url,
+        htp_url.remark,
+        htp_url_group.group_name FROM htp_url LEFT JOIN  htp_url_group ON htp_url.group_id = htp_url_group.group_id
+        <where>
+            <if test="groupId != null and groupId != ''">AND htp_url.group_id = #{groupId}</if>
+            <if test="serviceId != null and serviceId != ''">AND htp_url.service_id = #{serviceId}</if>
+        </where>
+        ORDER BY htp_url.update_time DESC
     </select>
-    <select id="selectHtpUrlGroup" resultType="java.util.Map">
+    <select id="selectHtpUrlGroup" resultMap="HtpUrlGroup">
         SELECT * FROM htp_url_group
+        <where>
+            <if test="groupId != null and groupId != ''">AND group_id = #{groupId}</if>
+            <if test="groupName != null and groupName != ''">AND group_name = #{groupName}</if>
+        </where>
+        ORDER BY create_time
     </select>
-    <select id="selectHtpWarehouse" resultType="java.util.Map">
-        SELECT * FROM htp_warehouse
+    <select id="selectHtpWarehouse" resultMap="HtpWarehouse">
+        SELECT *, warehouse_code warehouse_name FROM htp_warehouse
+        <where>
+            <if test="groupId != null and groupId != ''">AND group_id = #{groupId}</if>
+            <if test="warehouseCode != null and warehouseCode != ''">AND warehouse_code = #{warehouseCode}</if>
+        </where>
     </select>
-    <select id="selectHtpWarehouseGroup" resultType="java.util.Map">
+    <select id="selectHtpWarehouseGroup" resultMap="HtpWarehouseGroup">
         SELECT * FROM htp_warehouse_group
+        <where>
+            <if test="groupId != null and groupId != ''">AND group_id = #{groupId}</if>
+            <if test="groupName != null and groupName != ''">AND group_name = #{groupName}</if>
+        </where>
+        ORDER BY create_time
     </select>
-    <select id="selectHtpWarehouseUrlGroup" resultType="java.util.Map">
-        SELECT * FROM htp_warehouse_url_group
+    <select id="selectHtpWarehouseUrlGroup" resultMap="HtpWarehouseUrlGroup">
+        SELECT
+            a.warehouse_group_id,
+            c.group_name warehouse_group_name,
+            a.url_group_id,
+            b.group_name url_group_name
+        FROM
+        htp_warehouse_url_group a
+        LEFT JOIN htp_url_group b ON a.url_group_id = b.group_id
+        LEFT JOIN htp_warehouse_group c ON a.warehouse_group_id = c.group_id
+        <where>
+            <if test="warehouseGroupId != null and warehouseGroupId != ''">AND warehouse_group_id = #{warehouseGroupId}</if>
+            <if test="urlGroupId != null and urlGroupId != ''">AND url_group_id = #{urlGroupId}</if>
+        </where>
     </select>
-    <select id="selectDefaultHtpUrlGroup" resultType="java.util.Map">
-        SELECT * FROM htp_url_group WHERE `default` = '1'
+    <select id="selectDefaultHtpUrlGroup" resultMap="HtpUrlGroup">
+        SELECT * FROM htp_url_group WHERE `default_flag` = '1'
+    </select>
+    <select id="selectLastDeployLog" resultMap="HtpDeployLog">
+        SELECT * FROM htp_deploy_log ORDER BY create_time DESC LIMIT 1
     </select>
 </mapper>

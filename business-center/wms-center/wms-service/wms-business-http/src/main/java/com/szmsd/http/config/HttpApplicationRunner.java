@@ -23,7 +23,7 @@ public class HttpApplicationRunner {
     @PostConstruct
     public void initHttpConfig() {
         log.info("加载外部接口服务配置 ------------- start");
-        htpConfigService.loadHtpConfig();
+        htpConfigService.loadHtpConfig("服务启动部署");
         log.info("加载外部接口服务配置 ------------- end");
     }
 

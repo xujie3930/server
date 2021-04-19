@@ -44,6 +44,7 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
     public List<PricedProductSheetVO> sheets(String productCode) {
         R<PricedProductInfo> info = htpPricedProductFeignService.info(productCode);
         PricedProductInfo data = info.getData();
+        AssertUtil.notNull(data, info.getMsg());
         List<PricedProductSheet> sheets = data.getSheets();
         List<PricedProductSheetVO> pricedProductSheetVOS = BeanMapperUtil.mapList(sheets, PricedProductSheetVO.class);
         pricedProductSheetVOS.forEach(sheet -> sheet.setProductCode(productCode));

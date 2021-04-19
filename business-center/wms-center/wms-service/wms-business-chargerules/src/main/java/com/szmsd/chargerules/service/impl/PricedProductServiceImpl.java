@@ -12,6 +12,7 @@ import com.szmsd.chargerules.service.IPricedProductService;
 import com.szmsd.chargerules.vo.FreightCalculationVO;
 import com.szmsd.chargerules.vo.PricedProductInfoVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.PageVO;
@@ -131,8 +132,9 @@ public class PricedProductServiceImpl implements IPricedProductService {
         pricedProductSearchCriteria.setPageSize(pricedProductQueryDTO.getPageSize());
         pricedProductSearchCriteria.setCode(pricedProductQueryDTO.getCode());
         log.info("分页查询产品列表：{}", pricedProductSearchCriteria);
-        PageVO<PricedProduct> pageResult = htpPricedProductFeignService.pageResult(pricedProductSearchCriteria);
-        return TableDataInfo.convert(pageResult);
+        R<PageVO<PricedProduct>> pageResult = htpPricedProductFeignService.pageResult(pricedProductSearchCriteria);
+        AssertUtil.notNull(pageResult.getData(), pageResult.getMsg());
+        return TableDataInfo.convert(pageResult.getData());
     }
 
     /**
@@ -140,7 +142,7 @@ public class PricedProductServiceImpl implements IPricedProductService {
      * https://pricedproduct-internalapi-external.dsloco.com/api/products
      * @param createProductDTO
      */
-    @Override
+    @Override 
     public void create(CreateProductDTO createProductDTO) {
         log.info("创建报价产品信息：{}", createProductDTO);
         CreatePricedProductCommand createPricedProductCommand = new CreatePricedProductCommand();

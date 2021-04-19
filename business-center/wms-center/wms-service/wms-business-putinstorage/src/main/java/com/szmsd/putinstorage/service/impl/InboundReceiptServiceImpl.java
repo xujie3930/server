@@ -20,15 +20,19 @@ import com.szmsd.putinstorage.service.IInboundReceiptService;
 import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -51,6 +55,19 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      */
     @Override
     public List<InboundReceiptVO> selectList(InboundReceiptQueryDTO queryDTO) {
+        String warehouseNo = queryDTO.getWarehouseNo();
+        if (StringUtils.isNotEmpty(warehouseNo)) {
+            List<String> warehouseNoSplit = Arrays.asList(warehouseNo.split(","));
+            List<String> warehouseNoList = ListUtils.emptyIfNull(queryDTO.getWarehouseNoList());
+            queryDTO.setWarehouseNoList(Stream.of(warehouseNoSplit, warehouseNoList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
+        }
+        String orderNo = queryDTO.getOrderNo();
+        if (StringUtils.isNotEmpty(orderNo)) {
+            List<String> orderNoSplit = Arrays.asList(orderNo.split(","));
+            List<String> orderNoList = ListUtils.emptyIfNull(queryDTO.getOrderNoList());
+            queryDTO.setOrderNoList(Stream.of(orderNoSplit, orderNoList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
+        }
+
         return baseMapper.selectList(queryDTO);
     }
 

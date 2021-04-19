@@ -31,7 +31,7 @@ public class PricedProductServiceImpl extends SaaSPricedProductRequest implement
 
     @Override
     public List<KeyValuePair> keyValuePairs() {
-        return JSON.parseArray(httpPost("SZ", "pricedProduct.keyValuePairs", null), KeyValuePair.class);
+        return JSON.parseArray(httpPost("", "pricedProduct.keyValuePairs", null), KeyValuePair.class);
     }
 
     @Override

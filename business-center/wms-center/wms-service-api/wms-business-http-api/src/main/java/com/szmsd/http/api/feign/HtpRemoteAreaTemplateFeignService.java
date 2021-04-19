@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface HtpRemoteAreaTemplateFeignService {
 
     @PostMapping("/api/remote/area/http/pageResult")
-    PageVO<RemoteAreaTemplate> pageResult(@RequestBody RemoteAreaTemplateSearchCriteria remoteAreaTemplateSearchCriteria);
+    R<PageVO<RemoteAreaTemplate>> pageResult(@RequestBody RemoteAreaTemplateSearchCriteria remoteAreaTemplateSearchCriteria);
 
     @PostMapping(value = "/api/remote/area/http/importFile", headers = "content-type=multipart/form-data")
     R<ImportResult> importFile(@RequestPart("file") MultipartFile file);

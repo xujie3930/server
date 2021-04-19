@@ -3,6 +3,7 @@ package com.szmsd.chargerules.service.impl;
 import com.szmsd.chargerules.dto.RemoteAreaQueryDTO;
 import com.szmsd.chargerules.service.IRemoteAreaService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -37,8 +38,9 @@ public class RemoteAreaServiceImpl implements IRemoteAreaService {
         remoteAreaTemplateSearchCriteria.setPageSize(remoteAreaQueryDTO.getPageSize());
         remoteAreaTemplateSearchCriteria.setName(remoteAreaQueryDTO.getName());
         log.info("分页查询地址库模板列表：{}", remoteAreaTemplateSearchCriteria);
-        PageVO<RemoteAreaTemplate> pageResult = htpRemoteAreaTemplateFeignService.pageResult(remoteAreaTemplateSearchCriteria);
-        return TableDataInfo.convert(pageResult);
+        R<PageVO<RemoteAreaTemplate>> pageResult = htpRemoteAreaTemplateFeignService.pageResult(remoteAreaTemplateSearchCriteria);
+        AssertUtil.notNull(pageResult.getData(), pageResult.getMsg());
+        return TableDataInfo.convert(pageResult.getData());
     }
 
     /**
