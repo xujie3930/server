@@ -81,6 +81,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             httpConfig.loadError(e);
+            throw e;
         } finally {
             httpConfig.loadAfter();
         }
