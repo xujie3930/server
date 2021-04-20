@@ -193,9 +193,14 @@ abstract class AbstractRequest extends BaseRequest {
         return responseBody;
     }
 
+    boolean hasMultipleChannelUrlSet(String api) {
+        String formatApi = Utils.formatApi(api);
+        return this.httpConfig.getMultipleChannelUrlSet().contains(formatApi);
+    }
+
     HttpResponseBody httpRequestBodyAdapter(String warehouseCode, String api, ReFunction<String, UrlConfig, HttpResponseBody> reFunction) {
         // 判断是不是多通道的api
-        if (this.httpConfig.getMultipleChannelUrlSet().contains(api)) {
+        if (this.hasMultipleChannelUrlSet(api)) {
             HttpUrlType httpUrlType = this.getHttpUrlType();
             if (null == httpUrlType) {
                 throw new CommonException("999", "http url type cant be null");
