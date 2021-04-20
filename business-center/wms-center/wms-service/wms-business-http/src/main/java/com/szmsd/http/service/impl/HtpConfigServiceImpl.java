@@ -177,7 +177,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public void saveOrUpdateHtpUrlGroup(HtpUrlGroup htpUrlGroup) {
-        AssertUtil.isTrue(StringUtils.isNotEmpty(htpUrlGroup.getGroupName()), "请输入服务组名称");
+        AssertUtil.isTrue(StringUtils.isNotEmpty(htpUrlGroup.getGroupName()), "请输入地址组名称");
         htpUrlGroup.setGroupName(htpUrlGroup.getGroupName().trim());
         List<HtpUrlGroup> htpUrlGroups = htpConfigMapper.selectHtpUrlGroup(null, htpUrlGroup.getGroupName());
         if (CollectionUtils.isNotEmpty(htpUrlGroups)) {
@@ -268,7 +268,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
     @Override
     public void saveOrUpdateHtpWarehouseGroup(HtpWarehouseGroup htpWarehouseGroup) {
         String groupName = htpWarehouseGroup.getGroupName();
-        AssertUtil.isTrue(StringUtils.isNotEmpty(groupName), "请输入服务组名称");
+        AssertUtil.isTrue(StringUtils.isNotEmpty(groupName), "请输入地址组名称");
         htpWarehouseGroup.setGroupName(htpWarehouseGroup.getGroupName().trim());
         List<HtpWarehouseGroup> htpWarehouseGroups = htpConfigMapper.selectHtpWarehouseGroup(null, groupName);
         if (CollectionUtils.isNotEmpty(htpWarehouseGroups)) {
@@ -322,7 +322,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
         List<HtpWarehouseGroup> htpWarehouseGroups = htpConfigMapper.selectHtpWarehouseGroup(warehouseGroupId, null);
         AssertUtil.isTrue(CollectionUtils.isNotEmpty(htpWarehouseGroups), "仓库组不存在，请刷新重试");
 
-        List<HtpUrlGroup> htpUrlGroups = htpConfigMapper.selectHtpUrlGroup(warehouseGroupId, null);
+        List<HtpUrlGroup> htpUrlGroups = htpConfigMapper.selectHtpUrlGroup(urlGroupId, null);
         AssertUtil.isTrue(CollectionUtils.isNotEmpty(htpUrlGroups), "地址组不存在，请刷新重试");
 
         htpConfigMapper.deleteHtpWarehouseUrlGroupBywarehouseGroupId(warehouseGroupId);

@@ -9,13 +9,13 @@ import java.util.Date;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "HtpWarehouseGroup", description = "外部服务仓库组")
+@ApiModel(value = "HtpWarehouseGroup", description = "仓库组")
 public class HtpWarehouseGroup {
 
-    @ApiModelProperty(value = "服务组")
+    @ApiModelProperty(value = "地址组")
     private String groupId;
 
-    @ApiModelProperty(value = "服务组名称")
+    @ApiModelProperty(value = "地址组名称")
     private String groupName;
 
     @ApiModelProperty(value = "创建人")
