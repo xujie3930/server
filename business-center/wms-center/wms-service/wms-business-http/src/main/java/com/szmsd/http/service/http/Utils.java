@@ -33,4 +33,12 @@ public class Utils {
     public static String getMethod(String field) {
         return ("get" + field.substring(0, 1).toUpperCase() + field.substring(1));
     }
+
+    public static String formatApi(String api) {
+        // api
+        // base-info.seller         ->>> baseinfo.seller
+        // base-info.shipment-rule  ->>> baseinfo.shipmentrule
+        // exception.processing     ->>> exception.processing
+        return api.trim().replaceAll("-", "").toLowerCase();
+    }
 }

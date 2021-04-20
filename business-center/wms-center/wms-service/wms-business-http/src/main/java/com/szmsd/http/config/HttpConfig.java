@@ -2,6 +2,7 @@ package com.szmsd.http.config;
 
 import com.szmsd.http.config.inner.DefaultApiConfig;
 import com.szmsd.http.config.inner.UrlGroupConfig;
+import com.szmsd.http.service.http.Utils;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -51,6 +52,13 @@ public class HttpConfig {
         if (null == this.multipleChannelUrlSet) {
             this.multipleChannelUrlSet = new HashSet<>();
         }
+        // 对数据进行格式化
+        Set<String> copySet = new HashSet<>();
+        for (String value : multipleChannelUrlSet) {
+            copySet.add(Utils.formatApi(value));
+        }
+        this.multipleChannelUrlSet = copySet;
+        copySet = null;
     }
 
     /**
