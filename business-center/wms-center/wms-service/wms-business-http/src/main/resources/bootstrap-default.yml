@@ -126,4 +126,8 @@ com:
           recharges:
             recharges: /msd/v1/recharges
           callback:
-            notify-url: /wms-open/api/recharge/rechargeCallback
+            notify-url: http://183.3.221.136:22220/wms-open/api/recharge/rechargeCallback
+      # 多通道url配置
+      multiple-channel-url-set:
+        - base-info.packings
+        - base-info.products

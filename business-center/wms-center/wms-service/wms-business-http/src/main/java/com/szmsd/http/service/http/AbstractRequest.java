@@ -13,15 +13,11 @@ import com.szmsd.http.config.inner.UrlGroupConfig;
 import com.szmsd.http.config.inner.api.ApiConfig;
 import com.szmsd.http.config.inner.url.UrlApiConfig;
 import com.szmsd.http.config.inner.url.UrlConfig;
-import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.domain.HtpUrlGroup;
 import com.szmsd.http.enums.HttpUrlType;
-import com.szmsd.http.event.EventUtil;
-import com.szmsd.http.event.RequestLogEvent;
 import com.szmsd.http.service.IHtpConfigService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.Header;
-import org.slf4j.MDC;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,12 +32,11 @@ import java.util.Set;
  * @author zhangyuyuan
  * @date 2021-04-13 15:03
  */
-abstract class AbstractRequest {
-
-    @Resource
-    private IHtpConfigService iHtpConfigService;
+abstract class AbstractRequest extends BaseRequest {
 
     protected HttpConfig httpConfig;
+    @Resource
+    private IHtpConfigService iHtpConfigService;
 
     public AbstractRequest(HttpConfig httpConfig) {
         this.httpConfig = httpConfig;
@@ -87,6 +82,15 @@ abstract class AbstractRequest {
         if (null == httpUrlType) {
             throw new CommonException("999", "http url type cant be null");
         }
+        UrlConfig urlConfig = this.getUrlConfigAdapter(urlGroupConfig, httpUrlType);
+        if (null == urlConfig) {
+            HtpUrlGroup htpUrlGroup = iHtpConfigService.selectHtpUrlGroup(urlGroupName);
+            throw new CommonException("999", htpUrlGroup.getGroupName() + "的[" + HttpUrlType.valueOf(httpUrlType.name()).getKey() + "]服务未配置");
+        }
+        return urlConfig;
+    }
+
+    UrlConfig getUrlConfigAdapter(UrlGroupConfig urlGroupConfig, HttpUrlType httpUrlType) {
         UrlConfig urlConfig = null;
         switch (httpUrlType) {
             case WMS:
@@ -104,10 +108,6 @@ abstract class AbstractRequest {
             case PRODUCT_REMOTE_AREA:
                 urlConfig = urlGroupConfig.getProductRemoteArea();
                 break;
-        }
-        if (null == urlConfig) {
-            HtpUrlGroup htpUrlGroup = iHtpConfigService.selectHtpUrlGroup(urlGroupName);
-            throw new CommonException("999", htpUrlGroup.getGroupName() + "的[" + HttpUrlType.valueOf(httpUrlType.name()).getKey() + "]服务未配置");
         }
         return urlConfig;
     }
@@ -162,9 +162,7 @@ abstract class AbstractRequest {
         return s;
     }
 
-    HttpResponseBody httpRequestBody(String warehouseCode, String api, Object object, HttpMethod httpMethod, Object... pathVariable) {
-        String urlGroupName = this.getUrlGroupName(warehouseCode);
-        UrlConfig urlConfig = this.getUrlConfig(urlGroupName);
+    HttpResponseBody httpResponseBodySingle(String warehouseCode, String urlGroupName, UrlConfig urlConfig, String api, Object object, HttpMethod httpMethod, Object... pathVariable) {
         String url = urlConfig.getUrl() + this.getApi(urlConfig, api);
         if (url.contains("{")) {
             url = MessageFormat.format(url, pathVariable);
@@ -193,6 +191,40 @@ abstract class AbstractRequest {
         }
         this.addLog(warehouseCode, urlGroupName, url, httpMethod.name(), headerMap, logRequestBody, requestTime, responseBody.getBody());
         return responseBody;
+    }
+
+    boolean hasMultipleChannelUrlSet(String api) {
+        String formatApi = Utils.formatApi(api);
+        return this.httpConfig.getMultipleChannelUrlSet().contains(formatApi);
+    }
+
+    HttpResponseBody httpRequestBodyAdapter(String warehouseCode, String api, ReFunction<String, UrlConfig, HttpResponseBody> reFunction) {
+        // 判断是不是多通道的api
+        if (this.hasMultipleChannelUrlSet(api)) {
+            HttpUrlType httpUrlType = this.getHttpUrlType();
+            if (null == httpUrlType) {
+                throw new CommonException("999", "http url type cant be null");
+            }
+            // 循环调用
+            Map<String, UrlGroupConfig> urlGroup = this.httpConfig.getUrlGroup();
+            for (String urlGroupName : urlGroup.keySet()) {
+                // 线程池执行任务
+                MultipleChannelRequest.run(() -> {
+                    UrlGroupConfig urlGroupConfig = urlGroup.get(urlGroupName);
+                    UrlConfig urlConfig = getUrlConfigAdapter(urlGroupConfig, httpUrlType);
+                    reFunction.apply(urlGroupName, urlConfig);
+                });
+            }
+            return new HttpResponseBody.HttpResponseBodyEmpty("{}");
+        } else {
+            String urlGroupName = this.getUrlGroupName(warehouseCode);
+            UrlConfig urlConfig = this.getUrlConfig(urlGroupName);
+            return reFunction.apply(urlGroupName, urlConfig);
+        }
+    }
+
+    HttpResponseBody httpRequestBody(String warehouseCode, String api, Object object, HttpMethod httpMethod, Object... pathVariable) {
+        return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> httpResponseBodySingle(warehouseCode, urlGroupName, urlConfig, api, object, httpMethod, pathVariable));
     }
 
     protected String httpRequest(String warehouseCode, String api, Object object, HttpMethod httpMethod, Object... pathVariable) {
@@ -236,15 +268,16 @@ abstract class AbstractRequest {
     }
 
     protected FileStream httpPostFile(String warehouseCode, String api, Object object) {
-        String urlGroupName = this.getUrlGroupName(warehouseCode);
-        UrlConfig urlConfig = this.getUrlConfig(urlGroupName);
-        String url = urlConfig.getUrl() + this.getApi(urlConfig, api);
-        Map<String, String> headerMap = urlConfig.getHeaders();
         Date requestTime = new Date();
-        String requestBody = JSON.toJSONString(object);
-        // 调用获取文件流的方法
+        HttpResponseBody httpResponseBody = this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> {
+            String url = urlConfig.getUrl() + getApi(urlConfig, api);
+            Map<String, String> headerMap = urlConfig.getHeaders();
+            String requestBody = JSON.toJSONString(object);
+            HttpResponseBody httpResponseBody1 = HttpClientHelper.httpPostStream(url, headerMap, requestBody);
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.POST.name(), headerMap, requestBody, requestTime, "FileInputStream");
+            return httpResponseBody1;
+        });
         FileStream responseBody = null;
-        HttpResponseBody httpResponseBody = HttpClientHelper.httpPostStream(url, headerMap, requestBody);
         if (httpResponseBody instanceof HttpResponseBody.HttpResponseByteArrayWrapper) {
             responseBody = new FileStream();
             HttpResponseBody.HttpResponseByteArrayWrapper httpResponseByteArrayWrapper = (HttpResponseBody.HttpResponseByteArrayWrapper) httpResponseBody;
@@ -264,94 +297,70 @@ abstract class AbstractRequest {
                 responseBody.setInputStream(byteArray);
             }
         }
-        this.addLog(warehouseCode, urlGroupName, url, "POST", headerMap, requestBody, requestTime, "FileInputStream");
         return responseBody;
     }
 
     protected HttpResponseBody httpGetFile(String warehouseCode, String api, Object object, Object... pathVariable) {
-        String urlGroupName = this.getUrlGroupName(warehouseCode);
-        UrlConfig urlConfig = this.getUrlConfig(urlGroupName);
-        String url = urlConfig.getUrl() + this.getApi(urlConfig, api);
-        if (url.contains("{")) {
-            url = MessageFormat.format(url, pathVariable);
-        }
-        Map<String, String> headerMap = urlConfig.getHeaders();
-        Date requestTime = new Date();
-        String requestBody = null;
-        if (null != object) {
-            requestBody = JSON.toJSONString(object);
-        }
-        HttpResponseBody httpResponseBody = HttpClientHelper.httpGetStream(url, headerMap, requestBody);
-        this.addLog(warehouseCode, urlGroupName, url, "POST", headerMap, requestBody, requestTime, "FileInputStream");
-        return httpResponseBody;
+        return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> {
+            String url = urlConfig.getUrl() + getApi(urlConfig, api);
+            if (url.contains("{")) {
+                url = MessageFormat.format(url, pathVariable);
+            }
+            Map<String, String> headerMap = urlConfig.getHeaders();
+            Date requestTime = new Date();
+            String requestBody = null;
+            if (null != object) {
+                requestBody = JSON.toJSONString(object);
+            }
+            HttpResponseBody httpResponseBody1 = HttpClientHelper.httpGetStream(url, headerMap, requestBody);
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.POST.name(), headerMap, requestBody, requestTime, "FileInputStream");
+            return httpResponseBody1;
+        });
     }
 
     protected String httpPostMuFile(String warehouseCode, String api, Object object, MultipartFile file, Object... pathVariable) {
-        String urlGroupName = this.getUrlGroupName(warehouseCode);
-        UrlConfig urlConfig = this.getUrlConfig(urlGroupName);
-        String url = urlConfig.getUrl() + this.getApi(urlConfig, api);
-        if (url.contains("{")) {
-            url = MessageFormat.format(url, pathVariable);
-        }
-        Map<String, String> headerMap = urlConfig.getHeaders();
-        Date requestTime = new Date();
-        String requestBody = JSON.toJSONString(object);
-        HttpResponseBody responseBody = HttpClientHelper.httpPost(url, requestBody, file, headerMap);
-        this.addLog(warehouseCode, urlGroupName, url, "PUT", headerMap, requestBody, requestTime, responseBody.getBody());
-        return responseBody.getBody();
+        return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> {
+            String url = urlConfig.getUrl() + getApi(urlConfig, api);
+            if (url.contains("{")) {
+                url = MessageFormat.format(url, pathVariable);
+            }
+            Map<String, String> headerMap = urlConfig.getHeaders();
+            Date requestTime = new Date();
+            String requestBody = JSON.toJSONString(object);
+            HttpResponseBody responseBody = HttpClientHelper.httpPost(url, requestBody, file, headerMap);
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.PUT.name(), headerMap, requestBody, requestTime, responseBody.getBody());
+            return responseBody;
+        }).getBody();
     }
 
     protected String httpPutMuFile(String warehouseCode, String api, Object object, MultipartFile file, Object... pathVariable) {
-        String urlGroupName = this.getUrlGroupName(warehouseCode);
-        UrlConfig urlConfig = this.getUrlConfig(urlGroupName);
-        String url = urlConfig.getUrl() + this.getApi(urlConfig, api);
-        if (url.contains("{")) {
-            url = MessageFormat.format(url, pathVariable);
-        }
-        Map<String, String> headerMap = urlConfig.getHeaders();
-        Date requestTime = new Date();
-        String requestBody = JSON.toJSONString(object);
-        HttpResponseBody responseBody = HttpClientHelper.httpPut(url, requestBody, file, headerMap);
-        this.addLog(warehouseCode, urlGroupName, url, "PUT", headerMap, requestBody, requestTime, responseBody.getBody());
-        return responseBody.getBody();
+        return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> {
+            String url = urlConfig.getUrl() + getApi(urlConfig, api);
+            if (url.contains("{")) {
+                url = MessageFormat.format(url, pathVariable);
+            }
+            Map<String, String> headerMap = urlConfig.getHeaders();
+            Date requestTime = new Date();
+            String requestBody = JSON.toJSONString(object);
+            HttpResponseBody responseBody = HttpClientHelper.httpPut(url, requestBody, file, headerMap);
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.PUT.name(), headerMap, requestBody, requestTime, responseBody.getBody());
+            return null;
+        }).getBody();
     }
 
     protected String httpGet(String warehouseCode, String api, Object object, Object... pathVariable) {
-        String urlGroupName = this.getUrlGroupName(warehouseCode);
-        UrlConfig urlConfig = this.getUrlConfig(urlGroupName);
-        String url = urlConfig.getUrl() + this.getApi(urlConfig, api);
-        if (url.contains("{")) {
-            url = MessageFormat.format(url, pathVariable);
-        }
-        Map<String, String> headerMap = urlConfig.getHeaders();
-        String requestBody = JSON.toJSONString(object);
-        Date requestTime = new Date();
-        HttpResponseBody responseBody = HttpClientHelper.httpGet(url, requestBody, headerMap);
-        this.addLog(warehouseCode, urlGroupName, url, "GET", headerMap, requestBody, requestTime, responseBody.getBody());
-        return responseBody.getBody();
+        return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> {
+            String url = urlConfig.getUrl() + getApi(urlConfig, api);
+            if (url.contains("{")) {
+                url = MessageFormat.format(url, pathVariable);
+            }
+            Map<String, String> headerMap = urlConfig.getHeaders();
+            String requestBody = JSON.toJSONString(object);
+            Date requestTime = new Date();
+            HttpResponseBody responseBody = HttpClientHelper.httpGet(url, requestBody, headerMap);
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.GET.name(), headerMap, requestBody, requestTime, responseBody.getBody());
+            return responseBody;
+        }).getBody();
     }
 
-    void addLog(String warehouseCode, String urlGroup, String url, String method, Map<String, String> headerMap, String requestBody, Date requestTime, String responseBody) {
-        Date responseTime = new Date();
-        HtpRequestLog log = new HtpRequestLog();
-        log.setTraceId(MDC.get("TID"));
-        log.setWarehouseCode(warehouseCode);
-        log.setRequestUrlGroup(urlGroup);
-        log.setRequestUri(url);
-        log.setRequestMethod(method);
-        log.setRequestHeader(JSON.toJSONString(headerMap));
-        log.setRequestBody(requestBody);
-        log.setRequestTime(requestTime);
-        log.setResponseBody(responseBody);
-        log.setResponseTime(responseTime);
-        EventUtil.publishEvent(new RequestLogEvent(log));
-    }
-
-    boolean isNotEmpty(String str) {
-        return !this.isEmpty(str);
-    }
-
-    boolean isEmpty(String str) {
-        return null == str || "".equals(str.trim());
-    }
 }

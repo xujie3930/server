@@ -9,10 +9,10 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "HtpWarehouse", description = "外部服务仓库组仓库关联表")
+@ApiModel(value = "HtpWarehouse", description = "仓库组关联仓库")
 public class HtpWarehouse {
 
-    @ApiModelProperty(value = "服务组")
+    @ApiModelProperty(value = "地址组")
     private String groupId;
 
     @ApiModelProperty(value = "仓库编码")

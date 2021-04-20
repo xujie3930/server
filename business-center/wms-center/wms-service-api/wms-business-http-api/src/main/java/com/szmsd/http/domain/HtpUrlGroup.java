@@ -9,13 +9,13 @@ import java.util.Date;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "HtpUrlGroup", description = "外部服务地址分组表")
+@ApiModel(value = "HtpUrlGroup", description = "地址组")
 public class HtpUrlGroup {
 
-    @ApiModelProperty(value = "服务组")
+    @ApiModelProperty(value = "地址组")
     private String groupId;
 
-    @ApiModelProperty(value = "服务组名称")
+    @ApiModelProperty(value = "地址组名称")
     private String groupName;
 
     @ApiModelProperty(value = "1默认")

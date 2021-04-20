@@ -38,7 +38,7 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
     /**
      * 查询模块列表
      *
-     * @param BasSub 模块
+     * @param basSub 模块
      * @return 模块
      */
     @Override
@@ -67,14 +67,16 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
         if (StringUtils.isNotEmpty(basSub.getSubValue()) ) {
             where.like("sub_value", basSub.getSubValue());
         }
-        where.orderByDesc("create_time");
+        // where.orderByDesc("create_time");
+        // 按照输入的顺序进行排序
+        where.orderByDesc("sort");
         return baseMapper.selectList(where);
     }
 
     /**
      * 新增模块
      *
-     * @param BasSub 模块
+     * @param basSub 模块
      * @return 结果
      */
     @Override
@@ -85,7 +87,7 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
     /**
      * 修改模块
      *
-     * @param BasSub 模块
+     * @param basSub 模块
      * @return 结果
      */
     @Override

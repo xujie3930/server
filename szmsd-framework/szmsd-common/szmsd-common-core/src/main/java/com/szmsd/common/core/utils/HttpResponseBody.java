@@ -22,7 +22,20 @@ public interface HttpResponseBody {
      */
     String getBody();
 
+    /**
+     * 空的对象
+     */
     class HttpResponseBodyEmpty implements HttpResponseBody {
+
+        private String body;
+
+        public HttpResponseBodyEmpty() {
+            this.body = "";
+        }
+
+        public HttpResponseBodyEmpty(String body) {
+            this.body = body;
+        }
 
         @Override
         public int getStatus() {
@@ -31,10 +44,17 @@ public interface HttpResponseBody {
 
         @Override
         public String getBody() {
-            return "";
+            return this.body;
+        }
+
+        public void setBody(String body) {
+            this.body = body;
         }
     }
 
+    /**
+     * 包装对象
+     */
     class HttpResponseBodyWrapper implements HttpResponseBody {
         private int status;
         private String body;
@@ -70,6 +90,9 @@ public interface HttpResponseBody {
         }
     }
 
+    /**
+     * 字节流对象
+     */
     class HttpResponseByteArrayWrapper implements HttpResponseBody {
         private int status;
         private Header[] headers;
