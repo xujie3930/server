@@ -97,4 +97,6 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
     ReturnExpressVO getInfo(Long id);
 
     List<ReturnExpressListVO> selectClientReturnOrderList(ReturnExpressListQueryDTO queryDto);
+
+    int saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO);
 }

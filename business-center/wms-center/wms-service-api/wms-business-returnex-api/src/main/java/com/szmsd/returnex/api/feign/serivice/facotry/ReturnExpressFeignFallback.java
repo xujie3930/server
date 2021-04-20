@@ -30,6 +30,11 @@ public class ReturnExpressFeignFallback implements FallbackFactory<IReturnExpres
             public R<Integer> updateProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<Integer> saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

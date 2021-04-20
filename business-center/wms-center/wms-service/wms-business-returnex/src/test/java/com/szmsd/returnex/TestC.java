@@ -1,5 +1,6 @@
 package com.szmsd.returnex;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.returnex.config.ConfigStatus;
 import com.szmsd.returnex.service.IReturnExpressService;
 import org.junit.Test;
@@ -31,6 +32,6 @@ public class TestC {
     private ConfigStatus configStatus;
     @Test
     public void te2() {
-        System.out.println(configStatus);
+        System.out.println(JSONObject.toJSONString(configStatus));
     }
 }

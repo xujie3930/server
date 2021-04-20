@@ -37,20 +37,36 @@ public class ReturnExpressAPIController extends BaseController {
      */
     @PostMapping("/arrival")
     @ApiOperation(value = "接收仓库退件到货", notes = "/api/return/arrival #G1-接收仓库退件到货")
-    public int saveArrivalInfoFormVms(@RequestBody ReturnArrivalReqDTO returnArrivalReqDTO) {
-        return returnExpressService.saveArrivalInfoFormVms(returnArrivalReqDTO);
+    public int saveArrivalInfoFormWms(@RequestBody ReturnArrivalReqDTO returnArrivalReqDTO) {
+        return returnExpressService.saveArrivalInfoFormWms(returnArrivalReqDTO);
     }
 
     /**
-     * 接收VMS仓库退件处理结果
+     * 接收仓库拆包明细
+     * /api/return/details #G2-接收仓库拆包明细
+     *
+     * @param returnProcessingReqDTO 拆包明细
+     * @return 操作结果
+     */
+    @PostMapping("/details")
+    @ApiOperation(value = "接收仓库拆包明细", notes = "/api/return/details #G2-接收仓库拆包明细")
+    public R saveProcessingInfoFromVms(@RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
+        return toOk(returnExpressService.saveProcessingInfoFromVms(returnProcessingReqDTO));
+    }
+
+    /**
+     * 接收WMS仓库退件处理结果 结束流程
      * /api/return/processing #G2-接收仓库退件处理
+     * 更换 ->  /api/return/done #G3-接收仓库退件处理完成
      *
      * @param returnProcessingReqDTO 接收VMS仓库退件处理结果
      * @return 操作结果
      */
-    @PostMapping("/processing")
-    @ApiOperation(value = "接收仓库退件处理", notes = "/api/return/processing #G2-接收仓库退件处理")
-    public R updateProcessingInfoFromVms(@RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
-        return toOk(returnExpressService.updateProcessingInfoFromVms(returnProcessingReqDTO));
+    @PostMapping("/done")
+    @ApiOperation(value = "接收仓库退件处理完成", notes = "/api/return/done #G3-接收仓库退件处理完成")
+    public R updateProcessingInfoFromWms(@RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
+        return toOk(returnExpressService.updateProcessingInfoFromWms(returnProcessingReqDTO));
     }
+
+
 }

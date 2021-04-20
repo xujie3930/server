@@ -14,14 +14,14 @@ import java.util.List;
 
 /**
  * @ClassName: ReturnArrivalReqDTO
- * @Description: 接受VMS库存信息
+ * @Description: 接收WMS库存信息
  * @Author: 11
  * @Date: 2021/3/27 10:48
  */
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel("接受VMS库存信息")
+@ApiModel("接收WMS库存信息")
 public class ReturnArrivalReqDTO implements BOConvert {
 
     /**
@@ -82,10 +82,6 @@ public class ReturnArrivalReqDTO implements BOConvert {
     @StringLength(maxLength = 500, message = "备注超过约定长度[1-500]")
     @ApiModelProperty(value = "备注")
     private String remark;
-
-    //TODO 未返回收到的货物
-    @ApiModelProperty(value = "商品sku列表数据")
-    private List<ReturnExpressGoodAddDTO> goodList;
 
 
     @Override

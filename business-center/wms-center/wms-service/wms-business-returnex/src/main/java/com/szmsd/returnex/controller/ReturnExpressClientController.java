@@ -84,13 +84,14 @@ public class ReturnExpressClientController extends BaseController {
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
     @PostMapping("/update")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "更新退件单信息")
+    @ApiOperation(value = "更新退件单信息 指定sku的处理方式")
     public R update(@Validated @RequestBody ReturnExpressAddDTO expressUpdateDTO) {
         return toOk(returnExpressService.updateExpressInfo(expressUpdateDTO));
     }
 
     /**
      * 获取退件单信息详情
+     *
      * @param id
      * @return
      */
