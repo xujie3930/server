@@ -32,21 +32,35 @@ public class ReturnExpressFeignClientServiceImpl implements IReturnExpressFeignC
      * @return 操作结果
      */
     @Override
-    public int saveArrivalInfoFormVms(ReturnArrivalReqDTO returnArrivalReqDTO) {
+    public int saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO) {
         log.info("接受WMS仓库数据 {}", JSONObject.toJSONString(returnArrivalReqDTO));
         return R.getDataAndException(iReturnExpressFeignService.saveArrivalInfoFormVms(returnArrivalReqDTO));
     }
 
     /**
-     * 接收VMS仓库退件处理结果
+     * 接收VMS仓库退件处理结果 结束流程
      * /api/return/processing #G2-接收仓库退件处理
+     * 更换 ->  /api/return/done #G3-接收仓库退件处理完成
      *
      * @param returnProcessingReqDTO 接收VMS仓库退件处理结果
      * @return 操作结果
      */
     @Override
-    public int updateProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
-        log.info("接收VMS仓库退件处理结果 {}", JSONObject.toJSONString(returnProcessingReqDTO));
+    public int updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO) {
+        log.info("接收WMS仓库退件处理结果完成流程 {}", JSONObject.toJSONString(returnProcessingReqDTO));
         return R.getDataAndException(iReturnExpressFeignService.updateProcessingInfoFromVms(returnProcessingReqDTO));
+    }
+
+    /**
+     * 接收仓库拆包明细
+     * /api/return/details #G2-接收仓库拆包明细
+     *
+     * @param returnProcessingReqDTO 拆包明细
+     * @return 操作结果
+     */
+    @Override
+    public int saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
+        log.info("接收仓库拆包明细 {}", returnProcessingReqDTO);
+        return R.getDataAndException(iReturnExpressFeignService.saveProcessingInfoFromVms(returnProcessingReqDTO));
     }
 }

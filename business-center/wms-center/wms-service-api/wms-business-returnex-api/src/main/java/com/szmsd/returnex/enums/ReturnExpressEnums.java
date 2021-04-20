@@ -37,29 +37,6 @@ public class ReturnExpressEnums {
     }
 
     /**
-     * WMS 退件处理方式
-     */
-    @Getter
-    @AllArgsConstructor
-    public enum WMSProcessTypeEnum {
-        /**
-         *
-         */
-        DESTROY("销毁", "Destroy"),
-        PUT_AWAY_BY_PACKAGE("整包上架", "PutawayByPackage"),
-        OPEN_AND_CHECK("拆包检查", "OpenAndCheck"),
-        PUT_AWAY_BY_SKU("按明细上架", "PutawayBySku");
-        private String desc;
-        private String val;
-
-        public static String getWMSProcessTypeStr(String processTypeStr) {
-            return Arrays.stream(WMSProcessTypeEnum.values())
-                    .filter(x -> processTypeStr.equals(x.getDesc()))
-                    .map(WMSProcessTypeEnum::getVal).findAny().orElseThrow(() -> new BaseException("调用WMS异常,暂未配置该类型的处理方式"));
-        }
-    }
-
-    /**
      * 实际处理方式
      */
     @Getter

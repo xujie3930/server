@@ -62,8 +62,8 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     private String expectedNo;
 
     @TableField(insertStrategy = FieldStrategy.NOT_EMPTY)
-    @ApiModelProperty(value = "VMS处理单号")
-    @Excel(name = "VMS处理单号")
+    @ApiModelProperty(value = "WMS处理单号")
+    @Excel(name = "WMS处理单号")
     private String returnNo;
 
     @ApiModelProperty(value = "申请处理方式")

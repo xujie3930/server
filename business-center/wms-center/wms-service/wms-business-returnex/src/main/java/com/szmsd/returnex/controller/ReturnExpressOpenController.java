@@ -38,21 +38,6 @@ public class ReturnExpressOpenController extends BaseController {
     private IReturnExpressService returnExpressService;
 
     /**
-     * 接收VMS仓库退件处理结果
-     * /api/return/processing #G2-接收仓库退件处理
-     *
-     * @param returnProcessingReqDTO 接收VMS仓库退件处理结果
-     * @return 操作结果
-     */
-    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
-    @PostMapping("/processing")
-    @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "接收仓库-退件处理", notes = "/api/return/processing #G2-接收仓库退件处理")
-    public R updateProcessingInfoFromWms(@Validated @RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
-        return toOk(returnExpressService.updateProcessingInfoFromWms(returnProcessingReqDTO));
-    }
-
-    /**
      * 接收VMS仓库到件信息
      * /api/return/arrival #G1-接收仓库退件到货
      *
@@ -66,6 +51,35 @@ public class ReturnExpressOpenController extends BaseController {
     public R saveArrivalInfoFormWms(@Validated @RequestBody ReturnArrivalReqDTO returnArrivalReqDTO) {
         return toOk(returnExpressService.saveArrivalInfoFormWms(returnArrivalReqDTO));
     }
+    /**
+     * 接收仓库拆包明细
+     * /api/return/details #G2-接收仓库拆包明细
+     *
+     * @param returnProcessingReqDTO 拆包明细
+     * @return 操作结果
+     */
+    @PostMapping("/details")
+    @ApiOperation(value = "接收仓库拆包明细", notes = "/api/return/details #G2-接收仓库拆包明细")
+    public R saveProcessingInfoFromVms(@RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
+        return toOk(returnExpressService.saveProcessingInfoFromVms(returnProcessingReqDTO));
+    }
+
+    /**
+     * 接收WMS仓库退件处理结果 结束流程
+     * /api/return/processing #G2-接收仓库退件处理
+     * 更换 ->  /api/return/done #G3-接收仓库退件处理完成
+     *
+     * @param returnProcessingReqDTO 接收VMS仓库退件处理结果
+     * @return 操作结果
+     */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @PostMapping("/processing")
+    @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "接收仓库-退件处理", notes = "/api/return/done #G3-接收仓库退件处理完成")
+    public R updateProcessingInfoFromWms(@Validated @RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
+        return toOk(returnExpressService.updateProcessingInfoFromWms(returnProcessingReqDTO));
+    }
+
 
     @Resource
     private IHttpFeignClientService httpFeignClient;
@@ -97,5 +111,7 @@ public class ReturnExpressOpenController extends BaseController {
     public void processingUpdate(@RequestBody ProcessingUpdateReqDTO processingUpdateReqDTO) {
         ProcessingUpdateRespVO processingUpdateRespVO = httpFeignClient.processingUpdate(processingUpdateReqDTO);
     }
+
+
 
 }

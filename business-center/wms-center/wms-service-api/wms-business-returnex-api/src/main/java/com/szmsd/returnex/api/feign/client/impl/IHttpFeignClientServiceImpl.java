@@ -3,7 +3,6 @@ package com.szmsd.returnex.api.feign.client.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
-import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
 import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
 import com.szmsd.http.vo.ResponseVO;
@@ -12,9 +11,11 @@ import com.szmsd.http.vo.returnex.ProcessingUpdateRespVO;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
 import com.szmsd.returnex.api.feign.serivice.IHttpFeignService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Optional;
 
 /**
  * @ClassName: IReturnExpressFeignClientService
@@ -47,11 +48,15 @@ public class IHttpFeignClientServiceImpl implements IHttpFeignClientService {
     }
 
     private void checkSuccess(R<? extends ResponseVO> checkVo) {
-        if (StringUtils.isNotEmpty(checkVo.getData().getErrors())) {
+        log.info("返回结果{}", JSONObject.toJSONString(checkVo));
+        Optional<? extends ResponseVO> responseOpt = Optional.ofNullable(checkVo).map(R::getData);
+        boolean present = responseOpt.map(ResponseVO::getErrors).filter(StringUtils::isNotBlank).isPresent();
+        boolean present1 = responseOpt.map(ResponseVO::getSuccess).orElse(true);
+        if (present) {
             throw new BaseException(checkVo.getData().getErrors());
         }
-        if (!checkVo.getData().getSuccess()) {
-            String message = checkVo.getData().getMessage();
+        if (!present1) {
+            String message = responseOpt.map(ResponseVO::getMessage).orElse("调用WMS返回异常");
             throw new BaseException(message);
         }
     }

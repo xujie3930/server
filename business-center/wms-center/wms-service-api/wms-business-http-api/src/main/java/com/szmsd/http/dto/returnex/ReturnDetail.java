@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 /**
  * @ClassName: ReturnDetail
@@ -23,10 +24,23 @@ public class ReturnDetail implements Serializable {
 
     /**
      * 仓库登记SKU 1-50
+     * /api/return/details G2
      */
     @ApiModelProperty(value = "仓库登记SKU")
     private String sku;
 
+    @ApiModelProperty(value = "数量")
+    private Integer qty;
+
+    /**
+     * SKU处理备注 0-500
+     */
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
+
+
+    /*通知WMS参数*/
     /**
      * 新上架编码 0-50
      */

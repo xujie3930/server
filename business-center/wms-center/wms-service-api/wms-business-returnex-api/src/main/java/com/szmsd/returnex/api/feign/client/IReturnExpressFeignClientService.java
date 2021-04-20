@@ -18,14 +18,24 @@ public interface IReturnExpressFeignClientService {
      * @param returnArrivalReqDTO 接收VMS仓库到件信息
      * @return 操作结果
      */
-    int saveArrivalInfoFormVms(ReturnArrivalReqDTO returnArrivalReqDTO);
+    int saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO);
 
     /**
-     * 接收VMS仓库退件处理结果
+     * 接收WMS仓库退件处理结果 结束流程
      * /api/return/processing #G2-接收仓库退件处理
+     * 更换 ->  /api/return/done #G3-接收仓库退件处理完成
      *
-     * @param returnProcessingReqDTO 接收VMS仓库退件处理结果
+     * @param returnProcessingReqDTO 接收WMS仓库退件处理结果
      * @return 操作结果
      */
-    int updateProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO);
+    int updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO);
+
+    /**
+     * 接收仓库拆包明细
+     * /api/return/details #G2-接收仓库拆包明细
+     *
+     * @param returnProcessingReqDTO 拆包明细
+     * @return 操作结果
+     */
+    int saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO);
 }

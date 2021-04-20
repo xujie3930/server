@@ -1,9 +1,17 @@
 package com.szmsd.returnex.config;
 
+import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.returnex.enums.ReturnExpressEnums;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @ClassName: ConfigStatus
@@ -31,7 +39,36 @@ public class ConfigStatus {
      * 退件单来源
      */
     private ReturnSource returnSource;
+    /**
+     * 处理方式
+     * processType(code):WMS processType
+     */
+    private HashMap<String, String> returnProcessingMethod;
+    /**
+     * 拆包明细
+     */
+    private String receiveDetails;
 
+    /**
+     * 通过OMS中的主子类别的code 获取相对应的WMS操作类型
+     *
+     * @param code OMS 子类别code
+     * @return WMS操作类型
+     */
+    public String getPrCode(String code) {
+        return Optional.ofNullable(returnProcessingMethod.get(code)).filter(StringUtils::isNotEmpty).orElseThrow(() -> new BaseException("暂未配置该类型的处理方式"));
+    }
+
+    /**
+     * 获取继续操作的WMS操作类型
+     *
+     * @param processType WMS操作类型
+     * @return
+     */
+    public String getContinueOptCode(String processType) {
+        String s = returnProcessingMethod.get("继续操作");
+        return Optional.ofNullable(s).orElse(processType);
+    }
 
     @Data
     public static class DealStatus {
@@ -56,7 +93,7 @@ public class ConfigStatus {
          * 退件预报
          */
         private String returnForecast;
-        private String returnForecastStr="退件预报";
+        private String returnForecastStr = "退件预报";
         /**
          * WMS通知退件
          */

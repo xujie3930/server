@@ -37,6 +37,17 @@ public interface IReturnExpressFeignService {
      * @return 操作结果
      */
     @PostMapping("/api/return/processing")
-    @ApiOperation(value = "接收仓库退件处理", notes = "/api/return/processing #G2-接收仓库退件处理")
+    @ApiOperation(value = "接收仓库退件处理", notes = "/api/return/processing #G3-接收仓库退件处理")
     R<Integer> updateProcessingInfoFromVms(@RequestBody ReturnProcessingReqDTO returnProcessingReqDTO);
+
+    /**
+     * 接收仓库拆包明细
+     * /api/return/details #G2-接收仓库拆包明细
+     *
+     * @param returnProcessingReqDTO 拆包明细
+     * @return 操作结果
+     */
+    @PostMapping("/api/return/details")
+    @ApiOperation(value = "接收仓库拆包明细", notes = "/api/return/details #G2-接收仓库拆包明细")
+    R<Integer> saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO);
 }
