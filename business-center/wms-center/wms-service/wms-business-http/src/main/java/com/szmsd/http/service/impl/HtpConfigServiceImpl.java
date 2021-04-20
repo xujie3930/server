@@ -40,45 +40,55 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
      */
     @Override
     public void loadHtpConfig(String remark) {
-        List<HtpUrl> htpUrls = htpConfigMapper.selectHtpUrl(null, null);
-        Map<String, List<HtpUrl>> group = htpUrls.stream().collect(Collectors.groupingBy(HtpUrl::getGroupId));
-        Map<String, UrlGroupConfig> collect = group.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> {
-            Map<String, Object> service = e.getValue().stream().collect(Collectors.toMap(HtpUrl::getServiceId, v -> {
-                try {
-                    Optional.ofNullable(v.getHeaders()).ifPresent(item -> v.setHeaders(JSONObject.parseObject(item.toString())));
-                } catch (Exception ex) {
-                    log.error(ex.getMessage());
-                }
-                return v;
+        // 加载之前
+        httpConfig.loadBefore();
+        try {
+            List<HtpUrl> htpUrls = htpConfigMapper.selectHtpUrl(null, null);
+            Map<String, List<HtpUrl>> group = htpUrls.stream().collect(Collectors.groupingBy(HtpUrl::getGroupId));
+            Map<String, UrlGroupConfig> collect = group.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> {
+                Map<String, Object> service = e.getValue().stream().collect(Collectors.toMap(HtpUrl::getServiceId, v -> {
+                    try {
+                        Optional.ofNullable(v.getHeaders()).ifPresent(item -> v.setHeaders(JSONObject.parseObject(item.toString())));
+                    } catch (Exception ex) {
+                        log.error(ex.getMessage());
+                    }
+                    return v;
+                }));
+                return JSONObject.parseObject(JSON.toJSONString(service), UrlGroupConfig.class);
             }));
-            return JSONObject.parseObject(JSON.toJSONString(service), UrlGroupConfig.class);
-        }));
-        httpConfig.setUrlGroup(collect);
+            httpConfig.setUrlGroup(collect);
 
-        List<HtpWarehouse> htpWarehouses = htpConfigMapper.selectHtpWarehouse(null, null);
-        Map<String, Set<String>> warehouseGroup = htpWarehouses.stream().collect(Collectors.groupingBy(HtpWarehouse::getGroupId, Collectors.collectingAndThen(Collectors.toSet(), e -> e.stream().map(HtpWarehouse::getWarehouseCode).collect(Collectors.toSet()))));
-        httpConfig.setWarehouseGroup(warehouseGroup);
+            List<HtpWarehouse> htpWarehouses = htpConfigMapper.selectHtpWarehouse(null, null);
+            Map<String, Set<String>> warehouseGroup = htpWarehouses.stream().collect(Collectors.groupingBy(HtpWarehouse::getGroupId, Collectors.collectingAndThen(Collectors.toSet(), e -> e.stream().map(HtpWarehouse::getWarehouseCode).collect(Collectors.toSet()))));
+            httpConfig.setWarehouseGroup(warehouseGroup);
 
-        List<HtpWarehouseUrlGroup> htpWarehouseUrlGroups = htpConfigMapper.selectHtpWarehouseUrlGroup(null, null);
-        Map<String, String> mapperGroup = htpWarehouseUrlGroups.stream().collect(Collectors.toMap(HtpWarehouseUrlGroup::getWarehouseGroupId, HtpWarehouseUrlGroup::getUrlGroupId));
-        httpConfig.setMapperGroup(mapperGroup);
+            List<HtpWarehouseUrlGroup> htpWarehouseUrlGroups = htpConfigMapper.selectHtpWarehouseUrlGroup(null, null);
+            Map<String, String> mapperGroup = htpWarehouseUrlGroups.stream().collect(Collectors.toMap(HtpWarehouseUrlGroup::getWarehouseGroupId, HtpWarehouseUrlGroup::getUrlGroupId));
+            httpConfig.setMapperGroup(mapperGroup);
 
-        HtpUrlGroup htpUrlGroup = htpConfigMapper.selectDefaultHtpUrlGroup();
-        if (htpUrlGroup == null) {
-            String defaultUrlGroupId = new ArrayList(collect.keySet()).get(0).toString();
-            httpConfig.setDefaultUrlGroup(defaultUrlGroupId);
-            this.setHtpUrlGroupDefault(defaultUrlGroupId);
-            HtpUrlGroup htpUrlGroup1 = this.selectHtpUrlGroup(defaultUrlGroupId);
-            remark = remark == null ? "" : remark;
-            remark += ", 设置[" + htpUrlGroup1.getGroupName() + "]为默认组";
-        } else {
-            httpConfig.setDefaultUrlGroup(htpUrlGroup.getGroupId());
+            HtpUrlGroup htpUrlGroup = htpConfigMapper.selectDefaultHtpUrlGroup();
+            if (htpUrlGroup == null) {
+                String defaultUrlGroupId = new ArrayList(collect.keySet()).get(0).toString();
+                httpConfig.setDefaultUrlGroup(defaultUrlGroupId);
+                this.setHtpUrlGroupDefault(defaultUrlGroupId);
+                HtpUrlGroup htpUrlGroup1 = this.selectHtpUrlGroup(defaultUrlGroupId);
+                remark = remark == null ? "" : remark;
+                remark += ", 设置[" + htpUrlGroup1.getGroupName() + "]为默认组";
+            } else {
+                httpConfig.setDefaultUrlGroup(htpUrlGroup.getGroupId());
+            }
+            this.saveDeployLog(JSON.toJSONString(httpConfig), remark);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            httpConfig.loadError(e);
+        } finally {
+            httpConfig.loadAfter();
         }
-        this.saveDeployLog(JSON.toJSONString(httpConfig), remark);
     }
 
     /**
      * 保存部署日志
+     *
      * @param content
      * @param remark
      */
@@ -100,6 +110,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 查询最近一次部署
+     *
      * @return
      */
     @Override
@@ -109,6 +120,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 地址组集合
+     *
      * @return
      */
     @Override
@@ -118,12 +130,14 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 地址组
+     *
      * @return
      */
     @Override
     public HtpUrlGroup selectHtpUrlGroup(String groupId) {
         HtpUrlGroup htpUrlGroup = null;
-        List<HtpUrlGroup> htpUrlGroups = htpConfigMapper.selectHtpUrlGroup(groupId, null);;
+        List<HtpUrlGroup> htpUrlGroups = htpConfigMapper.selectHtpUrlGroup(groupId, null);
+        ;
         if (CollectionUtils.isNotEmpty(htpUrlGroups)) {
             htpUrlGroup = htpUrlGroups.get(0);
         }
@@ -132,6 +146,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 地址集合
+     *
      * @param htpUrl
      * @return
      */
@@ -142,6 +157,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 仓库组集合
+     *
      * @return
      */
     @Override
@@ -151,6 +167,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 仓库分组集合
+     *
      * @param htpWarehouse
      * @return
      */
@@ -161,6 +178,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 查询仓库组关联地址组
+     *
      * @param warehouseGroupId
      * @param urlGroupId
      * @return
@@ -172,6 +190,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 地址分组表【保存/修改】
+     *
      * @param htpUrlGroup
      */
     @Override
@@ -209,6 +228,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 设置默认
+     *
      * @param groupId
      */
     @Override
@@ -230,6 +250,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 地址表
+     *
      * @param htpUrl
      */
     @Override
@@ -263,6 +284,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 仓库组表【保存/修改】
+     *
      * @param htpWarehouseGroup
      */
     @Override
@@ -291,6 +313,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 仓库组仓库关联表【保存】
+     *
      * @param htpWarehouse
      */
     @Override
@@ -308,6 +331,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 仓库组关联地址组【保存】
+     *
      * @param htpWarehouseUrlGroup
      */
     @Override
@@ -332,6 +356,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
 
     /**
      * 仓库组仓库关联【移除仓库】 把仓库从改组移除
+     *
      * @param htpWarehouse
      */
     @Override
