@@ -4,6 +4,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
@@ -54,5 +55,19 @@ public final class DelOutboundServiceImplUtil {
         Date createTime = delOutbound.getCreateTime();
         String datePath = DateFormatUtils.format(createTime, "yyyy/MM/dd");
         return delOutbound.getOrderType() + "/" + datePath;
+    }
+
+    /**
+     * 不需要操作库存
+     *
+     * @param orderType 出库单类型
+     * @return true不需要，false需要
+     */
+    public static boolean noOperationInventory(String orderType) {
+        // 转运出库
+        // 集运出库
+        // 不需要冻结库存
+        return DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(orderType)
+                || DelOutboundOrderTypeEnum.TRANSFER.getCode().equals(orderType);
     }
 }

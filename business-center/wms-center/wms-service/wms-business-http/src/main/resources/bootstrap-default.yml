@@ -35,7 +35,7 @@ com:
           third-payment:
             headers:
               Authorization: Bearer YTY0ZWI3NWYtYjU1MC00YzUyLTk5Y2ItOTk3NzAzZTQyMjA5
-            url: https://carrierservice-api-admin-external.dsloco.com
+            url: https://thirdparty.ck1info.com
             callback: http://183.3.221.136:22220
       # 仓库组
       warehouse-group:

@@ -170,4 +170,10 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "单据取消处理状态")
     private String cancelledState;
+
+    @ApiModelProperty(value = "包裹重量尺寸确认")
+    private String packageConfirm;
+
+    @ApiModelProperty(value = "包裹重量误差")
+    private Integer packageWeightDeviation;
 }

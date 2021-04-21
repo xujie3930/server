@@ -24,26 +24,50 @@ public final class ApplicationRuleConfig {
 
 
     static {
-        // 提审配置 - 销毁出库
+        // =======================================================================================
+        // 提审配置
+        // =======================================================================================
+        // 没配置默认执行所有步骤
+        // 提审配置 - 【普通出库】
+        // 执行所有步骤
+        // 提审配置 - 【销毁出库】
         Set<String> bringVerifyDestroySet = new HashSet<>();
         bringVerifyDestroySet.add(BringVerifyEnum.BEGIN.name());
         bringVerifyDestroySet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
         bringVerifyDestroySet.add(BringVerifyEnum.END.name());
         bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.DESTROY.getCode(), bringVerifyDestroySet);
-        // 提审配置 - 自提出库
+        // 提审配置 - 【自提出库】
         Set<String> bringVerifySelfPickSet = new HashSet<>();
         bringVerifySelfPickSet.add(BringVerifyEnum.BEGIN.name());
         bringVerifySelfPickSet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
         bringVerifySelfPickSet.add(BringVerifyEnum.SHIPMENT_LABEL.name());
         bringVerifySelfPickSet.add(BringVerifyEnum.END.name());
         bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.SELF_PICK.getCode(), bringVerifySelfPickSet);
-        // 出库配置 - 销毁出库
+        // 提审配置 - 【转运出库】
+        // 执行所有步骤
+        // 提审配置 - 【集运出库】
+        // 执行所有步骤
+        // 提审配置 - 【新SKU上架出库】
+        // 提审配置 - 【批量出库】
+        // =======================================================================================
+        // 出库配置
+        // =======================================================================================
+        // 没有配置默认执行所有步骤
+        // 出库配置 - 【普通出库】
+        // 执行所有步骤
+        // 出库配置 - 【销毁出库】
         Set<String> shipmentDestroySet = new HashSet<>();
         shipmentDestroySet.add(ShipmentEnum.BEGIN.name());
         shipmentDestroySet.add(ShipmentEnum.END.name());
         shipmentRuleMap.put(DelOutboundOrderTypeEnum.DESTROY.getCode(), shipmentDestroySet);
-        // 出库配置 - 自提出库
+        // 出库配置 - 【自提出库】
         shipmentRuleMap.put(DelOutboundOrderTypeEnum.SELF_PICK.getCode(), shipmentDestroySet);
+        // 出库配置 - 【转运出库】
+        // 执行所有步骤
+        // 出库配置 - 【集运出库】
+        // 执行所有步骤
+        // 出库配置 - 【新SKU上架出库】
+        // 出库配置 - 【批量出库】
     }
 
     /**
@@ -55,9 +79,12 @@ public final class ApplicationRuleConfig {
      */
     public static boolean bringVerifyCondition(DelOutboundOrderTypeEnum orderTypeEnum, String currentState) {
         String code = orderTypeEnum.getCode();
+        // 根据类型获取配置的规则
+        // 如果没有配置规则，默认满足条件
         if (!bringVerifyRuleMap.containsKey(code)) {
             return true;
         }
+        // 判断配置的规则是否存在
         return bringVerifyRuleMap.get(code).contains(currentState);
     }
 

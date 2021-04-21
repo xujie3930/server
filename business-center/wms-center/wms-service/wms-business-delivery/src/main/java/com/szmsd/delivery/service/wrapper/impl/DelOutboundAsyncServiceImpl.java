@@ -93,9 +93,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         String completedState = delOutbound.getCompletedState();
         try {
             // 空值默认处理
-            if (com.szmsd.common.core.utils.StringUtils.isEmpty(completedState)) {
+            if (StringUtils.isEmpty(completedState)) {
                 // 执行扣减库存
-                this.deduction(orderNo, delOutbound.getWarehouseCode());
+                this.deduction(orderNo, delOutbound.getWarehouseCode(), delOutbound.getOrderType());
                 completedState = "FEE_DE";
             }
             // 销毁，自提不扣物流费用
@@ -146,8 +146,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
      *
      * @param orderNo       orderNo
      * @param warehouseCode warehouseCode
+     * @param orderType     orderType
      */
-    private void deduction(String orderNo, String warehouseCode) {
+    private void deduction(String orderNo, String warehouseCode, String orderType) {
+        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+            return;
+        }
         // 查询明细
         List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
         InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
@@ -189,8 +193,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 获取到处理状态
         String cancelledState = delOutbound.getCancelledState();
         try {
-            if (com.szmsd.common.core.utils.StringUtils.isEmpty(cancelledState)) {
-                this.unFreeze(orderNo, delOutbound.getWarehouseCode());
+            if (StringUtils.isEmpty(cancelledState)) {
+                this.unFreeze(orderNo, delOutbound.getWarehouseCode(), delOutbound.getOrderType());
                 cancelledState = "UN_FEE";
             }
             // 销毁，自提不扣物流费用
@@ -220,13 +224,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 cancelledState = "UN_CARRIER";
             }
             if ("UN_CARRIER".equals(cancelledState)) {
-                if (fee) {
-                    String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
-                    String trackingNo = delOutbound.getTrackingNo();
-                    if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(shipmentOrderNumber) && com.szmsd.common.core.utils.StringUtils.isNotEmpty(trackingNo)) {
-                        String referenceNumber = String.valueOf(delOutbound.getId());
-                        this.delOutboundBringVerifyService.cancellation(referenceNumber, shipmentOrderNumber, trackingNo);
-                    }
+                // 取消承运商物流订单
+                String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
+                String trackingNo = delOutbound.getTrackingNo();
+                if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
+                    String referenceNumber = String.valueOf(delOutbound.getId());
+                    this.delOutboundBringVerifyService.cancellation(referenceNumber, shipmentOrderNumber, trackingNo);
                 }
                 cancelledState = "MODIFY";
             }
@@ -255,8 +258,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
      *
      * @param orderNo       orderNo
      * @param warehouseCode warehouseCode
+     * @param orderType     orderType
      */
-    private void unFreeze(String orderNo, String warehouseCode) {
+    private void unFreeze(String orderNo, String warehouseCode, String orderType) {
+        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+            return;
+        }
         // 查询明细
         List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
         InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
