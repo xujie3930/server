@@ -95,6 +95,14 @@ public interface IBaseProductService extends IService<BaseProduct> {
     int insertBaseProduct(BaseProductDto baseProductDto);
 
     /**
+     * 批量新增模块
+     *
+     * @param baseProductDtos 模块
+     * @return 结果
+     */
+    void BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos);
+
+    /**
      * 修改模块
      *
      * @param baseProductDto 模块

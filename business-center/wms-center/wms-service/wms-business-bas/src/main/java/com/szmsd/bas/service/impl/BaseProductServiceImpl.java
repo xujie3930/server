@@ -363,6 +363,54 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         return baseMapper.insert(baseProduct);
     }
 
+    @Override
+    public void BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos){
+        baseProductDtos.stream().forEach(o->{
+            if (StringUtils.isEmpty(o.getCode())) {
+                if(ProductConstant.SKU_NAME.equals(o.getCategory())){
+                    String skuCode = "S" + o.getSellerCode() + baseSerialNumberService.generateNumber(ProductConstant.SKU_NAME);
+                    o.setCode(skuCode);
+                }else{
+                    o.setCode("WL"+o.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
+                }
+            }else{
+                if(o.getCode().length()<2){
+                    throw new BaseException(o.getCategory()+"编码长度不能小于两个字符");
+                }
+            }
+            //验证 填写信息
+            verifyBaseProduct(o);
+            QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("code", o.getCode());
+            if (super.count(queryWrapper) == 1) {
+                throw new BaseException(o.getCategory()+"编码重复");
+            }
+            //默认激活
+            o.setIsActive(true);
+            //默认仓库没有验收
+            o.setWarehouseAcceptance(false);
+        });
+        List<BaseProduct> baseProducts = BeanMapperUtil.mapList(baseProductDtos, BaseProduct.class);
+
+        baseProducts.stream().forEach(o->{
+            //包材不需要仓库测量尺寸
+            o.setWarehouseAcceptance(true);
+            //SKU需要仓库测量尺寸
+            o.setWarehouseAcceptance(false);
+            o.setWeight(o.getInitWeight());
+            o.setWidth(o.getInitWidth());
+            o.setLength(o.getInitLength());
+            o.setHeight(o.getInitHeight());
+            o.setVolume(o.getInitVolume());
+            ProductRequest productRequest = BeanMapperUtil.map(o, ProductRequest.class);
+            R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+            if (!r.getData().getSuccess()) {
+                throw new BaseException("传wms失败:" + r.getData().getMessage());
+            }
+        });
+         super.saveBatch(baseProducts);
+    }
+
     /**
      * 修改模块
      *
@@ -657,7 +705,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 s.append("产品说明超过十个字符,");
             }
             if(!s.toString().equals("")){
-                s1.append("第"+count+"条数据："+s+"\r\n");
+                s1.append("第"+count+"条数据："+s+"\n");
             }
             count++;
         }
