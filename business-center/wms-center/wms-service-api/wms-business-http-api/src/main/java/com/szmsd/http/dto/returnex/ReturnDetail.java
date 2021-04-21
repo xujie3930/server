@@ -19,7 +19,7 @@ import java.util.Optional;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(value = "ReturnDetail", description = "退货商品处理详情")
+@ApiModel(value = "接收WMS传递的商品信息", description = "接收WMS传递的商品信息")
 public class ReturnDetail implements Serializable {
 
     /**
@@ -37,27 +37,6 @@ public class ReturnDetail implements Serializable {
      */
     @ApiModelProperty(value = "备注")
     private String remark;
-
-
-
-    /*通知WMS参数*/
-    /**
-     * 新上架编码 0-50
-     */
-    @ApiModelProperty(value = "新上架编码")
-    private String putawaySku;
-
-    /**
-     * 新上架编码 1-99999
-     */
-    @ApiModelProperty(value = "上架数量")
-    private Integer putawayQty;
-
-    /**
-     * SKU处理备注 0-500
-     */
-    @ApiModelProperty(value = "SKU处理备注")
-    private String processRemark;
 
     @Override
     public String toString() {
