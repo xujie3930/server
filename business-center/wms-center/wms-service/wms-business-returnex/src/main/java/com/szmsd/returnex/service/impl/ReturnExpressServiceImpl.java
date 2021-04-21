@@ -273,7 +273,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     .eq(ReturnExpressDetail::getExpectedNo, returnArrivalReqDTO.getExpectedNo())
                     .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsWaitReceive()).last("LIMIT 1"));
             AssertUtil.notNull(returnExpressDetailCheck, "数据不存在!");
-            boolean isOpenAndCheck = returnExpressDetailCheck.getDealStatus().equals(configStatus.getUnpackingInspection());
+            boolean isOpenAndCheck = returnExpressDetailCheck.getProcessType().equals(configStatus.getUnpackingInspection());
             String dealStatus = isOpenAndCheck?  configStatus.getDealStatus().getWmsWaitReceive():configStatus.getDealStatus().getWaitCustomerDeal();
             String dealStatusStr = isOpenAndCheck?  configStatus.getDealStatus().getWmsWaitReceiveStr():configStatus.getDealStatus().getWaitCustomerDealStr();
 
