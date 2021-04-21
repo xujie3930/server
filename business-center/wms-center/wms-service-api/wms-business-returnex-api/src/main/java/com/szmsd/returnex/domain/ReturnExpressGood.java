@@ -1,6 +1,8 @@
 package com.szmsd.returnex.domain;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -29,6 +31,7 @@ public class ReturnExpressGood extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "主键ID")
+    @TableId(value = "id", type = IdType.AUTO)
     @Excel(name = "主键ID")
     private Integer id;
 
