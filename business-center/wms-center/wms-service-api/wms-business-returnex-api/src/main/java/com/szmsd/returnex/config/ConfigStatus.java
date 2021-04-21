@@ -48,6 +48,14 @@ public class ConfigStatus {
      * 拆包明细
      */
     private String unpackingInspection;
+    /**
+     * 整包上架
+     */
+    private String wholePackageOnShelves;
+    /**
+     * 销毁
+     */
+    private String destroy;
 
     /**
      * 通过OMS中的主子类别的code 获取相对应的WMS操作类型
@@ -57,17 +65,6 @@ public class ConfigStatus {
      */
     public String getPrCode(String code) {
         return Optional.ofNullable(returnProcessingMethod.get(code)).filter(StringUtils::isNotEmpty).orElseThrow(() -> new BaseException("暂未配置该类型的处理方式"));
-    }
-
-    /**
-     * 获取继续操作的WMS操作类型
-     *
-     * @param processType WMS操作类型
-     * @return
-     */
-    public String getContinueOptCode(String processType) {
-        String s = returnProcessingMethod.get("继续操作");
-        return Optional.ofNullable(s).orElse(processType);
     }
 
     @Data

@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.returnex.api.feign.client.IReturnExpressFeignClientService;
 import com.szmsd.returnex.api.feign.serivice.IReturnExpressFeignService;
-import com.szmsd.returnex.dto.ReturnArrivalReqDTO;
-import com.szmsd.returnex.dto.ReturnProcessingReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnArrivalReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

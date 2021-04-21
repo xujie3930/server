@@ -1,7 +1,7 @@
 package com.szmsd.returnex.api.feign.client;
 
-import com.szmsd.returnex.dto.ReturnArrivalReqDTO;
-import com.szmsd.returnex.dto.ReturnProcessingReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnArrivalReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
 
 /**
  * @ClassName: IReturnExpressFeignClientService
