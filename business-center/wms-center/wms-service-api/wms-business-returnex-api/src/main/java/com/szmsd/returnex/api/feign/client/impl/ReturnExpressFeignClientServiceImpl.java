@@ -32,7 +32,7 @@ public class ReturnExpressFeignClientServiceImpl implements IReturnExpressFeignC
      * @return 操作结果
      */
     @Override
-    public int saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO) {
+    public Integer saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO) {
         log.info("接受WMS仓库数据 {}", JSONObject.toJSONString(returnArrivalReqDTO));
         return R.getDataAndException(iReturnExpressFeignService.saveArrivalInfoFormVms(returnArrivalReqDTO));
     }
@@ -46,7 +46,7 @@ public class ReturnExpressFeignClientServiceImpl implements IReturnExpressFeignC
      * @return 操作结果
      */
     @Override
-    public int updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO) {
+    public Integer updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO) {
         log.info("接收WMS仓库退件处理结果完成流程 {}", JSONObject.toJSONString(returnProcessingReqDTO));
         return R.getDataAndException(iReturnExpressFeignService.updateProcessingInfoFromVms(returnProcessingReqDTO));
     }
@@ -59,7 +59,7 @@ public class ReturnExpressFeignClientServiceImpl implements IReturnExpressFeignC
      * @return 操作结果
      */
     @Override
-    public int saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
+    public Integer saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
         log.info("接收仓库拆包明细 {}", returnProcessingReqDTO);
         return R.getDataAndException(iReturnExpressFeignService.saveProcessingInfoFromVms(returnProcessingReqDTO));
     }
