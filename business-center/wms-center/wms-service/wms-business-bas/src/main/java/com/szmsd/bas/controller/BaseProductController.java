@@ -180,6 +180,15 @@ public class BaseProductController extends BaseController {
         return toOk(baseProductService.insertBaseProduct(baseProductDto));
     }
 
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:add')")
+    @Log(title = "模块", businessType = BusinessType.INSERT)
+    @PostMapping("addBatch")
+    @ApiOperation(value = "新增产品模块", notes = "新增产品模块")
+    public R addBatch(@RequestBody List<BaseProductDto> baseProductDtos) {
+        baseProductService.BatchInsertBaseProduct(baseProductDtos);
+        return R.ok();
+    }
+
     /**
      * 修改模块
      */
