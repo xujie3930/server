@@ -81,6 +81,12 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "提货/快递信息")
     private String deliveryInfo;
 
+    @ApiModelProperty(value = "包裹重量尺寸确认")
+    private String packageConfirm;
+
+    @ApiModelProperty(value = "包裹重量误差")
+    private Integer packageWeightDeviation;
+
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;

@@ -110,7 +110,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 throw new CommonException("999", "不存在的类型[" + delOutbound.getOrderType() + "]");
             }
             // 先判断规则
-            boolean condition = ApplicationRuleConfig.bringVerifyCondition(orderTypeEnum, currentState.name());
+            boolean condition = ApplicationRuleConfig.shipmentCondition(orderTypeEnum, currentState.name());
             if (condition) {
                 // 再判断子级规则
                 return this.otherCondition(context, currentState);

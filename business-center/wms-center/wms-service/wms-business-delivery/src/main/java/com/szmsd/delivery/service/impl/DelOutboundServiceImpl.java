@@ -201,7 +201,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
         delOutbound.setOrderNo("CK" + delOutbound.getCustomCode() + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
         // 冻结库存
-        this.freeze(delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), dto.getDetails());
+        this.freeze(delOutbound.getOrderType(), delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), dto.getDetails());
         // 默认状态
         delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
         // 默认异常状态
@@ -344,7 +344,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         String orderNo = delOutbound.getOrderNo();
         String warehouseCode = delOutbound.getWarehouseCode();
         List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
-        this.unFreezeAndFreeze(orderNo, warehouseCode, detailList, dto.getDetails());
+        this.unFreezeAndFreeze(delOutbound.getOrderType(), orderNo, warehouseCode, detailList, dto.getDetails());
         // 先删后增
         this.deleteAddress(orderNo);
         this.deleteDetail(orderNo);
@@ -363,7 +363,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return baseMapper.updateById(inputDelOutbound);
     }
 
-    private void unFreezeAndFreeze(String invoiceNo, String warehouseCode, List<DelOutboundDetail> details, List<DelOutboundDetailDto> detailDtos) {
+    private void unFreezeAndFreeze(String orderType, String invoiceNo, String warehouseCode, List<DelOutboundDetail> details, List<DelOutboundDetailDto> detailDtos) {
+        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+            return;
+        }
         if (CollectionUtils.isEmpty(details) && CollectionUtils.isEmpty(detailDtos)) {
             return;
         }
@@ -391,7 +394,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.inventoryFeignClientService.unFreezeAndFreeze(operateListDto);
     }
 
-    private void freeze(String invoiceNo, String warehouseCode, List<DelOutboundDetailDto> details) {
+    private void freeze(String orderType, String invoiceNo, String warehouseCode, List<DelOutboundDetailDto> details) {
+        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+            return;
+        }
         if (CollectionUtils.isEmpty(details)) {
             return;
         }
