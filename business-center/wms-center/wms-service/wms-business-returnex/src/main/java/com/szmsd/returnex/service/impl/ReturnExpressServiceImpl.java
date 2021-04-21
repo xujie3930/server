@@ -186,6 +186,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @return 返回结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int assignUsersForNoUserBindBatch(ReturnExpressAssignDTO expressAssignDTO) {
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .isNull(ReturnExpressDetail::getSellerCode)
@@ -204,6 +205,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @return 返回结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertReturnExpressDetail(ReturnExpressAddDTO returnExpressAddDTO) {
         returnExpressAddDTO.setSellerCode(getSellCode());
         checkSubmit(returnExpressAddDTO);
@@ -262,6 +264,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @return 操作结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO) {
 
         if (returnArrivalReqDTO.getExpectedNo() != null) {
