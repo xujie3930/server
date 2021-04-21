@@ -47,6 +47,10 @@ public class ReturnExpressGoodVO {
     @Excel(name = "SKU处理备注")
     private String processRemark;
 
+    @ApiModelProperty(value = "仓库备注")
+    @Excel(name = "仓库备注")
+    private String remark;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

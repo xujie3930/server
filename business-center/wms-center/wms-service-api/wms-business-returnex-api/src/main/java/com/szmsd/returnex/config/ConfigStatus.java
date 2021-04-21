@@ -47,7 +47,7 @@ public class ConfigStatus {
     /**
      * 拆包明细
      */
-    private String receiveDetails;
+    private String unpackingInspection;
 
     /**
      * 通过OMS中的主子类别的code 获取相对应的WMS操作类型
