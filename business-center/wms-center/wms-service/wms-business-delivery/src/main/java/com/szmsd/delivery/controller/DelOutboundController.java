@@ -85,7 +85,7 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 分页", position = 100)
     @AutoValue
     public TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto queryDto) {
-        startPage();
+        startPage(queryDto);
         return getDataTable(this.delOutboundService.selectDelOutboundList(queryDto));
     }
 
