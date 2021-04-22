@@ -281,7 +281,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             String dealStatusStr = configStatus.getDealStatus().getWaitCustomerDealStr();
             // 拆包/销毁 整包 需要等待接收其他接口 拆包 G2 需要用户处理，销毁 整包 G3直接结束流程
             boolean isOpenAndCheck = returnExpressDetailCheck.getProcessType().equals(configStatus.getUnpackingInspection());
-            boolean isDestroy = returnExpressDetailCheck.getProcessType().equals(configStatus.getDestroy())||returnExpressDetailCheck.getProcessType().equals(configStatus.getWholePackageOnShelves());
+            boolean isDestroy = returnExpressDetailCheck.getProcessType().equals(configStatus.getDestroy()) || returnExpressDetailCheck.getProcessType().equals(configStatus.getWholePackageOnShelves());
             if (isOpenAndCheck) {
                 dealStatus = configStatus.getDealStatus().getWmsWaitReceive();
                 dealStatusStr = configStatus.getDealStatus().getWmsWaitReceiveStr();
@@ -362,16 +362,26 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         //如果是拆包，不可以整包上架 前段控制;
         ReturnExpressDetail returnExpressDetailCheck = returnExpressMapper.selectById(expressUpdateDTO.getId());
         AssertUtil.notNull(returnExpressDetailCheck, "数据不存在!");
-        boolean isOpenAndCheck = returnExpressDetailCheck.getProcessType().equals(configStatus.getUnpackingInspection());
+        boolean isOpenAndCheck = configStatus.getUnpackingInspection().equals(returnExpressDetailCheck.getProcessType());
+        String dealStatus = configStatus.getDealStatus().getWmsReceivedDealWay();
+        String dealStatusStr = configStatus.getDealStatus().getWmsReceivedDealWayStr();
+
         if (isOpenAndCheck)
-            AssertUtil.isTrue(!expressUpdateDTO.getProcessType().equals(configStatus.getWholePackageOnShelves()), "拆包上架后不在支持整包上架");
+            AssertUtil.isTrue(!configStatus.getWholePackageOnShelves().equals(expressUpdateDTO.getProcessType()), "拆包上架后不在支持整包上架");
+        if (configStatus.getReturnSource().getWmsReturn().equals(returnExpressDetailCheck.getReturnSource()) && StringUtils.isBlank(returnExpressDetailCheck.getProcessType())) {
+            //如果是WMS通知退件 则需要重新走流程 状态重置为wms待处理
+            if (isOpenAndCheck) {
+                dealStatus = configStatus.getDealStatus().getWmsWaitReceive();
+                dealStatusStr = configStatus.getDealStatus().getWmsWaitReceiveStr();
+            }
+        }
 
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
 
-                .set(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsReceivedDealWay())
-                .set(ReturnExpressDetail::getDealStatusStr, configStatus.getDealStatus().getWmsReceivedDealWayStr())
+                .set(ReturnExpressDetail::getDealStatus, dealStatus)
+                .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
                 .set(expressUpdateDTO.getProcessTypeStr() != null, ReturnExpressDetail::getProcessTypeStr, expressUpdateDTO.getProcessTypeStr())
                 .set(StringUtil.isNotBlank(expressUpdateDTO.getFromOrderNo()), ReturnExpressDetail::getFromOrderNo, expressUpdateDTO.getFromOrderNo())
