@@ -4,6 +4,9 @@ package com.szmsd.returnex.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
 import com.szmsd.returnex.dto.*;
+import com.szmsd.returnex.dto.wms.ReturnArrivalReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnProcessingFinishReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
 
@@ -49,7 +52,7 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @param returnProcessingReqDTO 接收VMS仓库退件处理结果
      * @return 操作结果
      */
-    int updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO);
+    int finishProcessingInfoFromWms(ReturnProcessingFinishReqDTO returnProcessingReqDTO);
 
     /**
      * 无名件管理列表 - 分页

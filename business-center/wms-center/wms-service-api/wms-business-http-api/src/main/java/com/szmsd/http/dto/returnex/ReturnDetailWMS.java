@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.util.Optional;
 
 /**
  * @ClassName: ReturnDetail
@@ -19,8 +18,8 @@ import java.util.Optional;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(value = "接收WMS传递的商品信息", description = "接收WMS传递的商品信息")
-public class ReturnDetail implements Serializable {
+@ApiModel(value = "WMS接收商品处理详情", description = "WMS接收商品处理详情")
+public class ReturnDetailWMS implements Serializable {
 
     /**
      * 仓库登记SKU 1-50
@@ -29,14 +28,25 @@ public class ReturnDetail implements Serializable {
     @ApiModelProperty(value = "仓库登记SKU")
     private String sku;
 
-    @ApiModelProperty(value = "数量")
-    private Integer qty;
+
+    /*通知WMS参数*/
+    /**
+     * 新上架编码 0-50
+     */
+    @ApiModelProperty(value = "新上架编码")
+    private String putawaySku;
+
+    /**
+     * 新上架编码 1-99999
+     */
+    @ApiModelProperty(value = "上架数量")
+    private Integer putawayQty;
 
     /**
      * SKU处理备注 0-500
      */
-    @ApiModelProperty(value = "备注")
-    private String remark;
+    @ApiModelProperty(value = "SKU处理备注")
+    private String processRemark;
 
     @Override
     public String toString() {

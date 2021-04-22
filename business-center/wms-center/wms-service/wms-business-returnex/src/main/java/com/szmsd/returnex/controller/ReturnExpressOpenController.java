@@ -9,8 +9,9 @@ import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
 import com.szmsd.http.vo.returnex.CreateExpectedRespVO;
 import com.szmsd.http.vo.returnex.ProcessingUpdateRespVO;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
-import com.szmsd.returnex.dto.ReturnArrivalReqDTO;
-import com.szmsd.returnex.dto.ReturnProcessingReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnArrivalReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnProcessingFinishReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
 import com.szmsd.returnex.service.IReturnExpressService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -76,8 +77,8 @@ public class ReturnExpressOpenController extends BaseController {
     @PostMapping("/processing")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "接收仓库-退件处理", notes = "/api/return/done #G3-接收仓库退件处理完成")
-    public R updateProcessingInfoFromWms(@Validated @RequestBody ReturnProcessingReqDTO returnProcessingReqDTO) {
-        return toOk(returnExpressService.updateProcessingInfoFromWms(returnProcessingReqDTO));
+    public R updateProcessingInfoFromWms(@Validated @RequestBody ReturnProcessingFinishReqDTO returnProcessingReqDTO) {
+        return toOk(returnExpressService.finishProcessingInfoFromWms(returnProcessingReqDTO));
     }
 
 
@@ -111,7 +112,5 @@ public class ReturnExpressOpenController extends BaseController {
     public void processingUpdate(@RequestBody ProcessingUpdateReqDTO processingUpdateReqDTO) {
         ProcessingUpdateRespVO processingUpdateRespVO = httpFeignClient.processingUpdate(processingUpdateReqDTO);
     }
-
-
 
 }
