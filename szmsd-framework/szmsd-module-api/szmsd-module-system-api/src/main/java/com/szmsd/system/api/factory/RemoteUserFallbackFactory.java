@@ -63,6 +63,11 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             }
 
             @Override
+            public R removeByemail(SysUser user) {
+                return null;
+            }
+
+            @Override
             public R delFlag(Long[] userIds) {
                 return null;
             }

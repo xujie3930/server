@@ -70,6 +70,12 @@ public interface RemoteUserService {
     R remove(@PathVariable("userId") Long userId);
 
     /**
+     * 真实删除用户-邮箱
+     */
+    @PostMapping("/user/removeByemail")
+    R removeByemail(@RequestBody SysUser user);
+
+    /**
      * 逻辑删除用户
      */
     @DeleteMapping("/user/delFlag/{userIds}")
