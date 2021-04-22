@@ -323,6 +323,33 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.getDelOutboundDetailsList(queryDto));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:export')")
+    @Log(title = "出库管理 - 导出", businessType = BusinessType.EXPORT)
+    @GetMapping("/export")
+    @ApiOperation(value = "出库管理 - 导出", notes = "运单管理 - 运单新建 - 导出")
+    public void export(HttpServletResponse response, DelOutboundListQueryDto queryDto) throws IOException {
+//        try {
+//            QueryDto queryDto1 = new QueryDto();
+//            queryDto1.setPageNum(1);
+//            queryDto1.setPageSize(500);
+//            ExcelUtils.export2WebPage(response, "运单新建", "运单新建", DelOutboundExportListVO.class, new QueryPage<OmsOrder>() {
+//                @Override
+//                public Page<OmsOrder> getPage() {
+//                    startPage(queryDto1);
+//                    return (Page<OmsOrder>) omsOrderService.draftList(queryDto);
+//                }
+//
+//                @Override
+//                public void nextPage() {
+//                    // 下一页
+//                    queryDto1.setPageNum(queryDto1.getPageNum() + 1);
+//                }
+//            });
+//        } catch (Exception e) {
+//            log.error("导出异常:" + e.getMessage(), e);
+//        }
+    }
+
     @AutoValue
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundCharge')")
     @PostMapping("/delOutboundCharge/page")

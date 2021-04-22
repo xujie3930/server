@@ -253,6 +253,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutbound.setLength(packageInfo.getLength());
         delOutbound.setWidth(packageInfo.getWidth());
         delOutbound.setHeight(packageInfo.getHeight());
+        // 规格，长*宽*高
+        delOutbound.setSpecifications(packageInfo.getLength() + "*" + packageInfo.getWidth() + "*" + packageInfo.getHeight());
     }
 
     private String buildShipmentType(DelOutboundDto dto) {
@@ -538,9 +540,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
         updateWrapper.set(DelOutbound::getPackingMaterial, dto.getPackingMaterial());
         updateWrapper.set(DelOutbound::getLength, dto.getLength());
-        updateWrapper.set(DelOutbound::getWidth, dto.getWidth());
-        updateWrapper.set(DelOutbound::getHeight, dto.getHeight());
-        updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
+        // 处理空值问题
+        Double width = Utils.defaultValue(dto.getWidth());
+        Double height = Utils.defaultValue(dto.getHeight());
+        Double weight = Utils.defaultValue(dto.getWeight());
+        updateWrapper.set(DelOutbound::getWidth, width);
+        updateWrapper.set(DelOutbound::getHeight, height);
+        updateWrapper.set(DelOutbound::getWeight, weight);
+        // 规格，长*宽*高
+        updateWrapper.set(DelOutbound::getSpecifications, dto.getLength() + "*" + width + "*" + height);
         return this.baseMapper.update(null, updateWrapper);
     }
 
