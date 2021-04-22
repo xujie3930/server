@@ -63,8 +63,18 @@ public class BaseController {
      * 设置请求分页数据
      */
     protected void startPage() {
-
         PageDomain pageDomain = TableSupport.buildPageRequest();
+        startPage(pageDomain);
+    }
+
+    protected void startPage(QueryDto queryDto) {
+        PageDomain pageDomain = new PageDomain();
+        pageDomain.setPageNum(queryDto.getPageNum());
+        pageDomain.setPageSize(queryDto.getPageSize());
+        startPage(pageDomain);
+    }
+
+    private void startPage(PageDomain pageDomain) {
         Integer pageNum = pageDomain.getPageNum();
         Integer pageSize = pageDomain.getPageSize();
         if (pageNum == null) {
@@ -75,10 +85,8 @@ public class BaseController {
             pageSize = 10;
             pageDomain.setPageSize(pageSize);
         }
-        if (StringUtils.isNotNull(pageNum) && StringUtils.isNotNull(pageSize)) {
-            String orderBy = SqlUtil.escapeOrderBySql(pageDomain.getOrderBy());
-            PageHelper.startPage(pageNum, pageSize, orderBy);
-        }
+        String orderBy = SqlUtil.escapeOrderBySql(pageDomain.getOrderBy());
+        PageHelper.startPage(pageNum, pageSize, orderBy);
     }
 
     /**
