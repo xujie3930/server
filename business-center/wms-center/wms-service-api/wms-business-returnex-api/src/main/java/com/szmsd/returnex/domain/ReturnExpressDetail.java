@@ -37,6 +37,9 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     @Excel(name = "创建人")
     private String createBy;
 
+    @ApiModelProperty(value = "sku")
+    private String sku;
+
     @ApiModelProperty(value = "修改人")
     @Excel(name = "修改人")
     private String updateBy;

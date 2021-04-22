@@ -1,10 +1,8 @@
-package com.szmsd.returnex.dto;
+package com.szmsd.returnex.dto.wms;
 
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.validator.annotation.StringLength;
 import com.szmsd.http.dto.returnex.ReturnDetail;
-import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,7 +10,6 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -26,16 +23,7 @@ import java.util.List;
 @Accessors(chain = true)
 @ApiModel("接受WMS仓库退件处理结果")
 public class ReturnProcessingReqDTO {
-    @ApiModelProperty(value = "账号(OMS提供)")
-    private String appId;
-    @ApiModelProperty(value = "密码(OMS提供)")
-    private String sign;
-    @ApiModelProperty(value = "操作人")
-    private String operator;
-    @ApiModelProperty(value = "操作时间")
-    private String operateOn;
-    @ApiModelProperty(value = "业务主键,用来做幂等校验")
-    private String transactionId;
+
     /**
      * string
      * nullable: true

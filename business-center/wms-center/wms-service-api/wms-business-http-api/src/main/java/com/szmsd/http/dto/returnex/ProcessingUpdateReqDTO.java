@@ -49,11 +49,14 @@ public class ProcessingUpdateReqDTO {
     @ApiModelProperty(value = "处理备注")
     private String processRemark;
 
+    @ApiModelProperty(value = "sku 如果处理方式是整包上架,需要提供对整个包裹对应的sku编码" )
+    private String sku;
+
     /**
      * 明细处理备注
      */
     @ApiModelProperty(value = "明细处理备注")
-    private List<ReturnDetail> details;
+    private List<ReturnDetailWMS> details;
 
     @Override
     public String toString() {

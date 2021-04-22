@@ -1,4 +1,4 @@
-package com.szmsd.returnex.dto;
+package com.szmsd.returnex.dto.wms;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.validator.annotation.StringLength;
@@ -38,7 +38,7 @@ public class ReturnArrivalReqDTO implements BOConvert {
     /**
      * 预报单号，可能空 1-50
      */
-    @StringLength(minLength = 1, maxLength = 50, message = "预报单号超过约定长度[1-50]")
+    //@StringLength(minLength = 1, maxLength = 50, message = "预报单号超过约定长度[1-50]")
     @ApiModelProperty(value = "预报单号",example = "OMS123")
     private String expectedNo;
 
@@ -68,7 +68,6 @@ public class ReturnArrivalReqDTO implements BOConvert {
      * 卖家代码
      */
     @StringLength(minLength = 1, maxLength = 50, message = "卖家代码超过约定长度[1-50]")
-    @NotBlank(message = "卖家代码不能为空")
     @ApiModelProperty(value = "卖家代码")
     private String sellerCode;
 

@@ -1,7 +1,7 @@
 package com.szmsd.returnex.api.feign.client;
 
-import com.szmsd.returnex.dto.ReturnArrivalReqDTO;
-import com.szmsd.returnex.dto.ReturnProcessingReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnArrivalReqDTO;
+import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
 
 /**
  * @ClassName: IReturnExpressFeignClientService
@@ -18,7 +18,7 @@ public interface IReturnExpressFeignClientService {
      * @param returnArrivalReqDTO 接收VMS仓库到件信息
      * @return 操作结果
      */
-    int saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO);
+    Integer saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO);
 
     /**
      * 接收WMS仓库退件处理结果 结束流程
@@ -28,7 +28,7 @@ public interface IReturnExpressFeignClientService {
      * @param returnProcessingReqDTO 接收WMS仓库退件处理结果
      * @return 操作结果
      */
-    int updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO);
+    Integer updateProcessingInfoFromWms(ReturnProcessingReqDTO returnProcessingReqDTO);
 
     /**
      * 接收仓库拆包明细
@@ -37,5 +37,5 @@ public interface IReturnExpressFeignClientService {
      * @param returnProcessingReqDTO 拆包明细
      * @return 操作结果
      */
-    int saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO);
+    Integer saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO);
 }

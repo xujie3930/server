@@ -27,7 +27,8 @@ public class ReturnExpressVO {
     @TableId(value = "id", type = IdType.AUTO)
     @Excel(name = "主键ID")
     private Integer id;
-
+    @ApiModelProperty(value = "sku")
+    private String sku;
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
     private String sellerCode;

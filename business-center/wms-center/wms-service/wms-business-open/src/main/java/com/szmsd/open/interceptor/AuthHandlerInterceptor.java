@@ -16,6 +16,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Set;
 
@@ -29,6 +30,8 @@ public class AuthHandlerInterceptor implements HandlerInterceptor, Ordered {
 
     @Autowired
     private AuthConfig authConfig;
+    @Autowired
+    private AuthHandler authHandler;
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
@@ -48,21 +51,29 @@ public class AuthHandlerInterceptor implements HandlerInterceptor, Ordered {
         if (StringUtils.isEmpty(sign)) {
             sign = request.getHeader(RequestConstant.SIGN);
         }
-        // 判断有没有配置
-        if (StringUtils.isNotEmpty(authConfig.getAppId()) && StringUtils.isNotEmpty(authConfig.getSign())) {
-            if (!(authConfig.getAppId().equals(appId) && authConfig.getSign().equals(sign))) {
-                logger.info("认证失败");
-                response.reset();
-                response.setCharacterEncoding(RequestConstant.ENCODING);
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
-                PrintWriter pw = response.getWriter();
-                pw.write(JSONObject.toJSONString(R.failed("认证失败")));
-                pw.flush();
-                // pw.close();
-                return false;
-            }
+        // 执行认证逻辑
+        try {
+            this.authHandler.authentication(appId, sign);
+        } catch (AuthHandlerException e) {
+            logger.error(e.getMessage(), e);
+            this.responseWrite(response, e.getMessage());
+            return false;
         }
         return true;
+    }
+
+    private void responseWrite(HttpServletResponse response, String message) {
+        response.reset();
+        response.setCharacterEncoding(RequestConstant.ENCODING);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
+        PrintWriter pw;
+        try {
+            pw = response.getWriter();
+            pw.write(JSONObject.toJSONString(R.failed(message)));
+            pw.flush();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
     @Override

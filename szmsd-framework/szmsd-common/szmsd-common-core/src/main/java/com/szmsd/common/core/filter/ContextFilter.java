@@ -60,11 +60,17 @@ public class ContextFilter implements Filter {
                 requestBody = "{}";
             } else {
                 requestBody = requestBody.replaceAll("\t", "")
+                        .replaceAll(" ", "")
                         .replaceAll("\n", "")
                         .replaceAll("\r", "");
             }
             if (StringUtil.isEmpty(responseBody)) {
                 responseBody = "{}";
+            } else {
+                responseBody = responseBody.replaceAll("\t", "")
+                        .replaceAll(" ", "")
+                        .replaceAll("\n", "")
+                        .replaceAll("\r", "");
             }
             builder.append("{\"requestBody\":").append(requestBody).append(",");
             builder.append("\"responseBody\":").append(responseBody).append("}");
