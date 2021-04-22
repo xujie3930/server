@@ -176,6 +176,14 @@ public interface ISysUserService
     public int deleteUserById(Long userId);
 
     /**
+     * 通过邮箱删除用户
+     *
+     * @param email
+     * @return 结果
+     */
+    public int deleteUserByemail(String email);
+
+    /**
      * 批量删除用户信息
      * 
      * @param userIds 需要删除的用户ID

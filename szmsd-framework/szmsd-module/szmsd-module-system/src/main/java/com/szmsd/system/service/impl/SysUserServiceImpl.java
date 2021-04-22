@@ -414,6 +414,18 @@ public class SysUserServiceImpl implements ISysUserService {
         return userMapper.deleteUserById(userId);
     }
 
+    @Override
+    public int  deleteUserByemail(String email){
+        SysUser info = userMapper.checkEmailUnique(email);
+        Long userId = info.getUserId();
+        // 删除用户与角色关联
+
+        userRoleMapper.deleteUserRoleByUserId(userId);
+        // 删除用户与岗位表
+        userPostMapper.deleteUserPostByUserId(userId);
+        return userMapper.deleteUserById(userId);
+    }
+
     /**
      * 批量逻辑删除用户信息
      *

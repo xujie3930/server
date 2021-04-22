@@ -410,6 +410,17 @@ public class SysUserController extends BaseController {
         return toOk(userService.deleteUserById(userId));
     }
 
+    /**
+     * 真实删除用户
+     */
+//    @PreAuthorize("@ss.hasPermi('system:user:remove')")
+    @Log(title = "用户管理", businessType = BusinessType.DELETE)
+    @DeleteMapping("removeByemail")
+    @ApiOperation(httpMethod = "DELETE", value = "真实删除用户")
+    public R<Integer> removeByemail(@RequestBody SysUser user) {
+        return toOk(userService.deleteUserByemail(user.getEmail()));
+    }
+
 
     /**
      * 逻辑删除用户
