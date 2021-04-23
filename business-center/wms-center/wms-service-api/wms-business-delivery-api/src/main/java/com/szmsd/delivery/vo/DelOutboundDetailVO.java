@@ -68,4 +68,31 @@ public class DelOutboundDetailVO implements Serializable {
 
     @ApiModelProperty(value = "绑定专属包材产品名")
     private String bindCodeName;
+
+    @ApiModelProperty(value = "中文申报品名")
+    private String productNameChinese;
+
+    @ApiModelProperty(value = "申报价值")
+    private Double declaredValue;
+
+    @ApiModelProperty(value = "产品说明")
+    private String productDescription;
+
+    @ApiModelProperty(value = "产品属性编号")
+    private String productAttribute;
+
+    @ApiModelProperty(value = "产品属性名")
+    private String productAttributeName;
+
+    @ApiModelProperty(value = "带电信息编号")
+    private String electrifiedMode;
+
+    @ApiModelProperty(value = "带电信息名")
+    private String electrifiedModeName;
+
+    @ApiModelProperty(value = "电池包装编号")
+    private String batteryPackaging;
+
+    @ApiModelProperty(value = "电池包装名")
+    private String batteryPackagingName;
 }
