@@ -138,7 +138,6 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
     public HtpUrlGroup selectHtpUrlGroup(String groupId) {
         HtpUrlGroup htpUrlGroup = null;
         List<HtpUrlGroup> htpUrlGroups = htpConfigMapper.selectHtpUrlGroup(groupId, null);
-        ;
         if (CollectionUtils.isNotEmpty(htpUrlGroups)) {
             htpUrlGroup = htpUrlGroups.get(0);
         }
