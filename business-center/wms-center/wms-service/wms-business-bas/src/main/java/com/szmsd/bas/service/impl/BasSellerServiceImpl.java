@@ -245,21 +245,28 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             R<ResponseVO> result = htpBasFeignService.createSeller(sellerRequest);
             SysUser user = new SysUser();
             user.setEmail(dto.getInitEmail());
-            if(result.getData().getSuccess()==null){
-                if(result.getData().getErrors()!=null)
-                {
-                    //删除表中用户
-                    remoteUserService.removeByemail(user);
-                    throw new BaseException("传wms失败" + result.getData().getErrors());
-                }
+            if(result.getData()==null){
+                //删除表中用户
+                remoteUserService.removeByemail(user);
+                throw new BaseException("传wms失败" + result.getData().getErrors());
             }else{
-                if(!result.getData().getSuccess())
-                {
-                    //删除表中用户
-                    remoteUserService.removeByemail(user);
-                    throw new BaseException("传wms失败" + result.getData().getMessage());
+                if(result.getData().getSuccess()==null){
+                    if(result.getData().getErrors()!=null)
+                    {
+                        //删除表中用户
+                        remoteUserService.removeByemail(user);
+                        throw new BaseException("传wms失败" + result.getData().getErrors());
+                    }
+                }else{
+                    if(!result.getData().getSuccess())
+                    {
+                        //删除表中用户
+                        remoteUserService.removeByemail(user);
+                        throw new BaseException("传wms失败" + result.getData().getMessage());
+                    }
                 }
             }
+
             r.setData(true);
             r.setMsg("注册成功");
             return r;
