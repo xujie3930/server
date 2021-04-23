@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <springProperty scope="context" name="springProfilesActive" source="spring.profiles.active"/>
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
     <!-- 日志存放路径 -->
-	<property name="log.path" value="/u01/logs/ck1/business-finance" />
-   <!-- 日志输出格式 -->
+    <property name="log.path" value="/u01/logs/ck1/${springProfilesActive}/${springAppName}" />
+    <!-- 日志输出格式 -->
 	<property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n" />:ss} %-5level ${springAppName:-} %thread %logger %msg%n"/>
 
     <!-- 控制台输出 -->
@@ -62,12 +65,9 @@
 	<!-- Spring日志级别控制  -->
 	<logger name="org.springframework" level="warn" />
 
-	<root level="info">
-		<appender-ref ref="console" />
-	</root>
-	
 	<!--系统操作日志-->
     <root level="info">
+        <appender-ref ref="console" />
         <appender-ref ref="file_info" />
         <appender-ref ref="file_error" />
     </root>
