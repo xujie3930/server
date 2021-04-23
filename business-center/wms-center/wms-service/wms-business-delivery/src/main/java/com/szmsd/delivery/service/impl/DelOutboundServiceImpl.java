@@ -145,6 +145,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundListVO> selectDelOutboundList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
+        this.handlerQueryWrapper(queryWrapper, queryDto);
+        return baseMapper.pageList(queryWrapper);
+    }
+
+    private void handlerQueryWrapper(QueryWrapper<DelOutboundListQueryDto> queryWrapper, DelOutboundListQueryDto queryDto) {
         String orderNo = queryDto.getOrderNo();
         if (StringUtils.isNotEmpty(orderNo)) {
             if (orderNo.contains(",")) {
@@ -177,7 +182,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
-        return baseMapper.pageList(queryWrapper);
     }
 
     /**
@@ -852,6 +856,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.setAmount(queryChargeVO, delOutboundCharges);
         }
         return list;
+    }
+
+    @Override
+    public List<DelOutboundExportListDto> exportList(DelOutboundListQueryDto queryDto) {
+        QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
+        this.handlerQueryWrapper(queryWrapper, queryDto);
+        return this.baseMapper.exportList(queryWrapper);
     }
 
     /**

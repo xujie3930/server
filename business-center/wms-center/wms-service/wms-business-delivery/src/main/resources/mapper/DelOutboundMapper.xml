@@ -103,4 +103,34 @@
         </where>
     </select>
 
+    <select id="exportList" resultType="com.szmsd.delivery.dto.DelOutboundExportListDto">
+        SELECT
+            o.seller_code,
+            o.warehouse_code,
+            o.tracking_no,
+            o.shipment_order_number,
+            o.ref_order_no,
+            o.shipment_service,
+            o.bring_verify_time,
+            o.arrival_time,
+            o.shipments_time,
+            o.exception_state,
+            o.shipment_rule,
+            o.box_number,
+            o.weight,
+            o.calc_weight,
+            a.consignee,
+            a.street1,
+            a.street2,
+            a.state_or_province,
+            a.city,
+            a.post_code,
+            a.country,
+            a.phone_no,
+            o.specifications
+        FROM del_outbound o
+        INNER JOIN del_outbound_address a ON a.order_no = o.order_no
+        ${ew.customSqlSegment}
+    </select>
+
 </mapper>

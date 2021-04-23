@@ -9,28 +9,32 @@ import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
+import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.ExcelUtils;
+import com.szmsd.common.core.utils.QueryPage;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.validator.ValidationSaveGroup;
 import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.exported.DelOutboundExportContext;
+import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
+import com.szmsd.delivery.exported.ExportContext;
 import com.szmsd.delivery.imported.*;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
-import com.szmsd.delivery.vo.DelOutboundDetailVO;
-import com.szmsd.delivery.vo.DelOutboundListVO;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -79,6 +83,8 @@ public class DelOutboundController extends BaseController {
     private BasRegionFeignService basRegionFeignService;
     @Autowired
     private InventoryFeignClientService inventoryFeignClientService;
+    @Autowired
+    private BasWarehouseClientService basWarehouseClientService;
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/page")
@@ -326,28 +332,21 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:export')")
     @Log(title = "出库管理 - 导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    @ApiOperation(value = "出库管理 - 导出", notes = "运单管理 - 运单新建 - 导出")
+    @ApiOperation(value = "出库管理 - 导出")
     public void export(HttpServletResponse response, DelOutboundListQueryDto queryDto) throws IOException {
-//        try {
-//            QueryDto queryDto1 = new QueryDto();
-//            queryDto1.setPageNum(1);
-//            queryDto1.setPageSize(500);
-//            ExcelUtils.export2WebPage(response, "运单新建", "运单新建", DelOutboundExportListVO.class, new QueryPage<OmsOrder>() {
-//                @Override
-//                public Page<OmsOrder> getPage() {
-//                    startPage(queryDto1);
-//                    return (Page<OmsOrder>) omsOrderService.draftList(queryDto);
-//                }
-//
-//                @Override
-//                public void nextPage() {
-//                    // 下一页
-//                    queryDto1.setPageNum(queryDto1.getPageNum() + 1);
-//                }
-//            });
-//        } catch (Exception e) {
-//            log.error("导出异常:" + e.getMessage(), e);
-//        }
+        try {
+            QueryDto queryDto1 = new QueryDto();
+            queryDto1.setPageNum(1);
+            queryDto1.setPageSize(500);
+            // 查询出库类型数据
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("066");
+            List<BasSubWrapperVO> exceptionStateList = listMap.get("066");
+            ExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, exceptionStateList);
+            QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
+            ExcelUtils.export2WebPage(response, "出库单", "出库单", DelOutboundExportListVO.class, queryPage);
+        } catch (Exception e) {
+            log.error("导出异常:" + e.getMessage(), e);
+        }
     }
 
     @AutoValue
