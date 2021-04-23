@@ -307,7 +307,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         if (redisTemplate.hasKey(userAccountKey)) {
             redisTemplate.delete(userAccountKey);
         }
-        redisTemplate.opsForValue().set(userAccountKey, checkCode, 60000, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(userAccountKey, checkCode, 120000, TimeUnit.MILLISECONDS);
         // 转换流信息写出
         FastByteArrayOutputStream os = new FastByteArrayOutputStream();
         try {
