@@ -331,9 +331,9 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:export')")
     @Log(title = "出库管理 - 导出", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")
+    @PostMapping("/export")
     @ApiOperation(value = "出库管理 - 导出")
-    public void export(HttpServletResponse response, DelOutboundListQueryDto queryDto) throws IOException {
+    public void export(HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
         try {
             QueryDto queryDto1 = new QueryDto();
             queryDto1.setPageNum(1);
