@@ -370,8 +370,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 if(ProductConstant.SKU_NAME.equals(o.getCategory())){
                     String skuCode = "S" + o.getSellerCode() + baseSerialNumberService.generateNumber(ProductConstant.SKU_NAME);
                     o.setCode(skuCode);
+                    o.setCategoryCode("SKUtype");
                 }else{
                     o.setCode("WL"+o.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
+                    o.setCategoryCode("packagetype");
                 }
             }else{
                 if(o.getCode().length()<2){
