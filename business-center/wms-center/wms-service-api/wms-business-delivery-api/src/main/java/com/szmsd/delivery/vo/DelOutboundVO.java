@@ -93,6 +93,9 @@ public class DelOutboundVO implements Serializable {
     @ApiModelProperty(value = "重量 g")
     private Double weight;
 
+    @ApiModelProperty(value = "规格")
+    private String specifications;
+
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressVO address;
 
