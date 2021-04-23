@@ -364,7 +364,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public void BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos){
+    public List<BaseProduct> BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos){
         baseProductDtos.stream().forEach(o->{
             if (StringUtils.isEmpty(o.getCode())) {
                 if(ProductConstant.SKU_NAME.equals(o.getCategory())){
@@ -411,6 +411,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }
         });
          super.saveBatch(baseProducts);
+         return baseProducts;
     }
 
     /**

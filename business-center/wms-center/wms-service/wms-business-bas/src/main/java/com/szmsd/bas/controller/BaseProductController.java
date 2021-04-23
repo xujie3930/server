@@ -184,9 +184,8 @@ public class BaseProductController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("addBatch")
     @ApiOperation(value = "新增产品模块", notes = "新增产品模块")
-    public R addBatch(@RequestBody List<BaseProductDto> baseProductDtos) {
-        baseProductService.BatchInsertBaseProduct(baseProductDtos);
-        return R.ok();
+    public R<List<BaseProduct>> addBatch(@RequestBody List<BaseProductDto> baseProductDtos) {
+        return R.ok(baseProductService.BatchInsertBaseProduct(baseProductDtos));
     }
 
     /**

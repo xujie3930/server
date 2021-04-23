@@ -100,7 +100,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @param baseProductDtos 模块
      * @return 结果
      */
-    void BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos);
+    List<BaseProduct> BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos);
 
     /**
      * 修改模块
