@@ -64,8 +64,7 @@ public class SysUserController extends BaseController {
     @Resource
     private ISysPermissionService permissionService;
 
-    @Autowired
-    private BasSellerFeignService basSellerFeignService;
+
 
 
 
@@ -217,6 +216,8 @@ public class SysUserController extends BaseController {
     @GetMapping("getInfo")
     @ApiOperation(httpMethod = "GET", value = "获取用户信息")
     public R getInfo(@ApiParam("权限类型：1-PC，2-APP,3-VIP") @RequestParam(defaultValue = "1") @PathVariable("type") Integer type) {
+        log.info("用户ID"+SecurityUtils.getLoginUser().getUserId().toString());
+        log.info("用户"+SecurityUtils.getLoginUser().toString());
         Long userId = SecurityUtils.getLoginUser().getUserId();
         // 角色集合
         Set<String> roles = permissionService.getRolePermission(userId, type);
