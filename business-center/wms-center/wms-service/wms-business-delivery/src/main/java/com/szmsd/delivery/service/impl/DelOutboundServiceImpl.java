@@ -244,9 +244,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         double weight = 0.0;
         List<DelOutboundDetailDto> details = dto.getDetails();
         List<PackageInfo> packageInfoList = new ArrayList<>();
+        long boxNumber = 0L;
         for (DelOutboundDetailDto detail : details) {
             weight += Utils.defaultValue(detail.getWeight());
             packageInfoList.add(new PackageInfo(detail.getLength(), detail.getWidth(), detail.getHeight()));
+            boxNumber += Utils.defaultValue(detail.getQty());
         }
         delOutbound.setWeight(weight);
         PackageInfo packageInfo = PackageUtil.count(packageInfoList);
@@ -255,6 +257,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutbound.setHeight(packageInfo.getHeight());
         // 规格，长*宽*高
         delOutbound.setSpecifications(packageInfo.getLength() + "*" + packageInfo.getWidth() + "*" + packageInfo.getHeight());
+        delOutbound.setBoxNumber(boxNumber);
     }
 
     private String buildShipmentType(DelOutboundDto dto) {
@@ -513,6 +516,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 仓库开始处理
         if (DelOutboundOperationTypeEnum.PROCESSING.getCode().equals(dto.getOperationType())) {
             updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_PROCESSING.getCode());
+            updateWrapper.set(DelOutbound::getArrivalTime, new Date());
         }
         // 仓库已发货
         else if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
@@ -638,6 +642,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         // 清空异常信息
         delOutbound.setExceptionMessage("");
+        // 设置提审成功时间
+        delOutbound.setBringVerifyTime(new Date());
         this.updateById(delOutbound);
     }
 
@@ -663,6 +669,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
         return this.getOne(queryWrapper);
+    }
+
+    @Transactional
+    @Override
+    public void completed(Long id) {
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.COMPLETED.getCode());
+        updateWrapper.set(DelOutbound::getShipmentsTime, new Date());
+        updateWrapper.eq(DelOutbound::getId, id);
+        this.update(updateWrapper);
     }
 
     @Transactional

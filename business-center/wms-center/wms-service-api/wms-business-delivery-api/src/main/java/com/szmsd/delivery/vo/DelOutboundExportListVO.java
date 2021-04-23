@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @author zhangyuyuan
@@ -46,13 +47,13 @@ public class DelOutboundExportListVO implements Serializable {
     private String shipmentService;
 
     @ExcelProperty(value = "提审时间")
-    private String bringVerifyTime;
+    private Date bringVerifyTime;
 
     @ExcelProperty(value = "到仓时间")
-    private String arrivalTime;
+    private Date arrivalTime;
 
     @ExcelProperty(value = "发货时间")
-    private String deliveryTime;
+    private Date shipmentsTime;
 
     @ExcelProperty(value = "异常状态")
     private String exceptionStateName;
@@ -61,7 +62,7 @@ public class DelOutboundExportListVO implements Serializable {
     private String shipmentRule;
 
     @ExcelProperty(value = "箱数")
-    private String boxNumber;
+    private Long boxNumber;
 
     @ExcelProperty(value = "重量")
     private Double weight;

@@ -1,5 +1,6 @@
 package com.szmsd.delivery.domain;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -175,5 +176,17 @@ public class DelOutbound extends BaseEntity {
     private String packageConfirm;
 
     @ApiModelProperty(value = "包裹重量误差")
-    private Integer packageWeightDeviation;
+    private Long packageWeightDeviation;
+
+    @ExcelProperty(value = "提审时间")
+    private Date bringVerifyTime;
+
+    @ExcelProperty(value = "到仓时间")
+    private Date arrivalTime;
+
+    @ExcelProperty(value = "发货时间")
+    private Date shipmentsTime;
+
+    @ExcelProperty(value = "箱数")
+    private Long boxNumber;
 }
