@@ -106,8 +106,18 @@
     </select>
 
     <sql id="selectListWhere">
-        <if test="warehouseNo != null and warehouseNo != ''">AND t.warehouse_no = #{warehouseNo}</if>
-        <if test="orderNo != null and orderNo != ''">AND t.order_no = #{orderNo}</if>
+        <if test="warehouseNoList != null and warehouseNoList.size() > 0">
+            AND t.warehouse_no IN
+            <foreach collection="warehouseNoList" open="(" separator="," close=")" item="warehouseNo">
+                #{warehouseNo}
+            </foreach>
+        </if>
+        <if test="orderNoList != null and orderNoList.size() > 0">
+            AND t.order_no IN
+            <foreach collection="orderNoList" open="(" separator="," close=")" item="orderNo">
+                #{orderNo}
+            </foreach>
+        </if>
         <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
         <if test="cusCode != null and cusCode != ''">AND t.cus_code = #{cusCode}</if>
         <if test="status != null and status != ''">AND t.status = #{status}</if>

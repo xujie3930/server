@@ -41,6 +41,13 @@ public final class Utils {
         return value;
     }
 
+    public static long defaultValue(Long value) {
+        if (null == value) {
+            return 0L;
+        }
+        return value;
+    }
+
     public static String defaultValue(String text, String defaultText) {
         if (StringUtils.isEmpty(text)) {
             return defaultText;

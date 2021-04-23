@@ -122,7 +122,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             }
             if ("MODIFY".equals(completedState)) {
                 // 更新出库单状态为已完成
-                this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.COMPLETED);
+                this.delOutboundService.completed(delOutbound.getId());
                 // 处理异常修复
                 if (DelOutboundExceptionStateEnum.ABNORMAL.getCode().equals(delOutbound.getExceptionState())) {
                     this.delOutboundService.exceptionFix(delOutbound.getId());
