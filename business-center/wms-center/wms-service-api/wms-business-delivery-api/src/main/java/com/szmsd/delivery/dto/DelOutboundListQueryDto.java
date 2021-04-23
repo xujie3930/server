@@ -1,18 +1,19 @@
 package com.szmsd.delivery.dto;
 
+import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.io.Serializable;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author zhangyuyuan
  * @date 2021-03-05 14:21
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @ApiModel(value = "DelOutboundListQueryDto", description = "DelOutboundListQueryDto对象")
-public class DelOutboundListQueryDto implements Serializable {
+public class DelOutboundListQueryDto extends QueryDto {
 
     @ApiModelProperty(value = "出库单号")
     private String orderNo;
@@ -43,4 +44,5 @@ public class DelOutboundListQueryDto implements Serializable {
 
     @ApiModelProperty(value = "修改时间")
     private String updateTime;
+
 }
