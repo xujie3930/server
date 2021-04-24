@@ -49,12 +49,15 @@ public class ResponseVO implements Serializable {
         }
     }
 
-    public static void resultAssert(R<? extends ResponseVO> result, String api) {
+    public static void statusAssert(R<? extends ResponseVO> result, String api) {
         AssertUtil.notNull(result, () -> "RemoteRequest[" + api + "请求失败]");
 
         boolean expression = result.getCode() == HttpStatus.SUCCESS;
         AssertUtil.isTrue(expression, () -> "RemoteRequest[" + api + "失败:" +  result.getMsg() + "]");
 
+    }
+    public static void resultAssert(R<? extends ResponseVO> result, String api) {
+        statusAssert(result, api);
         ResponseVO data = result.getData();
         boolean expression1 = data == null || (data.getSuccess() == null ? false : data.getSuccess());
         AssertUtil.isTrue(expression1, () -> "RemoteRequest[" + api + "失败:" +  getDefaultStr(data.getMessage()).concat(getDefaultStr(data.getErrors())) + "]");
