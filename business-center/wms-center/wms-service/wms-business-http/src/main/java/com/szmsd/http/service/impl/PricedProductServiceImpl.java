@@ -75,7 +75,7 @@ public class PricedProductServiceImpl extends SaaSPricedProductRequest implement
 
     @Override
     public ResponseVO grade(ChangeSheetGradeCommand changeSheetGradeCommand) {
-        String text = httpPut("", "pricedGrade.grades", changeSheetGradeCommand, changeSheetGradeCommand.getProductCode(), changeSheetGradeCommand.getSheetCode());
+        String text = httpPut("", "pricedProduct.updateGrade", changeSheetGradeCommand, changeSheetGradeCommand.getProductCode(), changeSheetGradeCommand.getSheetCode());
         if ("true".equalsIgnoreCase(text)) {
             return null;
         }
