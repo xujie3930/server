@@ -30,7 +30,7 @@ public class AccountServiceImpl extends ThirdPaymentRequest implements IAccountS
         if (StringUtils.isEmpty(dto.getRemark())) {
             dto.setRemark("");
         }
-        return JSON.parseObject(httpPost("", "", dto), RechargesResponseVo.class);
+        return JSON.parseObject(httpPost("", "recharges.recharges", dto), RechargesResponseVo.class);
     }
 
     @Override
