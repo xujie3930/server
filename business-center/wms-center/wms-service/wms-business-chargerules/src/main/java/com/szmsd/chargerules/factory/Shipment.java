@@ -13,13 +13,17 @@ import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.finance.dto.AccountSerialBillDTO;
+import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.http.enums.HttpRechargeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -113,10 +117,32 @@ public class Shipment extends OrderType {
             return;
         }
         ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType(), datum.getWarehouseCode(),count);
-        R resultPay = payService.pay(datum.getCustomCode(), amount, BillEnum.PayMethod.BUSINESS_OPERATE, chargeLog);
+        CustPayDTO custPayDTO = setCustPayDto(datum, amount, chargeLog);
+        R resultPay = payService.pay(custPayDTO, chargeLog);
         if (resultPay.getCode() != 200)
             log.error("pay() pay failed.. msg: {},data: {}", resultPay.getMsg(), resultPay.getData());
 
+    }
+
+    private CustPayDTO setCustPayDto(DelOutboundDetailListVO datum, BigDecimal amount, ChargeLog chargeLog) {
+        CustPayDTO custPayDTO = new CustPayDTO();
+        List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>();
+        AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
+        accountSerialBillDTO.setChargeCategory("操作费");
+        accountSerialBillDTO.setChargeType(datum.getOrderType());
+        accountSerialBillDTO.setRemark(datum.getRemark());
+        accountSerialBillDTO.setAmount(amount);
+        accountSerialBillDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        serialBillInfoList.add(accountSerialBillDTO);
+        accountSerialBillDTO.setWarehouseCode(datum.getWarehouseCode());
+        custPayDTO.setCusCode(datum.getCustomCode());
+        custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
+        custPayDTO.setPayMethod(BillEnum.PayMethod.BUSINESS_OPERATE);
+        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        custPayDTO.setAmount(amount);
+        custPayDTO.setNo(chargeLog.getOrderNo());
+        custPayDTO.setSerialBillInfoList(serialBillInfoList);
+        return custPayDTO;
     }
 
 }
