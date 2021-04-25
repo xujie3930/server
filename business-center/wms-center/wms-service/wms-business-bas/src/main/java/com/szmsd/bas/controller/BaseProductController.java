@@ -153,6 +153,10 @@ public class BaseProductController extends BaseController {
     @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
     public void export(HttpServletResponse response, BaseProductQueryDto queryDto) throws IOException {
         queryDto.setCategory(ProductConstant.SKU_NAME);
+        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
+        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
+        BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
+        queryDto.setSellerCode(basSeller.getSellerCode());
         List<BaseProductExportDto> list = baseProductService.exportProduceList(queryDto);
         ExcelUtil<BaseProductExportDto> util = new ExcelUtil<BaseProductExportDto>(BaseProductExportDto.class);
         util.exportExcel(response, list, "sku导出");
