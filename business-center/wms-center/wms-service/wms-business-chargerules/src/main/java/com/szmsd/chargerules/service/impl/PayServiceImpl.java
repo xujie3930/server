@@ -7,7 +7,6 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.enums.HttpRechargeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,20 +37,11 @@ public class PayServiceImpl implements IPayService {
     }
 
     @Override
-    public R pay(String customCode, BigDecimal amount, BillEnum.PayMethod payMethod, ChargeLog chargeLog) {
-        CustPayDTO custPayDTO = new CustPayDTO();
-        custPayDTO.setCusCode(customCode);
-        custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
-        custPayDTO.setPayMethod(payMethod);
-        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
-        custPayDTO.setAmount(amount);
-        custPayDTO.setNo(chargeLog.getOrderNo());
-
-        chargeLog.setCustomCode(customCode);
+    public R pay(CustPayDTO custPayDTO, ChargeLog chargeLog) {
+        chargeLog.setCustomCode(custPayDTO.getCusCode());
         chargeLog.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
-        chargeLog.setAmount(amount);
-        chargeLog.setPayMethod(payMethod.getPaymentName());
-
+        chargeLog.setAmount(custPayDTO.getAmount());
+        chargeLog.setPayMethod(custPayDTO.getPayMethod().getPaymentName());
         R r = rechargesFeignService.warehouseFeeDeductions(custPayDTO);
         chargeLog.setSuccess(r.getCode() == 200);
         chargeLog.setMessage(r.getMsg());

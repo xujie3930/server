@@ -7,6 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 支付实体
@@ -60,4 +61,8 @@ public class CustPayDTO {
 
     @ApiModelProperty(value = "充值说明")
     private String remark;
+
+    @ApiModelProperty(value = "详情")
+    private List<AccountSerialBillDTO> serialBillInfoList;
+
 }
