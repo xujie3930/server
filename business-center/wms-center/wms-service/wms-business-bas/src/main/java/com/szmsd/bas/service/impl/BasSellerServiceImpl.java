@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
 * <p>
@@ -425,6 +426,13 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         public int deleteBasSellerById(String id)
         {
         return baseMapper.deleteById(id);
+        }
+
+        @Override
+        public List<String> getAllSellerCode(){
+            QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
+            queryWrapper.select("seller_code");
+            return super.list(queryWrapper).stream().map(o->o.getSellerCode()).collect(Collectors.toList());
         }
 
         private String sellerCode(){
