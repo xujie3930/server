@@ -161,4 +161,12 @@ public class InventoryController extends BaseController {
     public R<Integer> unDeductionAndDeduction(@RequestBody InventoryOperateListDto operateListDto) {
         return R.ok(this.inventoryWrapperService.unDeductionAndDeduction(operateListDto));
     }
+
+    @PreAuthorize("@ss.hasPermi('inbound:adjustment')")
+    @PostMapping("/adjustment")
+    @ApiOperation(value = "库存管理 - 调整")
+    public R adjustment(InventoryAdjustmentDTO inventoryAdjustmentDTO) {
+        inventoryService.adjustment(inventoryAdjustmentDTO);
+        return R.ok();
+    }
 }

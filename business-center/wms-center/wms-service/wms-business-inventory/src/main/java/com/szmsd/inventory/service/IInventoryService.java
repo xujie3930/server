@@ -3,6 +3,7 @@ package com.szmsd.inventory.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
@@ -93,5 +94,6 @@ public interface IInventoryService extends IService<Inventory> {
      */
     int unDeduction(String invoiceNo, String warehouseCode, String sku, Integer num);
 
+    void adjustment(InventoryAdjustmentDTO inventoryAdjustmentDTO);
 }
 

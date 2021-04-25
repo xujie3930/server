@@ -19,11 +19,11 @@ public class InboundServiceImpl extends WmsRequest implements IInboundService {
 
     @Override
     public CreateReceiptResponse create(CreateReceiptRequest createReceiptRequestDTO) {
-        return JSON.parseObject(httpPost("", "inbound.create", createReceiptRequestDTO), CreateReceiptResponse.class);
+        return JSON.parseObject(httpPost(createReceiptRequestDTO.getWarehouseCode(), "inbound.create", createReceiptRequestDTO), CreateReceiptResponse.class);
     }
 
     @Override
     public ResponseVO cancel(CancelReceiptRequest cancelReceiptRequestDTO) {
-        return JSON.parseObject(httpDelete("", "inbound.cancel", cancelReceiptRequestDTO), CreateReceiptResponse.class);
+        return JSON.parseObject(httpDelete(cancelReceiptRequestDTO.getWarehouseCode(), "inbound.cancel", cancelReceiptRequestDTO), CreateReceiptResponse.class);
     }
 }
