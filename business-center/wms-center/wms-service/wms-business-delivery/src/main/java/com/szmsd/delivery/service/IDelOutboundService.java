@@ -31,6 +31,15 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      */
     DelOutboundVO selectDelOutboundById(String id);
 
+
+    /**
+     * 出库-创建采购单
+     *
+     * @param idList
+     * @return
+     */
+    List<DelOutboundDetailVO> createPurchaseOrderListByIdList(List<String> idList);
+
     /**
      * 查询出库单模块列表
      *

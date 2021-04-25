@@ -106,5 +106,18 @@ public class DelOutboundDetailServiceImpl extends ServiceImpl<DelOutboundDetailM
         queryWrapper.in(DelOutboundDetail::getOrderNo, orderNos);
         return this.list(queryWrapper);
     }
+
+    /**
+     * 根据id集合查询 details
+     *
+     * @param orderNos orderNos
+     * @return
+     */
+    @Override
+    public List<DelOutboundDetail> queryDetailsByIdList(List<String> idList) {
+        LambdaQueryWrapper<DelOutboundDetail> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.in(DelOutboundDetail::getId, idList);
+        return this.list(queryWrapper);
+    }
 }
 

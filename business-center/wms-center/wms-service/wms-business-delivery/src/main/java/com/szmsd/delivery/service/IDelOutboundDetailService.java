@@ -79,5 +79,6 @@ public interface IDelOutboundDetailService extends IService<DelOutboundDetail> {
      */
     List<DelOutboundDetail> listByOrderNos(List<String> orderNos);
 
+    List<DelOutboundDetail> queryDetailsByIdList(List<String> idList);
 }
 

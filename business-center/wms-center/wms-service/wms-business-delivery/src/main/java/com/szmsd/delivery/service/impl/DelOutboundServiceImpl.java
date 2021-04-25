@@ -14,6 +14,7 @@ import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
@@ -134,6 +135,68 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutboundVO.setDetails(detailDtos);
         }
         return delOutboundVO;
+    }
+
+    /**
+     * 出库-创建采购的单
+     *
+     * @param idList
+     * @return
+     */
+    @Override
+    public List<DelOutboundDetailVO> createPurchaseOrderListByIdList(List<String> idList) {
+        //只查询集运类型的顶单
+        List<DelOutbound> delOutbounds = baseMapper.selectList(Wrappers.<DelOutbound>lambdaQuery()
+                .in(DelOutbound::getId, idList)
+                .eq(DelOutbound::getOrderType, DelOutboundOrderTypeEnum.TRANSFER.getCode())
+        );
+        if (CollectionUtils.isEmpty(delOutbounds)) {
+            return new ArrayList<DelOutboundDetailVO>();
+        }
+
+        //客户端 sellerCode相同
+        String sellerCode = delOutbounds.stream().map(DelOutbound::getSellerCode).findAny().orElseThrow(() -> new BaseException("获取该批数据的sellerCode失败"));
+        Map<String, List<DelOutbound>> baseInfoList = delOutbounds.stream().collect(Collectors.groupingBy(DelOutbound::getWarehouseCode));
+
+        //查询订单中的sku集合
+        List<String> collect1 = delOutbounds.stream().map(DelOutbound::getOrderNo).collect(Collectors.toList());
+        List<DelOutboundDetail> delOutboundDetailList = delOutboundDetailService.listByOrderNos(collect1);
+
+        List<DelOutboundDetailVO> resultList = new ArrayList<>();
+        baseInfoList.forEach((warehouseCode, dealOutBoundList) -> {
+
+            //获取sku其他信息
+            // 返回sku 列表集合
+            List<DelOutboundDetailVO> detailDtos = new ArrayList<>(delOutboundDetailList.size());
+            List<String> skus = new ArrayList<>(delOutboundDetailList.size());
+            for (DelOutboundDetail detail : delOutboundDetailList) {
+                detailDtos.add(BeanMapperUtil.map(detail, DelOutboundDetailVO.class));
+                skus.add(detail.getSku());
+            }
+            //获取 入库里面的商品实际库存
+            InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
+            inventoryAvailableQueryDto.setWarehouseCode(warehouseCode);
+            inventoryAvailableQueryDto.setCusCode(sellerCode);
+            inventoryAvailableQueryDto.setSkus(skus);
+            List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+
+            Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(availableList)) {
+                for (InventoryAvailableListVO vo : availableList) {
+                    availableMap.put(vo.getSku(), vo);
+                }
+                for (DelOutboundDetailVO vo : detailDtos) {
+                    InventoryAvailableListVO available = availableMap.get(vo.getSku());
+                    if (null != available) {
+                        BeanMapperUtil.map(available, vo);
+                    }
+                }
+                resultList.addAll(detailDtos);
+            }
+        });
+
+        logger.info("获取其他sku信息{}", resultList);
+        return resultList;
     }
 
     /**
