@@ -104,5 +104,7 @@ public interface IBasSellerService extends IService<BasSeller> {
         */
         int deleteBasSellerById(String id);
 
+        List<String> getAllSellerCode();
+
 }
 
