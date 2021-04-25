@@ -14,7 +14,9 @@ import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
@@ -113,7 +115,9 @@ public class RunnableExecute {
                         int days = Integer.parseInt(datePoor.substring(0, datePoor.indexOf("天")));
                         // 根据存放天数、存放体积计算应收取的费用
                         BigDecimal amount = warehouseOperationService.charge(days, skuVolume.getVolume(), warehouseOperation.getWarehouseCode(), warehouseOperations);
-                        R resultPay = payService.pay(skuVolume.getCusCode(), amount, BillEnum.PayMethod.WAREHOUSE_RENT, new ChargeLog(warehouseOperation.getWarehouseCode()));
+                        ChargeLog chargeLog = new ChargeLog(warehouseOperation.getWarehouseCode());
+                        CustPayDTO custPayDTO = setCustPayDto(skuVolume.getCusCode(), amount,chargeLog);
+                        R resultPay = payService.pay(custPayDTO, chargeLog);
                         if (resultPay.getCode() != 200) {
                             log.error("executeOperation() pay failed.. msg: {},data: {}", resultPay.getMsg(), resultPay.getData());
                         }
@@ -126,6 +130,17 @@ public class RunnableExecute {
             if (lock.isLocked()) lock.unlock();
         }
         log.info("executeWarehouse() end...");
+    }
+
+    private CustPayDTO setCustPayDto(String cusCode, BigDecimal amount, ChargeLog chargeLog) {
+        CustPayDTO custPayDTO = new CustPayDTO();
+        custPayDTO.setCusCode(cusCode);
+        custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
+        custPayDTO.setPayMethod(BillEnum.PayMethod.WAREHOUSE_RENT);
+        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        custPayDTO.setAmount(amount);
+        custPayDTO.setNo(chargeLog.getOrderNo());
+        return custPayDTO;
     }
 
 }

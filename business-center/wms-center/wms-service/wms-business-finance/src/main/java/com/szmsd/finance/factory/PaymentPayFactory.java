@@ -1,15 +1,18 @@
 package com.szmsd.finance.factory;
 
 import com.szmsd.bas.api.service.SerialNumberClientService;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.AccountBalanceChangeDTO;
+import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
-import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
+import com.szmsd.finance.service.IAccountSerialBillService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +28,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * @author liulei
+ * 付款
  */
 @Slf4j
 @Component
 public class PaymentPayFactory extends AbstractPayFactory {
-
-    @Autowired
-    AccountBalanceChangeMapper accountBalanceChangeMapper;
 
     @Autowired
     SerialNumberClientService serialNumberClientService;
@@ -42,6 +42,9 @@ public class PaymentPayFactory extends AbstractPayFactory {
 
     @Resource
     private IAccountBalanceService accountBalanceService;
+
+    @Resource
+    private IAccountSerialBillService accountSerialBillService;
 
     @Transactional
     @Override
@@ -78,6 +81,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 }
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance);
                 recordOpLog(dto, oldBalance.getCurrentBalance());
+                setSerialBillLog(dto);
             }
             return true;
         } catch (Exception e) {
@@ -157,4 +161,17 @@ public class PaymentPayFactory extends AbstractPayFactory {
         }
         return true;
     }
+
+    public void setSerialBillLog(CustPayDTO dto) {
+        if (CollectionUtils.isEmpty(dto.getSerialBillInfoList())) {
+            log.info("setSerialBillLog() list is empty :{} ", dto);
+            AccountSerialBillDTO accountSerialBillDTO = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
+            accountSerialBillService.add(accountSerialBillDTO);
+            return;
+        }
+        List<AccountSerialBillDTO> collect = dto.getSerialBillInfoList()
+                .stream().map(value -> new AccountSerialBillDTO(dto, value)).collect(Collectors.toList());
+        accountSerialBillService.saveBatch(collect);
+    }
+
 }
