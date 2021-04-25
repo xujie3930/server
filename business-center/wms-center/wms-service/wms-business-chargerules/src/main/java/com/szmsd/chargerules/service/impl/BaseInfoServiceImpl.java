@@ -23,15 +23,19 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
+import com.szmsd.finance.dto.AccountSerialBillDTO;
+import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationResultRequest;
+import com.szmsd.http.enums.HttpRechargeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -149,7 +153,8 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
             //调用扣费接口扣费
             ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType(), basSpecialOperation.getWarehouseCode(),basSpecialOperation.getQty());
-            R r = payService.pay(customCode, amount, BillEnum.PayMethod.SPECIAL_OPERATE, chargeLog);
+            CustPayDTO custPayDTO = setCustPayDto(customCode,amount,basSpecialOperation);
+            R r = payService.pay(custPayDTO, chargeLog);
             if (r.getCode() != 200) {
                 log.error("pay failed: {} {}", r.getData(), r.getMsg());
                 throw new CommonException("999", ErrorMessageEnum.PAY_FAILED.getMessage());
@@ -158,6 +163,33 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
             // 调用WMS接口回写结果
             this.sendResult(basSpecialOperation);
         }
+    }
+
+    /**
+     * 设置扣款实体类
+     * @param customCode 客户id
+     * @param amount 金额
+     * @param basSpecialOperation basSpecialOperation
+     * @return CustPayDTO
+     */
+    private CustPayDTO setCustPayDto(String customCode, BigDecimal amount, BasSpecialOperation basSpecialOperation) {
+        CustPayDTO custPayDTO = new CustPayDTO();
+        List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>();
+        AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
+        accountSerialBillDTO.setChargeCategory("特殊操作费");
+        accountSerialBillDTO.setChargeType(basSpecialOperation.getOperationType());
+        accountSerialBillDTO.setRemark(basSpecialOperation.getRemark());
+        accountSerialBillDTO.setAmount(amount);
+        accountSerialBillDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        serialBillInfoList.add(accountSerialBillDTO);
+        custPayDTO.setCusCode(customCode);
+        custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
+        custPayDTO.setPayMethod(BillEnum.PayMethod.SPECIAL_OPERATE);
+        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        custPayDTO.setAmount(amount);
+        custPayDTO.setNo(basSpecialOperation.getOrderNo());
+        custPayDTO.setSerialBillInfoList(serialBillInfoList);
+        return custPayDTO;
     }
 
     /**

@@ -3,7 +3,7 @@ package com.szmsd.chargerules.service;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
-import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.finance.dto.CustPayDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,10 +30,10 @@ public interface IPayService {
 
     /**
      * 调用扣费接口扣费
-     * @param customCode 客户编号
-     * @param amount 金额
+     * @param custPayDTO custPayDTO
+     * @param chargeLog chargeLog
      * @return result
      */
-    R pay(String customCode, BigDecimal amount, BillEnum.PayMethod payMethod, ChargeLog chargeLog);
+    R pay(CustPayDTO custPayDTO, ChargeLog chargeLog);
 
 }

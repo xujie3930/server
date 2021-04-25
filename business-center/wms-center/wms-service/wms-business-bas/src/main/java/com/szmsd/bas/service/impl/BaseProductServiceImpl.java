@@ -712,6 +712,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }
             count++;
         }
+
+        Map<String,String> map = new HashMap<>();
+        for(BaseProductImportDto b:list){
+            map.put(b.getCode(),b.getCode());
+        }
+        if(map.size()!=list.size()){
+            s1.append("sku有重复\n");
+        }
         if(!s1.toString().equals("")){
             throw new BaseException(s1.toString());
         }

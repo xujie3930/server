@@ -39,12 +39,13 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
      * @param type
      * @param beforeInventory
      * @param afterInventory
-     * @param receiptNo
-     * @param operator
-     * @param operateOn
      * @param quantity
-     * @param placeholder
      */
+    @Override
+    public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, Integer quantity) {
+        this.saveLogs(type, beforeInventory, afterInventory, "", null, null, quantity, "");
+    }
+
     @Override
     public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity, String... placeholder) {
         InventoryRecord inventoryRecord = new InventoryRecord();
@@ -63,6 +64,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         inventoryRecord.setAfterFreezeInventory(afterInventory.getFreezeInventory());
         inventoryRecord.setAfterTotalInbound(afterInventory.getTotalInbound());
         inventoryRecord.setAfterTotalOutbound(afterInventory.getTotalOutbound());
+        inventoryRecord.setCusCode(beforeInventory.getCusCode());
         String logs = getLogs(type, placeholder);
         inventoryRecord.setRemark(logs);
         inventoryRecord.setOperator(operator);

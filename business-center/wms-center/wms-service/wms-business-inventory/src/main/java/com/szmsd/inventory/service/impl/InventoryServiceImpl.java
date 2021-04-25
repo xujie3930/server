@@ -7,12 +7,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
@@ -259,6 +262,50 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() + num);
             updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() - num);
         }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);
+    }
+
+    /**
+     * 库存调整功能，只负责OMS的可用库存调整。记录日志，不传WMS
+     * @param inventoryAdjustmentDTO
+     */
+    @Transactional(rollbackFor = Throwable.class)
+    @Override
+    public void adjustment(InventoryAdjustmentDTO inventoryAdjustmentDTO) {
+
+        String sku = inventoryAdjustmentDTO.getSku();
+        String warehouseCode = inventoryAdjustmentDTO.getWarehouseCode();
+        Integer quantity = inventoryAdjustmentDTO.getQuantity();
+
+        AssertUtil.isTrue(quantity != null && quantity > 0, warehouseCode + "仓[" + sku + "]调整数量不能小于1");
+
+        String adjustment = inventoryAdjustmentDTO.getAdjustment();
+
+        LocalLanguageEnum localLanguageEnum = LocalLanguageEnum.getLocalLanguageEnum(LocalLanguageTypeEnum.INVENTORY_RECORD_TYPE, adjustment);
+        boolean increase = LocalLanguageEnum.INVENTORY_RECORD_TYPE_5 == localLanguageEnum;
+        boolean reduce = LocalLanguageEnum.INVENTORY_RECORD_TYPE_6 == localLanguageEnum;
+        AssertUtil.isTrue(increase || reduce, "调整类型有误");
+        quantity = increase ? quantity : -quantity;
+
+        Lock lock = new ReentrantLock(true);
+        try {
+            lock.lock();
+
+            Inventory before = this.getOne(new QueryWrapper<Inventory>().lambda().eq(Inventory::getSku, sku).eq(Inventory::getWarehouseCode, warehouseCode));
+            AssertUtil.notNull(before, warehouseCode + "仓没有[" + sku + "]库存记录");
+
+            int afterTotalInventory = before.getTotalInventory() + quantity;
+            int afterAvailableInventory = before.getAvailableInventory() + quantity;
+            AssertUtil.isTrue(afterTotalInventory > 0 && afterAvailableInventory > 0, warehouseCode + "仓[" + sku + "]可用库存调减数量不足[" + before.getAvailableInventory() + "]");
+
+            Inventory after = new Inventory();
+            after.setId(before.getId()).setCusCode(before.getCusCode()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory);
+            this.updateById(after);
+
+            // 记录库存日志
+            iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, after, quantity);
+        } finally {
+            lock.unlock();
+        }
     }
 
     private int doWorker(String invoiceNo, String warehouseCode, String sku, Integer num,
