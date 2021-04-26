@@ -165,7 +165,7 @@ public class InventoryController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:adjustment')")
     @PostMapping("/adjustment")
     @ApiOperation(value = "库存管理 - 调整")
-    public R adjustment(InventoryAdjustmentDTO inventoryAdjustmentDTO) {
+    public R adjustment(@RequestBody InventoryAdjustmentDTO inventoryAdjustmentDTO) {
         inventoryService.adjustment(inventoryAdjustmentDTO);
         return R.ok();
     }
