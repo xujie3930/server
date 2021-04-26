@@ -52,7 +52,7 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         if(StringUtils.isNotEmpty(dto.getEndTime())){
             queryWrapper.le(PreWithdraw::getCreateTime,dto.getEndTime());
         }
-        queryWrapper.orderByDesc(PreWithdraw::getCreateTime);
+        queryWrapper.orderByAsc(PreWithdraw::getVerifyStatus).orderByDesc(PreWithdraw::getCreateTime);
         return preWithdrawMapper.listPage(queryWrapper);
     }
 
