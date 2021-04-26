@@ -109,10 +109,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 this.deduction(orderNo, delOutbound.getWarehouseCode(), delOutbound.getOrderType());
                 completedState = "FEE_DE";
             }
-            // 销毁，自提不扣物流费用
+            // 销毁，自提，新SKU不扣物流费用
             boolean fee = true;
             if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
-                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
                 fee = false;
             }
             if ("FEE_DE".equals(completedState)) {
@@ -235,10 +236,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 this.unFreeze(orderNo, delOutbound.getWarehouseCode(), delOutbound.getOrderType());
                 cancelledState = "UN_FEE";
             }
-            // 销毁，自提不扣物流费用
+            // 销毁，自提，新SKU不扣物流费用
             boolean fee = true;
             if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
-                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
                 fee = false;
             }
             if ("UN_FEE".equals(cancelledState)) {

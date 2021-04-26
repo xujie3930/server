@@ -61,7 +61,7 @@ public class InventoryController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
-    @GetMapping("/inventory/record/page")
+    @GetMapping("/record/page")
     @ApiOperation(value = "日志记录", notes = "库存日志")
     public TableDataInfo<InventoryRecordVO> logsPage(InventoryRecordQueryDTO inventoryRecordQueryDTO) {
         startPage();
