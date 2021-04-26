@@ -1,14 +1,15 @@
 package com.szmsd.chargerules.controller;
 
+import com.szmsd.chargerules.api.feign.SpecialOperationFeignService;
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.service.IOperationService;
-import com.szmsd.chargerules.vo.OperationVo;
 import com.szmsd.chargerules.vo.OrderTypeLabelVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.dao.DuplicateKeyException;
@@ -72,6 +73,13 @@ public class OperationController extends BaseController {
     public R<List<OrderTypeLabelVo>> getOrderTypeList() {
         return R.ok(Arrays.stream(DelOutboundOrderTypeEnum.values()).map(value ->
                 new OrderTypeLabelVo(value.getCode(), value.getName())).collect(Collectors.toList()));
+    }
+
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
+    @ApiOperation(value = "业务计费 - 出库扣款")
+    @PostMapping("/delOutboundCharge")
+    public R delOutboundCharge(@RequestBody DelOutboundVO delOutboundVO) {
+        return operationService.delOutboundCharge(delOutboundVO);
     }
 
 }

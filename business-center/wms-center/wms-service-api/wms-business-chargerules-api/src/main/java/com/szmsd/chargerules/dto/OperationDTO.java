@@ -2,12 +2,16 @@ package com.szmsd.chargerules.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @ApiModel(value = "OperationDTO", description = "OperationDTO对象")
 public class OperationDTO implements Serializable {
 
@@ -29,8 +33,14 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "续件价格")
     private BigDecimal nextPrice;
 
-    @ApiModelProperty(value = "是否多SKU")
-    private boolean manySku;
+    @ApiModelProperty(value = "重量")
+    private Double weight;
+
+    @ApiModelProperty(value = "最小重量 - 开始 单位: g 大于")
+    private Double minimumWeight;
+
+    @ApiModelProperty(value = "最大重量 - 结束 单位: g 小于等于")
+    private Double maximumWeight;
 
     @ApiModelProperty(value = "计费单位")
     private String unit;
@@ -38,6 +48,9 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "备注")
     private String remark;
 
-
-
+    public OperationDTO(String operationType, String orderType, Double weight) {
+        this.operationType = operationType;
+        this.orderType = orderType;
+        this.weight = weight;
+    }
 }

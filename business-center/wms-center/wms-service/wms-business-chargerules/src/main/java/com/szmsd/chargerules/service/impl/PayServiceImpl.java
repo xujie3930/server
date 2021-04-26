@@ -43,6 +43,8 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setAmount(custPayDTO.getAmount());
         chargeLog.setPayMethod(custPayDTO.getPayMethod().getPaymentName());
         R r = rechargesFeignService.warehouseFeeDeductions(custPayDTO);
+        if (r.getCode() != 200)
+            log.error("pay() pay failed.. msg: {},data: {}", r.getMsg(), r.getData());
         chargeLog.setSuccess(r.getCode() == 200);
         chargeLog.setMessage(r.getMsg());
         int insert = chargeLogService.save(chargeLog);

@@ -33,9 +33,13 @@ public class Operation extends BaseEntity {
     @TableField(exist = false)
     private String operationTypeName;
 
-    @ApiModelProperty(value = "是否多SKU")
+    @ApiModelProperty(value = "最小重量 - 开始 单位: g 大于")
     @TableField
-    private boolean manySku;
+    private Double minimumWeight;
+
+    @ApiModelProperty(value = "最大重量 - 结束 单位: g 小于等于")
+    @TableField
+    private Double maximumWeight;
 
     @ApiModelProperty(value = "仓库")
     @TableField
