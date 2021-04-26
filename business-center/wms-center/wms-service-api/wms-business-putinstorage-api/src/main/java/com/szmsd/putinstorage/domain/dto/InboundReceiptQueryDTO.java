@@ -17,13 +17,13 @@ public class InboundReceiptQueryDTO {
     @ApiModelProperty(value = "入库单号")
     private String warehouseNo;
 
-    @ApiModelProperty(value = "入库单号", hidden = true)
+    @ApiModelProperty(value = "入库单号")
     private List<String> warehouseNoList;
 
     @ApiModelProperty(value = "采购单")
     private String orderNo;
 
-    @ApiModelProperty(value = "采购单", hidden = true)
+    @ApiModelProperty(value = "采购单")
     private List<String> orderNoList;
 
     @ApiModelProperty(value = "目的仓库编码")

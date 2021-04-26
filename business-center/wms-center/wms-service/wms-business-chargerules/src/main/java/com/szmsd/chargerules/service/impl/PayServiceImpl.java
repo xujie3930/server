@@ -41,7 +41,7 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setCustomCode(custPayDTO.getCusCode());
         chargeLog.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
         chargeLog.setAmount(custPayDTO.getAmount());
-        chargeLog.setPayMethod(custPayDTO.getPayMethod().getPaymentName());
+        chargeLog.setOperationPayMethod(custPayDTO.getPayMethod().getPaymentName());
         R r = rechargesFeignService.warehouseFeeDeductions(custPayDTO);
         if (r.getCode() != 200)
             log.error("pay() pay failed.. msg: {},data: {}", r.getMsg(), r.getData());

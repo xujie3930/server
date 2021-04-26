@@ -42,6 +42,16 @@ public final class ObjectMapperUtils {
         return t;
     }
 
+    public static <T> T serialize(T source) {
+        T t = null;
+        try {
+            t = (T)ObjectUtils.defaultIfNull(MAPPER.readValue(MAPPER.writeValueAsString(source), source.getClass()), source.getClass().newInstance());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return t;
+    }
+
     /**
      * 构造新的destinationClass实例对象，通过source对象中的字段内容
      * 映射到destinationClass实例对象中，并返回新的destinationClass实例对象。
@@ -55,4 +65,5 @@ public final class ObjectMapperUtils {
                 .map(source -> map(source, destinationClass))
                 .collect(Collectors.toList());
     }
+
 }

@@ -34,7 +34,7 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
     public List<PreWithdraw> listPage(PreWithdrawDTO dto) {
         LambdaQueryWrapper<PreWithdraw> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.isNotNull(PreWithdraw::getCusCode);
-        if(dto.getCusCode()!=null) {
+        if(dto.getCusId()!=null) {
             queryWrapper.eq(PreWithdraw::getCusCode, dto.getCusCode());
         }
         if(StringUtils.isNotEmpty(dto.getVerifyStatus())){
@@ -52,7 +52,7 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         if(StringUtils.isNotEmpty(dto.getEndTime())){
             queryWrapper.le(PreWithdraw::getCreateTime,dto.getEndTime());
         }
-        queryWrapper.orderByDesc(PreWithdraw::getCreateTime);
+        queryWrapper.orderByAsc(PreWithdraw::getVerifyStatus).orderByDesc(PreWithdraw::getCreateTime);
         return preWithdrawMapper.listPage(queryWrapper);
     }
 

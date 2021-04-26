@@ -6,11 +6,13 @@ import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptExportVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
@@ -320,6 +322,21 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         asyncDeleteAttachment(warehouseNo);
     }
 
+    /**
+     * 入库单导出数据查询
+     * @param queryDTO
+     */
+    @Override
+    public List<InboundReceiptExportVO> selectExport(InboundReceiptQueryDTO queryDTO) {
+        if (StringUtils.isNotEmpty(queryDTO.getWarehouseNo())) {
+            List<String> warehouseNoSplit = Arrays.asList(queryDTO.getWarehouseNo().split(","));
+            List<String> warehouseNoList = ListUtils.emptyIfNull(queryDTO.getWarehouseNoList());
+            queryDTO.setWarehouseNoList(Stream.of(warehouseNoSplit, warehouseNoList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
+        }
+        List<InboundReceiptExportVO> inboundReceiptExportVOS = baseMapper.selectExport(queryDTO);
+        List<InboundReceiptExportVO> serialize = ObjectMapperUtils.serialize(inboundReceiptExportVOS);
+        return BeanMapperUtil.mapList(serialize, InboundReceiptExportVO.class);
+    }
 
     /**
      * 异步删除附件
@@ -332,7 +349,6 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             remoteComponent.deleteAttachment(inboundReceiptDocuments, warehouseNo, null);
         });
     }
-
 
     /**
      * 异步保存附件
