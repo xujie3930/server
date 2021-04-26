@@ -11,6 +11,10 @@ public class BaseProductQueryDto {
     @Excel(name = "产品名称")
     private String productName;
 
+    @ApiModelProperty(value = "产品中文名称")
+    @Excel(name = "产品中文名称")
+    private String productNameChinese;
+
     @ApiModelProperty(value = "产品编码")
     @Excel(name = "产品编码")
     private String code;

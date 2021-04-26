@@ -2,6 +2,10 @@ package com.szmsd.bas.service;
 
 import com.szmsd.bas.domain.BasSellerMessage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.bas.dto.BasMessageDto;
+import com.szmsd.bas.dto.BasSellerDto;
+import com.szmsd.bas.dto.BasSellerMessageQueryDTO;
+
 import java.util.List;
 
 /**
@@ -25,10 +29,10 @@ public interface IBasSellerMessageService extends IService<BasSellerMessage> {
         /**
         * 查询模块列表
         *
-        * @param basSellerMessage 模块
+        * @param dto 模块
         * @return 模块集合
         */
-        List<BasSellerMessage> selectBasSellerMessageList(BasSellerMessage basSellerMessage);
+        List<BasMessageDto> selectBasSellerMessageList(BasSellerMessageQueryDTO dto);
 
         /**
         * 新增模块

@@ -1,4 +1,6 @@
 package com.szmsd.bas.controller;
+import com.szmsd.bas.dto.BasMessageDto;
+import com.szmsd.bas.dto.BasSellerMessageQueryDTO;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -39,12 +41,12 @@ public class BasSellerMessageController extends BaseController{
        * 查询模块列表
      */
       @PreAuthorize("@ss.hasPermi('BasSellerMessage:BasSellerMessage:list')")
-      @GetMapping("/list")
+      @GetMapping("/page")
       @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
-      public TableDataInfo list(BasSellerMessage basSellerMessage)
+      public TableDataInfo list(BasSellerMessageQueryDTO dto)
      {
             startPage();
-            List<BasSellerMessage> list = basSellerMessageService.selectBasSellerMessageList(basSellerMessage);
+            List<BasMessageDto> list = basSellerMessageService.selectBasSellerMessageList(dto);
             return getDataTable(list);
       }
 
@@ -55,9 +57,9 @@ public class BasSellerMessageController extends BaseController{
      @Log(title = "模块", businessType = BusinessType.EXPORT)
      @GetMapping("/export")
      @ApiOperation(value = "导出模块列表",notes = "导出模块列表")
-     public void export(HttpServletResponse response, BasSellerMessage basSellerMessage) throws IOException {
-     List<BasSellerMessage> list = basSellerMessageService.selectBasSellerMessageList(basSellerMessage);
-     ExcelUtil<BasSellerMessage> util = new ExcelUtil<BasSellerMessage>(BasSellerMessage.class);
+     public void export(HttpServletResponse response, BasSellerMessageQueryDTO dto) throws IOException {
+     List<BasMessageDto> list = basSellerMessageService.selectBasSellerMessageList(dto);
+     ExcelUtil<BasMessageDto> util = new ExcelUtil<BasMessageDto>(BasMessageDto.class);
         util.exportExcel(response,list, "BasSellerMessage");
 
      }

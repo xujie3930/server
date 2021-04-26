@@ -119,6 +119,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             sysUserByTypeAndUserType.setUsername(b.getUserName());
             UserInfo userInfo= remoteUserService.getUserInfo(sysUserByTypeAndUserType).getData();
             b.setSysId(userInfo.getSysUser().getUserId());
+            //查询认证状态
+
         }
             TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
             table.setCode(200);
@@ -344,7 +346,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             queryWrapper.eq("id",basSellerInfoDto.getId());
             BasSeller bas = super.getOne(queryWrapper);
             //注册到wms
-            SellerRequest sellerRequest = BeanMapperUtil.map(bas,SellerRequest.class);
+            SellerRequest sellerRequest = BeanMapperUtil.map(basSellerInfoDto,SellerRequest.class);
             sellerRequest.setIsActive(true);
             ObjectUtil.fillNull(sellerRequest,bas);
             R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
