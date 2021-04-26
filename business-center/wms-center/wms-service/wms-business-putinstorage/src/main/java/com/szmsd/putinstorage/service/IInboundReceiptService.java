@@ -3,6 +3,7 @@ package com.szmsd.putinstorage.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptExportVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
@@ -42,5 +43,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     void review(InboundReceiptReviewDTO inboundReceiptReviewDTO);
 
     void delete(String warehouseNo);
+
+    List<InboundReceiptExportVO> selectExport(InboundReceiptQueryDTO queryDTO);
 }
 
