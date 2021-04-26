@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.ServletUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
@@ -67,8 +68,8 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         inventoryRecord.setCusCode(beforeInventory.getCusCode());
         String logs = getLogs(type, placeholder);
         inventoryRecord.setRemark(logs);
-        inventoryRecord.setOperator(operator);
-        inventoryRecord.setOperateOn(operateOn);
+        inventoryRecord.setOperator(StringUtils.isEmpty(operator) ? beforeInventory.getCreateByName() : operator);
+        inventoryRecord.setOperateOn(StringUtils.isEmpty(operateOn) ? DateUtils.parseDateToStr("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", new Date()) : operateOn);
         inventoryRecord.setPlaceholder(Arrays.asList(placeholder).stream().collect(Collectors.joining(",")));
         log.info("保存入库操作日志：" + inventoryRecord);
         this.save(inventoryRecord);
