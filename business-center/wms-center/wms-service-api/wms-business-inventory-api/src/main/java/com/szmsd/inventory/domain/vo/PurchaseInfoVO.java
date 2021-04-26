@@ -22,7 +22,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(value = "采购单", description = "Purchase对象")
+@ApiModel(description = "Purchase对象")
 public class PurchaseInfoVO {
 
     private static final long serialVersionUID = 1L;

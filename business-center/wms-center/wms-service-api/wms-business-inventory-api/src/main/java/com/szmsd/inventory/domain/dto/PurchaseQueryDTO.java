@@ -27,7 +27,7 @@ import java.util.Optional;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(value = "采购单", description = "Purchase对象")
+@ApiModel(description = "Purchase对象")
 public class PurchaseQueryDTO extends BaseEntity {
 
     @ApiModelProperty(value = "ID")
