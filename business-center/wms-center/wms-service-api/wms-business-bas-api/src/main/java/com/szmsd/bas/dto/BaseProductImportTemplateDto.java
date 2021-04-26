@@ -14,12 +14,12 @@ public class BaseProductImportTemplateDto {
     @Excel(name = "SKU" ,type = Excel.Type.EXPORT)
     private String code;
 
-    @ApiModelProperty(value = "申报名称")
-    @Excel(name = "申报名称" ,type = Excel.Type.EXPORT)
-    private List<String> productName;
+    @ApiModelProperty(value = "英文申报品名")
+    @Excel(name = "英文申报品名" ,type = Excel.Type.EXPORT)
+    private String productName;
 
-    @ApiModelProperty(value = "中文申报名称")
-    @Excel(name = "中文申报名称" ,type = Excel.Type.EXPORT)
+    @ApiModelProperty(value = "中文申报品名")
+    @Excel(name = "中文申报品名" ,type = Excel.Type.EXPORT)
     private String productNameChinese;
 
     @ApiModelProperty(value = "申报价值(USD)")

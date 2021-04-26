@@ -11,8 +11,8 @@ public class BaseProductExportDto {
     @Excel(name = "序号")
     private Integer no;
 
-    @ApiModelProperty(value = "产品名称")
-    @Excel(name = "产品名称")
+    @ApiModelProperty(value = "英文申报品名")
+    @Excel(name = "英文申报品名")
     private String productName;
 
     @ApiModelProperty(value = "产品编码")
@@ -50,8 +50,8 @@ public class BaseProductExportDto {
     @Excel(name = "申报价值")
     private Double declaredValue;
 
-    @ApiModelProperty(value = "申报品名")
-    @Excel(name = "申报品名")
+    @ApiModelProperty(value = "中文申报品名")
+    @Excel(name = "中文申报品名")
     private String productNameChinese;
 
     @ApiModelProperty(value = "客户（卖家）编码")

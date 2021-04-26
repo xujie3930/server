@@ -56,6 +56,13 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         {
             return basSellerCertificateMapper.delBasSellerCertificateByPhysics(sellerCode);
         }
+        @Override
+        public int countVaildBasSellerCertificate(String sellerCode){
+            QueryWrapper<BasSellerCertificate> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("seller_code",sellerCode);
+            queryWrapper.isNull("vaild");
+            return super.count(queryWrapper);
+        }
         /**
         * 查询模块列表
         *
@@ -154,6 +161,10 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         }
 
 
+        @Override
+        public boolean review(BasSellerCertificate basSellerCertificate){
+            return super.updateById(basSellerCertificate);
+        }
 
     }
 
