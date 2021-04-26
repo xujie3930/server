@@ -1,10 +1,17 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.szmsd.bas.domain.BasMessage;
 import com.szmsd.bas.domain.BasSellerMessage;
+import com.szmsd.bas.dto.BasMessageDto;
+import com.szmsd.bas.dto.BasMessageQueryDTO;
+import com.szmsd.bas.dto.BasSellerDto;
+import com.szmsd.bas.dto.BasSellerMessageQueryDTO;
 import com.szmsd.bas.mapper.BasSellerMessageMapper;
 import com.szmsd.bas.service.IBasSellerMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -44,14 +51,16 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         /**
         * 查询模块列表
         *
-        * @param basSellerMessage 模块
+        * @param dto 模块
         * @return 模块
         */
         @Override
-        public List<BasSellerMessage> selectBasSellerMessageList(BasSellerMessage basSellerMessage)
+        public List<BasMessageDto> selectBasSellerMessageList(BasSellerMessageQueryDTO dto)
         {
-        QueryWrapper<BasSellerMessage> where = new QueryWrapper<BasSellerMessage>();
-        return baseMapper.selectList(where);
+            QueryWrapper<BasSellerMessage> where = new QueryWrapper<BasSellerMessage>();
+            queryHandle(where,dto);
+            where.orderByDesc("m.create_time");
+            return baseMapper.selectBasSellerMessage(where);
         }
 
         /**
@@ -74,6 +83,7 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
                 basSellerMessage.setSellerCode(s);
                 basSellerMessage.setMessageId(id);
                 basSellerMessage.setBullet(bullet);
+                basSellerMessage.setReadable(false);
                 super.save(basSellerMessage);
             }
         }
@@ -114,7 +124,12 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         return baseMapper.deleteById(id);
         }
 
-
+    private void queryHandle(QueryWrapper<BasSellerMessage> queryWrapper, BasSellerMessageQueryDTO dto){
+        QueryWrapperUtil.filterDate(queryWrapper,"m.create_time",dto.getCreateTimes());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ,"m.type",dto.getType());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE,"m.title",dto.getTitle());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ,"s.seller_code",dto.getSellerCode());
+    }
 
     }
 

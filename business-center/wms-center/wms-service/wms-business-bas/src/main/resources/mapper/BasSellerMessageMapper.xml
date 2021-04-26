@@ -34,6 +34,18 @@
         delete from bas_seller_message where message_id in #{ids}
     </delete>
 
+    <select id="selectBasSellerMessage" resultType="com.szmsd.bas.dto.BasMessageDto">
+    select m.id,
+    m.create_time,
+    m.title,
+    m.type,
+    s.bullet,
+    s.readable
+    from bas_seller_message s
+    left join bas_message m on m.id = s.message_id
+    ${ew.customSqlSegment}
+    </select>
+
 
 
 </mapper>

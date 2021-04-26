@@ -127,6 +127,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", queryDto.getCategory());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name_chinese", queryDto.getProductNameChinese());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
        /* if (queryDto.getIsActive() != null) {

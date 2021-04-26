@@ -70,7 +70,7 @@ public class BasMessageServiceImpl extends ServiceImpl<BasMessageMapper, BasMess
         @Override
         public void insertBasMessage(BasMessage basMessage)
         {
-            basMessage.setCreateByName(SecurityUtils.getLoginUser().getUsername());
+            /*basMessage.setCreateByName(SecurityUtils.getLoginUser().getUsername());*/
             baseMapper.insertBasMessage(basMessage);
             //同步数据到用户
             basSellerMessageService.insertBasSellerMessage(basMessage.getId(),basMessage.getBullet());
