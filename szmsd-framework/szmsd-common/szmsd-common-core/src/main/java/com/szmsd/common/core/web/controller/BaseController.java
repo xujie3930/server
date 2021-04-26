@@ -161,15 +161,15 @@ public class BaseController {
     @ExceptionHandler({BaseException.class})
     @ResponseBody
     public R handleBaseException(BaseException baseException) {
-        log.info("基础业务异常拦截 BaseException {}", baseException.getDefaultMessage());
-        return R.failed(HttpStatus.WEB_MSG,baseException.getDefaultMessage());
+        log.error("基础业务异常拦截 BaseException {}", baseException.getMessage());
+        return R.failed(HttpStatus.WEB_MSG,baseException.getMessage());
     }
 
     //自定义异常拦截
     @ExceptionHandler({ApiException.class})
     @ResponseBody
     public R handleApiException(ApiException e) {
-        log.info("自定义异常拦截 ApiException {}", e);
+        log.error("自定义异常拦截 ApiException {}", e);
 //        LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.FAIL, getLen());
         return R.failed(e.getCode(), e.getMessage());
     }
@@ -178,7 +178,7 @@ public class BaseController {
     @ExceptionHandler({Exception.class})
     @ResponseBody
     public R handleException(Exception e) {
-        log.info("系统异常拦截 Exception: {}", e);
+        log.error("系统异常拦截 Exception: {}", e);
         return R.failed(HttpStatus.ERROR, ExceptionUtil.getRootErrorMseeage(e));
     }
 
@@ -197,7 +197,7 @@ public class BaseController {
     })
     @ResponseBody
     public R server500(Exception e) {
-        log.info("请求前异常:" , e);
+        log.error("请求前异常:" , e);
         LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.REQUESTERROR, getLen());
         return R.failed(HttpStatus.REQUEST_ERROR, logisticsException.getMessage()+":"+ ExceptionUtil.getRootErrorMseeage(e));
     }
@@ -220,7 +220,7 @@ public class BaseController {
 
     })
     public R runtimeExceptionHandler(Exception e) {
-        log.info("运行时异常:" ,e);
+        log.error("运行时异常:" ,e);
         LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.RUNERROR, getLen());
         return R.failed(HttpStatus.ERROR, logisticsException.getMessage()+":"+ExceptionUtil.getRootErrorMseeage(e));
     }
