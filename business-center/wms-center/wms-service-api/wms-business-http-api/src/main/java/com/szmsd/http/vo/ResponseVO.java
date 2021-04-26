@@ -1,5 +1,6 @@
 package com.szmsd.http.vo;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -22,6 +24,7 @@ import java.util.Optional;
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "ResponseVO", description = "ResponseVO对象")
+@Slf4j
 public class ResponseVO implements Serializable {
 
     @ApiModelProperty(value = "是否执行成功")
@@ -50,6 +53,7 @@ public class ResponseVO implements Serializable {
     }
 
     public static void statusAssert(R<? extends ResponseVO> result, String api) {
+        log.info("{}[{}]", api, JSON.toJSONString(result));
         AssertUtil.notNull(result, () -> "RemoteRequest[" + api + "请求失败]");
 
         boolean expression = result.getCode() == HttpStatus.SUCCESS;
