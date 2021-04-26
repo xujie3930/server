@@ -48,6 +48,11 @@ public final class ApplicationRuleConfig {
         // 提审配置 - 【集运出库】
         // 执行所有步骤
         // 提审配置 - 【新SKU上架出库】
+        Set<String> bringVerifyNewSkuSet = new HashSet<>();
+        bringVerifyNewSkuSet.add(BringVerifyEnum.BEGIN.name());
+        bringVerifyNewSkuSet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
+        bringVerifyNewSkuSet.add(BringVerifyEnum.END.name());
+        bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.NEW_SKU.getCode(), bringVerifyNewSkuSet);
         // 提审配置 - 【批量出库】
         // =======================================================================================
         // 出库配置
@@ -61,12 +66,20 @@ public final class ApplicationRuleConfig {
         shipmentDestroySet.add(ShipmentEnum.END.name());
         shipmentRuleMap.put(DelOutboundOrderTypeEnum.DESTROY.getCode(), shipmentDestroySet);
         // 出库配置 - 【自提出库】
-        shipmentRuleMap.put(DelOutboundOrderTypeEnum.SELF_PICK.getCode(), shipmentDestroySet);
+        Set<String> shipmentSelfPickSet = new HashSet<>();
+        shipmentSelfPickSet.add(ShipmentEnum.BEGIN.name());
+        shipmentSelfPickSet.add(ShipmentEnum.END.name());
+        shipmentRuleMap.put(DelOutboundOrderTypeEnum.SELF_PICK.getCode(), shipmentSelfPickSet);
         // 出库配置 - 【转运出库】
         // 执行所有步骤
         // 出库配置 - 【集运出库】
         // 执行所有步骤
         // 出库配置 - 【新SKU上架出库】
+        Set<String> shipmentNewSkuSet = new HashSet<>();
+        shipmentNewSkuSet.add(ShipmentEnum.BEGIN.name());
+        shipmentNewSkuSet.add(ShipmentEnum.SHIPMENT_SHIPPING.name());
+        shipmentNewSkuSet.add(ShipmentEnum.END.name());
+        shipmentRuleMap.put(DelOutboundOrderTypeEnum.NEW_SKU.getCode(), shipmentNewSkuSet);
         // 出库配置 - 【批量出库】
     }
 
