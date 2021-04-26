@@ -27,6 +27,8 @@ public interface IBasSellerCertificateService extends IService<BasSellerCertific
 
         int delBasSellerCertificateByPhysics(String sellerCode);
 
+        int countVaildBasSellerCertificate(String sellerCode);
+
         /**
         * 查询模块列表
         *
@@ -62,6 +64,8 @@ public interface IBasSellerCertificateService extends IService<BasSellerCertific
         * @return 结果
         */
         int updateBasSellerCertificate(BasSellerCertificate basSellerCertificate);
+
+        boolean review(BasSellerCertificate basSellerCertificate);
 
         /**
         * 批量删除模块

@@ -115,4 +115,14 @@ public class BasSellerCertificateController extends BaseController {
         return toOk(basSellerCertificateService.deleteBasSellerCertificateByIds(ids));
     }
 
+    /**
+     * 修改模块
+     */
+    @PreAuthorize("@ss.hasPermi('BasSellerCertificate:BasSellerCertificate:edit')")
+    @Log(title = "模块", businessType = BusinessType.UPDATE)
+    @PutMapping("review")
+    @ApiOperation(value = " 审核VAT模块", notes = "审核VAT模块")
+    public R review(@RequestBody BasSellerCertificate basSellerCertificate) {
+        return R.ok(basSellerCertificateService.review(basSellerCertificate));
+    }
 }

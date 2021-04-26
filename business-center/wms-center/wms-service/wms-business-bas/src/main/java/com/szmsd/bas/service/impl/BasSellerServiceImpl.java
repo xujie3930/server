@@ -120,7 +120,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             UserInfo userInfo= remoteUserService.getUserInfo(sysUserByTypeAndUserType).getData();
             b.setSysId(userInfo.getSysUser().getUserId());
             //查询认证状态
-
+            if(basSellerCertificateService.countVaildBasSellerCertificate(b.getSellerCode())==0){
+                b.setReviewState(true);
+            }else{
+                b.setReviewState(false);
+            }
         }
             TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
             table.setCode(200);
