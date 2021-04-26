@@ -63,7 +63,7 @@ abstract class AbstractRequest extends BaseRequest {
                 urlGroupName = this.httpConfig.getMapperGroup().get(matchWarehouseGroupName);
             }
         }
-        if (this.isEmpty(urlGroupName) && this.isEmpty(warehouseCode)) {
+        if (this.isEmpty(urlGroupName)) {
             // 获取默认映射
             urlGroupName = this.httpConfig.getDefaultUrlGroup();
         }
