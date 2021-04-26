@@ -135,13 +135,13 @@ public class HandlerContext<T> {
      */
     private boolean valueIgnore(Object object) {
         if (null == object) {
-            return false;
+            return true;
         }
         if (object instanceof String) {
             return StringUtils.isEmpty((String) object);
         }
         // 其它无法识别的类型，默认进行处理
-        return true;
+        return false;
     }
 
     private void doJsonEncrypt(Iterable<?> iterable) {
