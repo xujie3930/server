@@ -98,6 +98,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")
     @GetMapping(value = "getInfo/{id}")
     @ApiOperation(value = "出库管理 - 详情", position = 200)
+    @AutoValue
     public R<DelOutboundVO> getInfo(@PathVariable("id") String id) {
         return R.ok(delOutboundService.selectDelOutboundById(id));
     }

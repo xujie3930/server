@@ -1,5 +1,7 @@
 package com.szmsd.delivery.vo;
 
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
+import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -55,7 +57,11 @@ public class DelOutboundVO implements Serializable {
     private Boolean isFirst;
 
     @ApiModelProperty(value = "出库后重新上架的新SKU编码")
+    @AutoFieldValue(supports = "BasProduct", cp = DefaultCommonParameter.class, nameField = "newSkuName")
     private String newSku;
+
+    @ApiModelProperty(value = "出库后重新上架的新SKU编码名称")
+    private String newSkuName;
 
     @ApiModelProperty(value = "客户代码")
     private String customCode;

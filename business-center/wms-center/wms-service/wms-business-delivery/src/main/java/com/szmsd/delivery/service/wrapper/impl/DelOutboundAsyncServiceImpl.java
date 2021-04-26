@@ -1,25 +1,31 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
+import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +53,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private InventoryFeignClientService inventoryFeignClientService;
     @Autowired
     private RechargesFeignService rechargesFeignService;
+    @Autowired
+    private IDelOutboundChargeService delOutboundChargeService;
+    @Autowired
+    private OperationFeignService operationFeignService;
 
     @Transactional
     @Override
@@ -78,7 +88,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     public void completed(String orderNo) {
         // 处理阶段
         // 1.扣减库存              DE
-        // 2.扣减费用              FEE_DE
+        // 2.1扣减费用             FEE_DE
+        // 2.2扣减操作费用         OP_FEE_DE
         // 3.更新状态为已完成       MODIFY
         // 4.完成                  END
         DelOutbound delOutbound = this.delOutboundService.getByOrderNo(orderNo);
@@ -98,10 +109,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 this.deduction(orderNo, delOutbound.getWarehouseCode(), delOutbound.getOrderType());
                 completedState = "FEE_DE";
             }
-            // 销毁，自提不扣物流费用
+            // 销毁，自提，新SKU不扣物流费用
             boolean fee = true;
             if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
-                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
                 fee = false;
             }
             if ("FEE_DE".equals(completedState)) {
@@ -113,10 +125,36 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     custPayDTO.setAmount(delOutbound.getAmount());
                     custPayDTO.setNo(delOutbound.getOrderNo());
                     custPayDTO.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
+                    // 查询费用明细
+                    List<DelOutboundCharge> chargeList = this.delOutboundChargeService.listCharges(orderNo);
+                    if (CollectionUtils.isNotEmpty(chargeList)) {
+                        List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>(chargeList.size());
+                        for (DelOutboundCharge charge : chargeList) {
+                            AccountSerialBillDTO serialBill = new AccountSerialBillDTO();
+                            serialBill.setNo(orderNo);
+                            serialBill.setTrackingNo(delOutbound.getTrackingNo());
+                            serialBill.setCusCode(delOutbound.getSellerCode());
+                            serialBill.setCurrencyCode(charge.getCurrencyCode());
+                            serialBill.setAmount(charge.getAmount());
+                            serialBill.setWarehouseCode(delOutbound.getWarehouseCode());
+                            serialBill.setChargeCategory(charge.getChargeNameCn());
+                            serialBillInfoList.add(serialBill);
+                        }
+                        custPayDTO.setSerialBillInfoList(serialBillInfoList);
+                    }
                     R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
                     if (null == r || Constants.SUCCESS != r.getCode()) {
                         throw new CommonException("999", "扣减费用失败");
                     }
+                }
+                completedState = "OP_FEE_DE";
+            }
+            if ("OP_FEE_DE".equals(completedState)) {
+                DelOutboundVO delOutboundVO = new DelOutboundVO();
+                delOutboundVO.setOrderNo(orderNo);
+                R<?> r = this.operationFeignService.delOutboundCharge(delOutboundVO);
+                if (null == r || Constants.SUCCESS != r.getCode()) {
+                    throw new CommonException("999", "扣减操作费用失败");
                 }
                 completedState = "MODIFY";
             }
@@ -174,7 +212,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     public void cancelled(String orderNo) {
         // 处理阶段
         // 1.取消冻结库存                                 UN_FREEZE
-        // 2.取消冻结费用                                 UN_FEE
+        // 2.1取消冻结费用                                UN_FEE
+        // 2.2取消冻结操作费用                             UN_OP_FEE
         // 3.如果是，下单后供应商获取，需要取消承运商物流订单 UN_CARRIER
         // 4.更新状态为已取消                              MODIFY
         // 5.完成                                         END
@@ -197,10 +236,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 this.unFreeze(orderNo, delOutbound.getWarehouseCode(), delOutbound.getOrderType());
                 cancelledState = "UN_FEE";
             }
-            // 销毁，自提不扣物流费用
+            // 销毁，自提，新SKU不扣物流费用
             boolean fee = true;
             if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
-                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
                 fee = false;
             }
             if ("UN_FEE".equals(cancelledState)) {
@@ -220,6 +260,15 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             throw new CommonException("999", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
                         }
                     }
+                }
+                cancelledState = "UN_OP_FEE";
+            }
+            if ("UN_OP_FEE".equals(cancelledState)) {
+                DelOutboundVO delOutboundVO = new DelOutboundVO();
+                delOutboundVO.setOrderNo(orderNo);
+                R<?> r = this.operationFeignService.delOutboundThaw(delOutboundVO);
+                if (null == r || Constants.SUCCESS != r.getCode()) {
+                    throw new CommonException("999", "取消冻结操作费用失败");
                 }
                 cancelledState = "UN_CARRIER";
             }
