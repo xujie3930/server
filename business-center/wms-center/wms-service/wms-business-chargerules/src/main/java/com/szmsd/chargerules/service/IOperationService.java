@@ -43,5 +43,9 @@ public interface IOperationService {
      * @param dto dto
      * @return result
      */
-    R delOutboundCharge(DelOutboundVO dto);
+    R delOutboundDeductions(DelOutboundVO dto);
+
+    R delOutboundFreeze(DelOutboundVO delOutboundVO);
+
+    R delOutboundThaw(DelOutboundVO delOutboundVO);
 }

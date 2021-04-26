@@ -90,7 +90,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
 
     @Override
-    public R delOutboundCharge(DelOutboundVO dto) {
+    public R delOutboundDeductions(DelOutboundVO dto) {
         List<DelOutboundDetailVO> details = dto.getDetails();
         if (CollectionUtils.isEmpty(details)) {
             log.error("calculate() 出库单对应的详情信息未找到");
@@ -115,6 +115,16 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         }
         return R.ok();
 
+    }
+
+    @Override
+    public R delOutboundFreeze(DelOutboundVO delOutboundVO) {
+        return R.ok();
+    }
+
+    @Override
+    public R delOutboundThaw(DelOutboundVO delOutboundVO) {
+        return R.ok();
     }
 
 
