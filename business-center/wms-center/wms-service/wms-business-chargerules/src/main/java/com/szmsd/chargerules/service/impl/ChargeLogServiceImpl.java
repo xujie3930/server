@@ -31,7 +31,7 @@ public class ChargeLogServiceImpl implements IChargeLogService {
     public ChargeLog selectLog(ChargeLogDto chargeLogDto) {
         LambdaQueryWrapper<ChargeLog> query = Wrappers.lambdaQuery();
         query.eq(ChargeLog::getOrderNo, chargeLogDto.getOrderNo());
-        query.eq(ChargeLog::getPayMethod, chargeLogDto.getPayMethod());
+        query.eq(ChargeLog::getOperationPayMethod, chargeLogDto.getOperationPayMethod());
         query.eq(ChargeLog::getOperationType, chargeLogDto.getOperationType());
         query.eq(ChargeLog::getWarehouseCode, chargeLogDto.getWarehouseCode());
         query.eq(ChargeLog::getSuccess, chargeLogDto.getSuccess());

@@ -31,8 +31,8 @@ public class ChargeLog extends BaseEntity {
     @ApiModelProperty(value = "币种名称")
     private String currencyCode;
 
-    @ApiModelProperty(value = "交易类型")
-    private String payMethod;
+    @ApiModelProperty(value = "操作支付类型")
+    private String operationPayMethod;
 
     @ApiModelProperty(value = "操作类型")
     private String operationType;
