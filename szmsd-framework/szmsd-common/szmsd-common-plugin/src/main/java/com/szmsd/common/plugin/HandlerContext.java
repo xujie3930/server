@@ -8,6 +8,7 @@ import com.szmsd.common.plugin.interfaces.CommonPlugin;
 import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,8 +88,9 @@ public class HandlerContext<T> {
                 Map<String, Set<Object>> stringSetMap = new HashMap<>(groupByField.length);
                 for (Object object : iterable) {
                     for (String field : groupByField) {
+                        // 获取到字段的名称
                         Object value = getValue(object, field);
-                        if (null == value) {
+                        if (valueIgnore(object)) {
                             continue;
                         }
                         if (stringSetMap.containsKey(field)) {
@@ -123,6 +125,23 @@ public class HandlerContext<T> {
             }
         }
         return hasAuto;
+    }
+
+    /**
+     * 判断是否为空值，当被判定为空值时，不做处理
+     *
+     * @param object object
+     * @return boolean 返回true继续处理，false不处理
+     */
+    private boolean valueIgnore(Object object) {
+        if (null == object) {
+            return false;
+        }
+        if (object instanceof String) {
+            return StringUtils.isEmpty((String) object);
+        }
+        // 其它无法识别的类型，默认进行处理
+        return true;
     }
 
     private void doJsonEncrypt(Iterable<?> iterable) {
