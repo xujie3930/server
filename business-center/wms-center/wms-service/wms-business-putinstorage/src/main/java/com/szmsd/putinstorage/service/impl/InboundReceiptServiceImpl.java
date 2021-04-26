@@ -112,7 +112,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         if (inboundReceiptReview) {
             // 审核
             String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
-            this.review(new InboundReceiptReviewDTO().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
+            this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
 
             // 第三方接口推送
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
@@ -271,22 +271,29 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     public void review(InboundReceiptReviewDTO inboundReceiptReviewDTO) {
         SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
         InboundReceipt inboundReceipt = new InboundReceipt();
-        String warehouseNo = inboundReceiptReviewDTO.getWarehouseNo();
-        inboundReceipt.setWarehouseNo(warehouseNo);
         InboundReceiptEnum.InboundReceiptEnumMethods anEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.InboundReceiptStatus.class, inboundReceiptReviewDTO.getStatus());
         inboundReceipt.setStatus(anEnum.getValue());
         inboundReceipt.setReviewRemark(inboundReceiptReviewDTO.getReviewRemark());
         inboundReceipt.setReviewBy(loginUserInfo.getUserId() + "");
         inboundReceipt.setReviewBy(loginUserInfo.getUserName());
         inboundReceipt.setReviewTime(new Date());
-        this.updateByWarehouseNo(inboundReceipt);
-        log.info("入库单审核: {},{}", anEnum.getValue2(), inboundReceipt);
-
-        // 审核通过 第三方接口推送
-        if (InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(inboundReceiptReviewDTO.getStatus())) {
+        List<String> warehouseNos = inboundReceiptReviewDTO.getWarehouseNos();
+        log.info("入库单审核: {},{},{}", anEnum.getValue2(), warehouseNos, inboundReceipt);
+        warehouseNos.forEach(warehouseNo -> {
+            inboundReceipt.setWarehouseNo(warehouseNo);
+            this.updateByWarehouseNo(inboundReceipt);
+            // 审核通过 第三方接口推送
+            if (!InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(inboundReceiptReviewDTO.getStatus())) {
+                return;
+            }
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
-            remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
-        }
+            try {
+                remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                this.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE.getValue()).setReviewRemark(e.getMessage()));
+            }
+        });
 
     }
 
