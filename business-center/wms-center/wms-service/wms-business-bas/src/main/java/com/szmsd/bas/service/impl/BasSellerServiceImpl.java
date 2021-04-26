@@ -350,8 +350,20 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             sellerRequest.setIsActive(true);
             ObjectUtil.fillNull(sellerRequest,bas);
             R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
-            if(!r.getData().getSuccess()){
-                throw new BaseException("传wms失败:"+r.getData().getMessage());
+            if(r.getData()==null){
+                throw new BaseException("传wms失败" + r.getData().getErrors());
+            }else{
+                if(r.getData().getSuccess()==null){
+                    if(r.getData().getErrors()!=null)
+                    {
+                        throw new BaseException("传wms失败" + r.getData().getErrors());
+                    }
+                }else{
+                    if(!r.getData().getSuccess())
+                    {
+                        throw new BaseException("传wms失败" + r.getData().getMessage());
+                    }
+                }
             }
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
             basSellerCertificateService.delBasSellerCertificateByPhysics(basSeller.getSellerCode());
@@ -383,8 +395,20 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                    sellerRequest.setIsActive(activeDto.getIsActive());
                    ObjectUtil.fillNull(sellerRequest, bas);
                    R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
-                   if(!r.getData().getSuccess()){
-                       throw new BaseException("传wms失败:"+r.getData().getMessage());
+                   if(r.getData()==null){
+                       throw new BaseException("传wms失败" + r.getData().getErrors());
+                   }else{
+                       if(r.getData().getSuccess()==null){
+                           if(r.getData().getErrors()!=null)
+                           {
+                               throw new BaseException("传wms失败" + r.getData().getErrors());
+                           }
+                       }else{
+                           if(!r.getData().getSuccess())
+                           {
+                               throw new BaseException("传wms失败" + r.getData().getMessage());
+                           }
+                       }
                    }
                }
             SysUserDto userDto = new SysUserDto();
