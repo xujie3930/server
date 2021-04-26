@@ -2,6 +2,7 @@ package com.szmsd.http.controller;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.dto.RemoteAreaTemplateIdCriteria;
@@ -38,6 +39,11 @@ public class RemoteAreaTemplateController extends BaseController {
     @ApiOperation(value = "导入地址库模板")
     public R<ImportResult> importFile(@RequestBody MultipartFile file) {
         ImportResult importFile = iRemoteAreaTemplateService.importFile(file);
+        if (StringUtils.isEmpty(importFile.getErrors())) {
+            importFile.setSuccess(true);
+        } else {
+            importFile.setSuccess(false);
+        }
         return R.ok(importFile);
     }
 
