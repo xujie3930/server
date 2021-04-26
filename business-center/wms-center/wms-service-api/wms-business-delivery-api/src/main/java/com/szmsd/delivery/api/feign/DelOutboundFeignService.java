@@ -10,8 +10,10 @@ import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.dto.ShipmentRequestDto;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -79,5 +81,15 @@ public interface DelOutboundFeignService {
      */
     @PostMapping("/api/outbound/delOutboundCharge/page")
     R<TableDataInfo<QueryChargeVO>> getDelOutboundCharge(@RequestBody QueryChargeDto queryDto);
+
+    /**
+     * 查询采购单中的sku列表
+     * @param idList
+     * @return
+     */
+    @GetMapping(value = "createPurchaseOrderListByIdList/{idList}")
+    @ApiOperation(value = "出库-创建采购单")
+    R<List<DelOutboundDetailVO>> createPurchaseOrderListByIdList(@PathVariable("idList") List<String> idList);
+
 
 }

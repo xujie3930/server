@@ -9,6 +9,7 @@ import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.dto.ShipmentRequestDto;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import feign.hystrix.FallbackFactory;
@@ -52,6 +53,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
 
             @Override
             public R<TableDataInfo<QueryChargeVO>> getDelOutboundCharge(QueryChargeDto queryDto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<DelOutboundDetailVO>> createPurchaseOrderListByIdList(List<String> idList) {
                 return R.convertResultJson(throwable);
             }
         };
