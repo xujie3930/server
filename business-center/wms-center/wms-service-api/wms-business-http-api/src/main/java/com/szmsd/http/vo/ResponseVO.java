@@ -1,5 +1,6 @@
 package com.szmsd.http.vo;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -52,7 +53,7 @@ public class ResponseVO implements Serializable {
     }
 
     public static void statusAssert(R<? extends ResponseVO> result, String api) {
-        log.info("{}[{}]", api, result);
+        log.info("{}[{}]", api, JSON.toJSONString(result));
         AssertUtil.notNull(result, () -> "RemoteRequest[" + api + "请求失败]");
 
         boolean expression = result.getCode() == HttpStatus.SUCCESS;
