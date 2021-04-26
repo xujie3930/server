@@ -62,7 +62,7 @@ public class RunnableExecute {
      * 定时任务：普通操作计价扣费；每天12点，23点执行一次
      */
 //    @Scheduled(cron = "0 0 13,23 * * *")
-    @Scheduled(cron = "0 0/5 * * * *")
+//    @Scheduled(cron = "0 0/5 * * * *")
     public void executeOperation() {
         log.info("executeOperation() start...");
         RLock lock = redissonClient.getLock("executeOperation");

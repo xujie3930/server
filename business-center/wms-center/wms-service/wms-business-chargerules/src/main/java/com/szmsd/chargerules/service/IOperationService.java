@@ -3,7 +3,8 @@ package com.szmsd.chargerules.service;
 
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
-import com.szmsd.chargerules.vo.OperationVo;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.delivery.vo.DelOutboundVO;
 
 import java.util.List;
 
@@ -36,4 +37,11 @@ public interface IOperationService {
      * @return Operation
      */
     Operation details(int id);
+
+    /**
+     * 出库扣款
+     * @param dto dto
+     * @return result
+     */
+    R delOutboundCharge(DelOutboundVO dto);
 }

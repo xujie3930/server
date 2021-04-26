@@ -86,17 +86,17 @@ public class Shipment extends OrderType {
             }
             BigDecimal amount = BigDecimal.ZERO;
             int count = 0;
-            if(operation.isManySku() && details.size() > 1) { // 配置为多SKU并且出库单SKU为多个
+//            if(operation.isManySku() && details.size() > 1) { // 配置为多SKU并且出库单SKU为多个
                 count = details.stream().mapToInt(detail -> detail.getQty().intValue()).sum();
                 amount = payService.manySkuCalculate(operation.getFirstPrice(), operation.getNextPrice(), details);
-            }
-            if(!operation.isManySku() && details.size() == 1) { // 配置为单SKU并且出库单SKU为单个
-                count = details.get(0).getQty().intValue();
-                amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), count);
-            }
+//            }
+//            if(!operation.isManySku() && details.size() == 1) { // 配置为单SKU并且出库单SKU为单个
+//                count = details.get(0).getQty().intValue();
+//                amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), count);
+//            }
             DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(datum.getOrderType());
             if(delOutboundOrderTypeEnum != null) datum.setOrderType(delOutboundOrderTypeEnum.getName());
-            log.info("orderNo: {} orderType: {} isManySku: {} amount: {}", datum.getOrderNo(), datum.getOrderType(),operation.isManySku(), amount);
+            log.info("orderNo: {} orderType: {} amount: {}", datum.getOrderNo(), datum.getOrderType(),amount);
             if(amount.compareTo(BigDecimal.ZERO) > 0) {
                 pay(datum, amount, count);
             }
