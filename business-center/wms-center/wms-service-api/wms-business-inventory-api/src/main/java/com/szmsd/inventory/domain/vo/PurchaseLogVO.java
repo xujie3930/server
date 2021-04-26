@@ -22,7 +22,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(value = "采购单日志", description = "PurchaseLog对象")
+@ApiModel(description = "PurchaseLog对象")
 public class PurchaseLogVO {
 
     @ApiModelProperty(value = "ID")

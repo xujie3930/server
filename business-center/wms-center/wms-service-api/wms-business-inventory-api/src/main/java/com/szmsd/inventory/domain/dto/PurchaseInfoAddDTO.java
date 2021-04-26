@@ -21,7 +21,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(value = "采购单", description = "Purchase对象")
+@ApiModel(description = "Purchase对象")
 public class PurchaseInfoAddDTO {
     @ApiModelProperty(value = "出库后重新上架的新SKU编码")
     List<PurchaseAddDTO> purchaseInfoAddDTOList;
