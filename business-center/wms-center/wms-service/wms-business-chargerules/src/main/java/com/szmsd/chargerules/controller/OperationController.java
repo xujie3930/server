@@ -75,11 +75,25 @@ public class OperationController extends BaseController {
                 new OrderTypeLabelVo(value.getCode(), value.getName())).collect(Collectors.toList()));
     }
 
-    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundFreeze')")
+    @ApiOperation(value = "业务计费 - 出库冻结余额")
+    @PostMapping("/delOutboundFreeze")
+    public R delOutboundFreeze(@RequestBody DelOutboundVO delOutboundVO) {
+        return operationService.delOutboundFreeze(delOutboundVO);
+    }
+
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundThaw')")
+    @ApiOperation(value = "业务计费 - 出库解冻余额")
+    @PostMapping("/delOutboundThaw")
+    public R delOutboundThaw(@RequestBody DelOutboundVO delOutboundVO) {
+        return operationService.delOutboundThaw(delOutboundVO);
+    }
+
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundDeductions')")
     @ApiOperation(value = "业务计费 - 出库扣款")
-    @PostMapping("/delOutboundCharge")
-    public R delOutboundCharge(@RequestBody DelOutboundVO delOutboundVO) {
-        return operationService.delOutboundCharge(delOutboundVO);
+    @PostMapping("/delOutboundDeductions")
+    public R delOutboundDeductions(@RequestBody DelOutboundVO delOutboundVO) {
+        return operationService.delOutboundDeductions(delOutboundVO);
     }
 
 }
