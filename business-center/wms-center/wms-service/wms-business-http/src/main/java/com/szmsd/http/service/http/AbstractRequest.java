@@ -344,7 +344,7 @@ abstract class AbstractRequest extends BaseRequest {
             String requestBody = JSON.toJSONString(object);
             HttpResponseBody responseBody = HttpClientHelper.httpPut(url, requestBody, file, headerMap);
             addLog(warehouseCode, urlGroupName, url, HttpMethod.PUT.name(), headerMap, requestBody, requestTime, responseBody.getBody());
-            return null;
+            return responseBody;
         }).getBody();
     }
 
