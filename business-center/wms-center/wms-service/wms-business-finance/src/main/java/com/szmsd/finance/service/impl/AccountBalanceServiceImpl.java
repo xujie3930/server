@@ -235,7 +235,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public boolean withDrawBalanceCheck(String cusCode, String currencyCode, BigDecimal amount) {
         BigDecimal currentBalance = getCurrentBalance(cusCode, currencyCode);
-        return currentBalance.compareTo(amount) > 0;
+        return currentBalance.compareTo(amount) >= 0;
     }
 
     /**
