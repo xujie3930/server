@@ -129,7 +129,7 @@
             a.phone_no,
             o.specifications
         FROM del_outbound o
-        INNER JOIN del_outbound_address a ON a.order_no = o.order_no
+        LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
     </select>
 
