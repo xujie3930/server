@@ -124,6 +124,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             String[] sellerCodes = queryDto.getSellerCodes().split(",");
             queryWrapper.in("seller_code", sellerCodes);
         }
+        if(CollectionUtils.isNotEmpty(queryDto.getIds())){
+            queryWrapper.in("id",queryDto.getIds());
+        }
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", queryDto.getCategory());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
@@ -208,6 +211,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         for(BaseProduct b:baseProductList)
         {
+            //b.setSource("01");
             b.setCategory(ProductConstant.SKU_NAME);
             b.setCategoryCode(ProductConstant.SKU);
             b.setSellerCode(seller.getSellerCode());
@@ -346,6 +350,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         //SKU需要仓库测量尺寸
         baseProduct.setWarehouseAcceptance(false);
+        //baseProduct.setSource("01");
         baseProduct.setWeight(baseProduct.getInitWeight());
         baseProduct.setWidth(baseProduct.getInitWidth());
         baseProduct.setLength(baseProduct.getInitLength());
@@ -390,6 +395,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }
             //默认激活
             o.setIsActive(true);
+            //o.setSource("02");
             //默认仓库没有验收
             o.setWarehouseAcceptance(false);
         });

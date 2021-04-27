@@ -4,8 +4,12 @@ import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class BaseProductQueryDto {
+
+    private List<Long> ids;
 
     @ApiModelProperty(value = "产品名称")
     @Excel(name = "产品名称")
