@@ -175,6 +175,16 @@ public class WmsApiConfig implements ApiConfig {
         private String create;
         // B2 取消入库单
         private String cancel;
+        // B3 创建转运单
+        private String createPackage;
+
+        public String getCreatePackage() {
+            return createPackage;
+        }
+
+        public void setCreatePackage(String createPackage) {
+            this.createPackage = createPackage;
+        }
 
         public String getCreate() {
             return create;

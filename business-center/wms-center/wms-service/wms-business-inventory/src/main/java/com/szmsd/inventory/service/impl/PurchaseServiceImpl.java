@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.com.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.inventory.component.RemoteComponent;
@@ -266,6 +267,9 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         String sellerCode = loginUserInfo.getSellerCode();
         //获取sku信息
         List<DelOutboundDetailVO> transshipmentProductData = remoteComponent.getTransshipmentProductData(transportWarehousingAddDTO.getIdList());
+        if (CollectionUtils.isEmpty(transshipmentProductData)) {
+            throw new RuntimeException("无相关数据");
+        }
         //创建入库单
         long sum = transshipmentProductData.stream().mapToLong(DelOutboundDetailVO::getQty).sum();
         String deliveryNo = transportWarehousingAddDTO.getDeliveryNo();
@@ -274,12 +278,14 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         createInboundReceiptDTO
                 .setDeliveryNo(deliveryNo)
                 .setCusCode(sellerCode)
-               .setVat(transportWarehousingAddDTO.getVat())
+//                .setCusCode("WS77")
+                .setVat(transportWarehousingAddDTO.getVat())
                 .setWarehouseCode(transportWarehousingAddDTO.getWarehouseCode())
                 .setOrderType(transportWarehousingAddDTO.getOrderType())
                 .setWarehouseCategoryCode(transportWarehousingAddDTO.getWarehouseCategoryCode())
                 .setDeliveryWayCode(transportWarehousingAddDTO.getDeliveryWay())
                 .setTotalDeclareQty(Integer.parseInt(sum + ""))
+//                .setTotalDeclareQty(10)
                 .setTotalPutQty(0);
 
         //设置SKU列表数据
@@ -288,6 +294,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
             inboundReceiptDetailDTO
                     .setDeclareQty(Integer.parseInt(addSku.getQty() + ""))
+//                    .setDeclareQty(10)
                     .setSku(addSku.getSku())
                     .setSkuName(addSku.getSku())
             ;
