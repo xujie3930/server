@@ -4,7 +4,7 @@ package com.szmsd.chargerules.service;
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.DelOutboundOperationVO;
 
 import java.util.List;
 
@@ -43,9 +43,9 @@ public interface IOperationService {
      * @param dto dto
      * @return result
      */
-    R delOutboundDeductions(DelOutboundVO dto);
+    R delOutboundDeductions(DelOutboundOperationVO dto);
 
-    R delOutboundFreeze(DelOutboundVO delOutboundVO);
+    R delOutboundFreeze(DelOutboundOperationVO delOutboundVO);
 
-    R delOutboundThaw(DelOutboundVO delOutboundVO);
+    R delOutboundThaw(DelOutboundOperationVO delOutboundVO);
 }
