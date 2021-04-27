@@ -12,6 +12,7 @@ public interface HttpResponseBody {
      * 状态码
      *
      * @return int
+     * @see org.springframework.http.HttpStatus
      */
     int getStatus();
 

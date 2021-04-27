@@ -2,12 +2,14 @@ package com.szmsd.http.config;
 
 import com.szmsd.http.config.inner.DefaultApiConfig;
 import com.szmsd.http.config.inner.UrlGroupConfig;
+import com.szmsd.http.enums.HttpUrlType;
 import com.szmsd.http.service.http.Utils;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +39,8 @@ public class HttpConfig {
 
     // 多通道url配置
     private Set<String> multipleChannelUrlSet;
+    // 多通道请求解析器开关
+    private Map<HttpUrlType, Boolean> resolverConfig;
 
     /**
      * 加载配置之前执行
@@ -59,6 +63,16 @@ public class HttpConfig {
         }
         this.multipleChannelUrlSet = copySet;
         copySet = null;
+        // 多通道解析器开关值处理
+        if (null == this.resolverConfig) {
+            this.resolverConfig = new HashMap<>();
+        }
+        for (HttpUrlType value : HttpUrlType.values()) {
+            if (!this.resolverConfig.containsKey(value)) {
+                // 如果不存在，默认配置为true
+                this.resolverConfig.put(value, true);
+            }
+        }
     }
 
     /**
