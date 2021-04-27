@@ -65,6 +65,10 @@ public class Purchase extends BaseEntity {
     @Excel(name = "采购数量")
     private Integer purchaseQuantity;
 
+    @ApiModelProperty(value = "剩余需要采购的数量")
+    @Excel(name = "剩余需要采购的数量")
+    private Integer remainingPurchaseQuantity;
+
     @ApiModelProperty(value = "已创建入库单的数量")
     @Excel(name = "已创建入库单的数量")
     private Integer quantityInStorageCreated;
@@ -101,9 +105,17 @@ public class Purchase extends BaseEntity {
     @Excel(name = "出库单号")
     private String orderNo;
 
-    @ApiModelProperty(value = "剩余的采购数量")
-    @Excel(name = "剩余的采购数量")
-    private Integer remainingPurchaseQuantity;
+    @ApiModelProperty(value = "VAT")
+    @Excel(name = "VAT")
+    private String vat;
+
+    @ApiModelProperty(value = "类别")
+    @Excel(name = "类别")
+    private String warehouseCategoryName;
+
+    @ApiModelProperty(value = "类别编码")
+    @Excel(name = "类别编码")
+    private String warehouseCategoryCode;
 
     @Override
     public String toString() {

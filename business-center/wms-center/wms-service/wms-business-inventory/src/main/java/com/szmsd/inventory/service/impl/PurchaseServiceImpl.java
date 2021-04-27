@@ -9,10 +9,7 @@ import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.config.IBOConvert;
 import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.PurchaseDetails;
-import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
-import com.szmsd.inventory.domain.dto.PurchaseDetailsAddDTO;
-import com.szmsd.inventory.domain.dto.PurchaseLogAddDTO;
-import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
+import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
 import com.szmsd.inventory.enums.PurchaseEnum;
@@ -22,6 +19,7 @@ import com.szmsd.inventory.service.IPurchaseDetailsService;
 import com.szmsd.inventory.service.IPurchaseLogService;
 import com.szmsd.inventory.service.IPurchaseService;
 import com.szmsd.inventory.service.IPurchaseStorageDetailsService;
+import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.system.api.domain.SysUser;
 import jodd.util.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -78,6 +77,12 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         return selectPurchaseList(purchaseQueryDTO);
     }
 
+    @Override
+    public int cancelByWarehouseNo(String warehouseNo) {
+        log.info("入库单取消{}，回滚相应的提交入库数量", warehouseNo);
+        return 0;
+    }
+
     /**
      * 批量删除采购单模块
      *
@@ -88,7 +93,6 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     public int deletePurchaseByIds(List<String> ids) {
         return baseMapper.deleteBatchIds(ids);
     }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -121,15 +125,33 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                     entityList.forEach(x -> x.setAssociationId(associationId));
                     iPurchaseDetailsService.saveOrUpdateBatch(entityList);
                 });
-
-        //添加采购日志
-        //调用批量入库
-
+        //添加采购单创建流程
         addLog(associationId, purchaseAddDTO);
-        //添加 入库日志 在入库里面做
+        //调用批量入库
+        purchaseOrderStorage(purchaseAddDTO);
         return saveBoolean ? 1 : 0;
     }
 
+    private void purchaseOrderStorage(PurchaseAddDTO purchaseAddDTO) {
+        log.info("开始批量入库");
+        //待入库数据
+        List<PurchaseStorageDetailsAddDTO> purchaseStorageDetailsAddList = purchaseAddDTO.getPurchaseStorageDetailsAddList();
+        List<PurchaseStorageDetailsAddDTO> waitStorage = purchaseStorageDetailsAddList.stream().filter(x -> null != x.getId() && x.getId() > 0).collect(Collectors.toList());
+        //封装请求参数
+        CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+
+        remoteComponent.orderStorage(createInboundReceiptDTO);
+        log.info("开始入库完成");
+        //添加采购日志
+
+    }
+
+    /**
+     * 添加采购单流程
+     *
+     * @param associationId
+     * @param purchaseAddDTO
+     */
     private void addLog(Integer associationId, PurchaseAddDTO purchaseAddDTO) {
         if (null != purchaseAddDTO.getId()) {
             return;

@@ -1,11 +1,15 @@
 package com.szmsd.inventory.component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +36,9 @@ public class RemoteComponent {
     @Resource
     private BaseProductFeignService baseProductFeignService;
 
+    @Resource
+    private InboundReceiptFeignService inboundReceiptFeignService;
+
     /**
      * 获取登录人信息
      *
@@ -48,6 +55,7 @@ public class RemoteComponent {
 
     /**
      * 获取SKU信息
+     *
      * @param code
      * @return
      */
@@ -60,6 +68,7 @@ public class RemoteComponent {
 
     /**
      * 批量获取sku信息
+     *
      * @param codes
      * @return
      */
@@ -70,4 +79,15 @@ public class RemoteComponent {
         return skuList;
     }
 
+    /**
+     * 采购单 [入库 - 新增/创建]
+     */
+    public InboundReceiptInfoVO orderStorage(CreateInboundReceiptDTO createInboundReceiptDTO) {
+        log.info("入库开始 请求参数 {}", JSONObject.toJSONString(createInboundReceiptDTO));
+        R<InboundReceiptInfoVO> inboundReceiptInfoVO = inboundReceiptFeignService.saveOrUpdate(createInboundReceiptDTO);
+        InboundReceiptInfoVO resultData = R.getDataAndException(inboundReceiptInfoVO);
+        log.info("入库完成 {}", JSONObject.toJSONString(resultData));
+        return resultData;
+
+    }
 }

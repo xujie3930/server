@@ -4,6 +4,7 @@ import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
+import io.swagger.annotations.ApiImplicitParam;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -97,4 +98,15 @@ public class PurchaseController extends BaseController {
         return toOk(purchaseService.deletePurchaseByIds(ids));
     }
 
+    /**
+     * 新增采购单模块
+     */
+    @PreAuthorize("@ss.hasPermi('Purchase:Purchase:delete')")
+    @Log(title = "采购单模块", businessType = BusinessType.DELETE)
+    @DeleteMapping("/storage/cancel/byWarehouseNo/{warehouseNo}")
+    @ApiImplicitParam(name = "warehouseNo", type = "String",value = "入库单主键id")
+    @ApiOperation(value = "取消采购单入库", notes = "取消采购单入库 回调, 通过入库单id取消创建的采购单里面入库的请求数据")
+    public R cancelByWarehouseNo(@PathVariable("warehouseNo") String warehouseNo) {
+        return toOk(purchaseService.cancelByWarehouseNo(warehouseNo));
+    }
 }
