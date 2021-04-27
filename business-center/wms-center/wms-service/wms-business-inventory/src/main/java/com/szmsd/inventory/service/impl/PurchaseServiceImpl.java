@@ -1,5 +1,6 @@
 package com.szmsd.inventory.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.sql.Wrapper;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -84,6 +86,28 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     @Override
     public int cancelByWarehouseNo(String warehouseNo) {
         log.info("入库单取消{}，回滚相应的提交入库数量", warehouseNo);
+        //取消改批次的单 回滚数量
+        List<PurchaseStorageDetails> rollBackStorage = iPurchaseStorageDetailsService.list(Wrappers.<PurchaseStorageDetails>lambdaQuery()
+                .eq(PurchaseStorageDetails::getWarehousingNo, warehouseNo)
+        );
+        //更新对应sku的数量 总数量
+
+        List<String> skuList = rollBackStorage.stream().map(PurchaseStorageDetails::getSku).collect(Collectors.toList());
+        //商品详情
+        List<PurchaseDetails> detailsList = iPurchaseDetailsService.list(Wrappers.<PurchaseDetails>lambdaQuery().in(PurchaseDetails::getSku, skuList));
+        //计算需要回滚的数量
+        Map<String, List<PurchaseStorageDetails>> collect1 = rollBackStorage.stream().collect(Collectors.groupingBy(PurchaseStorageDetails::getSku));
+
+        collect1.forEach((o1, o2) -> {
+
+        });
+
+
+        iPurchaseStorageDetailsService.update(Wrappers.<PurchaseStorageDetails>lambdaUpdate()
+                .set(PurchaseStorageDetails::getDelFlag, 2)
+                .eq(PurchaseStorageDetails::getWarehousingNo, warehouseNo)
+        );
+
         return 0;
     }
 
@@ -108,7 +132,6 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         boolean present = Optional.of(purchaseAddDTO).map(PurchaseAddDTO::getPurchaseNo).isPresent();
         if (present) {
             String purchaseNo = serialNumberClientService.generateNumber("PURCHASE_ORDER");
-            //String purchaseNo = "CG000000";
             SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
             String customCode = loginUserInfo.getSellerCode();
             purchaseAddDTO.setCustomCode(customCode);
@@ -162,7 +185,6 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                     .setDeliveryNo(no)
                     .setOrderNo(purchaseAddDTO.getPurchaseNo())
                     .setCusCode(purchaseAddDTO.getCustomCode())
-                    .setCusCode("CN72")
                     .setVat(purchaseAddDTO.getVat())
                     .setWarehouseCode(purchaseAddDTO.getWarehouseCode())
                     .setOrderType(purchaseAddDTO.getOrderType())
@@ -170,6 +192,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                     .setDeliveryWayCode(purchaseAddDTO.getDeliveryWay())
                     .setTotalDeclareQty(sum)
                     .setTotalPutQty(0)
+                    .setRemark(purchaseAddDTO.getRemark())
             ;
             //设置SKU列表数据
             ArrayList<InboundReceiptDetailDTO> inboundReceiptDetailAddList = new ArrayList<>();
@@ -198,7 +221,6 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                         //添加采购日志
 
                     });
-
         });
 
         log.info("开始入库完成");
@@ -235,6 +257,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                 .setOrderNo(purchaseAddDTO.getOrderNo());
         log.info("新增采购日志 {}", purchaseLogAddDTO);
         iPurchaseLogService.insertPurchaseLog(purchaseLogAddDTO);
+    }
+
+    @Override
+    public int transportWarehousingSubmit(TransportWarehousingAddDTO transportWarehousingAddDTO) {
+        return 0;
     }
 }
 

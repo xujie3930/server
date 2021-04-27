@@ -142,18 +142,27 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return delOutboundVO;
     }
 
+    @Override
+    public List<DelOutboundDetailVO> getTransshipmentProductData(List<String> idList) {
+        return createPurchaseOrderListByIdList(idList,DelOutboundOrderTypeEnum.PACKAGE_TRANSFER);
+    }
+
+    @Override
+    public List<DelOutboundDetailVO> createPurchaseOrderListByIdList(List<String> idList) {
+        return createPurchaseOrderListByIdList(idList, DelOutboundOrderTypeEnum.COLLECTION);
+    }
+
     /**
      * 出库-创建采购的单
      *
      * @param idList
      * @return
      */
-    @Override
-    public List<DelOutboundDetailVO> createPurchaseOrderListByIdList(List<String> idList) {
+    private List<DelOutboundDetailVO> createPurchaseOrderListByIdList(List<String> idList, DelOutboundOrderTypeEnum typeEnum) {
         //只查询集运类型的顶单
         List<DelOutbound> delOutbounds = baseMapper.selectList(Wrappers.<DelOutbound>lambdaQuery()
                 .in(DelOutbound::getId, idList)
-                .eq(DelOutbound::getOrderType, DelOutboundOrderTypeEnum.COLLECTION.getCode())
+                .eq(DelOutbound::getOrderType, typeEnum.getCode())
         );
         if (CollectionUtils.isEmpty(delOutbounds)) {
             return new ArrayList<DelOutboundDetailVO>();

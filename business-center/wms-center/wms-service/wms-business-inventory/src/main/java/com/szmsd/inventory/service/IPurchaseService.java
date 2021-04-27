@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
+import com.szmsd.inventory.domain.dto.TransportWarehousingAddDTO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
@@ -51,5 +52,8 @@ public interface IPurchaseService extends IService<Purchase> {
     List<PurchaseInfoListVO> selectPurchaseListClient(PurchaseQueryDTO purchaseQueryDTO);
 
     int cancelByWarehouseNo(String warehouseNo);
+
+
+    int transportWarehousingSubmit(TransportWarehousingAddDTO transportWarehousingAddDTO);
 }
 
