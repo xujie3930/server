@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
@@ -30,6 +31,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
     @Resource
     private IAccountSerialBillService accountSerialBillService;
 
+    @Transactional
     @Override
     public boolean updateBalance(CustPayDTO dto) {
         String key = "cky-test-fss-balance-all:" + dto.getCusId();
