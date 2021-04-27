@@ -19,5 +19,10 @@ public interface ExceptionInfoClientService {
      */
     R processException(ProcessExceptionRequest processExceptionRequest);
 
+    /**
+     * 统计客户异常订单数
+     * @param sellerCode
+     * @return
+     */
     Integer countprocessException(String sellerCode);
 }
