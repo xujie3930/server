@@ -20,12 +20,12 @@ public class OperationFeignFallback implements FallbackFactory<OperationFeignSer
 
             @Override
             public R delOutboundThaw(DelOutboundVO delOutboundVO) {
-                return null;
+                return R.convertResultJson(throwable);
             }
 
             @Override
             public R delOutboundFreeze(DelOutboundVO delOutboundVO) {
-                return null;
+                return R.convertResultJson(throwable);
             }
         };
     }

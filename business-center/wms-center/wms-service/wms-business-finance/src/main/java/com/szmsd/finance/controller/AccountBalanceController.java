@@ -33,6 +33,13 @@ public class AccountBalanceController extends FssBaseController {
         return getDataTable(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:list')")
+    @ApiOperation(value = "查询账户余额信息")
+    @PostMapping("/list")
+    public R<List<AccountBalance>> list(@RequestBody AccountBalanceDTO dto) {
+        return R.ok(accountBalanceService.listPage(dto));
+    }
+
     @PreAuthorize("@ss.hasPermi('ExchangeRate:recordListPage')")
     @ApiOperation(value = "分页查询账户余额变动")
     @GetMapping("/recordListPage")
