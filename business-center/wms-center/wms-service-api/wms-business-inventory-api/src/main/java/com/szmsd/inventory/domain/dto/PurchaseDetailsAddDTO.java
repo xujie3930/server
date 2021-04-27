@@ -1,5 +1,6 @@
-package com.szmsd.inventory.domain.vo;
+package com.szmsd.inventory.domain.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
@@ -8,8 +9,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.util.List;
 
 
 /**
@@ -23,8 +22,8 @@ import java.util.List;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(description = "Purchase对象")
-public class PurchaseInfoDetailVO {
+@ApiModel(value = "采购单", description = "Purchase对象")
+public class PurchaseDetailsAddDTO {
 
     private static final long serialVersionUID = 1L;
 
@@ -68,6 +67,11 @@ public class PurchaseInfoDetailVO {
     @ApiModelProperty(value = "附件图片地址")
     @Excel(name = "附件图片地址")
     private String attachmentUrl;
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 
 
 }

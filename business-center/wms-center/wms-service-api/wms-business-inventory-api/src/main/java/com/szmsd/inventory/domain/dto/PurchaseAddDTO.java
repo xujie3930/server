@@ -1,9 +1,11 @@
 package com.szmsd.inventory.domain.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
+import com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -27,9 +29,12 @@ import java.util.List;
 @ApiModel(value = "采购单", description = "Purchase对象")
 public class PurchaseAddDTO {
 
-    @ApiModelProperty(value = "出库后重新上架的新SKU编码")
-    @Excel(name = "出库后重新上架的新SKU编码")
-    private String newSku;
+    private static final long serialVersionUID = 1L;
+
+    @ApiModelProperty(value = "ID")
+    @TableId(value = "id", type = IdType.AUTO)
+    @Excel(name = "ID")
+    private Integer id;
 
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
@@ -39,25 +44,56 @@ public class PurchaseAddDTO {
     @Excel(name = "采购单号")
     private String purchaseNo;
 
-    @ApiModelProperty(value = "申报品名-产品描述")
-    @Excel(name = "申报品名")
-    private String productName;
-
     @ApiModelProperty(value = "已入库数-出库单里的可用库存")
     @Excel(name = "已入库数-出库单里的可用库存")
-    private String availableInventory;
+    private Integer availableInventory;
 
     @ApiModelProperty(value = "采购数量")
     @Excel(name = "采购数量")
-    private String purchaseQuantity;
+    private Integer purchaseQuantity;
 
     @ApiModelProperty(value = "已创建入库单的数量")
     @Excel(name = "已创建入库单的数量")
-    private String quantityInStorageCreated;
+    private Integer quantityInStorageCreated;
 
     @ApiModelProperty(value = "已到仓数量")
     @Excel(name = "已到仓数量")
-    private String arrivalQuantity;
+    private Integer arrivalQuantity;
 
+    @ApiModelProperty(value = "目标仓库code",required = true)
+    @Excel(name = "目标仓库code")
+    private String warehouseCode;
 
+    @ApiModelProperty(value = "目标仓库",required = true)
+    @Excel(name = "目标仓库")
+    private String warehouseName;
+
+    @ApiModelProperty(value = "出库方式编码",required = true)
+    @Excel(name = "出库方式编码")
+    private String orderType;
+
+    @ApiModelProperty(value = "出库方式名",required = true)
+    @Excel(name = "出库方式名")
+    private String orderTypeName;
+
+    @ApiModelProperty(value = "送货方式",required = true)
+    @Excel(name = "送货方式")
+    private String deliveryWayName;
+
+    @ApiModelProperty(value = "送货方式编码",required = true)
+    @Excel(name = "送货方式编码")
+    private String deliveryWay;
+
+    @ApiModelProperty(value = "出库单号",required = true)
+    @Excel(name = "出库单号")
+    private String orderNo;
+    @ApiModelProperty(value = "出库单号",required = true)
+    List<PurchaseDetailsAddDTO> purchaseDetailsAddList;
+    @ApiModelProperty(value = "出库单号",required = true)
+    List<PurchaseStorageDetailsAddDTO> purchaseStorageDetailsAddList;
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }
