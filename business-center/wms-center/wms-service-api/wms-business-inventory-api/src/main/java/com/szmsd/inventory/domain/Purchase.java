@@ -17,7 +17,7 @@ import com.szmsd.common.core.annotation.Excel;
  * </p>
  *
  * @author 11
- * @since 2021-04-25
+ * @since 2021-04-26
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -31,10 +31,6 @@ public class Purchase extends BaseEntity {
     @TableId(value = "id", type = IdType.AUTO)
     @Excel(name = "ID")
     private Integer id;
-
-    @ApiModelProperty(value = "关联的id集合")
-    @Excel(name = "关联的id集合")
-    private String assertId;
 
     @ApiModelProperty(value = "创建人编号")
     @Excel(name = "创建人编号")
@@ -52,16 +48,6 @@ public class Purchase extends BaseEntity {
     @Excel(name = "逻辑删除标识；2-已删除，0-未删除")
     private String delFlag;
 
-    @ApiModelProperty(value = "卖家代码")
-    @Excel(name = "卖家代码")
-    private String sellerCode;
-
-    @ApiModelProperty(value = "出库后重新上架的新SKU编码")
-    @Excel(name = "出库后重新上架的新SKU编码")
-    private String newSku;
-    @ApiModelProperty(value = "申报品名-产品描述")
-    @Excel(name = "申报品名")
-    private String productName;
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
     private String customCode;
@@ -72,19 +58,47 @@ public class Purchase extends BaseEntity {
 
     @ApiModelProperty(value = "已入库数-出库单里的可用库存")
     @Excel(name = "已入库数-出库单里的可用库存")
-    private String availableInventory;
+    private Integer availableInventory;
 
     @ApiModelProperty(value = "采购数量")
     @Excel(name = "采购数量")
-    private String purchaseQuantity;
+    private Integer purchaseQuantity;
 
     @ApiModelProperty(value = "已创建入库单的数量")
     @Excel(name = "已创建入库单的数量")
-    private String quantityInStorageCreated;
+    private Integer quantityInStorageCreated;
 
     @ApiModelProperty(value = "已到仓数量")
     @Excel(name = "已到仓数量")
-    private String arrivalQuantity;
+    private Integer arrivalQuantity;
+
+    @ApiModelProperty(value = "目标仓库code")
+    @Excel(name = "目标仓库code")
+    private String warehouseCode;
+
+    @ApiModelProperty(value = "目标仓库")
+    @Excel(name = "目标仓库")
+    private String warehouseName;
+
+    @ApiModelProperty(value = "出库方式编码")
+    @Excel(name = "出库方式编码")
+    private String orderType;
+
+    @ApiModelProperty(value = "出库方式名")
+    @Excel(name = "出库方式名")
+    private String orderTypeName;
+
+    @ApiModelProperty(value = "送货方式")
+    @Excel(name = "送货方式")
+    private String deliveryWayName;
+
+    @ApiModelProperty(value = "送货方式编码")
+    @Excel(name = "送货方式编码")
+    private String deliveryWay;
+
+    @ApiModelProperty(value = "出库单号")
+    @Excel(name = "出库单号")
+    private String orderNo;
 
 
 }

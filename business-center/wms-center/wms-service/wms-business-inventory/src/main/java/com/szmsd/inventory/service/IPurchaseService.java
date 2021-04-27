@@ -3,10 +3,10 @@ package com.szmsd.inventory.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
-import com.szmsd.inventory.domain.dto.PurchaseInfoAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
+import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public interface IPurchaseService extends IService<Purchase> {
      * @param id 采购单模块ID
      * @return 采购单模块
      */
-    PurchaseInfoDetailVO selectPurchaseByPurchaseNo(String id);
+    PurchaseInfoVO selectPurchaseByPurchaseNo(String id);
 
     /**
      * 查询采购单模块列表
@@ -45,16 +45,10 @@ public interface IPurchaseService extends IService<Purchase> {
      */
     int deletePurchaseByIds(List<String> ids);
 
-    /**
-     * 删除采购单模块信息
-     *
-     * @param id 采购单模块ID
-     * @return 结果
-     */
-    int deletePurchaseById(String id);
 
-    int insertPurchaseBatch(PurchaseInfoAddDTO purchase);
+    int insertPurchaseBatch(PurchaseAddDTO purchase);
 
     List<PurchaseInfoListVO> selectPurchaseListClient(PurchaseQueryDTO purchaseQueryDTO);
+
 }
 
