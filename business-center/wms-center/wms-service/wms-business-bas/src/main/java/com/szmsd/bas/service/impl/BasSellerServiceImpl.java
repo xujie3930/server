@@ -252,6 +252,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             R<ResponseVO> result = htpBasFeignService.createSeller(sellerRequest);
             SysUser user = new SysUser();
             user.setEmail(dto.getInitEmail());
+            if(result==null){
+                //删除表中用户
+                remoteUserService.removeByemail(user);
+                throw new BaseException("wms服务调用失败");
+            }
             if(result.getData()==null){
                 //删除表中用户
                 remoteUserService.removeByemail(user);
@@ -354,21 +359,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             sellerRequest.setIsActive(true);
             ObjectUtil.fillNull(sellerRequest,bas);
             R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
-            if(r.getData()==null){
-                throw new BaseException("传wms失败" + r.getData().getErrors());
-            }else{
-                if(r.getData().getSuccess()==null){
-                    if(r.getData().getErrors()!=null)
-                    {
-                        throw new BaseException("传wms失败" + r.getData().getErrors());
-                    }
-                }else{
-                    if(!r.getData().getSuccess())
-                    {
-                        throw new BaseException("传wms失败" + r.getData().getMessage());
-                    }
-                }
-            }
+            //验证wms
+            toWms(r);
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
             basSellerCertificateService.delBasSellerCertificateByPhysics(basSeller.getSellerCode());
             if(CollectionUtils.isNotEmpty(basSellerInfoDto.getBasSellerCertificateList())) {
@@ -399,21 +391,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                    sellerRequest.setIsActive(activeDto.getIsActive());
                    ObjectUtil.fillNull(sellerRequest, bas);
                    R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
-                   if(r.getData()==null){
-                       throw new BaseException("传wms失败" + r.getData().getErrors());
-                   }else{
-                       if(r.getData().getSuccess()==null){
-                           if(r.getData().getErrors()!=null)
-                           {
-                               throw new BaseException("传wms失败" + r.getData().getErrors());
-                           }
-                       }else{
-                           if(!r.getData().getSuccess())
-                           {
-                               throw new BaseException("传wms失败" + r.getData().getMessage());
-                           }
-                       }
-                   }
+                   //验证wms
+                   toWms(r);
                }
             SysUserDto userDto = new SysUserDto();
             userDto.setUserId(activeDto.getSysId());
@@ -496,6 +475,26 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             return pwd.toString();
 
         }
+    private void toWms(R<ResponseVO> r){
+        if(r==null){
+            throw new BaseException("wms服务调用失败");
+        }
+        if(r.getData()==null){
+            throw new BaseException("传wms失败" + r.getData().getErrors());
+        }else{
+            if(r.getData().getSuccess()==null){
+                if(r.getData().getErrors()!=null)
+                {
+                    throw new BaseException("传wms失败" + r.getData().getErrors());
+                }
+            }else{
+                if(!r.getData().getSuccess())
+                {
+                    throw new BaseException("传wms失败" + r.getData().getMessage());
+                }
+            }
+        }
+    }
 
     }
 

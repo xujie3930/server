@@ -14,8 +14,8 @@ import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
-import com.szmsd.delivery.vo.DelOutboundDetailVO;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
+import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -77,7 +77,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     }
 
     @Override
-    public R delOutboundDeductions(DelOutboundVO dto) {
+    public R delOutboundDeductions(DelOutboundOperationVO dto) {
         ChargeLog chargeLog = this.selectLog(dto.getOrderNo());
         if (chargeLog == null) {
             return R.failed("该单没有冻结余额 orderNo: " + dto.getOrderNo());
@@ -97,8 +97,8 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     }
 
     @Override
-    public R delOutboundFreeze(DelOutboundVO dto) {
-        List<DelOutboundDetailVO> details = dto.getDetails();
+    public R delOutboundFreeze(DelOutboundOperationVO dto) {
+        List<DelOutboundOperationDetailVO> details = dto.getDetails();
         if (CollectionUtils.isEmpty(details)) {
             log.error("calculate() 出库单对应的详情信息未找到");
             return R.failed("出库单的详情信息为空");
@@ -107,7 +107,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         OperationDTO operationDTO = new OperationDTO();
         List<Operation> operations = listPage(operationDTO);
 
-        for (DelOutboundDetailVO vo : details) {
+        for (DelOutboundOperationDetailVO vo : details) {
             Operation operation = operations.stream().filter(value ->
                     value.getWarehouseCode().equals(dto.getWarehouseCode()) && value.getOperationType().equals(dto.getOrderType())
                             && vo.getWeight() > value.getMinimumWeight() && vo.getWeight() <= value.getMaximumWeight()).findAny().orElse(null);
@@ -126,7 +126,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     }
 
-    private ChargeLog setChargeLog(DelOutboundVO dto, Long qty) {
+    private ChargeLog setChargeLog(DelOutboundOperationVO dto, Long qty) {
         ChargeLog chargeLog = new ChargeLog();
         chargeLog.setOrderNo(dto.getOrderNo());
         chargeLog.setOperationType(dto.getOrderType());
@@ -140,7 +140,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     }
 
     @Override
-    public R delOutboundThaw(DelOutboundVO dto) {
+    public R delOutboundThaw(DelOutboundOperationVO dto) {
         ChargeLog chargeLog = this.selectLog(dto.getOrderNo());
         if (chargeLog == null) {
             return R.failed("该单没有冻结余额 orderNo: " + dto.getOrderNo());

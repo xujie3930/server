@@ -353,22 +353,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProduct.setVolume(baseProduct.getInitVolume());
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
+
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-        if(r.getData()==null){
-            throw new BaseException("传wms失败" + r.getData().getErrors());
-        }else{
-            if(r.getData().getSuccess()==null){
-                if(r.getData().getErrors()!=null)
-                {
-                    throw new BaseException("传wms失败" + r.getData().getErrors());
-                }
-            }else{
-                if(!r.getData().getSuccess())
-                {
-                    throw new BaseException("传wms失败" + r.getData().getMessage());
-                }
-            }
-        }
+        //验证wms
+        toWms(r);
         if (CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())) {
             AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProductDto.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
@@ -419,21 +407,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             o.setVolume(o.getInitVolume());
             ProductRequest productRequest = BeanMapperUtil.map(o, ProductRequest.class);
             R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-            if(r.getData()==null){
-                throw new BaseException("传wms失败" + r.getData().getErrors());
-            }else{
-                if(r.getData().getSuccess()==null){
-                    if(r.getData().getErrors()!=null)
-                    {
-                        throw new BaseException("传wms失败" + r.getData().getErrors());
-                    }
-                }else{
-                    if(!r.getData().getSuccess())
-                    {
-                        throw new BaseException("传wms失败" + r.getData().getMessage());
-                    }
-                }
-            }
+            //验证wms
+            toWms(r);
         });
          super.saveBatch(baseProducts);
          return baseProducts;
@@ -461,21 +436,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         }
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-        if(r.getData()==null){
-            throw new BaseException("传wms失败" + r.getData().getErrors());
-        }else{
-            if(r.getData().getSuccess()==null){
-                if(r.getData().getErrors()!=null)
-                {
-                    throw new BaseException("传wms失败" + r.getData().getErrors());
-                }
-            }else{
-                if(!r.getData().getSuccess())
-                {
-                    throw new BaseException("传wms失败" + r.getData().getMessage());
-                }
-            }
-        }
+        //验证wms
+        toWms(r);
         return baseMapper.updateById(baseProductDto);
     }
 
@@ -494,21 +456,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             BaseProduct baseProduct = super.getById(id);
             ObjectUtil.fillNull(productRequest, baseProduct);
             R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-            if(r.getData()==null){
-                throw new BaseException("传wms失败" + r.getData().getErrors());
-            }else{
-                if(r.getData().getSuccess()==null){
-                    if(r.getData().getErrors()!=null)
-                    {
-                        throw new BaseException("传wms失败" + r.getData().getErrors());
-                    }
-                }else{
-                    if(!r.getData().getSuccess())
-                    {
-                        throw new BaseException("传wms失败" + r.getData().getMessage());
-                    }
-                }
-            }
+            //验证wms
+            toWms(r);
         }
         UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper();
         updateWrapper.in("id", ids);
@@ -771,6 +720,27 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         }
         if(!s1.toString().equals("")){
             throw new BaseException(s1.toString());
+        }
+    }
+
+    private void toWms(R<ResponseVO> r){
+        if(r==null){
+            throw new BaseException("wms服务调用失败");
+        }
+        if(r.getData()==null){
+            throw new BaseException("传wms失败" + r.getData().getErrors());
+        }else{
+            if(r.getData().getSuccess()==null){
+                if(r.getData().getErrors()!=null)
+                {
+                    throw new BaseException("传wms失败" + r.getData().getErrors());
+                }
+            }else{
+                if(!r.getData().getSuccess())
+                {
+                    throw new BaseException("传wms失败" + r.getData().getMessage());
+                }
+            }
         }
     }
 
