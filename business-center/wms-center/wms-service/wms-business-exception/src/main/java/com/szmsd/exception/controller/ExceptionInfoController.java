@@ -1,4 +1,5 @@
 package com.szmsd.exception.controller;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.ExceptionInfoQueryDto;
 import com.szmsd.exception.dto.NewExceptionRequest;
@@ -51,6 +52,18 @@ public class ExceptionInfoController extends BaseController{
             List<ExceptionInfo> list = exceptionInfoService.selectExceptionInfoPage(dto);
             return getDataTable(list);
       }
+
+    @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:list')")
+    @GetMapping("/count")
+    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    public R<Integer> count(String sellerCode)
+    {
+        QueryWrapper<ExceptionInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("seller_code",sellerCode);
+        queryWrapper.eq("deal",false);
+         return R.ok(exceptionInfoService.count(queryWrapper));
+
+    }
 
     /**
     * 导出模块列表
