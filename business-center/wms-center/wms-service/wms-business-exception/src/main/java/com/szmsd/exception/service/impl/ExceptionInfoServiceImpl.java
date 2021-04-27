@@ -83,6 +83,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
     public List<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto){
         QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "exception_type", dto.getExceptionType());
+        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "seller_code", dto.getSellerCode());
         QueryWrapperUtil.filterDate(where,"create_time",dto.getCreateTimes());
         if(CollectionUtils.isNotEmpty(dto.getExceptionNos())){
             where.in("exception_no",dto.getExceptionNos());

@@ -41,4 +41,10 @@ public class NewExceptionRequest {
 
     @ApiModelProperty(value = "备注")
     private String remark;
+
+    @ApiModelProperty(value = "客户编码")
+    @NotBlank(message = "客户编码不能为空")
+    private String sellerCode;
+
+
 }
