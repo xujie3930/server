@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.ChargeLogDto;
@@ -30,11 +31,24 @@ public class ChargeLogServiceImpl implements IChargeLogService {
     @Override
     public ChargeLog selectLog(ChargeLogDto chargeLogDto) {
         LambdaQueryWrapper<ChargeLog> query = Wrappers.lambdaQuery();
-        query.eq(ChargeLog::getOrderNo, chargeLogDto.getOrderNo());
-        query.eq(ChargeLog::getOperationPayMethod, chargeLogDto.getOperationPayMethod());
-        query.eq(ChargeLog::getOperationType, chargeLogDto.getOperationType());
-        query.eq(ChargeLog::getWarehouseCode, chargeLogDto.getWarehouseCode());
-        query.eq(ChargeLog::getSuccess, chargeLogDto.getSuccess());
+        if(StringUtils.isNotBlank(chargeLogDto.getOrderNo())) {
+            query.eq(ChargeLog::getOrderNo, chargeLogDto.getOrderNo());
+        }
+        if(StringUtils.isNotBlank(chargeLogDto.getOperationPayMethod())) {
+            query.eq(ChargeLog::getOperationPayMethod, chargeLogDto.getOperationPayMethod());
+        }
+        if(StringUtils.isNotBlank(chargeLogDto.getPayMethod())) {
+            query.eq(ChargeLog::getPayMethod, chargeLogDto.getPayMethod());
+        }
+        if(StringUtils.isNotBlank(chargeLogDto.getOperationType())) {
+            query.eq(ChargeLog::getOperationType, chargeLogDto.getOperationType());
+        }
+        if(StringUtils.isNotBlank(chargeLogDto.getWarehouseCode())) {
+            query.eq(ChargeLog::getWarehouseCode, chargeLogDto.getWarehouseCode());
+        }
+        if(chargeLogDto.getSuccess() != null) {
+            query.eq(ChargeLog::getSuccess, chargeLogDto.getSuccess());
+        }
         return chargeLogMapper.selectOne(query);
     }
 

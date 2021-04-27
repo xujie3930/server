@@ -2,11 +2,7 @@ package com.szmsd.chargerules.runnable;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.chargerules.domain.ChargeLog;
-import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.domain.WarehouseOperation;
-import com.szmsd.chargerules.dto.OperationDTO;
-import com.szmsd.chargerules.enums.OrderTypeEnum;
-import com.szmsd.chargerules.factory.OrderType;
 import com.szmsd.chargerules.factory.OrderTypeFactory;
 import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IOperationService;
@@ -57,36 +53,6 @@ public class RunnableExecute {
 
     @Resource
     private OrderTypeFactory orderTypeFactory;
-
-    /**
-     * 定时任务：普通操作计价扣费；每天12点，23点执行一次
-     */
-//    @Scheduled(cron = "0 0 13,23 * * *")
-//    @Scheduled(cron = "0 0/5 * * * *")
-    public void executeOperation() {
-        log.info("executeOperation() start...");
-        RLock lock = redissonClient.getLock("executeOperation");
-        try {
-            if (lock.tryLock()) {
-                OrderTypeEnum[] types = OrderTypeEnum.values();
-                OperationDTO operationDTO = new OperationDTO();
-                for (OrderTypeEnum type : types) {
-                    operationDTO.setOrderType(type.getNameEn());
-                    // 查询出每个订单类型对应的所有操作类型
-                    List<Operation> operations = operationService.listPage(operationDTO);
-                    for (Operation operation : operations) {
-                        OrderType factory = orderTypeFactory.getFactory(type.getNameEn());
-                        factory.operationPay(operation);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("executeOperation() execute error: ", e);
-        } finally {
-            if (lock.isLocked()) lock.unlock();
-        }
-        log.info("executeOperation() end...");
-    }
 
     /**
      * 定时任务：储存仓租计价扣费；每周日晚上8点执行
