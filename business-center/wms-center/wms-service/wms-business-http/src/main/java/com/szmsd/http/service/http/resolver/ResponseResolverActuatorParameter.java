@@ -7,12 +7,12 @@ import com.szmsd.http.enums.HttpUrlType;
  * @author zhangyuyuan
  * @date 2021-04-27 16:11
  */
-public class ResponseResovlerActuatorParameter implements ActuatorParameter {
+public class ResponseResolverActuatorParameter implements ActuatorParameter {
 
     private HttpUrlType httpUrlType;
     private HttpResponseBody httpResponseBody;
 
-    public ResponseResovlerActuatorParameter(HttpUrlType httpUrlType, HttpResponseBody httpResponseBody) {
+    public ResponseResolverActuatorParameter(HttpUrlType httpUrlType, HttpResponseBody httpResponseBody) {
         this.httpUrlType = httpUrlType;
         this.httpResponseBody = httpResponseBody;
     }
