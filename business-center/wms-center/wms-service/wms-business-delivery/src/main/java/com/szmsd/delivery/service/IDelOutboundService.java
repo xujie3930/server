@@ -11,6 +11,7 @@ import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -241,6 +242,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return int
      */
     int handler(DelOutboundHandlerDto dto);
+
+    /**
+     * 获取标签
+     *
+     * @param response response
+     * @param dto      dto
+     */
+    void label(HttpServletResponse response, DelOutboundLabelDto dto);
 
     /**
      * sku导入

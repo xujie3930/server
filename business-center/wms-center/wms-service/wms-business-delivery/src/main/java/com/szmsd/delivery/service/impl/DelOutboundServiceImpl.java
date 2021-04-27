@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.impl;
 
+import cn.hutool.core.io.IoUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -49,6 +50,7 @@ import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -287,8 +295,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutbound.setOrderNo(orderNo = ("CK" + delOutbound.getCustomCode() + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
             // 冻结操作费用
             List<DelOutboundDetailDto> details = dto.getDetails();
-            DelOutboundVO delOutboundVO = this.builderFreezeOperationDelOutboundVO(delOutbound, details);
-            this.freezeOperation(delOutboundVO);
+            DelOutboundOperationVO delOutboundOperationVO = this.builderFreezeOperationDelOutboundVO(delOutbound, details);
+            this.freezeOperation(delOutboundOperationVO);
             stepValue |= 0x01;
             // 冻结库存
             this.freeze(delOutbound.getOrderType(), orderNo, delOutbound.getWarehouseCode(), details);
@@ -346,32 +354,32 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param details     details
      * @return DelOutboundVO
      */
-    private DelOutboundVO builderFreezeOperationDelOutboundVO(DelOutbound delOutbound, List<DelOutboundDetailDto> details) {
-        DelOutboundVO delOutboundVO = new DelOutboundVO();
-        delOutboundVO.setOrderType(delOutbound.getOrderType());
-        delOutboundVO.setOrderNo(delOutbound.getOrderNo());
-        delOutboundVO.setWarehouseCode(delOutbound.getWarehouseCode());
-        delOutboundVO.setCustomCode(delOutbound.getCustomCode());
+    private DelOutboundOperationVO builderFreezeOperationDelOutboundVO(DelOutbound delOutbound, List<DelOutboundDetailDto> details) {
+        DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+        delOutboundOperationVO.setOrderType(delOutbound.getOrderType());
+        delOutboundOperationVO.setOrderNo(delOutbound.getOrderNo());
+        delOutboundOperationVO.setWarehouseCode(delOutbound.getWarehouseCode());
+        delOutboundOperationVO.setCustomCode(delOutbound.getCustomCode());
         // 处理明细
-        List<DelOutboundDetailVO> detailVOList = new ArrayList<>(details.size());
+        List<DelOutboundOperationDetailVO> detailVOList = new ArrayList<>(details.size());
         for (DelOutboundDetailDto detail : details) {
-            DelOutboundDetailVO detailVO = new DelOutboundDetailVO();
+            DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
             detailVO.setSku(detail.getSku());
             detailVO.setQty(detail.getQty());
             detailVO.setWeight(detail.getWeight());
             detailVOList.add(detailVO);
         }
-        delOutboundVO.setDetails(detailVOList);
-        return delOutboundVO;
+        delOutboundOperationVO.setDetails(detailVOList);
+        return delOutboundOperationVO;
     }
 
     /**
      * 冻结操作费
      *
-     * @param delOutboundVO delOutboundVO
+     * @param delOutboundOperationVO delOutboundOperationVO
      */
-    private void freezeOperation(DelOutboundVO delOutboundVO) {
-        R<?> r = this.operationFeignService.delOutboundFreeze(delOutboundVO);
+    private void freezeOperation(DelOutboundOperationVO delOutboundOperationVO) {
+        R<?> r = this.operationFeignService.delOutboundFreeze(delOutboundOperationVO);
         if (null == r || Constants.SUCCESS != r.getCode()) {
             throw new CommonException("1900", "冻结操作费用失败");
         }
@@ -380,17 +388,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     /**
      * 取消原本的冻结费用，并且重启冻结
      *
-     * @param orgDelOutboundVO orgDelOutboundVO
-     * @param newDelOutboundVO newDelOutboundVO
+     * @param orgDelOutboundOperationVO orgDelOutboundOperationVO
+     * @param newDelOutboundOperationVO newDelOutboundOperationVO
      */
-    private void unfreezeAndFreezeOperation(DelOutboundVO orgDelOutboundVO, DelOutboundVO newDelOutboundVO) {
+    private void unfreezeAndFreezeOperation(DelOutboundOperationVO orgDelOutboundOperationVO, DelOutboundOperationVO newDelOutboundOperationVO) {
         // 取消冻结
-        R<?> ur = this.operationFeignService.delOutboundThaw(orgDelOutboundVO);
+        R<?> ur = this.operationFeignService.delOutboundThaw(orgDelOutboundOperationVO);
         if (null == ur || Constants.SUCCESS != ur.getCode()) {
             throw new CommonException("1901", "取消冻结操作费用失败");
         }
         // 重新冻结
-        R<?> r = this.operationFeignService.delOutboundFreeze(newDelOutboundVO);
+        R<?> r = this.operationFeignService.delOutboundFreeze(newDelOutboundOperationVO);
         if (null == r || Constants.SUCCESS != r.getCode()) {
             throw new CommonException("1900", "冻结操作费用失败");
         }
@@ -402,9 +410,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param orderNo orderNo
      */
     private void unfreezeOperation(String orderNo) {
-        DelOutboundVO delOutboundVO = new DelOutboundVO();
-        delOutboundVO.setOrderNo(orderNo);
-        R<?> ur = this.operationFeignService.delOutboundThaw(delOutboundVO);
+        DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+        delOutboundOperationVO.setOrderNo(orderNo);
+        R<?> ur = this.operationFeignService.delOutboundThaw(delOutboundOperationVO);
         if (null == ur || Constants.SUCCESS != ur.getCode()) {
             throw new CommonException("1901", "取消冻结操作费用失败");
         }
@@ -426,23 +434,43 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param dto         dto
      */
     private void countPackageSize(DelOutbound delOutbound, DelOutboundDto dto) {
-        double weight = 0.0;
-        List<DelOutboundDetailDto> details = dto.getDetails();
-        List<PackageInfo> packageInfoList = new ArrayList<>();
-        long boxNumber = 0L;
-        for (DelOutboundDetailDto detail : details) {
-            weight += Utils.defaultValue(detail.getWeight());
-            packageInfoList.add(new PackageInfo(detail.getLength(), detail.getWidth(), detail.getHeight()));
-            boxNumber += Utils.defaultValue(detail.getQty());
+        // 转运特殊处理
+        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+            double length = Utils.defaultValue(dto.getLength());
+            double width = Utils.defaultValue(dto.getWidth());
+            double height = Utils.defaultValue(dto.getHeight());
+            double weight = Utils.defaultValue(dto.getWeight());
+            List<DelOutboundDetailDto> details = dto.getDetails();
+            long boxNumber = 0L;
+            for (DelOutboundDetailDto detail : details) {
+                boxNumber += Utils.defaultValue(detail.getQty());
+            }
+            delOutbound.setLength(length);
+            delOutbound.setWidth(width);
+            delOutbound.setHeight(height);
+            delOutbound.setWeight(weight);
+            // 规格，长*宽*高
+            delOutbound.setSpecifications(length + "*" + width + "*" + height);
+            delOutbound.setBoxNumber(boxNumber);
+        } else {
+            double weight = 0.0;
+            List<DelOutboundDetailDto> details = dto.getDetails();
+            List<PackageInfo> packageInfoList = new ArrayList<>();
+            long boxNumber = 0L;
+            for (DelOutboundDetailDto detail : details) {
+                weight += Utils.defaultValue(detail.getWeight());
+                packageInfoList.add(new PackageInfo(detail.getLength(), detail.getWidth(), detail.getHeight()));
+                boxNumber += Utils.defaultValue(detail.getQty());
+            }
+            delOutbound.setWeight(weight);
+            PackageInfo packageInfo = PackageUtil.count(packageInfoList);
+            delOutbound.setLength(packageInfo.getLength());
+            delOutbound.setWidth(packageInfo.getWidth());
+            delOutbound.setHeight(packageInfo.getHeight());
+            // 规格，长*宽*高
+            delOutbound.setSpecifications(packageInfo.getLength() + "*" + packageInfo.getWidth() + "*" + packageInfo.getHeight());
+            delOutbound.setBoxNumber(boxNumber);
         }
-        delOutbound.setWeight(weight);
-        PackageInfo packageInfo = PackageUtil.count(packageInfoList);
-        delOutbound.setLength(packageInfo.getLength());
-        delOutbound.setWidth(packageInfo.getWidth());
-        delOutbound.setHeight(packageInfo.getHeight());
-        // 规格，长*宽*高
-        delOutbound.setSpecifications(packageInfo.getLength() + "*" + packageInfo.getWidth() + "*" + packageInfo.getHeight());
-        delOutbound.setBoxNumber(boxNumber);
     }
 
     private String buildShipmentType(DelOutboundDto dto) {
@@ -538,13 +566,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 查询现有的库存
         List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
         // 构建冻结操作费的参数
-        DelOutboundVO newDelOutboundVO = this.builderFreezeOperationDelOutboundVO(delOutbound, details);
+        DelOutboundOperationVO newDelOutboundOperationVO = this.builderFreezeOperationDelOutboundVO(delOutbound, details);
         String orderType = delOutbound.getOrderType();
         try {
             // 取消冻结，再冻结
-            DelOutboundVO orgDelOutboundVO = new DelOutboundVO();
-            orgDelOutboundVO.setOrderNo(orderNo);
-            this.unfreezeAndFreezeOperation(orgDelOutboundVO, newDelOutboundVO);
+            DelOutboundOperationVO orgDelOutboundOperationVO = new DelOutboundOperationVO();
+            orgDelOutboundOperationVO.setOrderNo(orderNo);
+            this.unfreezeAndFreezeOperation(orgDelOutboundOperationVO, newDelOutboundOperationVO);
             stepValue |= 0x01;
             // 处理库存
             this.unFreezeAndFreeze(orderType, orderNo, warehouseCode, detailList, details);
@@ -569,7 +597,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             logger.error(e.getMessage(), e);
             // 回滚操作
             if (hitKey(stepValue, 0x01) && null != orderNo) {
-                this.freezeOperation(newDelOutboundVO);
+                this.freezeOperation(newDelOutboundOperationVO);
             }
             if (hitKey(stepValue, 0x02)) {
                 this.freezeNoWrapper(orderType, orderNo, warehouseCode, detailList);
@@ -1039,6 +1067,40 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             result = result + this.delOutboundAsyncService.shipmentPacking(id);
         }
         return result;
+    }
+
+    @Override
+    public void label(HttpServletResponse response, DelOutboundLabelDto dto) {
+        DelOutbound delOutbound = this.getById(dto.getId());
+        if (null == delOutbound) {
+            throw new CommonException("999", "单据不存在");
+        }
+        if (StringUtils.isEmpty(delOutbound.getShipmentOrderNumber())) {
+            throw new CommonException("999", "未获取承运商标签");
+        }
+        String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+        File labelFile = new File(pathname);
+        if (!labelFile.exists()) {
+            throw new CommonException("999", "标签文件不存在");
+        }
+        ServletOutputStream outputStream = null;
+        InputStream inputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            //response为HttpServletResponse对象
+            response.setContentType("application/pdf;charset=utf-8");
+            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition", "attachment;filename=" + delOutbound.getShipmentOrderNumber() + ".pdf");
+            inputStream = new FileInputStream(labelFile);
+            IOUtils.copy(inputStream, outputStream);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new CommonException("999", "读取标签文件失败");
+        } finally {
+            IoUtil.flush(outputStream);
+            IoUtil.close(outputStream);
+            IoUtil.close(inputStream);
+        }
     }
 
     @Override

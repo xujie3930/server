@@ -1,5 +1,7 @@
 package com.szmsd.bas.constant;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,6 +45,9 @@ public final class ShipmentType {
      * @return String
      */
     public static String highest(Collection<String> collections) {
+        if (CollectionUtils.isEmpty(collections)) {
+            return GENERAL_CARGO;
+        }
         return get(collections, new String[]{BATTERY, LIQUID, POWDER, MAGNET}, GENERAL_CARGO);
     }
 
@@ -54,6 +59,9 @@ public final class ShipmentType {
      * @return String
      */
     public static String lowest(Collection<String> collections) {
+        if (CollectionUtils.isEmpty(collections)) {
+            return BATTERY;
+        }
         return get(collections, new String[]{GENERAL_CARGO, MAGNET, POWDER, LIQUID}, BATTERY);
     }
 
