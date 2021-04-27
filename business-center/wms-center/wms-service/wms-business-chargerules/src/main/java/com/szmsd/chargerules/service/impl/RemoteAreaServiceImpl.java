@@ -12,6 +12,7 @@ import com.szmsd.http.dto.RemoteAreaTemplateIdCriteria;
 import com.szmsd.http.dto.RemoteAreaTemplateSearchCriteria;
 import com.szmsd.http.vo.ImportResult;
 import com.szmsd.http.vo.RemoteAreaTemplate;
+import com.szmsd.http.vo.ResponseVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,6 +53,7 @@ public class RemoteAreaServiceImpl implements IRemoteAreaService {
     @Override
     public ImportResult importFile(MultipartFile file) {
         R<ImportResult> importResultR = htpRemoteAreaTemplateFeignService.importFile(file);
+        ResponseVO.resultAssert(importResultR, "导入地址库模板");
         return importResultR.getData();
     }
 

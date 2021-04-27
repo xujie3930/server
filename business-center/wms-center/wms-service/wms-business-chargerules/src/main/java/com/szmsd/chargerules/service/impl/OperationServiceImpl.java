@@ -5,17 +5,19 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.domain.Operation;
+import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.dto.OperationDTO;
-import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.chargerules.mapper.OperationMapper;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IOperationService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
+import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.enums.HttpRechargeConstants;
@@ -74,76 +76,96 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return operationMapper.selectById(id);
     }
 
-    public Operation queryDetails(OperationDTO dto) {
-        LambdaQueryWrapper<Operation> query = Wrappers.lambdaQuery();
-        if (StringUtils.isNotBlank(dto.getOrderType())) {
-            query.eq(Operation::getOrderType, dto.getOrderType());
-        }
-        if (StringUtils.isNotBlank(dto.getOperationType())) {
-            query.eq(Operation::getOperationType, dto.getOperationType());
-        }
-        query.gt(Operation::getMinimumWeight, dto.getWeight());
-        query.le(Operation::getMaximumWeight, dto.getWeight());
-
-        return operationMapper.selectOne(query);
-    }
-
-
     @Override
     public R delOutboundDeductions(DelOutboundVO dto) {
+        ChargeLog chargeLog = this.selectLog(dto.getOrderNo());
+        if (chargeLog == null) {
+            return R.failed("该单没有冻结余额 orderNo: " + dto.getOrderNo());
+        }
+        chargeLog.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS.name());
+        CustPayDTO custPayDTO = setCustPayDto(chargeLog);
+        return payService.pay(custPayDTO, chargeLog);
+    }
+
+    private ChargeLog selectLog(String orderNo) {
+        ChargeLogDto chargeLogDto = new ChargeLogDto();
+        chargeLogDto.setOrderNo(orderNo);
+        chargeLogDto.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE.name());
+        chargeLogDto.setOperationPayMethod(BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName());
+        chargeLogDto.setSuccess(true);
+        return chargeLogService.selectLog(chargeLogDto);
+    }
+
+    @Override
+    public R delOutboundFreeze(DelOutboundVO dto) {
         List<DelOutboundDetailVO> details = dto.getDetails();
         if (CollectionUtils.isEmpty(details)) {
             log.error("calculate() 出库单对应的详情信息未找到");
             return R.failed("出库单的详情信息为空");
         }
 
-        // 查询收费规则
-        OperationDTO operationDTO = new OperationDTO(dto.getOrderType(), OrderTypeEnum.Shipment.name(), dto.getWeight());
-        Operation operation = queryDetails(operationDTO);
-        if(operation == null) {
-            log.error("orderType: {} weight: {}",dto.getOrderType(),dto.getWeight());
-            return R.failed("未找到收费配置");
-        }
+        OperationDTO operationDTO = new OperationDTO();
+        List<Operation> operations = listPage(operationDTO);
 
-        for (DelOutboundDetailVO detail : details) {
-            int qty = detail.getQty().intValue();
+        for (DelOutboundDetailVO vo : details) {
+            Operation operation = operations.stream().filter(value ->
+                    value.getWarehouseCode().equals(dto.getWarehouseCode()) && value.getOperationType().equals(dto.getOrderType())
+                            && vo.getWeight() > value.getMinimumWeight() && vo.getWeight() <= value.getMaximumWeight()).findAny().orElse(null);
+            if (operation == null) {
+                log.error("calculate() 未找到业务操作的收费配置");
+                return R.failed("未找到业务操作的收费配置");
+            }
+            Long qty = vo.getQty();
             BigDecimal amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), qty);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
-            ChargeLog chargeLog = new ChargeLog(dto.getOrderNo(), dto.getOrderType(), dto.getWarehouseCode(), qty);
-            CustPayDTO custPayDTO = setCustPayDto(dto, amount, chargeLog);
-            payService.pay(custPayDTO, chargeLog);
+            ChargeLog chargeLog = setChargeLog(dto, qty);
+            CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), HttpRechargeConstants.RechargeCurrencyCode.CNY.name(), dto.getOrderNo(), amount);
+            payService.freezeBalance(cusFreezeBalanceDTO, chargeLog);
         }
         return R.ok();
 
     }
 
-    @Override
-    public R delOutboundFreeze(DelOutboundVO delOutboundVO) {
-        return R.ok();
+    private ChargeLog setChargeLog(DelOutboundVO dto, Long qty) {
+        ChargeLog chargeLog = new ChargeLog();
+        chargeLog.setOrderNo(dto.getOrderNo());
+        chargeLog.setOperationType(dto.getOrderType());
+        DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(dto.getOrderType());
+        if (delOutboundOrderTypeEnum != null) chargeLog.setOperationType(delOutboundOrderTypeEnum.getName());
+        chargeLog.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE.name());
+        chargeLog.setOperationPayMethod(BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName());
+        chargeLog.setWarehouseCode(dto.getWarehouseCode());
+        chargeLog.setQty(qty);
+        return chargeLog;
     }
 
     @Override
-    public R delOutboundThaw(DelOutboundVO delOutboundVO) {
-        return R.ok();
+    public R delOutboundThaw(DelOutboundVO dto) {
+        ChargeLog chargeLog = this.selectLog(dto.getOrderNo());
+        if (chargeLog == null) {
+            return R.failed("该单没有冻结余额 orderNo: " + dto.getOrderNo());
+        }
+        chargeLog.setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
+        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(chargeLog.getCustomCode(), HttpRechargeConstants.RechargeCurrencyCode.CNY.name(), chargeLog.getOrderNo(), chargeLog.getAmount());
+        return payService.thawBalance(cusFreezeBalanceDTO, chargeLog);
     }
 
 
-    private CustPayDTO setCustPayDto(DelOutboundVO dto, BigDecimal amount, ChargeLog chargeLog) {
+    private CustPayDTO setCustPayDto(ChargeLog chargeLog) {
         CustPayDTO custPayDTO = new CustPayDTO();
         List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>();
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
         accountSerialBillDTO.setChargeCategory("操作费");
-        accountSerialBillDTO.setChargeType(dto.getOrderType());
-        accountSerialBillDTO.setRemark(dto.getRemark());
-        accountSerialBillDTO.setAmount(amount);
+        accountSerialBillDTO.setChargeType(chargeLog.getOperationType());
+        accountSerialBillDTO.setAmount(chargeLog.getAmount());
         accountSerialBillDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
         serialBillInfoList.add(accountSerialBillDTO);
-        accountSerialBillDTO.setWarehouseCode(dto.getWarehouseCode());
-        custPayDTO.setCusCode(dto.getCustomCode());
+        accountSerialBillDTO.setWarehouseCode(chargeLog.getWarehouseCode());
+        custPayDTO.setCusCode(chargeLog.getCustomCode());
         custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
         custPayDTO.setPayMethod(BillEnum.PayMethod.BUSINESS_OPERATE);
         custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
-        custPayDTO.setAmount(amount);
+        custPayDTO.setAmount(chargeLog.getAmount());
         custPayDTO.setNo(chargeLog.getOrderNo());
         custPayDTO.setSerialBillInfoList(serialBillInfoList);
         return custPayDTO;

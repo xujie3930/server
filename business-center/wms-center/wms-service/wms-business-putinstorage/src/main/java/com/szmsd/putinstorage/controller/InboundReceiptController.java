@@ -5,12 +5,14 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptExportVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
@@ -62,9 +64,9 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @PostMapping("/receipt/saveOrUpdate")
     @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
-    public R saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
-        iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
-        return R.ok();
+    public R<InboundReceiptInfoVO> saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
+        InboundReceiptInfoVO info = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
+        return R.ok(info);
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
@@ -165,6 +167,15 @@ public class InboundReceiptController extends BaseController {
     public R delete(@PathVariable("warehouseNo") String warehouseNo) {
         iInboundReceiptService.delete(warehouseNo);
         return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:export')")
+    @PostMapping("/export")
+    @ApiOperation(value = "入库单导出", notes = "入库管理 - 导出")
+    public void export(@RequestBody InboundReceiptQueryDTO queryDTO, HttpServletResponse response) {
+        List<InboundReceiptExportVO> list = iInboundReceiptService.selectExport(queryDTO);
+        ExcelUtil<InboundReceiptExportVO> util = new ExcelUtil<>(InboundReceiptExportVO.class);
+        util.exportExcel(response, list, "入库单导出" + DateUtils.dateTimeNow());
     }
 
 }

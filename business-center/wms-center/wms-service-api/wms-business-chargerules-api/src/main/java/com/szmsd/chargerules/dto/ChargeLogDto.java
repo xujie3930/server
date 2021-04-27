@@ -25,7 +25,10 @@ public class ChargeLogDto extends BaseEntity {
     @ApiModelProperty(value = "币种名称")
     private String currencyCode;
 
-    @ApiModelProperty(value = "交易类型")
+    @ApiModelProperty(value = "操作支付类型")
+    private String operationPayMethod;
+
+    @ApiModelProperty(value = "支付类型")
     private String payMethod;
 
     @ApiModelProperty(value = "操作类型")
@@ -43,9 +46,9 @@ public class ChargeLogDto extends BaseEntity {
     @ApiModelProperty(value = "是否成功")
     private Boolean success;
 
-    public ChargeLogDto(String orderNo, String payMethod, String operationType, String warehouseCode, Boolean success) {
+    public ChargeLogDto(String orderNo, String operationPayMethod, String operationType, String warehouseCode, Boolean success) {
         this.orderNo = orderNo;
-        this.payMethod = payMethod;
+        this.operationPayMethod = operationPayMethod;
         this.operationType = operationType;
         this.warehouseCode = warehouseCode;
         this.success = success;

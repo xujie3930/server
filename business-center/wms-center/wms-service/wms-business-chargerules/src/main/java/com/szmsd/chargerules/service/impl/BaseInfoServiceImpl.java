@@ -148,11 +148,11 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         }
         if(SpecialOperationStatusEnum.PASS.getStatus().equals(basSpecialOperation.getStatus())) {
             BigDecimal baseAmount = payService.calculate(specialOperation.getFirstPrice(),
-                    specialOperation.getNextPrice(), basSpecialOperation.getQty());
+                    specialOperation.getNextPrice(), basSpecialOperation.getQty().longValue());
             BigDecimal amount = baseAmount.multiply(new BigDecimal(basSpecialOperation.getCoefficient()));
 
             //调用扣费接口扣费
-            ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType(), basSpecialOperation.getWarehouseCode(),basSpecialOperation.getQty());
+            ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType(), basSpecialOperation.getWarehouseCode(),basSpecialOperation.getQty().longValue());
             CustPayDTO custPayDTO = setCustPayDto(customCode,amount,basSpecialOperation);
             R r = payService.pay(custPayDTO, chargeLog);
             if (r.getCode() != 200) {

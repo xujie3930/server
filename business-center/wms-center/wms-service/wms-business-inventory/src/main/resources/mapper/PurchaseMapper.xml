@@ -9,21 +9,39 @@
         <result column="update_by_name" property="updateByName"/>
         <result column="update_time" property="updateTime"/>
         <result column="remark" property="remark"/>
-        <result column="assert_id" property="assertId"/>
         <result column="create_by" property="createBy"/>
         <result column="update_by" property="updateBy"/>
         <result column="version" property="version"/>
         <result column="del_flag" property="delFlag"/>
-        <result column="seller_code" property="sellerCode"/>
-        <result column="new_sku" property="newSku"/>
         <result column="custom_code" property="customCode"/>
         <result column="purchase_no" property="purchaseNo"/>
         <result column="available_inventory" property="availableInventory"/>
         <result column="purchase_quantity" property="purchaseQuantity"/>
+        <result column="remaining_purchase_quantity" property="remainingPurchaseQuantity"/>
         <result column="quantity_in_storage_created" property="quantityInStorageCreated"/>
         <result column="arrival_quantity" property="arrivalQuantity"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_name" property="warehouseName"/>
+        <result column="order_type" property="orderType"/>
+        <result column="order_type_name" property="orderTypeName"/>
+        <result column="delivery_way_name" property="deliveryWayName"/>
+        <result column="delivery_way" property="deliveryWay"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="vat" property="vat"/>
+        <result column="warehouse_category_name" property="warehouseCategoryName"/>
+        <result column="warehouse_category_code" property="warehouseCategoryCode"/>
     </resultMap>
-
+    <resultMap id="selectPurchaseByPurchaseNoMap" type="com.szmsd.inventory.domain.vo.PurchaseInfoVO">
+        <id column="id" property="id"/>
+        <collection column="id" property="purchaseInfoDetailList"
+                    ofType="com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO"
+                    select="com.szmsd.inventory.mapper.PurchaseDetailsMapper.selectPurchaseInfoDetailListByAssId"
+        />
+        <collection column="id" property="purchaseStorageDetailsList"
+                    ofType="com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO"
+                    select="com.szmsd.inventory.mapper.PurchaseStorageDetailsMapper.selectPurchaseStorageDetailsListByAssId"
+        />
+    </resultMap>
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         create_by_name,
@@ -31,20 +49,12 @@
                 update_by_name,
                 update_time,
                 remark,
-                product_name,
-            id, assert_id, create_by, update_by, version, del_flag, seller_code, new_sku, custom_code, purchase_no, available_inventory, purchase_quantity, quantity_in_storage_created, arrival_quantity
+            id, create_by, update_by, version, del_flag, custom_code, purchase_no, available_inventory, purchase_quantity, remaining_purchase_quantity, quantity_in_storage_created, arrival_quantity, warehouse_code, warehouse_name, order_type, order_type_name, delivery_way_name, delivery_way, order_no, vat, warehouse_category_name, warehouse_category_code
     </sql>
 
     <select id="selectPurchaseList" resultType="com.szmsd.inventory.domain.vo.PurchaseInfoListVO">
         SELECT
-        SUM(available_inventory) AS available_inventory,
-        SUM(purchase_quantity) AS purchase_quantity,
-        SUM(quantity_in_storage_created) AS quantity_in_storage_created,
-        SUM(arrival_quantity) AS arrival_quantity,
-        custom_code,
-        purchase_no,
-        create_time,
-        id
+        <include refid="Base_Column_List"/>
         FROM `purchase`
         <where>
             <if test="cm.customCodeList != null and cm.customCodeList.size() > 0">
@@ -63,7 +73,13 @@
                 AND create_time BETWEEN #{cm.createTimeStart} AND #{cm.createTimeEnd}
             </if>
         </where>
-        GROUP BY (purchase_no)
         ORDER BY id DESC
+    </select>
+
+    <select id="selectPurchaseByPurchaseNo" resultType="com.szmsd.inventory.domain.vo.PurchaseInfoVO">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM purchase
+        WHERE purchase_no = #{purchaseNo};
     </select>
 </mapper>

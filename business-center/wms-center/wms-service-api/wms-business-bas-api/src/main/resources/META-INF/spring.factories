@@ -8,6 +8,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.bas.api.factory.BasePackingFeignFallback,\
   com.szmsd.bas.api.factory.BasWarehouseFeignFallback,\
   com.szmsd.bas.api.factory.BasSellerFeignFallback,\
-  com.szmsd.bas.plugin.BasWarehouseCommonPlugin
+  com.szmsd.bas.plugin.BasWarehouseCommonPlugin,\
+  com.szmsd.bas.plugin.BasProductCommonPlugin
 
   

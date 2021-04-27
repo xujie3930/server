@@ -31,7 +31,10 @@ public class ChargeLog extends BaseEntity {
     @ApiModelProperty(value = "币种名称")
     private String currencyCode;
 
-    @ApiModelProperty(value = "交易类型")
+    @ApiModelProperty(value = "操作支付类型")
+    private String operationPayMethod;
+
+    @ApiModelProperty(value = "支付类型")
     private String payMethod;
 
     @ApiModelProperty(value = "操作类型")
@@ -47,7 +50,7 @@ public class ChargeLog extends BaseEntity {
     private BigDecimal amount;
 
     @ApiModelProperty(value = "数量")
-    private Integer qty;
+    private Long qty;
 
     @ApiModelProperty(value = "是否成功")
     private Boolean success;
@@ -70,7 +73,7 @@ public class ChargeLog extends BaseEntity {
         this.warehouseCode = warehouseCode;
     }
 
-    public ChargeLog(String orderNo, String operationType, String warehouseCode, Integer qty) {
+    public ChargeLog(String orderNo, String operationType, String warehouseCode, Long qty) {
         this.operationType = operationType;
         this.orderNo = orderNo;
         this.warehouseCode = warehouseCode;

@@ -1,15 +1,8 @@
 package com.szmsd.finance.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.szmsd.finance.domain.FssBaseEntity;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -57,7 +50,7 @@ public class PreRechargeDTO {
     private String paymentVoucher;
 
     @ApiModelProperty(value = "审核状态(默认0=未审核，1=审核，2=审核未通过)")
-    private String verifyStatus="0";
+    private String verifyStatus;
 
     @ApiModelProperty(value = "审核备注")
     private String verifyRemark;

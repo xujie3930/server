@@ -15,6 +15,9 @@ public class InventorySkuQueryDTO {
     @ApiModelProperty(value = "主键ID", hidden = true)
     private Long id;
 
+    @ApiModelProperty(value = "主键ID集合")
+    private List<Long> ids;
+
     @ApiModelProperty(value = "仓库编码")
     private String warehouseCode;
 

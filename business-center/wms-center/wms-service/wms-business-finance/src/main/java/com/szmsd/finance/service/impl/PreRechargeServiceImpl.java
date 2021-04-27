@@ -57,7 +57,7 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
         if(StringUtils.isNotEmpty(dto.getEndTime())){
             queryWrapper.le(PreRecharge::getRemittanceTime,dto.getEndTime());
         }
-        queryWrapper.orderByDesc(PreRecharge::getCreateTime);
+        queryWrapper.orderByAsc(PreRecharge::getVerifyStatus).orderByDesc(PreRecharge::getCreateTime);
         return preRechargeMapper.listPage(queryWrapper);
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "ImportResult", description = "数据导入的结果")
-public class ImportResult {
+public class ImportResult extends ResponseVO {
 
     @ApiModelProperty("数据导入成功条数")
     private Integer successNumber;
