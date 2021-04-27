@@ -33,11 +33,11 @@
     </resultMap>
     <resultMap id="selectPurchaseByPurchaseNoMap" type="com.szmsd.inventory.domain.vo.PurchaseInfoVO">
         <id column="id" property="id"/>
-        <collection column="id" property="purchaseInfoDetailList"
+        <collection column="id" property="purchaseDetailsAddList"
                     ofType="com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO"
                     select="com.szmsd.inventory.mapper.PurchaseDetailsMapper.selectPurchaseInfoDetailListByAssId"
         />
-        <collection column="id" property="purchaseStorageDetailsList"
+        <collection column="id" property="purchaseStorageDetailsAddList"
                     ofType="com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO"
                     select="com.szmsd.inventory.mapper.PurchaseStorageDetailsMapper.selectPurchaseStorageDetailsListByAssId"
         />
