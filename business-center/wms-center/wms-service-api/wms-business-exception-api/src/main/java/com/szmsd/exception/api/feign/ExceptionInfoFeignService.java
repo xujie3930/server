@@ -18,4 +18,7 @@ public interface ExceptionInfoFeignService {
 
     @PostMapping(value = "/exception/info/process")
     R processException(@RequestBody ProcessExceptionRequest processExceptionRequest);
+
+    @PostMapping(value = "/exception/info/count")
+    R<Integer> countException(@RequestBody String sellerCode);
 }

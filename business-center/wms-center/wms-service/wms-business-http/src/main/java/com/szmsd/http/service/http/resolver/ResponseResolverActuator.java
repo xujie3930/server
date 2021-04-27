@@ -25,7 +25,7 @@ public class ResponseResolverActuator implements Actuator {
         if (null == actuatorParameter) {
             return false;
         }
-        ResponseResovlerActuatorParameter parameter = (ResponseResovlerActuatorParameter) actuatorParameter;
+        ResponseResolverActuatorParameter parameter = (ResponseResolverActuatorParameter) actuatorParameter;
         HttpUrlType httpUrlType = parameter.getHttpUrlType();
         HttpResponseBody httpResponseBody = parameter.getHttpResponseBody();
         if (null == httpUrlType || null == httpResponseBody) {
