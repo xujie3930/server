@@ -16,8 +16,12 @@ import com.szmsd.http.config.inner.url.UrlConfig;
 import com.szmsd.http.domain.HtpUrlGroup;
 import com.szmsd.http.enums.HttpUrlType;
 import com.szmsd.http.service.IHtpConfigService;
+import com.szmsd.http.service.http.resolver.Actuator;
+import com.szmsd.http.service.http.resolver.ActuatorParameter;
+import com.szmsd.http.service.http.resolver.ResponseResovlerActuatorParameter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.Header;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,6 +41,8 @@ abstract class AbstractRequest extends BaseRequest {
     protected HttpConfig httpConfig;
     @Resource
     private IHtpConfigService iHtpConfigService;
+    @Autowired
+    private Actuator actuator;
 
     public AbstractRequest(HttpConfig httpConfig) {
         this.httpConfig = httpConfig;
@@ -199,28 +205,39 @@ abstract class AbstractRequest extends BaseRequest {
     }
 
     HttpResponseBody httpRequestBodyAdapter(String warehouseCode, String api, ReFunction<String, UrlConfig, HttpResponseBody> reFunction) {
-        // 判断是不是多通道的api
-        if (this.hasMultipleChannelUrlSet(api)) {
-            HttpUrlType httpUrlType = this.getHttpUrlType();
-            if (null == httpUrlType) {
-                throw new CommonException("999", "http url type cant be null");
-            }
+        // 先调用自己的服务，自己的服务调用成功之后再去调用其它的服务
+        String urlGroupName = this.getUrlGroupName(warehouseCode);
+        UrlConfig urlConfig = this.getUrlConfig(urlGroupName);
+        HttpResponseBody httpResponseBody = reFunction.apply(urlGroupName, urlConfig);
+        if (!this.hasMultipleChannelUrlSet(api)) {
+            // 不是多通道api，直接返回结果集
+            return httpResponseBody;
+        }
+        // 对结果集进行解析，判断是否返回成功
+        // 如果返回是成功，返回这次请求的结果集，并且异步调用其它服务
+        HttpUrlType httpUrlType = this.getHttpUrlType();
+        if (null == httpUrlType) {
+            throw new CommonException("999", "http url type cant be null");
+        }
+        // 如果是true，就推给多个服务器
+        ActuatorParameter actuatorParameter = new ResponseResovlerActuatorParameter(httpUrlType, httpResponseBody);
+        if (this.actuator.execute(actuatorParameter)) {
             // 循环调用
             Map<String, UrlGroupConfig> urlGroup = this.httpConfig.getUrlGroup();
-            for (String urlGroupName : urlGroup.keySet()) {
+            for (String urlGroupNameKey : urlGroup.keySet()) {
+                if (urlGroupName.equals(urlGroupNameKey)) {
+                    // 自己的不再调用
+                    continue;
+                }
                 // 线程池执行任务
                 MultipleChannelRequest.run(() -> {
-                    UrlGroupConfig urlGroupConfig = urlGroup.get(urlGroupName);
-                    UrlConfig urlConfig = getUrlConfigAdapter(urlGroupConfig, httpUrlType);
-                    reFunction.apply(urlGroupName, urlConfig);
+                    UrlGroupConfig urlGroupConfig = urlGroup.get(urlGroupNameKey);
+                    UrlConfig urlConfigAdapter = getUrlConfigAdapter(urlGroupConfig, httpUrlType);
+                    reFunction.apply(urlGroupNameKey, urlConfigAdapter);
                 });
             }
-            return new HttpResponseBody.HttpResponseBodyEmpty("{}");
-        } else {
-            String urlGroupName = this.getUrlGroupName(warehouseCode);
-            UrlConfig urlConfig = this.getUrlConfig(urlGroupName);
-            return reFunction.apply(urlGroupName, urlConfig);
         }
+        return httpResponseBody;
     }
 
     HttpResponseBody httpRequestBody(String warehouseCode, String api, Object object, HttpMethod httpMethod, Object... pathVariable) {

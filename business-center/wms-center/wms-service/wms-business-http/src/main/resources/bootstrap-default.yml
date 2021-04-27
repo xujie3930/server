@@ -131,3 +131,10 @@ com:
       multiple-channel-url-set:
         - base-info.packings
         - base-info.products
+      # 多通道解析器开关
+      resolver-config:
+        WMS: true
+        PRICED_PRODUCT: true
+        CARRIER_SERVICE: true
+        PRODUCT_REMOTE_AREA: true
+        THIRD_PAYMENT: true

@@ -153,7 +153,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         //只查询集运类型的顶单
         List<DelOutbound> delOutbounds = baseMapper.selectList(Wrappers.<DelOutbound>lambdaQuery()
                 .in(DelOutbound::getId, idList)
-                .eq(DelOutbound::getOrderType, DelOutboundOrderTypeEnum.TRANSFER.getCode())
+                .eq(DelOutbound::getOrderType, DelOutboundOrderTypeEnum.COLLECTION.getCode())
         );
         if (CollectionUtils.isEmpty(delOutbounds)) {
             return new ArrayList<DelOutboundDetailVO>();
