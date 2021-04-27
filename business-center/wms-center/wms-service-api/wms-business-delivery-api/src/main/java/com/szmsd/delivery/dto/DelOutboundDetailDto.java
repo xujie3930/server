@@ -67,4 +67,7 @@ public class DelOutboundDetailDto implements Serializable {
 
     @ApiModelProperty(value = "电池包装编号")
     private String batteryPackaging;
+
+    @ApiModelProperty(value = "海关编码")
+    private String hsCode;
 }
