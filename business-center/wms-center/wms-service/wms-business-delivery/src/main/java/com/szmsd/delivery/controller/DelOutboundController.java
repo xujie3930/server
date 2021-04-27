@@ -349,6 +349,14 @@ public class DelOutboundController extends BaseController {
         return R.ok(this.delOutboundService.handler(dto));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:label')")
+    @PostMapping("/label")
+    @ApiOperation(value = "出库管理 - 获取标签", position = 1200)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundLabelDto")
+    public void label(HttpServletResponse response, @RequestBody @Validated DelOutboundLabelDto dto) {
+        this.delOutboundService.label(response, dto);
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/getDelOutboundDetailsList")
     @ApiOperation(value = "出库管理 - 按条件查询出库单及详情", position = 10000)

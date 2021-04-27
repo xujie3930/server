@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -29,7 +28,9 @@ public class DelOutboundOtherInServiceDto implements Serializable {
     @ApiModelProperty(value = "国家编码")
     private String countryCode;
 
-    @NotNull(message = "SKU不能为空")
     @ApiModelProperty(value = "SKU")
     private List<String> skus;
+
+    @ApiModelProperty(value = "产品属性信息")
+    private List<String> productAttributes;
 }

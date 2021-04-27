@@ -136,9 +136,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
         // conditionQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
         conditionQueryDto.setSkus(skus);
-        List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
-        if (CollectionUtils.isEmpty(productList)) {
-            throw new CommonException("999", "查询SKU信息失败");
+        List<BaseProduct> productList = null;
+        // 转运出库的不查询sku明细信息
+        if (!DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+            productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            if (CollectionUtils.isEmpty(productList)) {
+                throw new CommonException("999", "查询SKU信息失败");
+            }
         }
         // 查询sku包材信息
         /*List<String> bindCodeList = new ArrayList<>();
@@ -170,18 +174,24 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
         // 查询sku信息
         List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
-        Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
         // 包裹信息
         List<PackageInfo> packageInfos = new ArrayList<>();
-        for (DelOutboundDetail detail : detailList) {
-            String sku = detail.getSku();
-            BaseProduct product = productMap.get(sku);
-            if (null == product) {
-                throw new CommonException("999", "查询SKU[" + sku + "]信息失败");
+        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+            packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
+                    new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
+                    , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO));
+        } else {
+            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            for (DelOutboundDetail detail : detailList) {
+                String sku = detail.getSku();
+                BaseProduct product = productMap.get(sku);
+                if (null == product) {
+                    throw new CommonException("999", "查询SKU[" + sku + "]信息失败");
+                }
+                packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
+                        new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
+                        Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO));
             }
-            packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
-                    new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
-                    Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO));
         }
         // 计算包裹费用
         CalcShipmentFeeCommand calcShipmentFeeCommand = new CalcShipmentFeeCommand();
@@ -226,9 +236,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         BasWarehouse warehouse = delOutboundWrapperContext.getWarehouse();
         // 查询国家信息，收货地址所在的国家
         BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
-        // 查询sku信息
-        List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
-        Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
         // 创建承运商物流订单
         CreateShipmentOrderCommand createShipmentOrderCommand = new CreateShipmentOrderCommand();
         createShipmentOrderCommand.setReferenceNumber(String.valueOf(delOutbound.getId()));
@@ -257,15 +264,24 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 包裹信息
         List<Package> packages = new ArrayList<>();
         List<PackageItem> packageItems = new ArrayList<>();
-        for (DelOutboundDetail detail : detailList) {
-            String sku = detail.getSku();
-            BaseProduct product = productMap.get(sku);
-            if (null == product) {
-                throw new CommonException("999", "查询SKU[" + sku + "]信息失败");
+        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+            packageItems.add(new PackageItem(delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), Utils.valueOfDouble(delOutbound.getWeight()),
+                    new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
+                    1, "", String.valueOf(delOutbound.getId()), delOutbound.getOrderNo()));
+        } else {
+            // 查询sku信息
+            List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
+            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            for (DelOutboundDetail detail : detailList) {
+                String sku = detail.getSku();
+                BaseProduct product = productMap.get(sku);
+                if (null == product) {
+                    throw new CommonException("999", "查询SKU[" + sku + "]信息失败");
+                }
+                packageItems.add(new PackageItem(sku, product.getDeclaredValue(), Utils.valueOfDouble(product.getWeight()),
+                        new Size(product.getLength(), product.getWidth(), product.getHeight()),
+                        Utils.valueOfLong(detail.getQty()), "", String.valueOf(detail.getId()), sku));
             }
-            packageItems.add(new PackageItem(sku, product.getDeclaredValue(), Utils.valueOfDouble(product.getWeight()),
-                    new Size(product.getLength(), product.getWidth(), product.getHeight()),
-                    Utils.valueOfLong(detail.getQty()), "", String.valueOf(detail.getId()), sku));
         }
         packages.add(new Package(delOutbound.getOrderNo(), String.valueOf(delOutbound.getId()),
                 new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),

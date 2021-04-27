@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.impl;
 
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundDetail;
@@ -50,11 +51,17 @@ public final class DelOutboundServiceImplUtil {
         }
     }
 
-    public static String getLabelBizPath(DelOutbound delOutbound) {
+    private static String getLabelBizPath(DelOutbound delOutbound) {
         // 单据类型/年/月/日/单据号
         Date createTime = delOutbound.getCreateTime();
         String datePath = DateFormatUtils.format(createTime, "yyyy/MM/dd");
         return delOutbound.getOrderType() + "/" + datePath;
+    }
+
+    public static String getLabelFilePath(DelOutbound delOutbound) {
+        String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
+        String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
+        return basedir + "/shipment/label/" + labelBizPath;
     }
 
     /**
