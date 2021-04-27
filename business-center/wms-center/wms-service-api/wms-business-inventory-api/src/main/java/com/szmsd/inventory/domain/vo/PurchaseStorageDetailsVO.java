@@ -48,7 +48,7 @@ public class PurchaseStorageDetailsVO {
 
     @ApiModelProperty(value = "申报数量")
     @Excel(name = "申报数量")
-    private String declareQty;
+    private Integer declareQty;
 
     @Override
     public String toString() {

@@ -59,11 +59,14 @@ public class PurchaseInfoVO {
     @ApiModelProperty(value = "送货方式")
     @Excel(name = "送货方式")
     private String deliveryWayName;
-
+    @ApiModelProperty(value = "剩余的采购数量")
+    @Excel(name = "剩余的采购数量")
+    private Integer remainingPurchaseQuantity;
     @ApiModelProperty(value = "送货方式编码")
     @Excel(name = "送货方式编码")
     private String deliveryWay;
-
+    @ApiModelProperty(value = "备注")
+    private String remark;
     @ApiModelProperty(value = "出库单号")
     @Excel(name = "出库单号")
     private String orderNo;

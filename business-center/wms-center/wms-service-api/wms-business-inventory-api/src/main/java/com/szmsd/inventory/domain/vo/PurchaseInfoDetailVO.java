@@ -65,6 +65,10 @@ public class PurchaseInfoDetailVO {
     @Excel(name = "已到仓数量")
     private Integer arrivalQuantity;
 
+    @ApiModelProperty(value = "剩余的采购数量")
+    @Excel(name = "剩余的采购数量")
+    private Integer remainingPurchaseQuantity;
+
     @ApiModelProperty(value = "附件图片地址")
     @Excel(name = "附件图片地址")
     private String attachmentUrl;

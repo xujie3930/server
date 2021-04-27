@@ -50,7 +50,9 @@ public class PurchaseInfoListVO {
     @ApiModelProperty(value = "已创建入库单的数量")
     @Excel(name = "已创建入库单的数量")
     private Integer quantityInStorageCreated;
-
+    @ApiModelProperty(value = "剩余的采购数量")
+    @Excel(name = "剩余的采购数量")
+    private Integer remainingPurchaseQuantity;
     @ApiModelProperty(value = "已到仓数量")
     @Excel(name = "已到仓数量")
     private Integer arrivalQuantity;

@@ -23,10 +23,10 @@ public interface IPurchaseService extends IService<Purchase> {
     /**
      * 查询采购单模块
      *
-     * @param id 采购单模块ID
+     * @param purchaseNo 采购单模块ID
      * @return 采购单模块
      */
-    PurchaseInfoVO selectPurchaseByPurchaseNo(String id);
+    PurchaseInfoVO selectPurchaseByPurchaseNo(String purchaseNo);
 
     /**
      * 查询采购单模块列表

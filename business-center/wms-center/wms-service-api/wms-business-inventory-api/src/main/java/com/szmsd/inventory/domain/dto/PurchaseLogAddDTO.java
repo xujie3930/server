@@ -1,5 +1,6 @@
 package com.szmsd.inventory.domain.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.inventory.enums.PurchaseEnum;
 import io.swagger.annotations.ApiModel;
@@ -27,7 +28,7 @@ import java.util.Optional;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(value = "采购单日志", description = "PurchaseLog对象")
+@ApiModel(description = "PurchaseLog对象")
 public class PurchaseLogAddDTO {
 
     @NotNull
@@ -73,7 +74,7 @@ public class PurchaseLogAddDTO {
         String formatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
         switch (type) {
             case PURCHASE_ORDER:
-                logDetails = type.generateLog(createByName,formatTime, orderNo, purchaseNo);
+                logDetails = type.generateLog(createByName, formatTime, orderNo, purchaseNo);
                 break;
             case WAREHOUSING_LIST:
                 logDetails = type.generateLog(createByName, formatTime, purchaseNo, warehouseNo);
@@ -81,5 +82,10 @@ public class PurchaseLogAddDTO {
             default:
                 break;
         }
+    }
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
     }
 }
