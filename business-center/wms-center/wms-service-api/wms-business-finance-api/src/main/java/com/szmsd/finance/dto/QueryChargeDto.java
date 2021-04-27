@@ -16,6 +16,9 @@ public class QueryChargeDto implements Serializable {
     @ApiModelProperty(value = "客户编码")
     private String customCode;
 
+    @ApiModelProperty(value = "支付类型")
+    private String payMethod;
+
     @ApiModelProperty(value = "处理号/挂号/出库单号")
     private String no;
 

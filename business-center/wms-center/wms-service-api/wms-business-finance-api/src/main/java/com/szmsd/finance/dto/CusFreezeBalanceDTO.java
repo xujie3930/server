@@ -25,4 +25,16 @@ public class CusFreezeBalanceDTO {
     @NotNull
     @DecimalMin(value = "0")
     private BigDecimal amount;
+
+    public CusFreezeBalanceDTO() {
+
+    }
+
+    public CusFreezeBalanceDTO(String cusCode, String currencyCode, String no, BigDecimal amount) {
+        this.cusCode = cusCode;
+        this.currencyCode = currencyCode;
+        this.no = no;
+        this.amount = amount;
+    }
+
 }
