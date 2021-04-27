@@ -6,7 +6,9 @@ import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.inventory.component.RemoteComponent;
+import com.szmsd.inventory.component.RemoteRequest;
 import com.szmsd.inventory.config.IBOConvert;
 import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.PurchaseDetails;
@@ -59,6 +61,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     private IPurchaseDetailsService iPurchaseDetailsService;
     @Resource
     private IPurchaseStorageDetailsService iPurchaseStorageDetailsService;
+    @Resource
+    private RemoteRequest remoteRequest;
 
     @Override
     public PurchaseInfoVO selectPurchaseByPurchaseNo(String purchaseNo) {
@@ -222,10 +226,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
                     });
         });
-
         log.info("开始入库完成");
-
-
     }
 
     /**
@@ -254,13 +255,50 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                 .setPurchaseNo(purchaseAddDTO.getPurchaseNo())
                 .setType(PurchaseEnum.PURCHASE_ORDER)
                 .setAssociationId(associationId)
-                .setOrderNo(purchaseAddDTO.getOrderNo());
+                .setOrderNo(String.join(",", purchaseAddDTO.getOrderNo()));
         log.info("新增采购日志 {}", purchaseLogAddDTO);
         iPurchaseLogService.insertPurchaseLog(purchaseLogAddDTO);
     }
 
     @Override
     public int transportWarehousingSubmit(TransportWarehousingAddDTO transportWarehousingAddDTO) {
+        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+        String sellerCode = loginUserInfo.getSellerCode();
+        //获取sku信息
+        List<DelOutboundDetailVO> transshipmentProductData = remoteComponent.getTransshipmentProductData(transportWarehousingAddDTO.getIdList());
+        //创建入库单
+        long sum = transshipmentProductData.stream().mapToLong(DelOutboundDetailVO::getQty).sum();
+        String deliveryNo = transportWarehousingAddDTO.getDeliveryNo();
+        CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+
+        createInboundReceiptDTO
+                .setDeliveryNo(deliveryNo)
+                .setCusCode(sellerCode)
+               .setVat(transportWarehousingAddDTO.getVat())
+                .setWarehouseCode(transportWarehousingAddDTO.getWarehouseCode())
+                .setOrderType(transportWarehousingAddDTO.getOrderType())
+                .setWarehouseCategoryCode(transportWarehousingAddDTO.getWarehouseCategoryCode())
+                .setDeliveryWayCode(transportWarehousingAddDTO.getDeliveryWay())
+                .setTotalDeclareQty(Integer.parseInt(sum + ""))
+                .setTotalPutQty(0);
+
+        //设置SKU列表数据
+        ArrayList<InboundReceiptDetailDTO> inboundReceiptDetailAddList = new ArrayList<>();
+        transshipmentProductData.forEach(addSku -> {
+            InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
+            inboundReceiptDetailDTO
+                    .setDeclareQty(Integer.parseInt(addSku.getQty() + ""))
+                    .setSku(addSku.getSku())
+                    .setSkuName(addSku.getSku())
+            ;
+            inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
+        });
+        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
+
+        InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
+
+        //创建WMS入库单
+        remoteRequest.createPackage(inboundReceiptInfoVO);
         return 0;
     }
 }

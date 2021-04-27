@@ -3,6 +3,7 @@ package com.szmsd.http.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.CancelReceiptRequest;
+import com.szmsd.http.dto.CreatePackageReceiptRequest;
 import com.szmsd.http.dto.CreateReceiptRequest;
 import com.szmsd.http.service.IInboundService;
 import com.szmsd.http.service.http.WmsRequest;
@@ -25,5 +26,10 @@ public class InboundServiceImpl extends WmsRequest implements IInboundService {
     @Override
     public ResponseVO cancel(CancelReceiptRequest cancelReceiptRequestDTO) {
         return JSON.parseObject(httpDelete(cancelReceiptRequestDTO.getWarehouseCode(), "inbound.cancel", cancelReceiptRequestDTO), CreateReceiptResponse.class);
+    }
+
+    @Override
+    public ResponseVO createPackage(CreatePackageReceiptRequest createPackageReceiptRequest) {
+        return JSON.parseObject(httpPost(createPackageReceiptRequest.getWarehouseCode(), "inbound./api/inbound/package", createPackageReceiptRequest), CreateReceiptResponse.class);
     }
 }

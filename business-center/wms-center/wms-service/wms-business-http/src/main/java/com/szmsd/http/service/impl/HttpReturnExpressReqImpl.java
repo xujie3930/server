@@ -31,7 +31,7 @@ public class HttpReturnExpressReqImpl extends WmsRequest implements IHttpReturnE
      */
     @Override
     public CreateExpectedRespVO expectedCreate(CreateExpectedReqDTO expectedReqDTO) {
-        return JSON.parseObject(httpPost("", "returned.expected", expectedReqDTO), CreateExpectedRespVO.class);
+        return JSON.parseObject(httpPost(expectedReqDTO.getWarehouseCode(), "returned.expected", expectedReqDTO), CreateExpectedRespVO.class);
     }
 
     /**
@@ -43,6 +43,6 @@ public class HttpReturnExpressReqImpl extends WmsRequest implements IHttpReturnE
      */
     @Override
     public ProcessingUpdateRespVO processingUpdate(ProcessingUpdateReqDTO processingUpdateReqDTO) {
-        return JSON.parseObject(httpPut("", "returned.processing", processingUpdateReqDTO), ProcessingUpdateRespVO.class);
+        return JSON.parseObject(httpPut(processingUpdateReqDTO.getWarehouseCode(), "returned.processing", processingUpdateReqDTO), ProcessingUpdateRespVO.class);
     }
 }

@@ -60,6 +60,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<List<DelOutboundDetailVO>> createPurchaseOrderListByIdList(List<String> idList) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<List<DelOutboundDetailVO>> getTransshipmentProductData(List<String> idList) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

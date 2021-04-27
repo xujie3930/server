@@ -93,7 +93,7 @@ public class PurchaseAddDTO implements IBOConvert {
 
     @ApiModelProperty(value = "出库单号 - 前端缓存携带 , 拼接", required = true)
     @Excel(name = "出库单号")
-    private String orderNo;
+    private List<String> orderNo;
 
     @ApiModelProperty(value = "VAT")
     @Excel(name = "VAT")

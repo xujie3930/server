@@ -35,4 +35,9 @@ public class InboundReceiptDetailDTO {
     @ApiModelProperty(value = "对版图片")
     private AttachmentFileDTO editionImage;
 
+    @ApiModelProperty(value = "出库单号")
+    private String deliveryNo;
+
+
+
 }

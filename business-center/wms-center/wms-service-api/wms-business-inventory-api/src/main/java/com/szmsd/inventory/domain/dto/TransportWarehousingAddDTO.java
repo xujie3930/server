@@ -53,6 +53,18 @@ public class TransportWarehousingAddDTO {
     @Excel(name = "快递/揽收单号")
     private String deliveryNo;
 
+    @ApiModelProperty(value = "VAT")
+    @Excel(name = "VAT")
+    private String vat;
+
+    @ApiModelProperty(value = "类别")
+    @Excel(name = "类别")
+    private String warehouseCategoryName;
+
+    @ApiModelProperty(value = "类别编码")
+    @Excel(name = "类别编码")
+    private String warehouseCategoryCode;
+
     @ApiModelProperty(value = "转运单列表", required = true)
     List<String> transferNoList;
 

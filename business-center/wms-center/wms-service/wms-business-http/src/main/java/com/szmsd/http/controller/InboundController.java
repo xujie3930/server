@@ -3,6 +3,7 @@ package com.szmsd.http.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.CancelReceiptRequest;
+import com.szmsd.http.dto.CreatePackageReceiptRequest;
 import com.szmsd.http.dto.CreateReceiptRequest;
 import com.szmsd.http.service.IInboundService;
 import com.szmsd.http.vo.CreateReceiptResponse;
@@ -37,4 +38,10 @@ public class InboundController extends BaseController {
         return R.ok(cancel);
     }
 
+    @PostMapping("/package")
+    @ApiOperation(value = "B3 创建转运入库单")
+    public R<ResponseVO> createPackage(@RequestBody CreatePackageReceiptRequest createPackageReceiptRequest) {
+        ResponseVO cancel = iInboundService.createPackage(createPackageReceiptRequest);
+        return R.ok(cancel);
+    }
 }
