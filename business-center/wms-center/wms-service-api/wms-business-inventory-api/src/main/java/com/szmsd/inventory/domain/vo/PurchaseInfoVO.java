@@ -62,6 +62,17 @@ public class PurchaseInfoVO {
     @ApiModelProperty(value = "剩余的采购数量")
     @Excel(name = "剩余的采购数量")
     private Integer remainingPurchaseQuantity;
+    @ApiModelProperty(value = "VAT")
+    @Excel(name = "VAT")
+    private String vat;
+
+    @ApiModelProperty(value = "类别")
+    @Excel(name = "类别")
+    private String warehouseCategoryName;
+
+    @ApiModelProperty(value = "类别编码")
+    @Excel(name = "类别编码")
+    private String warehouseCategoryCode;
     @ApiModelProperty(value = "送货方式编码")
     @Excel(name = "送货方式编码")
     private String deliveryWay;

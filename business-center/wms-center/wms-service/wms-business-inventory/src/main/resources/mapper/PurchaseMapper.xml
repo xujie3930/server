@@ -17,6 +17,7 @@
         <result column="purchase_no" property="purchaseNo"/>
         <result column="available_inventory" property="availableInventory"/>
         <result column="purchase_quantity" property="purchaseQuantity"/>
+        <result column="remaining_purchase_quantity" property="remainingPurchaseQuantity"/>
         <result column="quantity_in_storage_created" property="quantityInStorageCreated"/>
         <result column="arrival_quantity" property="arrivalQuantity"/>
         <result column="warehouse_code" property="warehouseCode"/>
@@ -26,6 +27,9 @@
         <result column="delivery_way_name" property="deliveryWayName"/>
         <result column="delivery_way" property="deliveryWay"/>
         <result column="order_no" property="orderNo"/>
+        <result column="vat" property="vat"/>
+        <result column="warehouse_category_name" property="warehouseCategoryName"/>
+        <result column="warehouse_category_code" property="warehouseCategoryCode"/>
     </resultMap>
     <resultMap id="selectPurchaseByPurchaseNoMap" type="com.szmsd.inventory.domain.vo.PurchaseInfoVO">
         <id column="id" property="id"/>
@@ -45,8 +49,7 @@
                 update_by_name,
                 update_time,
                 remark,
-                remaining_purchase_quantity,
-            id, create_by, update_by, version, del_flag, custom_code, purchase_no, available_inventory, purchase_quantity, quantity_in_storage_created, arrival_quantity, warehouse_code, warehouse_name, order_type, order_type_name, delivery_way_name, delivery_way, order_no
+            id, create_by, update_by, version, del_flag, custom_code, purchase_no, available_inventory, purchase_quantity, remaining_purchase_quantity, quantity_in_storage_created, arrival_quantity, warehouse_code, warehouse_name, order_type, order_type_name, delivery_way_name, delivery_way, order_no, vat, warehouse_category_name, warehouse_category_code
     </sql>
 
     <select id="selectPurchaseList" resultType="com.szmsd.inventory.domain.vo.PurchaseInfoListVO">

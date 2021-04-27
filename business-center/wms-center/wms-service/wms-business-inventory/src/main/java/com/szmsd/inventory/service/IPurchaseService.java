@@ -50,5 +50,6 @@ public interface IPurchaseService extends IService<Purchase> {
 
     List<PurchaseInfoListVO> selectPurchaseListClient(PurchaseQueryDTO purchaseQueryDTO);
 
+    int cancelByWarehouseNo(String warehouseNo);
 }
 

@@ -2,6 +2,7 @@ package com.szmsd.putinstorage.api.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
@@ -25,6 +26,11 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
 
             @Override
             public R<InboundReceiptInfoVO> info(String warehouseNo) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<InboundReceiptInfoVO> saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO) {
                 return R.convertResultJson(throwable);
             }
         };
