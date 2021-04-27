@@ -7,6 +7,8 @@ import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
@@ -38,6 +40,9 @@ public class RemoteComponent {
 
     @Resource
     private InboundReceiptFeignService inboundReceiptFeignService;
+
+    @Resource
+    private DelOutboundFeignService delOutboundFeignService;
 
     /**
      * 获取登录人信息
@@ -88,6 +93,18 @@ public class RemoteComponent {
         InboundReceiptInfoVO resultData = R.getDataAndException(inboundReceiptInfoVO);
         log.info("入库完成 {}", JSONObject.toJSONString(resultData));
         return resultData;
+    }
 
+    /**
+     * 获取转运出库数据详情
+     *
+     * @param idList
+     */
+    public  List<DelOutboundDetailVO> getTransshipmentProductData(List<String> idList) {
+        log.info("获取转运出库数据 请求参数 {}", JSONObject.toJSONString(idList));
+        R<List<DelOutboundDetailVO>> transshipmentProductData = delOutboundFeignService.getTransshipmentProductData(idList);
+        List<DelOutboundDetailVO> dataAndException = R.getDataAndException(transshipmentProductData);
+        log.info("获取转运出库数据完成 请求参数 {}", JSONObject.toJSONString(dataAndException));
+        return dataAndException;
     }
 }

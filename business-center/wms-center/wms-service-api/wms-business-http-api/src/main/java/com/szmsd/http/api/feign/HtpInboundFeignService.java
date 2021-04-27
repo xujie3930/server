@@ -4,9 +4,11 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.fallback.HtpInboundFeignFallback;
 import com.szmsd.http.dto.CancelReceiptRequest;
+import com.szmsd.http.dto.CreatePackageReceiptRequest;
 import com.szmsd.http.dto.CreateReceiptRequest;
 import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,4 +22,9 @@ public interface HtpInboundFeignService {
 
     @DeleteMapping("/api/inbound/http/receipt")
     R<ResponseVO> cancel(@RequestBody CancelReceiptRequest cancelReceiptRequestDTO);
+
+    @PostMapping("/api/inbound/http/package")
+    @ApiOperation(value = "B3 创建转运入库单")
+    R<ResponseVO> createPackage(@RequestBody CreatePackageReceiptRequest createPackageReceiptRequest);
+
 }

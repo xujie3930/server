@@ -58,4 +58,6 @@ public class InboundReceiptDetail extends BaseEntity {
     @TableField(fill = FieldFill.UPDATE)
     private String updateBy;
 
+    @ApiModelProperty(value = "出库单号")
+    private String deliveryNo;
 }
