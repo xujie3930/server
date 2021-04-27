@@ -30,6 +30,6 @@ public class InboundServiceImpl extends WmsRequest implements IInboundService {
 
     @Override
     public ResponseVO createPackage(CreatePackageReceiptRequest createPackageReceiptRequest) {
-        return JSON.parseObject(httpPost(createPackageReceiptRequest.getWarehouseCode(), "inbound./api/inbound/package", createPackageReceiptRequest), CreateReceiptResponse.class);
+        return JSON.parseObject(httpPost(createPackageReceiptRequest.getWarehouseCode(), "inbound.createPackage", createPackageReceiptRequest), CreateReceiptResponse.class);
     }
 }

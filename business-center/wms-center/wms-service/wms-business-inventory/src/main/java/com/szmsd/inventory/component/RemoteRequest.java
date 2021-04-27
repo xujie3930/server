@@ -43,6 +43,7 @@ public class RemoteRequest {
         receiptDetailPackageInfos.add(receiptDetailPackageInfo);
 
         createPackageReceiptRequest
+                .setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode())
                 .setRemark(inboundReceiptInfoVO.getRemark())
                 .setOrderType("PackageTransfer")
                 .setSellerCode(inboundReceiptInfoVO.getCusCode())
