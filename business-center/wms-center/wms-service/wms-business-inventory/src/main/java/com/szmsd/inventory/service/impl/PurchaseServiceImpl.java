@@ -1,12 +1,11 @@
 package com.szmsd.inventory.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.exception.com.BaseException;
-import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.component.RemoteRequest;
@@ -18,7 +17,6 @@ import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
 import com.szmsd.inventory.enums.PurchaseEnum;
-import com.szmsd.inventory.mapper.PurchaseDetailsMapper;
 import com.szmsd.inventory.mapper.PurchaseMapper;
 import com.szmsd.inventory.service.IPurchaseDetailsService;
 import com.szmsd.inventory.service.IPurchaseLogService;
@@ -28,17 +26,14 @@ import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.system.api.domain.SysUser;
-import io.swagger.models.auth.In;
-import jodd.util.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.sql.Wrapper;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -94,26 +89,36 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         //取消改批次的单 回滚数量
         List<PurchaseStorageDetails> rollBackStorage = iPurchaseStorageDetailsService.list(Wrappers.<PurchaseStorageDetails>lambdaQuery()
                 .eq(PurchaseStorageDetails::getWarehousingNo, warehouseNo)
+                .eq(PurchaseStorageDetails::getDelFlag, 0)
         );
-        //更新对应sku的数量 总数量
+        //总共需要加
+        int sumCount = rollBackStorage.stream().mapToInt(PurchaseStorageDetails::getDeclareQty).sum();
 
+        Map<String, Integer> skuAndNum = rollBackStorage.stream().collect(Collectors.toMap(PurchaseStorageDetails::getSku, PurchaseStorageDetails::getDeclareQty, Integer::sum));
+
+        // 更新对应sku的数量 总数量
         List<String> skuList = rollBackStorage.stream().map(PurchaseStorageDetails::getSku).collect(Collectors.toList());
-        //商品详情
+        // 商品详情
         List<PurchaseDetails> detailsList = iPurchaseDetailsService.list(Wrappers.<PurchaseDetails>lambdaQuery().in(PurchaseDetails::getSku, skuList));
         //计算需要回滚的数量
-        Map<String, List<PurchaseStorageDetails>> collect1 = rollBackStorage.stream().collect(Collectors.groupingBy(PurchaseStorageDetails::getSku));
-
-        collect1.forEach((o1, o2) -> {
-
+        detailsList.forEach(x -> {
+            String sku = x.getSku();
+            Integer integer = skuAndNum.get(sku);
+            Optional.ofNullable(integer).ifPresent(c -> x.setRemainingPurchaseQuantity(x.getRemainingPurchaseQuantity() + c));
         });
-
-
+        log.info("更新数据 {}", JSONObject.toJSONString(detailsList));
+        iPurchaseDetailsService.saveOrUpdateBatch(detailsList);
+        Integer associationId = rollBackStorage.get(0).getAssociationId();
+        int update = baseMapper.update(new Purchase(), Wrappers.<Purchase>lambdaUpdate().eq(Purchase::getId, associationId)
+                .setSql("remainingPurchaseQuantity = remainingPurchaseQuantity +" + sumCount)
+        );
+        log.info("更新总表数据 {}条", update);
         iPurchaseStorageDetailsService.update(Wrappers.<PurchaseStorageDetails>lambdaUpdate()
                 .set(PurchaseStorageDetails::getDelFlag, 2)
                 .eq(PurchaseStorageDetails::getWarehousingNo, warehouseNo)
         );
 
-        return 0;
+        return 1;
     }
 
     /**
