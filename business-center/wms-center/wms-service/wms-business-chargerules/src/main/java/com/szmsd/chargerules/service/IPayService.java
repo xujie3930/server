@@ -2,7 +2,7 @@ package com.szmsd.chargerules.service;
 
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.delivery.dto.DelOutboundDetailDto;
+import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 
@@ -24,10 +24,10 @@ public interface IPayService {
      * 多SKU计算费用
      * @param firstPrice firstPrice
      * @param nextPrice nextPrice
-     * @param delOutboundDetailList delOutboundDetailList
+     * @param details details
      * @return 费用
      */
-    BigDecimal manySkuCalculate(BigDecimal firstPrice, BigDecimal nextPrice, List<DelOutboundDetailDto> delOutboundDetailList);
+    BigDecimal manySkuCalculate(BigDecimal firstPrice, BigDecimal nextPrice, List<DelOutboundOperationDetailVO> details);
 
     /**
      * 调用扣费接口扣费

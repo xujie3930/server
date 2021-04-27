@@ -45,6 +45,9 @@ public class AccountBalanceChangeDTO implements Serializable {
     @ApiModelProperty(value = "单号")
     private String no;
 
+    @ApiModelProperty(value = "该单是否存在冻结额")
+    private Boolean hasFreeze;
+
     @ApiModelProperty(value = "开始时间")
     private String beginTime;
 

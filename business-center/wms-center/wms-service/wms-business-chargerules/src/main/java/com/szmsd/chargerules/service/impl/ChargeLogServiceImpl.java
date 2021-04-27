@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.chargerules.domain.ChargeLog;
@@ -49,6 +50,9 @@ public class ChargeLogServiceImpl implements IChargeLogService {
         if(chargeLogDto.getSuccess() != null) {
             query.eq(ChargeLog::getSuccess, chargeLogDto.getSuccess());
         }
+        if(chargeLogDto.getHasFreeze() != null) {
+            query.eq(ChargeLog::getHasFreeze, chargeLogDto.getHasFreeze());
+        }
         return chargeLogMapper.selectOne(query);
     }
 
@@ -62,5 +66,12 @@ public class ChargeLogServiceImpl implements IChargeLogService {
     @Override
     public List<QueryChargeVO> selectChargeLogList(QueryChargeDto queryDto) {
         return chargeLogMapper.selectChargeLogList(queryDto);
+    }
+
+    @Override
+    public int update(Long id) {
+        LambdaUpdateWrapper<ChargeLog> update = Wrappers.lambdaUpdate();
+        update.set(ChargeLog::getHasFreeze,false).eq(ChargeLog::getId,id);
+        return chargeLogMapper.update(null,update);
     }
 }

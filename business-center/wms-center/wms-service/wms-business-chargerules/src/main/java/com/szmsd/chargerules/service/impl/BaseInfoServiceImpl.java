@@ -153,7 +153,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
             //调用扣费接口扣费
             ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType(), basSpecialOperation.getWarehouseCode(),basSpecialOperation.getQty().longValue());
-            CustPayDTO custPayDTO = setCustPayDto(customCode,amount,basSpecialOperation);
+            CustPayDTO custPayDTO = setCustPayDto(customCode,amount,basSpecialOperation,specialOperation);
             R r = payService.pay(custPayDTO, chargeLog);
             if (r.getCode() != 200) {
                 log.error("pay failed: {} {}", r.getData(), r.getMsg());
@@ -172,7 +172,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
      * @param basSpecialOperation basSpecialOperation
      * @return CustPayDTO
      */
-    private CustPayDTO setCustPayDto(String customCode, BigDecimal amount, BasSpecialOperation basSpecialOperation) {
+    private CustPayDTO setCustPayDto(String customCode, BigDecimal amount, BasSpecialOperation basSpecialOperation,SpecialOperation specialOperation) {
         CustPayDTO custPayDTO = new CustPayDTO();
         List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>();
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
@@ -180,12 +180,12 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         accountSerialBillDTO.setChargeType(basSpecialOperation.getOperationType());
         accountSerialBillDTO.setRemark(basSpecialOperation.getRemark());
         accountSerialBillDTO.setAmount(amount);
-        accountSerialBillDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        accountSerialBillDTO.setCurrencyCode(specialOperation.getCurrencyCode());
         serialBillInfoList.add(accountSerialBillDTO);
         custPayDTO.setCusCode(customCode);
         custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
         custPayDTO.setPayMethod(BillEnum.PayMethod.SPECIAL_OPERATE);
-        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        custPayDTO.setCurrencyCode(specialOperation.getCurrencyCode());
         custPayDTO.setAmount(amount);
         custPayDTO.setNo(basSpecialOperation.getOrderNo());
         custPayDTO.setSerialBillInfoList(serialBillInfoList);

@@ -45,7 +45,17 @@ public interface IOperationService {
      */
     R delOutboundDeductions(DelOutboundOperationVO dto);
 
+    /**
+     * 出库冻结余额
+     * @param delOutboundVO delOutboundVO
+     * @return result
+     */
     R delOutboundFreeze(DelOutboundOperationVO delOutboundVO);
 
+    /**
+     * 出库解冻余额
+     * @param delOutboundVO delOutboundVO
+     * @return result
+     */
     R delOutboundThaw(DelOutboundOperationVO delOutboundVO);
 }

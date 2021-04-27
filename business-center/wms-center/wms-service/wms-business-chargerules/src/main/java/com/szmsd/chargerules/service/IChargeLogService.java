@@ -31,4 +31,10 @@ public interface IChargeLogService {
     List<ChargeLog> selectPage(ChargeLogDto chargeLogDto);
 
     List<QueryChargeVO> selectChargeLogList(QueryChargeDto queryDto);
+
+    /**
+     * 修改
+     * @param id id
+     */
+    int update(Long id);
 }
