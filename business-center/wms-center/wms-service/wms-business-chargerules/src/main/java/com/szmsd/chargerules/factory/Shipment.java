@@ -88,7 +88,7 @@ public class Shipment extends OrderType {
             int count = 0;
 //            if(operation.isManySku() && details.size() > 1) { // 配置为多SKU并且出库单SKU为多个
                 count = details.stream().mapToInt(detail -> detail.getQty().intValue()).sum();
-                amount = payService.manySkuCalculate(operation.getFirstPrice(), operation.getNextPrice(), details);
+//                amount = payService.manySkuCalculate(operation.getFirstPrice(), operation.getNextPrice(), details);
 //            }
 //            if(!operation.isManySku() && details.size() == 1) { // 配置为单SKU并且出库单SKU为单个
 //                count = details.get(0).getQty().intValue();

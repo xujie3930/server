@@ -12,7 +12,6 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
-import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -80,13 +80,18 @@ public class RunnableExecute {
                         String datePoor = DateUtils.getDatePoor(new Date(), DateUtils.parseDate(skuVolume.getOperateOn()));
                         int days = Integer.parseInt(datePoor.substring(0, datePoor.indexOf("天")));
                         // 根据存放天数、存放体积计算应收取的费用
-                        BigDecimal amount = warehouseOperationService.charge(days, skuVolume.getVolume(), warehouseOperation.getWarehouseCode(), warehouseOperations);
-                        ChargeLog chargeLog = new ChargeLog(warehouseOperation.getWarehouseCode());
-                        CustPayDTO custPayDTO = setCustPayDto(skuVolume.getCusCode(), amount,chargeLog);
-                        R resultPay = payService.pay(custPayDTO, chargeLog);
-                        if (resultPay.getCode() != 200) {
-                            log.error("executeOperation() pay failed.. msg: {},data: {}", resultPay.getMsg(), resultPay.getData());
+//                        BigDecimal amount = warehouseOperationService.charge(days, skuVolume.getVolume(), warehouseOperation.getWarehouseCode(), warehouseOperations);
+                        WarehouseOperation warehouse = warehouseOperations.stream().filter(value -> value.getWarehouseCode().equals(warehouseOperation.getWarehouseCode())
+                                && days > value.getChargeDays()).max(Comparator.comparing(WarehouseOperation::getChargeDays)).orElse(null);
+                        if(warehouse == null) {
+                            log.error("charge() 未找到收费配置 warehouseCode: {}, days: {}",warehouseOperation.getWarehouseCode(),days);
+                            return;
                         }
+                        ChargeLog chargeLog = new ChargeLog(warehouseOperation.getWarehouseCode());
+                        chargeLog.setCurrencyCode(warehouse.getCurrencyCode());
+                        BigDecimal amount = skuVolume.getVolume().multiply(warehouse.getPrice()); //体积乘以价格
+                        CustPayDTO custPayDTO = setCustPayDto(skuVolume.getCusCode(), amount,chargeLog);
+                        payService.pay(custPayDTO, chargeLog);
                     });
                 });
             }
@@ -103,7 +108,7 @@ public class RunnableExecute {
         custPayDTO.setCusCode(cusCode);
         custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
         custPayDTO.setPayMethod(BillEnum.PayMethod.WAREHOUSE_RENT);
-        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        custPayDTO.setCurrencyCode(chargeLog.getCurrencyCode());
         custPayDTO.setAmount(amount);
         custPayDTO.setNo(chargeLog.getOrderNo());
         return custPayDTO;

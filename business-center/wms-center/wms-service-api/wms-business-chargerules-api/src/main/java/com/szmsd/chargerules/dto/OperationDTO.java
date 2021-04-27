@@ -42,15 +42,22 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "最大重量 - 结束 单位: g 小于等于")
     private Double maximumWeight;
 
+    @ApiModelProperty(value = "币种编码")
+    private String currencyCode;
+
+    @ApiModelProperty(value = "币种名称")
+    private String currencyName;
+
     @ApiModelProperty(value = "计费单位")
     private String unit;
 
     @ApiModelProperty(value = "备注")
     private String remark;
 
-    public OperationDTO(String operationType, String orderType, Double weight) {
+    public OperationDTO(String operationType, String orderType, String warehouseCode, Double weight) {
         this.operationType = operationType;
         this.orderType = orderType;
+        this.warehouseCode = warehouseCode;
         this.weight = weight;
     }
 }
