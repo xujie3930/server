@@ -60,6 +60,9 @@ public class AccountBalanceChange extends FssBaseEntity {
     @ApiModelProperty(value = "单号")
     private String no;
 
+    @ApiModelProperty(value = "该单是否存在冻结额")
+    private Boolean hasFreeze;
+
     public String getPayMethodName(){
         return payMethod.getPaymentName();
     }

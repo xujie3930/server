@@ -122,6 +122,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
         dto.setCurrencyCode(custPayDTO.getCurrencyCode());
         dto.setCusCode(custPayDTO.getCusCode());
         dto.setNo(custPayDTO.getNo());
+        dto.setHasFreeze(true);
         List<AccountBalanceChange> accountBalanceChanges = accountBalanceService.recordListPage(dto);
         log.info("accountBalanceChanges() no: {}, size: {}", dto.getNo(), accountBalanceChanges.size());
         return accountBalanceChanges
