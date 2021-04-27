@@ -24,7 +24,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
 
     InboundReceiptVO selectByWarehouseNo(String warehouseNo);
 
-    void saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO);
+    InboundReceiptInfoVO saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO);
 
     InboundReceipt saveOrUpdate(InboundReceiptDTO inboundReceiptDTO);
 

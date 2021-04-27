@@ -108,7 +108,7 @@ public class Shipment extends OrderType {
      * @param datum datum
      * @param amount amount
      */
-    private void pay(DelOutboundDetailListVO datum, BigDecimal amount,int count) {
+    private void pay(DelOutboundDetailListVO datum, BigDecimal amount,Integer count) {
         ChargeLogDto chargeLogDto = new ChargeLogDto(datum.getOrderNo(),
                 BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName(),datum.getOrderType(), datum.getWarehouseCode(),true);
         ChargeLog exist = chargeLogService.selectLog(chargeLogDto);
@@ -116,7 +116,7 @@ public class Shipment extends OrderType {
             log.info("该单已经扣过费, chargeLogDto: {}", chargeLogDto);
             return;
         }
-        ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType(), datum.getWarehouseCode(),count);
+        ChargeLog chargeLog = new ChargeLog(datum.getOrderNo(), datum.getOrderType(), datum.getWarehouseCode(),count.longValue());
         CustPayDTO custPayDTO = setCustPayDto(datum, amount, chargeLog);
         R resultPay = payService.pay(custPayDTO, chargeLog);
         if (resultPay.getCode() != 200)

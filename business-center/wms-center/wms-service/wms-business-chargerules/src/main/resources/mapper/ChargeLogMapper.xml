@@ -12,6 +12,9 @@
             <if test="customCode != null and customCode != ''">
                 AND custom_code = #{customCode}
             </if>
+            <if test="payMethod != null and payMethod != ''">
+                AND pay_method = #{payMethod}
+            </if>
             <if test="orderTimeStart != null and orderTimeStart != ''">
                 AND create_time >= #{orderTimeStart}
             </if>

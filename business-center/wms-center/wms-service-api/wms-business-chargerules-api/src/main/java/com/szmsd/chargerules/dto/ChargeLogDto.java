@@ -28,6 +28,9 @@ public class ChargeLogDto extends BaseEntity {
     @ApiModelProperty(value = "操作支付类型")
     private String operationPayMethod;
 
+    @ApiModelProperty(value = "支付类型")
+    private String payMethod;
+
     @ApiModelProperty(value = "操作类型")
     private String operationType;
 
