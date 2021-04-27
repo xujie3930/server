@@ -7,6 +7,7 @@ import com.szmsd.exception.dto.NewExceptionRequest;
 import com.szmsd.exception.dto.ProcessExceptionRequest;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Component
 public class ExceptionInfoFeignFallback implements FallbackFactory<ExceptionInfoFeignService> {
@@ -21,6 +22,10 @@ public class ExceptionInfoFeignFallback implements FallbackFactory<ExceptionInfo
 
             @Override
             public R processException(ProcessExceptionRequest processExceptionRequest) {
+                return R.convertResultJson(throwable);
+            }
+            @Override
+            public R<Integer> countException(@RequestBody String sellerCode){
                 return R.convertResultJson(throwable);
             }
         };

@@ -54,9 +54,9 @@ public class ExceptionInfoController extends BaseController{
       }
 
     @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:list')")
-    @GetMapping("/count")
+    @PostMapping("/count")
     @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
-    public R<Integer> count(String sellerCode)
+    public R<Integer> count(@RequestBody String sellerCode)
     {
         QueryWrapper<ExceptionInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seller_code",sellerCode);

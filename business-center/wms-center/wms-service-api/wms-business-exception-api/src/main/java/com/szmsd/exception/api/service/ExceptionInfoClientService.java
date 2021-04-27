@@ -18,4 +18,6 @@ public interface ExceptionInfoClientService {
      * @return
      */
     R processException(ProcessExceptionRequest processExceptionRequest);
+
+    Integer countprocessException(String sellerCode);
 }
