@@ -49,4 +49,22 @@ public class DelOutboundDetailDto implements Serializable {
 
     @ApiModelProperty(value = "重量 - 用于计算不保存")
     private Double weight;
+
+    @ApiModelProperty(value = "产品名称")
+    private String productName;
+
+    @ApiModelProperty(value = "中文申报品名")
+    private String productNameChinese;
+
+    @ApiModelProperty(value = "申报价值")
+    private Double declaredValue;
+
+    @ApiModelProperty(value = "产品属性编号")
+    private String productAttribute;
+
+    @ApiModelProperty(value = "带电信息编号")
+    private String electrifiedMode;
+
+    @ApiModelProperty(value = "电池包装编号")
+    private String batteryPackaging;
 }

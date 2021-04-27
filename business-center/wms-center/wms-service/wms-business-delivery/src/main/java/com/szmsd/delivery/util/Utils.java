@@ -34,6 +34,13 @@ public final class Utils {
         return BigDecimal.valueOf(value);
     }
 
+    public static double valueOf(BigDecimal value) {
+        if (null == value) {
+            return 0D;
+        }
+        return value.doubleValue();
+    }
+
     public static double defaultValue(Double value) {
         if (null == value) {
             return 0.0;
