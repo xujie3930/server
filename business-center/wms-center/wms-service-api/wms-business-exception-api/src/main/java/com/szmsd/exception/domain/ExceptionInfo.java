@@ -123,5 +123,8 @@ public class ExceptionInfo extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date dealDate;
 
+    @ApiModelProperty(value = "客户编码")
+    @Excel(name = "客户编码")
+    private String sellerCode;
 
 }
