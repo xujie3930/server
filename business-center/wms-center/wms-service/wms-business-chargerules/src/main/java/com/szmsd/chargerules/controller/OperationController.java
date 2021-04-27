@@ -1,6 +1,5 @@
 package com.szmsd.chargerules.controller;
 
-import com.szmsd.chargerules.api.feign.SpecialOperationFeignService;
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.service.IOperationService;
@@ -9,7 +8,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.dao.DuplicateKeyException;
@@ -78,21 +77,21 @@ public class OperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundFreeze')")
     @ApiOperation(value = "业务计费 - 出库冻结余额")
     @PostMapping("/delOutboundFreeze")
-    public R delOutboundFreeze(@RequestBody DelOutboundVO delOutboundVO) {
+    public R delOutboundFreeze(@RequestBody DelOutboundOperationVO delOutboundVO) {
         return operationService.delOutboundFreeze(delOutboundVO);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundThaw')")
     @ApiOperation(value = "业务计费 - 出库解冻余额")
     @PostMapping("/delOutboundThaw")
-    public R delOutboundThaw(@RequestBody DelOutboundVO delOutboundVO) {
+    public R delOutboundThaw(@RequestBody DelOutboundOperationVO delOutboundVO) {
         return operationService.delOutboundThaw(delOutboundVO);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundDeductions')")
     @ApiOperation(value = "业务计费 - 出库扣款")
     @PostMapping("/delOutboundDeductions")
-    public R delOutboundDeductions(@RequestBody DelOutboundVO delOutboundVO) {
+    public R delOutboundDeductions(@RequestBody DelOutboundOperationVO delOutboundVO) {
         return operationService.delOutboundDeductions(delOutboundVO);
     }
 
