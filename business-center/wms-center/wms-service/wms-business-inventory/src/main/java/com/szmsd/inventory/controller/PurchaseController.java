@@ -119,7 +119,7 @@ public class PurchaseController extends BaseController {
      * @return
      */
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:add')")
-    @PostMapping(value = "transport/warehousing/{idList}")
+    @PostMapping(value = "transport/warehousing")
     @ApiOperation(value = "转运入库-提交")
     public R transportWarehousingSubmit(@RequestBody TransportWarehousingAddDTO transportWarehousingAddDTO) {
         return R.ok(purchaseService.transportWarehousingSubmit(transportWarehousingAddDTO));
