@@ -41,6 +41,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     List<DelOutboundDetailVO> createPurchaseOrderListByIdList(List<String> idList);
 
     /**
+     * 获取转运单详情
+     *
+     * @param idList
+     * @return
+     */
+    List<DelOutboundDetailVO> getTransshipmentProductData(List<String> idList);
+
+    /**
      * 查询出库单模块列表
      *
      * @param queryDto 出库单模块
@@ -259,5 +267,6 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return List<DelOutboundExportListDto>
      */
     List<DelOutboundExportListDto> exportList(DelOutboundListQueryDto queryDto);
+
 }
 
