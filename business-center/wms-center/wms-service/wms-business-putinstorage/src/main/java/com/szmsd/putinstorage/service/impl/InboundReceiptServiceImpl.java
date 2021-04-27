@@ -93,7 +93,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      */
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO) {
+    public InboundReceiptInfoVO saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO) {
         log.info("创建入库单：{}", createInboundReceiptDTO);
 
         Integer totalDeclareQty = createInboundReceiptDTO.getTotalDeclareQty();
@@ -122,6 +122,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         }
 
         log.info("创建入库单：操作完成");
+        return this.queryInfo(warehouseNo, false);
     }
 
     /**
