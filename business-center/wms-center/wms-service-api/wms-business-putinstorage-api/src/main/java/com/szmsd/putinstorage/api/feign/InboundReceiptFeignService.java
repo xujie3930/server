@@ -26,7 +26,7 @@ public interface InboundReceiptFeignService {
     @GetMapping("/inbound/receipt/info/{warehouseNo}")
     R<InboundReceiptInfoVO> info(@PathVariable("warehouseNo") String warehouseNo);
 
-    @PostMapping("/receipt/saveOrUpdate")
+    @PostMapping("/inbound/receipt/saveOrUpdate")
     @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
     R<InboundReceiptInfoVO> saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO);
 }
