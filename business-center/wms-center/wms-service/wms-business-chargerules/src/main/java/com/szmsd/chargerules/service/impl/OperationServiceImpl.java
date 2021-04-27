@@ -139,13 +139,14 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R calculateFreeze(DelOutboundOperationVO dto, String orderType, List<DelOutboundOperationDetailVO> details, BigDecimal amount) {
         Long qty;
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
+        Operation operation = new Operation();
         for (DelOutboundOperationDetailVO vo : details) {
-            Operation operation = getOperationDetails(dto, orderType, vo.getWeight(), "未找到" + dto.getOrderType() + "配置");
+            operation = getOperationDetails(dto, orderType, vo.getWeight(), "未找到" + dto.getOrderType() + "配置");
             qty = vo.getQty();
             amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), qty).add(amount);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
-        return this.freezeBalance(dto, count, amount);
+        return this.freezeBalance(dto, count, amount, operation);
     }
 
     /**
@@ -201,10 +202,10 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return operation;
     }
 
-    private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount) {
+    private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount,Operation operation) {
         ChargeLog chargeLog = setChargeLog(dto, count);
         chargeLog.setHasFreeze(true);
-        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), HttpRechargeConstants.RechargeCurrencyCode.CNY.name(), dto.getOrderNo(), amount);
+        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), operation.getCurrencyCode(), dto.getOrderNo(), amount);
         return payService.freezeBalance(cusFreezeBalanceDTO, chargeLog);
     }
 
@@ -227,7 +228,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         ChargeLog chargeLog = this.selectLog(dto.getOrderNo());
         AssertUtil.notNull(chargeLog, "该单没有冻结金额，无法解冻 orderNo: " + dto.getOrderNo());
         chargeLog.setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
-        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(chargeLog.getCustomCode(), HttpRechargeConstants.RechargeCurrencyCode.CNY.name(), chargeLog.getOrderNo(), chargeLog.getAmount());
+        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(chargeLog.getCustomCode(), chargeLog.getCurrencyCode(), chargeLog.getOrderNo(), chargeLog.getAmount());
         return payService.thawBalance(cusFreezeBalanceDTO, chargeLog);
     }
 
@@ -239,13 +240,13 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         accountSerialBillDTO.setChargeCategory("操作费");
         accountSerialBillDTO.setChargeType(chargeLog.getOperationType());
         accountSerialBillDTO.setAmount(chargeLog.getAmount());
-        accountSerialBillDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        accountSerialBillDTO.setCurrencyCode(chargeLog.getCurrencyCode());
         serialBillInfoList.add(accountSerialBillDTO);
         accountSerialBillDTO.setWarehouseCode(chargeLog.getWarehouseCode());
         custPayDTO.setCusCode(chargeLog.getCustomCode());
         custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
         custPayDTO.setPayMethod(BillEnum.PayMethod.BUSINESS_OPERATE);
-        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        custPayDTO.setCurrencyCode(chargeLog.getCurrencyCode());
         custPayDTO.setAmount(chargeLog.getAmount());
         custPayDTO.setNo(chargeLog.getOrderNo());
         custPayDTO.setSerialBillInfoList(serialBillInfoList);

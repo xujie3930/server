@@ -40,7 +40,7 @@ public class PayServiceImpl implements IPayService {
     @Override
     public R pay(CustPayDTO custPayDTO, ChargeLog chargeLog) {
         chargeLog.setCustomCode(custPayDTO.getCusCode());
-        chargeLog.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        chargeLog.setCurrencyCode(custPayDTO.getCurrencyCode());
         chargeLog.setAmount(custPayDTO.getAmount());
         chargeLog.setOperationPayMethod(custPayDTO.getPayMethod().getPaymentName());
         chargeLog.setHasFreeze(false);
@@ -69,7 +69,7 @@ public class PayServiceImpl implements IPayService {
     @Override
     public R thawBalance(CusFreezeBalanceDTO dto, ChargeLog chargeLog) {
         chargeLog.setCustomCode(dto.getCusCode());
-        chargeLog.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+        chargeLog.setCurrencyCode(dto.getCurrencyCode());
         chargeLog.setAmount(dto.getAmount());
         chargeLog.setHasFreeze(false);
         R r = rechargesFeignService.thawBalance(dto);

@@ -40,6 +40,14 @@ public class WarehouseOperation extends BaseEntity {
     @TableField
     private BigDecimal price;
 
+    @ApiModelProperty(value = "币种编码")
+    @TableField
+    private String currencyCode;
+
+    @ApiModelProperty(value = "币种名称")
+    @TableField
+    private String currencyName;
+
     @ApiModelProperty(value = "计费单位")
     @TableField
     private String unit;

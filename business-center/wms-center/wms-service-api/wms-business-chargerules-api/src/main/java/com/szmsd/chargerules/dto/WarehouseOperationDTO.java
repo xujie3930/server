@@ -23,6 +23,12 @@ public class WarehouseOperationDTO implements Serializable {
     @ApiModelProperty(value = "价格")
     private BigDecimal price;
 
+    @ApiModelProperty(value = "币种编码")
+    private String currencyCode;
+
+    @ApiModelProperty(value = "币种名称")
+    private String currencyName;
+
     @ApiModelProperty(value = "计费单位")
     private String unit;
 

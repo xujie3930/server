@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -25,6 +26,12 @@ public class SpecialOperationDTO implements Serializable {
 
     @ApiModelProperty(value = "续件价格")
     private BigDecimal nextPrice;
+
+    @ApiModelProperty(value = "币种编码")
+    private String currencyCode;
+
+    @ApiModelProperty(value = "币种名称")
+    private String currencyName;
 
     @ApiModelProperty(value = "计费单位")
     private String unit;
