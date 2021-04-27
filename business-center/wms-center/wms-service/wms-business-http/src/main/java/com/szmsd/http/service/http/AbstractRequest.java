@@ -44,7 +44,7 @@ abstract class AbstractRequest extends BaseRequest {
     @Autowired
     private Actuator actuator;
 
-    public AbstractRequest(HttpConfig httpConfig) {
+    protected AbstractRequest(HttpConfig httpConfig) {
         this.httpConfig = httpConfig;
     }
 
@@ -224,16 +224,16 @@ abstract class AbstractRequest extends BaseRequest {
         if (this.actuator.execute(actuatorParameter)) {
             // 循环调用
             Map<String, UrlGroupConfig> urlGroup = this.httpConfig.getUrlGroup();
-            for (String urlGroupNameKey : urlGroup.keySet()) {
-                if (urlGroupName.equals(urlGroupNameKey)) {
-                    // 自己的不再调用
+            for (Map.Entry<String, UrlGroupConfig> entry : urlGroup.entrySet()) {
+                // 自己的不再调用
+                if (urlGroupName.equals(entry.getKey())) {
                     continue;
                 }
                 // 线程池执行任务
                 MultipleChannelRequest.run(() -> {
-                    UrlGroupConfig urlGroupConfig = urlGroup.get(urlGroupNameKey);
+                    UrlGroupConfig urlGroupConfig = entry.getValue();
                     UrlConfig urlConfigAdapter = getUrlConfigAdapter(urlGroupConfig, httpUrlType);
-                    reFunction.apply(urlGroupNameKey, urlConfigAdapter);
+                    reFunction.apply(entry.getKey(), urlConfigAdapter);
                 });
             }
         }
@@ -299,22 +299,36 @@ abstract class AbstractRequest extends BaseRequest {
             responseBody = new FileStream();
             HttpResponseBody.HttpResponseByteArrayWrapper httpResponseByteArrayWrapper = (HttpResponseBody.HttpResponseByteArrayWrapper) httpResponseBody;
             Header[] headers = httpResponseByteArrayWrapper.getHeaders();
+            responseBody.setContentDisposition(this.getContentDisposition(headers));
             byte[] byteArray = httpResponseByteArrayWrapper.getByteArray();
-            if (ArrayUtils.isNotEmpty(headers)) {
-                for (Header header : headers) {
-                    if (null == header) {
-                        continue;
-                    }
-                    if ("Content-Disposition".equals(header.getName())) {
-                        responseBody.setContentDisposition(header.getValue());
-                    }
-                }
-            }
             if (null != byteArray) {
                 responseBody.setInputStream(byteArray);
             }
         }
         return responseBody;
+    }
+
+    private String getContentDisposition(Header[] headers) {
+        if (ArrayUtils.isEmpty(headers)) {
+            return null;
+        }
+        Header header = this.getHeader(headers, "Content-Disposition");
+        if (null == header) {
+            return null;
+        }
+        return header.getValue();
+    }
+
+    private Header getHeader(Header[] headers, String headerName) {
+        for (Header header : headers) {
+            if (null == header) {
+                continue;
+            }
+            if (headerName.equals(header.getName())) {
+                return header;
+            }
+        }
+        return null;
     }
 
     protected HttpResponseBody httpGetFile(String warehouseCode, String api, Object object, Object... pathVariable) {

@@ -10,8 +10,11 @@ import java.lang.reflect.InvocationTargetException;
  * @author zhangyuyuan
  * @date 2021-04-13 22:40
  */
-public class Utils {
-    private final static Logger LOGGER = LoggerFactory.getLogger(Utils.class);
+public final class Utils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
+
+    private Utils() {
+    }
 
     public static String get(Object object, String path) {
         Object co = object;
@@ -39,6 +42,6 @@ public class Utils {
         // base-info.seller         ->>> baseinfo.seller
         // base-info.shipment-rule  ->>> baseinfo.shipmentrule
         // exception.processing     ->>> exception.processing
-        return api.trim().replaceAll("-", "").toLowerCase();
+        return api.trim().replace("-", "").toLowerCase();
     }
 }

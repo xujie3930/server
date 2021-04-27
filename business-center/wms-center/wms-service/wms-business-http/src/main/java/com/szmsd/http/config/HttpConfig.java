@@ -6,10 +6,12 @@ import com.szmsd.http.enums.HttpUrlType;
 import com.szmsd.http.service.http.Utils;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -23,9 +25,8 @@ import java.util.Set;
 @Component
 @ConfigurationProperties(prefix = HttpConfig.CONFIG_PREFIX)
 public class HttpConfig {
-
     static final String CONFIG_PREFIX = "com.szmsd.http";
-
+    private Logger logger = LoggerFactory.getLogger(HttpConfig.class);
     // 路径组
     private Map<String, UrlGroupConfig> urlGroup;
     // 仓库组
@@ -46,32 +47,29 @@ public class HttpConfig {
      * 加载配置之前执行
      */
     public void loadBefore() {
+        // 多通道url配置 处理默认值
+        if (null == this.multipleChannelUrlSet) {
+            this.multipleChannelUrlSet = new HashSet<>();
+        }
+        // 多通道解析器开关值处理
+        if (null == this.resolverConfig) {
+            this.resolverConfig = new EnumMap<>(HttpUrlType.class);
+        }
     }
 
     /**
      * 加载配置之后执行
      */
     public void loadAfter() {
-        // 多通道url配置 处理默认值
-        if (null == this.multipleChannelUrlSet) {
-            this.multipleChannelUrlSet = new HashSet<>();
-        }
         // 对数据进行格式化
         Set<String> copySet = new HashSet<>();
         for (String value : multipleChannelUrlSet) {
             copySet.add(Utils.formatApi(value));
         }
         this.multipleChannelUrlSet = copySet;
-        copySet = null;
-        // 多通道解析器开关值处理
-        if (null == this.resolverConfig) {
-            this.resolverConfig = new HashMap<>();
-        }
         for (HttpUrlType value : HttpUrlType.values()) {
-            if (!this.resolverConfig.containsKey(value)) {
-                // 如果不存在，默认配置为true
-                this.resolverConfig.put(value, true);
-            }
+            // 如果不存在，默认配置为true
+            this.resolverConfig.putIfAbsent(value, true);
         }
     }
 
@@ -81,5 +79,8 @@ public class HttpConfig {
      * @param throwable throwable
      */
     public void loadError(Throwable throwable) {
+        if (null != throwable) {
+            logger.error(throwable.getMessage(), throwable);
+        }
     }
 }
