@@ -2,7 +2,7 @@ package com.szmsd.chargerules.api.feign.factory;
 
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
@@ -14,17 +14,17 @@ public class OperationFeignFallback implements FallbackFactory<OperationFeignSer
     public OperationFeignService create(Throwable throwable) {
         return new OperationFeignService() {
             @Override
-            public R delOutboundCharge(DelOutboundVO delOutboundVO) {
+            public R delOutboundCharge(DelOutboundOperationVO delOutboundVO) {
                 return R.convertResultJson(throwable);
             }
 
             @Override
-            public R delOutboundThaw(DelOutboundVO delOutboundVO) {
+            public R delOutboundThaw(DelOutboundOperationVO delOutboundVO) {
                 return R.convertResultJson(throwable);
             }
 
             @Override
-            public R delOutboundFreeze(DelOutboundVO delOutboundVO) {
+            public R delOutboundFreeze(DelOutboundOperationVO delOutboundVO) {
                 return R.convertResultJson(throwable);
             }
         };
