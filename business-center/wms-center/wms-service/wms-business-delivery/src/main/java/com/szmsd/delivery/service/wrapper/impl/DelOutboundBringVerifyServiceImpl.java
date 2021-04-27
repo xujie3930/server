@@ -353,9 +353,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         List<ShipmentDetailInfoDto> details;
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
             details = new ArrayList<>();
-            for (DelOutboundDetail detail : detailList) {
+            // 转运出库，明细不传
+            /*for (DelOutboundDetail detail : detailList) {
                 details.add(new ShipmentDetailInfoDto(detail.getProductName(), detail.getQty(), detail.getNewLabelCode()));
-            }
+            }*/
         } else {
             // 查询sku详细信息
             List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
