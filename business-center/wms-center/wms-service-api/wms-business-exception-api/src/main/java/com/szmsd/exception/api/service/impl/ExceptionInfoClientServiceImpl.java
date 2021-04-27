@@ -22,4 +22,9 @@ public class ExceptionInfoClientServiceImpl implements ExceptionInfoClientServic
     public R processException(ProcessExceptionRequest processExceptionRequest) {
         return exceptionInfoFeignService.processException(processExceptionRequest);
     }
+
+    @Override
+    public Integer countprocessException(String sellerCode){
+        return exceptionInfoFeignService.countException(sellerCode).getData();
+    }
 }
