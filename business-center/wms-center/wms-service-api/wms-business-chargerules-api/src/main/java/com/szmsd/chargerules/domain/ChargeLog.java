@@ -55,6 +55,9 @@ public class ChargeLog extends BaseEntity {
     @ApiModelProperty(value = "是否成功")
     private Boolean success;
 
+    @ApiModelProperty(value = "该单是否存在冻结额")
+    private Boolean hasFreeze;
+
     @ApiModelProperty(value = "信息")
     private String message;
 

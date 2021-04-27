@@ -70,32 +70,33 @@ public class OperationController extends BaseController {
     @ApiOperation(value = "业务计费逻辑 - 查询订单类型")
     @GetMapping("/getOrderTypeList")
     public R<List<OrderTypeLabelVo>> getOrderTypeList() {
-        return R.ok(Arrays.stream(DelOutboundOrderTypeEnum.values()).map(value ->
-                new OrderTypeLabelVo(value.getCode(), value.getName())).collect(Collectors.toList()));
+        List<OrderTypeLabelVo> collect = Arrays.stream(DelOutboundOrderTypeEnum.values()).map(value ->
+                new OrderTypeLabelVo(value.getCode(), value.getName())).collect(Collectors.toList());
+        collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.BATCH.getCode().concat("-packing"), DelOutboundOrderTypeEnum.BATCH.getName().concat("-装箱费")));
+        collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.BATCH.getCode().concat("-label"), DelOutboundOrderTypeEnum.BATCH.getName().concat("-贴标费")));
+        collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.COLLECTION.getCode().concat("-manySku"), DelOutboundOrderTypeEnum.BATCH.getName().concat("-多SKU")));
+        return R.ok(collect);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundFreeze')")
     @ApiOperation(value = "业务计费 - 出库冻结余额")
     @PostMapping("/delOutboundFreeze")
     public R delOutboundFreeze(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        return R.ok();
-//        return operationService.delOutboundFreeze(delOutboundVO);
+        return operationService.delOutboundFreeze(delOutboundVO);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundThaw')")
     @ApiOperation(value = "业务计费 - 出库解冻余额")
     @PostMapping("/delOutboundThaw")
     public R delOutboundThaw(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        return R.ok();
-//        return operationService.delOutboundThaw(delOutboundVO);
+        return operationService.delOutboundThaw(delOutboundVO);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundDeductions')")
     @ApiOperation(value = "业务计费 - 出库扣款")
     @PostMapping("/delOutboundDeductions")
     public R delOutboundDeductions(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        return R.ok();
-//        return operationService.delOutboundDeductions(delOutboundVO);
+        return operationService.delOutboundDeductions(delOutboundVO);
     }
 
 }

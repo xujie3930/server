@@ -4,7 +4,7 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.delivery.dto.DelOutboundDetailDto;
+import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -32,9 +32,9 @@ public class PayServiceImpl implements IPayService {
     }
 
     @Override
-    public BigDecimal manySkuCalculate(BigDecimal firstPrice, BigDecimal nextPrice, List<DelOutboundDetailDto> delOutboundDetailList) {
-        return delOutboundDetailList.stream().map(value -> this.calculate(firstPrice , nextPrice,
-                value.getQty())).reduce(BigDecimal::add).get();
+    public BigDecimal manySkuCalculate(BigDecimal firstPrice, BigDecimal nextPrice, List<DelOutboundOperationDetailVO> details) {
+        return details.stream().map(value -> this.calculate(firstPrice , nextPrice,
+                value.getQty())).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }
 
     @Override
@@ -43,15 +43,9 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
         chargeLog.setAmount(custPayDTO.getAmount());
         chargeLog.setOperationPayMethod(custPayDTO.getPayMethod().getPaymentName());
+        chargeLog.setHasFreeze(false);
         R r = rechargesFeignService.warehouseFeeDeductions(custPayDTO);
-        if (r.getCode() != 200)
-            log.error("pay() pay failed.. msg: {},data: {}", r.getMsg(), r.getData());
-        chargeLog.setSuccess(r.getCode() == 200);
-        chargeLog.setMessage(r.getMsg());
-        int insert = chargeLogService.save(chargeLog);
-        if (insert < 1) {
-            log.error("pay() failed {}", chargeLog);
-        }
+        updateAndSave(chargeLog, r);
         return r;
     }
 
@@ -77,16 +71,22 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setCustomCode(dto.getCusCode());
         chargeLog.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
         chargeLog.setAmount(dto.getAmount());
+        chargeLog.setHasFreeze(false);
         R r = rechargesFeignService.thawBalance(dto);
-        if (r.getCode() != 200)
-            log.error("thawBalance() pay failed.. msg: {},data: {}", r.getMsg(), r.getData());
+        updateAndSave(chargeLog, r);
+        return r;
+    }
+
+    private void updateAndSave(ChargeLog chargeLog, R r) {
+        if (r.getCode() == 200) {
+            chargeLogService.update(chargeLog.getId()); // 解冻 把之前冻结记录的hasFreeze修改为false
+        }
         chargeLog.setSuccess(r.getCode() == 200);
         chargeLog.setMessage(r.getMsg());
         int insert = chargeLogService.save(chargeLog);
         if (insert < 1) {
             log.error("pay() failed {}", chargeLog);
         }
-        return r;
     }
 
 }
