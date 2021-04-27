@@ -106,7 +106,8 @@ public class PurchaseAddDTO implements IBOConvert {
     @ApiModelProperty(value = "类别编码")
     @Excel(name = "类别编码")
     private String warehouseCategoryCode;
-
+    @ApiModelProperty(value = "备注")
+    private String remark;
     @ApiModelProperty(value = "采购列表", required = true)
     List<PurchaseDetailsAddDTO> purchaseDetailsAddList;
     @ApiModelProperty(value = "入库列表", required = true)

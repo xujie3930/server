@@ -2,6 +2,7 @@ package com.szmsd.inventory.controller;
 
 import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
+import com.szmsd.inventory.domain.dto.TransportWarehousingAddDTO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
 import io.swagger.annotations.ApiImplicitParam;
@@ -108,5 +109,19 @@ public class PurchaseController extends BaseController {
     @ApiOperation(value = "取消采购单入库", notes = "取消采购单入库 回调, 通过入库单id取消创建的采购单里面入库的请求数据")
     public R cancelByWarehouseNo(@PathVariable("warehouseNo") String warehouseNo) {
         return toOk(purchaseService.cancelByWarehouseNo(warehouseNo));
+    }
+
+
+    /**
+     * 转运-提交
+     *
+     * @param transportWarehousingAddDTO
+     * @return
+     */
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:add')")
+    @PostMapping(value = "transport/warehousing")
+    @ApiOperation(value = "转运入库-提交")
+    public R transportWarehousingSubmit(@RequestBody TransportWarehousingAddDTO transportWarehousingAddDTO) {
+        return R.ok(purchaseService.transportWarehousingSubmit(transportWarehousingAddDTO));
     }
 }

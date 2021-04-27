@@ -11,6 +11,7 @@ import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -39,6 +40,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return
      */
     List<DelOutboundDetailVO> createPurchaseOrderListByIdList(List<String> idList);
+
+    /**
+     * 获取转运单详情
+     *
+     * @param idList
+     * @return
+     */
+    List<DelOutboundDetailVO> getTransshipmentProductData(List<String> idList);
 
     /**
      * 查询出库单模块列表
@@ -235,6 +244,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     int handler(DelOutboundHandlerDto dto);
 
     /**
+     * 获取标签
+     *
+     * @param response response
+     * @param dto      dto
+     */
+    void label(HttpServletResponse response, DelOutboundLabelDto dto);
+
+    /**
      * sku导入
      *
      * @param warehouseCode warehouseCode
@@ -259,5 +276,6 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return List<DelOutboundExportListDto>
      */
     List<DelOutboundExportListDto> exportList(DelOutboundListQueryDto queryDto);
+
 }
 

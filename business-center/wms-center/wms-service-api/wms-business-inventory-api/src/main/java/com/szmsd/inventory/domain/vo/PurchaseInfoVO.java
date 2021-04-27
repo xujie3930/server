@@ -82,9 +82,9 @@ public class PurchaseInfoVO {
     @Excel(name = "出库单号")
     private String orderNo;
     @ApiModelProperty(value = "采购单列表")
-    private List<PurchaseInfoDetailVO> purchaseInfoDetailList;
+    private List<PurchaseInfoDetailVO> purchaseDetailsAddList;
     @ApiModelProperty(value = "预入库列表")
-    private List<PurchaseStorageDetailsVO> purchaseStorageDetailsList;
+    private List<PurchaseStorageDetailsVO> purchaseStorageDetailsAddList;
 
     @Override
     public String toString() {

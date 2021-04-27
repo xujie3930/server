@@ -288,11 +288,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             if (null != responseObject) {
                 if (responseObject.isSuccess()) {
                     FileStream fileStream = responseObject.getObject();
-                    String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
-                    // 保存文件
-                    // 单据类型/年/月/日/单据号
-                    String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
-                    File file = new File(basedir + "/shipment/label/" + labelBizPath);
+                    String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound);
+                    File file = new File(pathname);
                     if (!file.exists()) {
                         try {
                             FileUtils.forceMkdir(file);
@@ -341,9 +338,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
-            String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
-            File labelFile = new File(basedir + "/shipment/label/" + labelBizPath + "/" + delOutbound.getShipmentOrderNumber());
+            String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+            File labelFile = new File(pathname);
             if (!labelFile.exists()) {
                 throw new CommonException("999", "标签文件不存在");
             }

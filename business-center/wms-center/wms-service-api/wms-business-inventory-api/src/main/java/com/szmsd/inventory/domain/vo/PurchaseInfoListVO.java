@@ -35,9 +35,9 @@ public class PurchaseInfoListVO {
     @Excel(name = "ID")
     private Integer id;
 
-    @ApiModelProperty(value = "卖家代码")
-    @Excel(name = "卖家代码")
-    private String sellerCode;
+    @ApiModelProperty(value = "客户代码")
+    @Excel(name = "客户代码")
+    private String customCode;
 
     @ApiModelProperty(value = "采购单号")
     @Excel(name = "采购单号")

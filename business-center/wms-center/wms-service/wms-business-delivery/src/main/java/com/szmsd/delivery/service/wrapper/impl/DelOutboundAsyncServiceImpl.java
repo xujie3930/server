@@ -16,7 +16,7 @@ import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
@@ -150,9 +150,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 completedState = "OP_FEE_DE";
             }
             if ("OP_FEE_DE".equals(completedState)) {
-                DelOutboundVO delOutboundVO = new DelOutboundVO();
-                delOutboundVO.setOrderNo(orderNo);
-                R<?> r = this.operationFeignService.delOutboundCharge(delOutboundVO);
+                DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+                delOutboundOperationVO.setOrderNo(orderNo);
+                R<?> r = this.operationFeignService.delOutboundCharge(delOutboundOperationVO);
                 if (null == r || Constants.SUCCESS != r.getCode()) {
                     throw new CommonException("999", "扣减操作费用失败");
                 }
@@ -264,9 +264,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 cancelledState = "UN_OP_FEE";
             }
             if ("UN_OP_FEE".equals(cancelledState)) {
-                DelOutboundVO delOutboundVO = new DelOutboundVO();
-                delOutboundVO.setOrderNo(orderNo);
-                R<?> r = this.operationFeignService.delOutboundThaw(delOutboundVO);
+                DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+                delOutboundOperationVO.setOrderNo(orderNo);
+                R<?> r = this.operationFeignService.delOutboundThaw(delOutboundOperationVO);
                 if (null == r || Constants.SUCCESS != r.getCode()) {
                     throw new CommonException("999", "取消冻结操作费用失败");
                 }

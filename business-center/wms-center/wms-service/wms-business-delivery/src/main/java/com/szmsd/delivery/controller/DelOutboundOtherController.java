@@ -19,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiSort;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -78,7 +79,12 @@ public class DelOutboundOtherController extends BaseController {
                 warehouse.getProvince(),
                 new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName())
         ));
-        criteria.setIsElectriferous(ShipmentType.BATTERY.equals(this.baseProductClientService.buildShipmentType(dto.getWarehouseCode(), dto.getSkus())));
+        if (CollectionUtils.isNotEmpty(dto.getSkus())) {
+            criteria.setIsElectriferous(ShipmentType.BATTERY.equals(this.baseProductClientService.buildShipmentType(dto.getWarehouseCode(), dto.getSkus())));
+        }
+        if (CollectionUtils.isNotEmpty(dto.getProductAttributes())) {
+            criteria.setIsElectriferous(ShipmentType.BATTERY.equals(ShipmentType.highest(dto.getProductAttributes())));
+        }
         return R.ok(this.htpPricedProductClientService.inService(criteria));
     }
 }
