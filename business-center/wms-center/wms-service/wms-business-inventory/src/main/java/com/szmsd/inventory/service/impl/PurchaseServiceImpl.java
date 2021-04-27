@@ -2,25 +2,36 @@ package com.szmsd.inventory.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
+import com.szmsd.common.core.enums.ExceptionMessageEnum;
+import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
+import com.szmsd.inventory.config.IBOConvert;
 import com.szmsd.inventory.domain.Purchase;
+import com.szmsd.inventory.domain.PurchaseDetails;
 import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
+import com.szmsd.inventory.domain.dto.PurchaseDetailsAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseLogAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
 import com.szmsd.inventory.enums.PurchaseEnum;
+import com.szmsd.inventory.mapper.PurchaseDetailsMapper;
 import com.szmsd.inventory.mapper.PurchaseMapper;
 import com.szmsd.inventory.service.IPurchaseDetailsService;
 import com.szmsd.inventory.service.IPurchaseLogService;
 import com.szmsd.inventory.service.IPurchaseService;
+import com.szmsd.inventory.service.IPurchaseStorageDetailsService;
 import com.szmsd.system.api.domain.SysUser;
+import jodd.util.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -41,28 +52,12 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     private IPurchaseLogService iPurchaseLogService;
     @Resource
     private IPurchaseDetailsService iPurchaseDetailsService;
+    @Resource
+    private IPurchaseStorageDetailsService iPurchaseStorageDetailsService;
 
     @Override
-    public PurchaseInfoVO selectPurchaseByPurchaseNo(String id) {
-        /*SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
-        PurchaseInfoDetailVO purchaseInfoDetailVO = new PurchaseInfoDetailVO();
-        List<Purchase> purchases = baseMapper.selectList(Wrappers.<Purchase>lambdaQuery()
-                .eq(StringUtils.isNotBlank(loginUserInfo.getSellerCode()), Purchase::getCustomCode, loginUserInfo.getSellerCode())
-                .eq(Purchase::getPurchaseNo, id)
-        );
-        List<PurchaseGoodsInfoVO> purchaseInfoVOS = new ArrayList<>(purchases.size());
-        purchases.forEach(x -> {
-            PurchaseGoodsInfoVO purchaseInfoVO = new PurchaseGoodsInfoVO();
-            BeanUtils.copyProperties(x, purchaseInfoVO);
-            purchaseInfoVOS.add(purchaseInfoVO);
-        });
-        purchaseInfoDetailVO.setPurchaseInfoList(purchaseInfoVOS);
-        String remark = purchases.stream().map(BaseEntity::getRemark).findAny().orElse("");
-        purchaseInfoDetailVO.setRemark(remark);
-        String purchaseNo = purchases.stream().map(Purchase::getPurchaseNo).findAny().orElse("");
-        purchaseInfoDetailVO.setPurchaseNo(purchaseNo);
-        return purchaseInfoDetailVO;*/
-        return null;
+    public PurchaseInfoVO selectPurchaseByPurchaseNo(String purchaseNo) {
+        return baseMapper.selectPurchaseByPurchaseNo(purchaseNo);
     }
 
     /**
@@ -94,39 +89,58 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         return baseMapper.deleteBatchIds(ids);
     }
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertPurchaseBatch(PurchaseAddDTO purchaseAddList) {
-       /* List<PurchaseAddDTO> purchase = purchaseAddList.getPurchaseInfoAddDTOList();
-        if (CollectionUtils.isEmpty(purchase)) {
-            return 0;
+    public int insertPurchaseBatch(PurchaseAddDTO purchaseAddDTO) {
+        log.info("新增采购单数据 {}", purchaseAddDTO);
+        AssertUtil.notNull(purchaseAddDTO, ExceptionMessageEnum.CANNOTBENULL);
+        Integer associationId;
+
+        boolean present = Optional.of(purchaseAddDTO).map(PurchaseAddDTO::getPurchaseNo).isPresent();
+        if (present) {
+//            String purchaseNo = serialNumberClientService.generateNumber("PURCHASE_ORDER");
+            String purchaseNo = "CG000000";
+            SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+            String customCode = loginUserInfo.getSellerCode();
+            purchaseAddDTO.setCustomCode(customCode);
+            purchaseAddDTO.setPurchaseNo(purchaseNo);
         }
-        log.info("新增采购单数据");
-        String purchaseNo = serialNumberClientService.generateNumber("PURCHASE_ORDER");
-        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
-        String sellerCode = loginUserInfo.getSellerCode();
-        String remark = purchaseAddList.getRemark();
-        ArrayList<Purchase> purchasesAdd = new ArrayList<>(purchase.size());
-        for (PurchaseAddDTO x : purchase) {
-            x.setPurchaseNo(purchaseNo);
-            Purchase purchase1 = new Purchase();
-            x.setCustomCode(sellerCode);
-            BeanUtils.copyProperties(x, purchase1);
-            purchase1.setRemark(remark);
-            purchasesAdd.add(purchase1);
-        }
-        boolean b = saveBatch(purchasesAdd);
-        //添加日志
-        addLog(purchaseNo, purchasesAdd.get(0).getId(), purchaseAddList.getOrderNoList());*/
-        return true ? 1 : 0;
+        //计算采购数量
+        purchaseAddDTO.insertHandle();
+        Purchase purchase = purchaseAddDTO.convertThis(Purchase.class);
+        log.info("采购单新增信息{}", purchase);
+        boolean saveBoolean = this.saveOrUpdate(purchase);
+        associationId = purchase.getId();
+
+        //插入采购单数据
+        List<PurchaseDetailsAddDTO> purchaseDetailsAddList = purchaseAddDTO.getPurchaseDetailsAddList();
+        Optional.ofNullable(purchaseDetailsAddList).filter(CollectionUtils::isNotEmpty).ifPresent(
+                purchaseDetailList -> {
+                    List<PurchaseDetails> entityList = IBOConvert.copyListProperties(purchaseDetailList, PurchaseDetails::new);
+                    entityList.forEach(x -> x.setAssociationId(associationId));
+                    iPurchaseDetailsService.saveOrUpdateBatch(entityList);
+                });
+
+        //添加采购日志
+        //调用批量入库
+
+        addLog(associationId, purchaseAddDTO);
+        //添加 入库日志 在入库里面做
+        return saveBoolean ? 1 : 0;
     }
 
-    private void addLog(String purchaseNo, Integer assId, List<String> orderNoList) {
+    private void addLog(Integer associationId, PurchaseAddDTO purchaseAddDTO) {
+        if (null != purchaseAddDTO.getId()) {
+            return;
+        }
         PurchaseLogAddDTO purchaseLogAddDTO = new PurchaseLogAddDTO();
-        purchaseLogAddDTO.setPurchaseNo(purchaseNo);
-        purchaseLogAddDTO.setType(PurchaseEnum.PURCHASE_ORDER);
-        purchaseLogAddDTO.setAssociationId(assId);
-        purchaseLogAddDTO.setOrderNoList(orderNoList);
+        purchaseLogAddDTO
+                .setPurchaseNo(purchaseAddDTO.getPurchaseNo())
+                .setType(PurchaseEnum.PURCHASE_ORDER)
+                .setAssociationId(associationId)
+                .setOrderNo(purchaseAddDTO.getOrderNo());
+        log.info("新增采购日志 {}", purchaseLogAddDTO);
         iPurchaseLogService.insertPurchaseLog(purchaseLogAddDTO);
     }
 }

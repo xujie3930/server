@@ -1,5 +1,6 @@
 package com.szmsd.inventory.domain;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -71,6 +72,9 @@ public class PurchaseLog extends BaseEntity {
     @ApiModelProperty(value = "日志内容")
     @Excel(name = "日志内容")
     private String logDetails;
-
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 
 }

@@ -2,6 +2,9 @@ package com.szmsd.inventory.mapper;
 
 import com.szmsd.inventory.domain.PurchaseStorageDetails;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,5 +15,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2021-04-26
  */
 public interface PurchaseStorageDetailsMapper extends BaseMapper<PurchaseStorageDetails> {
-
+    List<PurchaseStorageDetailsVO> selectPurchaseStorageDetailsListByAssId(Integer assId);
 }

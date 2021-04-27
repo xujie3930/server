@@ -1,5 +1,6 @@
 package com.szmsd.inventory.domain;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -72,6 +73,10 @@ public class PurchaseDetails extends BaseEntity {
     @Excel(name = "采购数量")
     private Integer purchaseQuantity;
 
+    @ApiModelProperty(value = "剩余的采购数量")
+    @Excel(name = "剩余的采购数量")
+    private Integer remainingPurchaseQuantity;
+
     @ApiModelProperty(value = "已创建入库单的数量")
     @Excel(name = "已创建入库单的数量")
     private Integer quantityInStorageCreated;
@@ -84,5 +89,8 @@ public class PurchaseDetails extends BaseEntity {
     @Excel(name = "附件图片地址")
     private String attachmentUrl;
 
-
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }

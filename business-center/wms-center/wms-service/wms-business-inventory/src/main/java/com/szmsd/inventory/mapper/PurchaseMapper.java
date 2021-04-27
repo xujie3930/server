@@ -4,6 +4,7 @@ import com.szmsd.inventory.domain.Purchase;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
+import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -19,4 +20,6 @@ import java.util.List;
 public interface PurchaseMapper extends BaseMapper<Purchase> {
 
     List<PurchaseInfoListVO> selectPurchaseList(@Param("cm") PurchaseQueryDTO purchaseQueryDTO);
+
+    PurchaseInfoVO selectPurchaseByPurchaseNo(String purchaseNo);
 }

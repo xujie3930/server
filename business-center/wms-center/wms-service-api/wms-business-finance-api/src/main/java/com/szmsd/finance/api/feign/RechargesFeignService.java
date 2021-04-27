@@ -2,14 +2,14 @@ package com.szmsd.finance.api.feign;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.factory.RechargeFeignFallback;
+import com.szmsd.finance.dto.AccountBalanceDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
 import com.szmsd.finance.enums.BusinessFssInterface;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author liulei
@@ -36,4 +36,8 @@ public interface RechargesFeignService {
     @ApiOperation(value = "解冻余额")
     @PostMapping("/accountBalance/thawBalance")
     public R thawBalance(@RequestBody CusFreezeBalanceDTO dto);
+
+    @ApiOperation(value = "查询账户余额信息")
+    @PostMapping("/accountBalance/list")
+    R accountList(@RequestBody AccountBalanceDTO dto);
 }

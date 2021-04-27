@@ -64,9 +64,9 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @PostMapping("/receipt/saveOrUpdate")
     @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
-    public R saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
-        iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
-        return R.ok();
+    public R<InboundReceiptInfoVO> saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
+        InboundReceiptInfoVO info = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
+        return R.ok(info);
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")

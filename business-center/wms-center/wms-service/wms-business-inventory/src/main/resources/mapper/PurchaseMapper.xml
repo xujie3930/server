@@ -27,7 +27,17 @@
         <result column="delivery_way" property="deliveryWay"/>
         <result column="order_no" property="orderNo"/>
     </resultMap>
-
+    <resultMap id="selectPurchaseByPurchaseNoMap" type="com.szmsd.inventory.domain.vo.PurchaseInfoVO">
+        <id column="id" property="id"/>
+        <collection column="id" property="purchaseInfoDetailList"
+                    ofType="com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO"
+                    select="com.szmsd.inventory.mapper.PurchaseDetailsMapper.selectPurchaseInfoDetailListByAssId"
+        />
+        <collection column="id" property="purchaseStorageDetailsList"
+                    ofType="com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO"
+                    select="com.szmsd.inventory.mapper.PurchaseStorageDetailsMapper.selectPurchaseStorageDetailsListByAssId"
+        />
+    </resultMap>
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         create_by_name,
@@ -35,6 +45,7 @@
                 update_by_name,
                 update_time,
                 remark,
+                remaining_purchase_quantity,
             id, create_by, update_by, version, del_flag, custom_code, purchase_no, available_inventory, purchase_quantity, quantity_in_storage_created, arrival_quantity, warehouse_code, warehouse_name, order_type, order_type_name, delivery_way_name, delivery_way, order_no
     </sql>
 
@@ -60,5 +71,12 @@
             </if>
         </where>
         ORDER BY id DESC
+    </select>
+
+    <select id="selectPurchaseByPurchaseNo" resultType="com.szmsd.inventory.domain.vo.PurchaseInfoVO">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM purchase
+        WHERE purchase_no = #{purchaseNo};
     </select>
 </mapper>

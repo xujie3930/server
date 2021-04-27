@@ -9,6 +9,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -22,7 +26,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(value = "采购单", description = "Purchase对象")
+@ApiModel(description = "Purchase对象")
 public class PurchaseDetailsAddDTO {
 
     private static final long serialVersionUID = 1L;
@@ -55,6 +59,9 @@ public class PurchaseDetailsAddDTO {
     @ApiModelProperty(value = "采购数量")
     @Excel(name = "采购数量")
     private Integer purchaseQuantity;
+    @ApiModelProperty(value = "剩余的采购数量")
+    @Excel(name = "剩余的采购数量")
+    private Integer remainingPurchaseQuantity;
 
     @ApiModelProperty(value = "已创建入库单的数量")
     @Excel(name = "已创建入库单的数量")
