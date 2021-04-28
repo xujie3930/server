@@ -11,7 +11,9 @@ import lombok.experimental.Accessors;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
@@ -122,6 +124,15 @@ public class PurchaseAddDTO implements IBOConvert {
                     quantityInStorageCreated = x.stream().mapToInt(PurchaseStorageDetailsAddDTO::getDeclareQty).sum();
                     //计算剩余需要采购的数量
                     remainingPurchaseQuantity = purchaseQuantity - quantityInStorageCreated;
+
+                    //更新sku剩余采购数量
+                    Map<String, Integer> numberOfWarehoused = x.stream().collect(Collectors.groupingBy(PurchaseStorageDetailsAddDTO::getSku, Collectors.summingInt(PurchaseStorageDetailsAddDTO::getDeclareQty)));
+                    purchaseDetailsOpt.ifPresent(purchaseDetails -> {
+                        purchaseDetails.forEach(details -> {
+                            int i = details.getRemainingPurchaseQuantity() - (numberOfWarehoused.get(details.getSku()));
+                            details.setRemainingPurchaseQuantity(i);
+                        });
+                    });
                 });
     }
 
