@@ -66,4 +66,6 @@ public class InboundReceiptDTO {
     @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
     private String status;
 
+    @ApiModelProperty(value = "是否是转运")
+    private String isFromTransport;
 }

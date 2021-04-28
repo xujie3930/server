@@ -50,6 +50,7 @@ public class RemoteRequest {
                 .setRefOrderNo(inboundReceiptInfoVO.getWarehouseNo())
                 .setDetailPackages(receiptDetailPackageInfos)
         ;
+        log.info("调用WMS创建入库单{}",createPackageReceiptRequest);
         R<ResponseVO> aPackage = htpInboundFeignService.createPackage(createPackageReceiptRequest);
         ResponseVO.resultAssert(aPackage, "创建转运入库单");
     }

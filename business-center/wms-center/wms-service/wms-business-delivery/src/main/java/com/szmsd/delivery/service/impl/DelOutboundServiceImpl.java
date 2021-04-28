@@ -185,6 +185,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         List<DelOutboundDetail> delOutboundDetailList = delOutboundDetailService.listByOrderNos(collect1);
 
         List<DelOutboundDetailVO> resultList = new ArrayList<>();
+        //不同仓库 要获取其他信息需要仓库编码和用户code查询
         baseInfoList.forEach((warehouseCode, dealOutBoundList) -> {
 
             //获取sku其他信息

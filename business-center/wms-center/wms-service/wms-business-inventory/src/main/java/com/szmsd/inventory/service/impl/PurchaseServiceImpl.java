@@ -167,7 +167,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         //调用批量入库
         purchaseOrderStorage(associationId, purchaseAddDTO);
         //回调出库表 回写采购单号
-        remoteComponent.setPurchaseNo(purchaseAddDTO.getPurchaseNo(),purchaseAddDTO.getOrderNo());
+        remoteComponent.setPurchaseNo(purchaseAddDTO.getPurchaseNo(), purchaseAddDTO.getOrderNo());
         return saveBoolean ? 1 : 0;
     }
 
@@ -334,7 +334,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                 .setTotalDeclareQty(Integer.parseInt(sum + ""))
 //                .setTotalDeclareQty(10)
                 .setTotalPutQty(0);
-
+        //当成商品sku使用
+        List<String> transferNoList = transportWarehousingAddDTO.getTransferNoList();
         //设置SKU列表数据
         ArrayList<InboundReceiptDetailDTO> inboundReceiptDetailAddList = new ArrayList<>();
         transshipmentProductData.forEach(addSku -> {
@@ -342,12 +343,15 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             inboundReceiptDetailDTO
                     .setDeclareQty(Integer.parseInt(addSku.getQty() + ""))
 //                    .setDeclareQty(10)
-                    .setSku(addSku.getSku())
-                    .setSkuName(addSku.getSku())
+                    // 设置sku为出库单号
+                    .setSku(addSku.getOrderNo())
+                    //出库单号
+                    .setDeliveryNo(addSku.getOrderNo())
+                    .setSkuName(addSku.getProductName())
             ;
             inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
         });
-        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
+        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList).setIsFromTransport("isFromTransport");
 
         InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
 
