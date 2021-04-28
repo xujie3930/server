@@ -37,6 +37,9 @@ public class InboundReceiptDetailVO {
     @Excel(name = "原产品编码")
     private String originCode;
 
+    @ApiModelProperty(value = "出库单号")
+    private String deliveryNo;
+
     @ApiModelProperty(value = "对版图片")
     private AttachmentFileDTO editionImage;
 

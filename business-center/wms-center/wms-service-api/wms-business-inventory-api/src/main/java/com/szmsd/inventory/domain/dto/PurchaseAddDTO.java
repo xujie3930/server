@@ -1,20 +1,20 @@
 package com.szmsd.inventory.domain.dto;
 
+import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.inventory.config.IBOConvert;
-import com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.math.NumberUtils;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -93,7 +93,7 @@ public class PurchaseAddDTO implements IBOConvert {
 
     @ApiModelProperty(value = "出库单号 - 前端缓存携带 , 拼接", required = true)
     @Excel(name = "出库单号")
-    private String orderNo;
+    private List<String> orderNo;
 
     @ApiModelProperty(value = "VAT")
     @Excel(name = "VAT")
@@ -127,6 +127,16 @@ public class PurchaseAddDTO implements IBOConvert {
                     quantityInStorageCreated = x.stream().mapToInt(PurchaseStorageDetailsAddDTO::getDeclareQty).sum();
                     //计算剩余需要采购的数量
                     remainingPurchaseQuantity = purchaseQuantity - quantityInStorageCreated;
+
+                    //更新sku剩余采购数量
+                    Map<String, Integer> numberOfWarehoused = x.stream().collect(Collectors.groupingBy(PurchaseStorageDetailsAddDTO::getSku, Collectors.summingInt(PurchaseStorageDetailsAddDTO::getDeclareQty)));
+                    purchaseDetailsOpt.ifPresent(purchaseDetails -> {
+                        purchaseDetails.forEach(details -> {
+                            Integer integer = Optional.ofNullable(numberOfWarehoused.get(details.getSku())).orElse(0);
+                            int i = details.getRemainingPurchaseQuantity() - integer;
+                            details.setRemainingPurchaseQuantity(i);
+                        });
+                    });
                 });
     }
 

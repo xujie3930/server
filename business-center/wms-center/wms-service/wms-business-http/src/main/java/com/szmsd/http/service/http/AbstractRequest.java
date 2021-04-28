@@ -18,7 +18,7 @@ import com.szmsd.http.enums.HttpUrlType;
 import com.szmsd.http.service.IHtpConfigService;
 import com.szmsd.http.service.http.resolver.Actuator;
 import com.szmsd.http.service.http.resolver.ActuatorParameter;
-import com.szmsd.http.service.http.resolver.ResponseResovlerActuatorParameter;
+import com.szmsd.http.service.http.resolver.ResponseResolverActuatorParameter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ abstract class AbstractRequest extends BaseRequest {
                 urlGroupName = this.httpConfig.getMapperGroup().get(matchWarehouseGroupName);
             }
         }
-        if (this.isEmpty(urlGroupName) && this.isEmpty(warehouseCode)) {
+        if (this.isEmpty(urlGroupName)) {
             // 获取默认映射
             urlGroupName = this.httpConfig.getDefaultUrlGroup();
         }
@@ -220,7 +220,7 @@ abstract class AbstractRequest extends BaseRequest {
             throw new CommonException("999", "http url type cant be null");
         }
         // 如果是true，就推给多个服务器
-        ActuatorParameter actuatorParameter = new ResponseResovlerActuatorParameter(httpUrlType, httpResponseBody);
+        ActuatorParameter actuatorParameter = new ResponseResolverActuatorParameter(httpUrlType, httpResponseBody);
         if (this.actuator.execute(actuatorParameter)) {
             // 循环调用
             Map<String, UrlGroupConfig> urlGroup = this.httpConfig.getUrlGroup();

@@ -76,6 +76,7 @@ public interface DelOutboundFeignService {
 
     /**
      * 出库费用查询
+     *
      * @param queryDto queryDto
      * @return pageList
      */
@@ -84,12 +85,27 @@ public interface DelOutboundFeignService {
 
     /**
      * 查询采购单中的sku列表
+     *
      * @param idList
      * @return
      */
-    @GetMapping(value = "createPurchaseOrderListByIdList/{idList}")
+    @GetMapping(value = "/api/outbound/createPurchaseOrderListByIdList/{idList}")
     @ApiOperation(value = "出库-创建采购单")
     R<List<DelOutboundDetailVO>> createPurchaseOrderListByIdList(@PathVariable("idList") List<String> idList);
 
+    @GetMapping(value = "/api/outbound/getTransshipmentProductData/{idList}")
+    @ApiOperation(value = "转运-获取转运里面的商品数据")
+    R<List<DelOutboundDetailVO>> getTransshipmentProductData(@PathVariable("idList") List<String> idList);
 
+    /**
+     * 出库-创建采购单后回写出库单 采购单号
+     * 多个出库单，对应一个采购单
+     *
+     * @param purchaseNo  采购单号
+     * @param orderNoList 出库单列表
+     * @return
+     */
+    @GetMapping(value = "/api/outbound/purchase/setPurchaseNo/{purchaseNo}/{orderNoList}")
+    @ApiOperation(value = "出库-实际创建采购单后回写采购单号")
+    R setPurchaseNo(@PathVariable("purchaseNo") String purchaseNo, @PathVariable("orderNoList") List<String> orderNoList);
 }

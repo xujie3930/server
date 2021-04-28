@@ -2,7 +2,6 @@ package com.szmsd.delivery.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.szmsd.bas.api.client.BasSubClientService;
@@ -56,7 +55,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -104,16 +102,31 @@ public class DelOutboundController extends BaseController {
     }
 
     /**
-     * 出库-创建采购单
+     * 出库-创建采购单 查询
      *
      * @param idList
      * @return
      */
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")
     @GetMapping(value = "createPurchaseOrderListByIdList/{idList}")
-    @ApiOperation(value = "出库-创建采购单")
+    @ApiOperation(value = "出库-创建采购单  查询")
     public R<List<DelOutboundDetailVO>> createPurchaseOrderListByIdList(@PathVariable("idList") List<String> idList) {
         return R.ok(delOutboundService.createPurchaseOrderListByIdList(idList));
+    }
+
+    /**
+     * 出库-创建采购单后回写出库单 采购单号
+     * 多个出库单，对应一个采购单
+     *
+     * @param purchaseNo  采购单号
+     * @param orderNoList 出库单列表
+     * @return
+     */
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")
+    @GetMapping(value = "purchase/setPurchaseNo/{purchaseNo}/{orderNoList}")
+    @ApiOperation(value = "出库-实际创建采购单后回写采购单号")
+    public R setPurchaseNo(@PathVariable("purchaseNo") String purchaseNo, @PathVariable("orderNoList") List<String> orderNoList) {
+        return R.ok(delOutboundService.setPurchaseNo(purchaseNo, orderNoList));
     }
 
     /**
@@ -181,22 +194,9 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:exportTemplate')")
     @GetMapping("/exportTemplate")
     @ApiOperation(value = "出库管理 - 新增 - SKU导入模板", position = 800)
-    public void exportTemplate(HttpServletResponse response) {
-        try (ExcelWriter excel = cn.hutool.poi.excel.ExcelUtil.getWriter(true);
-             ServletOutputStream out = response.getOutputStream()) {
-            List<String> row1 = CollUtil.newArrayList("SKU", "数量");
-            List<List<String>> rows = CollUtil.newArrayList(row1, new ArrayList<>());
-            excel.write(rows, true);
-            //response为HttpServletResponse对象
-            response.setContentType("application/vnd.ms-excel;charset=utf-8");
-            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String("出库单SKU导入".getBytes("gb2312"), "ISO8859-1") + ".xlsx");
-            excel.flush(out);
-            //此处记得关闭输出Servlet流
-            IoUtil.close(out);
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
+    public void exportTemplate(HttpServletResponse response) throws UnsupportedEncodingException {
+        List<String> rows = CollUtil.newArrayList("SKU", "数量");
+        super.excelExportTitle(response, rows, "出库单SKU导入");
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:importdetail')")
@@ -351,7 +351,7 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:label')")
     @PostMapping("/label")
-    @ApiOperation(value = "出库管理 - 获取标签", position = 1200)
+    @ApiOperation(value = "出库管理 - 获取标签", position = 1300)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundLabelDto")
     public void label(HttpServletResponse response, @RequestBody @Validated DelOutboundLabelDto dto) {
         this.delOutboundService.label(response, dto);

@@ -11,27 +11,27 @@ import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptExportVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import com.szmsd.putinstorage.domain.vo.*;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.mapper.InboundReceiptMapper;
 import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
+import com.szmsd.putinstorage.util.ExcelUtil;
 import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -282,9 +282,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         inboundReceipt.setReviewTime(new Date());
         List<String> warehouseNos = inboundReceiptReviewDTO.getWarehouseNos();
         log.info("入库单审核: {},{},{}", anEnum.getValue2(), warehouseNos, inboundReceipt);
+        StringBuffer sb = new StringBuffer();
         warehouseNos.forEach(warehouseNo -> {
             inboundReceipt.setWarehouseNo(warehouseNo);
-            this.updateByWarehouseNo(inboundReceipt);
             // 审核通过 第三方接口推送
             if (!InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(inboundReceiptReviewDTO.getStatus())) {
                 return;
@@ -292,12 +292,14 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
             try {
                 remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+                this.updateByWarehouseNo(inboundReceipt);
             } catch (Exception e) {
                 log.error(e.getMessage());
-                this.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE.getValue()).setReviewRemark(e.getMessage()));
+                sb.append(e.getMessage().replace("运行时异常", warehouseNo));
+//                this.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE.getValue()).setReviewRemark(e.getMessage()));
             }
         });
-
+        AssertUtil.isTrue(sb.length() == 0, () -> sb.toString());
     }
 
     /**
@@ -337,6 +339,71 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         List<InboundReceiptExportVO> inboundReceiptExportVOS = baseMapper.selectExport(queryDTO);
         List<InboundReceiptExportVO> serialize = ObjectMapperUtils.serialize(inboundReceiptExportVOS);
         return BeanMapperUtil.mapList(serialize, InboundReceiptExportVO.class);
+    }
+
+    /**
+     * 导出sku
+     * @param excel
+     * @param details
+     */
+    @Override
+    public void exportSku(Workbook excel, List<InboundReceiptDetailVO> details) {
+        // 创建sheet
+        Sheet sheet = excel.createSheet();
+        // 内容
+        List<InboundReceiptSkuExcelVO> sheetList = new ArrayList<>();
+
+        // 列名
+        sheetList.add(new InboundReceiptSkuExcelVO().setColumn0("SKU").setColumn1("英文申报品名").setColumn2("申报数量").setColumn3("上架数量").setColumn4("原产品编码").setColumn5("对版图片").setColumn6("备注"));
+
+        // 入库单明细SKU
+        sheetList.addAll(details.stream().map(detail -> {
+            InboundReceiptSkuExcelVO vo = new InboundReceiptSkuExcelVO();
+            vo.setColumn0(detail.getSku());
+            vo.setColumn1(detail.getSkuName());
+            vo.setColumn2(detail.getDeclareQty() + "");
+            vo.setColumn3(detail.getPutQty() + "");
+            vo.setColumn4(detail.getOriginCode());
+            vo.setColumn5(detail.getEditionImage() == null ? "" : detail.getEditionImage().getAttachmentUrl());
+            vo.setColumn6(detail.getRemark());
+            return vo;
+        }).collect(Collectors.toList()));
+
+        // 创建行
+        for (int i = 0; i < sheetList.size(); i++) {
+            Row row = sheet.createRow(i);
+            InboundReceiptSkuExcelVO vo = sheetList.get(i);
+            Class<? extends InboundReceiptSkuExcelVO> aClass = vo.getClass();
+            Field[] declaredFields = aClass.getDeclaredFields();
+            for (int i1 = 0; i1 < declaredFields.length; i1++) {
+                // 反射获取value
+                String value;
+                try {
+                    Field declaredField = declaredFields[i1];
+                    declaredField.setAccessible(true);
+                    value = (String) declaredField.get(vo);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    value = "";
+                }
+
+                // 第2行 至 最后一行 第5列插入图片
+                if ((i > 0) && (i1 == 5) && StringUtils.isNotEmpty(value) && !"null".equals(value)) {
+                    try {
+                        ExcelUtil.insertImage(excel, sheet, i, i1, new URL(value));
+                    } catch (Exception e) {
+                        log.error("第{}行图片插入失败, imageUrl={}", i, value);
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
+
+                // 单元格赋值
+                row.createCell(i1).setCellValue(value);
+            }
+            // 设置样式
+            ExcelUtil.bord(excel, row, false, 6);
+        }
     }
 
     /**

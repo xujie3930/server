@@ -46,6 +46,9 @@ public class ChargeLogDto extends BaseEntity {
     @ApiModelProperty(value = "是否成功")
     private Boolean success;
 
+    @ApiModelProperty(value = "该单是否存在冻结额")
+    private Boolean hasFreeze;
+
     public ChargeLogDto(String orderNo, String operationPayMethod, String operationType, String warehouseCode, Boolean success) {
         this.orderNo = orderNo;
         this.operationPayMethod = operationPayMethod;

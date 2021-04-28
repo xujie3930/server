@@ -11,6 +11,7 @@
         <result column="declare_qty" property="declareQty"/>
         <result column="put_qty" property="putQty"/>
         <result column="origin_code" property="originCode"/>
+        <result column="delivery_no" property="deliveryNo"/>
         <result column="remark" property="remark"/>
     </resultMap>
 
@@ -23,6 +24,7 @@
         t.declare_qty,
         t.put_qty,
         t.origin_code,
+        t.delivery_no,
         t.remark
     </sql>
     <delete id="deleteByWarehouseNo">

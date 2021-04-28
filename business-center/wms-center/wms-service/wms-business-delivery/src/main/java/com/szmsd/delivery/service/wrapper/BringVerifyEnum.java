@@ -9,6 +9,7 @@ import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
@@ -331,7 +332,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 throw new CommonException("999", "新增/修改发货规则失败");
             }
             if (!baseOperationResponse.getSuccess()) {
-                String message = Utils.defaultValue(baseOperationResponse.getMessage(), "新增/修改发货规则失败");
+                String msg = baseOperationResponse.getMessage();
+                if (StringUtils.isEmpty(msg)) {
+                    msg = baseOperationResponse.getErrors();
+                }
+                String message = Utils.defaultValue(msg, "新增/修改发货规则失败");
                 throw new CommonException("999", message);
             }
         }

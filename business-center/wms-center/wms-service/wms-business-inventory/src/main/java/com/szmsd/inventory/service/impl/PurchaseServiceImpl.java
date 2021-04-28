@@ -1,12 +1,14 @@
 package com.szmsd.inventory.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.inventory.component.RemoteComponent;
+import com.szmsd.inventory.component.RemoteRequest;
 import com.szmsd.inventory.config.IBOConvert;
 import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.PurchaseDetails;
@@ -15,7 +17,6 @@ import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
 import com.szmsd.inventory.enums.PurchaseEnum;
-import com.szmsd.inventory.mapper.PurchaseDetailsMapper;
 import com.szmsd.inventory.mapper.PurchaseMapper;
 import com.szmsd.inventory.service.IPurchaseDetailsService;
 import com.szmsd.inventory.service.IPurchaseLogService;
@@ -25,17 +26,14 @@ import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.system.api.domain.SysUser;
-import io.swagger.models.auth.In;
-import jodd.util.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.sql.Wrapper;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +57,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     private IPurchaseDetailsService iPurchaseDetailsService;
     @Resource
     private IPurchaseStorageDetailsService iPurchaseStorageDetailsService;
+    @Resource
+    private RemoteRequest remoteRequest;
 
     @Override
     public PurchaseInfoVO selectPurchaseByPurchaseNo(String purchaseNo) {
@@ -89,26 +89,36 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         //取消改批次的单 回滚数量
         List<PurchaseStorageDetails> rollBackStorage = iPurchaseStorageDetailsService.list(Wrappers.<PurchaseStorageDetails>lambdaQuery()
                 .eq(PurchaseStorageDetails::getWarehousingNo, warehouseNo)
+                .eq(PurchaseStorageDetails::getDelFlag, 0)
         );
-        //更新对应sku的数量 总数量
+        //总共需要加
+        int sumCount = rollBackStorage.stream().mapToInt(PurchaseStorageDetails::getDeclareQty).sum();
 
+        Map<String, Integer> skuAndNum = rollBackStorage.stream().collect(Collectors.toMap(PurchaseStorageDetails::getSku, PurchaseStorageDetails::getDeclareQty, Integer::sum));
+
+        // 更新对应sku的数量 总数量
         List<String> skuList = rollBackStorage.stream().map(PurchaseStorageDetails::getSku).collect(Collectors.toList());
-        //商品详情
+        // 商品详情
         List<PurchaseDetails> detailsList = iPurchaseDetailsService.list(Wrappers.<PurchaseDetails>lambdaQuery().in(PurchaseDetails::getSku, skuList));
         //计算需要回滚的数量
-        Map<String, List<PurchaseStorageDetails>> collect1 = rollBackStorage.stream().collect(Collectors.groupingBy(PurchaseStorageDetails::getSku));
-
-        collect1.forEach((o1, o2) -> {
-
+        detailsList.forEach(x -> {
+            String sku = x.getSku();
+            Integer integer = skuAndNum.get(sku);
+            Optional.ofNullable(integer).ifPresent(c -> x.setRemainingPurchaseQuantity(x.getRemainingPurchaseQuantity() + c));
         });
-
-
+        log.info("更新数据 {}", JSONObject.toJSONString(detailsList));
+        iPurchaseDetailsService.saveOrUpdateBatch(detailsList);
+        Integer associationId = rollBackStorage.get(0).getAssociationId();
+        int update = baseMapper.update(new Purchase(), Wrappers.<Purchase>lambdaUpdate().eq(Purchase::getId, associationId)
+                .setSql("remainingPurchaseQuantity = remainingPurchaseQuantity +" + sumCount)
+        );
+        log.info("更新总表数据 {}条", update);
         iPurchaseStorageDetailsService.update(Wrappers.<PurchaseStorageDetails>lambdaUpdate()
                 .set(PurchaseStorageDetails::getDelFlag, 2)
                 .eq(PurchaseStorageDetails::getWarehousingNo, warehouseNo)
         );
 
-        return 0;
+        return 1;
     }
 
     /**
@@ -130,7 +140,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         Integer associationId;
 
         boolean present = Optional.of(purchaseAddDTO).map(PurchaseAddDTO::getPurchaseNo).isPresent();
-        if (present) {
+        if (!present) {
             String purchaseNo = serialNumberClientService.generateNumber("PURCHASE_ORDER");
             SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
             String customCode = loginUserInfo.getSellerCode();
@@ -156,19 +166,21 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         addLog(associationId, purchaseAddDTO);
         //调用批量入库
         purchaseOrderStorage(associationId, purchaseAddDTO);
+        //回调出库表 回写采购单号
+        remoteComponent.setPurchaseNo(purchaseAddDTO.getPurchaseNo(),purchaseAddDTO.getOrderNo());
         return saveBoolean ? 1 : 0;
     }
 
     private void purchaseOrderStorage(Integer associationId, PurchaseAddDTO purchaseAddDTO) {
         log.info("开始批量采购入库--");
-        List<PurchaseDetailsAddDTO> purchaseDetailsAddList = purchaseAddDTO.getPurchaseDetailsAddList();
-
         //待入库数据
         List<PurchaseStorageDetailsAddDTO> purchaseStorageDetailsAddList = purchaseAddDTO.getPurchaseStorageDetailsAddList();
         List<PurchaseStorageDetailsAddDTO> waitStorage = purchaseStorageDetailsAddList.stream().filter(x -> !(null != x.getId() && x.getId() > 0)).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(waitStorage)) {
             log.info("终止批量采购入库,待入库的数据为空");
         }
+        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+        String sellerCode = loginUserInfo.getSellerCode();
         //组合数据 快递单号：该单号下的数据
         Map<String, List<PurchaseStorageDetailsAddDTO>> collect = waitStorage.stream().collect(Collectors.groupingBy(PurchaseStorageDetailsAddDTO::getDeliveryNo));
         collect.forEach((no, addList) -> {
@@ -184,7 +196,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             createInboundReceiptDTO
                     .setDeliveryNo(no)
                     .setOrderNo(purchaseAddDTO.getPurchaseNo())
-                    .setCusCode(purchaseAddDTO.getCustomCode())
+                    .setCusCode(sellerCode)
                     .setVat(purchaseAddDTO.getVat())
                     .setWarehouseCode(purchaseAddDTO.getWarehouseCode())
                     .setOrderType(purchaseAddDTO.getOrderType())
@@ -209,7 +221,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
             InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
             String warehouseNo = inboundReceiptInfoVO.getWarehouseNo();
-            //插入采购入库数据 + 日志
+            //插入 采购入库 数据 + 日志
             Optional.of(addList).filter(CollectionUtils::isNotEmpty).ifPresent(
                     purchaseStorageDetailsList -> {
                         List<PurchaseStorageDetails> entityList = IBOConvert.copyListProperties(purchaseStorageDetailsList, PurchaseStorageDetails::new);
@@ -218,14 +230,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                             x.setWarehousingNo(warehouseNo);
                         });
                         iPurchaseStorageDetailsService.saveOrUpdateBatch(entityList);
-                        //添加采购日志
-
+                        //添加采购-入库日志
+                        addLog(associationId, purchaseAddDTO, warehouseNo);
                     });
         });
-
-        log.info("开始入库完成");
-
-
+        log.info("入库完成");
     }
 
     /**
@@ -240,6 +249,34 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     }
 
     /**
+     * 添加采购->入库日志
+     *
+     * @param associationId
+     * @param purchaseNo
+     * @param purchaseStorageDetailsList
+     * @param entityList
+     */
+    /**
+     * @param associationId
+     * @param purchaseAddDTO
+     * @param warehouseNo
+     */
+    private void addLog(Integer associationId, PurchaseAddDTO purchaseAddDTO, String warehouseNo) {
+        PurchaseLogAddDTO purchaseLogAddDTO = new PurchaseLogAddDTO();
+        List<PurchaseStorageDetailsAddDTO> purchaseStorageDetailsList = purchaseAddDTO.getPurchaseStorageDetailsAddList();
+        List<String> collect = purchaseStorageDetailsList.stream().map(PurchaseStorageDetailsAddDTO::getDeliveryNo).collect(Collectors.toList());
+        purchaseLogAddDTO
+                .setPurchaseNo(purchaseAddDTO.getPurchaseNo())
+                .setType(PurchaseEnum.WAREHOUSING_LIST)
+                .setWarehouseNo(warehouseNo)
+                .setDeliveryNo(String.join(",", collect))
+                .setAssociationId(associationId)
+                .setOrderNo(String.join(",", purchaseAddDTO.getOrderNo()));
+        log.info("新增采购入库日志 {}", purchaseLogAddDTO);
+        iPurchaseLogService.insertPurchaseLog(purchaseLogAddDTO);
+    }
+
+    /**
      * 添加采购单流程
      *
      * @param associationId
@@ -249,18 +286,73 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         if (null != purchaseAddDTO.getId()) {
             return;
         }
+        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+        String sellerCode = loginUserInfo.getSellerCode();
         PurchaseLogAddDTO purchaseLogAddDTO = new PurchaseLogAddDTO();
         purchaseLogAddDTO
+                .setCreateByName(sellerCode)
                 .setPurchaseNo(purchaseAddDTO.getPurchaseNo())
                 .setType(PurchaseEnum.PURCHASE_ORDER)
                 .setAssociationId(associationId)
-                .setOrderNo(purchaseAddDTO.getOrderNo());
+                .setOrderNo(String.join(",", purchaseAddDTO.getOrderNo()));
         log.info("新增采购日志 {}", purchaseLogAddDTO);
         iPurchaseLogService.insertPurchaseLog(purchaseLogAddDTO);
     }
 
+    private static List<DelOutboundDetailVO> mergeTwo(List<DelOutboundDetailVO> transshipmentProductData) {
+        return new ArrayList<>(transshipmentProductData.stream().collect(Collectors.toMap(DelOutboundDetailVO::getSku, a -> a, (o1, o2) -> {
+            o1.setQty(o1.getQty() + o2.getQty());
+            return o1;
+        })).values());
+    }
+
     @Override
     public int transportWarehousingSubmit(TransportWarehousingAddDTO transportWarehousingAddDTO) {
+        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+        String sellerCode = loginUserInfo.getSellerCode();
+        //获取sku信息
+        List<DelOutboundDetailVO> transshipmentProductData = remoteComponent.getTransshipmentProductData(transportWarehousingAddDTO.getIdList());
+        if (CollectionUtils.isEmpty(transshipmentProductData)) {
+            throw new RuntimeException("无相关数据");
+        }
+        //合并相同sku数据
+        transshipmentProductData = mergeTwo(transshipmentProductData);
+        //创建入库单
+        long sum = transshipmentProductData.stream().mapToLong(DelOutboundDetailVO::getQty).sum();
+        String deliveryNo = transportWarehousingAddDTO.getDeliveryNo();
+        CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+
+        createInboundReceiptDTO
+                .setDeliveryNo(deliveryNo)
+                .setCusCode(sellerCode)
+//                .setCusCode("WS77")
+                .setVat(transportWarehousingAddDTO.getVat())
+                .setWarehouseCode(transportWarehousingAddDTO.getWarehouseCode())
+                .setOrderType(transportWarehousingAddDTO.getOrderType())
+                .setWarehouseCategoryCode(transportWarehousingAddDTO.getWarehouseCategoryCode())
+                .setDeliveryWayCode(transportWarehousingAddDTO.getDeliveryWay())
+                .setTotalDeclareQty(Integer.parseInt(sum + ""))
+//                .setTotalDeclareQty(10)
+                .setTotalPutQty(0);
+
+        //设置SKU列表数据
+        ArrayList<InboundReceiptDetailDTO> inboundReceiptDetailAddList = new ArrayList<>();
+        transshipmentProductData.forEach(addSku -> {
+            InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
+            inboundReceiptDetailDTO
+                    .setDeclareQty(Integer.parseInt(addSku.getQty() + ""))
+//                    .setDeclareQty(10)
+                    .setSku(addSku.getSku())
+                    .setSkuName(addSku.getSku())
+            ;
+            inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
+        });
+        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
+
+        InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
+
+        //创建WMS入库单
+        remoteRequest.createPackage(inboundReceiptInfoVO);
         return 0;
     }
 }

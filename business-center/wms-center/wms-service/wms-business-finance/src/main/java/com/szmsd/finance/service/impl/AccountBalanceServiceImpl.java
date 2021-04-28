@@ -93,6 +93,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (StringUtils.isNotEmpty(dto.getNo())) {
             queryWrapper.eq(AccountBalanceChange::getNo, dto.getNo());
         }
+        if (dto.getHasFreeze() != null) {
+            queryWrapper.eq(AccountBalanceChange::getHasFreeze, dto.getHasFreeze());
+        }
         queryWrapper.orderByDesc(AccountBalanceChange::getCreateTime);
         return accountBalanceChangeMapper.recordListPage(queryWrapper);
     }
@@ -235,7 +238,18 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public boolean withDrawBalanceCheck(String cusCode, String currencyCode, BigDecimal amount) {
         BigDecimal currentBalance = getCurrentBalance(cusCode, currencyCode);
-        return currentBalance.compareTo(amount) > 0;
+        return currentBalance.compareTo(amount) >= 0;
+    }
+
+    @Override
+    public int updateAccountBalanceChange(AccountBalanceChangeDTO dto) {
+        LambdaUpdateWrapper<AccountBalanceChange> update = Wrappers.lambdaUpdate();
+        update.set(AccountBalanceChange::getHasFreeze,dto.getHasFreeze())
+                .eq(AccountBalanceChange::getCusCode,dto.getCusCode())
+                .eq(AccountBalanceChange::getNo,dto.getNo())
+                .eq(AccountBalanceChange::getCurrencyCode,dto.getCurrencyCode())
+                .eq(AccountBalanceChange::getPayMethod,dto.getPayMethod());
+        return accountBalanceChangeMapper.update(null,update);
     }
 
     /**
