@@ -282,9 +282,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         inboundReceipt.setReviewTime(new Date());
         List<String> warehouseNos = inboundReceiptReviewDTO.getWarehouseNos();
         log.info("入库单审核: {},{},{}", anEnum.getValue2(), warehouseNos, inboundReceipt);
+        StringBuffer sb = new StringBuffer();
         warehouseNos.forEach(warehouseNo -> {
             inboundReceipt.setWarehouseNo(warehouseNo);
-            this.updateByWarehouseNo(inboundReceipt);
             // 审核通过 第三方接口推送
             if (!InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(inboundReceiptReviewDTO.getStatus())) {
                 return;
@@ -292,12 +292,14 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
             try {
                 remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+                this.updateByWarehouseNo(inboundReceipt);
             } catch (Exception e) {
                 log.error(e.getMessage());
-                this.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE.getValue()).setReviewRemark(e.getMessage()));
+                sb.append(e.getMessage().replace("运行时异常", warehouseNo));
+//                this.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE.getValue()).setReviewRemark(e.getMessage()));
             }
         });
-
+        AssertUtil.isTrue(sb.length() == 0, () -> sb.toString());
     }
 
     /**
