@@ -140,7 +140,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         Integer associationId;
 
         boolean present = Optional.of(purchaseAddDTO).map(PurchaseAddDTO::getPurchaseNo).isPresent();
-        if (present) {
+        if (!present) {
             String purchaseNo = serialNumberClientService.generateNumber("PURCHASE_ORDER");
             SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
             String customCode = loginUserInfo.getSellerCode();
@@ -262,9 +262,16 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                 .setPurchaseNo(purchaseAddDTO.getPurchaseNo())
                 .setType(PurchaseEnum.PURCHASE_ORDER)
                 .setAssociationId(associationId)
-                .setOrderNo(String.join(",", purchaseAddDTO.getOrderNo()));
+                .setOrderNo(JSONObject.toJSONString(purchaseAddDTO.getOrderNo()));
         log.info("新增采购日志 {}", purchaseLogAddDTO);
         iPurchaseLogService.insertPurchaseLog(purchaseLogAddDTO);
+    }
+
+    private static List<DelOutboundDetailVO> mergeTwo(List<DelOutboundDetailVO> transshipmentProductData) {
+        return new ArrayList<>(transshipmentProductData.stream().collect(Collectors.toMap(DelOutboundDetailVO::getSku, a -> a, (o1, o2) -> {
+            o1.setQty(o1.getQty() + o2.getQty());
+            return o1;
+        })).values());
     }
 
     @Override
@@ -276,6 +283,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         if (CollectionUtils.isEmpty(transshipmentProductData)) {
             throw new RuntimeException("无相关数据");
         }
+        //合并相同sku数据
+        transshipmentProductData = mergeTwo(transshipmentProductData);
         //创建入库单
         long sum = transshipmentProductData.stream().mapToLong(DelOutboundDetailVO::getQty).sum();
         String deliveryNo = transportWarehousingAddDTO.getDeliveryNo();
