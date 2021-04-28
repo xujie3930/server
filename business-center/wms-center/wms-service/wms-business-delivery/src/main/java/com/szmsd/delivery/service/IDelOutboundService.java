@@ -277,5 +277,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      */
     List<DelOutboundExportListDto> exportList(DelOutboundListQueryDto queryDto);
 
+    /**
+     * 出库-创建采购单后回写出库单 采购单号
+     * 多个出库单，对应一个采购单
+     *
+     * @param purchaseNo  采购单号
+     * @param orderNoList 出库单列表
+     * @return
+     */
+    int setPurchaseNo(String purchaseNo, List<String> orderNoList);
 }
 

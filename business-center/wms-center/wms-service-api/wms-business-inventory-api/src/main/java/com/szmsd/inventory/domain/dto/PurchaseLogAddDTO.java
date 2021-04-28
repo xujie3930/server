@@ -64,7 +64,8 @@ public class PurchaseLogAddDTO {
     private String purchaseNo;
     @ApiModelProperty(value = "创建者")
     private String createByName;
-
+    @ApiModelProperty(value = "快递单号")
+    private String deliveryNo;
     /**
      * 设置日志
      *

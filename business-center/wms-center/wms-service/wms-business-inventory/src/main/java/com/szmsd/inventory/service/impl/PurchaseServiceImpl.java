@@ -166,12 +166,13 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         addLog(associationId, purchaseAddDTO);
         //调用批量入库
         purchaseOrderStorage(associationId, purchaseAddDTO);
+        //回调出库表 回写采购单号
+        remoteComponent.setPurchaseNo(purchaseAddDTO.getPurchaseNo(),purchaseAddDTO.getOrderNo());
         return saveBoolean ? 1 : 0;
     }
 
     private void purchaseOrderStorage(Integer associationId, PurchaseAddDTO purchaseAddDTO) {
         log.info("开始批量采购入库--");
-
         //待入库数据
         List<PurchaseStorageDetailsAddDTO> purchaseStorageDetailsAddList = purchaseAddDTO.getPurchaseStorageDetailsAddList();
         List<PurchaseStorageDetailsAddDTO> waitStorage = purchaseStorageDetailsAddList.stream().filter(x -> !(null != x.getId() && x.getId() > 0)).collect(Collectors.toList());
@@ -220,7 +221,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
             InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
             String warehouseNo = inboundReceiptInfoVO.getWarehouseNo();
-            //插入采购入库数据 + 日志
+            //插入 采购入库 数据 + 日志
             Optional.of(addList).filter(CollectionUtils::isNotEmpty).ifPresent(
                     purchaseStorageDetailsList -> {
                         List<PurchaseStorageDetails> entityList = IBOConvert.copyListProperties(purchaseStorageDetailsList, PurchaseStorageDetails::new);
@@ -229,11 +230,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                             x.setWarehousingNo(warehouseNo);
                         });
                         iPurchaseStorageDetailsService.saveOrUpdateBatch(entityList);
-                        //添加采购日志
-
+                        //添加采购-入库日志
+                        addLog(associationId, purchaseAddDTO, warehouseNo);
                     });
         });
-        log.info("开始入库完成");
+        log.info("入库完成");
     }
 
     /**
@@ -248,6 +249,34 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     }
 
     /**
+     * 添加采购->入库日志
+     *
+     * @param associationId
+     * @param purchaseNo
+     * @param purchaseStorageDetailsList
+     * @param entityList
+     */
+    /**
+     * @param associationId
+     * @param purchaseAddDTO
+     * @param warehouseNo
+     */
+    private void addLog(Integer associationId, PurchaseAddDTO purchaseAddDTO, String warehouseNo) {
+        PurchaseLogAddDTO purchaseLogAddDTO = new PurchaseLogAddDTO();
+        List<PurchaseStorageDetailsAddDTO> purchaseStorageDetailsList = purchaseAddDTO.getPurchaseStorageDetailsAddList();
+        List<String> collect = purchaseStorageDetailsList.stream().map(PurchaseStorageDetailsAddDTO::getDeliveryNo).collect(Collectors.toList());
+        purchaseLogAddDTO
+                .setPurchaseNo(purchaseAddDTO.getPurchaseNo())
+                .setType(PurchaseEnum.WAREHOUSING_LIST)
+                .setWarehouseNo(warehouseNo)
+                .setDeliveryNo(String.join(",", collect))
+                .setAssociationId(associationId)
+                .setOrderNo(String.join(",", purchaseAddDTO.getOrderNo()));
+        log.info("新增采购入库日志 {}", purchaseLogAddDTO);
+        iPurchaseLogService.insertPurchaseLog(purchaseLogAddDTO);
+    }
+
+    /**
      * 添加采购单流程
      *
      * @param associationId
@@ -257,12 +286,15 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         if (null != purchaseAddDTO.getId()) {
             return;
         }
+        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+        String sellerCode = loginUserInfo.getSellerCode();
         PurchaseLogAddDTO purchaseLogAddDTO = new PurchaseLogAddDTO();
         purchaseLogAddDTO
+                .setCreateByName(sellerCode)
                 .setPurchaseNo(purchaseAddDTO.getPurchaseNo())
                 .setType(PurchaseEnum.PURCHASE_ORDER)
                 .setAssociationId(associationId)
-                .setOrderNo(JSONObject.toJSONString(purchaseAddDTO.getOrderNo()));
+                .setOrderNo(String.join(",", purchaseAddDTO.getOrderNo()));
         log.info("新增采购日志 {}", purchaseLogAddDTO);
         iPurchaseLogService.insertPurchaseLog(purchaseLogAddDTO);
     }
