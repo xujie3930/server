@@ -712,7 +712,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 s.append("产品说明超过十个字符,");
             }
             if(!s.toString().equals("")){
-                s1.append("第"+count+"条数据："+s+"\n");
+                s1.append("第"+count+"条数据："+s+"<br/>");
             }
             count++;
         }
@@ -722,7 +722,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             map.put(b.getCode(),b.getCode());
         }
         if(map.size()!=list.size()){
-            s1.append("sku有重复\n");
+            s1.append("sku有重复<br/>");
         }
         if(!s1.toString().equals("")){
             throw new BaseException(s1.toString());
