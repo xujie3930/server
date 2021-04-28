@@ -81,6 +81,7 @@ public final class ApplicationRuleConfig {
         shipmentNewSkuSet.add(ShipmentEnum.END.name());
         shipmentRuleMap.put(DelOutboundOrderTypeEnum.NEW_SKU.getCode(), shipmentNewSkuSet);
         // 出库配置 - 【批量出库】
+        //
     }
 
     /**
