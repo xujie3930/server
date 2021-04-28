@@ -98,4 +98,7 @@ public class DelOutboundDetailVO implements Serializable {
 
     @ApiModelProperty(value = "海关编码")
     private String hsCode;
+
+    @ApiModelProperty(value = "出库单号")
+    private String orderNo;
 }

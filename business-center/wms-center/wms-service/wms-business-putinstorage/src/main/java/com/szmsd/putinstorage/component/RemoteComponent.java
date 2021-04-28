@@ -18,6 +18,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
+import com.szmsd.common.core.utils.ServletUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 远程接口
@@ -156,6 +158,11 @@ public class RemoteComponent {
      */
     public void vailSku(String sku) {
         log.info("SKU验证：SKU={}", sku);
+        boolean present = Optional.ofNullable(ServletUtils.getParameter("isFromTransport")).filter(StringUtils::isNotEmpty).filter("isFromTransport"::equals).isPresent();
+        if (present) {
+            log.info("|转运入库单不校验sku");
+            return;
+        }
         R<Boolean> booleanR = baseProductFeignService.checkSkuValidToDelivery(new BaseProduct().setCode(sku));
         AssertUtil.notNull(booleanR, "SKU验证失败");
         AssertUtil.isTrue(booleanR.getData() != null && booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
