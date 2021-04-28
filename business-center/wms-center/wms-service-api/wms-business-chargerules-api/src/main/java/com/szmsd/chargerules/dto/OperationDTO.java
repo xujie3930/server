@@ -24,6 +24,9 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "操作类型")
     private String operationType;
 
+    @ApiModelProperty(value = "操作类型名称")
+    private String operationTypeName;
+
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 

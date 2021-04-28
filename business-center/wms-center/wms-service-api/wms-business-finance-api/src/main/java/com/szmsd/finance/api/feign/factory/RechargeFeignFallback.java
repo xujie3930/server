@@ -2,6 +2,7 @@ package com.szmsd.finance.api.feign.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.dto.AccountBalanceDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -9,6 +10,8 @@ import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author liulei
@@ -52,7 +55,7 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
             }
 
             @Override
-            public R accountList(AccountBalanceDTO dto) {
+            public R<List<AccountBalance>> accountList(AccountBalanceDTO dto) {
                 return R.convertResultJson(throwable);
             }
 

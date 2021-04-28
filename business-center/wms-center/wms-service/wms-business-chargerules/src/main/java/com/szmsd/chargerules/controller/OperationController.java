@@ -74,7 +74,7 @@ public class OperationController extends BaseController {
                 new OrderTypeLabelVo(value.getCode(), value.getName())).collect(Collectors.toList());
         collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.BATCH.getCode().concat("-packing"), DelOutboundOrderTypeEnum.BATCH.getName().concat("-装箱费")));
         collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.BATCH.getCode().concat("-label"), DelOutboundOrderTypeEnum.BATCH.getName().concat("-贴标费")));
-        collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.COLLECTION.getCode().concat("-manySku"), DelOutboundOrderTypeEnum.BATCH.getName().concat("-多SKU")));
+        collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.COLLECTION.getCode().concat("-manySku"), DelOutboundOrderTypeEnum.COLLECTION.getName().concat("-多SKU")));
         return R.ok(collect);
     }
 

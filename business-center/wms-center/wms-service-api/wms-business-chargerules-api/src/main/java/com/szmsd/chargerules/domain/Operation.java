@@ -30,7 +30,6 @@ public class Operation extends BaseEntity {
     private String operationType;
 
     @ApiModelProperty(value = "操作类型名称")
-    @TableField(exist = false)
     private String operationTypeName;
 
     @ApiModelProperty(value = "最小重量 - 开始 单位: g 大于")
