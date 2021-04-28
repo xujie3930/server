@@ -171,7 +171,6 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
     private void purchaseOrderStorage(Integer associationId, PurchaseAddDTO purchaseAddDTO) {
         log.info("开始批量采购入库--");
-        List<PurchaseDetailsAddDTO> purchaseDetailsAddList = purchaseAddDTO.getPurchaseDetailsAddList();
 
         //待入库数据
         List<PurchaseStorageDetailsAddDTO> purchaseStorageDetailsAddList = purchaseAddDTO.getPurchaseStorageDetailsAddList();
@@ -179,6 +178,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         if (CollectionUtils.isEmpty(waitStorage)) {
             log.info("终止批量采购入库,待入库的数据为空");
         }
+        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+        String sellerCode = loginUserInfo.getSellerCode();
         //组合数据 快递单号：该单号下的数据
         Map<String, List<PurchaseStorageDetailsAddDTO>> collect = waitStorage.stream().collect(Collectors.groupingBy(PurchaseStorageDetailsAddDTO::getDeliveryNo));
         collect.forEach((no, addList) -> {
@@ -194,7 +195,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             createInboundReceiptDTO
                     .setDeliveryNo(no)
                     .setOrderNo(purchaseAddDTO.getPurchaseNo())
-                    .setCusCode(purchaseAddDTO.getCustomCode())
+                    .setCusCode(sellerCode)
                     .setVat(purchaseAddDTO.getVat())
                     .setWarehouseCode(purchaseAddDTO.getWarehouseCode())
                     .setOrderType(purchaseAddDTO.getOrderType())
