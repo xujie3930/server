@@ -593,8 +593,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                     s.append("SKU长度小于两字符，");
                 }
                 QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
-                queryWrapper.eq("code", b.getCode());
-                if (super.count(queryWrapper) == 1) {
+                queryWrapper1.eq("code", b.getCode());
+                if (super.count(queryWrapper1) == 1) {
                     s.append(b.getCode()+"编码重复,");
                 }
 
@@ -712,7 +712,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 s.append("产品说明超过十个字符,");
             }
             if(!s.toString().equals("")){
-                s1.append("第"+count+"条数据："+s+"\n");
+                s1.append("<br/>第"+count+"条数据："+s);
             }
             count++;
         }
@@ -722,7 +722,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             map.put(b.getCode(),b.getCode());
         }
         if(map.size()!=list.size()){
-            s1.append("sku有重复\n");
+            s1.append("<br/>sku有重复");
         }
         if(!s1.toString().equals("")){
             throw new BaseException(s1.toString());

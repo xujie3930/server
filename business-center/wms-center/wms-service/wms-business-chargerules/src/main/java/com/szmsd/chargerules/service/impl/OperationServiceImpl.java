@@ -22,7 +22,6 @@ import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
-import com.szmsd.http.enums.HttpRechargeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -132,6 +131,10 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
             return chargeCollection(dto, details);
         }
 
+        if (dto.getOrderType().equals(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode())) {
+            return packageTransfer(dto);
+        }
+
         if (dto.getOrderType().equals(DelOutboundOrderTypeEnum.BATCH.getCode())) {
             return chargeBatch(dto, details);
         }
@@ -140,6 +143,26 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     }
 
+    /**
+     * 转运出库单 转运单没有重量，数量为1
+     *
+     * @param dto dto
+     * @return result
+     */
+    private R<?> packageTransfer(DelOutboundOperationVO dto) {
+        Operation operation = getOperationDetails(dto, dto.getOrderType(), null, "未找到" + dto.getOrderType() + "配置");
+        return this.freezeBalance(dto, 1L, operation.getFirstPrice(), operation);
+    }
+
+    /**
+     * 遍历出库单的详情信息 根据收费规则计算费用
+     *
+     * @param dto       dto
+     * @param orderType orderType
+     * @param details   details
+     * @param amount    amount
+     * @return result
+     */
     private R calculateFreeze(DelOutboundOperationVO dto, String orderType, List<DelOutboundOperationDetailVO> details, BigDecimal amount) {
         Long qty;
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
@@ -170,6 +193,9 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     /**
      * 出库单批量出库处理费
+     * 包含下架装箱费、贴标费、出库费
+     * 下架装箱费、贴标费没有重量按照数量计价
+     * 总费用=下架装箱费+贴标费+出库费
      *
      * @param dto     dto
      * @param details details
@@ -180,7 +206,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         //计算装箱费
         Integer packingCount = dto.getPackingCount();
         BigDecimal amount = BigDecimal.ZERO;
-        if (packingCount > 0) {
+        if (packingCount != null && packingCount > 0) {
             String packingType = dto.getOrderType().concat("-packing");
             Operation packingOperation = getOperationDetails(dto, packingType, null, "未找到" + packingType + "配置");
             BigDecimal calculate = payService.calculate(packingOperation.getFirstPrice(), packingOperation.getNextPrice(), packingCount.longValue());
@@ -189,7 +215,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
         //计算贴标费
         Integer shipmentLabelCount = dto.getShipmentLabelCount();
-        if (shipmentLabelCount > 0) {
+        if (shipmentLabelCount != null && shipmentLabelCount > 0) {
             String LabelType = dto.getOrderType().concat("-label");
             Operation LabelOperation = getOperationDetails(dto, LabelType, null, "未找到" + LabelType + "配置");
             BigDecimal calculate = payService.calculate(LabelOperation.getFirstPrice(), LabelOperation.getNextPrice(), shipmentLabelCount.longValue());
@@ -206,7 +232,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return operation;
     }
 
-    private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount,Operation operation) {
+    private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount, Operation operation) {
         ChargeLog chargeLog = setChargeLog(dto, count);
         chargeLog.setHasFreeze(true);
         CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), operation.getCurrencyCode(), dto.getOrderNo(), amount);

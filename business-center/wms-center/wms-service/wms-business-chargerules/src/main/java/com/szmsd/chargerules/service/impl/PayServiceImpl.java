@@ -8,7 +8,6 @@ import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.http.enums.HttpRechargeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -77,9 +76,14 @@ public class PayServiceImpl implements IPayService {
         return r;
     }
 
+    /**
+     * 解冻或者扣款成功后 把之前冻结记录的hasFreeze修改为false
+     * @param chargeLog chargeLog
+     * @param r result
+     */
     private void updateAndSave(ChargeLog chargeLog, R r) {
         if (r.getCode() == 200) {
-            chargeLogService.update(chargeLog.getId()); // 解冻 把之前冻结记录的hasFreeze修改为false
+            chargeLogService.update(chargeLog.getId());
         }
         chargeLog.setSuccess(r.getCode() == 200);
         chargeLog.setMessage(r.getMsg());

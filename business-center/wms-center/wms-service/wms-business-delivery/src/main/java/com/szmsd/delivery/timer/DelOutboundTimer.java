@@ -48,7 +48,7 @@ public class DelOutboundTimer {
     // 秒域 分域 时域 日域 月域 周域 年域
     @Scheduled(cron = "0 * * * * ?")
     public void completed() {
-        logger.info("开始执行任务 - 处理完成的单据");
+        logger.debug("开始执行任务 - 处理完成的单据");
         String key = applicationName + ":DelOutboundTimer:completed";
         this.doWorker(key, () -> {
             // 查询初始化的任务执行
@@ -67,7 +67,7 @@ public class DelOutboundTimer {
     @Async
     @Scheduled(cron = "0 */5 * * * ?")
     public void completedFail() {
-        logger.info("开始执行任务 - 处理完成失败的单据");
+        logger.debug("开始执行任务 - 处理完成失败的单据");
         String key = applicationName + ":DelOutboundTimer:completedFail";
         this.doWorker(key, () -> {
             // 查询初始化的任务执行
@@ -91,7 +91,7 @@ public class DelOutboundTimer {
     @Async
     @Scheduled(cron = "0 * * * * ?")
     public void cancelled() {
-        logger.info("开始执行任务 - 处理取消的单据");
+        logger.debug("开始执行任务 - 处理取消的单据");
         String key = applicationName + ":DelOutboundTimer:cancelled";
         this.doWorker(key, () -> {
             // 查询初始化的任务执行
@@ -110,7 +110,7 @@ public class DelOutboundTimer {
     @Async
     @Scheduled(cron = "0 */5 * * * ?")
     public void cancelledFail() {
-        logger.info("开始执行任务 - 处理取消失败的单据");
+        logger.debug("开始执行任务 - 处理取消失败的单据");
         String key = applicationName + ":DelOutboundTimer:cancelledFail";
         this.doWorker(key, () -> {
             LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
