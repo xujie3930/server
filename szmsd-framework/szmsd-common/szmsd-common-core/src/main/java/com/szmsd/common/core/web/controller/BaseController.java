@@ -36,6 +36,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyEditorSupport;
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -262,7 +263,8 @@ public class BaseController {
             //response为HttpServletResponse对象
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition" , "attachment;filename=" + fileName + ".xls");
+
+            response.setHeader("Content-Disposition" , "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
             excel.flush(out);
             //此处记得关闭输出Servlet流
             IoUtil.close(out);

@@ -181,7 +181,7 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 新增 - SKU导入模板", position = 800)
     public void exportTemplate(HttpServletResponse response) throws UnsupportedEncodingException {
         List<String> rows = CollUtil.newArrayList("SKU", "数量");
-        super.excelExportTitle(response, rows, new String("出库单SKU导入".getBytes("gb2312")));
+        super.excelExportTitle(response, rows, "出库单SKU导入");
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:importdetail')")
