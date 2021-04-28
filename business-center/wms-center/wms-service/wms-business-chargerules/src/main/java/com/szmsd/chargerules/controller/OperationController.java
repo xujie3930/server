@@ -82,24 +82,21 @@ public class OperationController extends BaseController {
     @ApiOperation(value = "业务计费 - 出库冻结余额")
     @PostMapping("/delOutboundFreeze")
     public R delOutboundFreeze(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        return R.ok();
-//        return operationService.delOutboundFreeze(delOutboundVO);
+        return operationService.delOutboundFreeze(delOutboundVO);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundThaw')")
     @ApiOperation(value = "业务计费 - 出库解冻余额")
     @PostMapping("/delOutboundThaw")
     public R delOutboundThaw(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        return R.ok();
-//        return operationService.delOutboundThaw(delOutboundVO);
+        return operationService.delOutboundThaw(delOutboundVO);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundDeductions')")
     @ApiOperation(value = "业务计费 - 出库扣款")
     @PostMapping("/delOutboundDeductions")
     public R delOutboundDeductions(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        return R.ok();
-//        return operationService.delOutboundDeductions(delOutboundVO);
+        return operationService.delOutboundDeductions(delOutboundVO);
     }
 
 }
