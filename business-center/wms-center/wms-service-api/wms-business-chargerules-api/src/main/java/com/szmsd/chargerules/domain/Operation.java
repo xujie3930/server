@@ -89,14 +89,6 @@ public class Operation extends BaseEntity {
         return warehouseCode;
     }
 
-    public String getOperationTypeName() {
-        DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(this.operationType);
-        if (delOutboundOrderTypeEnum != null) {
-            return delOutboundOrderTypeEnum.getName();
-        }
-        return null;
-    }
-
     public String getOrderTypeName() {
         return OrderTypeEnum.get(this.orderType);
     }
