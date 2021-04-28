@@ -2,6 +2,7 @@ package com.szmsd.finance.api.feign.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.dto.AccountBalanceDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -52,7 +53,7 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
             }
 
             @Override
-            public R accountList(AccountBalanceDTO dto) {
+            public R<AccountBalance> accountList(AccountBalanceDTO dto) {
                 return R.convertResultJson(throwable);
             }
 
