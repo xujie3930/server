@@ -870,7 +870,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.AUDIT_FAILED.getCode());
         updateWrapper.set(DelOutbound::getExceptionState, DelOutboundExceptionStateEnum.ABNORMAL.getCode());
-        updateWrapper.set(DelOutbound::getExceptionMessage, exceptionMessage);
+        updateWrapper.set(DelOutbound::getExceptionMessage, StringUtils.substring(exceptionMessage, 0, 255));
         updateWrapper.eq(DelOutbound::getId, id);
         this.update(updateWrapper);
     }
@@ -881,6 +881,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         DelOutbound modifyDelOutbound = new DelOutbound();
         modifyDelOutbound.setId(id);
         modifyDelOutbound.setExceptionState(DelOutboundExceptionStateEnum.ABNORMAL.getCode());
+        exceptionMessage = org.apache.commons.lang3.StringUtils.substring(exceptionMessage, 0, 255);
         modifyDelOutbound.setExceptionMessage(exceptionMessage);
         this.updateById(modifyDelOutbound);
     }
@@ -900,6 +901,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public void bringVerifyFail(DelOutbound delOutbound) {
         delOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.ABNORMAL.getCode());
+        String exceptionMessage = delOutbound.getExceptionMessage();
+        if (StringUtils.isNotEmpty(exceptionMessage)) {
+            exceptionMessage = org.apache.commons.lang3.StringUtils.substring(exceptionMessage, 0, 255);
+            delOutbound.setExceptionMessage(exceptionMessage);
+        }
         this.updateById(delOutbound);
     }
 
