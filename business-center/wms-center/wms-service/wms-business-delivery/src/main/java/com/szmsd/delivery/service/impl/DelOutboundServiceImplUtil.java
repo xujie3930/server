@@ -1,11 +1,15 @@
 package com.szmsd.delivery.service.impl;
 
+import com.szmsd.common.core.constant.Constants;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.util.Utils;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
@@ -17,6 +21,9 @@ import java.util.Map;
  * @date 2021-04-08 16:56
  */
 public final class DelOutboundServiceImplUtil {
+
+    private DelOutboundServiceImplUtil() {
+    }
 
     public static void handlerInventoryOperate(DelOutboundDetail detail, Map<String, InventoryOperateDto> inventoryOperateDtoMap) {
         String invoiceLineNo = String.valueOf(detail.getLineNo());
@@ -76,5 +83,67 @@ public final class DelOutboundServiceImplUtil {
         // 不需要冻结库存
         return DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(orderType)
                 || DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType);
+    }
+
+    /**
+     * 冻结操作费用失败
+     *
+     * @param r r
+     */
+    public static void freezeOperationThrowErrorMessage(R<?> r) {
+        throwCommonException(r, "1900", "1901", "冻结操作费用失败");
+    }
+
+    /**
+     * 取消冻结操作费用失败
+     *
+     * @param r r
+     */
+    public static void thawOperationThrowCommonException(R<?> r) {
+        throwCommonException(r, "1910", "1911", "取消冻结操作费用失败");
+    }
+
+    /**
+     * 扣减操作费用失败
+     *
+     * @param r r
+     */
+    public static void chargeOperationThrowCommonException(R<?> r) {
+        throwCommonException(r, "1920", "1921", "扣减操作费用失败");
+    }
+
+    private static void throwCommonException(R<?> r, String code, String code2, String throwMsg) {
+        if (null == r) {
+            throwCommonException(code, throwMsg);
+        }
+        if (Constants.SUCCESS != r.getCode()) {
+            throwCommonException(code2, Utils.defaultValue(r.getMsg(), throwMsg));
+        }
+    }
+
+    private static void throwCommonException(String code, String msg) {
+        throw new CommonException(code, msg);
+    }
+
+    /**
+     * 加入hit位
+     *
+     * @param value value
+     * @param key   key
+     * @return int
+     */
+    public static int joinKey(int value, int key) {
+        return (value | key);
+    }
+
+    /**
+     * 判断有没有hit位
+     *
+     * @param value value
+     * @param key   key
+     * @return boolean
+     */
+    public static boolean hitKey(int value, int key) {
+        return (value & key) == key;
     }
 }

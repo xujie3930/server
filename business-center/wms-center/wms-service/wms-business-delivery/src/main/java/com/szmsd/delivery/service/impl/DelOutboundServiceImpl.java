@@ -16,7 +16,6 @@ import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
-import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
@@ -299,10 +298,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             List<DelOutboundDetailDto> details = dto.getDetails();
             DelOutboundOperationVO delOutboundOperationVO = this.builderFreezeOperationDelOutboundVO(delOutbound, details);
             this.freezeOperation(delOutboundOperationVO);
-            stepValue |= 0x01;
+            stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x01);
             // 冻结库存
             this.freeze(delOutbound.getOrderType(), orderNo, delOutbound.getWarehouseCode(), details);
-            stepValue |= 0x02;
+            stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x02);
             // 默认状态
             delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
             // 默认异常状态
@@ -327,10 +326,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // 回滚操作
-            if (hitKey(stepValue, 0x01) && null != orderNo) {
+            if (DelOutboundServiceImplUtil.hitKey(stepValue, 0x01) && null != orderNo) {
                 this.unfreezeOperation(orderNo);
             }
-            if (hitKey(stepValue, 0x02)) {
+            if (DelOutboundServiceImplUtil.hitKey(stepValue, 0x02)) {
                 this.unFreeze(dto.getOrderType(), orderNo, dto.getWarehouseCode());
             }
             // 异常传播
@@ -338,16 +337,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
     }
 
-    /**
-     * 判断有没有hit位
-     *
-     * @param value value
-     * @param key   key
-     * @return boolean
-     */
-    private boolean hitKey(int value, int key) {
-        return (value & key) == key;
-    }
 
     /**
      * 构建冻结操作费用的参数
@@ -364,12 +353,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutboundOperationVO.setCustomCode(delOutbound.getCustomCode());
         // 处理明细
         List<DelOutboundOperationDetailVO> detailVOList = new ArrayList<>(details.size());
-        for (DelOutboundDetailDto detail : details) {
+        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
             DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
-            detailVO.setSku(detail.getSku());
-            detailVO.setQty(detail.getQty());
-            detailVO.setWeight(detail.getWeight());
+            detailVO.setQty(1L);
+            detailVO.setWeight(delOutbound.getWeight());
             detailVOList.add(detailVO);
+        } else {
+            for (DelOutboundDetailDto detail : details) {
+                DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
+                detailVO.setSku(detail.getSku());
+                detailVO.setQty(detail.getQty());
+                detailVO.setWeight(detail.getWeight());
+                detailVOList.add(detailVO);
+            }
         }
         delOutboundOperationVO.setDetails(detailVOList);
         return delOutboundOperationVO;
@@ -382,9 +378,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      */
     private void freezeOperation(DelOutboundOperationVO delOutboundOperationVO) {
         R<?> r = this.operationFeignService.delOutboundFreeze(delOutboundOperationVO);
-        if (null == r || Constants.SUCCESS != r.getCode()) {
-            throw new CommonException("1900", "冻结操作费用失败");
-        }
+        DelOutboundServiceImplUtil.freezeOperationThrowErrorMessage(r);
     }
 
     /**
@@ -396,14 +390,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private void unfreezeAndFreezeOperation(DelOutboundOperationVO orgDelOutboundOperationVO, DelOutboundOperationVO newDelOutboundOperationVO) {
         // 取消冻结
         R<?> ur = this.operationFeignService.delOutboundThaw(orgDelOutboundOperationVO);
-        if (null == ur || Constants.SUCCESS != ur.getCode()) {
-            throw new CommonException("1901", "取消冻结操作费用失败");
-        }
+        DelOutboundServiceImplUtil.thawOperationThrowCommonException(ur);
         // 重新冻结
         R<?> r = this.operationFeignService.delOutboundFreeze(newDelOutboundOperationVO);
-        if (null == r || Constants.SUCCESS != r.getCode()) {
-            throw new CommonException("1900", "冻结操作费用失败");
-        }
+        DelOutboundServiceImplUtil.freezeOperationThrowErrorMessage(r);
     }
 
     /**
@@ -415,9 +405,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
         delOutboundOperationVO.setOrderNo(orderNo);
         R<?> ur = this.operationFeignService.delOutboundThaw(delOutboundOperationVO);
-        if (null == ur || Constants.SUCCESS != ur.getCode()) {
-            throw new CommonException("1901", "取消冻结操作费用失败");
-        }
+        DelOutboundServiceImplUtil.thawOperationThrowCommonException(ur);
     }
 
     @Override
@@ -575,10 +563,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             DelOutboundOperationVO orgDelOutboundOperationVO = new DelOutboundOperationVO();
             orgDelOutboundOperationVO.setOrderNo(orderNo);
             this.unfreezeAndFreezeOperation(orgDelOutboundOperationVO, newDelOutboundOperationVO);
-            stepValue |= 0x01;
+            stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x01);
             // 处理库存
             this.unFreezeAndFreeze(orderType, orderNo, warehouseCode, detailList, details);
-            stepValue |= 0x02;
+            stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x02);
             // 先删后增
             this.deleteAddress(orderNo);
             this.deleteDetail(orderNo);
@@ -598,10 +586,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // 回滚操作
-            if (hitKey(stepValue, 0x01) && null != orderNo) {
+            if (DelOutboundServiceImplUtil.hitKey(stepValue, 0x01) && null != orderNo) {
                 this.freezeOperation(newDelOutboundOperationVO);
             }
-            if (hitKey(stepValue, 0x02)) {
+            if (DelOutboundServiceImplUtil.hitKey(stepValue, 0x02)) {
                 this.freezeNoWrapper(orderType, orderNo, warehouseCode, detailList);
             }
             throw e;
