@@ -11,6 +11,8 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author liulei
  */
@@ -53,7 +55,7 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
             }
 
             @Override
-            public R<AccountBalance> accountList(AccountBalanceDTO dto) {
+            public R<List<AccountBalance>> accountList(AccountBalanceDTO dto) {
                 return R.convertResultJson(throwable);
             }
 

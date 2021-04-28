@@ -12,6 +12,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author liulei
  */
@@ -40,5 +42,5 @@ public interface RechargesFeignService {
 
     @ApiOperation(value = "查询账户余额信息")
     @PostMapping("/accountBalance/list")
-    R<AccountBalance> accountList(@RequestBody AccountBalanceDTO dto);
+    R<List<AccountBalance>> accountList(@RequestBody AccountBalanceDTO dto);
 }
