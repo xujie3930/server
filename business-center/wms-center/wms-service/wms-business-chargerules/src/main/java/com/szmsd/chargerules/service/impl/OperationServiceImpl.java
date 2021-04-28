@@ -71,6 +71,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             where.eq(Operation::getWarehouseCode, dto.getWarehouseCode());
         }
+        where.orderByDesc(Operation::getCreateTime);
         return operationMapper.selectList(where);
     }
 
@@ -86,6 +87,9 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         }
         if (StringUtils.isNotBlank(dto.getOperationType())) {
             query.eq(Operation::getOperationType, dto.getOperationType());
+        }
+        if (StringUtils.isNotBlank(dto.getWarehouseCode())) {
+            query.eq(Operation::getWarehouseCode, dto.getWarehouseCode());
         }
         if (dto.getWeight() != null) {
             query.lt(Operation::getMinimumWeight, dto.getWeight());

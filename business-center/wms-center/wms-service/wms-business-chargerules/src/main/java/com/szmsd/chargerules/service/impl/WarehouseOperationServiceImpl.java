@@ -43,6 +43,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
         if(StringUtils.isNotBlank(dto.getWarehouseCode())) {
             where.eq(WarehouseOperation::getWarehouseCode,dto.getWarehouseCode());
         }
+        where.orderByDesc(WarehouseOperation::getCreateTime);
         return warehouseOperationMapper.selectList(where);
     }
 
