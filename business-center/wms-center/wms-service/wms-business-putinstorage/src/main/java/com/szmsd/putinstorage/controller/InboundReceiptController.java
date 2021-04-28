@@ -28,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +88,7 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
     @GetMapping("/receipt/exportTemplate")
     @ApiOperation(value = "导出模板", notes = "入库管理 - 新增 - 下载模板")
-    public void exportTemplate(HttpServletResponse response) throws UnsupportedEncodingException {
+    public void exportTemplate(HttpServletResponse response) {
         List<String> rows = CollUtil.newArrayList("SKU", "申报品名", "申报数量", "原产品编码", "备注");
         super.excelExportTitle(response, rows, "入库单SKU导入");
     }
