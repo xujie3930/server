@@ -368,6 +368,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             vo.setColumn6(detail.getRemark());
             return vo;
         }).collect(Collectors.toList()));
+        log.info("导出sku: {}", details);
 
         // 创建行
         for (int i = 0; i < sheetList.size(); i++) {
@@ -390,7 +391,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 // 第2行 至 最后一行 第5列插入图片
                 if ((i > 0) && (i1 == 5) && StringUtils.isNotEmpty(value) && !"null".equals(value)) {
                     try {
-                        ExcelUtil.insertImage(excel, sheet, i, i1, new URL(value).getFile());
+                        String file = new URL(value).getFile();
+                        ExcelUtil.insertImage(excel, sheet, i, i1, file);
+                        log.info("row: {} col: {} 插入图片: {}", i, i1, file);
                     } catch (Exception e) {
                         log.error("第{}行图片插入失败, imageUrl={}", i, value);
                         e.printStackTrace();
