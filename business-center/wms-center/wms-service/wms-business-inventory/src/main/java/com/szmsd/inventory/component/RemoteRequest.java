@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -30,17 +31,21 @@ public class RemoteRequest {
      *
      * @param inboundReceiptInfoVO
      */
-    public void createPackage(InboundReceiptInfoVO inboundReceiptInfoVO) {
+    public void createPackage(InboundReceiptInfoVO inboundReceiptInfoVO, List<String> transferNoList) {
         CreatePackageReceiptRequest createPackageReceiptRequest = new CreatePackageReceiptRequest();
         ArrayList<ReceiptDetailPackageInfo> receiptDetailPackageInfos = new ArrayList<>();
 
         String warehouseNo = inboundReceiptInfoVO.getWarehouseNo();
 
-        ReceiptDetailPackageInfo receiptDetailPackageInfo = new ReceiptDetailPackageInfo();
-        //统一传入库单号
-        receiptDetailPackageInfo.setPackageOrderNo(warehouseNo);
-        receiptDetailPackageInfo.setScanCode(warehouseNo);
-        receiptDetailPackageInfos.add(receiptDetailPackageInfo);
+
+        transferNoList.forEach(x->{
+            ReceiptDetailPackageInfo receiptDetailPackageInfo = new ReceiptDetailPackageInfo();
+            //统一传出库单号
+            receiptDetailPackageInfo.setPackageOrderNo(x);
+            receiptDetailPackageInfo.setScanCode(x);
+            receiptDetailPackageInfos.add(receiptDetailPackageInfo);
+        });
+
 
         createPackageReceiptRequest
                 .setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode())
