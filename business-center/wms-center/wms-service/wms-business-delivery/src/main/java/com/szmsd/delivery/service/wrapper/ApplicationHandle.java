@@ -1,5 +1,8 @@
 package com.szmsd.delivery.service.wrapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author zhangyuyuan
  * @date 2021-04-01 16:09
@@ -56,6 +59,7 @@ public interface ApplicationHandle {
      * 对错误处理进行处理
      */
     abstract class AbstractApplicationHandle implements ApplicationHandle {
+        protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
         @Override
         public void rollback(ApplicationContext context) {

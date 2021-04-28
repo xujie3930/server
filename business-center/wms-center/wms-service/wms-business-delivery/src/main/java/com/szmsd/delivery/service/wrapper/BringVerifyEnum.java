@@ -458,6 +458,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     throw new CommonException("999", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
                 }
             } catch (IOException e) {
+                logger.error("读取标签文件失败, {}", e.getMessage(), e);
                 throw new CommonException("999", "读取标签文件失败");
             }
         }
