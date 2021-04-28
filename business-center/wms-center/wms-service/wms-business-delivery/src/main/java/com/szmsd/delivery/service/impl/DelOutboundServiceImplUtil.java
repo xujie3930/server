@@ -112,6 +112,15 @@ public final class DelOutboundServiceImplUtil {
         throwCommonException(r, "1920", "1921", "扣减操作费用失败");
     }
 
+    /**
+     * 对<code>R<?></code>结果集进行判断
+     * 当结果集出现异常，执行抛出异常的动作
+     *
+     * @param r        返回的结果集对象
+     * @param code     r结果为空时提示的异常编码
+     * @param code2    r失败时提示的异常编码
+     * @param throwMsg 当r是null时提示的异常信息；当r的msg是空时，提示的异常信息
+     */
     private static void throwCommonException(R<?> r, String code, String code2, String throwMsg) {
         if (null == r) {
             throwCommonException(code, throwMsg);
