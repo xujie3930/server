@@ -67,5 +67,5 @@ public class InboundReceiptDTO {
     private String status;
 
     @ApiModelProperty(value = "是否是转运")
-    private String isFromTransport;
+    private Boolean isFromTransport;
 }

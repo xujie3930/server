@@ -158,14 +158,14 @@ public class RemoteComponent {
      */
     public void vailSku(String sku) {
         log.info("SKU验证：SKU={}", sku);
-        boolean present = Optional.ofNullable(ServletUtils.getParameter("isFromTransport")).filter(StringUtils::isNotEmpty).filter("isFromTransport"::equals).isPresent();
-        if (present) {
+        if (CheckTag.get()) {
+            CheckTag.remove();
             log.info("|转运入库单不校验sku");
             return;
         }
-        //R<Boolean> booleanR = baseProductFeignService.checkSkuValidToDelivery(new BaseProduct().setCode(sku));
-        //AssertUtil.notNull(booleanR, "SKU验证失败");
-        //AssertUtil.isTrue(booleanR.getData() != null && booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
+        R<Boolean> booleanR = baseProductFeignService.checkSkuValidToDelivery(new BaseProduct().setCode(sku));
+        AssertUtil.notNull(booleanR, "SKU验证失败");
+        AssertUtil.isTrue(booleanR.getData() != null && booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
     }
 
     /**

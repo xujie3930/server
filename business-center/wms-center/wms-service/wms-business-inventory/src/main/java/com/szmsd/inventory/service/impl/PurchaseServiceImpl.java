@@ -213,6 +213,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                 inboundReceiptDetailDTO
                         .setDeclareQty(addSku.getDeclareQty())
                         .setSku(addSku.getSku())
+                        .setDeliveryNo(purchaseAddDTO.getPurchaseNo())
                         .setSkuName(addSku.getSku())
                 ;
                 inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
@@ -351,12 +352,12 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             ;
             inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
         });
-        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList).setIsFromTransport("isFromTransport");
+        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList).setIsFromTransport(true);
 
         InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
 
         //创建WMS入库单
-        remoteRequest.createPackage(inboundReceiptInfoVO);
+        remoteRequest.createPackage(inboundReceiptInfoVO,transferNoList);
         return 0;
     }
 }

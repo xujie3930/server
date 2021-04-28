@@ -65,7 +65,7 @@ public class TransportWarehousingAddDTO {
     @Excel(name = "类别编码")
     private String warehouseCategoryCode;
 
-    @ApiModelProperty(value = "转运单列表", required = true)
+    @ApiModelProperty(value = "转运单列表 - 出库单号", required = true)
     List<String> transferNoList;
 
     @Override
