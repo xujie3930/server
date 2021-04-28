@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service.impl;
 
 import cn.hutool.core.io.IoUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -152,7 +153,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Override
     public List<DelOutboundDetailVO> getTransshipmentProductData(List<String> idList) {
-        return createPurchaseOrderListByIdList(idList,DelOutboundOrderTypeEnum.PACKAGE_TRANSFER);
+        return createPurchaseOrderListByIdList(idList, DelOutboundOrderTypeEnum.PACKAGE_TRANSFER);
     }
 
     @Override
@@ -1185,5 +1186,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         });
     }
 
+    @Override
+    public int setPurchaseNo(String purchaseNo, List<String> orderNoList) {
+        if (CollectionUtils.isEmpty(orderNoList)) return 1;
+        int update = baseMapper.update(new DelOutbound(), Wrappers.<DelOutbound>lambdaUpdate()
+                .in(DelOutbound::getOrderNo, orderNoList)
+                .set(DelOutbound::getPurchaseNo, purchaseNo)
+        );
+        logger.info("回写出库单{}-采购单号{},修改条数{}", JSONObject.toJSONString(orderNoList), purchaseNo, update);
+        return update;
+    }
 }
 

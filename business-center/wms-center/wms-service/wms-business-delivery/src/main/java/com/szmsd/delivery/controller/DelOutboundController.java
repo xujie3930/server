@@ -102,16 +102,31 @@ public class DelOutboundController extends BaseController {
     }
 
     /**
-     * 出库-创建采购单
+     * 出库-创建采购单 查询
      *
      * @param idList
      * @return
      */
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")
     @GetMapping(value = "createPurchaseOrderListByIdList/{idList}")
-    @ApiOperation(value = "出库-创建采购单")
+    @ApiOperation(value = "出库-创建采购单  查询")
     public R<List<DelOutboundDetailVO>> createPurchaseOrderListByIdList(@PathVariable("idList") List<String> idList) {
         return R.ok(delOutboundService.createPurchaseOrderListByIdList(idList));
+    }
+
+    /**
+     * 出库-创建采购单后回写出库单 采购单号
+     * 多个出库单，对应一个采购单
+     *
+     * @param purchaseNo  采购单号
+     * @param orderNoList 出库单列表
+     * @return
+     */
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")
+    @GetMapping(value = "purchase/setPurchaseNo/{purchaseNo}/{orderNoList}")
+    @ApiOperation(value = "出库-实际创建采购单后回写采购单号")
+    public R setPurchaseNo(@PathVariable("purchaseNo") String purchaseNo, @PathVariable("orderNoList") List<String> orderNoList) {
+        return R.ok(delOutboundService.setPurchaseNo(purchaseNo, orderNoList));
     }
 
     /**

@@ -15,8 +15,10 @@ import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -100,11 +102,25 @@ public class RemoteComponent {
      *
      * @param idList
      */
-    public  List<DelOutboundDetailVO> getTransshipmentProductData(List<String> idList) {
+    public List<DelOutboundDetailVO> getTransshipmentProductData(List<String> idList) {
         log.info("获取转运出库数据 请求参数 {}", JSONObject.toJSONString(idList));
         R<List<DelOutboundDetailVO>> transshipmentProductData = delOutboundFeignService.getTransshipmentProductData(idList);
         List<DelOutboundDetailVO> dataAndException = R.getDataAndException(transshipmentProductData);
         log.info("获取转运出库数据完成 请求参数 {}", JSONObject.toJSONString(dataAndException));
         return dataAndException;
+    }
+
+    /**
+     * 出库-创建采购单后回写出库单 采购单号
+     * 多个出库单，对应一个采购单
+     *
+     * @param purchaseNo  采购单号
+     * @param orderNoList 出库单列表
+     * @return
+     */
+    public void setPurchaseNo(String purchaseNo, List<String> orderNoList) {
+        log.info("出库-创建采购单后回写出库单采购单号{}-采购单号{}", JSONObject.toJSONString(orderNoList), purchaseNo);
+        if (CollectionUtils.isEmpty(orderNoList)) return;
+        delOutboundFeignService.setPurchaseNo(purchaseNo, orderNoList);
     }
 }

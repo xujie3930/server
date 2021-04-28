@@ -1,5 +1,6 @@
 package com.szmsd.inventory.domain.dto;
 
+import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.inventory.config.IBOConvert;
@@ -9,7 +10,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.math.NumberUtils;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -129,7 +132,8 @@ public class PurchaseAddDTO implements IBOConvert {
                     Map<String, Integer> numberOfWarehoused = x.stream().collect(Collectors.groupingBy(PurchaseStorageDetailsAddDTO::getSku, Collectors.summingInt(PurchaseStorageDetailsAddDTO::getDeclareQty)));
                     purchaseDetailsOpt.ifPresent(purchaseDetails -> {
                         purchaseDetails.forEach(details -> {
-                            int i = details.getRemainingPurchaseQuantity() - (numberOfWarehoused.get(details.getSku()));
+                            Integer integer = Optional.ofNullable(numberOfWarehoused.get(details.getSku())).orElse(0);
+                            int i = details.getRemainingPurchaseQuantity() - integer;
                             details.setRemainingPurchaseQuantity(i);
                         });
                     });
