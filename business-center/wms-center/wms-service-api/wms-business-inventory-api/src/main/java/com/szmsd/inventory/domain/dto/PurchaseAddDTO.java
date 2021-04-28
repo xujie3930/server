@@ -133,8 +133,7 @@ public class PurchaseAddDTO implements IBOConvert {
                     purchaseDetailsOpt.ifPresent(purchaseDetails -> {
                         purchaseDetails.forEach(details -> {
                             Integer integer = Optional.ofNullable(numberOfWarehoused.get(details.getSku())).orElse(0);
-                            int i = details.getRemainingPurchaseQuantity() - integer;
-                            details.setRemainingPurchaseQuantity(i);
+                            details.setRemainingPurchaseQuantity(details.getPurchaseQuantity() - integer);
                         });
                     });
                 });
