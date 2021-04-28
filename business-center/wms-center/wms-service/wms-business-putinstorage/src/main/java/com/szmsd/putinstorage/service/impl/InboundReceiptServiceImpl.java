@@ -25,10 +25,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
@@ -39,6 +41,9 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper, InboundReceipt> implements IInboundReceiptService {
+
+    @Value("${file.mainUploadFolder}")
+    private String mainUploadFolder;
 
     @Resource
     private RemoteRequest remoteRequest;
@@ -392,7 +397,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 if ((i > 0) && (i1 == 5) && StringUtils.isNotEmpty(value) && !"null".equals(value)) {
                     String file = value;
                     try {
-                        file = new URL(value).getFile();
+                        file = mainUploadFolder + File.separator + new URL(value).getFile();
                         ExcelUtil.insertImage(excel, sheet, i, i1, file);
                     } catch (Exception e) {
                         log.error("第{}行图片插入失败, imageUrl={}, {}", i, file, e.getMessage());
