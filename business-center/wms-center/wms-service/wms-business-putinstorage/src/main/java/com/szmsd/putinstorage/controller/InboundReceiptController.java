@@ -1,6 +1,7 @@
 package com.szmsd.putinstorage.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.IoUtil;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.DateUtils;
@@ -18,12 +19,15 @@ import com.szmsd.putinstorage.service.IInboundReceiptService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +94,28 @@ public class InboundReceiptController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
+    @PostMapping("/receipt/exportSku")
+    @ApiOperation(value = "导出SKU", notes = "入库管理 - 详情 - 导出")
+    public void exportSku(@RequestBody List<InboundReceiptDetailVO> details, HttpServletResponse response) {
+        try (Workbook excel = new XSSFWorkbook();
+             OutputStream out = response.getOutputStream()) {
+            // 导出SKU
+            iInboundReceiptService.exportSku(excel, details);
+            //response为HttpServletResponse对象
+            response.reset();
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            String fileName = new String(("SKU_入库单_" + details.get(0).getWarehouseNo() + "" ).getBytes("gb2312"), "ISO8859-1" );
+            response.setHeader("Content-Disposition" , "attachment;filename=" + fileName + ".xls");
+            excel.write(out);
+            //此处记得关闭输出Servlet流
+            IoUtil.close(out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
     @PostMapping("/receipt/importDetail")
     @ApiOperation(value = "导入明细", notes = "入库管理 - 新增 - 导入")
     public R<List<InboundReceiptDetailVO>> importDetail(MultipartFile file) {
@@ -104,7 +130,7 @@ public class InboundReceiptController extends BaseController {
             ExcelUtil<InboundReceiptDetailVO> excelUtil = new ExcelUtil<>(InboundReceiptDetailVO.class);
             List<InboundReceiptDetailVO> inboundReceiptDetailVOS = excelUtil.importExcel(file.getInputStream());
             Map<String, Long> collect = inboundReceiptDetailVOS.stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
-            collect.entrySet().forEach(item -> AssertUtil.isTrue(!(item.getValue() > 1L), "Excel存在重复SKU"));
+            collect.forEach((key, value) -> AssertUtil.isTrue(!(value > 1L), "Excel存在重复SKU"));
             return R.ok(inboundReceiptDetailVOS);
         } catch (Exception e) {
             e.printStackTrace();

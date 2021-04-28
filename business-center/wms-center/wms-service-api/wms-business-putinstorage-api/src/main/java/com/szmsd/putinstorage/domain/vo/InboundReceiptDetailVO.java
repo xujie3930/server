@@ -36,6 +36,7 @@ public class InboundReceiptDetailVO {
     @ApiModelProperty(value = "原产品编码")
     @Excel(name = "原产品编码")
     private String originCode;
+
     @ApiModelProperty(value = "出库单号")
     private String deliveryNo;
 
