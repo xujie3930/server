@@ -200,6 +200,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             inventoryAvailableQueryDto.setWarehouseCode(warehouseCode);
             inventoryAvailableQueryDto.setCusCode(sellerCode);
             inventoryAvailableQueryDto.setSkus(skus);
+            //如果没有库存不会塞数据 先方判断外面
             List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
 
             Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
@@ -207,14 +208,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 for (InventoryAvailableListVO vo : availableList) {
                     availableMap.put(vo.getSku(), vo);
                 }
-                for (DelOutboundDetailVO vo : detailDtos) {
-                    InventoryAvailableListVO available = availableMap.get(vo.getSku());
-                    if (null != available) {
-                        BeanMapperUtil.map(available, vo);
-                    }
-                }
-                resultList.addAll(detailDtos);
             }
+            for (DelOutboundDetailVO vo : detailDtos) {
+                InventoryAvailableListVO available = availableMap.get(vo.getSku());
+                if (null != available) {
+                    BeanMapperUtil.map(available, vo);
+                }
+            }
+            resultList.addAll(detailDtos);
         });
 
         logger.info("获取其他sku信息{}", resultList);
