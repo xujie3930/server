@@ -390,13 +390,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
                 // 第2行 至 最后一行 第5列插入图片
                 if ((i > 0) && (i1 == 5) && StringUtils.isNotEmpty(value) && !"null".equals(value)) {
+                    String file = value;
                     try {
-                        String file = new URL(value).getFile();
+                        file = new URL(value).getFile();
                         ExcelUtil.insertImage(excel, sheet, i, i1, file);
-                        log.info("row: {} col: {} 插入图片: {}", i, i1, file);
                     } catch (Exception e) {
-                        log.error("第{}行图片插入失败, imageUrl={}", i, value);
-                        e.printStackTrace();
+                        log.error("第{}行图片插入失败, imageUrl={}, {}", i, file, e.getMessage());
                     }
                     continue;
                 }
