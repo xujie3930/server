@@ -163,9 +163,9 @@ public class RemoteComponent {
             log.info("|转运入库单不校验sku");
             return;
         }
-        R<Boolean> booleanR = baseProductFeignService.checkSkuValidToDelivery(new BaseProduct().setCode(sku));
-        AssertUtil.notNull(booleanR, "SKU验证失败");
-        AssertUtil.isTrue(booleanR.getData() != null && booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
+        //R<Boolean> booleanR = baseProductFeignService.checkSkuValidToDelivery(new BaseProduct().setCode(sku));
+        //AssertUtil.notNull(booleanR, "SKU验证失败");
+        //AssertUtil.isTrue(booleanR.getData() != null && booleanR.getData(), "SKU验证失败：" + booleanR.getMsg());
     }
 
     /**
