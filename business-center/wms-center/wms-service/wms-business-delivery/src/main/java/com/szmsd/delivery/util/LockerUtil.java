@@ -36,7 +36,7 @@ public class LockerUtil<E> {
     }
 
     protected E doLocker(String key, Callback<E> callback) {
-        logger.info("================thread id: {}, do begin", Thread.currentThread().getId());
+        logger.debug("================thread id: {}, do begin", Thread.currentThread().getId());
         // key
         RLock lock = redissonClient.getLock(key);
         // time 5 seconds
@@ -57,7 +57,7 @@ public class LockerUtil<E> {
     }
 
     public void tryLock(String key, Worker worker) {
-        logger.info("================thread id: {}, do begin", Thread.currentThread().getId());
+        logger.debug("================thread id: {}, do begin", Thread.currentThread().getId());
         // key
         RLock lock = redissonClient.getLock(key);
         try {
