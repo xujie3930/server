@@ -79,6 +79,7 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
         if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             where.eq(SpecialOperation::getWarehouseCode, dto.getWarehouseCode());
         }
+        where.orderByDesc(SpecialOperation::getCreateTime);
         return specialOperationMapper.selectList(where);
     }
 

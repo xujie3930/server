@@ -126,6 +126,13 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 b.setReviewState(false);
             }
         }
+
+        if(basSeller.getReviewState()!=null){
+            List<BasSellerSysDto> basSellerSysDtoList = basSellerSysDtos.stream().filter(s -> s.getReviewState().equals(basSeller.getReviewState())).collect(Collectors.toList());
+            TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtoList,count);
+            table.setCode(200);
+            return table;
+        }
             TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
             table.setCode(200);
             return table;
