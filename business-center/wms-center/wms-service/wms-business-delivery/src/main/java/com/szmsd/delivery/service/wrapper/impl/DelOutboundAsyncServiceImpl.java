@@ -153,9 +153,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
                 delOutboundOperationVO.setOrderNo(orderNo);
                 R<?> r = this.operationFeignService.delOutboundCharge(delOutboundOperationVO);
-                if (null == r || Constants.SUCCESS != r.getCode()) {
-                    throw new CommonException("999", "扣减操作费用失败");
-                }
+                DelOutboundServiceImplUtil.chargeOperationThrowCommonException(r);
                 completedState = "MODIFY";
             }
             if ("MODIFY".equals(completedState)) {
@@ -267,9 +265,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
                 delOutboundOperationVO.setOrderNo(orderNo);
                 R<?> r = this.operationFeignService.delOutboundThaw(delOutboundOperationVO);
-                if (null == r || Constants.SUCCESS != r.getCode()) {
-                    throw new CommonException("999", "取消冻结操作费用失败");
-                }
+                DelOutboundServiceImplUtil.thawOperationThrowCommonException(r);
                 cancelledState = "UN_CARRIER";
             }
             if ("UN_CARRIER".equals(cancelledState)) {
