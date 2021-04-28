@@ -593,8 +593,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                     s.append("SKU长度小于两字符，");
                 }
                 QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
-                queryWrapper.eq("code", b.getCode());
-                if (super.count(queryWrapper) == 1) {
+                queryWrapper1.eq("code", b.getCode());
+                if (super.count(queryWrapper1) == 1) {
                     s.append(b.getCode()+"编码重复,");
                 }
 
