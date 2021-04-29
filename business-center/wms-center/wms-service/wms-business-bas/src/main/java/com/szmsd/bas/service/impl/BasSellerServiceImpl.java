@@ -10,6 +10,7 @@ import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.config.DefaultBasConfig;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.*;
@@ -68,6 +69,9 @@ import java.util.stream.Collectors;
 */
 @Service
 public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller> implements IBasSellerService {
+
+    @Autowired
+    protected DefaultBasConfig defaultBasConfig;
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -163,7 +167,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             //生成四位客户代码
             boolean b = false;
             while(b==false){
-                String sellerCode = sellerCode();
+                String sellerCode = this.defaultBasConfig.getCountry()+sellerCode();
                 QueryWrapper<BasSeller> queryWrapperEmail = new QueryWrapper<>();
                 queryWrapperEmail.eq("seller_code",sellerCode);
                 int count = super.count(queryWrapperEmail);
