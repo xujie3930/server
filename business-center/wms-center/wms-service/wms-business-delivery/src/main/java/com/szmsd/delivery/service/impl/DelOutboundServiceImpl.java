@@ -907,6 +907,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             exceptionMessage = org.apache.commons.lang3.StringUtils.substring(exceptionMessage, 0, 255);
             delOutbound.setExceptionMessage(exceptionMessage);
         }
+        // 设置提审时间
+        delOutbound.setBringVerifyTime(new Date());
         this.updateById(delOutbound);
     }
 
@@ -917,7 +919,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         // 清空异常信息
         delOutbound.setExceptionMessage("");
-        // 设置提审成功时间
+        // 设置提审时间
         delOutbound.setBringVerifyTime(new Date());
         this.updateById(delOutbound);
     }
