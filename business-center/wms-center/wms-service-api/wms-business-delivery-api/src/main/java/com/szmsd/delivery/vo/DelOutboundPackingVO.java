@@ -1,4 +1,4 @@
-package com.szmsd.delivery.dto;
+package com.szmsd.delivery.vo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -7,17 +7,16 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 
-
-/**
- * @author zhangyuyuan
- * @date 2021-03-08 19:05
- */
 @Data
-@ApiModel(value = "ContainerInfoDto", description = "ContainerInfoDto对象")
-public class ContainerInfoDto implements Serializable {
+@ApiModel(value = "装箱信息", description = "DelOutboundPackingVO对象")
+public class DelOutboundPackingVO implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "容器号")
-    private String containerCode;
+    @ApiModelProperty(value = "数量")
+    private Long qty;
+
+    @ApiModelProperty(value = "箱号")
+    private String packingNo;
 
     @ApiModelProperty(value = "长 CM")
     private Double length;
@@ -34,6 +33,6 @@ public class ContainerInfoDto implements Serializable {
     @ApiModelProperty(value = "包材类型")
     private String packingMaterial;
 
-    @ApiModelProperty(value = "箱明细")
-    private List<ContainerDetailDto> containerDetailList;
+    @ApiModelProperty(value = "明细")
+    private List<DelOutboundPackingDetailVO> details;
 }

@@ -18,5 +18,5 @@ public class ContainerDetailDto implements Serializable {
     private String sku;
 
     @ApiModelProperty(value = "qty")
-    private Integer qty;
+    private Long qty;
 }

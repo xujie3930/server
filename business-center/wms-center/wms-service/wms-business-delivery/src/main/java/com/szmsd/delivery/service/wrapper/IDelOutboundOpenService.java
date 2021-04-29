@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.wrapper;
 
+import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 
 /**
@@ -15,4 +16,12 @@ public interface IDelOutboundOpenService {
      * @return int
      */
     int shipmentPacking(ShipmentPackingMaterialRequestDto dto);
+
+    /**
+     * 出库管理 - Open - 接收批量出库单类型装箱信息
+     *
+     * @param dto dto
+     * @return int
+     */
+    int shipmentContainers(ShipmentContainersRequestDto dto);
 }

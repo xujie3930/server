@@ -99,6 +99,9 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "重量 g")
     private Double weight;
 
+    @ApiModelProperty(value = "出货渠道")
+    private String shipmentChannel;
+
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;
@@ -109,4 +112,7 @@ public class DelOutboundDto implements Serializable {
 
     @ApiModelProperty(value = "文件信息")
     private List<AttachmentDataDTO> documentsFiles;
+
+    @ApiModelProperty(value = "装箱信息")
+    private List<DelOutboundPackingDto> packings;
 }
