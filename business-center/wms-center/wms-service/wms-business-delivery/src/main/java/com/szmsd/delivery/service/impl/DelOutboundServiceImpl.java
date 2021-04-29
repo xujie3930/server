@@ -340,6 +340,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 装箱信息
                 List<DelOutboundPackingDto> packings = dto.getPackings();
                 this.delOutboundPackingService.save(orderNo, packings, false);
+                // 箱标文件
+                AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
+                this.remoteAttachmentService.saveAndUpdate(batchLabel);
             }
             return insert;
         } catch (Exception e) {
@@ -605,6 +608,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 装箱信息
                 List<DelOutboundPackingDto> packings = dto.getPackings();
                 this.delOutboundPackingService.save(orderNo, packings, true);
+                // 箱标文件
+                AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
+                this.remoteAttachmentService.saveAndUpdate(batchLabel);
             }
             // 更新
             return baseMapper.updateById(inputDelOutbound);

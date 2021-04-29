@@ -119,6 +119,9 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "文件信息")
     private List<AttachmentDataDTO> documentsFiles;
 
+    @ApiModelProperty(value = "箱标文件")
+    private List<AttachmentDataDTO> batchLabels;
+
     @ApiModelProperty(value = "装箱信息")
     private List<DelOutboundPackingDto> packings;
 }
