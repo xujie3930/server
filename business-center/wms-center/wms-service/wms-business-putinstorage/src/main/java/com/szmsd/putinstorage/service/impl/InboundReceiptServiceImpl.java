@@ -7,6 +7,7 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
+import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
 import com.szmsd.putinstorage.domain.InboundReceipt;
@@ -18,6 +19,7 @@ import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
 import com.szmsd.putinstorage.util.ExcelUtil;
 import com.szmsd.system.api.domain.SysUser;
+import javafx.scene.control.CheckBox;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -100,7 +102,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Transactional(rollbackFor = Throwable.class)
     public InboundReceiptInfoVO saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO) {
         log.info("创建入库单：{}", createInboundReceiptDTO);
-
+        CheckTag.set(createInboundReceiptDTO.getIsFromTransport());
         Integer totalDeclareQty = createInboundReceiptDTO.getTotalDeclareQty();
         AssertUtil.isTrue(totalDeclareQty > 0, "合计申报数量不能为" + totalDeclareQty);
 

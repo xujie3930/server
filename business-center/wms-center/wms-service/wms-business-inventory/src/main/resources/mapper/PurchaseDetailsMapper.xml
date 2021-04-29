@@ -31,7 +31,7 @@
                 update_by_name,
                 update_time,
                 remark,
-            id, association_id, create_by, update_by, version, del_flag, product_name, product_description, sku, available_inventory, purchase_quantity, quantity_in_storage_created, arrival_quantity, attachment_url
+            id, association_id, create_by,remaining_purchase_quantity, update_by, version, del_flag, product_name, product_description, sku, available_inventory, purchase_quantity, quantity_in_storage_created, arrival_quantity, attachment_url
     </sql>
 
     <select id="selectPurchaseInfoDetailListByAssId" resultType="com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO">

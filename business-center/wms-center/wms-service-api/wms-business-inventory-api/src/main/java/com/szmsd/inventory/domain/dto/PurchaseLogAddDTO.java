@@ -66,6 +66,7 @@ public class PurchaseLogAddDTO {
     private String createByName;
     @ApiModelProperty(value = "快递单号")
     private String deliveryNo;
+
     /**
      * 设置日志
      *
@@ -78,7 +79,10 @@ public class PurchaseLogAddDTO {
                 logDetails = type.generateLog(createByName, formatTime, orderNo, purchaseNo);
                 break;
             case WAREHOUSING_LIST:
-                logDetails = type.generateLog(createByName, formatTime, purchaseNo, warehouseNo);
+                logDetails = type.generateLog(createByName, formatTime, purchaseNo, deliveryNo, warehouseNo);
+                break;
+            case CANCEL_STORAGE:
+                logDetails = type.generateLog(createByName, formatTime, warehouseNo, purchaseNo, deliveryNo);
                 break;
             default:
                 break;
