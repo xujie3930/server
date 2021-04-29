@@ -1,5 +1,7 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.delivery.api.service.impl.DelOutboundClientServiceImpl,\
-  com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback
+  com.szmsd.delivery.api.service.impl.DelOutboundReportClientServiceImpl,\
+  com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback,\
+  com.szmsd.delivery.api.feign.factory.DelOutboundReportFeignFallback
 
   
