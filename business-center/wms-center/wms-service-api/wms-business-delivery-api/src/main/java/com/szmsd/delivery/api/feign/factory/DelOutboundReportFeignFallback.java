@@ -20,6 +20,11 @@ public class DelOutboundReportFeignFallback implements FallbackFactory<DelOutbou
     public DelOutboundReportFeignService create(Throwable throwable) {
         return new DelOutboundReportFeignService() {
             @Override
+            public R<List<DelOutboundReportListVO>> queryCreateData(DelOutboundReportQueryDto queryDto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R<List<DelOutboundReportListVO>> queryBringVerifyData(DelOutboundReportQueryDto queryDto) {
                 return R.convertResultJson(throwable);
             }

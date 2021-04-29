@@ -12,6 +12,14 @@ import java.util.List;
 public interface DelOutboundReportClientService {
 
     /**
+     * 查询创建数据
+     *
+     * @param queryDto queryDto
+     * @return List<DelOutboundReportListVO>
+     */
+    List<DelOutboundReportListVO> queryCreateData(DelOutboundReportQueryDto queryDto);
+
+    /**
      * 查询提审数据
      *
      * @param queryDto queryDto
