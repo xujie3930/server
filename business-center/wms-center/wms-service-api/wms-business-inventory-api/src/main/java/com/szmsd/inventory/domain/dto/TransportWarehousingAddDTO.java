@@ -33,10 +33,13 @@ public class TransportWarehousingAddDTO {
     @Excel(name = "目标仓库")
     private String warehouseName;
 
+    @ApiModelProperty(value = "入库方式编码")
+    private String warehouseMethodCode;
+    @Deprecated
     @ApiModelProperty(value = "出库方式编码", required = true)
     @Excel(name = "出库方式编码")
     private String orderType;
-
+    @Deprecated
     @ApiModelProperty(value = "出库方式名", required = true)
     @Excel(name = "出库方式名")
     private String orderTypeName;

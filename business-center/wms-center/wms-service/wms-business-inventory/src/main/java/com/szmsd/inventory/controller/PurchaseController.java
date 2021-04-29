@@ -108,7 +108,8 @@ public class PurchaseController extends BaseController {
     @ApiImplicitParam(name = "warehouseNo", type = "String", value = "入库单号")
     @ApiOperation(value = "取消采购单入库", notes = "取消采购单入库 回调, 通过入库单id取消创建的采购单里面入库的请求数据")
     public R cancelByWarehouseNo(@PathVariable("warehouseNo") String warehouseNo) {
-        return toOk(purchaseService.cancelByWarehouseNo(warehouseNo));
+        purchaseService.cancelByWarehouseNo(warehouseNo);
+        return R.ok();
     }
 
 

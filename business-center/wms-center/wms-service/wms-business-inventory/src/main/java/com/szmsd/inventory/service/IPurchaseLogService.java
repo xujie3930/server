@@ -1,7 +1,10 @@
 package com.szmsd.inventory.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.PurchaseLog;
+import com.szmsd.inventory.domain.PurchaseStorageDetails;
+import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseLogAddDTO;
 import com.szmsd.inventory.domain.vo.PurchaseLogVO;
 
@@ -33,6 +36,10 @@ public interface IPurchaseLogService extends IService<PurchaseLog> {
      */
     int insertPurchaseLog(PurchaseLogAddDTO purchaseLog);
 
+    void addLog(String warehouseNo, List<PurchaseStorageDetails> rollBackStorage, Integer associationId, Purchase purchase);
 
+    void addLog(Integer associationId, PurchaseAddDTO purchaseAddDTO, String warehouseNo);
+
+    void addLog(Integer associationId, PurchaseAddDTO purchaseAddDTO);
 }
 

@@ -74,7 +74,9 @@ public class PurchaseAddDTO implements IBOConvert {
     @ApiModelProperty(value = "目标仓库", required = true)
     @Excel(name = "目标仓库")
     private String warehouseName;
-
+    /**
+     * 对应 warehouseMethodCode 入库方式
+     */
     @ApiModelProperty(value = "出库方式编码", required = true)
     @Excel(name = "出库方式编码")
     private String orderType;
@@ -119,14 +121,14 @@ public class PurchaseAddDTO implements IBOConvert {
         purchaseDetailsOpt
                 .ifPresent(x -> {
                     //计算采购数量总和
-                    purchaseQuantity = x.stream().mapToInt(PurchaseDetailsAddDTO::getPurchaseQuantity).sum();
+                    this.purchaseQuantity = x.stream().mapToInt(PurchaseDetailsAddDTO::getPurchaseQuantity).sum();
                 });
         purchaseStorageDetailsOpt
                 .ifPresent(x -> {
                     //计算已入库总和
-                    quantityInStorageCreated = x.stream().mapToInt(PurchaseStorageDetailsAddDTO::getDeclareQty).sum();
+                    this.quantityInStorageCreated = x.stream().mapToInt(PurchaseStorageDetailsAddDTO::getDeclareQty).sum();
                     //计算剩余需要采购的数量
-                    remainingPurchaseQuantity = purchaseQuantity - quantityInStorageCreated;
+                    this.remainingPurchaseQuantity = purchaseQuantity - quantityInStorageCreated;
 
                     //更新sku剩余采购数量
                     Map<String, Integer> numberOfWarehoused = x.stream().collect(Collectors.groupingBy(PurchaseStorageDetailsAddDTO::getSku, Collectors.summingInt(PurchaseStorageDetailsAddDTO::getDeclareQty)));
@@ -134,6 +136,7 @@ public class PurchaseAddDTO implements IBOConvert {
                         purchaseDetails.forEach(details -> {
                             Integer integer = Optional.ofNullable(numberOfWarehoused.get(details.getSku())).orElse(0);
                             details.setRemainingPurchaseQuantity(details.getPurchaseQuantity() - integer);
+                            details.setQuantityInStorageCreated(integer);
                         });
                     });
                 });
