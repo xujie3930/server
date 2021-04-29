@@ -317,7 +317,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             throw new RuntimeException("无相关数据");
         }
         //合并相同sku数据
-        transshipmentProductData = mergeTwo(transshipmentProductData);
+        //transshipmentProductData = mergeTwo(transshipmentProductData);
         //创建入库单
         long sum = transshipmentProductData.stream().mapToLong(DelOutboundDetailVO::getQty).sum();
         String deliveryNo = transportWarehousingAddDTO.getDeliveryNo();
