@@ -602,7 +602,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             if(StringUtils.isEmpty(b.getProductName()))
             {
 
-                s.append("申报品名未填写,");
+                s.append("英文申报品名未填写,");
             }
             if(StringUtils.isEmpty(b.getProductAttributeName()))
             {
