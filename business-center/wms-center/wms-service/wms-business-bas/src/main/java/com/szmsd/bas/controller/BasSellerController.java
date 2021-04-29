@@ -42,9 +42,9 @@ public class BasSellerController extends BaseController{
        * 查询模块列表
      */
       @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
-      @GetMapping("/list")
+      @PostMapping("/list")
       @ApiOperation(value = "分页查询模块列表",notes = "分页查询模块列表")
-      public TableDataInfo list(BasSellerQueryDto basSeller)
+      public TableDataInfo list(@RequestBody BasSellerQueryDto basSeller)
      {
             return basSellerService.selectBasSellerList(basSeller);
       }
