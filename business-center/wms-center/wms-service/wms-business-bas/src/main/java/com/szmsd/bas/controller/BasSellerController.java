@@ -82,6 +82,18 @@ public class BasSellerController extends BaseController{
         return r;
     }
 
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
+    @PostMapping("/getInspection")
+    @ApiOperation(value = "查询验货要求",notes = "查询验货要求")
+    public R<String> getInspection(@RequestBody String sellerCode)
+    {
+        R r = new R();
+        r.setCode(200);
+        r.setData(basSellerService.getInspection(sellerCode));
+        r.setMsg("SUCCESS");
+        return r;
+    }
+
 
     /**
     * 导出模块列表
