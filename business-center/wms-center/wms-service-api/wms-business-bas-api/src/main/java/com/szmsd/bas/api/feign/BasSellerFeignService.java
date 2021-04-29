@@ -16,4 +16,12 @@ public interface BasSellerFeignService {
     R<String> getSellerCode(@RequestBody BasSeller basSeller);
     @PostMapping(value = "/bas/seller/getLoginSellerCode")
     R<String> getLoginSellerCode();
+
+    /**
+     * 查询客户验货要求
+     * @param sellerCode
+     * @return
+     */
+    @PostMapping(value = "/bas/seller/getInspection")
+    R<String> getInspection(@RequestBody String sellerCode);
 }
