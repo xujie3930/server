@@ -2,6 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.delivery.mapper.DelOutboundReportMapper">
 
+    <select id="queryCreateData" resultType="com.szmsd.delivery.vo.DelOutboundReportListVO">
+        SELECT
+            DATE_FORMAT(o.create_time, '%Y-%m-%d') AS 'date',
+            COUNT(0) AS 'count'
+        FROM del_outbound o
+        ${ew.customSqlSegment}
+    </select>
+
     <select id="queryBringVerifyData" resultType="com.szmsd.delivery.vo.DelOutboundReportListVO">
         SELECT
             DATE_FORMAT(o.bring_verify_time, '%Y-%m-%d') AS 'date',

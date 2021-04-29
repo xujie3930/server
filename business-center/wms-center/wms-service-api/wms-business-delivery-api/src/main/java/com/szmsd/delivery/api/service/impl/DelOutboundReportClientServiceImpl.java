@@ -23,6 +23,11 @@ public class DelOutboundReportClientServiceImpl implements DelOutboundReportClie
     }
 
     @Override
+    public List<DelOutboundReportListVO> queryCreateData(DelOutboundReportQueryDto queryDto) {
+        return R.getDataAndException(this.delOutboundReportFeignService.queryCreateData(queryDto));
+    }
+
+    @Override
     public List<DelOutboundReportListVO> queryBringVerifyData(DelOutboundReportQueryDto queryDto) {
         return R.getDataAndException(this.delOutboundReportFeignService.queryBringVerifyData(queryDto));
     }
