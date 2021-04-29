@@ -46,6 +46,12 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     @Resource
     private IChargeLogService chargeLogService;
 
+    private static final String manySku = "-manySku";
+
+    private static final String packing = "-packing";
+
+    private static final String label = "-label";
+
     @Override
     public int save(OperationDTO dto) {
         Operation domain = new Operation();
@@ -186,7 +192,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R<?> chargeCollection(DelOutboundOperationVO dto, List<DelOutboundOperationDetailVO> details) {
         BigDecimal amount = BigDecimal.ZERO;
         if (details.size() > 1) {
-            return this.calculateFreeze(dto, dto.getOrderType().concat("-manySku"), details, amount);
+            return this.calculateFreeze(dto, dto.getOrderType().concat(manySku), details, amount);
         }
         return this.calculateFreeze(dto, dto.getOrderType(), details, amount);
     }
@@ -206,23 +212,23 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         //计算装箱费
         Integer packingCount = dto.getPackingCount();
         BigDecimal amount = BigDecimal.ZERO;
-        if (packingCount != null && packingCount > 0) {
-            String packingType = dto.getOrderType().concat("-packing");
-            Operation packingOperation = getOperationDetails(dto, packingType, null, "未找到" + packingType + "配置");
-            BigDecimal calculate = payService.calculate(packingOperation.getFirstPrice(), packingOperation.getNextPrice(), packingCount.longValue());
-            amount = amount.add(calculate);
-        }
+        amount = getBatchAmount(dto, amount, packingCount, packing);
 
         //计算贴标费
         Integer shipmentLabelCount = dto.getShipmentLabelCount();
-        if (shipmentLabelCount != null && shipmentLabelCount > 0) {
-            String LabelType = dto.getOrderType().concat("-label");
-            Operation LabelOperation = getOperationDetails(dto, LabelType, null, "未找到" + LabelType + "配置");
-            BigDecimal calculate = payService.calculate(LabelOperation.getFirstPrice(), LabelOperation.getNextPrice(), shipmentLabelCount.longValue());
-            amount = amount.add(calculate);
-        }
+        amount = getBatchAmount(dto, amount, shipmentLabelCount, label);
 
         return this.calculateFreeze(dto, dto.getOrderType(), details, amount);
+    }
+
+    private BigDecimal getBatchAmount(DelOutboundOperationVO dto, BigDecimal amount, Integer count, String type) {
+        if (count != null && count > 0) {
+            String orderType = dto.getOrderType().concat(type);
+            Operation labelOperation = getOperationDetails(dto, orderType, null, "未找到" + orderType + "配置");
+            BigDecimal calculate = payService.calculate(labelOperation.getFirstPrice(), labelOperation.getNextPrice(), count.longValue());
+            amount = amount.add(calculate);
+        }
+        return amount;
     }
 
     private Operation getOperationDetails(DelOutboundOperationVO dto, String orderType, Double weight, String message) {
