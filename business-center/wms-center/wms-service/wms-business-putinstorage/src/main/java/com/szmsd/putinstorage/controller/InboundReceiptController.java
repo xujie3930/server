@@ -10,10 +10,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptExportVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import com.szmsd.putinstorage.domain.vo.*;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
 import io.swagger.annotations.Api;
@@ -185,6 +182,14 @@ public class InboundReceiptController extends BaseController {
         List<InboundReceiptExportVO> list = iInboundReceiptService.selectExport(queryDTO);
         ExcelUtil<InboundReceiptExportVO> util = new ExcelUtil<>(InboundReceiptExportVO.class);
         util.exportExcel(response, list, "入库单导出_" + DateUtils.dateTimeNow());
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:statistics')")
+    @GetMapping("/statistics")
+    @ApiOperation(value = "统计", notes = "入库单统计")
+    public R<List<InboundCountVO>> statistics(InboundReceiptQueryDTO queryDTO) {
+        List<InboundCountVO> statistics = iInboundReceiptService.statistics(queryDTO);
+        return R.ok(statistics);
     }
 
 }

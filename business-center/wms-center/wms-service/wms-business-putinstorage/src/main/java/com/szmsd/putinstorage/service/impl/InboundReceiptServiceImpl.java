@@ -19,7 +19,6 @@ import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
 import com.szmsd.putinstorage.util.ExcelUtil;
 import com.szmsd.system.api.domain.SysUser;
-import javafx.scene.control.CheckBox;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -413,6 +412,16 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             // 设置样式
             ExcelUtil.bord(excel, row, false, 6);
         }
+    }
+
+    /**
+     * 统计入库单
+     * @param queryDTO
+     * @return
+     */
+    @Override
+    public List<InboundCountVO> statistics(InboundReceiptQueryDTO queryDTO) {
+        return baseMapper.statistics(queryDTO);
     }
 
     /**

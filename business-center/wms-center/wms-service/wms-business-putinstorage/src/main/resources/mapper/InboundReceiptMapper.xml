@@ -69,6 +69,13 @@
         <result column="vat" property="vat"/>
     </resultMap>
 
+    <resultMap id="InboundCountVO" type="com.szmsd.putinstorage.domain.vo.InboundCountVO">
+        <result column="cus_code" property="cusCode"/>
+        <result column="group_by" property="groupBy"/>
+        <result column="count" property="count"/>
+        <result column="count2" property="count2"/>
+    </resultMap>
+
     <sql id="Column_List_VO">
         t.id,
         t.warehouse_no,
@@ -156,6 +163,12 @@
         <include refid="selectListWhere"/>
         ORDER BY t.`status`
     </select>
+    <select id="statistics" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultMap="InboundCountVO">
+        SELECT t.cus_code, DATE_FORMAT(t.create_time, '%Y-%m-%d') group_by, COUNT(1) count, COUNT(total_put_qty) count2 FROM inbound_receipt t
+        <where><include refid="selectListWhere"/></where>
+        GROUP BY t.cus_code, DATE_FORMAT(t.create_time, '%Y-%m-%d')
+        ORDER BY create_time;
+    </select>
 
     <sql id="selectListWhere">
         <if test="warehouseNoList != null and warehouseNoList.size() > 0">
@@ -171,8 +184,15 @@
             </foreach>
         </if>
         <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
+        <if test="orderType != null and orderType != ''">AND t.order_type = #{orderType}</if>
         <if test="cusCode != null and cusCode != ''">AND t.cus_code = #{cusCode}</if>
         <if test="status != null and status != ''">AND t.status = #{status}</if>
+        <if test="statusList != null and statusList.size() > 0">
+            AND t.status IN
+            <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
         <if test="deliveryWayCode != null and deliveryWayCode != ''">AND t.delivery_way_code = #{deliveryWayCode}</if>
         <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
         <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>

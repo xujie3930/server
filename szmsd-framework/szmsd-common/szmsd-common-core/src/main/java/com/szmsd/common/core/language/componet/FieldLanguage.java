@@ -90,7 +90,7 @@ public class FieldLanguage extends JsonSerializer<String> implements ContextualS
             Map<String, String> language = cacheMap.get(code);
             return language != null ? language.get(getLen()) : "";
         }
-        return "";
+        return code;
     }
 
     private String getLocalLanguage(String value) {
@@ -102,7 +102,7 @@ public class FieldLanguage extends JsonSerializer<String> implements ContextualS
         }
         if (localLanguageEnum == null) {
             log.error("没有维护[{}]枚举语言[{}]", jsonI18nLocalLanguage, value);
-            return "";
+            return value;
         }
         String language;
         switch (getLen()) {
