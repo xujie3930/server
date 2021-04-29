@@ -3,11 +3,13 @@ package com.szmsd.delivery.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.Date;
 
 @Data
+@Accessors(chain = true)
 @ApiModel(value = "DelOutboundReportQueryDto", description = "DelOutboundReportQueryDto对象")
 public class DelOutboundReportQueryDto implements Serializable {
 

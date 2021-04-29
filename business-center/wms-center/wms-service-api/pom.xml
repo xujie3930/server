@@ -33,6 +33,7 @@
         <module>wms-business-returnex-api</module>
         <module>wms-business-exception-api</module>
         <module>wms-business-package-api</module>
+        <module>wms-business-report-api</module>
     </modules>
 
     <dependencyManagement>
@@ -80,6 +81,16 @@
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-returnex-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-report-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-putinstorage-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
         </dependencies>

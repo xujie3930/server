@@ -72,6 +72,7 @@
             <if test="skuPropertyCode != null and skuPropertyCode != ''">AND sku.product_attribute = #{skuPropertyCode}</if>
             <if test="skuDeclaredName != null and skuDeclaredName != ''">AND sku.product_name_chinese LIKE CONCAT(#{skuDeclaredName}, '%')</if>
         </where>
+        ORDER BY t.update_time DESC
     </select>
 
     <select id="queryAvailableList" resultType="com.szmsd.inventory.domain.vo.InventoryAvailableListVO">

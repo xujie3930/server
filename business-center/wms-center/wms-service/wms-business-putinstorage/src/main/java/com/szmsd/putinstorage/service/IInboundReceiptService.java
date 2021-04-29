@@ -3,10 +3,7 @@ package com.szmsd.putinstorage.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptExportVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import com.szmsd.putinstorage.domain.vo.*;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -49,5 +46,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     List<InboundReceiptExportVO> selectExport(InboundReceiptQueryDTO queryDTO);
 
     void exportSku(Workbook excel, List<InboundReceiptDetailVO> details);
+
+    List<InboundCountVO> statistics(InboundReceiptQueryDTO queryDTO);
 }
 
