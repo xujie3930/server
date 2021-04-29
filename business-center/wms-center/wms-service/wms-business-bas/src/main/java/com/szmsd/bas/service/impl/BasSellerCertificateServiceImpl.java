@@ -60,7 +60,7 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         public int countVaildBasSellerCertificate(String sellerCode){
             QueryWrapper<BasSellerCertificate> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("seller_code",sellerCode);
-            queryWrapper.ne("vaild","0");
+            queryWrapper.eq("vaild","0");
             return super.count(queryWrapper);
         }
         /**
