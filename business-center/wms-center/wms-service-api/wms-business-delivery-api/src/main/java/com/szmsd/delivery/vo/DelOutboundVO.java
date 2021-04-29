@@ -108,4 +108,9 @@ public class DelOutboundVO implements Serializable {
     @ApiModelProperty(value = "明细信息")
     private List<DelOutboundDetailVO> details;
 
+    @ApiModelProperty(value = "装箱信息")
+    private List<DelOutboundPackingVO> packings;
+
+    @ApiModelProperty(value = "装箱列表,wms返回的")
+    private List<DelOutboundPackingVO> containerList;
 }

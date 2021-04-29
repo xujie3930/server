@@ -60,6 +60,6 @@ public class DelOutboundOpenController extends BaseController {
     @ApiOperation(value = "出库管理 - Open - #D3 接收批量出库单类型装箱信息", position = 300)
     @ApiImplicitParam(name = "dto", value = "ShipmentContainersRequestDto", dataType = "ShipmentContainersRequestDto")
     public R<Integer> shipmentContainers(@RequestBody @Validated ShipmentContainersRequestDto dto) {
-        return R.ok(this.delOutboundService.shipmentContainers(dto));
+        return R.ok(this.delOutboundOpenService.shipmentContainers(dto));
     }
 }

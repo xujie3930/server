@@ -78,4 +78,6 @@ public class DelOutboundPacking extends BaseEntity {
     @ApiModelProperty(value = "类型，1新增，2WMS测量返回的")
     private Integer type;
 
+    @ApiModelProperty(value = "包材类型")
+    private String packingMaterial;
 }

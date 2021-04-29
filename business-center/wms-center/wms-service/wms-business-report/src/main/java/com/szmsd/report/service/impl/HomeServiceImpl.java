@@ -54,10 +54,10 @@ public class HomeServiceImpl implements HomeService {
     public List<CusWalletVO> selectCusWallet(String cusCode) {
 
         // 断言 是否是当前登录客户
-//        assertCusCode(cusCode);
+        assertCusCode(cusCode);
 
         String redisKey = MessageFormat.format(HOME_CUS_WALLET_KEY, cusCode);
-        List<CusWalletVO> cacheObject = redisService.getCacheList(redisKey);
+        List<CusWalletVO> cacheObject = redisService.getCacheObject(redisKey);
         if (CollectionUtils.isNotEmpty(cacheObject)) {
             return cacheObject;
         }
@@ -87,6 +87,9 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     public List<DocumentVO> selectDocuments(String cusCode) {
+
+        // 断言 是否是当前登录客户
+        assertCusCode(cusCode);
 
         // 当天到仓量
         String thatDay = "2021-04-27"; // DateUtils.dateTimeNow("yyyy-MM-dd");
@@ -134,6 +137,10 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     public List<DocumentVO> selectProblem(String cusCode) {
+
+        // 断言 是否是当前登录客户
+        assertCusCode(cusCode);
+
         String redisKey =  MessageFormat.format(HOME_PROBLEM, cusCode);
 
         List<DocumentVO> cacheObject = redisService.getCacheObject(redisKey);
@@ -154,6 +161,9 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     public List<List<String>> queryOrder7Report(String cusCode) {
+
+        // 断言 是否是当前登录客户
+        assertCusCode(cusCode);
 
         String startTime = DateUtils.getPastDate(6);
         String endTime = DateUtils.dateTimeNow("yyyy-MM-dd").concat(" 00:00:00");
