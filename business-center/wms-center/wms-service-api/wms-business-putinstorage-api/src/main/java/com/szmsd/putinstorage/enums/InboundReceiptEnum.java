@@ -15,14 +15,18 @@ public class InboundReceiptEnum {
     public enum OrderType implements InboundReceiptEnumMethods {
         /** 入库单类型：普通入库 **/
         NORMAL("Normal", "普通入库"),
-        /** 入库单类型：转运入库 **/
-        TRANSFER("Transfer", "转运入库"),
+        /** 入库单类型：集运入库 **/
+        COLLECTION("Collection", "集运入库"),
+        /** 入库单类型：新SKU入库 **/
+        NEW_SKU("NewSku", "新SKU入库"),
         /** 入库单类型：采购入库 **/
         PURCHASE("Purchase", "采购入库"),
         /** 入库单类型：上架入库 **/
         PUTAWAY("Putaway", "上架入库"),
         /** 入库单类型：点数入库 **/
         COUNTING("Counting", "点数入库"),
+        /** 入库单类型：转运入库 **/
+        PACKAGE_TRANSFER("PackageTransfer", "包裹转运入库"),
         ;
         private String value;
 
