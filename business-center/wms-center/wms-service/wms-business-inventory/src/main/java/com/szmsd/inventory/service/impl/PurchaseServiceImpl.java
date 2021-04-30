@@ -328,7 +328,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             ;
             inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
         });
-        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList).setIsFromTransport(true);
+        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
 
         InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
 
