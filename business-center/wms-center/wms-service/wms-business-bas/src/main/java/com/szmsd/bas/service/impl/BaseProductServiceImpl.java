@@ -595,7 +595,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
                 queryWrapper1.eq("code", b.getCode());
                 if (super.count(queryWrapper1) >0) {
-                    s.append(b.getCode()+"编码重复,");
+                    s.append(b.getCode()+"编码重复录入,");
                 }
 
             }
@@ -730,7 +730,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }
         }
         if(map.size()!=list.size()){
-            s1.append("sku有重复:");
+            s1.append("<br/>文件内填写sku有重复:");
             for (Object key : map.keySet()) {
                 Integer value = (Integer)map.get(key);
                 if(value>1){
