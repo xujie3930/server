@@ -29,6 +29,7 @@ public class ChargeController extends BaseController {
     @ApiOperation(value = "费用查询")
     @GetMapping("/query/page")
     public TableDataInfo<QueryChargeVO> queryPage(QueryChargeDto queryChargeDto) {
+        startPage();
         if(queryChargeDto.getQueryType() == 1) {
             R<TableDataInfo<QueryChargeVO>> result = chargeFeignService.selectPage(queryChargeDto);
             if(result.getCode() != 200) {
