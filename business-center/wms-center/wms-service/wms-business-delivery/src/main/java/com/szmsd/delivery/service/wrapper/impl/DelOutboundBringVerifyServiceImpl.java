@@ -195,6 +195,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
         // 计算包裹费用
         CalcShipmentFeeCommand calcShipmentFeeCommand = new CalcShipmentFeeCommand();
+        // true代表需要验证，false的话，主要是用于测算
+        calcShipmentFeeCommand.setAddressValifition(true);
         // 产品代码就是选择的物流承运商
         calcShipmentFeeCommand.setProductCode(delOutbound.getShipmentRule());
         calcShipmentFeeCommand.setClientCode(delOutbound.getCustomCode());
