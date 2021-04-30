@@ -18,16 +18,11 @@ public class ExcelUtil {
     protected static final Logger log = LoggerFactory.getLogger(ExcelUtil.class);
 
     /**
-     * @param excel
      * @param row
-     * @param oneRowBold
      * @param j
      */
-    public static void bord(Workbook excel, Row row, boolean oneRowBold, int j) {
+    public static void bord(Workbook excel, Row row, int rowNum, int j) {
         CellStyle cellStyle = excel.createCellStyle();
-
-        //设置自动换行
-        cellStyle.setWrapText(true);
 
         // 边框
         cellStyle.setBorderTop(BorderStyle.THIN);
@@ -44,10 +39,13 @@ public class ExcelUtil {
         font.setFontName("宋体");
         font.setFontHeightInPoints((short) 12);
         // 首行标题加粗
-        if (oneRowBold) {
+        if (rowNum == 0) {
+            row.setHeightInPoints((short) 30);
             font.setFontHeightInPoints((short) 14);
             font.setFontName("黑体");
             font.setBold(true);
+        } else {
+            row.setHeight((short) (30 * 20));
         }
         cellStyle.setFont(font);
 

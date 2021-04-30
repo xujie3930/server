@@ -14,6 +14,10 @@ public class BaseProductMeasureDto {
     @TableField("`code`")
     private String code;
 
+    @ApiModelProperty(value = "产品名称")
+    @Excel(name = "产品名称")
+    private String productName;
+
     @ApiModelProperty(value = "类型")
     private String category;
 

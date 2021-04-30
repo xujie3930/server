@@ -3,6 +3,7 @@ package com.szmsd.bas.api.feign;
 import com.szmsd.bas.api.BusinessBasInterface;
 import com.szmsd.bas.api.factory.BaseProductFeignFallback;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductBatchQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.bas.dto.MeasuringProductRequest;
@@ -40,11 +41,11 @@ public interface BaseProductFeignService {
     /**
      * 批量查询SKU数值信息
      *
-     * @param codes
+     * @param dto
      * @return
      */
     @PostMapping(value = "/base/product/batchSKU")
-    R<List<BaseProductMeasureDto>> batchSKU(@RequestBody List<String> codes);
+    R<List<BaseProductMeasureDto>> batchSKU(@RequestBody BaseProductBatchQueryDto dto);
 
     @PostMapping(value = "/base/product/measuring")
     R measuringProduct(@RequestBody MeasuringProductRequest measuringProductRequest);

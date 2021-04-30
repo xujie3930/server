@@ -43,6 +43,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -182,13 +183,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductMeasureDto> batchSKU(List<String> codes) {
+    public List<BaseProductMeasureDto> batchSKU(BaseProductBatchQueryDto dto) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        if (CollectionUtils.isEmpty(codes)) {
+        if (CollectionUtils.isEmpty(dto.getCodes())) {
             return Collections.emptyList();
         } else {
             queryWrapper.eq("is_active", true);
-            queryWrapper.in("code", codes);
+            queryWrapper.in("code", dto.getCodes());
+            QueryWrapperUtil.filter(queryWrapper,SqlKeyword.EQ,"seller_code",dto.getSellerCode());
         }
         return BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductMeasureDto.class);
     }
@@ -594,8 +596,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 }
                 QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
                 queryWrapper1.eq("code", b.getCode());
-                if (super.count(queryWrapper1) == 1) {
-                    s.append(b.getCode()+"编码重复,");
+                if (super.count(queryWrapper1) >0) {
+                    s.append(b.getCode()+"编码重复录入,");
                 }
 
             }
@@ -721,12 +723,23 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             count++;
         }
 
-        Map<String,String> map = new HashMap<>();
+        Map<String,Integer> map = new HashMap<>();
         for(BaseProductImportDto b:list){
-            map.put(b.getCode(),b.getCode());
+            if(map.containsKey(b.getCode())){
+                map.put(b.getCode(),map.get(b.getCode())+1);
+            }else{
+                map.put(b.getCode(),1);
+            }
         }
         if(map.size()!=list.size()){
-            s1.append("<br/>sku有重复");
+            s1.append("<br/>文件内填写sku有重复:");
+            for (Object key : map.keySet()) {
+                Integer value = (Integer)map.get(key);
+                if(value>1){
+                    s1.append(key+",\n");
+                }
+            }
+
         }
         if(!s1.toString().equals("")){
             throw new BaseException(s1.toString());
