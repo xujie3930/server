@@ -119,7 +119,8 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         if (StringUtils.isNotEmpty(dto.getOperationType())) {
             where.eq("operation_type", dto.getOperationType());
         }
-        where.eq("status",SpecialOperationStatusEnum.PENDING.getStatus());
+        where.orderByDesc("status");
+//        where.eq("status",SpecialOperationStatusEnum.PENDING.getStatus());
         return baseInfoMapper.selectPageList(where);
     }
 
