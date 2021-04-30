@@ -196,7 +196,7 @@ public class HomeServiceImpl implements HomeService {
             Integer submitedCount = submited.stream().filter(item -> time.equals(item.getDate())).map(DelOutboundReportListVO::getCount).reduce(Integer::sum).orElse(0);
             Integer completedCount = completed.stream().filter(item -> time.equals(item.getGroupBy())).map(InboundCountVO::getCount).reduce(Integer::sum).orElse(0);
             Integer shippedCount = shipped.stream().filter(item -> time.equals(item.getDate())).map(DelOutboundReportListVO::getCount).reduce(Integer::sum).orElse(0);
-            List<String> source = Arrays.asList(time, createdCount.toString(), submitedCount.toString(), completedCount.toString(), shippedCount.toString());
+            List<String> source = Arrays.asList(time.replace(DateUtils.dateTimeNow("yyyy-"), ""), createdCount.toString(), submitedCount.toString(), completedCount.toString(), shippedCount.toString());
             result.add(source);
         }
 
