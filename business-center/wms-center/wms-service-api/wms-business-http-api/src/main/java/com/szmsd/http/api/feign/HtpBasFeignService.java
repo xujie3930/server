@@ -32,4 +32,7 @@ public interface HtpBasFeignService {
 
     @PostMapping("/api/bas/http/shipmentRule")
     R<BaseOperationResponse> shipmentRule(@RequestBody AddShipmentRuleRequest addShipmentRuleRequest);
+
+    @PostMapping("/api/bas/http/inspection")
+    R<ResponseVO> inspection(@RequestBody AddSkuInspectionRequest request);
 }
