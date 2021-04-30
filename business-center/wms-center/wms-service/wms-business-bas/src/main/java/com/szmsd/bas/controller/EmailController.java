@@ -1,15 +1,20 @@
 package com.szmsd.bas.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.enums.EmailEnum;
+import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.util.EmailUtil;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.redis.service.RedisService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +36,9 @@ public class EmailController extends BaseController {
     @Resource
     private RedisService redisService;
 
+    @Autowired
+    private IBasSellerService basSellerService;
+
     @Resource
     private Executor asyncTaskExecutor;
 
@@ -40,6 +48,12 @@ public class EmailController extends BaseController {
     public R sendVerCode(@PathVariable("email") String email) {
         boolean isEmail = EmailUtil.isEmail(email);
         AssertUtil.isTrue(isEmail, "请填写正确的邮箱格式");
+        QueryWrapper<BasSeller> queryWrapperEmail = new QueryWrapper<>();
+        queryWrapperEmail.eq("init_email",email);
+        int count = basSellerService.count(queryWrapperEmail);
+        if(count!=0){
+           throw new BaseException("邮箱重复，请更换邮箱");
+        }
         EmailEnum varCode = EmailEnum.VAR_CODE;
         String key = varCode.name().concat("-").concat(email);
         String cacheObject = redisService.getCacheObject(key);

@@ -53,6 +53,11 @@ public class HtpBasFeignFallback implements FallbackFactory<HtpBasFeignService> 
             public R<BaseOperationResponse> shipmentRule(AddShipmentRuleRequest addShipmentRuleRequest) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<ResponseVO> inspection(AddSkuInspectionRequest request) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

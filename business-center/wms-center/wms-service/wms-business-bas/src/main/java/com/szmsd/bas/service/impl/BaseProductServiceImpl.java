@@ -594,8 +594,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 }
                 QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
                 queryWrapper1.eq("code", b.getCode());
-                if (super.count(queryWrapper1) == 1) {
-                    s.append(b.getCode()+"编码重复,");
+                if (super.count(queryWrapper1) >0) {
+                    s.append(b.getCode()+"编码重复录入,");
                 }
 
             }
@@ -721,12 +721,23 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             count++;
         }
 
-        Map<String,String> map = new HashMap<>();
+        Map<String,Integer> map = new HashMap<>();
         for(BaseProductImportDto b:list){
-            map.put(b.getCode(),b.getCode());
+            if(map.containsKey(b.getCode())){
+                map.put(b.getCode(),map.get(b.getCode())+1);
+            }else{
+                map.put(b.getCode(),1);
+            }
         }
         if(map.size()!=list.size()){
-            s1.append("<br/>sku有重复");
+            s1.append("<br/>文件内填写sku有重复:");
+            for (Object key : map.keySet()) {
+                Integer value = (Integer)map.get(key);
+                if(value>1){
+                    s1.append(key+",\n");
+                }
+            }
+
         }
         if(!s1.toString().equals("")){
             throw new BaseException(s1.toString());

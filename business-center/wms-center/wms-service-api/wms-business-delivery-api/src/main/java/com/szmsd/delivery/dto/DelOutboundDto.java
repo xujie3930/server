@@ -102,6 +102,12 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "出货渠道")
     private String shipmentChannel;
 
+    @ApiModelProperty(value = "是否必须按要求装箱")
+    private Boolean isDefaultWarehouse;
+
+    @ApiModelProperty(value = "是否优先发货")
+    private Boolean isLabelBox;
+
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;
@@ -112,6 +118,9 @@ public class DelOutboundDto implements Serializable {
 
     @ApiModelProperty(value = "文件信息")
     private List<AttachmentDataDTO> documentsFiles;
+
+    @ApiModelProperty(value = "箱标文件")
+    private List<AttachmentDataDTO> batchLabels;
 
     @ApiModelProperty(value = "装箱信息")
     private List<DelOutboundPackingDto> packings;

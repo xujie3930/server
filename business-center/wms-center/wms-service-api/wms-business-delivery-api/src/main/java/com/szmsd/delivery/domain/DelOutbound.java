@@ -194,4 +194,10 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "装箱状态")
     private Integer containerState;
+
+    @ApiModelProperty(value = "是否必须按要求装箱")
+    private Boolean isDefaultWarehouse;
+
+    @ApiModelProperty(value = "是否优先发货")
+    private Boolean isLabelBox;
 }
