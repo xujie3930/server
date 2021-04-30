@@ -34,7 +34,7 @@ public class RemoteRequest {
 
         String orderType = inboundReceiptInfoVO.getOrderType();
         InboundReceiptEnum.InboundReceiptEnumMethods orderTypeEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.OrderType.class, orderType);
-        AssertUtil.notNull(orderType, "orderType[" + orderType + "]无效");
+        AssertUtil.notNull(orderTypeEnum, "orderType[" + orderType + "]无效");
 
         CreateReceiptRequest createInboundReceipt = new CreateReceiptRequest();
         createInboundReceipt.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
