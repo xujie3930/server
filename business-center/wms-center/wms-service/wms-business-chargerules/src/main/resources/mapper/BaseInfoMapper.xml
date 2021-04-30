@@ -44,8 +44,10 @@
         INNER join
             cha_special_operation b
         ON a.operation_type = b.id
-        WHERE
-        ${ew.sqlSegment}
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        order by status desc
     </select>
 
 </mapper>
