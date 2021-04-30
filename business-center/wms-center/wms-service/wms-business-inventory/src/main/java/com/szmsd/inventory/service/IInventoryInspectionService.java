@@ -2,6 +2,7 @@ package com.szmsd.inventory.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.inventory.domain.InventoryInspection;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
 import com.szmsd.inventory.domain.dto.InventoryInspectionDTO;
 import com.szmsd.inventory.domain.dto.InventoryInspectionDetailsDTO;
 import com.szmsd.inventory.domain.dto.InventoryInspectionQueryDTO;
@@ -18,4 +19,6 @@ public interface IInventoryInspectionService extends IService<InventoryInspectio
     InventoryInspectionVo details(String inspectionNo);
 
     int audit(InventoryInspectionDTO dto);
+
+    boolean inboundInventory(InboundInventoryDTO inboundInventoryDTO);
 }
