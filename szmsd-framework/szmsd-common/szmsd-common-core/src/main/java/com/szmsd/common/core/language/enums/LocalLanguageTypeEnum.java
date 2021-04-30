@@ -30,5 +30,11 @@ public enum LocalLanguageTypeEnum {
 
     /** 是否 **/
     YN,
+
+    /** 首页订单类型 **/
+    HOME_DOCUMENT_TYPE,
+
+    /** 首页条形统计图 **/
+    HOME_BAR_CHART_TYPE
     ;
 }

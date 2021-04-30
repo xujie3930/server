@@ -3,6 +3,7 @@ package com.szmsd.putinstorage.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
+import com.szmsd.putinstorage.domain.vo.InboundCountVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptExportVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -17,4 +18,6 @@ public interface InboundReceiptMapper extends BaseMapper<InboundReceipt> {
     InboundReceiptInfoVO selectInfo(@Param("id") Long id, @Param("warehouseNo") String warehouseNo);
 
     List<InboundReceiptExportVO> selectExport(InboundReceiptQueryDTO queryDTO);
+
+    List<InboundCountVO> statistics(InboundReceiptQueryDTO queryDTO);
 }

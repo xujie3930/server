@@ -34,6 +34,25 @@ public class DelOutboundReportServiceImpl extends ServiceImpl<DelOutboundMapper,
     }
 
     @Override
+    public List<DelOutboundReportListVO> queryCreateData(DelOutboundReportQueryDto queryDto) {
+        // 查询提审的出库单数量
+        Date beginDate = queryDto.getBeginDate();
+        Date endDate = queryDto.getEndDate();
+        if (Utils.isAnyNull(queryDto.getSellerCode(), beginDate, endDate)) {
+            return Collections.emptyList();
+        }
+        QueryWrapper<DelOutboundReportQueryDto> queryWrapper = Wrappers.query();
+        // 客户代码
+        queryWrapper.eq("o.seller_code", queryDto.getSellerCode());
+        // 时间范围
+        queryWrapper.between("o.create_time", beginDate, endDate);
+        // 按天分组
+        queryWrapper.groupBy("DATE_FORMAT(o.create_time, '%Y-%m-%d')");
+        List<DelOutboundReportListVO> list = this.reportMapper.queryCreateData(queryWrapper);
+        return this.fullDiff(beginDate, endDate, list);
+    }
+
+    @Override
     public List<DelOutboundReportListVO> queryBringVerifyData(DelOutboundReportQueryDto queryDto) {
         // 查询提审的出库单数量
         Date beginDate = queryDto.getBeginDate();
@@ -48,6 +67,8 @@ public class DelOutboundReportServiceImpl extends ServiceImpl<DelOutboundMapper,
         queryWrapper.eq("o.seller_code", queryDto.getSellerCode());
         // 时间范围
         queryWrapper.between("o.bring_verify_time", beginDate, endDate);
+        // 按天分组
+        queryWrapper.groupBy("DATE_FORMAT(o.bring_verify_time, '%Y-%m-%d')");
         List<DelOutboundReportListVO> list = this.reportMapper.queryBringVerifyData(queryWrapper);
         return this.fullDiff(beginDate, endDate, list);
     }

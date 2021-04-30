@@ -29,6 +29,7 @@
         <module>wms-business-exception</module>
         <module>wms-business-returnex</module>
         <module>wms-business-package</module>
+        <module>wms-business-report</module>
     </modules>
 
     <properties>
@@ -96,6 +97,11 @@
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-exception-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-report-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
         </dependencies>

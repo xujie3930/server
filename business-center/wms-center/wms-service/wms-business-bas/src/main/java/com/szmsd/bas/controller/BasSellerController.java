@@ -42,9 +42,9 @@ public class BasSellerController extends BaseController{
        * 查询模块列表
      */
       @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
-      @GetMapping("/list")
+      @PostMapping("/list")
       @ApiOperation(value = "分页查询模块列表",notes = "分页查询模块列表")
-      public TableDataInfo list(BasSellerQueryDto basSeller)
+      public TableDataInfo list(@RequestBody BasSellerQueryDto basSeller)
      {
             return basSellerService.selectBasSellerList(basSeller);
       }
@@ -78,6 +78,18 @@ public class BasSellerController extends BaseController{
         R r = new R();
         r.setCode(200);
         r.setData(basSellerService.getLoginSellerCode());
+        r.setMsg("SUCCESS");
+        return r;
+    }
+
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
+    @PostMapping("/getInspection")
+    @ApiOperation(value = "查询验货要求",notes = "查询验货要求")
+    public R<String> getInspection(@RequestBody String sellerCode)
+    {
+        R r = new R();
+        r.setCode(200);
+        r.setData(basSellerService.getInspection(sellerCode));
         r.setMsg("SUCCESS");
         return r;
     }

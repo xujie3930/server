@@ -27,10 +27,7 @@ import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.*;
-import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
-import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
@@ -101,6 +98,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private IDelOutboundAsyncService delOutboundAsyncService;
     @Autowired
     private OperationFeignService operationFeignService;
+    @Autowired
+    private IDelOutboundPackingService delOutboundPackingService;
 
     /**
      * 查询出库单模块
@@ -146,6 +145,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
             }
             delOutboundVO.setDetails(detailDtos);
+        }
+        // 批量出库
+        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+            // 查询装箱信息
+            delOutboundVO.setPackings(this.delOutboundPackingService.listByOrderNo(orderNo, DelOutboundPackingTypeConstant.TYPE_1));
+            // 查询装箱信息
+            Integer containerState = delOutbound.getContainerState();
+            if (null == containerState) {
+                containerState = DelOutboundConstant.CONTAINER_STATE_0;
+            }
+            if (DelOutboundConstant.CONTAINER_STATE_1 == containerState) {
+                delOutboundVO.setContainerList(this.delOutboundPackingService.listByOrderNo(orderNo, DelOutboundPackingTypeConstant.TYPE_2));
+            }
         }
         return delOutboundVO;
     }
@@ -323,6 +335,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 附件信息
             AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+            // 批量出库保存装箱信息
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+                // 装箱信息
+                List<DelOutboundPackingDto> packings = dto.getPackings();
+                this.delOutboundPackingService.save(orderNo, packings, false);
+                // 箱标文件
+                AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
+                this.remoteAttachmentService.saveAndUpdate(batchLabel);
+            }
             return insert;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -582,6 +603,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
             // 计算包裹大小
             this.countPackageSize(inputDelOutbound, dto);
+            // 批量出库保存装箱信息
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+                // 装箱信息
+                List<DelOutboundPackingDto> packings = dto.getPackings();
+                this.delOutboundPackingService.save(orderNo, packings, true);
+                // 箱标文件
+                AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
+                this.remoteAttachmentService.saveAndUpdate(batchLabel);
+            }
             // 更新
             return baseMapper.updateById(inputDelOutbound);
         } catch (Exception e) {
@@ -725,6 +755,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaQueryWrapper<DelOutboundAddress> addressLambdaQueryWrapper = Wrappers.lambdaQuery();
         addressLambdaQueryWrapper.in(DelOutboundAddress::getOrderNo, orderNos);
         this.delOutboundAddressService.remove(addressLambdaQueryWrapper);
+        // 删除装箱信息
+        this.delOutboundPackingService.deleted(orderNos);
         // 取消冻结
         for (String orderNo : orderNos) {
             DelOutbound delOutbound1 = delOutboundMap.get(orderNo);
@@ -828,7 +860,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional
     @Override
     public int shipmentContainers(ShipmentContainersRequestDto dto) {
-        return 0;
+        // 保存装箱信息
+        List<ContainerInfoDto> containerList = dto.getContainerList();
+        this.delOutboundPackingService.save(dto.getOrderNo(), containerList);
+        // 修改装箱状态
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
+        updateWrapper.eq(DelOutbound::getContainerState, DelOutboundConstant.CONTAINER_STATE_1);
+        return this.baseMapper.update(null, updateWrapper);
     }
 
     @Override
@@ -907,6 +946,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             exceptionMessage = org.apache.commons.lang3.StringUtils.substring(exceptionMessage, 0, 255);
             delOutbound.setExceptionMessage(exceptionMessage);
         }
+        // 设置提审时间
+        delOutbound.setBringVerifyTime(new Date());
         this.updateById(delOutbound);
     }
 
@@ -917,7 +958,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
         // 清空异常信息
         delOutbound.setExceptionMessage("");
-        // 设置提审成功时间
+        // 设置提审时间
         delOutbound.setBringVerifyTime(new Date());
         this.updateById(delOutbound);
     }

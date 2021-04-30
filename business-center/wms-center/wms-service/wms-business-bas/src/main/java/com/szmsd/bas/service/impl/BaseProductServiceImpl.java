@@ -602,7 +602,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             if(StringUtils.isEmpty(b.getProductName()))
             {
 
-                s.append("申报品名未填写,");
+                s.append("英文申报品名未填写,");
             }
             if(StringUtils.isEmpty(b.getProductAttributeName()))
             {
@@ -708,8 +708,12 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             {
                 s.append("申报价值未填写,");
             }
-            if(b.getProductDescription().length()>10){
-                s.append("产品说明超过十个字符,");
+            if(StringUtils.isEmpty(b.getProductDescription())){
+                s.append("产品说明未填写,");
+            }else{
+                if(b.getProductDescription().length()>10){
+                    s.append("产品说明超过十个字符,");
+                }
             }
             if(!s.toString().equals("")){
                 s1.append("<br/>第"+count+"条数据："+s);

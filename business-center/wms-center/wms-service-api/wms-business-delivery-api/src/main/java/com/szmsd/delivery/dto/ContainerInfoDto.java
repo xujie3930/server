@@ -31,6 +31,9 @@ public class ContainerInfoDto implements Serializable {
     @ApiModelProperty(value = "重量 g")
     private Double weight;
 
+    @ApiModelProperty(value = "包材类型")
+    private String packingMaterial;
+
     @ApiModelProperty(value = "箱明细")
     private List<ContainerDetailDto> containerDetailList;
 }

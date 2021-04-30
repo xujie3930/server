@@ -7,10 +7,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.ApiException;
-import com.szmsd.common.core.exception.com.LogisticsException;
-import com.szmsd.common.core.exception.com.LogisticsExceptionUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.*;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -49,6 +46,17 @@ import java.util.Optional;
  */
 public class BaseController {
     protected static final Logger log = LoggerFactory.getLogger(BaseController.class);
+
+    /**
+     * 获取多语言标识
+     */
+    public static String getLen() {
+        String len = ServletUtils.getHeaders("Langr");
+        if (StringUtils.isEmpty(len)) {
+            len = "zh";
+        }
+        return len;
+    }
 
     /**
      * 将前台传递过来的日期格式的字符串，自动转化为Date类型
@@ -98,19 +106,19 @@ public class BaseController {
      * 响应请求分页数据
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    protected <T>TableDataInfo<T> getDataTable(List<T> list) {
+    protected <T> TableDataInfo<T> getDataTable(List<T> list) {
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(HttpStatus.SUCCESS);
         rspData.setRows(list);
         rspData.setTotal(new PageInfo(list).getTotal());//只适用于list instanceof Page 的查询
-
         return rspData;
     }
+
     /**
      * 响应请求分页数据
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    protected <T>TableDataInfo<T> getDataTable(List<T> list,String msg) {
+    protected <T> TableDataInfo<T> getDataTable(List<T> list, String msg) {
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(HttpStatus.WEB_MSG);
         rspData.setRows(list);
@@ -121,22 +129,23 @@ public class BaseController {
 
     /**
      * 分頁返回对象，处理  ！list instanceOf Page 。
+     *
      * @param pageInfo
      * @param t
      * @return
      */
-    protected <T>TableDataInfo<T> getDataTable(PageInfo<T> pageInfo, Class<?> t) {
+    protected <T> TableDataInfo<T> getDataTable(PageInfo<T> pageInfo, Class<?> t) {
         pageInfo = Optional.ofNullable(pageInfo).orElse(new PageInfo());
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(HttpStatus.SUCCESS);
         rspData.setTotal(pageInfo.getTotal());
-        rspData.setRows(t==null? CollectionUtils.isEmpty(pageInfo.getList())?new ArrayList():pageInfo.getList()
-                :BeanMapperUtil.mapList(pageInfo.getList(),t));
+        rspData.setRows(t == null ? CollectionUtils.isEmpty(pageInfo.getList()) ? new ArrayList() : pageInfo.getList()
+                : BeanMapperUtil.mapList(pageInfo.getList(), t));
         return rspData;
     }
 
-    protected <T>TableDataInfo<T> getDataTable(PageInfo<T> pageInfo) {
-       return getDataTable(pageInfo,null);
+    protected <T> TableDataInfo<T> getDataTable(PageInfo<T> pageInfo) {
+        return getDataTable(pageInfo, null);
     }
 
     /**
@@ -149,7 +158,6 @@ public class BaseController {
         return rows > 0 ? R.ok() : R.failed();
     }
 
-
     /**
      * 登录异常
      */
@@ -157,17 +165,15 @@ public class BaseController {
     @ResponseBody
     public R handleLoginException(LoginException e) {
         log.error("基础业务异常拦截 LoginException {}", e.getMessage(), e);
-
-        return R.failed(HttpStatus.ERROR,e.getMessage());
+        return R.failed(HttpStatus.ERROR, e.getMessage());
     }
-
 
     //基础业务异常拦截
     @ExceptionHandler({BaseException.class})
     @ResponseBody
     public R handleBaseException(BaseException baseException) {
         log.error("基础业务异常拦截 BaseException {}", baseException.getDefaultMessage());
-        return R.failed(HttpStatus.WEB_MSG,baseException.getDefaultMessage());
+        return R.failed(HttpStatus.WEB_MSG, baseException.getDefaultMessage());
     }
 
     //自定义异常拦截
@@ -187,7 +193,6 @@ public class BaseController {
         return R.failed(HttpStatus.ERROR, ExceptionUtil.getRootErrorMseeage(e));
     }
 
-
     /**
      * @return com.szmsd.inner.common.handler.ResponseEntity
      * @Author Mars
@@ -202,9 +207,10 @@ public class BaseController {
     })
     @ResponseBody
     public R server500(Exception e) {
-        log.error("请求前异常:" , e);
-        LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.REQUESTERROR, getLen());
-        return R.failed(HttpStatus.REQUEST_ERROR, logisticsException.getMessage()+":"+ ExceptionUtil.getRootErrorMseeage(e));
+        log.error("请求前异常:", e);
+        // LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.REQUESTERROR, getLen());
+        // return R.failed(HttpStatus.REQUEST_ERROR, logisticsException.getMessage() + ":" + ExceptionUtil.getRootErrorMseeage(e));
+        return R.failed(HttpStatus.REQUEST_ERROR, ExceptionUtil.getRootErrorMseeage(e));
     }
 
     /**
@@ -225,20 +231,10 @@ public class BaseController {
 
     })
     public R runtimeExceptionHandler(Exception e) {
-        log.error("运行时异常:" ,e);
-        LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.RUNERROR, getLen());
-        return R.failed(HttpStatus.ERROR, logisticsException.getMessage()+":"+ExceptionUtil.getRootErrorMseeage(e));
-    }
-
-    /**
-     * 获取多语言标识
-     */
-    public static String getLen() {
-        String len = ServletUtils.getHeaders("Langr");
-        if (StringUtils.isEmpty(len)) {
-            len = "zh";
-        }
-        return len;
+        log.error("运行时异常:", e);
+        // LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.RUNERROR, getLen());
+        // return R.failed(HttpStatus.ERROR, logisticsException.getMessage()+":"+ExceptionUtil.getRootErrorMseeage(e));
+        return R.failed(HttpStatus.ERROR, ExceptionUtil.getRootErrorMseeage(e));
     }
 
     public void fileStreamWrite(HttpServletResponse response, FileStream fileStream) {
@@ -263,8 +259,7 @@ public class BaseController {
             //response为HttpServletResponse对象
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-
-            response.setHeader("Content-Disposition" , "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
             excel.flush(out);
             //此处记得关闭输出Servlet流
             IoUtil.close(out);

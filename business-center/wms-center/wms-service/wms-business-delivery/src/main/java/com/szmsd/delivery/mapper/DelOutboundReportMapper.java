@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface DelOutboundReportMapper extends BaseMapper<DelOutbound> {
 
+    List<DelOutboundReportListVO> queryCreateData(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundReportQueryDto> queryWrapper);
+
     List<DelOutboundReportListVO> queryBringVerifyData(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundReportQueryDto> queryWrapper);
 
     List<DelOutboundReportListVO> queryOutboundData(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundReportQueryDto> queryWrapper);

@@ -2,6 +2,9 @@ package com.szmsd.delivery.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutboundPacking;
+import com.szmsd.delivery.dto.ContainerInfoDto;
+import com.szmsd.delivery.dto.DelOutboundPackingDto;
+import com.szmsd.delivery.vo.DelOutboundPackingVO;
 
 import java.util.List;
 
@@ -63,5 +66,44 @@ public interface IDelOutboundPackingService extends IService<DelOutboundPacking>
      */
     int deleteDelOutboundPackingById(String id);
 
+    /**
+     * 保存装箱信息
+     *
+     * @param orderNo  orderNo
+     * @param packings packings
+     * @param deleted  deleted
+     */
+    void save(String orderNo, List<DelOutboundPackingDto> packings, boolean deleted);
+
+    /**
+     * 删除装箱信息
+     *
+     * @param orderNo orderNo
+     */
+    void deleted(String orderNo);
+
+    /**
+     * 删除装箱信息
+     *
+     * @param orderNos orderNos
+     */
+    void deleted(List<String> orderNos);
+
+    /**
+     * 查询装箱信息
+     *
+     * @param orderNo orderNo
+     * @param type    type
+     * @return List<DelOutboundPackingVO>
+     */
+    List<DelOutboundPackingVO> listByOrderNo(String orderNo, int type);
+
+    /**
+     * 保存装箱信息
+     *
+     * @param orderNo       orderNo
+     * @param containerList containerList
+     */
+    void save(String orderNo, List<ContainerInfoDto> containerList);
 }
 

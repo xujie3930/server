@@ -10,6 +10,7 @@ import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.config.DefaultBasConfig;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.*;
@@ -70,6 +71,9 @@ import java.util.stream.Collectors;
 public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller> implements IBasSellerService {
 
     @Autowired
+    protected DefaultBasConfig defaultBasConfig;
+
+    @Autowired
     private RedisTemplate redisTemplate;
     @Resource
     private RemoteUserService remoteUserService;
@@ -106,32 +110,19 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         {
         QueryWrapper<BasSeller> where = new QueryWrapper<BasSeller>();
         if(basSeller.getIsActive()!=null){
-            where.eq("is_active",basSeller.getIsActive());
+            where.eq("o.is_active",basSeller.getIsActive());
         }
-        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "seller_code", basSeller.getSellerCode());
-        QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"user_name",basSeller.getUserName());
-        int count = super.count(where);
-            where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());
-        List<BasSellerSysDto> basSellerSysDtos = BeanMapperUtil.mapList(baseMapper.selectList(where),BasSellerSysDto.class);
+        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
+        QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"o.user_name",basSeller.getUserName());
+        int count = baseMapper.countBasSeller(where,basSeller.getReviewState());
+       /* where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());*/
+        List<BasSellerSysDto> basSellerSysDtos = baseMapper.selectBasSeller(where,basSeller.getReviewState(),(basSeller.getPageNum()-1)*basSeller.getPageSize(),basSeller.getPageSize());
         for(BasSellerSysDto b:basSellerSysDtos){
             SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
             sysUserByTypeAndUserType.setUserType("01");
             sysUserByTypeAndUserType.setUsername(b.getUserName());
             UserInfo userInfo= remoteUserService.getUserInfo(sysUserByTypeAndUserType).getData();
             b.setSysId(userInfo.getSysUser().getUserId());
-            //查询认证状态
-            if(basSellerCertificateService.countVaildBasSellerCertificate(b.getSellerCode())==0){
-                b.setReviewState(true);
-            }else{
-                b.setReviewState(false);
-            }
-        }
-
-        if(basSeller.getReviewState()!=null){
-            List<BasSellerSysDto> basSellerSysDtoList = basSellerSysDtos.stream().filter(s -> s.getReviewState().equals(basSeller.getReviewState())).collect(Collectors.toList());
-            TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtoList,count);
-            table.setCode(200);
-            return table;
         }
             TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
             table.setCode(200);
@@ -163,7 +154,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             //生成四位客户代码
             boolean b = false;
             while(b==false){
-                String sellerCode = sellerCode();
+                String sellerCode = this.defaultBasConfig.getCountry()+sellerCode();
                 QueryWrapper<BasSeller> queryWrapperEmail = new QueryWrapper<>();
                 queryWrapperEmail.eq("seller_code",sellerCode);
                 int count = super.count(queryWrapperEmail);
@@ -432,6 +423,13 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         return seller.getSellerCode();
     }
 
+    @Override
+    public String getInspection(String sellerCode){
+        QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("seller_code",sellerCode);
+        BasSeller seller = super.getOne(queryWrapper);
+        return seller.getInspectionRequirement();
+    }
         /**
         * 删除模块信息
         *

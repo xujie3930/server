@@ -18,6 +18,9 @@ import java.util.List;
 @FeignClient(contextId = "FeignClient.DelOutboundReportFeignService", name = BusinessDeliveryInterface.SERVICE_NAME, fallbackFactory = DelOutboundReportFeignFallback.class)
 public interface DelOutboundReportFeignService {
 
+    @PostMapping("/api/outbound/report/create")
+    R<List<DelOutboundReportListVO>> queryCreateData(@RequestBody DelOutboundReportQueryDto queryDto);
+
     @PostMapping("/api/outbound/report/bringVerify")
     R<List<DelOutboundReportListVO>> queryBringVerifyData(@RequestBody DelOutboundReportQueryDto queryDto);
 

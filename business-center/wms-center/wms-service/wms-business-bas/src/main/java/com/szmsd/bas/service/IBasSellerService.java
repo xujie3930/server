@@ -59,6 +59,8 @@ public interface IBasSellerService extends IService<BasSeller> {
          */
         String getLoginSellerCode();
 
+        String getInspection(String sellerCode);
+
         /**
         * 新增模块
         *

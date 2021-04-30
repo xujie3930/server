@@ -60,7 +60,7 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         public int countVaildBasSellerCertificate(String sellerCode){
             QueryWrapper<BasSellerCertificate> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("seller_code",sellerCode);
-            queryWrapper.isNull("vaild");
+            queryWrapper.eq("vaild","0");
             return super.count(queryWrapper);
         }
         /**
@@ -94,8 +94,7 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
             vatQueryWrapper.eq("seller_code",vatQueryDto.getSellerCode());
             vatQueryWrapper.eq("country_code",vatQueryDto.getCountryCode());
             vatQueryWrapper.eq("is_active",true);
-            vatQueryWrapper.eq("vaild",true);
-            vatQueryWrapper.isNotNull("vat");
+            vatQueryWrapper.eq("vaild","1");
             return super.list(vatQueryWrapper);
         }
 

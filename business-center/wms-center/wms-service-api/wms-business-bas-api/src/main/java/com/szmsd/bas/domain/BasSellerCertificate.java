@@ -88,7 +88,7 @@ public class BasSellerCertificate extends BaseEntity {
 
     @ApiModelProperty(value = "证件是否有效")
     @Excel(name = "证件是否有效")
-    private Boolean vaild;
+    private String vaild;
 
 
 }
