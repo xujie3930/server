@@ -1,5 +1,7 @@
 package com.szmsd.putinstorage.component;
 
+import com.szmsd.putinstorage.enums.InboundReceiptEnum;
+
 import java.util.Optional;
 
 /**
@@ -11,8 +13,8 @@ import java.util.Optional;
 public class CheckTag {
     private static final ThreadLocal<Boolean> FROM_TRANSPORT = new ThreadLocal<>();
 
-    public static void set(Boolean isFromTransport) {
-        FROM_TRANSPORT.set(isFromTransport);
+    public static void set(String orderType) {
+        FROM_TRANSPORT.set(InboundReceiptEnum.OrderType.COLLECTION.getValue().equals(orderType));
     }
     public static Boolean get() {
         return Optional.ofNullable(FROM_TRANSPORT.get()).orElse(false);
