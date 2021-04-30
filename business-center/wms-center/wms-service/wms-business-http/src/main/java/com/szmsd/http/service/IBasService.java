@@ -61,4 +61,6 @@ public interface IBasService {
      * @return BaseOperationResponse
      */
     BaseOperationResponse shipmentRule(AddShipmentRuleRequest addShipmentRuleRequest);
+
+    ResponseVO inspection(AddSkuInspectionRequest request);
 }
