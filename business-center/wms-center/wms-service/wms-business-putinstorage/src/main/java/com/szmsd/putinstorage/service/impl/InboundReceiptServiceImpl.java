@@ -101,7 +101,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Transactional(rollbackFor = Throwable.class)
     public InboundReceiptInfoVO saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO) {
         log.info("创建入库单：{}", createInboundReceiptDTO);
-        CheckTag.set(createInboundReceiptDTO.getIsFromTransport());
+        CheckTag.set(createInboundReceiptDTO.getOrderType());
         Integer totalDeclareQty = createInboundReceiptDTO.getTotalDeclareQty();
         AssertUtil.isTrue(totalDeclareQty > 0, "合计申报数量不能为" + totalDeclareQty);
 
@@ -115,16 +115,28 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         inboundReceiptDetailDTOS.forEach(item -> item.setWarehouseNo(warehouseNo));
         iInboundReceiptDetailService.saveOrUpdate(inboundReceiptDetailDTOS, createInboundReceiptDTO.getReceiptDetailIds());
 
+        boolean isCollection = InboundReceiptEnum.OrderType.COLLECTION.getValue().equals(createInboundReceiptDTO.getOrderType());
         // 判断自动审核
-        boolean inboundReceiptReview = remoteComponent.inboundReceiptReview(createInboundReceiptDTO.getWarehouseCode());
+        boolean inboundReceiptReview;
+        // 转运自动审核
+        if (isCollection) {
+            log.info("---转运单自动审核---");
+            inboundReceiptReview = true;
+        } else {
+            inboundReceiptReview = remoteComponent.inboundReceiptReview(createInboundReceiptDTO.getWarehouseCode());
+        }
+
         if (inboundReceiptReview) {
             // 审核
             String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
             this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
-
-            // 第三方接口推送
-            InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
-            remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+            if (!isCollection) {
+                // 第三方接口推送
+                InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
+                remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+            } else {
+                log.info("转运单不推送第三方，由转运入库-提交 里面直接调用B3接口");
+            }
         }
 
         log.info("创建入库单：操作完成");
