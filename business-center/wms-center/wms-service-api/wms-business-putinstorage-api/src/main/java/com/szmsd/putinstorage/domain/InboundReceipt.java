@@ -36,6 +36,7 @@ public class InboundReceipt extends BaseEntity {
 
     @ApiModelProperty(value = "普通入库（OMS用）：Normal" +
             "集运入库（OMS用）：Collection" +
+            "包裹转运入库（OMS用）：PackageTransfer" +
             "新SKU入库（OMS用）：NewSku" +
             "上架入库（Yewu用）：Putaway" +
             "点数入库（Yewu用）：Counting")

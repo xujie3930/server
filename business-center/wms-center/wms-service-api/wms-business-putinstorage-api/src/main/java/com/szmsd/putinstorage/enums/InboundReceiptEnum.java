@@ -16,7 +16,9 @@ public class InboundReceiptEnum {
         /** 入库单类型：普通入库 **/
         NORMAL("Normal", "普通入库"),
         /** 入库单类型：转运入库 **/
-        TRANSFER("Transfer", "转运入库"),
+        PACKAGE_TRANSFER("PackageTransfer", "转运入库"),
+        /** 集运入库：Collection **/
+        COLLECTION("Collection", "转运入库"),
         /** 入库单类型：采购入库 **/
         PURCHASE("Purchase", "采购入库"),
         /** 入库单类型：上架入库 **/
