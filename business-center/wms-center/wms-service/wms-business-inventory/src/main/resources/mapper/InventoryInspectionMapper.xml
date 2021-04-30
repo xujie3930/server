@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.inventory.mapper.InventoryInspectionMapper">
+
+    <resultMap id="inspectionMap" type="com.szmsd.inventory.domain.vo.InventoryInspectionVo">
+        <result column="id" property="id" />
+        <result column="inspection_no" property="inspectionNo" />
+        <result column="custom_code" property="customCode" />
+        <result column="custom_name" property="customName" />
+        <result column="warehouse_code" property="warehouseCode" />
+        <result column="warehouse_name" property="warehouseName" />
+        <result column="status" property="status" />
+        <result column="reason" property="reason" />
+        <result column="remark" property="remark" />
+        <result column="create_time" property="createTime" />
+        <collection property="details" javaType="java.util.List" select="selectInventoryInspectionDetails" column="inspection_no" />
+    </resultMap>
+
+    <select id="selectInventoryInspectionDetails" resultType="com.szmsd.inventory.domain.vo.InventoryInspectionDetailsVo">
+        SELECT b.id,
+               b.inspection_no,
+               b.sku,
+               c.weight,
+               c.length,
+               c.width,
+               c.height,
+               c.volume
+        FROM inventory_inspection_details b
+             LEFT JOIN
+             base_product c
+             ON b.sku = c.code
+        WHERE b.inspection_no = #{inspectionNo}
+    </select>
+
+    <select id="selectListPage" resultType="com.szmsd.inventory.domain.vo.InventoryInspectionVo" parameterType="com.szmsd.inventory.domain.dto.InventoryInspectionQueryDTO">
+        select
+        a.id,
+        a.inspection_no,
+        a.custom_code,
+        a.custom_name,
+        a.warehouse_code,
+        a.warehouse_name,
+        a.status,
+        a.reason,
+        a.remark,
+        a.create_time
+        from
+        inventory_inspection a
+        <where>
+            <if test="customCode != null and customCode != ''">
+                AND a.custom_code = #{customCode}
+            </if>
+            <if test="warehouseCode != null and warehouseCode != ''">
+                AND a.warehouse_code = #{warehouseCode}
+            </if>
+            <if test="inspectionNoList != null and inspectionNoList.size() > 0">
+                AND a.inspection_no IN
+                <foreach collection="inspectionNoList" item="inspectionNo" open="(" separator="," close=")">
+                    #{inspectionNo}
+                </foreach>
+            </if>
+            <if test="createTimeStart != null and createTimeEnd != null and createTimeStart != '' and createTimeEnd != ''">
+                AND a.create_time >= #{createTimeStart} and a.create_time &lt;= #{createTimeEnd}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectDetails" resultMap="inspectionMap" parameterType="String">
+        SELECT a.id,
+               a.inspection_no,
+               a.custom_code,
+               a.custom_name,
+               a.warehouse_code,
+               a.warehouse_name,
+               a.status,
+               a.reason,
+               a.remark,
+               a.create_time
+        FROM inventory_inspection a
+        WHERE a.inspection_no = #{inspectionNo}
+    </select>
+
+</mapper>
