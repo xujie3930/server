@@ -271,7 +271,7 @@ public class BasSubController extends BaseController {
             int subCode = 1;
             int length = 3;
             if (!CollectionUtils.isEmpty(list)) {
-                String subStr = list.get(0).getSubCode().substring(mainSub.length());
+                String subStr = list.get(list.size()-1).getSubCode().substring(mainSub.length());
                 subCode = Integer.parseInt(subStr);
                 subCode++;
                 length = subStr.length();
