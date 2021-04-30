@@ -89,6 +89,9 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
         if (StringUtils.isNotNull(basSpecialOperation.getOperationType())) {
             where.eq("operation_type", basSpecialOperation.getOperationType());
         }
+        if (StringUtils.isNotNull(basSpecialOperation.getWarehouseCode())) {
+            where.eq("warehouse_code", basSpecialOperation.getWarehouseCode());
+        }
         return specialOperationMapper.selectOne(where);
     }
 
