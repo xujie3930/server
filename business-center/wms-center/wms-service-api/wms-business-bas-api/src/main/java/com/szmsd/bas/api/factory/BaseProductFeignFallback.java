@@ -2,6 +2,7 @@ package com.szmsd.bas.api.factory;
 
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductBatchQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.bas.dto.MeasuringProductRequest;
@@ -36,7 +37,7 @@ public class BaseProductFeignFallback implements FallbackFactory<BaseProductFeig
             }
 
             @Override
-            public R<List<BaseProductMeasureDto>> batchSKU(@RequestBody List<String> codes) {
+            public R<List<BaseProductMeasureDto>> batchSKU(@RequestBody BaseProductBatchQueryDto dto) {
                 return R.convertResultJson(throwable);
             }
 
