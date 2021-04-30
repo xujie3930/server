@@ -110,32 +110,19 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         {
         QueryWrapper<BasSeller> where = new QueryWrapper<BasSeller>();
         if(basSeller.getIsActive()!=null){
-            where.eq("is_active",basSeller.getIsActive());
+            where.eq("o.is_active",basSeller.getIsActive());
         }
-        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "seller_code", basSeller.getSellerCode());
-        QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"user_name",basSeller.getUserName());
-        int count = super.count(where);
-            where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());
-        List<BasSellerSysDto> basSellerSysDtos = BeanMapperUtil.mapList(baseMapper.selectList(where),BasSellerSysDto.class);
+        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
+        QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"o.user_name",basSeller.getUserName());
+        int count = baseMapper.countBasSeller(where,basSeller.getReviewState());
+       /* where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());*/
+        List<BasSellerSysDto> basSellerSysDtos = baseMapper.selectBasSeller(where,basSeller.getReviewState(),(basSeller.getPageNum()-1)*basSeller.getPageSize(),basSeller.getPageSize());
         for(BasSellerSysDto b:basSellerSysDtos){
             SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
             sysUserByTypeAndUserType.setUserType("01");
             sysUserByTypeAndUserType.setUsername(b.getUserName());
             UserInfo userInfo= remoteUserService.getUserInfo(sysUserByTypeAndUserType).getData();
             b.setSysId(userInfo.getSysUser().getUserId());
-            //查询认证状态
-            if(basSellerCertificateService.countVaildBasSellerCertificate(b.getSellerCode())==0){
-                b.setReviewState(true);
-            }else{
-                b.setReviewState(false);
-            }
-        }
-
-        if(basSeller.getReviewState()!=null){
-            List<BasSellerSysDto> basSellerSysDtoList = basSellerSysDtos.stream().filter(s -> s.getReviewState().equals(basSeller.getReviewState())).collect(Collectors.toList());
-            TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtoList,count);
-            table.setCode(200);
-            return table;
         }
             TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
             table.setCode(200);

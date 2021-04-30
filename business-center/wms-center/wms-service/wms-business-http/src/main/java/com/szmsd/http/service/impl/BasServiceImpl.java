@@ -50,4 +50,9 @@ public class BasServiceImpl extends WmsRequest implements IBasService {
     public BaseOperationResponse shipmentRule(AddShipmentRuleRequest addShipmentRuleRequest) {
         return JSON.parseObject(httpPost("", "baseInfo.shipmentRule", addShipmentRuleRequest), BaseOperationResponse.class);
     }
+
+    @Override
+    public ResponseVO inspection(AddSkuInspectionRequest request) {
+        return JSON.parseObject(httpPost("", "baseInfo.inspection", request), ResponseVO.class);
+    }
 }

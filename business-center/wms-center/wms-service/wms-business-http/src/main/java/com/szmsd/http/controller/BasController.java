@@ -69,4 +69,10 @@ public class BasController extends BaseController {
     public R<BaseOperationResponse> shipmentRule(@RequestBody AddShipmentRuleRequest addShipmentRuleRequest) {
         return R.ok(iBasService.shipmentRule(addShipmentRuleRequest));
     }
+
+    @PostMapping("/inspection")
+    @ApiOperation(value = "A5 新增验货请求")
+    public R<ResponseVO> inspection(@RequestBody AddSkuInspectionRequest request) {
+        return R.ok(iBasService.inspection(request));
+    }
 }
