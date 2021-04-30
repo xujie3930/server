@@ -383,6 +383,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             Class<? extends InboundReceiptSkuExcelVO> aClass = vo.getClass();
             Field[] declaredFields = aClass.getDeclaredFields();
             for (int i1 = 0; i1 < declaredFields.length; i1++) {
+                sheet.setColumnWidth(i1, 100 * 40);
                 // 反射获取value
                 String value;
                 try {
@@ -410,7 +411,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 row.createCell(i1).setCellValue(value);
             }
             // 设置样式
-            ExcelUtil.bord(excel, row, false, 6);
+            ExcelUtil.bord(excel, row, i, 6);
         }
     }
 
