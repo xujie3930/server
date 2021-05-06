@@ -94,31 +94,34 @@ public class OpnTransactionServiceImpl extends ServiceImpl<OpnTransactionMapper,
     }
 
     @Override
-    public boolean hasRep(String requestUri, String transactionId) {
+    public boolean hasRep(String requestUri, String transactionId, String appId) {
         LambdaQueryWrapper<OpnTransaction> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(OpnTransaction::getRequestUri, requestUri);
         queryWrapper.eq(OpnTransaction::getTransactionId, transactionId);
+        queryWrapper.eq(OpnTransaction::getAppId, appId);
         queryWrapper.eq(OpnTransaction::getState, OpnTransactionStateEnum.REP);
         return this.count(queryWrapper) > 0;
     }
 
     @Transactional
     @Override
-    public void add(String traceId, String requestUri, String transactionId) {
+    public void add(String traceId, String requestUri, String transactionId, String appId) {
         OpnTransaction opnTransaction = new OpnTransaction();
         opnTransaction.setTraceId(traceId);
         opnTransaction.setRequestUri(requestUri);
         opnTransaction.setTransactionId(transactionId);
+        opnTransaction.setAppId(appId);
         opnTransaction.setState(OpnTransactionStateEnum.REQ.name());
         this.save(opnTransaction);
     }
 
     @Transactional
     @Override
-    public void onRep(String traceId) {
+    public void onRep(String traceId, String appId) {
         LambdaUpdateWrapper<OpnTransaction> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(OpnTransaction::getState, OpnTransactionStateEnum.REP);
         updateWrapper.eq(OpnTransaction::getTraceId, traceId);
+        updateWrapper.eq(OpnTransaction::getAppId, appId);
         this.update(updateWrapper);
     }
 }
