@@ -14,6 +14,7 @@ import com.szmsd.chargerules.service.IOperationService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
@@ -56,11 +57,24 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     public int save(OperationDTO dto) {
         Operation domain = new Operation();
         BeanUtils.copyProperties(dto, domain);
+        checkDuplicate(domain);
         return operationMapper.insert(domain);
+    }
+
+    /**
+     * 新增和修改时校验是否数据是否重复
+     * @param operation operation
+     */
+    private void checkDuplicate(Operation operation) {
+        int count = operationMapper.findCount(operation);
+        if(count > 0) {
+            throw new CommonException("999","仓库+操作类型+订单类型 重量区间不能重合");
+        }
     }
 
     @Override
     public int update(Operation dto) {
+        checkDuplicate(dto);
         return operationMapper.updateById(dto);
     }
 
