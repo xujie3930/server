@@ -36,7 +36,7 @@ public interface HtpConfigMapper extends BaseMapper {
 
     void saveWarehouse(HtpWarehouse htpWarehouse);
 
-    void deleteHtpWarehouseUrlGroupBywarehouseGroupId(String warehouseGroupId);
+    void deleteHtpWarehouseUrlGroupByWarehouseGroupId(String warehouseGroupId);
 
     void saveHtpWarehouseUrlGroup(HtpWarehouseUrlGroup htpWarehouseUrlGroup);
 
@@ -46,4 +46,7 @@ public interface HtpConfigMapper extends BaseMapper {
 
     HtpDeployLog selectLastDeployLog();
 
+    void deleteHtpGroup(String groupId);
+
+    void deleteHtpWarehouseGroup(String groupId);
 }
