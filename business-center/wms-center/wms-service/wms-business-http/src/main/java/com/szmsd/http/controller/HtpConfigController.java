@@ -133,4 +133,19 @@ public class HtpConfigController extends BaseController {
         }
     }
 
+    @DeleteMapping("/htpGroup/delete/{groupId}")
+    @ApiOperation(value = "地址组【删除】")
+    public R deleteHtpGroup(@PathVariable("groupId") String groupId) {
+        htpConfigService.deleteHtpGroup(groupId);
+        return R.ok();
+    }
+
+    @DeleteMapping("/htpWarehouseGroup/delete/{groupId}")
+    @ApiOperation(value = "仓库组【删除】")
+    public R deleteHtpWarehouseGroup(@PathVariable("groupId") String groupId) {
+        htpConfigService.deleteHtpWarehouseGroup(groupId);
+        return R.ok();
+    }
+
+
 }
