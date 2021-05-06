@@ -133,6 +133,13 @@ public class HtpConfigController extends BaseController {
         }
     }
 
+    @DeleteMapping("/htpUrl/delete")
+    @ApiOperation(value = "地址【删除】")
+    public R deleteHtpUrl(@RequestBody HtpUrl htpUrl) {
+        htpConfigService.deleteHtpUrl(htpUrl);
+        return R.ok();
+    }
+
     @DeleteMapping("/htpGroup/delete/{groupId}")
     @ApiOperation(value = "地址组【删除】")
     public R deleteHtpGroup(@PathVariable("groupId") String groupId) {
@@ -146,6 +153,5 @@ public class HtpConfigController extends BaseController {
         htpConfigService.deleteHtpWarehouseGroup(groupId);
         return R.ok();
     }
-
 
 }
