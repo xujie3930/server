@@ -133,15 +133,6 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "处理状态编码", hidden = true)
     private String dealStatusStr;
 
-    public void setDealStatus(String dealStatus) {
-        this.dealStatus = dealStatus;
-        this.dealStatusStr = dealStatus;
-    }
-
-    public void setDealStatusStr(String dealStatusStr) {
-        //empty
-    }
-
     @ApiModelProperty(value = "目的仓库名称")
     private String warehouseCode;
     @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
