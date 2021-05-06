@@ -71,10 +71,12 @@ public class RequestLogFilter implements Filter {
         }
         // 获取transactionId
         String transactionId = requestWrapper.getHeader(RequestConstant.TRANSACTION_ID);
+        String appId = requestWrapper.getHeader(RequestConstant.APP_ID);
         AssertUtil.isTrue(StringUtils.isNotEmpty(transactionId), "transactionId cannot be null");
         RequestLogFilterContext currentContext = RequestLogFilterContext.getCurrentContext();
         currentContext.setRequestId(traceId);
         currentContext.setTransactionId(transactionId);
+        currentContext.setAppId(appId);
         currentContext.setRequestUri(requestUri);
         filterChain.doFilter(requestWrapper, responseWrapper);
 

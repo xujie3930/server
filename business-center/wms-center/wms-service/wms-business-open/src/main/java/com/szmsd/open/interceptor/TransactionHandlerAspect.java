@@ -130,6 +130,6 @@ public class TransactionHandlerAspect {
     }
 
     private String builderOnlyKey(RequestLogFilterContext currentContext) {
-        return Base64.getEncoder().encodeToString(currentContext.getRequestUri().getBytes(StandardCharsets.UTF_8)) + "_" + currentContext.getTransactionId();
+        return Base64.getEncoder().encodeToString(currentContext.getRequestUri().getBytes(StandardCharsets.UTF_8)) + "_" + currentContext.getAppId() + "_" + currentContext.getTransactionId();
     }
 }
