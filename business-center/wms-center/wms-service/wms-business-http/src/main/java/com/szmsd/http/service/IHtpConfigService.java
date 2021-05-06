@@ -38,4 +38,9 @@ public interface IHtpConfigService {
 
     void deleteHtpWarehouse(HtpWarehouse htpWarehouse);
 
+    void deleteHtpGroup(String groupId);
+
+    void deleteHtpWarehouseGroup(String groupId);
+
+    void deleteHtpUrl(HtpUrl htpUrl);
 }
