@@ -239,7 +239,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                         .setDeclareQty(addSku.getDeclareQty())
                         .setSku(addSku.getSku())
                         .setDeliveryNo(purchaseAddDTO.getPurchaseNo())
-                        .setSkuName(addSku.getSku())
+                        .setSkuName(addSku.getProductName())
                 ;
                 inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
             });
