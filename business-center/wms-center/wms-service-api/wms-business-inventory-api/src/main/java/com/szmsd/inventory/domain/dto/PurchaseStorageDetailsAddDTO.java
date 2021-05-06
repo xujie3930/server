@@ -45,6 +45,9 @@ public class PurchaseStorageDetailsAddDTO {
     @ApiModelProperty(value = "产品编号")
     @Excel(name = "产品编号")
     private String sku;
+    @ApiModelProperty(value = "英文申报名称")
+    @Excel(name = "英文申报名称")
+    private String productName;
 
     @ApiModelProperty(value = "申报数量")
     @Excel(name = "申报数量")
