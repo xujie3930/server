@@ -10,6 +10,7 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.domain.SpecialOperation;
 import com.szmsd.chargerules.dto.BasSpecialOperationRequestDTO;
 import com.szmsd.chargerules.enums.ErrorMessageEnum;
+import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.chargerules.enums.SpecialOperationStatusEnum;
 import com.szmsd.chargerules.factory.OrderType;
 import com.szmsd.chargerules.factory.OrderTypeFactory;
@@ -19,16 +20,15 @@ import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.ISpecialOperationService;
 import com.szmsd.chargerules.vo.BasSpecialOperationVo;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationResultRequest;
-import com.szmsd.http.enums.HttpRechargeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -204,7 +204,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
      * @return customCode
      */
     private String getCustomCode(BasSpecialOperation basSpecialOperation) {
-        OrderType factory = orderTypeFactory.getFactory(basSpecialOperation.getOrderType());
+        OrderType factory = orderTypeFactory.getFactory(OrderTypeEnum.getEn(basSpecialOperation.getOrderType()));
         String customCode = factory.findOrderById(basSpecialOperation.getOrderNo());
         if (StringUtils.isEmpty(customCode)) {
             throw new CommonException("999", ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());
@@ -222,6 +222,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         }
 
         BasSpecialOperation check = baseInfoMapper.selectById(basSpecialOperation.getId());
+        AssertUtil.notNull(check,"数据不存在");
         if (SpecialOperationStatusEnum.PASS.getStatus().equals(check.getStatus())) {
             throw new CommonException("999", ErrorMessageEnum.DUPLICATE_APPLY.getMessage());
         }

@@ -27,4 +27,13 @@ public enum OrderTypeEnum {
         return null;
     }
 
+    public static String getEn(String nameCn) {
+        for (OrderTypeEnum orderTypeEnum : OrderTypeEnum.values()) {
+            if (orderTypeEnum.getNameCn().equals(nameCn)) {
+                return orderTypeEnum.getNameEn();
+            }
+        }
+        return null;
+    }
+
 }
