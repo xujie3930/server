@@ -16,6 +16,9 @@ public class SpecialOperationRequest implements Serializable {
     @ApiModelProperty(value = "操作类型描述")
     private String operationTypeDesc;
 
+    @ApiModelProperty(value = "仓库")
+    private String warehouseCode;
+
     @ApiModelProperty(value = "计费单位")
     private String unit;
 
