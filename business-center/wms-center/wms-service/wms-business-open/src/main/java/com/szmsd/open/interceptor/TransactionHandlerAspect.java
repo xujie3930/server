@@ -71,16 +71,16 @@ public class TransactionHandlerAspect {
                 // 获取锁
                 if (lock.tryLock(time, timeUnit)) {
                     // 验证有没有REP记录
-                    if (this.opnTransactionService.hasRep(currentContext.getRequestUri(), currentContext.getTransactionId())) {
+                    if (this.opnTransactionService.hasRep(currentContext.getRequestUri(), currentContext.getTransactionId(), currentContext.getAppId())) {
                         result = ResponseVO.ok("重复请求");
                     } else {
                         // 新增记录
-                        this.opnTransactionService.add(currentContext.getRequestId(), currentContext.getRequestUri(), currentContext.getTransactionId());
+                        this.opnTransactionService.add(currentContext.getRequestId(), currentContext.getRequestUri(), currentContext.getTransactionId(), currentContext.getAppId());
                         try {
                             // 执行业务操作
                             result = proceed(point);
                             // 执行成功
-                            this.opnTransactionService.onRep(currentContext.getRequestId());
+                            this.opnTransactionService.onRep(currentContext.getRequestId(), currentContext.getAppId());
                         } catch (CommonException e) {
                             logger.error(e.getMessage(), e);
                             result = ResponseVO.failed(e.getMessage());

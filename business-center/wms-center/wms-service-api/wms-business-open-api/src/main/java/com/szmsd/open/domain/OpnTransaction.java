@@ -48,6 +48,9 @@ public class OpnTransaction extends BaseEntity {
     @ApiModelProperty(value = "业务主键ID")
     private String transactionId;
 
+    @ApiModelProperty(value = "appId")
+    private String appId;
+
     @ApiModelProperty(value = "请求路径")
     private String requestUri;
 
