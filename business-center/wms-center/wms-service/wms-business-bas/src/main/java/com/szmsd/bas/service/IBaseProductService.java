@@ -5,6 +5,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -50,7 +51,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
      */
     List<BaseProductVO> selectBaseProductByCode(String code,String sellerCode,String category);
 
-    List<BaseProductMeasureDto> batchSKU(List<String> codes);
+    List<BaseProductMeasureDto> batchSKU(BaseProductBatchQueryDto dto);
 
     /**
      * 导入sku

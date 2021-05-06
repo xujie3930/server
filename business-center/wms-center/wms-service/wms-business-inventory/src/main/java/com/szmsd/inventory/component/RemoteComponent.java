@@ -3,6 +3,7 @@ package com.szmsd.inventory.component;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductBatchQueryDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.security.domain.LoginUser;
@@ -80,7 +81,9 @@ public class RemoteComponent {
      * @return
      */
     public List<BaseProductMeasureDto> listSku(List<String> codes) {
-        R<List<BaseProductMeasureDto>> result = baseProductFeignService.batchSKU(codes);
+        BaseProductBatchQueryDto queryDto = new BaseProductBatchQueryDto();
+        queryDto.setCodes(codes);
+        R<List<BaseProductMeasureDto>> result = baseProductFeignService.batchSKU(queryDto);
         List<BaseProductMeasureDto> skuList = ListUtils.emptyIfNull(result.getData());
         log.info("远程接口：查询SKU, code={}, {}", codes, skuList);
         return skuList;

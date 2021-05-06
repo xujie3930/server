@@ -43,6 +43,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -182,13 +183,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductMeasureDto> batchSKU(List<String> codes) {
+    public List<BaseProductMeasureDto> batchSKU(BaseProductBatchQueryDto dto) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        if (CollectionUtils.isEmpty(codes)) {
+        if (CollectionUtils.isEmpty(dto.getCodes())) {
             return Collections.emptyList();
         } else {
             queryWrapper.eq("is_active", true);
-            queryWrapper.in("code", codes);
+            queryWrapper.in("code", dto.getCodes());
+            QueryWrapperUtil.filter(queryWrapper,SqlKeyword.EQ,"seller_code",dto.getSellerCode());
         }
         return BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductMeasureDto.class);
     }

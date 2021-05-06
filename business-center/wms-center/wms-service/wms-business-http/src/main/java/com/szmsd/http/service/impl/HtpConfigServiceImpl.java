@@ -349,7 +349,7 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
         List<HtpUrlGroup> htpUrlGroups = htpConfigMapper.selectHtpUrlGroup(urlGroupId, null);
         AssertUtil.isTrue(CollectionUtils.isNotEmpty(htpUrlGroups), "地址组不存在，请刷新重试");
 
-        htpConfigMapper.deleteHtpWarehouseUrlGroupBywarehouseGroupId(warehouseGroupId);
+        htpConfigMapper.deleteHtpWarehouseUrlGroupByWarehouseGroupId(warehouseGroupId);
         htpConfigMapper.saveHtpWarehouseUrlGroup(htpWarehouseUrlGroup);
 
     }
@@ -362,6 +362,39 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
     @Override
     public void deleteHtpWarehouse(HtpWarehouse htpWarehouse) {
         htpConfigMapper.deleteHtpWarehouse(htpWarehouse.getGroupId(), htpWarehouse.getWarehouseCode());
+    }
+
+    /**
+     * 删除地址组
+     * 空组可以删除
+     * @param groupId
+     */
+    @Override
+    public void deleteHtpGroup(String groupId) {
+        List<HtpUrl> htpUrls = this.selectHtpUrl(new HtpUrl().setGroupId(groupId));
+        AssertUtil.isTrue(CollectionUtils.isEmpty(htpUrls), "该组绑定了相关地址，不能删除");
+        htpConfigMapper.deleteHtpGroup(groupId);
+    }
+
+    /**
+     * 删除仓库组
+     * 空组可以删除
+     * @param groupId
+     */
+    @Override
+    public void deleteHtpWarehouseGroup(String groupId) {
+        List<HtpWarehouse> htpUrls = this.selectHtpWarehouse(new HtpWarehouse().setGroupId(groupId));
+        AssertUtil.isTrue(CollectionUtils.isEmpty(htpUrls), "该组绑定了相关仓库，不能删除");
+        htpConfigMapper.deleteHtpWarehouseGroup(groupId);
+    }
+
+    /**
+     * 移除地址
+     * @param htpUrl
+     */
+    @Override
+    public void deleteHtpUrl(HtpUrl htpUrl) {
+        htpConfigMapper.deleteHtpUrl(htpUrl.getGroupId(), htpUrl.getServiceId());
     }
 
     private SysUser getLoginUser() {

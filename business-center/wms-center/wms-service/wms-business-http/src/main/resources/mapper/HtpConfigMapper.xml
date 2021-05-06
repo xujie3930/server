@@ -109,8 +109,17 @@
         DELETE FROM htp_warehouse WHERE warehouse_code = #{warehouseCode}
     </delete>
 
-    <delete id="deleteHtpWarehouseUrlGroupBywarehouseGroupId">
+    <delete id="deleteHtpWarehouseUrlGroupByWarehouseGroupId">
         DELETE FROM htp_warehouse_url_group WHERE warehouse_group_id = #{warehouseGroupId}
+    </delete>
+    <delete id="deleteHtpGroup">
+        DELETE FROM htp_url_group WHERE group_id = #{groupId}
+    </delete>
+    <delete id="deleteHtpWarehouseGroup">
+        DELETE FROM htp_warehouse_group WHERE group_id = #{groupId}
+    </delete>
+    <delete id="deleteHtpUrl">
+        DELETE FROM htp_url WHERE group_id = #{groupId} AND service_id = #{serviceId}
     </delete>
     <insert id="saveHtpWarehouseUrlGroup" parameterType="com.szmsd.http.domain.HtpWarehouseUrlGroup">
         INSERT INTO htp_warehouse_url_group

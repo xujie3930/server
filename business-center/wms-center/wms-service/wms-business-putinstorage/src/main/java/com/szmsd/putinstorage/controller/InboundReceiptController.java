@@ -2,12 +2,14 @@ package com.szmsd.putinstorage.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
+import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
@@ -15,6 +17,7 @@ import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -26,6 +29,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,6 +52,9 @@ public class InboundReceiptController extends BaseController {
 
     @Resource
     private IInboundReceiptService iInboundReceiptService;
+
+    @Resource
+    private RemoteComponent remoteComponent;
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
     @GetMapping("/receipt/page")
@@ -84,15 +91,15 @@ public class InboundReceiptController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
     @GetMapping("/receipt/exportTemplate")
-    @ApiOperation(value = "导出模板", notes = "入库管理 - 新增 - 下载模板")
+    @ApiOperation(value = "导出sku模板", notes = "入库管理 - 新增 - 下载模板")
     public void exportTemplate(HttpServletResponse response) {
-        List<String> rows = CollUtil.newArrayList("SKU", "申报品名", "申报数量", "原产品编码", "备注");
+        List<String> rows = CollUtil.newArrayList("SKU", "申报数量", "原产品编码", "备注");
         super.excelExportTitle(response, rows, "入库单SKU导入");
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
     @PostMapping("/receipt/exportSku")
-    @ApiOperation(value = "导出SKU", notes = "入库管理 - 详情 - 导出")
+    @ApiOperation(value = "导出sku", notes = "入库管理 - 详情 - 导出")
     public void exportSku(@RequestBody List<InboundReceiptDetailVO> details, HttpServletResponse response) {
         try (Workbook excel = new XSSFWorkbook();
              OutputStream out = response.getOutputStream()) {
@@ -112,10 +119,10 @@ public class InboundReceiptController extends BaseController {
         }
     }
 
-    @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
-    @PostMapping("/receipt/importDetail")
-    @ApiOperation(value = "导入明细", notes = "入库管理 - 新增 - 导入")
-    public R<List<InboundReceiptDetailVO>> importDetail(MultipartFile file) {
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:importsku')")
+    @PostMapping("/receipt/{cusCode}/importSku")
+    @ApiOperation(value = "导入sku", notes = "入库管理 - 新增 - 导入")
+    public R<List<InboundReceiptDetailVO>> importSku(MultipartFile file, @PathVariable("cusCode") String cusCode) {
         AssertUtil.isTrue(ObjectUtils.allNotNull(file), "上传文件不存在");
         String originalFilename = file.getOriginalFilename();
         int lastIndexOf = originalFilename.lastIndexOf(".");
@@ -123,16 +130,31 @@ public class InboundReceiptController extends BaseController {
         boolean isXls = "xls".equals(suffix);
         boolean isXlsx = "xlsx".equals(suffix);
         AssertUtil.isTrue(isXls || isXlsx, "请上传xls或xlsx文件");
+        List<String> error = new ArrayList<>();
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOS;
         try {
             ExcelUtil<InboundReceiptDetailVO> excelUtil = new ExcelUtil<>(InboundReceiptDetailVO.class);
-            List<InboundReceiptDetailVO> inboundReceiptDetailVOS = excelUtil.importExcel(file.getInputStream());
+            inboundReceiptDetailVOS = excelUtil.importExcel(file.getInputStream());
             Map<String, Long> collect = inboundReceiptDetailVOS.stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
-            collect.forEach((key, value) -> AssertUtil.isTrue(!(value > 1L), "Excel存在重复SKU"));
-            return R.ok(inboundReceiptDetailVOS);
+            collect.forEach((key, value) -> AssertUtil.isTrue(!(value > 1L), "Excel存在重复SKU[" + key + "]"));
+
+            List<BaseProductMeasureDto> skuList = remoteComponent.querySku(new ArrayList<>(collect.keySet()), cusCode);
+            for (int i = 0; i < inboundReceiptDetailVOS.size(); i++) {
+                InboundReceiptDetailVO vo = inboundReceiptDetailVOS.get(i);
+                String item = vo.getSku();
+                List<BaseProductMeasureDto> collect1 = skuList.stream().filter(data -> item.equals(data.getCode())).collect(Collectors.toList());
+                if (CollectionUtils.isEmpty(collect1)) {
+                    error.add("Excel第" + (i + 1) + "行,sku[" + item + "]不存在");
+                } else {
+                    vo.setSkuName(collect1.get(0).getProductName());
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return R.failed("文件解析异常");
         }
+        AssertUtil.isTrue(error.size() == 0, String.join("; ", error));
+        return R.ok(inboundReceiptDetailVOS);
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receiving')")

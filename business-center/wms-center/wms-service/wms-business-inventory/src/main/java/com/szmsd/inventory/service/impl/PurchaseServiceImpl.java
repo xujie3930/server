@@ -220,12 +220,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                     .setDeliveryNo(no)
                     // 出库叫orderType 对应入库方式 warehouseMethodCode
                     .setWarehouseMethodCode(purchaseAddDTO.getOrderType())
-                    .setOrderType(InboundReceiptEnum.OrderType.PURCHASE.getValue())
                     .setOrderNo(purchaseAddDTO.getPurchaseNo())
                     .setCusCode(sellerCode)
                     .setVat(purchaseAddDTO.getVat())
                     .setWarehouseCode(purchaseAddDTO.getWarehouseCode())
-                    .setOrderType(purchaseAddDTO.getOrderType())
+                    .setOrderType(InboundReceiptEnum.OrderType.PURCHASE.getValue())
                     .setWarehouseCategoryCode(purchaseAddDTO.getWarehouseCategoryCode())
                     .setDeliveryWayCode(purchaseAddDTO.getDeliveryWay())
                     .setTotalDeclareQty(sum)
@@ -306,7 +305,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                 .setVat(transportWarehousingAddDTO.getVat())
                 .setWarehouseCode(transportWarehousingAddDTO.getWarehouseCode())
                 .setWarehouseMethodCode(transportWarehousingAddDTO.getWarehouseMethodCode())
-                .setOrderType(InboundReceiptEnum.OrderType.TRANSFER.getValue())
+                .setOrderType(InboundReceiptEnum.OrderType.COLLECTION.getValue())
                 .setWarehouseCategoryCode(transportWarehousingAddDTO.getWarehouseCategoryCode())
                 .setDeliveryWayCode(transportWarehousingAddDTO.getDeliveryWay())
                 .setTotalDeclareQty(Integer.parseInt(sum + ""))
@@ -329,7 +328,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             ;
             inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
         });
-        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList).setIsFromTransport(true);
+        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
 
         InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
 

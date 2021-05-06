@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.component;
 
+import cn.hutool.core.collection.ListUtil;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.domain.BasSub;
@@ -13,12 +14,13 @@ import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductBatchQueryDto;
+import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
-import com.szmsd.common.core.utils.ServletUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
@@ -37,7 +39,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 远程接口
@@ -222,6 +223,26 @@ public class RemoteComponent {
      */
     public void deleteAttachment(AttachmentTypeEnum attachmentTypeEnum, String businessNo, String businessItemNo) {
         remoteAttachmentService.deleteByBusinessNo(AttachmentDTO.builder().attachmentTypeEnum(attachmentTypeEnum).businessNo(businessNo).businessItemNo(businessItemNo).build());
+    }
+
+    /**
+     * 批量查询sku
+     * @param sku
+     * @return
+     */
+    public List<BaseProductMeasureDto> querySku(List<String> sku, String cusCode) {
+        BaseProductBatchQueryDto queryDto = new BaseProductBatchQueryDto();
+        queryDto.setCodes(sku);
+        queryDto.setSellerCode(cusCode);
+        R<List<BaseProductMeasureDto>> listR = baseProductFeignService.batchSKU(queryDto);
+        if (listR == null) {
+            return ListUtil.empty();
+        }
+        List<BaseProductMeasureDto> data = listR.getData();
+        if (data == null) {
+            return ListUtil.empty();
+        }
+        return data;
     }
 
 }

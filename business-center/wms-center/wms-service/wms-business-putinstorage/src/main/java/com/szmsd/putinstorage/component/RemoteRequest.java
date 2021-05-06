@@ -1,6 +1,7 @@
 package com.szmsd.putinstorage.component;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.http.api.feign.HtpInboundFeignService;
 import com.szmsd.http.dto.CancelReceiptRequest;
 import com.szmsd.http.dto.CreateReceiptRequest;
@@ -30,9 +31,14 @@ public class RemoteRequest {
      * @param inboundReceiptInfoVO
      */
     public void createInboundReceipt(InboundReceiptInfoVO inboundReceiptInfoVO) {
+
+        String orderType = inboundReceiptInfoVO.getOrderType();
+        InboundReceiptEnum.InboundReceiptEnumMethods orderTypeEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.OrderType.class, orderType);
+        AssertUtil.notNull(orderTypeEnum, "orderType[" + orderType + "]无效");
+
         CreateReceiptRequest createInboundReceipt = new CreateReceiptRequest();
         createInboundReceipt.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
-        createInboundReceipt.setOrderType(InboundReceiptEnum.OrderType.NORMAL.getValue());
+        createInboundReceipt.setOrderType(orderTypeEnum.getValue());
         createInboundReceipt.setSellerCode(inboundReceiptInfoVO.getCusCode());
         createInboundReceipt.setTrackingNumber(inboundReceiptInfoVO.getDeliveryNo());
         createInboundReceipt.setRemark(inboundReceiptInfoVO.getRemark());

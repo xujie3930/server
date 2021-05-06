@@ -1,7 +1,6 @@
 package com.szmsd.bas.controller;
 
 import com.szmsd.bas.api.domain.BasEmployees;
-import com.szmsd.bas.api.domain.BasWeightDto;
 import com.szmsd.bas.api.domain.BasWeightSectionDto;
 import com.szmsd.bas.driver.UpdateRedis;
 import com.szmsd.bas.service.IBasEmployeesService;
@@ -27,7 +26,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -94,7 +96,7 @@ public class BasEmployeesController extends BaseController {
         if (list.size() != 0) {
             return R.failed("员工编号重复");
         }
-        BasEmployees basEmployees2 = new BasEmployees();
+//        BasEmployees basEmployees2 = new BasEmployees();
 //        basEmployees2.setEmpTel(basEmployees.getEmpTel());
 //        List<BasEmployees> lists = basEmployeesService.selectBasEmployeesList(basEmployees2);
 //        if (lists.size() != 0) {
@@ -128,19 +130,7 @@ public class BasEmployeesController extends BaseController {
             return R.failed(r.getMsg());
         }
         basEmployees.setUserId(Long.parseLong(userId));
-        int i = basEmployeesService.insertBasEmployees(basEmployees);
-        if(i > 0){
-            //同时生成重量段位
-            int i1 = weightSectionService.insertBasWeightSection(new BasWeightSectionDto()
-                    .setWeightDto(Arrays.asList(new BasWeightDto().setWeightStart("0").setWeightEnd("1"),
-                            new BasWeightDto().setWeightStart("1").setWeightEnd("5"),
-                            new BasWeightDto().setWeightStart("5").setWeightEnd("10"),
-                            new BasWeightDto().setWeightStart("10").setWeightEnd("1000")
-                    )).setUserCode(basEmployees.getEmpCode()).setUserName(basEmployees.getEmpName()));
-            if(i1 <= 0){
-                log.info("生成重量段失败");
-            }
-        }
+        basEmployeesService.insertBasEmployees(basEmployees);
         return R.ok();
     }
 
