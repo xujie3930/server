@@ -388,6 +388,15 @@ public class HtpConfigServiceImpl implements IHtpConfigService {
         htpConfigMapper.deleteHtpWarehouseGroup(groupId);
     }
 
+    /**
+     * 移除地址
+     * @param htpUrl
+     */
+    @Override
+    public void deleteHtpUrl(HtpUrl htpUrl) {
+        htpConfigMapper.deleteHtpUrl(htpUrl.getGroupId(), htpUrl.getServiceId());
+    }
+
     private SysUser getLoginUser() {
         SysUser sysUser = new SysUser();
         LoginUser loginUser = SecurityUtils.getLoginUser();

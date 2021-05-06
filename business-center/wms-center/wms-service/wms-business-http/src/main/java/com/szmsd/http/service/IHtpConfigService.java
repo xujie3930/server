@@ -41,4 +41,6 @@ public interface IHtpConfigService {
     void deleteHtpGroup(String groupId);
 
     void deleteHtpWarehouseGroup(String groupId);
+
+    void deleteHtpUrl(HtpUrl htpUrl);
 }
