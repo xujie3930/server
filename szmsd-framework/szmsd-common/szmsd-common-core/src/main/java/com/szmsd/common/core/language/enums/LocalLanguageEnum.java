@@ -92,6 +92,11 @@ public enum LocalLanguageEnum {
     RETURN_EXPRESS_8(RETURN_EXPRESS,"自有库存退件","自有库存退件","Own package inventory return"),
     RETURN_EXPRESS_9(RETURN_EXPRESS,"转动单退件","转动单退件","Rotation single package return"),
     RETURN_EXPRESS_10(RETURN_EXPRESS,"外部渠道退件","外部渠道退件","External channel package return"),
+    /** 处理状态*/
+    RETURN_EXPRESS_11(RETURN_EXPRESS,"处理中","处理中","In process"),
+    RETURN_EXPRESS_12(RETURN_EXPRESS,"待客户处理","待客户处理","Waiting for customer to handle"),
+    RETURN_EXPRESS_13(RETURN_EXPRESS,"待指派","待指派","Waiting assigned"),
+    RETURN_EXPRESS_14(RETURN_EXPRESS,"已完成","已完成","Completed"),
 
     ;
 
