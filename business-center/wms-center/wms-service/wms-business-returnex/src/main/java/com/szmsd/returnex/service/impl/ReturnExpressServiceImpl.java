@@ -300,6 +300,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     .set(ReturnExpressDetail::getSellerCode, returnArrivalReqDTO.getSellerCode())
                     .set(StringUtil.isNotBlank(returnArrivalReqDTO.getRemark()), BaseEntity::getRemark, returnArrivalReqDTO.getRemark())
                     .set(ReturnExpressDetail::getArrivalTime, LocalDateTime.now())
+                    .set(isDestroy,ReturnExpressDetail::getFinishTime,LocalDateTime.now())
 
                     .set(ReturnExpressDetail::getDealStatus, dealStatus)
                     .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
@@ -417,12 +418,13 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 returnDetail
                         .setSku(x.getSku())
                         .setPutawaySku(x.getPutawaySku())
-                        .setPutawayQty(returnDetail.getPutawayQty())
+                        .setPutawayQty(x.getPutawayQty())
                         .setProcessRemark(x.getProcessRemark());
                 detailArrayList.add(returnDetail);
             });
             processingUpdateReqDTO.setDetails(detailArrayList);
         }
+        log.info("推送商品处理信息 {}" ,processingUpdateReqDTO);
         httpFeignClient.processingUpdate(processingUpdateReqDTO);
     }
 
