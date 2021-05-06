@@ -35,6 +35,12 @@ public enum LocalLanguageTypeEnum {
     HOME_DOCUMENT_TYPE,
 
     /** 首页条形统计图 **/
-    HOME_BAR_CHART_TYPE
+    HOME_BAR_CHART_TYPE,
+
+    /** 地址管理*/
+    ADDRESS_MANAGEMENT,
+
+    /** 退件 */
+    RETURN_EXPRESS
     ;
 }
