@@ -129,7 +129,7 @@ public class ReturnExpressListVO implements Serializable {
 
     @ApiModelProperty(value = "处理状态编码")
     private String dealStatus;
-    //    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.RETURN_EXPRESS)
     @ApiModelProperty(value = "处理状态编码", hidden = true)
     private String dealStatusStr;
 
