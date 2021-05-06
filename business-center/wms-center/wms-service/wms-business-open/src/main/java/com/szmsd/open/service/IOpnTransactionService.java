@@ -68,9 +68,10 @@ public interface IOpnTransactionService extends IService<OpnTransaction> {
      *
      * @param requestUri    requestUri
      * @param transactionId transactionId
+     * @param appId appId
      * @return boolean
      */
-    boolean hasRep(String requestUri, String transactionId);
+    boolean hasRep(String requestUri, String transactionId, String appId);
 
     /**
      * 新增记录
@@ -78,14 +79,16 @@ public interface IOpnTransactionService extends IService<OpnTransaction> {
      * @param traceId       traceId
      * @param requestUri    requestUri
      * @param transactionId transactionId
+     * @param appId appId
      */
-    void add(String traceId, String requestUri, String transactionId);
+    void add(String traceId, String requestUri, String transactionId, String appId);
 
     /**
      * rep
      *
      * @param traceId traceId
+     * @param appId appId
      */
-    void onRep(String traceId);
+    void onRep(String traceId, String appId);
 }
 
