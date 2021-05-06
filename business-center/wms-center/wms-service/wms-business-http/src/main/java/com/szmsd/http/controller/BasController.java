@@ -54,14 +54,14 @@ public class BasController extends BaseController {
     @ApiOperation(value = "A6 新增特殊操作类型")
     public R<ResponseVO> create(@RequestBody SpecialOperationRequest specialOperationRequest) {
         ResponseVO responseVO = iBasService.save(specialOperationRequest);
-        return responseVO != null ? R.ok(responseVO) : R.failed();
+        return responseVO != null && responseVO.getErrors() == null ? R.ok(responseVO) : R.failed();
     }
 
     @PostMapping("/specialOperation/result")
     @ApiOperation(value = "A7 更新特殊操作结果")
     public R<ResponseVO> update(@RequestBody SpecialOperationResultRequest specialOperationResultRequest) {
         ResponseVO responseVO = iBasService.update(specialOperationResultRequest);
-        return responseVO != null ? R.ok(responseVO) : R.failed();
+        return responseVO != null && responseVO.getErrors() == null ? R.ok(responseVO) : R.failed();
     }
 
     @PostMapping("/shipmentRule")

@@ -126,11 +126,14 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
      * 调用WMS接口回写数据
      * @param basSpecialOperation basSpecialOperation
      */
-    private void sendResult(BasSpecialOperation basSpecialOperation) {
+    private void sendResult(BasSpecialOperation basSpecialOperation,String status) {
         SpecialOperationResultRequest request = new SpecialOperationResultRequest();
-        BeanUtils.copyProperties(basSpecialOperation, request);
+        request.setOperationOrderNo(basSpecialOperation.getOperationOrderNo());
+        request.setStatus(status);
+        request.setRemark(basSpecialOperation.getOmsRemark());
         R<com.szmsd.http.vo.ResponseVO> responseVOR = htpBasFeignService.specialOperationResult(request);
-        if (responseVOR.getCode() != 200) {
+        if (responseVOR.getCode() != 200 || !responseVOR.getData().getSuccess()) {
+            log.error("操作费数据回调失败 msg: {} error: {}",responseVOR.getData().getMessage(),responseVOR.getData().getErrors());
             throw new CommonException("999", ErrorMessageEnum.UPDATE_OPERATION_TYPE_ERROR.getMessage());
         }
     }
@@ -160,7 +163,11 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
             }
 
             // 调用WMS接口回写结果
-            this.sendResult(basSpecialOperation);
+            this.sendResult(basSpecialOperation,SpecialOperationStatusEnum.PASS.getStatusName());
+        }
+        //不同意也需要回写
+        if(SpecialOperationStatusEnum.REJECT.getStatus().equals(basSpecialOperation.getStatus())) {
+            this.sendResult(basSpecialOperation,SpecialOperationStatusEnum.REJECT.getStatusName());
         }
     }
 

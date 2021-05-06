@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.vo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import io.swagger.annotations.ApiModel;
@@ -70,6 +71,10 @@ public class BasSpecialOperationVo {
 
     public String getWarehouseName() {
         return warehouseCode;
+    }
+
+    public String getOrderType() {
+        return OrderTypeEnum.get(orderType);
     }
 
 }

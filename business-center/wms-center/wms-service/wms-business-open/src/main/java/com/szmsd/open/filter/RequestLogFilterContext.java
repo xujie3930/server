@@ -12,6 +12,7 @@ public class RequestLogFilterContext {
     private static final ThreadLocal<RequestLogFilterContext> contextHolder = new ThreadLocal<>();
     private String requestId;
     private String transactionId;
+    private String appId;
     private String requestUri;
     private Map<String, Object> parameterMap = new HashMap<>();
 
@@ -57,5 +58,13 @@ public class RequestLogFilterContext {
 
     public void setParameterMap(Map<String, Object> parameterMap) {
         this.parameterMap = parameterMap;
+    }
+
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 }
