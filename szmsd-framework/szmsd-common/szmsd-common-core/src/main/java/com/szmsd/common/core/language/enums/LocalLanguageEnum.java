@@ -74,6 +74,25 @@ public enum LocalLanguageEnum {
     HOME_BAR_CHART_TYPE_3(HOME_BAR_CHART_TYPE, "已入库订单", "已入库订单", "Order Completed"),
     /** 已出库订单 **/
     HOME_BAR_CHART_TYPE_4(HOME_BAR_CHART_TYPE, "已出库订单", "已出库订单", "Order Shipped"),
+
+    /** 交货管理 **/
+    ADDR_EXPORTED(ADDRESS_MANAGEMENT,"已导出","已导出","Exported"),
+    ADDR_NOT_EXPORTED(ADDRESS_MANAGEMENT,"未导出","未导出","Not exported"),
+
+    /** 退件 **/
+    RETURN_EXPRESS_1(RETURN_EXPRESS,"wms退件通知","wms退件通知","WMS return notification"),
+    RETURN_EXPRESS_2(RETURN_EXPRESS,"WMS退件通知","WMS退件通知","WMS return notification"),
+    /**处理方式*/
+    RETURN_EXPRESS_3(RETURN_EXPRESS,"退件预报","退件预报","Return forecast"),
+    RETURN_EXPRESS_4(RETURN_EXPRESS,"销毁","销毁","Destruction"),
+    RETURN_EXPRESS_5(RETURN_EXPRESS,"整包上架","整包上架","Package put for sell"),
+    RETURN_EXPRESS_6(RETURN_EXPRESS,"拆包检查","拆包检查","Unpacking inspection"),
+    RETURN_EXPRESS_7(RETURN_EXPRESS,"按明细上架","按明细上架","Package for sell according to details"),
+    /** 退件类型 */
+    RETURN_EXPRESS_8(RETURN_EXPRESS,"自有库存退件","自有库存退件","Own package inventory return"),
+    RETURN_EXPRESS_9(RETURN_EXPRESS,"转动单退件","转动单退件","Rotation single package return"),
+    RETURN_EXPRESS_10(RETURN_EXPRESS,"外部渠道退件","外部渠道退件","External channel package return"),
+
     ;
 
     private LocalLanguageTypeEnum typeEnum;

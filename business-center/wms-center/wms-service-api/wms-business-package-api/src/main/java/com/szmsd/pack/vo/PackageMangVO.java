@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.language.annotation.FieldJsonI18n;
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -54,6 +56,7 @@ public class PackageMangVO {
     @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
     private Integer exportType;
 
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.ADDRESS_MANAGEMENT)
     @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
     private String exportTypeStr;
 
@@ -158,7 +161,7 @@ public class PackageMangVO {
     private String showChoose;
 
     public void setShowChoose() {
-        this.showChoose = String.join(" ",provinceNameZh,cityNameZh,districtNameZh);
+        this.showChoose = String.join(" ", provinceNameZh, cityNameZh, districtNameZh);
     }
 
     @Override
