@@ -1,6 +1,5 @@
 package com.szmsd.open.event.listener;
 
-import com.szmsd.open.event.RequestLogEvent;
 import com.szmsd.open.event.TransactionEvent;
 import com.szmsd.open.service.IOpnTransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ public class TransactionListener {
     @EventListener
     public void onApplicationEvent(TransactionEvent event) {
         if (null != event.getSource()) {
-            this.opnTransactionService.onRep((String) event.getSource());
+//            this.opnTransactionService.onRep((String) event.getSource());
         }
     }
 }
