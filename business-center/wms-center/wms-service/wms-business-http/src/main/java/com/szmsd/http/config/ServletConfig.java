@@ -1,6 +1,7 @@
 package com.szmsd.http.config;
 
 import com.szmsd.http.servlet.RequestForwardServlet;
+import com.szmsd.http.servlet.matcher.RequestForwardMatcher;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -14,11 +15,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ServletConfig {
 
+    private final RequestForwardMatcher requestForwardMatcher;
+
+    public ServletConfig(RequestForwardMatcher requestForwardMatcher) {
+        this.requestForwardMatcher = requestForwardMatcher;
+    }
+
     @Bean
     public ServletRegistrationBean<RequestForwardServlet> registerRequestForwardServlet() {
         ServletRegistrationBean<RequestForwardServlet> requestForwardServlet = new ServletRegistrationBean<>();
-        requestForwardServlet.setServlet(new RequestForwardServlet());
+        requestForwardServlet.setServlet(new RequestForwardServlet(requestForwardMatcher));
         requestForwardServlet.addUrlMappings("/rf");
         return requestForwardServlet;
     }
+
 }

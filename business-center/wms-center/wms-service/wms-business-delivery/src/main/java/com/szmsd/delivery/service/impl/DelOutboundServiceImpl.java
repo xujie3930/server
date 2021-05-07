@@ -15,6 +15,8 @@ import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -295,6 +297,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (!DelOutboundOrderTypeEnum.has(dto.getOrderType())) {
             throw new CommonException("999", "订单类型不存在");
         }
+        // 来源为新增
+        dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_ADD);
         return this.createDelOutbound(dto);
     }
 
@@ -381,11 +385,36 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             detailVO.setWeight(delOutbound.getWeight());
             detailVOList.add(detailVO);
         } else {
+            // 统计包材信息
+            List<String> bindCodes = details.stream().map(DelOutboundDetailDto::getBindCode).filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+            Map<String, BaseProduct> bindCodeMap = null;
+            if (CollectionUtils.isNotEmpty(bindCodes)) {
+                BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
+                List<BaseProduct> productList = this.baseProductClientService.queryProductList(baseProductConditionQueryDto);
+                if (CollectionUtils.isNotEmpty(productList)) {
+                    bindCodeMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v1, v2) -> v1));
+                }
+            }
+            if (null == bindCodeMap) {
+                bindCodeMap = Collections.emptyMap();
+            }
+            // 处理操作费用参数
             for (DelOutboundDetailDto detail : details) {
+                double weight = Utils.defaultValue(detail.getWeight());
+                // 查询包材重量
+                String bindCode = detail.getBindCode();
+                if (StringUtils.isNotEmpty(bindCode) && bindCodeMap.containsKey(bindCode)) {
+                    // 累计包材的重量
+                    BaseProduct baseProduct = bindCodeMap.get(bindCode);
+                    if (null != baseProduct) {
+                        weight = weight + Utils.defaultValue(baseProduct.getWeight());
+                    }
+                }
+                // 操作费对象
                 DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
                 detailVO.setSku(detail.getSku());
                 detailVO.setQty(detail.getQty());
-                detailVO.setWeight(detail.getWeight());
+                detailVO.setWeight(weight);
                 detailVOList.add(detailVO);
             }
         }

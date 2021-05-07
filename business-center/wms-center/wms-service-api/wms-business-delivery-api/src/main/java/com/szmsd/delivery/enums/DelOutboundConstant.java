@@ -16,4 +16,13 @@ public class DelOutboundConstant {
      */
     public static final int CONTAINER_STATE_1 = 1;
 
+    /**
+     * 出库单据来源 - web界面新增
+     */
+    public static final String SOURCE_TYPE_ADD = "ADD";
+
+    /**
+     * 导入
+     */
+    public static final String SOURCE_TYPE_IMP = "IMP";
 }

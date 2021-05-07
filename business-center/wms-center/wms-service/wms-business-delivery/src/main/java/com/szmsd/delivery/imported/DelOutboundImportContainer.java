@@ -3,6 +3,7 @@ package com.szmsd.delivery.imported;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
             outboundDto.setDeliveryInfo(dto.getDeliveryInfo());
             outboundDto.setAddress(this.buildAddress(dto));
             outboundDto.setDetails(this.buildDetails(dto));
+            outboundDto.setSourceType(DelOutboundConstant.SOURCE_TYPE_IMP);
             outboundDtoList.add(outboundDto);
         }
         return outboundDtoList;

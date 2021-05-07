@@ -5,6 +5,7 @@ import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
@@ -35,7 +36,10 @@ public class ChargeLogController extends BaseController {
     @PostMapping("/operationCharge/page")
     @ApiOperation(value = "扣费日志 - 查询操作费用")
     public R<TableDataInfo<QueryChargeVO>> getPage(@RequestBody QueryChargeDto queryDto) {
-        startPage();
+        QueryDto page = new QueryDto();
+        page.setPageNum(queryDto.getPageNum());
+        page.setPageSize(queryDto.getPageSize());
+        startPage(page);
         List<QueryChargeVO> list = chargeLogService.selectChargeLogList(queryDto);
         return R.ok(getDataTable(list));
     }

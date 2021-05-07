@@ -48,6 +48,11 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
     }
 
     @Override
+    public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity) {
+        this.saveLogs(type, beforeInventory, afterInventory, receiptNo, operator, operateOn, quantity, "");
+    }
+
+    @Override
     public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity, String... placeholder) {
         InventoryRecord inventoryRecord = new InventoryRecord();
         inventoryRecord.setType(type);
@@ -70,7 +75,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         inventoryRecord.setRemark(logs);
         inventoryRecord.setOperator(StringUtils.isEmpty(operator) ? beforeInventory.getCreateByName() : operator);
         inventoryRecord.setOperateOn(StringUtils.isEmpty(operateOn) ? DateUtils.parseDateToStr("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", new Date()) : operateOn);
-        inventoryRecord.setPlaceholder(Arrays.asList(placeholder).stream().collect(Collectors.joining(",")));
+        inventoryRecord.setPlaceholder(String.join(",", placeholder));
         log.info("保存入库操作日志：" + inventoryRecord);
         this.save(inventoryRecord);
         log.info("保存入库操作日志：操作完成");
@@ -133,14 +138,11 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
             len = "zh";
         }
         String logs = localLanguageEnum.getZhName();
-        switch (len) {
-            case "en":
-                logs = localLanguageEnum.getEhName();
-                break;
+        if ("en".equals(len)) {
+            logs = localLanguageEnum.getEhName();
         }
-        switch (localLanguageEnum) {
-            case INBOUND_INVENTORY_LOG:
-                return MessageFormat.format(logs, placeholder);
+        if (localLanguageEnum == LocalLanguageEnum.INBOUND_INVENTORY_LOG) {
+            return MessageFormat.format(logs, placeholder);
         }
         return logs;
     }
