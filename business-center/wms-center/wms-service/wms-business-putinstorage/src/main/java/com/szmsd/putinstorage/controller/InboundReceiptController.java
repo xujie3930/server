@@ -89,7 +89,7 @@ public class InboundReceiptController extends BaseController {
         return R.ok(inboundReceiptInfoVO);
     }
 
-    @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:exporttemplate')")
     @GetMapping("/receipt/exportTemplate")
     @ApiOperation(value = "导出sku模板", notes = "入库管理 - 新增 - 下载模板")
     public void exportTemplate(HttpServletResponse response) {
@@ -97,7 +97,7 @@ public class InboundReceiptController extends BaseController {
         super.excelExportTitle(response, rows, "入库单SKU导入");
     }
 
-    @PreAuthorize("@ss.hasPermi('inbound:receipt:importdetail')")
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:exportsku')")
     @PostMapping("/receipt/exportSku")
     @ApiOperation(value = "导出sku", notes = "入库管理 - 详情 - 导出")
     public void exportSku(@RequestBody List<InboundReceiptDetailVO> details, HttpServletResponse response) {
