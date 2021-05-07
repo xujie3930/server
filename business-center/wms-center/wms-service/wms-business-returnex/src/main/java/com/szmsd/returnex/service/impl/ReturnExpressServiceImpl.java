@@ -309,7 +309,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     .set(StringUtil.isNotBlank(returnArrivalReqDTO.getRemark()), BaseEntity::getRemark, returnArrivalReqDTO.getRemark())
                     .set(ReturnExpressDetail::getArrivalTime, LocalDateTime.now())
                     .set(isDestroy, ReturnExpressDetail::getFinishTime, LocalDateTime.now())
-
+                    .set(ReturnExpressDetail::getArrivalTime, LocalDateTime.now())
                     .set(ReturnExpressDetail::getDealStatus, dealStatus)
                     .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
             );
@@ -320,6 +320,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             returnExpressDetail.setReturnSource(configStatus.getReturnSource().getWmsReturn());
             returnExpressDetail.setReturnSourceStr(configStatus.getReturnSource().getWmsReturnStr());
             returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWaitAssigned());
+            returnExpressDetail.setArrivalTime(LocalDateTime.now());
             returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWaitAssignedStr());
             int insert = returnExpressMapper.insert(returnExpressDetail);
             // 其他处理
