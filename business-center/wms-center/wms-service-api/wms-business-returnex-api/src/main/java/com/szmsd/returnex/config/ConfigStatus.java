@@ -49,6 +49,10 @@ public class ConfigStatus {
      */
     private String unpackingInspection;
     /**
+     *  按明细上架
+     */
+    private String putawayByDetail;
+    /**
      * 整包上架
      */
     private String wholePackageOnShelves;
@@ -77,6 +81,7 @@ public class ConfigStatus {
         private String waitAssignedStr = "待指派";
         private String waitProcessedAfterUnpacking;
         private String waitProcessedAfterUnpackingStr = "待客户处理";
+        //等待WMS按客户处理方式处理
         private String wmsReceivedDealWay;
         private String wmsReceivedDealWayStr = "处理中";
         private String wmsFinish;
