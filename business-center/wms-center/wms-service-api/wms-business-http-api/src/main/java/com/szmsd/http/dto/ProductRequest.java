@@ -1,11 +1,12 @@
 package com.szmsd.http.dto;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.http.annotation.LogIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
+@LogIgnore({"productImage"})
 public class ProductRequest {
     @ApiModelProperty(value = "产品名称")
     @Excel(name = "产品名称")

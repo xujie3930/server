@@ -167,6 +167,11 @@ public class PaymentPayFactory extends AbstractPayFactory {
         if (CollectionUtils.isEmpty(dto.getSerialBillInfoList())) {
             log.info("setSerialBillLog() list is empty :{} ", dto);
             AccountSerialBillDTO accountSerialBillDTO = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
+            String paymentName = accountSerialBillDTO.getPayMethod().getPaymentName();
+            accountSerialBillDTO.setBusinessCategory(paymentName);
+            accountSerialBillDTO.setProductCategory(paymentName);
+            accountSerialBillDTO.setChargeCategory(paymentName.concat(accountSerialBillDTO.getCurrencyName()));
+            accountSerialBillDTO.setChargeType(paymentName);
             accountSerialBillService.add(accountSerialBillDTO);
             return;
         }

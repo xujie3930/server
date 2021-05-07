@@ -54,6 +54,7 @@ public final class ApplicationRuleConfig {
         bringVerifyNewSkuSet.add(BringVerifyEnum.END.name());
         bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.NEW_SKU.getCode(), bringVerifyNewSkuSet);
         // 提审配置 - 【批量出库】
+        // 执行所有步骤
         // =======================================================================================
         // 出库配置
         // =======================================================================================
@@ -81,7 +82,7 @@ public final class ApplicationRuleConfig {
         shipmentNewSkuSet.add(ShipmentEnum.END.name());
         shipmentRuleMap.put(DelOutboundOrderTypeEnum.NEW_SKU.getCode(), shipmentNewSkuSet);
         // 出库配置 - 【批量出库】
-        //
+        // 执行所有步骤
     }
 
     /**
