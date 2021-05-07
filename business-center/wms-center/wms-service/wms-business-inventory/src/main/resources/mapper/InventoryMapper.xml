@@ -24,6 +24,7 @@
         <result column="sku_declared_name" property="skuDeclaredName"/>
         <result column="remark" property="remark"/>
         <result column="cus_code" property="cusCode"/>
+        <result column="last_inbound_time" property="lastInboundTime"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -47,7 +48,8 @@
         sku.declared_value sku_declared_value,
         sku.product_name_chinese sku_declared_name,
         t.remark,
-        t.cus_code
+        t.cus_code,
+        t.last_inbound_time
     </sql>
 
     <select id="selectListVO" parameterType="com.szmsd.inventory.domain.dto.InventorySkuQueryDTO" resultMap="InventorySkuVO">
@@ -72,7 +74,7 @@
             <if test="skuPropertyCode != null and skuPropertyCode != ''">AND sku.product_attribute = #{skuPropertyCode}</if>
             <if test="skuDeclaredName != null and skuDeclaredName != ''">AND sku.product_name_chinese LIKE CONCAT(#{skuDeclaredName}, '%')</if>
         </where>
-        ORDER BY t.update_time DESC
+        ORDER BY t.last_inbound_time DESC
     </select>
 
     <select id="queryAvailableList" resultType="com.szmsd.inventory.domain.vo.InventoryAvailableListVO">
