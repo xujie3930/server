@@ -170,7 +170,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
      * @return result
      */
     private R<?> packageTransfer(DelOutboundOperationVO dto) {
-        Operation operation = getOperationDetails(dto, dto.getOrderType(), null, "未找到" + dto.getOrderType() + "配置");
+        Operation operation = getOperationDetails(dto, dto.getOrderType(), null, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
         return this.freezeBalance(dto, 1L, operation.getFirstPrice(), operation);
     }
 
@@ -188,7 +188,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
         Operation operation = new Operation();
         for (DelOutboundOperationDetailVO vo : details) {
-            operation = getOperationDetails(dto, orderType, vo.getWeight(), "未找到" + dto.getOrderType() + "配置");
+            operation = getOperationDetails(dto, orderType, vo.getWeight(), "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
             qty = vo.getQty();
             amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), qty).add(amount);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
@@ -238,7 +238,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private BigDecimal getBatchAmount(DelOutboundOperationVO dto, BigDecimal amount, Integer count, String type) {
         if (count != null && count > 0) {
             String orderType = dto.getOrderType().concat(type);
-            Operation labelOperation = getOperationDetails(dto, orderType, null, "未找到" + orderType + "配置");
+            Operation labelOperation = getOperationDetails(dto, orderType, null, "未找到" + orderType + "业务费用规则，请联系管理员");
             BigDecimal calculate = payService.calculate(labelOperation.getFirstPrice(), labelOperation.getNextPrice(), count.longValue());
             amount = amount.add(calculate);
         }
