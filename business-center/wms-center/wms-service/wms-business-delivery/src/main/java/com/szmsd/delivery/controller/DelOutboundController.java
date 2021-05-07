@@ -389,7 +389,10 @@ public class DelOutboundController extends BaseController {
     @PostMapping("/delOutboundCharge/page")
     @ApiOperation(value = "出库管理 - 按条件查询出库单及费用详情", position = 10100)
     public R<TableDataInfo<QueryChargeVO>> getDelOutboundCharge(@RequestBody QueryChargeDto queryDto) {
-        startPage();
+        QueryDto page = new QueryDto();
+        page.setPageNum(queryDto.getPageNum());
+        page.setPageSize(queryDto.getPageSize());
+        startPage(page);
         return R.ok(getDataTable(delOutboundService.getDelOutboundCharge(queryDto)));
     }
 
