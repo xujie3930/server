@@ -10,6 +10,12 @@ import java.io.Serializable;
 @ApiModel(value = "DelOutboundChargeQueryDto", description = "DelOutboundChargeQueryDto对象")
 public class QueryChargeDto implements Serializable {
 
+    @ApiModelProperty(value = "当前起始页索引")
+    private int pageNum;
+
+    @ApiModelProperty(value = "每页显示记录数")
+    private int pageSize;
+
     @ApiModelProperty(value = "查询费用类型 0：出库费 1：操作费")
     private int queryType;
 
