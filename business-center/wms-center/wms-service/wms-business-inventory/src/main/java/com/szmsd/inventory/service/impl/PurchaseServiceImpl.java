@@ -198,6 +198,9 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         log.info("开始批量采购入库--");
         //待入库数据
         List<PurchaseStorageDetailsAddDTO> purchaseStorageDetailsAddList = purchaseAddDTO.getPurchaseStorageDetailsAddList();
+        List<PurchaseDetailsAddDTO> detailsList = purchaseAddDTO.getPurchaseDetailsAddList();
+        //通过sku 获取商品名称
+        Map<String, List<PurchaseDetailsAddDTO>> collect1 = detailsList.stream().collect(Collectors.groupingBy(PurchaseDetailsAddDTO::getSku));
         List<PurchaseStorageDetailsAddDTO> waitStorage = purchaseStorageDetailsAddList.stream().filter(x -> !(null != x.getId() && x.getId() > 0)).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(waitStorage)) {
             log.info("终止批量采购入库,待入库的数据为空");
@@ -239,8 +242,10 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                         .setDeclareQty(addSku.getDeclareQty())
                         .setSku(addSku.getSku())
                         .setDeliveryNo(purchaseAddDTO.getPurchaseNo())
+                        // 前端没有这个值
                         .setSkuName(addSku.getProductName())
                 ;
+                Optional.ofNullable(collect1.get(addSku.getSku())).filter(CollectionUtils::isNotEmpty).ifPresent(x-> inboundReceiptDetailDTO.setSkuName(x.get(0).getProductName()));
                 inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
             });
             createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
