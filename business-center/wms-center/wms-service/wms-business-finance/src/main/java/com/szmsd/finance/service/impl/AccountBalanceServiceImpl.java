@@ -96,6 +96,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (dto.getHasFreeze() != null) {
             queryWrapper.eq(AccountBalanceChange::getHasFreeze, dto.getHasFreeze());
         }
+        if (StringUtils.isNotEmpty(dto.getOrderType())) {
+            queryWrapper.eq(AccountBalanceChange::getOrderType, dto.getOrderType());
+        }
         queryWrapper.orderByDesc(AccountBalanceChange::getCreateTime);
         return accountBalanceChangeMapper.recordListPage(queryWrapper);
     }
@@ -244,12 +247,15 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public int updateAccountBalanceChange(AccountBalanceChangeDTO dto) {
         LambdaUpdateWrapper<AccountBalanceChange> update = Wrappers.lambdaUpdate();
-        update.set(AccountBalanceChange::getHasFreeze,dto.getHasFreeze())
-                .eq(AccountBalanceChange::getCusCode,dto.getCusCode())
-                .eq(AccountBalanceChange::getNo,dto.getNo())
-                .eq(AccountBalanceChange::getCurrencyCode,dto.getCurrencyCode())
-                .eq(AccountBalanceChange::getPayMethod,dto.getPayMethod());
-        return accountBalanceChangeMapper.update(null,update);
+        update.set(AccountBalanceChange::getHasFreeze, dto.getHasFreeze())
+                .eq(AccountBalanceChange::getCusCode, dto.getCusCode())
+                .eq(AccountBalanceChange::getNo, dto.getNo())
+                .eq(AccountBalanceChange::getCurrencyCode, dto.getCurrencyCode())
+                .eq(AccountBalanceChange::getPayMethod, dto.getPayMethod());
+        if (StringUtils.isNotBlank(dto.getOrderType())) {
+            update.eq(AccountBalanceChange::getOrderType, dto.getOrderType());
+        }
+        return accountBalanceChangeMapper.update(null, update);
     }
 
     /**

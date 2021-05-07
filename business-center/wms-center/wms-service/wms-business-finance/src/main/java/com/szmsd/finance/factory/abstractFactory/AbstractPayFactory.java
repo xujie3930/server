@@ -2,8 +2,10 @@ package com.szmsd.finance.factory.abstractFactory;
 
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.dto.AccountBalanceChangeDTO;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.ISysDictDataService;
@@ -43,6 +45,7 @@ public abstract class AbstractPayFactory {
         if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
             String currencyName = sysDictDataService.getCurrencyNameByCode(accountBalanceChange.getCurrencyCode());
             accountBalanceChange.setCurrencyName(currencyName);
+            dto.setCurrencyName(currencyName);
         }
 
         accountBalanceChange.setSerialNum(SnowflakeId.getNextId12());
@@ -70,5 +73,16 @@ public abstract class AbstractPayFactory {
     }
 
     public abstract BalanceDTO calculateBalance(BalanceDTO oldBalance, BigDecimal changeAmount);
+
+    protected void setHasFreeze(CustPayDTO dto) {
+        AccountBalanceChangeDTO accountBalanceChange = new AccountBalanceChangeDTO();
+        accountBalanceChange.setNo(dto.getNo());
+        accountBalanceChange.setCurrencyCode(dto.getCurrencyCode());
+        accountBalanceChange.setOrderType(dto.getOrderType());
+        accountBalanceChange.setCusCode(dto.getCusCode());
+        accountBalanceChange.setHasFreeze(false);
+        accountBalanceChange.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE); //修改冻结的单
+        accountBalanceService.updateAccountBalanceChange(accountBalanceChange);
+    }
 
 }

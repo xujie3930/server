@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 
 @Data
@@ -58,6 +59,12 @@ public class AccountSerialBillDTO {
 
     @ApiModelProperty(value = "费用类型")
     private String chargeType;
+
+    @ApiModelProperty(value = "下单时间")
+    private Date orderTime;
+
+    @ApiModelProperty(value = "结算时间")
+    private Date paymentTime;
 
     @ApiModelProperty(value = "计算时间开始")
     private String createTimeStart;

@@ -41,6 +41,9 @@ public class AccountBalanceChange extends FssBaseEntity {
     @ApiModelProperty(value = "交易类型")
     private BillEnum.PayMethod payMethod;
 
+    @ApiModelProperty(value = "操作类型")
+    private String orderType;
+
     @ApiModelProperty(value = "交易类型名称")
     @TableField(exist = false)
     private String PayMethodName;
