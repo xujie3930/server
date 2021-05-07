@@ -108,6 +108,9 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "是否优先发货")
     private Boolean isLabelBox;
 
+    @ApiModelProperty(value = "来源")
+    private String sourceType;
+
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;

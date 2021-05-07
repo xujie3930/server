@@ -297,6 +297,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (!DelOutboundOrderTypeEnum.has(dto.getOrderType())) {
             throw new CommonException("999", "订单类型不存在");
         }
+        // 来源为新增
+        dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_ADD);
         return this.createDelOutbound(dto);
     }
 
