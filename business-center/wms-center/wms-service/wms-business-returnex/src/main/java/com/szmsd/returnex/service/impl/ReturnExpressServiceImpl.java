@@ -270,8 +270,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO) {
-
-        if (returnArrivalReqDTO.getExpectedNo() != null) {
+        log.info("接收wms 仓库到件信息{}", returnArrivalReqDTO);
+        if (StringUtils.isNotBlank(returnArrivalReqDTO.getExpectedNo())) {
             //到货 拆包检查的 需要接收商品详情
             ReturnExpressDetail returnExpressDetailCheck = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaUpdate()
                     .eq(ReturnExpressDetail::getExpectedNo, returnArrivalReqDTO.getExpectedNo())
