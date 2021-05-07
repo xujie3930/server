@@ -5,6 +5,10 @@ import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.api.service.BaseProductClientService;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -12,11 +16,15 @@ import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.util.Utils;
+import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
+import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpIBasClientService;
@@ -26,16 +34,17 @@ import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.BaseOperationResponse;
 import com.szmsd.http.vo.PricedProductInfo;
 import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.inventory.api.service.InventoryFeignClientService;
+import com.szmsd.inventory.domain.dto.InventoryOperateDto;
+import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 出库单提审步骤
@@ -53,7 +62,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     // #1 PRC 计费
     PRC_PRICING,
 
-    // #2 冻结费用
+    // #2 冻结物流费用
     FREEZE_BALANCE,
 
     // #3 获取产品信息
@@ -71,6 +80,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     // #7 更新标签
     SHIPMENT_LABEL,
 
+    // #8 冻结库存
+    FREEZE_INVENTORY,
+
+    // #9 冻结操作费用
+    FREEZE_OPERATION,
+
     /**
      * 结束
      */
@@ -86,6 +101,20 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         return null;
     }
 
+    /**
+     * 大于
+     *
+     * @param e1 e1为对照
+     * @param e2 e2大于e1
+     * @return boolean
+     */
+    public static boolean gt(BringVerifyEnum e1, BringVerifyEnum e2) {
+        if (null == e1 || null == e2) {
+            throw new CommonException("999", "枚举类型不能为空");
+        }
+        return e1.ordinal() < e2.ordinal();
+    }
+
     @Override
     public Map<String, ApplicationHandle> register() {
         Map<String, ApplicationHandle> map = new HashMap<>();
@@ -97,6 +126,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         map.put(SHIPMENT_ORDER.name(), new ShipmentOrderHandle());
         map.put(SHIPMENT_CREATE.name(), new ShipmentCreateHandle());
         map.put(SHIPMENT_LABEL.name(), new ShipmentLabelHandle());
+        map.put(FREEZE_INVENTORY.name(), new FreezeInventoryHandle());
+        map.put(FREEZE_OPERATION.name(), new FreezeOperationHandle());
         map.put(END.name(), new EndHandle());
         return map;
     }
@@ -473,6 +504,137 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 return DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType());
             }
             return false;
+        }
+
+        @Override
+        public ApplicationState nextState() {
+            return FREEZE_INVENTORY;
+        }
+    }
+
+    static class FreezeInventoryHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState quoState() {
+            return FREEZE_INVENTORY;
+        }
+
+        @Override
+        public void handle(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            String orderType = delOutbound.getOrderType();
+            if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+                return;
+            }
+            List<DelOutboundDetail> details = delOutboundWrapperContext.getDetailList();
+            if (CollectionUtils.isEmpty(details)) {
+                return;
+            }
+            InventoryOperateListDto operateListDto = new InventoryOperateListDto();
+            operateListDto.setInvoiceNo(delOutbound.getOrderNo());
+            operateListDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
+            for (DelOutboundDetail detail : details) {
+                DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
+            }
+            operateListDto.setOperateList(new ArrayList<>(inventoryOperateDtoMap.values()));
+            try {
+                InventoryFeignClientService inventoryFeignClientService = SpringUtils.getBean(InventoryFeignClientService.class);
+                inventoryFeignClientService.freeze(operateListDto);
+            } catch (CommonException e) {
+                logger.error(e.getMessage(), e);
+                throw e;
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new CommonException("999", "冻结库存操作失败");
+            }
+        }
+
+        @Override
+        public ApplicationState nextState() {
+            return FREEZE_OPERATION;
+        }
+    }
+
+    static class FreezeOperationHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState quoState() {
+            return FREEZE_OPERATION;
+        }
+
+        @Override
+        public void handle(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+            delOutboundOperationVO.setOrderType(delOutbound.getOrderType());
+            delOutboundOperationVO.setOrderNo(delOutbound.getOrderNo());
+            delOutboundOperationVO.setWarehouseCode(delOutbound.getWarehouseCode());
+            delOutboundOperationVO.setCustomCode(delOutbound.getCustomCode());
+            // 处理明细
+            List<DelOutboundDetail> details = delOutboundWrapperContext.getDetailList();
+            List<DelOutboundOperationDetailVO> detailVOList = new ArrayList<>(details.size());
+            if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+                DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
+                detailVO.setQty(1L);
+                detailVO.setWeight(delOutbound.getWeight());
+                detailVOList.add(detailVO);
+            } else {
+                // 统计包材信息
+                Set<String> skus = new HashSet<>();
+                for (DelOutboundDetail detail : details) {
+                    // sku信息
+                    skus.add(detail.getSku());
+                    // sku包材信息
+                    if (StringUtils.isNotEmpty(detail.getBindCode())) {
+                        skus.add(detail.getBindCode());
+                    }
+                }
+                Map<String, BaseProduct> productMap = null;
+                if (CollectionUtils.isNotEmpty(skus)) {
+                    BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
+                    baseProductConditionQueryDto.setSkus(new ArrayList<>(skus));
+                    BaseProductClientService baseProductClientService = SpringUtils.getBean(BaseProductClientService.class);
+                    List<BaseProduct> productList = baseProductClientService.queryProductList(baseProductConditionQueryDto);
+                    if (CollectionUtils.isNotEmpty(productList)) {
+                        productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v1, v2) -> v1));
+                    }
+                }
+                // 没有查询到SKU信息
+                if (null == productMap) {
+                    throw new CommonException("999", "查询SKU信息失败");
+                }
+                // 处理操作费用参数
+                for (DelOutboundDetail detail : details) {
+                    String sku = detail.getSku();
+                    BaseProduct product = productMap.get(sku);
+                    if (null == product) {
+                        throw new CommonException("999", "SKU[" + sku + "]信息不存在");
+                    }
+                    double weight = Utils.defaultValue(product.getWeight());
+                    // 查询包材重量
+                    String bindCode = detail.getBindCode();
+                    if (StringUtils.isNotEmpty(bindCode) && productMap.containsKey(bindCode)) {
+                        // 累计包材的重量
+                        BaseProduct baseProduct = productMap.get(bindCode);
+                        if (null != baseProduct) {
+                            weight = weight + Utils.defaultValue(baseProduct.getWeight());
+                        }
+                    }
+                    // 操作费对象
+                    DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
+                    detailVO.setSku(sku);
+                    detailVO.setQty(detail.getQty());
+                    detailVO.setWeight(weight);
+                    detailVOList.add(detailVO);
+                }
+            }
+            delOutboundOperationVO.setDetails(detailVOList);
+            OperationFeignService operationFeignService = SpringUtils.getBean(OperationFeignService.class);
+            R<?> r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
+            DelOutboundServiceImplUtil.freezeOperationThrowErrorMessage(r);
         }
 
         @Override

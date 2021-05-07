@@ -20,6 +20,9 @@ public class QueryChargeVO implements Serializable {
     @ApiModelProperty(value = "时间")
     private String createTime;
 
+    @ApiModelProperty(value = "客户代码")
+    private String customCode;
+
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
 
