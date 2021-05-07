@@ -379,8 +379,8 @@ public class DelOutboundController extends BaseController {
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066");
             DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService);
-            exportContext.setStateCacheAdapter(listMap.get("063"));
-            exportContext.setOrderTypeCacheAdapter(listMap.get("065"));
+            exportContext.setStateCacheAdapter(listMap.get("065"));
+            exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
             exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
             QueryDto queryDto1 = new QueryDto();
             queryDto1.setPageNum(1);
