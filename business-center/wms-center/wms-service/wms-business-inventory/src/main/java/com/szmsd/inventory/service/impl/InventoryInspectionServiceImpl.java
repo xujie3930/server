@@ -69,8 +69,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
             String customCode = dto.get(0).getCustomCode();
             inventoryInspection.setCustomCode(customCode);
             inventoryInspection.setWarehouseCode(key);
-            // 流水号规则：PD + 客户代码 + （年月日 + 5位流水）
-            String inspectionNo = "PD" + customCode + serialNumberClientService.generateNumber("INVENTORY_CHECK");
+            String inspectionNo = getInspectionNo(customCode);
             inventoryInspection.setInspectionNo(inspectionNo);
             this.saveDetails(value, inspectionNo);
             iInventoryInspectionMapper.insert(inventoryInspection);
@@ -193,8 +192,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
 
     private String setInventoryInspection(InboundInventoryDTO inboundInventoryDTO, InventoryInspection inventoryInspection) {
         String operator = inboundInventoryDTO.getOperator();
-        // 流水号规则：PD + 客户代码 + （年月日 + 5位流水）
-        String inspectionNo = "PD" + operator + serialNumberClientService.generateNumber("INVENTORY_CHECK");
+        String inspectionNo = getInspectionNo(operator);
         inventoryInspection.setInspectionNo(inspectionNo);
         inventoryInspection.setCustomCode(operator);
         inventoryInspection.setWarehouseCode(inboundInventoryDTO.getWarehouseCode());
@@ -206,6 +204,16 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         inventoryInspectionDetails.setSku(inboundInventoryDTO.getSku());
         inventoryInspectionDetails.setInspectionNo(inspectionNo);
         detailsService.save(inventoryInspectionDetails);
+    }
+
+    /**
+     * 流水号规则：YH + 客户代码 + （年月日 + 5位流水）
+     *
+     * @param operator 操作人
+     * @return inspectionNo
+     */
+    private String getInspectionNo(String operator) {
+        return "PD" + operator + serialNumberClientService.generateNumber("INVENTORY_CHECK");
     }
 
 }
