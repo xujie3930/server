@@ -68,4 +68,10 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "费用类型")
     private String chargeType;
 
+    @ApiModelProperty(value = "下单时间")
+    private String orderTime;
+
+    @ApiModelProperty(value = "结算时间")
+    private String paymentTime;
+
 }
