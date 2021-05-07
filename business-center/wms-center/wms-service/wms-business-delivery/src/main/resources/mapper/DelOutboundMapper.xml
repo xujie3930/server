@@ -75,6 +75,7 @@
             t.id,
             t.order_no,
             t.create_time,
+            t.custom_code,
             (SELECT a.country FROM del_outbound_address a WHERE a.order_no = t.order_no LIMIT 1) AS country,
             t.shipment_rule,
             t.tracking_no,
@@ -105,20 +106,14 @@
 
     <select id="exportList" resultType="com.szmsd.delivery.dto.DelOutboundExportListDto">
         SELECT
+            o.state,
+            o.order_no,
+            o.tracking_no,
             o.seller_code,
             o.warehouse_code,
-            o.tracking_no,
-            o.shipment_order_number,
             o.ref_order_no,
-            o.shipment_service,
-            o.bring_verify_time,
-            o.arrival_time,
-            o.shipments_time,
-            o.exception_state,
+            o.order_type,
             o.shipment_rule,
-            o.box_number,
-            o.weight,
-            o.calc_weight,
             a.consignee,
             a.street1,
             a.street2,
@@ -127,7 +122,12 @@
             a.post_code,
             a.country,
             a.phone_no,
-            o.specifications
+            o.weight,
+            o.calc_weight,
+            o.specifications,
+            o.bring_verify_time,
+            o.shipments_time,
+            o.exception_state
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}

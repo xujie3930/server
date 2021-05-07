@@ -45,8 +45,8 @@ public class ReturnArrivalReqDTO implements BOConvert {
     /**
      * 退件原出库单号 1-50
      */
-    @StringLength(minLength = 1, maxLength = 50, message = "退件原出库单号超过约定长度[1-50]")
-    @NotBlank(message = "退件原出库单号不能为空")
+//    @StringLength(minLength = 1, maxLength = 50, message = "退件原出库单号超过约定长度[1-50]")
+//    @NotBlank(message = "退件原出库单号不能为空")
     @ApiModelProperty(value = "退件原出库单号")
     private String fromOrderNo;
 

@@ -11,6 +11,7 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
@@ -74,6 +75,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             if (beforeInventory == null) {
                 beforeInventory = new Inventory().setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(0).setAvailableInventory(0).setAvailableInventory(0).setTotalInbound(0);
                 BaseProduct sku1 = remoteComponent.getSku(sku);
+                beforeInventory.setCusCode(sku1.getSellerCode());
                 afterInventory.setCusCode(sku1.getSellerCode());
             }
 
@@ -82,17 +84,14 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             int afterAvailableInventory = beforeInventory.getAvailableInventory() + qty;
             int afterTotalInbound = beforeInventory.getTotalInbound() + qty;
             afterInventory.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
+            afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", inboundInventoryDTO.getOperateOn()));
             this.saveOrUpdate(afterInventory);
 
             // 记录库存日志
-            iInventoryRecordService.saveLogs(
-                    LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty,
-                    inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getSku(), inboundInventoryDTO.getWarehouseCode(), (inboundInventoryDTO.getQty() + "")
-            );
+            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty);
         } finally {
             lock.unlock();
         }
-
     }
 
     /**

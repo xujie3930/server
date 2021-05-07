@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -195,6 +196,8 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         custPayDTO.setAmount(amount);
         custPayDTO.setNo(basSpecialOperation.getOrderNo());
         custPayDTO.setSerialBillInfoList(serialBillInfoList);
+        custPayDTO.setOrderType(basSpecialOperation.getOperationType());
+        custPayDTO.setOrderTime(new Date()); //下单时间 当前时间
         return custPayDTO;
     }
 

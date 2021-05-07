@@ -1,9 +1,9 @@
 package com.szmsd.finance.factory;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
-import com.szmsd.finance.dto.AccountBalanceChangeDTO;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
@@ -22,6 +22,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 冻结
@@ -86,20 +87,46 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     private boolean checkBalance(BalanceDTO balance, CustPayDTO dto) {
         BigDecimal changeAmount = dto.getAmount();
         if (BillEnum.PayMethod.BALANCE_FREEZE == dto.getPayMethod()) {
+            List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
+            if (accountBalanceChanges.size() > 0) {
+                log.error("该单已有冻结额，单号： {}", dto.getNo());
+                return false;
+            }
             balance.setCurrentBalance(balance.getCurrentBalance().subtract(changeAmount));
             balance.setFreezeBalance(balance.getFreezeBalance().add(changeAmount));
-            return BigDecimal.ZERO.compareTo(balance.getCurrentBalance()) > 0 ? false : true;
+            return BigDecimal.ZERO.compareTo(balance.getCurrentBalance()) <= 0;
         }
         if (BillEnum.PayMethod.BALANCE_THAW == dto.getPayMethod()) {
-            balance.setCurrentBalance(balance.getCurrentBalance().add(changeAmount));
-            balance.setFreezeBalance(balance.getFreezeBalance().subtract(changeAmount));
-            AccountBalanceChangeDTO map = BeanMapperUtil.map(dto, AccountBalanceChangeDTO.class);
-            map.setHasFreeze(false);
-            map.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE); //修改冻结的单
-            accountBalanceService.updateAccountBalanceChange(map);
-            return BigDecimal.ZERO.compareTo(balance.getFreezeBalance()) > 0 ? false : true;
+            List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
+            if (accountBalanceChanges.size() > 0) {
+                //查询出此单冻结的金额
+                BigDecimal amountChange = accountBalanceChanges.stream().map(AccountBalanceChange::getAmountChange).reduce(BigDecimal.ZERO, BigDecimal::add);
+                balance.setCurrentBalance(balance.getCurrentBalance().add(amountChange));
+                balance.setFreezeBalance(balance.getFreezeBalance().subtract(amountChange));
+                dto.setAmount(amountChange);
+                boolean b = BigDecimal.ZERO.compareTo(balance.getFreezeBalance()) <= 0;
+                if(b) {
+                    setHasFreeze(dto);
+                    return true;
+                }
+                log.error("解冻金额不足 单号: {} 金额：{}",dto.getNo(),amountChange);
+            }
+            log.error("没有找到该单的冻结额。 单号： {}", dto.getNo());
+            return false;
         }
         return false;
+    }
+
+    private List<AccountBalanceChange> getRecordList(CustPayDTO dto) {
+        LambdaQueryWrapper<AccountBalanceChange> query = Wrappers.lambdaQuery();
+        query.eq(AccountBalanceChange::getCurrencyCode, dto.getCurrencyCode());
+        query.eq(AccountBalanceChange::getNo, dto.getNo());
+        if(StringUtils.isNotBlank(dto.getOrderType())){
+            query.eq(AccountBalanceChange::getOrderType,dto.getOrderType());
+        }
+        query.eq(AccountBalanceChange::getPayMethod, BillEnum.PayMethod.BALANCE_FREEZE);
+        query.eq(AccountBalanceChange::getHasFreeze, true);
+        return accountBalanceChangeMapper.recordListPage(query);
     }
 
     @Override

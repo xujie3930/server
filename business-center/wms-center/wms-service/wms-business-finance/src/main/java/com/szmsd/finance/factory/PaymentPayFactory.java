@@ -7,7 +7,6 @@ import com.szmsd.finance.dto.AccountBalanceChangeDTO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
@@ -23,8 +22,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -56,11 +53,8 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
 
-                Map<String, BigDecimal> balanceChange = getBalanceChange(dto);
-
-                BigDecimal freeze = balanceChange.get(BillEnum.PayMethod.BALANCE_FREEZE.name());
-
-                if (Objects.isNull(freeze)) { // 此单没有冻结金额 直接扣除余额
+                List<AccountBalanceChange> balanceChange = getBalanceChange(dto);
+                if (balanceChange.size() == 0) {
                     log.info("no freeze, customCode: {}, getCurrencyCode: {}, no: {}", dto.getCusCode(), dto.getCurrencyCode(), dto.getNo());
                     //余额不足
                     if (oldBalance.getCurrentBalance().compareTo(changeAmount) < 0) {
@@ -68,16 +62,14 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     }
                     this.calculateBalance(oldBalance, changeAmount);
                 }
-
-                if (Objects.nonNull(freeze)) {// 此单有冻结金额 扣除冻结金额
-                    log.info("freeze, customCode: {}, getCurrencyCode: {}, no: {}", dto.getCusCode(), dto.getCurrencyCode(), dto.getNo());
-                    BigDecimal thaw = balanceChange.get(BillEnum.PayMethod.BALANCE_THAW.name());
-                    BigDecimal freezeTotal = freeze;
-                    if (Objects.nonNull(thaw)) {
-                        log.info("no thaw, customCode: {}, getCurrencyCode: {}, no: {}", dto.getCusCode(), dto.getCurrencyCode(), dto.getNo());
-                        freezeTotal = freeze.subtract(thaw);
-                    }
-                    if (!calculateBalance(oldBalance, changeAmount, freezeTotal)) return false;
+                if (balanceChange.size() == 1) {
+                    AccountBalanceChange accountBalanceChange = balanceChange.get(0);
+                    BigDecimal freeze = accountBalanceChange.getAmountChange();
+                    if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
+                }
+                if (balanceChange.size() > 1) {
+                    log.info("该单存在多个冻结额，操作失败。单号： {} 币种： {}", dto.getNo(), dto.getCurrencyCode());
+                    return false;
                 }
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance);
                 recordOpLog(dto, oldBalance.getCurrentBalance());
@@ -117,18 +109,14 @@ public class PaymentPayFactory extends AbstractPayFactory {
      * @param custPayDTO custPayDTO
      * @return k:支付类型 v:该单支付类型金额总和
      */
-    private Map<String, BigDecimal> getBalanceChange(CustPayDTO custPayDTO) {
+    private List<AccountBalanceChange> getBalanceChange(CustPayDTO custPayDTO) {
         AccountBalanceChangeDTO dto = new AccountBalanceChangeDTO();
         dto.setCurrencyCode(custPayDTO.getCurrencyCode());
         dto.setCusCode(custPayDTO.getCusCode());
+        dto.setOrderType(custPayDTO.getOrderType());
         dto.setNo(custPayDTO.getNo());
         dto.setHasFreeze(true);
-        List<AccountBalanceChange> accountBalanceChanges = accountBalanceService.recordListPage(dto);
-        log.info("accountBalanceChanges() no: {}, size: {}", dto.getNo(), accountBalanceChanges.size());
-        return accountBalanceChanges
-                .stream().collect(Collectors.groupingBy(v -> v.getPayMethod().name())).entrySet()
-                .stream().collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue()
-                        .stream().map(AccountBalanceChange::getAmountChange).reduce(BigDecimal.ZERO, BigDecimal::add)));
+        return accountBalanceService.recordListPage(dto);
     }
 
     /**
@@ -137,7 +125,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
      * @param freezeTotal 此单的冻结总额
      * @return result
      */
-    private boolean calculateBalance(BalanceDTO oldBalance, BigDecimal amount, BigDecimal freezeTotal) {
+    private boolean calculateBalance(BalanceDTO oldBalance, BigDecimal amount, BigDecimal freezeTotal, CustPayDTO dto) {
         int compare = amount.compareTo(freezeTotal);
         if (compare == 0) { // 实际费用等于冻结额
             // 冻结金额扣除 总金额扣除
@@ -160,6 +148,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
             oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().subtract(difference)); // 可用余额扣除冻结金额不够扣的部分
             oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(amount)); //总金额扣掉实际产生费用
         }
+        setHasFreeze(dto);
         return true;
     }
 
@@ -167,6 +156,13 @@ public class PaymentPayFactory extends AbstractPayFactory {
         if (CollectionUtils.isEmpty(dto.getSerialBillInfoList())) {
             log.info("setSerialBillLog() list is empty :{} ", dto);
             AccountSerialBillDTO accountSerialBillDTO = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
+            String paymentName = accountSerialBillDTO.getPayMethod().getPaymentName();
+            accountSerialBillDTO.setBusinessCategory(paymentName);
+            accountSerialBillDTO.setProductCategory(paymentName);
+            String currencyName = accountSerialBillDTO.getCurrencyName();
+            currencyName = currencyName == null ? "" : currencyName;
+            accountSerialBillDTO.setChargeCategory(paymentName.concat(currencyName));
+            accountSerialBillDTO.setChargeType(paymentName);
             accountSerialBillService.add(accountSerialBillDTO);
             return;
         }

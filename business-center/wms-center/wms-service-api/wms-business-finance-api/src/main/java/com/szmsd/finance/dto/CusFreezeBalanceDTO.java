@@ -21,6 +21,9 @@ public class CusFreezeBalanceDTO {
     @ApiModelProperty(value = "单号")
     private String no;
 
+    @ApiModelProperty(value = "操作类型")
+    private String orderType;
+
     @ApiModelProperty(value = "金额")
     @NotNull
     @DecimalMin(value = "0")
@@ -30,10 +33,11 @@ public class CusFreezeBalanceDTO {
 
     }
 
-    public CusFreezeBalanceDTO(String cusCode, String currencyCode, String no, BigDecimal amount) {
+    public CusFreezeBalanceDTO(String cusCode, String currencyCode, String no, String orderType, BigDecimal amount) {
         this.cusCode = cusCode;
         this.currencyCode = currencyCode;
         this.no = no;
+        this.orderType = orderType;
         this.amount = amount;
     }
 

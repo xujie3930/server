@@ -1,18 +1,19 @@
 package com.szmsd.inventory.api.feign;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.api.BusinessInventoryInterface;
 import com.szmsd.inventory.api.factory.InventoryFeignFallback;
-import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
-import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
-import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
-import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
+import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
+import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.domain.vo.InventoryVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -54,4 +55,10 @@ public interface InventoryFeignService {
 
     @PostMapping("/inventory/unDeductionAndDeduction")
     R<Integer> unDeductionAndDeduction(@RequestBody InventoryOperateListDto operateListDto);
+
+    @GetMapping("/inventory/page")
+    TableDataInfo<InventorySkuVO> page(@RequestParam(value = "warehouseCode") String warehouseCode, @RequestParam(value = "sku") String sku, @RequestParam(value = "cusCode") String cusCode, @RequestParam(value = "pageSize") Integer pageSize);
+
+    @PostMapping("/inventory/adjustment")
+    R adjustment(@RequestBody InventoryAdjustmentDTO inventoryAdjustmentDTO);
 }

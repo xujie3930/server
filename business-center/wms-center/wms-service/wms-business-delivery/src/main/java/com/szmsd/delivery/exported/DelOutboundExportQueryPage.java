@@ -40,7 +40,9 @@ public class DelOutboundExportQueryPage implements QueryPage<DelOutboundExportLi
         if (CollectionUtils.isNotEmpty(exportPage)) {
             for (DelOutboundExportListDto dto : exportPage) {
                 DelOutboundExportListVO vo = BeanMapperUtil.map(dto, DelOutboundExportListVO.class);
+                vo.setStateName(this.exportContext.getStateName(dto.getState()));
                 vo.setWarehouseName(this.exportContext.getWarehouseName(dto.getWarehouseCode()));
+                vo.setOrderTypeName(this.exportContext.getOrderTypeName(dto.getOrderType()));
                 vo.setExceptionStateName(this.exportContext.getExceptionStateName(dto.getExceptionState()));
                 page.add(vo);
             }

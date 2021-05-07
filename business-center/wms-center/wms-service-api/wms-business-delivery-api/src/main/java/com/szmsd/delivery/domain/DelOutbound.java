@@ -200,4 +200,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "是否优先发货")
     private Boolean isLabelBox;
+
+    @ApiModelProperty(value = "来源")
+    private String sourceType;
 }

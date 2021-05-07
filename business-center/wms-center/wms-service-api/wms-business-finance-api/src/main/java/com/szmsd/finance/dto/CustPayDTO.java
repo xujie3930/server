@@ -7,6 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,6 +30,9 @@ public class CustPayDTO {
 
     @ApiModelProperty(value = "支付方式")
     private BillEnum.PayMethod payMethod;
+
+    @ApiModelProperty(value = "订单类型")
+    private String orderType;
 
     @ApiModelProperty(value = "币种编码")
     private String currencyCode;
@@ -58,6 +62,9 @@ public class CustPayDTO {
 
     @ApiModelProperty(value = "单号")
     private String no;
+
+    @ApiModelProperty(value = "下单时间")
+    private Date orderTime;
 
     @ApiModelProperty(value = "充值说明")
     private String remark;

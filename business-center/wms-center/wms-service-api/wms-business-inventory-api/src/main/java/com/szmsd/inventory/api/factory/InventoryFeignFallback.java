@@ -1,12 +1,13 @@
 package com.szmsd.inventory.api.factory;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.com.BaseException;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
-import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
-import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
-import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
-import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
+import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
+import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.domain.vo.InventoryVO;
 import feign.hystrix.FallbackFactory;
@@ -76,6 +77,16 @@ public class InventoryFeignFallback implements FallbackFactory<InventoryFeignSer
 
             @Override
             public R<Integer> unDeductionAndDeduction(InventoryOperateListDto operateListDto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public TableDataInfo<InventorySkuVO> page(String warehouseCode, String sku, String cusCode, Integer pageSize) {
+                throw new RuntimeException(throwable);
+            }
+
+            @Override
+            public R adjustment(InventoryAdjustmentDTO inventoryAdjustmentDTO) {
                 return R.convertResultJson(throwable);
             }
         };

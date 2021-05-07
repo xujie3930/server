@@ -63,12 +63,13 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     /**
      * 新增和修改时校验是否数据是否重复
+     *
      * @param operation operation
      */
     private void checkDuplicate(Operation operation) {
         int count = operationMapper.findCount(operation);
-        if(count > 0) {
-            throw new CommonException("999","仓库+操作类型+订单类型 重量区间不能重合");
+        if (count > 0) {
+            throw new CommonException("999", "仓库+操作类型+订单类型 重量区间不能重合");
         }
     }
 
@@ -159,7 +160,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
             return chargeBatch(dto, details);
         }
 
-        return this.calculateFreeze(dto, dto.getOrderType(), details, amount);
+        return this.calculateFreeze(dto, details, amount);
 
     }
 
@@ -170,25 +171,24 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
      * @return result
      */
     private R<?> packageTransfer(DelOutboundOperationVO dto) {
-        Operation operation = getOperationDetails(dto, dto.getOrderType(), null, "未找到" + dto.getOrderType() + "配置");
+        Operation operation = getOperationDetails(dto, null, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
         return this.freezeBalance(dto, 1L, operation.getFirstPrice(), operation);
     }
 
     /**
      * 遍历出库单的详情信息 根据收费规则计算费用
      *
-     * @param dto       dto
-     * @param orderType orderType
-     * @param details   details
-     * @param amount    amount
+     * @param dto     dto
+     * @param details details
+     * @param amount  amount
      * @return result
      */
-    private R calculateFreeze(DelOutboundOperationVO dto, String orderType, List<DelOutboundOperationDetailVO> details, BigDecimal amount) {
+    private R calculateFreeze(DelOutboundOperationVO dto, List<DelOutboundOperationDetailVO> details, BigDecimal amount) {
         Long qty;
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
         Operation operation = new Operation();
         for (DelOutboundOperationDetailVO vo : details) {
-            operation = getOperationDetails(dto, orderType, vo.getWeight(), "未找到" + dto.getOrderType() + "配置");
+            operation = getOperationDetails(dto, vo.getWeight(), "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
             qty = vo.getQty();
             amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), qty).add(amount);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
@@ -206,9 +206,10 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R<?> chargeCollection(DelOutboundOperationVO dto, List<DelOutboundOperationDetailVO> details) {
         BigDecimal amount = BigDecimal.ZERO;
         if (details.size() > 1) {
-            return this.calculateFreeze(dto, dto.getOrderType().concat(manySku), details, amount);
+            dto.setOrderType(dto.getOrderType().concat(manySku));
+            return this.calculateFreeze(dto, details, amount);
         }
-        return this.calculateFreeze(dto, dto.getOrderType(), details, amount);
+        return this.calculateFreeze(dto, details, amount);
     }
 
     /**
@@ -232,21 +233,21 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         Integer shipmentLabelCount = dto.getShipmentLabelCount();
         amount = getBatchAmount(dto, amount, shipmentLabelCount, label);
 
-        return this.calculateFreeze(dto, dto.getOrderType(), details, amount);
+        return this.calculateFreeze(dto, details, amount);
     }
 
     private BigDecimal getBatchAmount(DelOutboundOperationVO dto, BigDecimal amount, Integer count, String type) {
         if (count != null && count > 0) {
             String orderType = dto.getOrderType().concat(type);
-            Operation labelOperation = getOperationDetails(dto, orderType, null, "未找到" + orderType + "配置");
+            Operation labelOperation = getOperationDetails(dto, null, "未找到" + orderType + "业务费用规则，请联系管理员");
             BigDecimal calculate = payService.calculate(labelOperation.getFirstPrice(), labelOperation.getNextPrice(), count.longValue());
             amount = amount.add(calculate);
         }
         return amount;
     }
 
-    private Operation getOperationDetails(DelOutboundOperationVO dto, String orderType, Double weight, String message) {
-        OperationDTO operationDTO = new OperationDTO(orderType, OrderTypeEnum.Shipment.name(), dto.getWarehouseCode(), weight);
+    private Operation getOperationDetails(DelOutboundOperationVO dto, Double weight, String message) {
+        OperationDTO operationDTO = new OperationDTO(dto.getOrderType(), OrderTypeEnum.Shipment.name(), dto.getWarehouseCode(), weight);
         Operation operation = this.queryDetails(operationDTO);
         AssertUtil.notNull(operation, message);
         return operation;
@@ -255,7 +256,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount, Operation operation) {
         ChargeLog chargeLog = setChargeLog(dto, count);
         chargeLog.setHasFreeze(true);
-        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), operation.getCurrencyCode(), dto.getOrderNo(), amount);
+        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), operation.getCurrencyCode(), dto.getOrderType(), dto.getOrderNo(), amount);
         return payService.freezeBalance(cusFreezeBalanceDTO, chargeLog);
     }
 
@@ -278,7 +279,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         ChargeLog chargeLog = this.selectLog(dto.getOrderNo());
         AssertUtil.notNull(chargeLog, "该单没有冻结金额，无法解冻 orderNo: " + dto.getOrderNo());
         chargeLog.setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
-        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(chargeLog.getCustomCode(), chargeLog.getCurrencyCode(), chargeLog.getOrderNo(), chargeLog.getAmount());
+        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(chargeLog.getCustomCode(), chargeLog.getCurrencyCode(), chargeLog.getOrderNo(), chargeLog.getOperationType(), chargeLog.getAmount());
         return payService.thawBalance(cusFreezeBalanceDTO, chargeLog);
     }
 
@@ -300,6 +301,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         custPayDTO.setAmount(chargeLog.getAmount());
         custPayDTO.setNo(chargeLog.getOrderNo());
         custPayDTO.setSerialBillInfoList(serialBillInfoList);
+        custPayDTO.setOrderType(chargeLog.getOperationType());
         return custPayDTO;
     }
 

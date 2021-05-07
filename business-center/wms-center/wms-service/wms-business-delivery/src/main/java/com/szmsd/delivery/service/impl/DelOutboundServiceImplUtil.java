@@ -1,18 +1,24 @@
 package com.szmsd.delivery.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.core.enums.SqlLike;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -154,5 +160,46 @@ public final class DelOutboundServiceImplUtil {
      */
     public static boolean hitKey(int value, int key) {
         return (value & key) == key;
+    }
+
+    /**
+     * 出库单公共查询条件处理
+     *
+     * @param queryWrapper queryWrapper
+     * @param queryDto     queryDto
+     */
+    public static void handlerQueryWrapper(QueryWrapper<DelOutboundListQueryDto> queryWrapper, DelOutboundListQueryDto queryDto) {
+        String orderNo = queryDto.getOrderNo();
+        if (StringUtils.isNotEmpty(orderNo)) {
+            if (orderNo.contains(",")) {
+                queryWrapper.in("o.order_no", Arrays.asList(orderNo.split(",")));
+            } else {
+                queryWrapper.likeRight("o.order_no", orderNo);
+            }
+        }
+        String purchaseNo = queryDto.getPurchaseNo();
+        if (StringUtils.isNotEmpty(purchaseNo)) {
+            if (purchaseNo.contains(",")) {
+                queryWrapper.in("o.purchase_no", Arrays.asList(purchaseNo.split(",")));
+            } else {
+                queryWrapper.likeRight("o.purchase_no", purchaseNo);
+            }
+        }
+        String trackingNo = queryDto.getTrackingNo();
+        if (StringUtils.isNotEmpty(trackingNo)) {
+            if (trackingNo.contains(",")) {
+                queryWrapper.in("o.tracking_no", Arrays.asList(trackingNo.split(",")));
+            } else {
+                queryWrapper.likeRight("o.tracking_no", trackingNo);
+            }
+        }
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.shipment_rule", queryDto.getShipmentRule());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.warehouse_code", queryDto.getWarehouseCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.state", queryDto.getState());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.order_type", queryDto.getOrderType());
+        QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
+        QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
+        // 按照创建时间倒序
+        queryWrapper.orderByDesc("o.create_time");
     }
 }

@@ -5,8 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.enums.SqlKeyword;
-import com.baomidou.mybatisplus.core.enums.SqlLike;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
@@ -21,7 +19,6 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundCharge;
@@ -30,6 +27,7 @@ import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
+import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
@@ -244,43 +242,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundListVO> selectDelOutboundList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        this.handlerQueryWrapper(queryWrapper, queryDto);
+        DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
         return baseMapper.pageList(queryWrapper);
-    }
-
-    private void handlerQueryWrapper(QueryWrapper<DelOutboundListQueryDto> queryWrapper, DelOutboundListQueryDto queryDto) {
-        String orderNo = queryDto.getOrderNo();
-        if (StringUtils.isNotEmpty(orderNo)) {
-            if (orderNo.contains(",")) {
-                queryWrapper.in("o.order_no", Arrays.asList(orderNo.split(",")));
-            } else {
-                queryWrapper.likeRight("o.order_no", orderNo);
-            }
-        }
-        String purchaseNo = queryDto.getPurchaseNo();
-        if (StringUtils.isNotEmpty(purchaseNo)) {
-            if (purchaseNo.contains(",")) {
-                queryWrapper.in("o.purchase_no", Arrays.asList(purchaseNo.split(",")));
-            } else {
-                queryWrapper.likeRight("o.purchase_no", purchaseNo);
-            }
-        }
-        String trackingNo = queryDto.getTrackingNo();
-        if (StringUtils.isNotEmpty(trackingNo)) {
-            if (trackingNo.contains(",")) {
-                queryWrapper.in("o.tracking_no", Arrays.asList(trackingNo.split(",")));
-            } else {
-                queryWrapper.likeRight("o.tracking_no", trackingNo);
-            }
-        }
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.shipment_rule", queryDto.getShipmentRule());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.warehouse_code", queryDto.getWarehouseCode());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.state", queryDto.getState());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.order_type", queryDto.getOrderType());
-        QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
-        QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
-        // 按照创建时间倒序
-        queryWrapper.orderByDesc("o.create_time");
     }
 
     /**
@@ -295,12 +258,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (!DelOutboundOrderTypeEnum.has(dto.getOrderType())) {
             throw new CommonException("999", "订单类型不存在");
         }
+        // 来源为新增
+        dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_ADD);
         return this.createDelOutbound(dto);
     }
 
     private int createDelOutbound(DelOutboundDto dto) {
         int stepValue = 0x00;
-        String orderNo = null;
+        String orderNo;
         // 创建出库单
         try {
             DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
@@ -308,12 +273,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
             delOutbound.setOrderNo(orderNo = ("CK" + delOutbound.getCustomCode() + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
             // 冻结操作费用
-            List<DelOutboundDetailDto> details = dto.getDetails();
-            DelOutboundOperationVO delOutboundOperationVO = this.builderFreezeOperationDelOutboundVO(delOutbound, details);
-            this.freezeOperation(delOutboundOperationVO);
-            stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x01);
-            // 冻结库存
-            this.freeze(delOutbound.getOrderType(), orderNo, delOutbound.getWarehouseCode(), details);
             stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x02);
             // 默认状态
             delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
@@ -347,75 +306,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return insert;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            // 回滚操作
-            if (DelOutboundServiceImplUtil.hitKey(stepValue, 0x01) && null != orderNo) {
-                this.unfreezeOperation(orderNo);
-            }
-            if (DelOutboundServiceImplUtil.hitKey(stepValue, 0x02)) {
-                this.unFreeze(dto.getOrderType(), orderNo, dto.getWarehouseCode());
-            }
             // 异常传播
             throw e;
         }
-    }
-
-
-    /**
-     * 构建冻结操作费用的参数
-     *
-     * @param delOutbound delOutbound
-     * @param details     details
-     * @return DelOutboundVO
-     */
-    private DelOutboundOperationVO builderFreezeOperationDelOutboundVO(DelOutbound delOutbound, List<DelOutboundDetailDto> details) {
-        DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
-        delOutboundOperationVO.setOrderType(delOutbound.getOrderType());
-        delOutboundOperationVO.setOrderNo(delOutbound.getOrderNo());
-        delOutboundOperationVO.setWarehouseCode(delOutbound.getWarehouseCode());
-        delOutboundOperationVO.setCustomCode(delOutbound.getCustomCode());
-        // 处理明细
-        List<DelOutboundOperationDetailVO> detailVOList = new ArrayList<>(details.size());
-        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
-            DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
-            detailVO.setQty(1L);
-            detailVO.setWeight(delOutbound.getWeight());
-            detailVOList.add(detailVO);
-        } else {
-            for (DelOutboundDetailDto detail : details) {
-                DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
-                detailVO.setSku(detail.getSku());
-                detailVO.setQty(detail.getQty());
-                detailVO.setWeight(detail.getWeight());
-                detailVOList.add(detailVO);
-            }
-        }
-        delOutboundOperationVO.setDetails(detailVOList);
-        return delOutboundOperationVO;
-    }
-
-    /**
-     * 冻结操作费
-     *
-     * @param delOutboundOperationVO delOutboundOperationVO
-     */
-    private void freezeOperation(DelOutboundOperationVO delOutboundOperationVO) {
-        R<?> r = this.operationFeignService.delOutboundFreeze(delOutboundOperationVO);
-        DelOutboundServiceImplUtil.freezeOperationThrowErrorMessage(r);
-    }
-
-    /**
-     * 取消原本的冻结费用，并且重启冻结
-     *
-     * @param orgDelOutboundOperationVO orgDelOutboundOperationVO
-     * @param newDelOutboundOperationVO newDelOutboundOperationVO
-     */
-    private void unfreezeAndFreezeOperation(DelOutboundOperationVO orgDelOutboundOperationVO, DelOutboundOperationVO newDelOutboundOperationVO) {
-        // 取消冻结
-        R<?> ur = this.operationFeignService.delOutboundThaw(orgDelOutboundOperationVO);
-        DelOutboundServiceImplUtil.thawOperationThrowCommonException(ur);
-        // 重新冻结
-        R<?> r = this.operationFeignService.delOutboundFreeze(newDelOutboundOperationVO);
-        DelOutboundServiceImplUtil.freezeOperationThrowErrorMessage(r);
     }
 
     /**
@@ -577,17 +470,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         List<DelOutboundDetailDto> details = dto.getDetails();
         // 查询现有的库存
         List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
-        // 构建冻结操作费的参数
-        DelOutboundOperationVO newDelOutboundOperationVO = this.builderFreezeOperationDelOutboundVO(delOutbound, details);
-        String orderType = delOutbound.getOrderType();
         try {
-            // 取消冻结，再冻结
-            DelOutboundOperationVO orgDelOutboundOperationVO = new DelOutboundOperationVO();
-            orgDelOutboundOperationVO.setOrderNo(orderNo);
-            this.unfreezeAndFreezeOperation(orgDelOutboundOperationVO, newDelOutboundOperationVO);
-            stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x01);
-            // 处理库存
-            this.unFreezeAndFreeze(orderType, orderNo, warehouseCode, detailList, details);
             stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x02);
             // 先删后增
             this.deleteAddress(orderNo);
@@ -616,13 +499,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return baseMapper.updateById(inputDelOutbound);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            // 回滚操作
-            if (DelOutboundServiceImplUtil.hitKey(stepValue, 0x01) && null != orderNo) {
-                this.freezeOperation(newDelOutboundOperationVO);
-            }
-            if (DelOutboundServiceImplUtil.hitKey(stepValue, 0x02)) {
-                this.freezeNoWrapper(orderType, orderNo, warehouseCode, detailList);
-            }
             throw e;
         }
     }
@@ -760,10 +636,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 取消冻结
         for (String orderNo : orderNos) {
             DelOutbound delOutbound1 = delOutboundMap.get(orderNo);
-            // 取消冻结库存
-            this.unFreeze(delOutbound1.getOrderType(), orderNo, delOutbound1.getWarehouseCode());
-            // 取消冻结操作费用
-            this.unfreezeOperation(orderNo);
+            // 提审状态
+            String bringVerifyState = delOutbound.getBringVerifyState();
+            if (StringUtils.isNotEmpty(bringVerifyState)) {
+                // 判断要不要取消冻结库存
+                if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY, BringVerifyEnum.get(bringVerifyState))) {
+                    // 取消冻结库存
+                    this.unFreeze(delOutbound1.getOrderType(), orderNo, delOutbound1.getWarehouseCode());
+                }
+                // 判断要不要取消冻结操作费用
+                if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
+                    // 取消冻结操作费用
+                    this.unfreezeOperation(orderNo);
+                }
+            }
         }
         // 删除明细
         LambdaQueryWrapper<DelOutboundDetail> detailLambdaQueryWrapper = Wrappers.lambdaQuery();
@@ -1064,10 +950,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 取消冻结的数据
             for (String orderNo : reviewedList) {
                 DelOutbound delOutbound = delOutboundMap.get(orderNo);
-                // 取消冻结库存
-                this.unFreeze(delOutbound.getOrderType(), orderNo, warehouseCode);
-                // 取消冻结操作费用
-                this.unfreezeOperation(orderNo);
+                // 提审状态
+                String bringVerifyState = delOutbound.getBringVerifyState();
+                if (StringUtils.isNotEmpty(bringVerifyState)) {
+                    // 判断要不要取消冻结库存
+                    if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY, BringVerifyEnum.get(bringVerifyState))) {
+                        // 取消冻结库存
+                        this.unFreeze(delOutbound.getOrderType(), orderNo, delOutbound.getWarehouseCode());
+                    }
+                    // 判断要不要取消冻结操作费用
+                    if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
+                        // 取消冻结操作费用
+                        this.unfreezeOperation(orderNo);
+                    }
+                }
             }
         }
         // 判断是否需要WMS处理
@@ -1189,7 +1085,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundExportListDto> exportList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        this.handlerQueryWrapper(queryWrapper, queryDto);
+        DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
         return this.baseMapper.exportList(queryWrapper);
     }
 

@@ -1,5 +1,6 @@
 package com.szmsd.inventory.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
@@ -9,6 +10,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @Accessors(chain = true)
@@ -91,5 +93,9 @@ public class InventorySkuVO {
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
     private String cusCode;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ApiModelProperty(value = "最后入库时间")
+    private Date lastInboundTime;
 
 }
