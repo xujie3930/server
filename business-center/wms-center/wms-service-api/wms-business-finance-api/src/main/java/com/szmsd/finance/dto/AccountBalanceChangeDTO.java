@@ -27,6 +27,9 @@ public class AccountBalanceChangeDTO implements Serializable {
     @ApiModelProperty(value = "交易类型")
     private BillEnum.PayMethod payMethod;
 
+    @ApiModelProperty(value = "操作类型")
+    private String orderType;
+
     @ApiModelProperty(value = "交易类型")
     private String payMethodName;
 
