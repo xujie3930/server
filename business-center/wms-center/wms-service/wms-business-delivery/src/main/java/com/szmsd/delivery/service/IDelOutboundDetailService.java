@@ -2,6 +2,8 @@ package com.szmsd.delivery.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.dto.DelOutboundExportItemListDto;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 
 import java.util.List;
 
@@ -80,5 +82,13 @@ public interface IDelOutboundDetailService extends IService<DelOutboundDetail> {
     List<DelOutboundDetail> listByOrderNos(List<String> orderNos);
 
     List<DelOutboundDetail> queryDetailsByIdList(List<String> idList);
+
+    /**
+     * 导出列表查询
+     *
+     * @param queryDto queryDto
+     * @return List<DelOutboundExportItemListDto>
+     */
+    List<DelOutboundExportItemListDto> exportList(DelOutboundListQueryDto queryDto);
 }
 

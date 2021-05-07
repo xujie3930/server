@@ -9,6 +9,7 @@ import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
+import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -28,9 +29,10 @@ import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
+import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
-import com.szmsd.delivery.exported.ExportContext;
 import com.szmsd.delivery.imported.*;
+import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.vo.*;
@@ -83,6 +85,10 @@ public class DelOutboundController extends BaseController {
     private InventoryFeignClientService inventoryFeignClientService;
     @Autowired
     private BasWarehouseClientService basWarehouseClientService;
+    @Autowired
+    private IDelOutboundDetailService delOutboundDetailService;
+    @Autowired
+    private BaseProductClientService baseProductClientService;
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/page")
@@ -370,15 +376,52 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 导出")
     public void export(HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
         try {
+            // 查询出库类型数据
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066");
+            DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService);
+            exportContext.setStateCacheAdapter(listMap.get("063"));
+            exportContext.setOrderTypeCacheAdapter(listMap.get("065"));
+            exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
             QueryDto queryDto1 = new QueryDto();
             queryDto1.setPageNum(1);
             queryDto1.setPageSize(500);
-            // 查询出库类型数据
-            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("066");
-            List<BasSubWrapperVO> exceptionStateList = listMap.get("066");
-            ExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, exceptionStateList);
             QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
-            ExcelUtils.export2WebPage(response, "出库单", "出库单", DelOutboundExportListVO.class, queryPage);
+            QueryDto queryDto2 = new QueryDto();
+            queryDto2.setPageNum(1);
+            queryDto2.setPageSize(500);
+            QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService);
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("出库单", null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
+                        @Override
+                        public String sheetName() {
+                            return "出库单详情";
+                        }
+
+                        @Override
+                        public Class<DelOutboundExportListVO> classType() {
+                            return DelOutboundExportListVO.class;
+                        }
+
+                        @Override
+                        public QueryPage<DelOutboundExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                            return queryPage;
+                        }
+                    },
+                    new ExcelUtils.ExportSheet<DelOutboundExportItemListVO>() {
+                        @Override
+                        public String sheetName() {
+                            return "包裹明细";
+                        }
+
+                        @Override
+                        public Class<DelOutboundExportItemListVO> classType() {
+                            return DelOutboundExportItemListVO.class;
+                        }
+
+                        @Override
+                        public QueryPage<DelOutboundExportItemListVO> query(ExcelUtils.ExportContext exportContext) {
+                            return itemQueryPage;
+                        }
+                    }));
         } catch (Exception e) {
             log.error("导出异常:" + e.getMessage(), e);
         }

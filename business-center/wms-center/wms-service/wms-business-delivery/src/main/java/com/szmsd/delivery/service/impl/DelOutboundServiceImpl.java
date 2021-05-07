@@ -246,43 +246,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundListVO> selectDelOutboundList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        this.handlerQueryWrapper(queryWrapper, queryDto);
+        DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
         return baseMapper.pageList(queryWrapper);
-    }
-
-    private void handlerQueryWrapper(QueryWrapper<DelOutboundListQueryDto> queryWrapper, DelOutboundListQueryDto queryDto) {
-        String orderNo = queryDto.getOrderNo();
-        if (StringUtils.isNotEmpty(orderNo)) {
-            if (orderNo.contains(",")) {
-                queryWrapper.in("o.order_no", Arrays.asList(orderNo.split(",")));
-            } else {
-                queryWrapper.likeRight("o.order_no", orderNo);
-            }
-        }
-        String purchaseNo = queryDto.getPurchaseNo();
-        if (StringUtils.isNotEmpty(purchaseNo)) {
-            if (purchaseNo.contains(",")) {
-                queryWrapper.in("o.purchase_no", Arrays.asList(purchaseNo.split(",")));
-            } else {
-                queryWrapper.likeRight("o.purchase_no", purchaseNo);
-            }
-        }
-        String trackingNo = queryDto.getTrackingNo();
-        if (StringUtils.isNotEmpty(trackingNo)) {
-            if (trackingNo.contains(",")) {
-                queryWrapper.in("o.tracking_no", Arrays.asList(trackingNo.split(",")));
-            } else {
-                queryWrapper.likeRight("o.tracking_no", trackingNo);
-            }
-        }
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.shipment_rule", queryDto.getShipmentRule());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.warehouse_code", queryDto.getWarehouseCode());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.state", queryDto.getState());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.order_type", queryDto.getOrderType());
-        QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
-        QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
-        // 按照创建时间倒序
-        queryWrapper.orderByDesc("o.create_time");
     }
 
     /**
@@ -1218,7 +1183,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundExportListDto> exportList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        this.handlerQueryWrapper(queryWrapper, queryDto);
+        DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
         return this.baseMapper.exportList(queryWrapper);
     }
 

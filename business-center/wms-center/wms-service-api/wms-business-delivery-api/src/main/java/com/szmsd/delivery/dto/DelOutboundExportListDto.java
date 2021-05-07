@@ -17,47 +17,29 @@ import java.util.Date;
 @ApiModel(value = "DelOutboundExportListDto", description = "DelOutboundExportListDto对象")
 public class DelOutboundExportListDto implements Serializable {
 
+    @ApiModelProperty(value = "状态")
+    private String state;
+
+    @ApiModelProperty(value = "出库单号")
+    private String orderNo;
+
+    @ApiModelProperty(value = "跟踪号")
+    private String trackingNo;
+
     @ApiModelProperty(value = "客户代码")
     private String sellerCode;
 
     @ApiModelProperty(value = "处理点/仓库")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "跟踪号")
-    private String trackingNo;
-
-    @ApiModelProperty(value = "物流单号")
-    private String shipmentOrderNumber;
-
     @ApiModelProperty(value = "RefNo")
     private String refOrderNo;
 
-    @ApiModelProperty(value = "供应商服务代码")
-    private String shipmentService;
+    @ApiModelProperty(value = "出库方式")
+    private String orderType;
 
-    @ExcelProperty(value = "提审时间")
-    private Date bringVerifyTime;
-
-    @ExcelProperty(value = "到仓时间")
-    private Date arrivalTime;
-
-    @ExcelProperty(value = "发货时间")
-    private Date shipmentsTime;
-
-    @ApiModelProperty(value = "异常状态")
-    private String exceptionState;
-
-    @ApiModelProperty(value = "服务产品代码")
+    @ApiModelProperty(value = "物流服务")
     private String shipmentRule;
-
-    @ApiModelProperty(value = "箱数")
-    private Long boxNumber;
-
-    @ApiModelProperty(value = "重量")
-    private Double weight;
-
-    @ApiModelProperty(value = "计费重")
-    private BigDecimal calcWeight;
 
     @ApiModelProperty(value = "收件人名称")
     private String consignee;
@@ -83,6 +65,22 @@ public class DelOutboundExportListDto implements Serializable {
     @ApiModelProperty(value = "联系方式")
     private String phoneNo;
 
+    @ApiModelProperty(value = "重量")
+    private Double weight;
+
+    @ApiModelProperty(value = "计费重")
+    private BigDecimal calcWeight;
+
     @ApiModelProperty(value = "规格")
     private String specifications;
+
+    @ExcelProperty(value = "提审时间")
+    private Date bringVerifyTime;
+
+    @ExcelProperty(value = "发货时间")
+    private Date shipmentsTime;
+
+    @ApiModelProperty(value = "异常状态")
+    private String exceptionState;
+
 }

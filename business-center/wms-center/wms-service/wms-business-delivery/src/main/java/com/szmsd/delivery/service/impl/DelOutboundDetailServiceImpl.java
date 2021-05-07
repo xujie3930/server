@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.dto.DelOutboundExportItemListDto;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.mapper.DelOutboundDetailMapper;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import org.springframework.stereotype.Service;
@@ -43,8 +45,8 @@ public class DelOutboundDetailServiceImpl extends ServiceImpl<DelOutboundDetailM
     @Override
     public List<DelOutboundDetail> selectDelOutboundDetailList(DelOutboundDetail delOutboundDetail) {
         QueryWrapper<DelOutboundDetail> where = new QueryWrapper<>();
-        if(StringUtils.isNotBlank(delOutboundDetail.getOrderNo())) {
-            where.eq("order_no",delOutboundDetail.getOrderNo());
+        if (StringUtils.isNotBlank(delOutboundDetail.getOrderNo())) {
+            where.eq("order_no", delOutboundDetail.getOrderNo());
         }
         return baseMapper.selectList(where);
     }
@@ -110,7 +112,7 @@ public class DelOutboundDetailServiceImpl extends ServiceImpl<DelOutboundDetailM
     /**
      * 根据id集合查询 details
      *
-     * @param orderNos orderNos
+     * @param idList idList
      * @return
      */
     @Override
@@ -118,6 +120,13 @@ public class DelOutboundDetailServiceImpl extends ServiceImpl<DelOutboundDetailM
         LambdaQueryWrapper<DelOutboundDetail> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.in(DelOutboundDetail::getId, idList);
         return this.list(queryWrapper);
+    }
+
+    @Override
+    public List<DelOutboundExportItemListDto> exportList(DelOutboundListQueryDto queryDto) {
+        QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
+        DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
+        return this.baseMapper.exportList(queryWrapper);
     }
 }
 
