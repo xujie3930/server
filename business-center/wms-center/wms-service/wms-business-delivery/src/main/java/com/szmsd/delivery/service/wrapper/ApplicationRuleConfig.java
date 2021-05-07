@@ -34,6 +34,8 @@ public final class ApplicationRuleConfig {
         Set<String> bringVerifyDestroySet = new HashSet<>();
         bringVerifyDestroySet.add(BringVerifyEnum.BEGIN.name());
         bringVerifyDestroySet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
+        bringVerifyDestroySet.add(BringVerifyEnum.FREEZE_INVENTORY.name());
+        bringVerifyDestroySet.add(BringVerifyEnum.FREEZE_OPERATION.name());
         bringVerifyDestroySet.add(BringVerifyEnum.END.name());
         bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.DESTROY.getCode(), bringVerifyDestroySet);
         // 提审配置 - 【自提出库】
@@ -41,6 +43,8 @@ public final class ApplicationRuleConfig {
         bringVerifySelfPickSet.add(BringVerifyEnum.BEGIN.name());
         bringVerifySelfPickSet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
         bringVerifySelfPickSet.add(BringVerifyEnum.SHIPMENT_LABEL.name());
+        bringVerifySelfPickSet.add(BringVerifyEnum.FREEZE_INVENTORY.name());
+        bringVerifySelfPickSet.add(BringVerifyEnum.FREEZE_OPERATION.name());
         bringVerifySelfPickSet.add(BringVerifyEnum.END.name());
         bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.SELF_PICK.getCode(), bringVerifySelfPickSet);
         // 提审配置 - 【转运出库】
@@ -51,6 +55,8 @@ public final class ApplicationRuleConfig {
         Set<String> bringVerifyNewSkuSet = new HashSet<>();
         bringVerifyNewSkuSet.add(BringVerifyEnum.BEGIN.name());
         bringVerifyNewSkuSet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
+        bringVerifyNewSkuSet.add(BringVerifyEnum.FREEZE_INVENTORY.name());
+        bringVerifyNewSkuSet.add(BringVerifyEnum.FREEZE_OPERATION.name());
         bringVerifyNewSkuSet.add(BringVerifyEnum.END.name());
         bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.NEW_SKU.getCode(), bringVerifyNewSkuSet);
         // 提审配置 - 【批量出库】
