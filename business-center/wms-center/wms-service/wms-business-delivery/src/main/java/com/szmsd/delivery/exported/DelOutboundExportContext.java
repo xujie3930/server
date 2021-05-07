@@ -18,19 +18,43 @@ public class DelOutboundExportContext implements ExportContext {
 
     private final Lock warehouseLock;
     private final BasWarehouseClientService basWarehouseClientService;
+    private final CacheContext<String, String> stateCache;
     private final CacheContext<String, String> warehouseCache;
+    private final CacheContext<String, String> orderTypeCache;
     private final CacheContext<String, String> exceptionStateCache;
 
-    public DelOutboundExportContext(BasWarehouseClientService basWarehouseClientService, List<BasSubWrapperVO> exceptionStateList) {
+    public DelOutboundExportContext(BasWarehouseClientService basWarehouseClientService) {
         this.warehouseLock = new ReentrantLock();
         this.basWarehouseClientService = basWarehouseClientService;
+        this.stateCache = new CacheContext.MapCacheContext<>();
         this.warehouseCache = new CacheContext.MapCacheContext<>();
+        this.orderTypeCache = new CacheContext.MapCacheContext<>();
         this.exceptionStateCache = new CacheContext.MapCacheContext<>();
-        if (CollectionUtils.isNotEmpty(exceptionStateList)) {
-            for (BasSubWrapperVO vo : exceptionStateList) {
-                this.exceptionStateCache.put(vo.getSubValue(), vo.getSubName());
+    }
+
+    private void setBySubValue(CacheContext<String, String> cacheContext, List<BasSubWrapperVO> list) {
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (BasSubWrapperVO vo : list) {
+                cacheContext.put(vo.getSubValue(), vo.getSubName());
             }
         }
+    }
+
+    public void setStateCacheAdapter(List<BasSubWrapperVO> list) {
+        this.setBySubValue(this.stateCache, list);
+    }
+
+    public void setOrderTypeCacheAdapter(List<BasSubWrapperVO> list) {
+        this.setBySubValue(this.orderTypeCache, list);
+    }
+
+    public void setExceptionStateCacheAdapter(List<BasSubWrapperVO> list) {
+        this.setBySubValue(this.exceptionStateCache, list);
+    }
+
+    @Override
+    public String getStateName(String state) {
+        return this.stateCache.get(state);
     }
 
     @Override
@@ -60,6 +84,11 @@ public class DelOutboundExportContext implements ExportContext {
             }
             return warehouseName;
         }
+    }
+
+    @Override
+    public String getOrderTypeName(String orderType) {
+        return this.orderTypeCache.get(orderType);
     }
 
     @Override
