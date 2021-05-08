@@ -37,4 +37,12 @@ public interface ExportContext {
      * @return String
      */
     String getExceptionStateName(String exceptionState);
+
+    /**
+     * 获取国家名称
+     *
+     * @param countryCode countryCode
+     * @return String
+     */
+    String getCountry(String countryCode);
 }
