@@ -8,14 +8,13 @@ import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.AddSkuInspectionRequest;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.InventoryInspection;
 import com.szmsd.inventory.domain.InventoryInspectionDetails;
-import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
 import com.szmsd.inventory.domain.dto.InventoryInspectionDTO;
 import com.szmsd.inventory.domain.dto.InventoryInspectionDetailsDTO;
 import com.szmsd.inventory.domain.dto.InventoryInspectionQueryDTO;
@@ -57,9 +56,6 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
     @Resource
     private IInventoryService inventoryService;
 
-    @Resource
-    private IInventoryInspectionDetailsService detailsService;
-
     @Transactional
     @Override
     public boolean add(List<InventoryInspectionDetailsDTO> dto) {
@@ -85,7 +81,6 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
      */
     private void saveDetails(List<InventoryInspectionDetailsDTO> value, String inspectionNo) {
         List<InventoryInspectionDetails> inventoryCheckDetails = BeanMapperUtil.mapList(value, InventoryInspectionDetails.class);
-        BeanUtils.copyProperties(value, inventoryCheckDetails);
         for (InventoryInspectionDetails inventoryInspectionDetails : inventoryCheckDetails) {
             inventoryInspectionDetails.setInspectionNo(inspectionNo);
         }
@@ -133,77 +128,73 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
     /**
      * 入库验货
      *
-     * @param inboundInventoryDTO inboundInventoryDTO
+     * @param dto dto
      * @return result
      */
     @Transactional
     @Override
-    public boolean inboundInventory(InboundInventoryDTO inboundInventoryDTO) {
-        R<String> result = basSellerFeignService.getInspection(inboundInventoryDTO.getOperator());
+    public boolean inboundInventory(InboundInventoryInspectionDTO dto) {
+        R<String> result = basSellerFeignService.getInspection(dto.getCusCode());
         if (result.getCode() != 200) {
             log.error("inboundInventory() code:{} message: {}", result.getMsg(), result.getMsg());
             return false;
         }
         String data = result.getData();
-        if (data == null) {
-            return true;
-        }
-        if (data.equals("不验货")) {
-            return true;
-        }
+        if (data == null)  return true;
+
+        if (data.equals("不验货")) return true;
+
         if (data.equals("新SKU必验")) {
-            LambdaQueryWrapper<Inventory> query = Wrappers.lambdaQuery();
-            query.eq(Inventory::getSku, inboundInventoryDTO.getSku());
-            int count = inventoryService.count(query);
-            if (count == 0) { // 入库的SKU在库存表里不存在
-                return createInventory(inboundInventoryDTO);
+            List<String> skus = dto.getSkus();
+            List<String> skuList = new ArrayList<>();
+            for (String sku : skus) {
+                LambdaQueryWrapper<Inventory> query = Wrappers.lambdaQuery();
+                query.eq(Inventory::getSku, sku);
+                int count = inventoryService.count(query);
+                if (count == 0) { // 入库的SKU在库存表里不存在为新SKU
+                    skuList.add(sku);
+                }
             }
+            if (skuList.size() > 0)
+                return createInventory(new InboundInventoryInspectionDTO(dto.getCusCode(), dto.getWarehouseNo(), dto.getWarehouseCode(), skuList));
+
             return true;
         }
         // 入库必验
-        return createInventory(inboundInventoryDTO);
+        return createInventory(dto);
     }
 
     /**
      * 入库创建无需审批验货单
      *
-     * @param inboundInventoryDTO inboundInventoryDTO
-     * @return
+     * @param dto dto
+     * @return result
      */
-    private boolean createInventory(InboundInventoryDTO inboundInventoryDTO) {
-        AddSkuInspectionRequest addSkuInspectionRequest = setAddSkuInspectionRequest(inboundInventoryDTO);
+    private boolean createInventory(InboundInventoryInspectionDTO dto) {
         InventoryInspection inventoryInspection = new InventoryInspection();
-        String inspectionNo = setInventoryInspection(inboundInventoryDTO, inventoryInspection);
-        this.saveDetails(inboundInventoryDTO, inspectionNo);
+        String inspectionNo = setInventoryInspection(dto, inventoryInspection);
+
+        List<InventoryInspectionDetailsDTO> inventoryInspectionDetailsDTO = dto.getSkus().stream()
+                .map(sku -> new InventoryInspectionDetailsDTO(sku, dto.getWarehouseCode(), dto.getCusCode())).collect(Collectors.toList());
+
+        this.saveDetails(inventoryInspectionDetailsDTO, inspectionNo);
+        AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(dto.getWarehouseCode(), dto.getWarehouseNo(), dto.getSkus());
         R<ResponseVO> response = htpBasFeignService.inspection(addSkuInspectionRequest);
         if (response.getCode() != 200) {
             inventoryInspection.setErrorCode(response.getCode());
             inventoryInspection.setErrorMessage(response.getMsg());
         }
-        inventoryInspection.setStatus(3);
+        inventoryInspection.setStatus(3); //3为入库创建的验货单
         return iInventoryInspectionMapper.insert(inventoryInspection) > 0;
     }
 
-    private AddSkuInspectionRequest setAddSkuInspectionRequest(InboundInventoryDTO inboundInventoryDTO) {
-        List<String> skuList = new ArrayList<>();
-        skuList.add(inboundInventoryDTO.getSku());
-        return new AddSkuInspectionRequest(inboundInventoryDTO.getWarehouseCode(), inboundInventoryDTO.getOrderNo(), skuList);
-    }
-
-    private String setInventoryInspection(InboundInventoryDTO inboundInventoryDTO, InventoryInspection inventoryInspection) {
-        String operator = inboundInventoryDTO.getOperator();
+    private String setInventoryInspection(InboundInventoryInspectionDTO dto, InventoryInspection inventoryInspection) {
+        String operator = dto.getCusCode();
         String inspectionNo = getInspectionNo(operator);
         inventoryInspection.setInspectionNo(inspectionNo);
         inventoryInspection.setCustomCode(operator);
-        inventoryInspection.setWarehouseCode(inboundInventoryDTO.getWarehouseCode());
+        inventoryInspection.setWarehouseCode(dto.getWarehouseCode());
         return inspectionNo;
-    }
-
-    private void saveDetails(InboundInventoryDTO inboundInventoryDTO, String inspectionNo) {
-        InventoryInspectionDetails inventoryInspectionDetails = new InventoryInspectionDetails();
-        inventoryInspectionDetails.setSku(inboundInventoryDTO.getSku());
-        inventoryInspectionDetails.setInspectionNo(inspectionNo);
-        detailsService.save(inventoryInspectionDetails);
     }
 
     /**

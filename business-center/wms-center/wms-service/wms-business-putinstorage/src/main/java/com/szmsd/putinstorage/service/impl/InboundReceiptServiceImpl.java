@@ -7,6 +7,9 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
+import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
@@ -54,6 +57,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     @Resource
     private RemoteComponent remoteComponent;
+
+    @Resource
+    private InventoryInspectionFeignService inventoryInspectionFeignService;
 
 
     /**
@@ -311,13 +317,31 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             try {
                 remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
                 this.updateByWarehouseNo(inboundReceipt);
+                this.inbound(inboundReceiptInfoVO);
             } catch (Exception e) {
                 log.error(e.getMessage());
                 sb.append(e.getMessage().replace("运行时异常", warehouseNo));
 //                this.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE.getValue()).setReviewRemark(e.getMessage()));
             }
         });
-        AssertUtil.isTrue(sb.length() == 0, () -> sb.toString());
+        AssertUtil.isTrue(sb.length() == 0, sb::toString);
+    }
+
+    /**
+     * 入库单审核 根据客户配置的验货状态生成验货单
+     * @param inboundReceiptInfoVO inboundReceiptInfoVO
+     */
+    private void inbound(InboundReceiptInfoVO inboundReceiptInfoVO) {
+        List<InboundReceiptDetailVO> inboundReceiptDetails = inboundReceiptInfoVO.getInboundReceiptDetails();
+        if(inboundReceiptDetails != null && inboundReceiptDetails.size() > 0) {
+            InboundInventoryInspectionDTO dto = new InboundInventoryInspectionDTO();
+            dto.setCusCode(inboundReceiptInfoVO.getCusCode());
+            dto.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
+            dto.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
+            List<String> collect = inboundReceiptInfoVO.getInboundReceiptDetails().stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.toList());
+            dto.setSkus(collect);
+            inventoryInspectionFeignService.inbound(dto);
+        }
     }
 
     /**
