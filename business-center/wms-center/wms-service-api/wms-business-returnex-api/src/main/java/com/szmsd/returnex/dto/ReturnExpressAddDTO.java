@@ -65,7 +65,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "退货渠道", example = "客户自选")
     private String returnChannel;
 
-    @ApiModelProperty(value = "退货Tracking 号", example = "TID123456")
+    @ApiModelProperty(value = "退货Tracking 号", example = "TID123456", required = true)
     private String scanCode;
     /**
      * 销毁 包裹上架 拆包检查
