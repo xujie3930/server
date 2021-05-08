@@ -92,9 +92,9 @@ public class OperationController extends BaseController {
         return operationService.delOutboundThaw(delOutboundVO);
     }
 
-    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundDeductions')")
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
     @ApiOperation(value = "业务计费 - 出库扣款")
-    @PostMapping("/delOutboundDeductions")
+    @PostMapping("/delOutboundCharge")
     public R delOutboundDeductions(@RequestBody DelOutboundOperationVO delOutboundVO) {
         return operationService.delOutboundDeductions(delOutboundVO);
     }
