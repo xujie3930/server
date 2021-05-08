@@ -138,7 +138,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     public int saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
         log.info("接收WMS仓库拆包明细 {}", returnProcessingReqDTO);
         ReturnExpressDetail detail = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaUpdate()
-                .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsReceivedDealWay())
+                .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsWaitReceive())
                 .eq(ReturnExpressDetail::getProcessType, configStatus.getUnpackingInspection())
                 .eq(ReturnExpressDetail::getReturnNo, returnProcessingReqDTO.getReturnNo()));
         AssertUtil.notNull(detail, "数据不存在!");
@@ -146,7 +146,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         //wms处理中的会接收到拆包明细 拆包方式才调这个接口
         ReturnExpressDetail returnExpressDetail = new ReturnExpressDetail();
         int update = returnExpressMapper.update(returnExpressDetail, Wrappers.<ReturnExpressDetail>lambdaUpdate()
-                .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsReceivedDealWay())
+                .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsWaitReceive())
                 .eq(ReturnExpressDetail::getProcessType, configStatus.getUnpackingInspection())
                 .eq(ReturnExpressDetail::getReturnNo, returnProcessingReqDTO.getReturnNo())
 
@@ -322,7 +322,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             returnExpressDetail.setArrivalTime(LocalDateTime.now());
             if (StringUtils.isNotBlank(returnExpressDetail.getSellerCode())) {
                 returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWaitCustomerDeal());
-                returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWaitCustomerDeal());
+                returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWaitCustomerDealStr());
             } else {
                 returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWaitAssigned());
                 returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWaitAssignedStr());
@@ -399,7 +399,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 //一直为增加
                 inventoryAdjustmentDTO.setAdjustment("5");
                 Integer skuAddNum = needAddSkuNum.get(x.getSku());
-                inventoryAdjustmentDTO.setQuantity(inventoryAdjustmentDTO.getQuantity() + skuAddNum);
+                inventoryAdjustmentDTO.setQuantity(skuAddNum);
                 log.info("拆包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
                 inventoryFeignService.adjustment(inventoryAdjustmentDTO);
             });
@@ -416,7 +416,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 BeanUtils.copyProperties(x, inventoryAdjustmentDTO);
                 //一直为增加
                 inventoryAdjustmentDTO.setAdjustment("5");
-                inventoryAdjustmentDTO.setQuantity(inventoryAdjustmentDTO.getQuantity() + 1);
+                inventoryAdjustmentDTO.setQuantity(1);
                 log.info("整包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
                 inventoryFeignService.adjustment(inventoryAdjustmentDTO);
             });
@@ -425,7 +425,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     private List<ReturnExpressGoodVO> merage(List<ReturnExpressGoodVO> details) {
         return new ArrayList<>(details.stream()
-                .collect(Collectors.toMap(ReturnExpressGoodVO::getSku, a -> a, (o1, o2) -> {
+                .collect(Collectors.toMap(ReturnExpressGoodVO::getPutawaySku, a -> a, (o1, o2) -> {
                     o1.setPutawayQty(o1.getPutawayQty() + o2.getPutawayQty());
                     return o1;
                 })).values());
@@ -440,11 +440,19 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int updateExpressInfo(ReturnExpressAddDTO expressUpdateDTO) {
-        //如果之前是销毁，已经结束了，到这都是要么销毁，要么拆包上架
+        //如果之前是销毁，已经结束了，到这都是要么销毁，要么拆包上架 还有WMS通知退件等待
         checkBeforeUpdate(expressUpdateDTO);
-        // 处理完后状态
-        String dealStatus = configStatus.getDealStatus().getWmsReceivedDealWay();
-        String dealStatusStr = configStatus.getDealStatus().getWmsReceivedDealWayStr();
+        String dealStatus;
+        String dealStatusStr;
+        if (expressUpdateDTO.getProcessType().equals(configStatus.getUnpackingInspection())) {
+            dealStatus = configStatus.getDealStatus().getWmsWaitReceive();
+            dealStatusStr = configStatus.getDealStatus().getWmsWaitReceiveStr();
+        } else {
+            // 处理完后状态
+            dealStatus = configStatus.getDealStatus().getWmsReceivedDealWay();
+            dealStatusStr = configStatus.getDealStatus().getWmsReceivedDealWayStr();
+        }
+
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
@@ -488,7 +496,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             if (unpackAndPutOnTheShelf) {
                 // 如果是按明细上架，则所有的明细需要设置相对应的数量和sku sku 可以相同
                 List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getDetails();
-                Optional.ofNullable(details).filter(CollectionUtils::isNotEmpty).ifPresent(x -> {
+                AssertUtil.isTrue(CollectionUtils.isNotEmpty(details), "按明细上架，明细列表不能为空!");
+                Optional.of(details).filter(CollectionUtils::isNotEmpty).ifPresent(x -> {
                     AtomicBoolean mustHadOne = new AtomicBoolean(false);
                     x.forEach(detail -> {
                         detail.check();
@@ -500,7 +509,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 });
             }
             boolean b = configStatus.getDestroy().equals(processType) || unpackAndPutOnTheShelf;
-            AssertUtil.isTrue(!b, "拆包检查后只能按明细上架/销毁");
+            AssertUtil.isTrue(b, "拆包检查后只能按明细上架/销毁");
         }
     }
 
