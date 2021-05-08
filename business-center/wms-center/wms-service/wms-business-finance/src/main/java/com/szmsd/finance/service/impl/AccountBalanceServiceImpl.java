@@ -19,6 +19,7 @@ import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.service.IThirdRechargeRecordService;
 import com.szmsd.finance.util.SnowflakeId;
+import com.szmsd.finance.ws.WebSocketServer;
 import com.szmsd.http.api.feign.HttpRechargeFeignService;
 import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
 import com.szmsd.http.dto.recharges.RechargesRequestDTO;
@@ -30,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -57,6 +60,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Autowired
     ISysDictDataService sysDictDataService;
+
+    @Resource
+    private WebSocketServer webSocketServer;
 
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
@@ -143,6 +149,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             return R.failed("没有找到对应的充值记录");
         }
         String rechargeStatus = HttpRechargeConstants.RechargeStatusCode.Successed.name();
+        try {
+            webSocketServer.sendMessage(thirdRechargeRecord.getCusCode(), requestDTO.getStatus());
+        } catch (IOException e) {
+            log.error("充值接口通知客户端失败", e);
+        }
         //如果充值成功进行充值
         if (StringUtils.equals(thirdRechargeRecord.getRechargeStatus(), rechargeStatus)) {
             CustPayDTO dto = new CustPayDTO();
