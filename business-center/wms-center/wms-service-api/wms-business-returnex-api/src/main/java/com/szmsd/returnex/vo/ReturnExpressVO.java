@@ -128,7 +128,9 @@ public class ReturnExpressVO {
     @ApiModelProperty(value = "处理备注")
     @Excel(name = "处理备注")
     private String processRemark;
-
+    @ApiModelProperty(value = "仓库处理备注")
+    @Excel(name = "仓库处理备注")
+    private String remark;
     @ApiModelProperty(value = "退件单来源[默认：1：申请退件]")
     @Excel(name = "退件单来源[默认：1：申请退件]")
     private String returnSource;

@@ -164,6 +164,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (dto.getPayType() == null) {
             return R.failed("支付类型为空");
         }
+        setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
         return flag ? R.ok() : R.failed("余额不足");
@@ -175,6 +176,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
+        setCurrencyName(dto);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
         dto.setPayType(BillEnum.PayType.PAYMENT);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
@@ -270,6 +272,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
+        setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.ONLINE_INCOME);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
@@ -289,6 +292,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
+        setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
@@ -376,6 +380,12 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     private String getCurrencyName(String currencyCode) {
         return sysDictDataService.getCurrencyNameByCode(currencyCode);
+    }
+
+    private void setCurrencyName(CustPayDTO dto) {
+        if (StringUtils.isEmpty(dto.getCurrencyName())) {
+            dto.setCurrencyName(getCurrencyName(dto.getCurrencyCode()));
+        }
     }
 
     /**

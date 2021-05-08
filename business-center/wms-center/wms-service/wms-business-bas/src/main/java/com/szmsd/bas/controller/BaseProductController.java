@@ -72,13 +72,12 @@ public class BaseProductController extends BaseController {
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/listByCode")
     @ApiOperation(value = "通过code查询列表", notes = "通过code查询列表")
-    public TableDataInfo listByCode(String code,String category) {
+    public TableDataInfo listByCode(String code,String category,int current,int size) {
         QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
-        startPage();
-        List<BaseProductVO> list = baseProductService.selectBaseProductByCode(code,basSeller.getSellerCode(),category);
-        return getDataTable(list);
+        TableDataInfo<BaseProductVO> list = baseProductService.selectBaseProductByCode(code,basSeller.getSellerCode(),category,current,size);
+        return list;
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:add')")

@@ -32,6 +32,7 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.ProductRequest;
@@ -158,28 +159,34 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductVO> selectBaseProductByCode(String code, String sellerCode,String category) {
+    public TableDataInfo<BaseProductVO> selectBaseProductByCode(String code, String sellerCode, String category,int current,int size) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", category);
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code);
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", sellerCode);
         queryWrapper.eq("is_active", true);
+        int total = super.count(queryWrapper);
         queryWrapper.orderByAsc("code");
+        queryWrapper.last("limit "+(current-1)*size+","+size);
         List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductVO.class);
         baseProductVOList.forEach(b -> {
-            if(b.getCode()!=null){
-                List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
-                        .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(b.getCode()).setBusinessItemNo(null)).getData());
-                if (CollectionUtils.isNotEmpty(attachment)) {
-                    List<AttachmentFileDTO> documentsFiles = new ArrayList();
-                    for(BasAttachment a:attachment){
-                        documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
+                    if (b.getCode() != null) {
+                        List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
+                                .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(b.getCode()).setBusinessItemNo(null)).getData());
+                        if (CollectionUtils.isNotEmpty(attachment)) {
+                            List<AttachmentFileDTO> documentsFiles = new ArrayList();
+                            for (BasAttachment a : attachment) {
+                                documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
+                            }
+                            b.setDocumentsFiles(documentsFiles);
+                        }
                     }
-                    b.setDocumentsFiles(documentsFiles);
-                }
-            }
-        });
-        return baseProductVOList;
+                });
+            TableDataInfo table = new TableDataInfo();
+            table.setTotal(total);
+            table.setRows(baseProductVOList);
+            table.setCode(200);
+            return table;
     }
 
     @Override
@@ -245,7 +252,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", request.getCode());
         queryWrapper.eq("category", ProductConstant.SKU_NAME);
-        if (super.count(queryWrapper) != 1) {
+        if (super.count(queryWrapper) < 1) {
             throw new BaseException("sku不存在");
         }
         BigDecimal volume = new BigDecimal(request.getHeight()).multiply(new BigDecimal(request.getWidth()))

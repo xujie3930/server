@@ -49,7 +49,7 @@ public class ConfigStatus {
      */
     private String unpackingInspection;
     /**
-     *  按明细上架
+     * 按明细上架
      */
     private String putawayByDetail;
     /**
@@ -73,6 +73,7 @@ public class ConfigStatus {
 
     @Data
     public static class DealStatus {
+        //等待接收货物
         private String wmsWaitReceive;
         private String wmsWaitReceiveStr = "处理中";
         private String waitCustomerDeal;
