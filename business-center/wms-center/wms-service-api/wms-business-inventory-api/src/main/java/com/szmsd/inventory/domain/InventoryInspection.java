@@ -36,7 +36,7 @@ public class InventoryInspection extends BaseEntity {
     @ApiModelProperty(value = "仓库名称")
     private String warehouseName;
 
-    @ApiModelProperty(value = "库存盘点审批结果")
+    @ApiModelProperty(value = "库存盘点审批结果 待审批：0 通过：1 驳回：2 入库：3")
     private Integer status;
 
     @ApiModelProperty(value = "审批不通过原因")

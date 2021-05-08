@@ -77,8 +77,8 @@ public class DelOutboundTimer {
             queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.SHIPPED.getCode());
             // 小于3次
             queryWrapper.lt(DelOutboundCompleted::getHandleSize, 3);
-            // 处理时间大于等于当前时间的
-            queryWrapper.ge(DelOutboundCompleted::getNextHandleTime, new Date());
+            // 处理时间小于等于当前时间的
+            queryWrapper.le(DelOutboundCompleted::getNextHandleTime, new Date());
             handleCompleted(queryWrapper);
         });
     }
@@ -118,8 +118,8 @@ public class DelOutboundTimer {
             queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.CANCELED.getCode());
             // 小于3次
             queryWrapper.lt(DelOutboundCompleted::getHandleSize, 3);
-            // 处理时间大于等于当前时间的
-            queryWrapper.ge(DelOutboundCompleted::getNextHandleTime, new Date());
+            // 处理时间小于等于当前时间的
+            queryWrapper.le(DelOutboundCompleted::getNextHandleTime, new Date());
             this.handleCancelled(queryWrapper);
         });
     }
