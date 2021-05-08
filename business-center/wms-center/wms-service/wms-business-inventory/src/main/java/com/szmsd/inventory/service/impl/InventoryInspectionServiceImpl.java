@@ -204,7 +204,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
      * @return inspectionNo
      */
     private String getInspectionNo(String operator) {
-        return "PD" + operator + serialNumberClientService.generateNumber("INVENTORY_CHECK");
+        return "YH" + operator + serialNumberClientService.generateNumber("INVENTORY_INSPECTION");
     }
 
 }
