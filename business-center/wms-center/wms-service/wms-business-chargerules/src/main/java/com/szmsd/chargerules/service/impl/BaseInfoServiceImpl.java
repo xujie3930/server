@@ -111,14 +111,14 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     @Override
     public List<BasSpecialOperationVo> list(BasSpecialOperationRequestDTO dto) {
         QueryWrapper<BasSpecialOperation> where = new QueryWrapper<>();
-        if (StringUtils.isNotEmpty(dto.getOperationType())) {
-            where.eq("operation_order_no", dto.getOperationType());
+        if (StringUtils.isNotEmpty(dto.getOperationOrderNo())) {
+            where.eq("a.operation_order_no", dto.getOperationOrderNo());
+        }
+        if (StringUtils.isNotEmpty(dto.getOrderNo())) {
+            where.eq("a.order_no", dto.getOrderNo());
         }
         if (StringUtils.isNotEmpty(dto.getOperationType())) {
-            where.eq("order_no", dto.getOperationType());
-        }
-        if (StringUtils.isNotEmpty(dto.getOperationType())) {
-            where.eq("operation_type", dto.getOperationType());
+            where.eq("b.operation_type", dto.getOperationType());
         }
         return baseInfoMapper.selectPageList(where);
     }

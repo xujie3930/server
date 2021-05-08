@@ -16,6 +16,6 @@ public class ExceptionServiceImpl extends WmsRequest implements IExceptionServic
 
     @Override
     public ResponseVO processing(ExceptionProcessRequest exceptionProcessRequest){
-        return JSON.parseObject(httpPut("", "exception.processing", exceptionProcessRequest), ResponseVO.class);
+        return JSON.parseObject(httpPut(exceptionProcessRequest.getWarehouseCode(), "exception.processing", exceptionProcessRequest), ResponseVO.class);
     }
 }
