@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.service.impl;
 
 import com.szmsd.chargerules.domain.ChargeLog;
+import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.common.core.domain.R;
@@ -43,6 +44,8 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setAmount(custPayDTO.getAmount());
         chargeLog.setOperationPayMethod(custPayDTO.getPayMethod().getPaymentName());
         chargeLog.setHasFreeze(false);
+        String code = DelOutboundOrderEnum.getCode(custPayDTO.getOrderType());
+        if(code != null) custPayDTO.setOrderType(code);
         R r = rechargesFeignService.warehouseFeeDeductions(custPayDTO);
         updateAndSave(chargeLog, r);
         return r;
@@ -53,6 +56,8 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setCustomCode(dto.getCusCode());
         chargeLog.setCurrencyCode(dto.getCurrencyCode());
         chargeLog.setAmount(dto.getAmount());
+        String code = DelOutboundOrderEnum.getCode(dto.getOrderType());
+        if(code != null) dto.setOrderType(code);
         R r = rechargesFeignService.freezeBalance(dto);
         if (r.getCode() != 200)
             log.error("freezeBalance() pay failed.. msg: {},data: {}", r.getMsg(), r.getData());
@@ -71,6 +76,8 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setCurrencyCode(dto.getCurrencyCode());
         chargeLog.setAmount(dto.getAmount());
         chargeLog.setHasFreeze(false);
+        String code = DelOutboundOrderEnum.getCode(dto.getOrderType());
+        if(code != null) dto.setOrderType(code);
         R r = rechargesFeignService.thawBalance(dto);
         updateAndSave(chargeLog, r);
         return r;

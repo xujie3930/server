@@ -203,6 +203,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
+        setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
@@ -220,6 +221,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         }
         dto.setPayType(BillEnum.PayType.FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_THAW);
+        setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
         return flag ? R.ok() : R.failed("冻结金额不足以解冻");

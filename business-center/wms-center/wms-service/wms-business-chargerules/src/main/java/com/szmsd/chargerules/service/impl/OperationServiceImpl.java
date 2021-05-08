@@ -7,6 +7,7 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.dto.OperationDTO;
+import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.chargerules.mapper.OperationMapper;
 import com.szmsd.chargerules.service.IChargeLogService;
@@ -16,7 +17,6 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -46,12 +46,6 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     @Resource
     private IChargeLogService chargeLogService;
-
-    private static final String manySku = "-manySku";
-
-    private static final String packing = "-packing";
-
-    private static final String label = "-label";
 
     @Override
     public int save(OperationDTO dto) {
@@ -148,15 +142,15 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         }
 
         BigDecimal amount = BigDecimal.ZERO;
-        if (dto.getOrderType().equals(DelOutboundOrderTypeEnum.COLLECTION.getCode())) {
+        if (dto.getOrderType().equals(DelOutboundOrderEnum.COLLECTION.getCode())) {
             return chargeCollection(dto, details);
         }
 
-        if (dto.getOrderType().equals(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode())) {
+        if (dto.getOrderType().equals(DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode())) {
             return packageTransfer(dto);
         }
 
-        if (dto.getOrderType().equals(DelOutboundOrderTypeEnum.BATCH.getCode())) {
+        if (dto.getOrderType().equals(DelOutboundOrderEnum.BATCH.getCode())) {
             return chargeBatch(dto, details);
         }
 
@@ -206,7 +200,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R<?> chargeCollection(DelOutboundOperationVO dto, List<DelOutboundOperationDetailVO> details) {
         BigDecimal amount = BigDecimal.ZERO;
         if (details.size() > 1) {
-            dto.setOrderType(dto.getOrderType().concat(manySku));
+            dto.setOrderType(dto.getOrderType().concat(DelOutboundOrderEnum.COLLECTION_MANY_SKU.getCode()));
             return this.calculateFreeze(dto, details, amount);
         }
         return this.calculateFreeze(dto, details, amount);
@@ -227,19 +221,18 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         //计算装箱费
         Integer packingCount = dto.getPackingCount();
         BigDecimal amount = BigDecimal.ZERO;
-        amount = getBatchAmount(dto, amount, packingCount, packing);
+        amount = getBatchAmount(dto, amount, packingCount, DelOutboundOrderEnum.BATCH_PACKING.getCode());
 
         //计算贴标费
         Integer shipmentLabelCount = dto.getShipmentLabelCount();
-        amount = getBatchAmount(dto, amount, shipmentLabelCount, label);
+        amount = getBatchAmount(dto, amount, shipmentLabelCount, DelOutboundOrderEnum.BATCH_LABEL.getCode());
 
         return this.calculateFreeze(dto, details, amount);
     }
 
     private BigDecimal getBatchAmount(DelOutboundOperationVO dto, BigDecimal amount, Integer count, String type) {
         if (count != null && count > 0) {
-            String orderType = dto.getOrderType().concat(type);
-            Operation labelOperation = getOperationDetails(dto, null, "未找到" + orderType + "业务费用规则，请联系管理员");
+            Operation labelOperation = getOperationDetails(dto, null, "未找到" + type + "业务费用规则，请联系管理员");
             BigDecimal calculate = payService.calculate(labelOperation.getFirstPrice(), labelOperation.getNextPrice(), count.longValue());
             amount = amount.add(calculate);
         }
@@ -264,8 +257,8 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         ChargeLog chargeLog = new ChargeLog();
         chargeLog.setOrderNo(dto.getOrderNo());
         chargeLog.setOperationType(dto.getOrderType());
-        DelOutboundOrderTypeEnum delOutboundOrderTypeEnum = DelOutboundOrderTypeEnum.get(dto.getOrderType());
-        if (delOutboundOrderTypeEnum != null) chargeLog.setOperationType(delOutboundOrderTypeEnum.getName());
+        DelOutboundOrderEnum delOutboundOrderEnum = DelOutboundOrderEnum.get(dto.getOrderType());
+        if (delOutboundOrderEnum != null) chargeLog.setOperationType(delOutboundOrderEnum.getName());
         chargeLog.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE.name());
         chargeLog.setOperationPayMethod(BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName());
         chargeLog.setWarehouseCode(dto.getWarehouseCode());
