@@ -264,7 +264,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     private int createDelOutbound(DelOutboundDto dto) {
-        int stepValue = 0x00;
         String orderNo;
         // 创建出库单
         try {
@@ -272,8 +271,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 生成出库单号
             // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
             delOutbound.setOrderNo(orderNo = ("CK" + delOutbound.getCustomCode() + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
-            // 冻结操作费用
-            stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x02);
             // 默认状态
             delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
             // 默认异常状态
@@ -465,13 +462,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 先取消冻结，再冻结
         // 取消冻结
         String orderNo = delOutbound.getOrderNo();
-        String warehouseCode = delOutbound.getWarehouseCode();
-        int stepValue = 0x00;
-        List<DelOutboundDetailDto> details = dto.getDetails();
-        // 查询现有的库存
-        List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
         try {
-            stepValue = DelOutboundServiceImplUtil.joinKey(stepValue, 0x02);
             // 先删后增
             this.deleteAddress(orderNo);
             this.deleteDetail(orderNo);
@@ -501,44 +492,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             logger.error(e.getMessage(), e);
             throw e;
         }
-    }
-
-    private void unFreezeAndFreeze(String orderType, String invoiceNo, String warehouseCode, List<DelOutboundDetail> details, List<DelOutboundDetailDto> detailDtos) {
-        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
-            return;
-        }
-        if (CollectionUtils.isEmpty(details) && CollectionUtils.isEmpty(detailDtos)) {
-            return;
-        }
-        InventoryOperateListDto operateListDto = new InventoryOperateListDto();
-        operateListDto.setInvoiceNo(invoiceNo);
-        operateListDto.setWarehouseCode(warehouseCode);
-        if (CollectionUtils.isNotEmpty(details)) {
-            Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
-            for (DelOutboundDetail detail : details) {
-                DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
-            }
-            List<InventoryOperateDto> unOperateList = new ArrayList<>(inventoryOperateDtoMap.values());
-            operateListDto.setUnOperateList(unOperateList);
-        }
-        if (CollectionUtils.isNotEmpty(detailDtos)) {
-            Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
-            long lineNo = 1L;
-            for (DelOutboundDetailDto detail : detailDtos) {
-                detail.setLineNo(lineNo++);
-                DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
-            }
-            List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
-            operateListDto.setOperateList(operateList);
-        }
-        this.inventoryFeignClientService.unFreezeAndFreeze(operateListDto);
-    }
-
-    private void freezeNoWrapper(String orderType, String invoiceNo, String warehouseCode, List<DelOutboundDetail> details) {
-        if (CollectionUtils.isEmpty(details)) {
-            return;
-        }
-        this.freeze(orderType, invoiceNo, warehouseCode, BeanMapperUtil.mapList(details, DelOutboundDetailDto.class));
     }
 
     private void freeze(String orderType, String invoiceNo, String warehouseCode, List<DelOutboundDetailDto> details) {
