@@ -129,6 +129,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             inventoryAvailableQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
             inventoryAvailableQueryDto.setCusCode(delOutbound.getSellerCode());
             inventoryAvailableQueryDto.setSkus(skus);
+            // 可用库存为0的也需要查询出来
+            inventoryAvailableQueryDto.setQueryType(2);
             List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
             Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(availableList)) {
@@ -211,6 +213,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             inventoryAvailableQueryDto.setWarehouseCode(warehouseCode);
             inventoryAvailableQueryDto.setCusCode(sellerCode);
             inventoryAvailableQueryDto.setSkus(skus);
+            inventoryAvailableQueryDto.setQueryType(2);
             //如果没有库存不会塞数据 先方判断外面
             List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
 
@@ -1011,6 +1014,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         inventoryAvailableQueryDto.setWarehouseCode(warehouseCode);
         inventoryAvailableQueryDto.setCusCode(sellerCode);
         inventoryAvailableQueryDto.setSkus(skus);
+        // 这里是导入，导入的时候，可用库存必须大于0才查询出来
+        inventoryAvailableQueryDto.setQueryType(1);
         List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
         Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(availableList)) {

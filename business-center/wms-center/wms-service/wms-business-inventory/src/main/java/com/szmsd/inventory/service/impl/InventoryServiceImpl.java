@@ -123,6 +123,10 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         if (CollectionUtils.isNotEmpty(queryDto.getSkus())) {
             queryWrapper.in("sku", queryDto.getSkus());
         }
+        if (null != queryDto.getQueryType() && 1 == queryDto.getQueryType()) {
+            // 可用库存大于0
+            queryWrapper.gt("available_inventory", 0);
+        }
     }
 
     @Override
@@ -265,6 +269,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     /**
      * 库存调整功能，只负责OMS的可用库存调整。记录日志，不传WMS
+     *
      * @param inventoryAdjustmentDTO
      */
     @Transactional(rollbackFor = Throwable.class)
