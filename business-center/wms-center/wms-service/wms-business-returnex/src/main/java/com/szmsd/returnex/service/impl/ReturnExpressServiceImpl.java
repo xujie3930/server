@@ -245,6 +245,14 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     }
 
     private void checkSubmit(ReturnExpressAddDTO returnExpressAddDTO) {
+        //整包上架必须有sku
+        Optional.of(returnExpressAddDTO).map(ReturnExpressAddDTO::getProcessType).ifPresent(x->{
+            boolean equals =configStatus.getWholePackageOnShelves().equals(x);
+            if (equals) {
+                AssertUtil.isTrue(StringUtils.isNotBlank(returnExpressAddDTO.getSku()), "整包上架，sku必填");
+            }
+        });
+
         // 校验重复条件
         String fromOrderNo = returnExpressAddDTO.getFromOrderNo();
         Integer integer = returnExpressMapper.selectCount(Wrappers.<ReturnExpressDetail>lambdaQuery()

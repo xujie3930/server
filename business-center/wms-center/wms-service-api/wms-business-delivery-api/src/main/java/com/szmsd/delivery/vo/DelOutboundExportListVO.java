@@ -32,7 +32,7 @@ public class DelOutboundExportListVO implements Serializable {
     private String warehouseName;
 
     @ExcelProperty(value = "RefNo")
-    private String refOrderNo;
+    private String refNo;
 
     @ExcelProperty(value = "出库方式")
     private String orderTypeName;

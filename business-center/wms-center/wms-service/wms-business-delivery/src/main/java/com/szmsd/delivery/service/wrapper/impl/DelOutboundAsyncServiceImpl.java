@@ -143,6 +143,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         }
                         custPayDTO.setSerialBillInfoList(serialBillInfoList);
                     }
+                    custPayDTO.setOrderType("Freight");
                     R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
                     if (null == r || Constants.SUCCESS != r.getCode()) {
                         throw new CommonException("999", "扣减费用失败");
@@ -152,6 +153,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             }
             if ("OP_FEE_DE".equals(completedState)) {
                 DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+                delOutboundOperationVO.setOrderType(delOutbound.getOrderType());
                 delOutboundOperationVO.setOrderNo(orderNo);
                 R<?> r = this.operationFeignService.delOutboundCharge(delOutboundOperationVO);
                 DelOutboundServiceImplUtil.chargeOperationThrowCommonException(r);
@@ -251,6 +253,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
                         cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
                         cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                        cusFreezeBalanceDTO.setOrderType("Freight");
                         R<?> thawBalanceR = this.rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
                         if (null == thawBalanceR) {
                             throw new CommonException("999", "取消冻结费用失败");
@@ -264,6 +267,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             }
             if ("UN_OP_FEE".equals(cancelledState)) {
                 DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+                delOutboundOperationVO.setOrderType(delOutbound.getOrderType());
                 delOutboundOperationVO.setOrderNo(orderNo);
                 R<?> r = this.operationFeignService.delOutboundThaw(delOutboundOperationVO);
                 DelOutboundServiceImplUtil.thawOperationThrowCommonException(r);

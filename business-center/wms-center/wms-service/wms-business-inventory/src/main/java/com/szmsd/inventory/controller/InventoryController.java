@@ -34,19 +34,11 @@ public class InventoryController extends BaseController {
     @Autowired
     private IInventoryWrapperService inventoryWrapperService;
 
-    @Resource
-    private IInventoryInspectionService inventoryInspectionService;
-
     @PreAuthorize("@ss.hasPermi('inventory:inbound')")
     @PostMapping("/inbound")
     @ApiOperation(value = "#入库上架", notes = "库存管理 - Inbound - /api/inbound/receiving #B1 接收入库上架 - 修改库存")
     public R inbound(@RequestBody InboundInventoryDTO inboundInventoryDTO) {
         inventoryService.inbound(inboundInventoryDTO);
-        try {
-            inventoryInspectionService.inboundInventory(inboundInventoryDTO);
-        } catch (Exception e) {
-            log.error("入库验货失败", e);
-        }
         return R.ok();
     }
 

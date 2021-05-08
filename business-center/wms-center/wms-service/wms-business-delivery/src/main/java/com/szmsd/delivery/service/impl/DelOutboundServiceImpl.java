@@ -129,6 +129,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             inventoryAvailableQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
             inventoryAvailableQueryDto.setCusCode(delOutbound.getSellerCode());
             inventoryAvailableQueryDto.setSkus(skus);
+            // 可用库存为0的也需要查询出来
+            inventoryAvailableQueryDto.setQueryType(2);
             List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
             Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(availableList)) {
@@ -211,6 +213,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             inventoryAvailableQueryDto.setWarehouseCode(warehouseCode);
             inventoryAvailableQueryDto.setCusCode(sellerCode);
             inventoryAvailableQueryDto.setSkus(skus);
+            inventoryAvailableQueryDto.setQueryType(2);
             //如果没有库存不会塞数据 先方判断外面
             List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
 
@@ -311,10 +314,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     /**
      * 取消冻结操作费用
      *
-     * @param orderNo orderNo
+     * @param orderNo   orderNo
+     * @param orderType orderType
      */
-    private void unfreezeOperation(String orderNo) {
+    private void unfreezeOperation(String orderNo, String orderType) {
         DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+        delOutboundOperationVO.setOrderType(orderType);
         delOutboundOperationVO.setOrderNo(orderNo);
         R<?> ur = this.operationFeignService.delOutboundThaw(delOutboundOperationVO);
         DelOutboundServiceImplUtil.thawOperationThrowCommonException(ur);
@@ -600,7 +605,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 判断要不要取消冻结操作费用
                 if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
                     // 取消冻结操作费用
-                    this.unfreezeOperation(orderNo);
+                    this.unfreezeOperation(orderNo, delOutbound1.getOrderType());
                 }
             }
         }
@@ -914,7 +919,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     // 判断要不要取消冻结操作费用
                     if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
                         // 取消冻结操作费用
-                        this.unfreezeOperation(orderNo);
+                        this.unfreezeOperation(orderNo, delOutbound.getOrderType());
                     }
                 }
             }
@@ -951,7 +956,18 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         int result = 0;
         for (Long id : ids) {
-            result = result + this.delOutboundAsyncService.shipmentPacking(id);
+            DelOutbound delOutbound = this.getById(id);
+            if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getOrderType())) {
+                // 仓库发货，调用完成的接口
+                this.delOutboundAsyncService.completed(delOutbound.getOrderNo());
+                result++;
+            } else if (DelOutboundStateEnum.WHSE_CANCELLED.getCode().equals(delOutbound.getOrderType())) {
+                // 仓库取消，调用取消的接口
+                this.delOutboundAsyncService.cancelled(delOutbound.getOrderNo());
+                result++;
+            } else {
+                result = result + this.delOutboundAsyncService.shipmentPacking(id);
+            }
         }
         return result;
     }
@@ -998,6 +1014,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         inventoryAvailableQueryDto.setWarehouseCode(warehouseCode);
         inventoryAvailableQueryDto.setCusCode(sellerCode);
         inventoryAvailableQueryDto.setSkus(skus);
+        // 这里是导入，导入的时候，可用库存必须大于0才查询出来
+        inventoryAvailableQueryDto.setQueryType(1);
         List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
         Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(availableList)) {

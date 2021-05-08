@@ -2,6 +2,7 @@ package com.szmsd.http.controller;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.dto.*;
@@ -48,6 +49,11 @@ public class PricedProductController extends BaseController {
     @ApiOperation(value = "创建报价产品信息")
     public R<ResponseVO> create(@RequestBody CreatePricedProductCommand createPricedProductCommand) {
         ResponseVO create = iPricedProductService.create(createPricedProductCommand);
+        if (StringUtils.isEmpty(create.getErrors())) {
+            create.setSuccess(true);
+        } else {
+            create.setSuccess(false);
+        }
         return R.ok(create);
     }
 

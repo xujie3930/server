@@ -33,7 +33,7 @@ public class DelOutboundExportListDto implements Serializable {
     private String warehouseCode;
 
     @ApiModelProperty(value = "RefNo")
-    private String refOrderNo;
+    private String refNo;
 
     @ApiModelProperty(value = "出库方式")
     private String orderType;
@@ -58,6 +58,9 @@ public class DelOutboundExportListDto implements Serializable {
 
     @ApiModelProperty(value = "邮编")
     private String postCode;
+
+    @ApiModelProperty(value = "国家编码")
+    private String countryCode;
 
     @ApiModelProperty(value = "国家")
     private String country;

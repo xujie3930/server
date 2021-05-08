@@ -3,6 +3,7 @@ package com.szmsd.delivery.exported;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.szmsd.common.core.utils.QueryPage;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.delivery.dto.DelOutboundExportListDto;
@@ -44,6 +45,10 @@ public class DelOutboundExportQueryPage implements QueryPage<DelOutboundExportLi
                 vo.setWarehouseName(this.exportContext.getWarehouseName(dto.getWarehouseCode()));
                 vo.setOrderTypeName(this.exportContext.getOrderTypeName(dto.getOrderType()));
                 vo.setExceptionStateName(this.exportContext.getExceptionStateName(dto.getExceptionState()));
+                if (StringUtils.isEmpty(dto.getCountry()) && StringUtils.isNotEmpty(dto.getCountryCode())) {
+                    // 根据编码去查询名称
+                    vo.setCountry(this.exportContext.getCountry(dto.getCountryCode()));
+                }
                 page.add(vo);
             }
         }

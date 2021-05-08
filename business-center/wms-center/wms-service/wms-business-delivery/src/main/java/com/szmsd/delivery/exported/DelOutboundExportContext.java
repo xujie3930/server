@@ -1,14 +1,18 @@
 package com.szmsd.delivery.exported;
 
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.imported.CacheContext;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 /**
  * @author zhangyuyuan
@@ -22,14 +26,20 @@ public class DelOutboundExportContext implements ExportContext {
     private final CacheContext<String, String> warehouseCache;
     private final CacheContext<String, String> orderTypeCache;
     private final CacheContext<String, String> exceptionStateCache;
+    private final BasRegionFeignService basRegionFeignService;
+    private final CacheContext<String, String> countryCache;
+    private final Lock countryLock;
 
-    public DelOutboundExportContext(BasWarehouseClientService basWarehouseClientService) {
+    public DelOutboundExportContext(BasWarehouseClientService basWarehouseClientService, BasRegionFeignService basRegionFeignService) {
+        this.basRegionFeignService = basRegionFeignService;
         this.warehouseLock = new ReentrantLock();
         this.basWarehouseClientService = basWarehouseClientService;
         this.stateCache = new CacheContext.MapCacheContext<>();
         this.warehouseCache = new CacheContext.MapCacheContext<>();
         this.orderTypeCache = new CacheContext.MapCacheContext<>();
         this.exceptionStateCache = new CacheContext.MapCacheContext<>();
+        this.countryCache = new CacheContext.MapCacheContext<>();
+        this.countryLock = new ReentrantLock();
     }
 
     private void setBySubValue(CacheContext<String, String> cacheContext, List<BasSubWrapperVO> list) {
@@ -59,30 +69,37 @@ public class DelOutboundExportContext implements ExportContext {
 
     @Override
     public String getWarehouseName(String warehouseCode) {
+        return this.getLockValue(warehouseCode, this.warehouseLock, this.warehouseCache, (key) -> {
+            BasWarehouse basWarehouse = this.basWarehouseClientService.queryByWarehouseCode(key);
+            if (null != basWarehouse) {
+                return basWarehouse.getWarehouseNameCn();
+            }
+            return null;
+        });
+    }
+
+    private <K, V> V getLockValue(K key, Lock lock, CacheContext<K, V> cacheContext, Function<K, V> function) {
         // 线程访问开放
-        if (this.warehouseCache.containsKey(warehouseCode)) {
-            return this.warehouseCache.get(warehouseCode);
+        if (cacheContext.containsKey(key)) {
+            return cacheContext.get(key);
         } else {
-            String warehouseName = null;
+            V value;
             try {
                 // 锁
-                this.warehouseLock.lock();
+                lock.lock();
                 // 双层判断
-                if (this.warehouseCache.containsKey(warehouseCode)) {
-                    warehouseName = this.warehouseCache.get(warehouseCode);
+                if (cacheContext.containsKey(key)) {
+                    value = cacheContext.get(key);
                 } else {
-                    BasWarehouse basWarehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
-                    if (null != basWarehouse) {
-                        warehouseName = basWarehouse.getWarehouseNameCn();
-                    }
+                    value = function.apply(key);
                     // 当结果集是空的时候，这里赋值也是空
-                    this.warehouseCache.put(warehouseCode, warehouseName);
+                    cacheContext.put(key, value);
                 }
             } finally {
                 // 释放锁
-                this.warehouseLock.unlock();
+                lock.unlock();
             }
-            return warehouseName;
+            return value;
         }
     }
 
@@ -94,5 +111,19 @@ public class DelOutboundExportContext implements ExportContext {
     @Override
     public String getExceptionStateName(String exceptionState) {
         return this.exceptionStateCache.get(exceptionState);
+    }
+
+    @Override
+    public String getCountry(String countryCode) {
+        return this.getLockValue(countryCode, this.countryLock, this.countryCache, (key) -> {
+            R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(key);
+            if (null != countryR) {
+                BasRegionSelectListVO data = countryR.getData();
+                if (null != data) {
+                    return data.getName();
+                }
+            }
+            return null;
+        });
     }
 }

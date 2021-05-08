@@ -3,9 +3,7 @@ package com.szmsd.inventory.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.inventory.domain.dto.InventoryInspectionDTO;
-import com.szmsd.inventory.domain.dto.InventoryInspectionDetailsDTO;
-import com.szmsd.inventory.domain.dto.InventoryInspectionQueryDTO;
+import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.InventoryInspectionVo;
 import com.szmsd.inventory.service.IInventoryInspectionService;
 import io.swagger.annotations.Api;
@@ -52,6 +50,13 @@ public class InventoryInspectionController extends BaseController {
     @ApiOperation(value = "库存验货 - 审核")
     public R<Integer> audit(@RequestBody InventoryInspectionDTO dto) {
         return R.ok(this.inventoryInspectionService.audit(dto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inventory:inspection:inboundInventory')")
+    @PostMapping("/inboundInventory")
+    @ApiOperation(value = "库存验货 - 入库验货")
+    public R<Boolean> inboundInventory(@RequestBody InboundInventoryInspectionDTO dto) {
+        return R.ok(this.inventoryInspectionService.inboundInventory(dto));
     }
 
 }
