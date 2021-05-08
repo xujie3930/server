@@ -125,6 +125,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     custPayDTO.setAmount(delOutbound.getAmount());
                     custPayDTO.setNo(delOutbound.getOrderNo());
                     custPayDTO.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
+                    custPayDTO.setOrderTime(delOutbound.getCreateTime());
                     // 查询费用明细
                     List<DelOutboundCharge> chargeList = this.delOutboundChargeService.listCharges(orderNo);
                     if (CollectionUtils.isNotEmpty(chargeList)) {
