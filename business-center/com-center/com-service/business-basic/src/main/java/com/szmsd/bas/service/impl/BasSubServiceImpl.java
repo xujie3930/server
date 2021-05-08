@@ -69,7 +69,7 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
         }
         // where.orderByDesc("create_time");
         // 按照输入的顺序进行排序
-        where.orderByAsc("sort");
+        where.orderByAsc("create_time");
         return baseMapper.selectList(where);
     }
 
