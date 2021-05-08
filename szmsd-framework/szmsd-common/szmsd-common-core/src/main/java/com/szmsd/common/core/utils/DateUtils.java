@@ -150,6 +150,19 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
 
     /**
+     * 获取过去第几天的日期
+     *
+     * @param past
+     * @return
+     */
+    public static Date getPastDate(Date date, int past) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) - past);
+        return calendar.getTime();
+    }
+
+    /**
      * 校验日期是否存在改范围之内
      *
      * @param

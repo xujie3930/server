@@ -143,6 +143,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         }
                         custPayDTO.setSerialBillInfoList(serialBillInfoList);
                     }
+                    custPayDTO.setOrderType("Freight");
                     R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
                     if (null == r || Constants.SUCCESS != r.getCode()) {
                         throw new CommonException("999", "扣减费用失败");
@@ -252,6 +253,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
                         cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
                         cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                        cusFreezeBalanceDTO.setOrderType("Freight");
                         R<?> thawBalanceR = this.rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
                         if (null == thawBalanceR) {
                             throw new CommonException("999", "取消冻结费用失败");
