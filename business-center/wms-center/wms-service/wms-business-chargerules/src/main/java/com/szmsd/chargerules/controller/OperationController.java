@@ -2,12 +2,12 @@ package com.szmsd.chargerules.controller;
 
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
+import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.service.IOperationService;
 import com.szmsd.chargerules.vo.OrderTypeLabelVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,11 +70,8 @@ public class OperationController extends BaseController {
     @ApiOperation(value = "业务计费逻辑 - 查询订单类型")
     @GetMapping("/getOrderTypeList")
     public R<List<OrderTypeLabelVo>> getOrderTypeList() {
-        List<OrderTypeLabelVo> collect = Arrays.stream(DelOutboundOrderTypeEnum.values()).map(value ->
+        List<OrderTypeLabelVo> collect = Arrays.stream(DelOutboundOrderEnum.values()).map(value ->
                 new OrderTypeLabelVo(value.getCode(), value.getName())).collect(Collectors.toList());
-        collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.BATCH.getCode().concat("-packing"), DelOutboundOrderTypeEnum.BATCH.getName().concat("-装箱费")));
-        collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.BATCH.getCode().concat("-label"), DelOutboundOrderTypeEnum.BATCH.getName().concat("-贴标费")));
-        collect.add(new OrderTypeLabelVo(DelOutboundOrderTypeEnum.COLLECTION.getCode().concat("-manySku"), DelOutboundOrderTypeEnum.COLLECTION.getName().concat("-多SKU")));
         return R.ok(collect);
     }
 
