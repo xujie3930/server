@@ -256,7 +256,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount, Operation operation) {
         ChargeLog chargeLog = setChargeLog(dto, count);
         chargeLog.setHasFreeze(true);
-        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), operation.getCurrencyCode(), dto.getOrderType(), dto.getOrderNo(), amount);
+        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), operation.getCurrencyCode(), dto.getOrderNo(), dto.getOrderType(), amount);
         return payService.freezeBalance(cusFreezeBalanceDTO, chargeLog);
     }
 
