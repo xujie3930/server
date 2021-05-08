@@ -246,12 +246,13 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     private void checkSubmit(ReturnExpressAddDTO returnExpressAddDTO) {
         // 校验重复条件
-        ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaQuery()
-                .eq(ReturnExpressDetail::getExpectedNo, returnExpressAddDTO.getExpectedNo())
+        String fromOrderNo = returnExpressAddDTO.getFromOrderNo();
+        Integer integer = returnExpressMapper.selectCount(Wrappers.<ReturnExpressDetail>lambdaQuery()
+                //唯一 必填
+                .eq(ReturnExpressDetail::getScanCode, returnExpressAddDTO.getScanCode())
+                .or().eq(StringUtils.isNotBlank(fromOrderNo), ReturnExpressDetail::getFromOrderNo, fromOrderNo)
                 .select(ReturnExpressDetail::getId));
-        Optional.ofNullable(returnExpressDetail).ifPresent(x -> {
-            throw new BaseException("请勿重复提交");
-        });
+        AssertUtil.isTrue(integer == 0, "退件可扫描编码/原出库单号不能重复");
     }
 
     /**
