@@ -83,7 +83,6 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         return 1;
     }
 
-    @Transactional
     @Override
     public void completed(String orderNo) {
         // 处理阶段
