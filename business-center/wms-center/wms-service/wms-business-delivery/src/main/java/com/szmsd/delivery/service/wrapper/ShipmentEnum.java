@@ -392,6 +392,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
             cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
             cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+            cusFreezeBalanceDTO.setOrderType("Freight");
             // 调用冻结费用接口
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
             R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
@@ -502,6 +503,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             cusFreezeBalanceDTO2.setCurrencyCode(delOutbound.getCurrencyCode());
             cusFreezeBalanceDTO2.setCusCode(delOutbound.getSellerCode());
             cusFreezeBalanceDTO2.setNo(delOutbound.getOrderNo());
+            cusFreezeBalanceDTO2.setOrderType("Freight");
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
             R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO2);
             if (null != freezeBalanceR) {
