@@ -152,6 +152,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             }
             if ("OP_FEE_DE".equals(completedState)) {
                 DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+                delOutboundOperationVO.setOrderType(delOutbound.getOrderType());
                 delOutboundOperationVO.setOrderNo(orderNo);
                 R<?> r = this.operationFeignService.delOutboundCharge(delOutboundOperationVO);
                 DelOutboundServiceImplUtil.chargeOperationThrowCommonException(r);
@@ -264,6 +265,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             }
             if ("UN_OP_FEE".equals(cancelledState)) {
                 DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+                delOutboundOperationVO.setOrderType(delOutbound.getOrderType());
                 delOutboundOperationVO.setOrderNo(orderNo);
                 R<?> r = this.operationFeignService.delOutboundThaw(delOutboundOperationVO);
                 DelOutboundServiceImplUtil.thawOperationThrowCommonException(r);
