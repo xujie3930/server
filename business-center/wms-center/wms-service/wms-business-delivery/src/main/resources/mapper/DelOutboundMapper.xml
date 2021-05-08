@@ -102,6 +102,7 @@
                 AND t.create_time &lt;= #{orderTimeEnd}
             </if>
         </where>
+        ORDER BY t.create_time DESC
     </select>
 
     <select id="exportList" resultType="com.szmsd.delivery.dto.DelOutboundExportListDto">
