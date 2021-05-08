@@ -27,7 +27,7 @@ public class InventoryRecordQueryDTO {
     @ApiModelProperty(value = "操作人姓名")
     private String operator;
 
-    @ApiModelProperty(value = "创建时间（CR）")
+    @ApiModelProperty(value = "变动时间（OPERATE_ON）")
     private TimeType timeType;
 
     @ApiModelProperty(value = "开始时间 - 由接口调用方定义")
