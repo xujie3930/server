@@ -3,8 +3,14 @@
 <mapper namespace="com.szmsd.chargerules.mapper.OperationMapper">
 
     <select id="findCount" parameterType="com.szmsd.chargerules.domain.Operation" resultType="Integer">
-        SELECT COUNT(1) FROM cha_operation WHERE operation_type = #{operationType} AND order_type = #{orderType} AND warehouse_code = #{warehouseCode}
-        AND ((minimum_weight <![CDATA[ <= ]]> #{minimumWeight} AND maximum_weight > #{minimumWeight}) OR (minimum_weight <![CDATA[ <= ]]> #{maximumWeight} AND maximum_weight > #{maximumWeight}))
+        SELECT COUNT(1) FROM cha_operation
+            <where>
+                operation_type = #{operationType} AND order_type = #{orderType} AND warehouse_code = #{warehouseCode}
+                AND ((minimum_weight <![CDATA[ <= ]]> #{minimumWeight} AND maximum_weight > #{minimumWeight}) OR (minimum_weight <![CDATA[ <= ]]> #{maximumWeight} AND maximum_weight > #{maximumWeight}))
+                <if test="id != null or id != 0">
+                    AND id != #{id}
+                </if>
+            </where>
     </select>
 
 </mapper>

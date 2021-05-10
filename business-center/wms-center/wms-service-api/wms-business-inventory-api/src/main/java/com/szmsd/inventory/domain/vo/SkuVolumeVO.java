@@ -15,6 +15,12 @@ public class SkuVolumeVO {
     @ApiModelProperty(value = "SKU")
     private String sku;
 
+    @ApiModelProperty(value = "数量")
+    private Integer qty;
+
+    @ApiModelProperty(value = "单个体积")
+    private BigDecimal singleVolume;
+
     @ApiModelProperty(value = "体积")
     private BigDecimal volume;
 
