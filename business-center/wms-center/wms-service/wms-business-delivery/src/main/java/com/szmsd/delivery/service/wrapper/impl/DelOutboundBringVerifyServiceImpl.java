@@ -296,7 +296,28 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
         if (responseObjectWrapper.isSuccess()) {
             // 保存挂号
-            return responseObjectWrapper.getObject();
+            // 判断结果集是不是正确的
+            ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
+            if (null == shipmentOrderResult) {
+                throw new CommonException("999", "创建承运商物流订单失败3");
+            }
+            if (null == shipmentOrderResult.getSuccess() || !shipmentOrderResult.getSuccess()) {
+                // 判断有没有错误信息
+                ErrorDto error = shipmentOrderResult.getError();
+                StringBuilder builder = new StringBuilder();
+                if (null != error && StringUtils.isNotEmpty(error.getMessage())) {
+                    if (StringUtils.isNotEmpty(error.getErrorCode())) {
+                        builder.append("[")
+                                .append(error.getErrorCode())
+                                .append("]");
+                    }
+                    builder.append(error.getMessage());
+                } else {
+                    builder.append("创建承运商物流订单失败4");
+                }
+                throw new CommonException("999", builder.toString());
+            }
+            return shipmentOrderResult;
         } else {
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败2");
             throw new CommonException("999", exceptionMessage);
