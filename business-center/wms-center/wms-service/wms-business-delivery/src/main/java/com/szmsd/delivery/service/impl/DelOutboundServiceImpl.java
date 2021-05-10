@@ -680,7 +680,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Transactional
     @Override
-    public int shipmentPacking(ShipmentPackingMaterialRequestDto dto) {
+    public int shipmentPacking(ShipmentPackingMaterialRequestDto dto, String orderType) {
+
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
@@ -688,16 +689,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
         updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
         updateWrapper.set(DelOutbound::getPackingMaterial, dto.getPackingMaterial());
-        updateWrapper.set(DelOutbound::getLength, dto.getLength());
-        // 处理空值问题
-        Double width = Utils.defaultValue(dto.getWidth());
-        Double height = Utils.defaultValue(dto.getHeight());
-        Double weight = Utils.defaultValue(dto.getWeight());
-        updateWrapper.set(DelOutbound::getWidth, width);
-        updateWrapper.set(DelOutbound::getHeight, height);
-        updateWrapper.set(DelOutbound::getWeight, weight);
-        // 规格，长*宽*高
-        updateWrapper.set(DelOutbound::getSpecifications, dto.getLength() + "*" + width + "*" + height);
+        // 自提的不处理重量长宽高
+        if (!DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(orderType)) {
+            updateWrapper.set(DelOutbound::getLength, dto.getLength());
+            // 处理空值问题
+            Double width = Utils.defaultValue(dto.getWidth());
+            Double height = Utils.defaultValue(dto.getHeight());
+            Double weight = Utils.defaultValue(dto.getWeight());
+            updateWrapper.set(DelOutbound::getWidth, width);
+            updateWrapper.set(DelOutbound::getHeight, height);
+            updateWrapper.set(DelOutbound::getWeight, weight);
+            // 规格，长*宽*高
+            updateWrapper.set(DelOutbound::getSpecifications, dto.getLength() + "*" + width + "*" + height);
+        }
         return this.baseMapper.update(null, updateWrapper);
     }
 

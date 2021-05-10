@@ -172,6 +172,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             String exceptionMessage = Utils.defaultValue(throwable.getMessage(), "提审操作失败");
             updateDelOutbound.setExceptionMessage(exceptionMessage);
             // PRC计费
+            updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
+            updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             // 产品信息
@@ -225,14 +227,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
                     // 计算成功了
                     ChargeWrapper chargeWrapper = responseObject.getObject();
-                    DelOutbound updateDelOutbound = new DelOutbound();
-                    updateDelOutbound.setId(delOutbound.getId());
                     // 更新：计费重，金额
                     ShipmentChargeInfo data = chargeWrapper.getData();
                     PricingPackageInfo packageInfo = data.getPackageInfo();
                     Weight calcWeight = packageInfo.getCalcWeight();
-                    updateDelOutbound.setCalcWeight(calcWeight.getValue());
-                    updateDelOutbound.setCalcWeightUnit(calcWeight.getUnit());
+                    delOutbound.setCalcWeight(calcWeight.getValue());
+                    delOutbound.setCalcWeightUnit(calcWeight.getUnit());
                     List<ChargeItem> charges = chargeWrapper.getCharges();
                     // 保存费用信息
                     List<DelOutboundCharge> delOutboundCharges = new ArrayList<>();
