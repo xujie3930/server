@@ -13,6 +13,8 @@ import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -342,12 +344,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      */
     private void countPackageSize(DelOutbound delOutbound, DelOutboundDto dto) {
         // 转运特殊处理
+        List<DelOutboundDetailDto> details = dto.getDetails();
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
             double length = Utils.defaultValue(dto.getLength());
             double width = Utils.defaultValue(dto.getWidth());
             double height = Utils.defaultValue(dto.getHeight());
             double weight = Utils.defaultValue(dto.getWeight());
-            List<DelOutboundDetailDto> details = dto.getDetails();
             long boxNumber = 0L;
             for (DelOutboundDetailDto detail : details) {
                 boxNumber += Utils.defaultValue(detail.getQty());
@@ -360,13 +362,41 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutbound.setSpecifications(length + "*" + width + "*" + height);
             delOutbound.setBoxNumber(boxNumber);
         } else {
+            // 查询包材的信息
+            Set<String> skus = new HashSet<>();
+            for (DelOutboundDetailDto detail : details) {
+                // sku包材信息
+                if (StringUtils.isNotEmpty(detail.getBindCode())) {
+                    skus.add(detail.getBindCode());
+                }
+            }
+            Map<String, BaseProduct> productMap = null;
+            if (!skus.isEmpty()) {
+                BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
+                baseProductConditionQueryDto.setSkus(new ArrayList<>(skus));
+                List<BaseProduct> productList = this.baseProductClientService.queryProductList(baseProductConditionQueryDto);
+                if (CollectionUtils.isNotEmpty(productList)) {
+                    productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v1, v2) -> v1));
+                }
+            }
+            if (null == productMap) {
+                productMap = Collections.emptyMap();
+            }
             double weight = 0.0;
-            List<DelOutboundDetailDto> details = dto.getDetails();
             List<PackageInfo> packageInfoList = new ArrayList<>();
             long boxNumber = 0L;
             for (DelOutboundDetailDto detail : details) {
+                // sku信息
                 weight += Utils.defaultValue(detail.getWeight());
                 packageInfoList.add(new PackageInfo(detail.getLength(), detail.getWidth(), detail.getHeight()));
+                // 包材信息
+                if (StringUtils.isNotEmpty(detail.getBindCode())) {
+                    BaseProduct product = productMap.get(detail.getBindCode());
+                    if (null != product) {
+                        weight += Utils.defaultValue(product.getWeight());
+                        packageInfoList.add(new PackageInfo(product.getLength(), product.getWidth(), product.getHeight()));
+                    }
+                }
                 boxNumber += Utils.defaultValue(detail.getQty());
             }
             delOutbound.setWeight(weight);
