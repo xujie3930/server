@@ -1,5 +1,6 @@
 package com.szmsd.finance.factory;
 
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -17,6 +18,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 充值
@@ -81,6 +83,7 @@ public class IncomePayFactory extends AbstractPayFactory {
         serialBill.setBusinessCategory("充值");
         serialBill.setProductCategory("充值成功");
         serialBill.setRemark(dto.getRemark());
+        serialBill.setPaymentTime(new Date());
         accountSerialBillService.add(serialBill);
     }
 
