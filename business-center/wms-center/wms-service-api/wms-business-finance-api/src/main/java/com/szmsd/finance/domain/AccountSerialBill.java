@@ -3,6 +3,7 @@ package com.szmsd.finance.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.finance.enums.BillEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -11,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -68,10 +70,12 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "费用类型")
     private String chargeType;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "下单时间")
-    private String orderTime;
+    private Date orderTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "结算时间")
-    private String paymentTime;
+    private Date paymentTime;
 
 }
