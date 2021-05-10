@@ -67,7 +67,12 @@ public class RemoteComponent {
      * @return
      */
     public List<AccountBalance> accountList(String cusCode) {
-        R<List<AccountBalance>> accountBalanceR = rechargesFeignService.accountList(new AccountBalanceDTO().setCusCode(cusCode));
+        R<List<AccountBalance>> accountBalanceR = null;
+        try {
+            accountBalanceR = rechargesFeignService.accountList(new AccountBalanceDTO().setCusCode(cusCode));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (accountBalanceR == null) {
             return ListUtil.empty();
         }
@@ -84,7 +89,12 @@ public class RemoteComponent {
      * @return
      */
     public List<InboundCountVO> inboundCount(InboundReceiptQueryDTO queryDTO) {
-        R<List<InboundCountVO>> statistics = inboundReceiptFeignService.statistics(queryDTO);
+        R<List<InboundCountVO>> statistics = null;
+        try {
+            statistics = inboundReceiptFeignService.statistics(queryDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (statistics == null) {
             return ListUtil.empty();
         }
@@ -101,7 +111,12 @@ public class RemoteComponent {
      * @return
      */
     public List<DelOutboundReportListVO> outboundReportCount(DelOutboundReportQueryDto queryDto) {
-        List<DelOutboundReportListVO> data = delOutboundReportClientService.queryBringVerifyData(queryDto);
+        List<DelOutboundReportListVO> data = null;
+        try {
+            data = delOutboundReportClientService.queryBringVerifyData(queryDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (data == null) {
             return ListUtil.empty();
         }
@@ -114,7 +129,12 @@ public class RemoteComponent {
      * @return
      */
     public List<DelOutboundReportListVO> outboundData(DelOutboundReportQueryDto queryDto) {
-        List<DelOutboundReportListVO> data = delOutboundReportClientService.queryOutboundData(queryDto);
+        List<DelOutboundReportListVO> data = null;
+        try {
+            data = delOutboundReportClientService.queryOutboundData(queryDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (data == null) {
             return ListUtil.empty();
         }
@@ -127,7 +147,12 @@ public class RemoteComponent {
      * @return
      */
     public List<DelOutboundReportListVO> queryCreateData(DelOutboundReportQueryDto queryDto) {
-        List<DelOutboundReportListVO> data = delOutboundReportClientService.queryCreateData(queryDto);
+        List<DelOutboundReportListVO> data = null;
+        try {
+            data = delOutboundReportClientService.queryCreateData(queryDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (data == null) {
             return ListUtil.empty();
         }
@@ -140,7 +165,13 @@ public class RemoteComponent {
      * @return
      */
     public Integer problemCount(String cusCode) {
-        return exceptionInfoClientService.countprocessException(cusCode);
+        Integer problemCount = 0;
+        try {
+            problemCount = exceptionInfoClientService.countprocessException(cusCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return problemCount;
     }
 
 }
