@@ -42,6 +42,7 @@ public class HtpRequestLogServiceImpl extends ServiceImpl<HtpRequestLogMapper, H
     @Override
     public List<HtpRequestLog> selectHtpRequestLogList(HtpRequestLog htpRequestLog) {
         QueryWrapper<HtpRequestLog> where = new QueryWrapper<HtpRequestLog>();
+        where.orderByDesc("create_time");
         return baseMapper.selectList(where);
     }
 
