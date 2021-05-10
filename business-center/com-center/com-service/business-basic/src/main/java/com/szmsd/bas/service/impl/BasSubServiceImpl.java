@@ -1,7 +1,9 @@
 package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.dao.BasSubMapper;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -71,6 +74,27 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
         // 按照输入的顺序进行排序
         where.orderByAsc("create_time");
         return baseMapper.selectList(where);
+    }
+
+    @Override
+    public BasSub selectMaxBasSub(BasSub basSub) {
+        String mainCode = basSub.getMainCode();
+        boolean present = Optional.ofNullable(mainCode).filter(StringUtils::isNotBlank).isPresent();
+        List<String> codeList = new ArrayList<>();
+        if (present) {
+            mainCode = mainCode.replace("，", ",").replace(" ", ",");
+            String[] split = mainCode.split(",");
+            codeList = Arrays.asList(split);
+        }
+        BasSub basSub1 = baseMapper.selectOne(Wrappers.<BasSub>lambdaQuery()
+                .in(CollectionUtils.isNotEmpty(codeList), BasSub::getMainCode,codeList)
+                .like(StringUtils.isNotBlank(basSub.getMainName()), BasSub::getMainName, basSub.getMainName())
+                .like(StringUtils.isNotBlank(basSub.getSubName()), BasSub::getMainName, basSub.getSubName())
+                .like(StringUtils.isNotBlank(basSub.getSubCode()), BasSub::getMainName, basSub.getSubCode())
+                .like(StringUtils.isNotBlank(basSub.getSubValue()), BasSub::getMainName, basSub.getSubValue())
+                .orderByDesc(BasSub::getSubCode)
+                .last("LIMIT 1"));
+        return basSub1;
     }
 
     /**
