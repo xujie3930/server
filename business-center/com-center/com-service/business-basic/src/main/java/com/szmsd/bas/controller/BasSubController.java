@@ -61,8 +61,8 @@ public class BasSubController extends BaseController {
     @PreAuthorize("@ss.hasPermi('bas:bassub:listApi')")
     @ApiOperation(value = "查询子类别列表api", notes = "查询子类别列表api")
     @GetMapping("/listApi")
-    public List<BasSub> listApi(@RequestParam("mainCode") String mainCode,@RequestParam("subValue") String subValue) {
-        return basSubService.selectBasSubList(new BasSub(mainCode,subValue));
+    public List<BasSub> listApi(@RequestParam("mainCode") String mainCode, @RequestParam("subValue") String subValue) {
+        return basSubService.selectBasSubList(new BasSub(mainCode, subValue));
     }
 
 
@@ -79,9 +79,9 @@ public class BasSubController extends BaseController {
         } else {
             map = new HashMap<>();
             for (BasSub basSub : list) {
-                    map.put(basSub.getSubName(), basSub.getSubValue());
-                }
+                map.put(basSub.getSubName(), basSub.getSubValue());
             }
+        }
         return R.ok(map);
     }
 
@@ -116,6 +116,7 @@ public class BasSubController extends BaseController {
         }
         return R.ok(map);
     }
+
     @ApiOperation(value = "根据name，code查询子类别（下拉框）", notes = "根据name，code查询子类别列表（下拉框）")
     @GetMapping("/getSubName")
     public R list(String code, String name) {
@@ -267,11 +268,12 @@ public class BasSubController extends BaseController {
                 return R.failed(String.format("主类别不能为空:%s", mainSub));
             }
             basSub2.setMainCode(mainSub);
-            List<BasSub> list = basSubService.selectBasSubList(basSub2);
+
+            BasSub list = basSubService.selectMaxBasSub(basSub2);
             int subCode = 1;
             int length = 3;
-            if (!CollectionUtils.isEmpty(list)) {
-                String subStr = list.get(list.size()-1).getSubCode().substring(mainSub.length());
+            if (null != list) {
+                String subStr = list.getSubCode().substring(mainSub.length());
                 subCode = Integer.parseInt(subStr);
                 subCode++;
                 length = subStr.length();

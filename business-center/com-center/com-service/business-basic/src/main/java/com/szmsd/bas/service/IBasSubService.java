@@ -31,6 +31,12 @@ public interface IBasSubService extends IService<BasSub> {
      */
     public List<BasSub> selectBasSubList(BasSub basSub);
 
+    /**
+     * 查询该类最大的值
+     * @param basSub
+     * @return
+     */
+    BasSub selectMaxBasSub(BasSub basSub);
 
     /**
      * 新增模块

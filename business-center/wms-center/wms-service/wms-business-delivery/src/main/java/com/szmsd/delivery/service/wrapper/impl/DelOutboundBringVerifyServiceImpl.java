@@ -173,7 +173,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 查询国家信息，收货地址所在的国家
         BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
         // 查询sku信息
-        List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
+        // List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
         // 包裹信息
         List<PackageInfo> packageInfos = new ArrayList<>();
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
@@ -181,7 +181,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
                     , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO));
         } else {
-            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
+                    new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
+                    , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO));
+            /*Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
             for (DelOutboundDetail detail : detailList) {
                 String sku = detail.getSku();
                 BaseProduct product = productMap.get(sku);
@@ -191,7 +194,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
                         new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
                         Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO));
-            }
+            }*/
         }
         // 计算包裹费用
         CalcShipmentFeeCommand calcShipmentFeeCommand = new CalcShipmentFeeCommand();

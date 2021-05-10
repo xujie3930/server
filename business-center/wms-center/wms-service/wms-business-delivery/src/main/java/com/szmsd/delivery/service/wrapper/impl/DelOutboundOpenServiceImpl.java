@@ -37,7 +37,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                 throw new CommonException("999", "单据不存在");
             }
             // 更新包裹信息
-            this.delOutboundService.shipmentPacking(dto);
+            this.delOutboundService.shipmentPacking(dto, delOutbound.getOrderType());
             // 执行异步任务
             EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
             return 1;
