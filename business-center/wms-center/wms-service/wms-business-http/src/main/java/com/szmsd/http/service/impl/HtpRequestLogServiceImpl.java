@@ -1,11 +1,15 @@
 package com.szmsd.http.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.mapper.HtpRequestLogMapper;
 import com.szmsd.http.service.IHtpRequestLogService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,9 +45,17 @@ public class HtpRequestLogServiceImpl extends ServiceImpl<HtpRequestLogMapper, H
      */
     @Override
     public List<HtpRequestLog> selectHtpRequestLogList(HtpRequestLog htpRequestLog) {
-        QueryWrapper<HtpRequestLog> where = new QueryWrapper<HtpRequestLog>();
-        where.orderByDesc("create_time");
-        return baseMapper.selectList(where);
+        QueryWrapper<HtpRequestLog> queryWrapper = Wrappers.query();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "trace_id", htpRequestLog.getTraceId());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "warehouse_code", htpRequestLog.getWarehouseCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "request_url_group", htpRequestLog.getRequestUrlGroup());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_uri", htpRequestLog.getRequestUri());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_body", htpRequestLog.getRequestBody());
+        if (null != htpRequestLog.getRequestTime()) {
+            queryWrapper.eq("request_time", DateFormatUtils.format(htpRequestLog.getRequestTime(), "yyyy-MM-dd"));
+        }
+        queryWrapper.orderByDesc("create_time");
+        return super.list(queryWrapper);
     }
 
     /**
