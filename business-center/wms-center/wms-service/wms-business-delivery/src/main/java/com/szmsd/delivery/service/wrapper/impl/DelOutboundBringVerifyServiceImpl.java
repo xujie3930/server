@@ -365,8 +365,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setShipmentRule(delOutbound.getShipmentRule());
         createShipmentRequestDto.setPackingRule(delOutbound.getPackingRule());
         if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
-            createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryAgent());
-            createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryInfo());
+            createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryInfo());
+            createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
         }
         createShipmentRequestDto.setRemark(delOutbound.getRemark());
         createShipmentRequestDto.setRefOrderNo(delOutbound.getOrderNo());
