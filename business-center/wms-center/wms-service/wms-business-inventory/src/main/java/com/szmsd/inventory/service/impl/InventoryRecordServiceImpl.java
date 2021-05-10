@@ -140,23 +140,34 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
                 String endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getNowDate());
 
                 // 所有入库记录条数 避免死循环
-                int count = this.count(new QueryWrapper<InventoryRecord>().lambda().eq(InventoryRecord::getSku, sku).eq(InventoryRecord::getWarehouseCode, warehouseCode));
+                int count = this.count(new QueryWrapper<InventoryRecord>().lambda().eq(InventoryRecord::getSku, sku).eq(InventoryRecord::getWarehouseCode, warehouseCode).gt(InventoryRecord::getQuantity, 0));
                 List<InventoryRecordVO> inventoryRecordVOS = recursionType1Record(sku, warehouseCode, startTime, endTime, new ArrayList<>(), count, availableInventory);
                 String finalCusCode = cusCode;
                 BigDecimal finalSkuVolume = skuVolume;
                 List<SkuVolumeVO> result = inventoryRecordVOS.stream().map(record -> {
                     BigDecimal volume = new BigDecimal(record.getQuantity()).multiply(finalSkuVolume);
-                    return new SkuVolumeVO().setSku(sku).setVolume(volume).setWarehouseNo(warehouseCode).setOperateOn(record.getOperateOn()).setCusCode(finalCusCode);
+                    return new SkuVolumeVO().setSku(sku).setQty(record.getQuantity()).setSingleVolume(finalSkuVolume).setVolume(volume).setWarehouseNo(warehouseCode).setOperateOn(record.getOperateOn()).setCusCode(finalCusCode);
                 }).collect(Collectors.collectingAndThen(Collectors.toList(), e -> {
-                    // 处理最后一条数据体积 减去最后一条溢出的数量体积
-                    SkuVolumeVO lastVolume = e.get(e.size() - 1);
-                    InventoryRecordVO lastRecord = inventoryRecordVOS.get(e.size() - 1);
-                    List<InventoryRecordVO> front = inventoryRecordVOS.subList(0, inventoryRecordVOS.size() - 1);
-                    Integer frontQty = front.stream().mapToInt(InventoryRecordVO::getQuantity).sum();
-                    // 数量溢出重算
-                    if ((availableInventory - frontQty) < 0) {
-                        BigDecimal volume = (lastVolume.getVolume().divide(new BigDecimal(lastRecord.getQuantity()))).multiply(BigDecimal.valueOf(availableInventory - frontQty));
-                        lastVolume.setVolume(volume);
+
+                    // 符合条件的总入库数量
+                    int totalQty = inventoryRecordVOS.stream().mapToInt(InventoryRecordVO::getQuantity).sum();
+
+                    // 溢出数量
+                    int overflowQty = totalQty - availableInventory;
+                    if (overflowQty > 0) {
+                        for (int i = e.size() - 1; i >= 0; i--) {
+                            if (overflowQty > 0) {
+                                SkuVolumeVO lastVolume = e.get(i);
+                                overflowQty = lastVolume.getQty() - overflowQty;
+                                if (overflowQty > 0) {
+                                    lastVolume.setQty(overflowQty);
+                                    BigDecimal volume = (lastVolume.getSingleVolume()).multiply(BigDecimal.valueOf(lastVolume.getQty()));
+                                    lastVolume.setVolume(volume);
+                                    break;
+                                }
+                                e = e.subList(0, i);
+                            }
+                        }
                     }
                     return e;
                 }));
@@ -190,6 +201,9 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         Integer searchQty = records.stream().mapToInt(InventoryRecordVO::getQuantity).sum();
         List<InventoryRecordVO> inventoryRecords = this.selectList(new InventoryRecordQueryDTO().setSku(sku).setWarehouseCode(warehouse).setTimeType(InventoryRecordQueryDTO.TimeType.OPERATE_ON).setStartTime(startTime).setEndTime(endTime).setType("1"));
         for (InventoryRecordVO record : inventoryRecords) {
+            if (record.getQuantity() < 1) {
+                continue;
+            }
             searchQty += record.getQuantity();
             records.add(record);
             if (searchQty >= qty) {
