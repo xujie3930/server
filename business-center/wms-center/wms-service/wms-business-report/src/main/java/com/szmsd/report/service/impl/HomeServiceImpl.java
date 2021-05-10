@@ -92,7 +92,7 @@ public class HomeServiceImpl implements HomeService {
         assertCusCode(cusCode);
 
         // 当天到仓量
-        String thatDay = "2021-04-27"; // DateUtils.dateTimeNow("yyyy-MM-dd");
+        String thatDay = DateUtils.dateTimeNow("yyyy-MM-dd");
         String startTime = thatDay.concat(" 00:00:00");
         String endTime = thatDay.concat(" 23:59:59");
         String redisKey =  MessageFormat.format(HOME_DOCUMENTS, cusCode, startTime, endTime);
