@@ -10,34 +10,30 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value = "仓储业务操作", description = "仓储业务操作表")
-@TableName("cha_warehouse_operation")
-public class WarehouseOperation extends BaseEntity {
+@ApiModel(value = "仓储业务操作详情", description = "仓储业务操作详情表")
+@TableName("cha_warehouse_operation_details")
+public class WarehouseOperationDetails extends BaseEntity {
 
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
-    @ApiModelProperty(value = "仓库")
-    @TableField
-    private String warehouseCode;
+    @ApiModelProperty(value = "计费天数")
+    private String chargeDays;
 
-    @TableField(exist = false)
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
-    @ApiModelProperty(value = "仓库名称")
-    private String warehouseName;
+    @ApiModelProperty(value = "价格")
+    private BigDecimal price;
 
-    @ApiModelProperty(value = "币种编码")
-    @TableField
-    private String currencyCode;
+    @ApiModelProperty(value = "计费单位")
+    private String unit;
 
-    @ApiModelProperty(value = "币种名称")
-    @TableField
-    private String currencyName;
+    @ApiModelProperty(value = "仓租计价id")
+    private Integer warehouseOperationId;
 
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建人")
@@ -47,8 +43,5 @@ public class WarehouseOperation extends BaseEntity {
     @ApiModelProperty(value = "修改人")
     private String updateBy;
 
-    public String getWarehouseName() {
-        return warehouseCode;
-    }
 
 }
