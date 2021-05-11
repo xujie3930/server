@@ -1,27 +1,24 @@
 package com.szmsd.chargerules.dto;
 
+import com.szmsd.chargerules.domain.WarehouseOperationDetails;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data
+@Accessors(chain = true)
 @ApiModel(value = "WarehouseOperationDTO", description = "WarehouseOperationDTO对象")
 public class WarehouseOperationDTO implements Serializable {
 
     @ApiModelProperty(value = "ID")
-    private Long id;
+    private Integer id;
 
     @ApiModelProperty(value = "仓库")
     private String warehouseCode;
-
-    @ApiModelProperty(value = "计费天数（天）")
-    private Integer chargeDays;
-
-    @ApiModelProperty(value = "价格")
-    private BigDecimal price;
 
     @ApiModelProperty(value = "币种编码")
     private String currencyCode;
@@ -29,11 +26,11 @@ public class WarehouseOperationDTO implements Serializable {
     @ApiModelProperty(value = "币种名称")
     private String currencyName;
 
-    @ApiModelProperty(value = "计费单位")
-    private String unit;
-
     @ApiModelProperty(value = "备注")
     private String remark;
+
+    @ApiModelProperty(value = "详情")
+    private List<WarehouseOperationDetails> details;
 
 
 

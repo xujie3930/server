@@ -162,7 +162,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     @Override
-    public ResponseObject<ChargeWrapper, ProblemDetails> pricing(DelOutboundWrapperContext delOutboundWrapperContext) {
+    public ResponseObject<ChargeWrapper, ProblemDetails> pricing(DelOutboundWrapperContext delOutboundWrapperContext, PricingEnum pricingEnum) {
         DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
         // 查询地址信息
         DelOutboundAddress address = delOutboundWrapperContext.getAddress();
@@ -173,7 +173,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 查询国家信息，收货地址所在的国家
         BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
         // 查询sku信息
-        // List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
+        List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
         // 包裹信息
         List<PackageInfo> packageInfos = new ArrayList<>();
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
@@ -181,20 +181,54 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
                     , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO));
         } else {
-            packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
-                    new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                    , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO));
-            /*Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
-            for (DelOutboundDetail detail : detailList) {
-                String sku = detail.getSku();
-                BaseProduct product = productMap.get(sku);
-                if (null == product) {
-                    throw new CommonException("999", "查询SKU[" + sku + "]信息失败");
+            if (PricingEnum.SKU.equals(pricingEnum)) {
+                // 查询包材的信息
+                Set<String> skus = new HashSet<>();
+                for (DelOutboundDetail detail : detailList) {
+                    // sku包材信息
+                    if (StringUtils.isNotEmpty(detail.getBindCode())) {
+                        skus.add(detail.getBindCode());
+                    }
                 }
-                packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
-                        new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
-                        Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO));
-            }*/
+                Map<String, BaseProduct> bindCodeMap = null;
+                if (!skus.isEmpty()) {
+                    BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
+                    baseProductConditionQueryDto.setSkus(new ArrayList<>(skus));
+                    List<BaseProduct> basProductList = this.baseProductClientService.queryProductList(baseProductConditionQueryDto);
+                    if (CollectionUtils.isNotEmpty(basProductList)) {
+                        bindCodeMap = basProductList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v1, v2) -> v1));
+                    }
+                }
+                if (null == bindCodeMap) {
+                    bindCodeMap = Collections.emptyMap();
+                }
+                Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+                for (DelOutboundDetail detail : detailList) {
+                    String sku = detail.getSku();
+                    BaseProduct product = productMap.get(sku);
+                    if (null == product) {
+                        throw new CommonException("999", "查询SKU[" + sku + "]信息失败");
+                    }
+                    packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
+                            new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
+                            Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO));
+                    // 判断有没有包材
+                    String bindCode = detail.getBindCode();
+                    if (StringUtils.isNotEmpty(bindCode)) {
+                        BaseProduct baseProduct = bindCodeMap.get(bindCode);
+                        if (null == baseProduct) {
+                            throw new CommonException("999", "查询SKU[" + sku + "]的包材[" + bindCode + "]信息失败");
+                        }
+                        packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(baseProduct.getWeight()), "g"),
+                                new Packing(Utils.valueOf(baseProduct.getLength()), Utils.valueOf(baseProduct.getWidth()), Utils.valueOf(baseProduct.getHeight()), "cm"),
+                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO));
+                    }
+                }
+            } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
+                packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
+                        new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
+                        , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO));
+            }
         }
         // 计算包裹费用
         CalcShipmentFeeCommand calcShipmentFeeCommand = new CalcShipmentFeeCommand();

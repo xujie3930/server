@@ -15,6 +15,7 @@ public class BillEnum implements Serializable {
         PAYMENT("02"),
         EXCHANGE("03"),
         FREEZE("04"),
+        PAYMENT_NO_FREEZE("05"),
         ;
         PayType(String payType){
             this.payType=payType;

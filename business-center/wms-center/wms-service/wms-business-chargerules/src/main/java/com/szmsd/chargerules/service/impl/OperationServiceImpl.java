@@ -285,8 +285,8 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         accountSerialBillDTO.setChargeType(chargeLog.getOperationType());
         accountSerialBillDTO.setAmount(chargeLog.getAmount());
         accountSerialBillDTO.setCurrencyCode(chargeLog.getCurrencyCode());
-        serialBillInfoList.add(accountSerialBillDTO);
         accountSerialBillDTO.setWarehouseCode(chargeLog.getWarehouseCode());
+        serialBillInfoList.add(accountSerialBillDTO);
         custPayDTO.setCusCode(chargeLog.getCustomCode());
         custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
         custPayDTO.setPayMethod(BillEnum.PayMethod.BUSINESS_OPERATE);
