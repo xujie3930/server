@@ -353,4 +353,11 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         return update;
     }
 
+    @Override
+    public List<Inventory> getWarehouseSku() {
+        LambdaQueryWrapper<Inventory> query = Wrappers.lambdaQuery();
+        query.gt(Inventory::getAvailableInventory,0);
+        return this.list(query);
+    }
+
 }

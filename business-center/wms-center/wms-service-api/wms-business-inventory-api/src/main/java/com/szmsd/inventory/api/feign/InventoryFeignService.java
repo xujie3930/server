@@ -4,6 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.api.BusinessInventoryInterface;
 import com.szmsd.inventory.api.factory.InventoryFeignFallback;
+import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
@@ -61,4 +62,7 @@ public interface InventoryFeignService {
 
     @PostMapping("/inventory/adjustment")
     R adjustment(@RequestBody InventoryAdjustmentDTO inventoryAdjustmentDTO);
+
+    @GetMapping("/inventory/getWarehouseSku")
+    R<List<Inventory>> getWarehouseSku();
 }
