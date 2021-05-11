@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import java.math.BigDecimal;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -21,7 +20,7 @@ public class WarehouseOperation extends BaseEntity {
 
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private Integer id;
 
     @ApiModelProperty(value = "仓库")
     @TableField
@@ -32,14 +31,6 @@ public class WarehouseOperation extends BaseEntity {
     @ApiModelProperty(value = "仓库名称")
     private String warehouseName;
 
-    @ApiModelProperty(value = "计费天数")
-    @TableField
-    private Integer chargeDays;
-
-    @ApiModelProperty(value = "价格")
-    @TableField
-    private BigDecimal price;
-
     @ApiModelProperty(value = "币种编码")
     @TableField
     private String currencyCode;
@@ -47,10 +38,6 @@ public class WarehouseOperation extends BaseEntity {
     @ApiModelProperty(value = "币种名称")
     @TableField
     private String currencyName;
-
-    @ApiModelProperty(value = "计费单位")
-    @TableField
-    private String unit;
 
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建人")

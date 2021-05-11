@@ -5,4 +5,6 @@ package com.szmsd.finance.service;
  */
 public interface ISysDictDataService {
     String getCurrencyNameByCode(String currencyCode);
+
+    String getWarehouseNameByCode(String warehouseCode);
 }

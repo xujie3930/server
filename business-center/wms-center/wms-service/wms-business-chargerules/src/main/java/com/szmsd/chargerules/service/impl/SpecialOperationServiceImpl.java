@@ -75,7 +75,7 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
     public List<SpecialOperation> listPage(SpecialOperationDTO dto) {
         LambdaQueryWrapper<SpecialOperation> where = Wrappers.lambdaQuery();
         if (StringUtils.isNotEmpty(dto.getOperationType())) {
-            where.eq(SpecialOperation::getOperationType, dto.getOperationType());
+            where.like(SpecialOperation::getOperationType, dto.getOperationType());
         }
         if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             where.eq(SpecialOperation::getWarehouseCode, dto.getWarehouseCode());

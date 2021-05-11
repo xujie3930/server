@@ -5,9 +5,9 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.*;
-import com.szmsd.inventory.service.IInventoryInspectionService;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
 import com.szmsd.inventory.service.IInventoryWrapperService;
@@ -170,4 +170,12 @@ public class InventoryController extends BaseController {
         inventoryService.adjustment(inventoryAdjustmentDTO);
         return R.ok();
     }
+
+    @PreAuthorize("@ss.hasPermi('inventory:getWarehouseSku')")
+    @GetMapping("/getWarehouseSku")
+    @ApiOperation(value = "查询仓库和SKU", notes = "库存管理 - 查询仓库和SKU")
+    public R<List<Inventory>> getWarehouseSku() {
+        return R.ok(inventoryService.getWarehouseSku());
+    }
+
 }

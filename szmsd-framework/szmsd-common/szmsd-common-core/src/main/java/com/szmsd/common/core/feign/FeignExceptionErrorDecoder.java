@@ -8,6 +8,8 @@ import feign.Response;
 import feign.Util;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 
 import java.nio.charset.StandardCharsets;
@@ -15,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Configuration
 public class FeignExceptionErrorDecoder implements ErrorDecoder {
+    private final Logger logger = LoggerFactory.getLogger(FeignExceptionErrorDecoder.class);
 
     @Override
     public Exception decode(String s, Response response) {
@@ -28,6 +31,7 @@ public class FeignExceptionErrorDecoder implements ErrorDecoder {
                 }
             }
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             if (e instanceof CommonException) {
                 return e;
             }

@@ -14,7 +14,7 @@
             b.operation_type,
             a.qty,
             a.coefficient,
-            a.unit,
+            b.unit,
             a.oms_remark,
             a.status,
             a.create_by,

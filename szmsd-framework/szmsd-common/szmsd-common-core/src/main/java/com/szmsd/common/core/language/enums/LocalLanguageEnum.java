@@ -64,7 +64,7 @@ public enum LocalLanguageEnum {
     HOME_DOCUMENT_TYPE_2(HOME_DOCUMENT_TYPE, "当天到仓量", "当天到仓量", "Received Quantity"),
     HOME_DOCUMENT_TYPE_3(HOME_DOCUMENT_TYPE, "当天装运包裹到仓量", "当天装运包裹到仓量", "Order Completed"),
     HOME_DOCUMENT_TYPE_4(HOME_DOCUMENT_TYPE, "当天出库量", "当天出库量", "Order Shipped"),
-    HOME_DOCUMENT_TYPE_5(HOME_DOCUMENT_TYPE, "未处理问题件", "未处理问题件", "Untreated Problem pieces"),
+    HOME_DOCUMENT_TYPE_5(HOME_DOCUMENT_TYPE, "未处理问题件", "未处理问题件", "Untreated Problem Pieces"),
 
     /** 已创建订单 **/
     HOME_BAR_CHART_TYPE_1(HOME_BAR_CHART_TYPE, "已创建订单", "已创建订单", "Order Created"),

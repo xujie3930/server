@@ -106,12 +106,21 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     int shipmentOperationType(ShipmentRequestDto dto);
 
     /**
-     * 出库管理 - Open - 接收出库包裹使用包材
+     * 出库管理 - Open - 接收出库包裹使用包材（只更新包材类型）
      *
      * @param dto dto
      * @return int
      */
-    int shipmentPacking(ShipmentPackingMaterialRequestDto dto);
+    int shipmentPackingMaterial(ShipmentPackingMaterialRequestDto dto);
+
+    /**
+     * 出库管理 - Open - 接收出库包裹使用包材
+     *
+     * @param dto       dto
+     * @param orderType orderType
+     * @return int
+     */
+    int shipmentPacking(ShipmentPackingMaterialRequestDto dto, String orderType);
 
     /**
      * 出库管理 - Open - 接收批量出库单类型装箱信息

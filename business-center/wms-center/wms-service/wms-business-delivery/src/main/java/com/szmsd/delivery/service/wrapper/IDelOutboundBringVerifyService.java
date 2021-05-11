@@ -35,9 +35,10 @@ public interface IDelOutboundBringVerifyService {
      * 计算包裹费用
      *
      * @param delOutboundWrapperContext delOutboundWrapperContext
+     * @param pricingEnum               pricingEnum
      * @return ResponseObject<ChargeWrapper, ProblemDetails>
      */
-    ResponseObject<ChargeWrapper, ProblemDetails> pricing(DelOutboundWrapperContext delOutboundWrapperContext);
+    ResponseObject<ChargeWrapper, ProblemDetails> pricing(DelOutboundWrapperContext delOutboundWrapperContext, PricingEnum pricingEnum);
 
     /**
      * 创建承运商物流订单（客户端）

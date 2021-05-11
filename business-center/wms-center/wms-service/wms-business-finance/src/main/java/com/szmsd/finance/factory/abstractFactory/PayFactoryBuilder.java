@@ -2,14 +2,12 @@ package com.szmsd.finance.factory.abstractFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.szmsd.finance.enums.BillEnum;
-import com.szmsd.finance.factory.BalanceFreezeFactory;
-import com.szmsd.finance.factory.ExchangePayFactory;
-import com.szmsd.finance.factory.IncomePayFactory;
-import com.szmsd.finance.factory.PaymentPayFactory;
+import com.szmsd.finance.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 /**
  * @author liulei
@@ -28,6 +26,9 @@ public class PayFactoryBuilder {
     @Autowired
     private BalanceFreezeFactory balanceFreezeFactory;
 
+    @Resource
+    private PaymentNoFreezePayFactory paymentNoFreezePayFactory;
+
     private ImmutableMap<BillEnum.PayType, AbstractPayFactory> factoryMap;
 
     @PostConstruct
@@ -37,6 +38,7 @@ public class PayFactoryBuilder {
                 .put(BillEnum.PayType.PAYMENT,paymentPayFactory)
                 .put(BillEnum.PayType.EXCHANGE,exchangePayFactory)
                 .put(BillEnum.PayType.FREEZE,balanceFreezeFactory)
+                .put(BillEnum.PayType.PAYMENT_NO_FREEZE,paymentNoFreezePayFactory)
                 .build();
 
     }

@@ -190,7 +190,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         accountSerialBillDTO.setCurrencyCode(specialOperation.getCurrencyCode());
         serialBillInfoList.add(accountSerialBillDTO);
         custPayDTO.setCusCode(customCode);
-        custPayDTO.setPayType(BillEnum.PayType.PAYMENT);
+        custPayDTO.setPayType(BillEnum.PayType.PAYMENT_NO_FREEZE);
         custPayDTO.setPayMethod(BillEnum.PayMethod.SPECIAL_OPERATE);
         custPayDTO.setCurrencyCode(specialOperation.getCurrencyCode());
         custPayDTO.setAmount(amount);

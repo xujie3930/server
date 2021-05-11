@@ -77,6 +77,7 @@ public class AccountSerialBillDTO {
 
     public AccountSerialBillDTO(CustPayDTO dto, AccountSerialBillDTO details) {
         this.no = dto.getNo();
+        this.trackingNo = details.getTrackingNo();
         this.cusCode = dto.getCusCode();
         this.cusName = dto.getCusName();
         this.currencyCode = details.getCurrencyCode();
@@ -90,6 +91,8 @@ public class AccountSerialBillDTO {
         this.productCategory = details.getProductCategory();
         this.chargeCategory = details.getChargeCategory();
         this.chargeType = details.getChargeType();
+        this.orderTime = details.getOrderTime();
+        this.paymentTime = details.getPaymentTime();
         this.remark = details.getRemark();
     }
 }

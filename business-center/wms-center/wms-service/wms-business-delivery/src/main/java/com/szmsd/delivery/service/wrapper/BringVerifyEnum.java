@@ -172,6 +172,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             String exceptionMessage = Utils.defaultValue(throwable.getMessage(), "提审操作失败");
             updateDelOutbound.setExceptionMessage(exceptionMessage);
             // PRC计费
+            updateDelOutbound.setLength(delOutbound.getLength());
+            updateDelOutbound.setWidth(delOutbound.getWidth());
+            updateDelOutbound.setHeight(delOutbound.getHeight());
+            updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
+            updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
+            updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             // 产品信息
@@ -215,7 +221,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
-            ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext);
+            ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.SKU);
             if (null == responseObject) {
                 // 返回值是空的
                 throw new CommonException("999", "计算包裹费用失败");
@@ -225,14 +231,17 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
                     // 计算成功了
                     ChargeWrapper chargeWrapper = responseObject.getObject();
-                    DelOutbound updateDelOutbound = new DelOutbound();
-                    updateDelOutbound.setId(delOutbound.getId());
-                    // 更新：计费重，金额
                     ShipmentChargeInfo data = chargeWrapper.getData();
                     PricingPackageInfo packageInfo = data.getPackageInfo();
+                    // 包裹信息
+                    Packing packing = packageInfo.getPacking();
+                    delOutbound.setLength(Utils.valueOf(packing.getLength()));
+                    delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
+                    delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
+                    // 计费重信息
                     Weight calcWeight = packageInfo.getCalcWeight();
-                    updateDelOutbound.setCalcWeight(calcWeight.getValue());
-                    updateDelOutbound.setCalcWeightUnit(calcWeight.getUnit());
+                    delOutbound.setCalcWeight(calcWeight.getValue());
+                    delOutbound.setCalcWeightUnit(calcWeight.getUnit());
                     List<ChargeItem> charges = chargeWrapper.getCharges();
                     // 保存费用信息
                     List<DelOutboundCharge> delOutboundCharges = new ArrayList<>();
@@ -614,22 +623,22 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     if (null == product) {
                         throw new CommonException("999", "SKU[" + sku + "]信息不存在");
                     }
-                    double weight = Utils.defaultValue(product.getWeight());
-                    // 查询包材重量
-                    String bindCode = detail.getBindCode();
-                    if (StringUtils.isNotEmpty(bindCode) && productMap.containsKey(bindCode)) {
-                        // 累计包材的重量
-                        BaseProduct baseProduct = productMap.get(bindCode);
-                        if (null != baseProduct) {
-                            weight = weight + Utils.defaultValue(baseProduct.getWeight());
-                        }
-                    }
                     // 操作费对象
                     DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
                     detailVO.setSku(sku);
                     detailVO.setQty(detail.getQty());
-                    detailVO.setWeight(weight);
+                    detailVO.setWeight(Utils.defaultValue(product.getWeight()));
                     detailVOList.add(detailVO);
+                    // 判断有没有包材
+                    String bindCode = detail.getBindCode();
+                    if (StringUtils.isNotEmpty(bindCode) && productMap.containsKey(bindCode)) {
+                        BaseProduct baseProduct = productMap.get(bindCode);
+                        DelOutboundOperationDetailVO vo = new DelOutboundOperationDetailVO();
+                        vo.setSku(bindCode);
+                        vo.setQty(detail.getQty());
+                        vo.setWeight(Utils.defaultValue(baseProduct.getWeight()));
+                        detailVOList.add(vo);
+                    }
                 }
             }
             delOutboundOperationVO.setDetails(detailVOList);
