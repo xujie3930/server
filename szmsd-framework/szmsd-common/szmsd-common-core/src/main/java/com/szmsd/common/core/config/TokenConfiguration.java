@@ -5,6 +5,7 @@ import com.szmsd.common.core.interceptor.ResetTokenHandlerExceptionResolver;
 import com.szmsd.common.core.interceptor.TokenConstant;
 import com.szmsd.common.core.interceptor.TokenHandlerInterceptor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import java.util.*;
  * @author zhangyuyuan
  * @date 2021-05-10 11:26
  */
+@ConditionalOnClass(WebMvcConfigurer.class)
 @ConditionalOnExpression("${com.szmsd.toekn.enabled:true}")
 @ComponentScan(basePackages = {"com.szmsd.common.core.config", "com.szmsd.common.core.interceptor"})
 @Configuration
