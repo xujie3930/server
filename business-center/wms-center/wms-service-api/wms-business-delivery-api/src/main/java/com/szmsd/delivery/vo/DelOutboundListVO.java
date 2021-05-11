@@ -66,6 +66,9 @@ public class DelOutboundListVO implements Serializable {
     @ApiModelProperty(value = "计费重")
     private Double calcWeight;
 
+    @ApiModelProperty(value = "计费单位")
+    private String calcWeightUnit;
+
     @ApiModelProperty(value = "费用")
     private BigDecimal amount;
 
