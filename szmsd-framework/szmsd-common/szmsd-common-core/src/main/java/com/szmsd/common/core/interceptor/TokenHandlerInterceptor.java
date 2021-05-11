@@ -49,6 +49,6 @@ public class TokenHandlerInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, Exception ex) throws Exception {
-
+        TokenContext.destroy();
     }
 }
