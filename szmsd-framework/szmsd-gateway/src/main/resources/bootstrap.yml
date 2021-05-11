@@ -12,8 +12,3 @@ spring:
     active: dev
   main:
     allow-bean-definition-overriding: true
-
-com:
-  szmsd:
-    toekn:
-      enabled: false
