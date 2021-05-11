@@ -251,7 +251,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         log.info("更新sku测量值: {}", request);
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", request.getCode());
-        queryWrapper.eq("category", ProductConstant.SKU_NAME);
+        //queryWrapper.eq("category", ProductConstant.SKU_NAME);
         if (super.count(queryWrapper) < 1) {
             throw new BaseException("sku不存在");
         }
