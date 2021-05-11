@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -108,6 +109,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
             throw new CommonException("999", "该单据已审核通过，请勿重复提交");
         }
         InventoryInspection map = BeanMapperUtil.map(dto, InventoryInspection.class);
+        map.setAuditTime(new Date());
         LambdaQueryWrapper<InventoryInspectionDetails> query = Wrappers.lambdaQuery();
         query.eq(InventoryInspectionDetails::getInspectionNo, dto.getInspectionNo());
         List<InventoryInspectionDetails> list = inventoryInspectionDetailsService.list(query);
