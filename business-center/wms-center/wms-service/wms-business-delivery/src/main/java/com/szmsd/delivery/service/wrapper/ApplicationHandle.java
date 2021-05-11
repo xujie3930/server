@@ -10,6 +10,13 @@ import org.slf4j.LoggerFactory;
 public interface ApplicationHandle {
 
     /**
+     * 前态
+     *
+     * @return ApplicationState
+     */
+    ApplicationState preState();
+
+    /**
      * 现态
      *
      * @return ApplicationState

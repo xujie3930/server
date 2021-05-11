@@ -534,27 +534,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
     }
 
-    private void freeze(String orderType, String invoiceNo, String warehouseCode, List<DelOutboundDetailDto> details) {
-        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
-            return;
-        }
-        if (CollectionUtils.isEmpty(details)) {
-            return;
-        }
-        InventoryOperateListDto operateListDto = new InventoryOperateListDto();
-        operateListDto.setInvoiceNo(invoiceNo);
-        operateListDto.setWarehouseCode(warehouseCode);
-        long lineNo = 1L;
-        Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
-        for (DelOutboundDetailDto detail : details) {
-            detail.setLineNo(lineNo++);
-            DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
-        }
-        List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
-        operateListDto.setOperateList(operateList);
-        this.inventoryFeignClientService.freeze(operateListDto);
-    }
-
     /**
      * 取消冻结
      *
@@ -562,7 +541,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param orderNo       orderNo
      * @param warehouseCode warehouseCode
      */
-    private void unFreeze(String orderType, String orderNo, String warehouseCode) {
+    @Override
+    public void unFreeze(String orderType, String orderNo, String warehouseCode) {
         if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
             return;
         }

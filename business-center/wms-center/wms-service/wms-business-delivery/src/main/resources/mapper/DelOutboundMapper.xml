@@ -33,6 +33,7 @@
             o.shipment_rule,
             o.tracking_no,
             o.specifications,
+            o.weight,
             o.calc_weight,
             o.calc_weight_unit,
             o.amount,

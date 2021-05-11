@@ -236,6 +236,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (accountBalance != null) {
             return new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
         }
+        log.info("getBalance() cusCode: {} currencyCode: {}",cusCode,currencyCode);
         accountBalance = new AccountBalance(cusCode, currencyCode, getCurrencyName(currencyCode));
         accountBalanceMapper.insert(accountBalance);
         return new BalanceDTO(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
@@ -342,7 +343,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public BigDecimal getCurrentBalance(String cusCode, String currencyCode) {
-        QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper();
+        QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cus_code", cusCode);
         queryWrapper.eq("currency_code", currencyCode);
         AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
