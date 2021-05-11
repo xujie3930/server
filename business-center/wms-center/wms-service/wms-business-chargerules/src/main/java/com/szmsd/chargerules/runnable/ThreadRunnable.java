@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class RunnableExecute {
+public class ThreadRunnable {
 
     @Resource
     private IPayService payService;
@@ -125,12 +125,6 @@ public class RunnableExecute {
                 pay(warehouseCode, skuVolume, warehouseOperationVo, amount);
             }
         }
-    }
-
-    public static void main(String[] args) {
-
-        System.out.println(new BigDecimal("10").compareTo(BigDecimal.ZERO) > 0);
-
     }
 
     /**
