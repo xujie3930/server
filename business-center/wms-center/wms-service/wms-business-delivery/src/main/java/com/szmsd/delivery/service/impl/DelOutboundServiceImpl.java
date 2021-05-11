@@ -8,7 +8,9 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
@@ -55,6 +57,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -100,6 +103,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private OperationFeignService operationFeignService;
     @Autowired
     private IDelOutboundPackingService delOutboundPackingService;
+    @Resource
+    private BasRegionFeignService basRegionFeignService;
 
     /**
      * 查询出库单模块
@@ -1085,7 +1090,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         List<QueryChargeVO> list = baseMapper.selectDelOutboundList(queryDto);
         for (QueryChargeVO queryChargeVO : list) {
             String orderNo = queryChargeVO.getOrderNo();
-
+            queryChargeVO.setCountry(getCountryName(queryChargeVO.getCountry()));
             List<DelOutboundDetail> delOutboundDetails = delOutboundDetailService.selectDelOutboundDetailList(new DelOutboundDetail().setOrderNo(orderNo));
             //计算数量 = 多个SKU的数量+包材（1个）
             queryChargeVO.setQty(ListUtils.emptyIfNull(delOutboundDetails).stream().map(value -> StringUtils.isBlank(value.getBindCode())
@@ -1096,6 +1101,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.setAmount(queryChargeVO, delOutboundCharges);
         }
         return list;
+    }
+
+    private String getCountryName(String country) {
+        if(StringUtils.isEmpty(country)) return country;
+        R<BasRegionSelectListVO> result = basRegionFeignService.queryByCountryCode(country);
+        if(result.getCode() == 200 && result.getData() != null) {
+            return result.getData().getName();
+        }
+        return "";
     }
 
     @Override
