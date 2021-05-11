@@ -89,6 +89,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 1.扣减库存              DE
         // 2.1扣减费用             FEE_DE
         // 2.2扣减操作费用         OP_FEE_DE
+        // TODO 2.3扣减物料费           PM_FEE_DE
         // 3.更新状态为已完成       MODIFY
         // 4.完成                  END
         DelOutbound delOutbound = this.delOutboundService.getByOrderNo(orderNo);

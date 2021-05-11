@@ -46,7 +46,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     @Transactional
     @Override
     public boolean updateBalance(CustPayDTO dto) {
-        String key = "cky-test-fss-balance-all:" + dto.getCusId();
+        String key = "cky-test-fss-freeze-balance-all:" + dto.getCusId();
         RLock lock = redissonClient.getLock(key);
         try {
             BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());

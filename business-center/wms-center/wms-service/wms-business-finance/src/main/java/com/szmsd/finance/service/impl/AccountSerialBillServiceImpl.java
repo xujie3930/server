@@ -9,11 +9,13 @@ import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
+import com.szmsd.finance.service.ISysDictDataService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,6 +23,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Resource
     private AccountSerialBillMapper accountSerialBillMapper;
+
+    @Resource
+    private ISysDictDataService sysDictDataService;
 
     @Override
     public List<AccountSerialBill> listPage(AccountSerialBillDTO dto) {
@@ -65,13 +70,24 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     @Override
     public int add(AccountSerialBillDTO dto) {
         AccountSerialBill accountSerialBill = BeanMapperUtil.map(dto, AccountSerialBill.class);
+        if (StringUtils.isBlank(accountSerialBill.getWarehouseName()))
+            accountSerialBill.setWarehouseName(sysDictDataService.getWarehouseNameByCode(accountSerialBill.getWarehouseCode()));
+        if (StringUtils.isBlank(accountSerialBill.getCurrencyName()))
+            accountSerialBill.setCurrencyName(sysDictDataService.getCurrencyNameByCode(dto.getCurrencyCode()));
         return accountSerialBillMapper.insert(accountSerialBill);
     }
 
     @Override
     public boolean saveBatch(List<AccountSerialBillDTO> dto) {
         List<AccountSerialBill> accountSerialBill = BeanMapperUtil.mapList(dto, AccountSerialBill.class);
-        boolean b = this.saveBatch(accountSerialBill);
+        List<AccountSerialBill> collect = accountSerialBill.stream().map(value -> {
+            if (StringUtils.isBlank(value.getWarehouseName()))
+                value.setWarehouseName(sysDictDataService.getWarehouseNameByCode(value.getWarehouseCode()));
+            if (StringUtils.isBlank(value.getCurrencyName()))
+                value.setCurrencyName(sysDictDataService.getCurrencyNameByCode(value.getCurrencyCode()));
+            return value;
+        }).collect(Collectors.toList());
+        boolean b = this.saveBatch(collect);
         if (!b) log.error("saveBatch() insert failed. {}", accountSerialBill);
         return b;
     }

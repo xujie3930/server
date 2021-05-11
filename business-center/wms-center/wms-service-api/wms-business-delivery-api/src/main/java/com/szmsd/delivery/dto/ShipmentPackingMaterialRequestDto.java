@@ -42,4 +42,28 @@ public class ShipmentPackingMaterialRequestDto implements Serializable {
     @ApiModelProperty(value = "重量 g")
     private Double weight;
 
+    /**
+     * 判断是不是只更新包材
+     *
+     * @return boolean
+     */
+    public boolean isPackingMaterial() {
+        // 如果长宽高重量，都是0，就认为，只更新包材类型
+        // 如果是null，也默认为0
+        this.length = this.setDefaultValue(this.length);
+        this.width = this.setDefaultValue(this.width);
+        this.height = this.setDefaultValue(this.height);
+        this.weight = this.setDefaultValue(this.weight);
+        return (0.0D == this.length
+                || 0.0D == this.width
+                || 0.0D == this.height
+                || 0.0D == this.weight);
+    }
+
+    private double setDefaultValue(Double value) {
+        if (null == value) {
+            return 0.0D;
+        }
+        return value;
+    }
 }

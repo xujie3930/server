@@ -37,10 +37,15 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                 throw new CommonException("999", "单据不存在");
             }
             // 更新包裹信息
-            this.delOutboundService.shipmentPacking(dto, delOutbound.getOrderType());
-            // 执行异步任务
-            EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
-            return 1;
+            int result;
+            if (dto.isPackingMaterial()) {
+                result = this.delOutboundService.shipmentPackingMaterial(dto);
+            } else {
+                result = this.delOutboundService.shipmentPacking(dto, delOutbound.getOrderType());
+                // 执行异步任务
+                EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
+            }
+            return result;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
