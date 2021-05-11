@@ -95,5 +95,12 @@ public interface IInventoryService extends IService<Inventory> {
     int unDeduction(String invoiceNo, String warehouseCode, String sku, Integer num);
 
     void adjustment(InventoryAdjustmentDTO inventoryAdjustmentDTO);
+
+    /**
+     * 获取仓库SKU
+     * @return list
+     */
+    List<Inventory> getWarehouseSku();
+
 }
 

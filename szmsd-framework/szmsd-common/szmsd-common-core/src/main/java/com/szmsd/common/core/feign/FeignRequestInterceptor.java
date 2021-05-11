@@ -37,6 +37,10 @@ public class FeignRequestInterceptor implements RequestInterceptor {
                 Enumeration<String> values = request.getHeaders(name);
                 while (values.hasMoreElements()) {
                     String value = values.nextElement();
+                    // 停止传播
+                    if ("T-Token-Verification".equalsIgnoreCase(name)) {
+                        break;
+                    }
                     if ("content-type".equalsIgnoreCase(name) && value.contains("multipart/form-data")) {
                         break;
                     }
