@@ -235,7 +235,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         String cancelledState = delOutbound.getCancelledState();
         try {
             if (StringUtils.isEmpty(cancelledState)) {
-                this.unFreeze(orderNo, delOutbound.getWarehouseCode(), delOutbound.getOrderType());
+                this.delOutboundService.unFreeze(delOutbound.getOrderType(), orderNo, delOutbound.getWarehouseCode());
                 cancelledState = "UN_FEE";
             }
             // 销毁，自提，新SKU不扣物流费用
@@ -301,35 +301,6 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             throw e;
         } finally {
             this.delOutboundService.updateCancelledState(delOutbound.getId(), cancelledState);
-        }
-    }
-
-    /**
-     * 取消冻结
-     *
-     * @param orderNo       orderNo
-     * @param warehouseCode warehouseCode
-     * @param orderType     orderType
-     */
-    private void unFreeze(String orderNo, String warehouseCode, String orderType) {
-        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
-            return;
-        }
-        // 查询明细
-        List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
-        InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
-        Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
-        for (DelOutboundDetail detail : details) {
-            DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
-        }
-        inventoryOperateListDto.setInvoiceNo(orderNo);
-        inventoryOperateListDto.setWarehouseCode(warehouseCode);
-        List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
-        inventoryOperateListDto.setOperateList(operateList);
-        // 取消冻结
-        Integer deduction = this.inventoryFeignClientService.unFreeze(inventoryOperateListDto);
-        if (null == deduction || deduction < 1) {
-            throw new CommonException("999", "取消冻结库存失败");
         }
     }
 

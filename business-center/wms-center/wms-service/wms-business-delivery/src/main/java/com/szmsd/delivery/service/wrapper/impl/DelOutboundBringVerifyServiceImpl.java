@@ -78,8 +78,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     throw new CommonException("999", "单据不存在");
                 }
                 // 可以提审的状态：待提审，审核失败
+                boolean isAuditFailed = DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState());
                 if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
-                        || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
+                        || isAuditFailed)) {
                     throw new CommonException("999", "单据状态不正确，不能提审");
                 }
                 ApplicationContext context = this.initContext(delOutbound);
@@ -89,8 +90,22 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     currentState = BringVerifyEnum.BEGIN;
                 } else {
                     currentState = BringVerifyEnum.get(bringVerifyState);
+                    if (null == currentState) {
+                        currentState = BringVerifyEnum.BEGIN;
+                    }
                 }
-                ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
+                ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.BEGIN, BringVerifyEnum.BEGIN);
+                // 如果是审核失败的，先回滚操作，然后再来重新提交
+                // 回滚之前先判断有没有超过 BringVerifyEnum.SHIPMENT_CREATE 节点，如果超过了这个节点，就不允许回滚。
+                if (isAuditFailed && currentState.ordinal() <= BringVerifyEnum.SHIPMENT_CREATE.ordinal()) {
+                    // 执行回滚操作
+                    applicationContainer.rollback();
+                    // 状态重置
+                    currentState = BringVerifyEnum.BEGIN;
+                }
+                // 重新设置状态
+                applicationContainer.setCurrentState(currentState);
+                applicationContainer.setEndState(BringVerifyEnum.END);
                 applicationContainer.action();
             }
         }

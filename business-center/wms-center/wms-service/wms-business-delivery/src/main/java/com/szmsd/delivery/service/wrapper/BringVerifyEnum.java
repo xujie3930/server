@@ -59,32 +59,32 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
      */
     BEGIN,
 
-    // #1 PRC 计费
+    // #1 PRC 计费        - 无回滚
     PRC_PRICING,
 
-    // #2 冻结物流费用
+    // #2 冻结物流费用    - 有回滚
     FREEZE_BALANCE,
 
-    // #3 获取产品信息
+    // #3 获取产品信息    - 无回滚
     PRODUCT_INFO,
 
-    // #4 新增/修改发货规则
+    // #4 新增/修改发货规则 - 无回滚
     SHIPMENT_RULE,
 
-    // #5 创建承运商物流订单
+    // #5 创建承运商物流订单 - 有回滚
     SHIPMENT_ORDER,
 
-    // #6 推单WMS
-    SHIPMENT_CREATE,
-
-    // #7 更新标签
-    SHIPMENT_LABEL,
-
-    // #8 冻结库存
+    // #6 冻结库存          - 有回滚
     FREEZE_INVENTORY,
 
-    // #9 冻结操作费用
+    // #7 冻结操作费用       - 有回滚
     FREEZE_OPERATION,
+
+    // #8 推单WMS             - 无回滚，需要取消单据
+    SHIPMENT_CREATE,
+
+    // #9 更新标签             - 无回滚
+    SHIPMENT_LABEL,
 
     /**
      * 结束
@@ -124,10 +124,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         map.put(PRODUCT_INFO.name(), new ProductInfoHandle());
         map.put(SHIPMENT_RULE.name(), new ShipmentRuleHandle());
         map.put(SHIPMENT_ORDER.name(), new ShipmentOrderHandle());
-        map.put(SHIPMENT_CREATE.name(), new ShipmentCreateHandle());
-        map.put(SHIPMENT_LABEL.name(), new ShipmentLabelHandle());
         map.put(FREEZE_INVENTORY.name(), new FreezeInventoryHandle());
         map.put(FREEZE_OPERATION.name(), new FreezeOperationHandle());
+        map.put(SHIPMENT_CREATE.name(), new ShipmentCreateHandle());
+        map.put(SHIPMENT_LABEL.name(), new ShipmentLabelHandle());
         map.put(END.name(), new EndHandle());
         return map;
     }
@@ -195,6 +195,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     static class BeginHandle extends CommonApplicationHandle {
 
         @Override
+        public ApplicationState preState() {
+            return BEGIN;
+        }
+
+        @Override
         public ApplicationState quoState() {
             return BEGIN;
         }
@@ -211,6 +216,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     }
 
     static class PrcPricingHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return BEGIN;
+        }
 
         @Override
         public ApplicationState quoState() {
@@ -287,6 +297,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     static class FreezeBalanceHandle extends CommonApplicationHandle {
 
         @Override
+        public ApplicationState preState() {
+            return PRC_PRICING;
+        }
+
+        @Override
         public ApplicationState quoState() {
             return FREEZE_BALANCE;
         }
@@ -317,12 +332,38 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public void rollback(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+            cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
+            cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
+            cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+            cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+            cusFreezeBalanceDTO.setOrderType("Freight");
+            RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
+            R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+            if (null == thawBalanceR) {
+                throw new CommonException("999", "取消冻结费用失败");
+            }
+            if (Constants.SUCCESS != thawBalanceR.getCode()) {
+                throw new CommonException("999", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
+            }
+            super.rollback(context);
+        }
+
+        @Override
         public ApplicationState nextState() {
             return PRODUCT_INFO;
         }
     }
 
     static class ProductInfoHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return FREEZE_BALANCE;
+        }
 
         @Override
         public ApplicationState quoState() {
@@ -347,12 +388,26 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public void rollback(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            delOutbound.setTrackingAcquireType("");
+            delOutbound.setShipmentService("");
+            super.rollback(context);
+        }
+
+        @Override
         public ApplicationState nextState() {
             return SHIPMENT_RULE;
         }
     }
 
     static class ShipmentRuleHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return PRODUCT_INFO;
+        }
 
         @Override
         public ApplicationState quoState() {
@@ -391,6 +446,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     static class ShipmentOrderHandle extends CommonApplicationHandle {
 
         @Override
+        public ApplicationState preState() {
+            return SHIPMENT_RULE;
+        }
+
+        @Override
         public ApplicationState quoState() {
             return SHIPMENT_ORDER;
         }
@@ -410,110 +470,20 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
-        public ApplicationState nextState() {
-            return SHIPMENT_CREATE;
-        }
-    }
-
-    static class ShipmentCreateHandle extends CommonApplicationHandle {
-
-        @Override
-        public ApplicationState quoState() {
-            return SHIPMENT_CREATE;
-        }
-
-        @Override
-        public void handle(ApplicationContext context) {
+        public void rollback(ApplicationContext context) {
+            // 取消承运商物流订单
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            // 推单到WMS
-            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
-            String refOrderNo = delOutboundBringVerifyService.shipmentCreate(delOutboundWrapperContext, delOutbound.getTrackingNo());
-            // 保存信息
-            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
-            DelOutbound updateDelOutbound = new DelOutbound();
-            updateDelOutbound.setId(delOutbound.getId());
-            updateDelOutbound.setBringVerifyState(END.name());
-            // PRC计费
-            updateDelOutbound.setAmount(delOutbound.getAmount());
-            updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
-            // 产品信息
-            updateDelOutbound.setTrackingAcquireType(delOutbound.getTrackingAcquireType());
-            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
-            // 创建承运商物流订单
-            updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
-            updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
-            // 推单WMS
-            updateDelOutbound.setRefOrderNo(refOrderNo);
-            delOutboundService.bringVerifySuccess(updateDelOutbound);
-        }
-
-        @Override
-        public ApplicationState nextState() {
-            return SHIPMENT_LABEL;
-        }
-    }
-
-    static class ShipmentLabelHandle extends CommonApplicationHandle {
-        @Override
-        public ApplicationState quoState() {
-            return SHIPMENT_LABEL;
-        }
-
-        @Override
-        public void handle(ApplicationContext context) {
-            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
-            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            // 查询上传文件信息
-            RemoteAttachmentService remoteAttachmentService = SpringUtils.getBean(RemoteAttachmentService.class);
-            BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
-            basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
-            basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
-            R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
-            if (null == listR || null == listR.getData()) {
-                return;
+            String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
+            String trackingNo = delOutbound.getTrackingNo();
+            if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
+                String referenceNumber = String.valueOf(delOutbound.getId());
+                IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+                delOutboundBringVerifyService.cancellation(referenceNumber, shipmentOrderNumber, trackingNo);
+                delOutbound.setTrackingNo("");
+                delOutbound.setShipmentOrderNumber("");
             }
-            List<BasAttachment> attachmentList = listR.getData();
-            if (CollectionUtils.isEmpty(attachmentList)) {
-                return;
-            }
-            BasAttachment attachment = attachmentList.get(0);
-            String filePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
-            File labelFile = new File(filePath);
-            if (!labelFile.exists()) {
-                throw new CommonException("999", "标签文件不存在");
-            }
-            try {
-                byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
-                String encode = Base64.encode(byteArray);
-                ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
-                shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
-                shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
-                shipmentLabelChangeRequestDto.setLabel(encode);
-                IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
-                ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
-                if (null == responseVO || null == responseVO.getSuccess()) {
-                    throw new CommonException("999", "更新标签失败");
-                }
-                if (!responseVO.getSuccess()) {
-                    throw new CommonException("999", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
-                }
-            } catch (IOException e) {
-                logger.error("读取标签文件失败, {}", e.getMessage(), e);
-                throw new CommonException("999", "读取标签文件失败");
-            }
-        }
-
-        @Override
-        public boolean condition(ApplicationContext context, ApplicationState currentState) {
-            boolean condition = super.condition(context, currentState);
-            if (condition) {
-                DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
-                DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-                // 自提出库
-                return DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType());
-            }
-            return false;
+            super.rollback(context);
         }
 
         @Override
@@ -523,6 +493,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     }
 
     static class FreezeInventoryHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return SHIPMENT_ORDER;
+        }
 
         @Override
         public ApplicationState quoState() {
@@ -562,12 +537,26 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public void rollback(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            delOutboundService.unFreeze(delOutbound.getOrderType(), delOutbound.getOrderNo(), delOutbound.getWarehouseCode());
+            super.rollback(context);
+        }
+
+        @Override
         public ApplicationState nextState() {
             return FREEZE_OPERATION;
         }
     }
 
     static class FreezeOperationHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return FREEZE_INVENTORY;
+        }
 
         @Override
         public ApplicationState quoState() {
@@ -648,12 +637,147 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public void rollback(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+            delOutboundOperationVO.setOrderType(delOutbound.getOrderType());
+            delOutboundOperationVO.setOrderNo(delOutbound.getOrderNo());
+            OperationFeignService operationFeignService = SpringUtils.getBean(OperationFeignService.class);
+            R<?> r = operationFeignService.delOutboundThaw(delOutboundOperationVO);
+            DelOutboundServiceImplUtil.thawOperationThrowCommonException(r);
+            super.rollback(context);
+        }
+
+        @Override
+        public ApplicationState nextState() {
+            return SHIPMENT_CREATE;
+        }
+    }
+
+    static class ShipmentCreateHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return FREEZE_OPERATION;
+        }
+
+        @Override
+        public ApplicationState quoState() {
+            return SHIPMENT_CREATE;
+        }
+
+        @Override
+        public void handle(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            // 推单到WMS
+            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+            String refOrderNo = delOutboundBringVerifyService.shipmentCreate(delOutboundWrapperContext, delOutbound.getTrackingNo());
+            // 保存信息
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setId(delOutbound.getId());
+            updateDelOutbound.setBringVerifyState(END.name());
+            // PRC计费
+            updateDelOutbound.setAmount(delOutbound.getAmount());
+            updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
+            // 产品信息
+            updateDelOutbound.setTrackingAcquireType(delOutbound.getTrackingAcquireType());
+            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+            // 创建承运商物流订单
+            updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
+            updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
+            // 推单WMS
+            updateDelOutbound.setRefOrderNo(refOrderNo);
+            delOutboundService.bringVerifySuccess(updateDelOutbound);
+        }
+
+        @Override
+        public ApplicationState nextState() {
+            return SHIPMENT_LABEL;
+        }
+    }
+
+    static class ShipmentLabelHandle extends CommonApplicationHandle {
+        @Override
+        public ApplicationState preState() {
+            return SHIPMENT_CREATE;
+        }
+
+        @Override
+        public ApplicationState quoState() {
+            return SHIPMENT_LABEL;
+        }
+
+        @Override
+        public void handle(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            // 查询上传文件信息
+            RemoteAttachmentService remoteAttachmentService = SpringUtils.getBean(RemoteAttachmentService.class);
+            BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+            basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
+            basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+            R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+            if (null == listR || null == listR.getData()) {
+                return;
+            }
+            List<BasAttachment> attachmentList = listR.getData();
+            if (CollectionUtils.isEmpty(attachmentList)) {
+                return;
+            }
+            BasAttachment attachment = attachmentList.get(0);
+            String filePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
+            File labelFile = new File(filePath);
+            if (!labelFile.exists()) {
+                throw new CommonException("999", "标签文件不存在");
+            }
+            try {
+                byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
+                String encode = Base64.encode(byteArray);
+                ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+                shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
+                shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+                shipmentLabelChangeRequestDto.setLabel(encode);
+                IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+                ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
+                if (null == responseVO || null == responseVO.getSuccess()) {
+                    throw new CommonException("999", "更新标签失败");
+                }
+                if (!responseVO.getSuccess()) {
+                    throw new CommonException("999", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
+                }
+            } catch (IOException e) {
+                logger.error("读取标签文件失败, {}", e.getMessage(), e);
+                throw new CommonException("999", "读取标签文件失败");
+            }
+        }
+
+        @Override
+        public boolean condition(ApplicationContext context, ApplicationState currentState) {
+            boolean condition = super.condition(context, currentState);
+            if (condition) {
+                DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+                DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+                // 自提出库
+                return DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType());
+            }
+            return false;
+        }
+
+        @Override
         public ApplicationState nextState() {
             return END;
         }
     }
 
     static class EndHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return SHIPMENT_LABEL;
+        }
 
         @Override
         public ApplicationState quoState() {
