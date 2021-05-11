@@ -13,6 +13,7 @@
         <result column="reason" property="reason" />
         <result column="remark" property="remark" />
         <result column="create_time" property="createTime" />
+        <result column="audit_time" property="auditTime" />
         <collection property="details" javaType="java.util.List" select="selectInventoryInspectionDetails" column="inspection_no" />
     </resultMap>
 
@@ -43,10 +44,15 @@
         a.status,
         a.reason,
         a.remark,
-        a.create_time
+        a.create_time,
+        a.audit_time
         from
         inventory_inspection a
         <where>
+            a.status != 3
+            <if test="status != null">
+                AND a.status = #{status}
+            </if>
             <if test="customCode != null and customCode != ''">
                 AND a.custom_code = #{customCode}
             </if>
@@ -63,6 +69,7 @@
                 AND a.create_time >= #{createTimeStart} and a.create_time &lt;= #{createTimeEnd}
             </if>
         </where>
+        order by a.status,a.audit_time
     </select>
 
     <select id="selectDetails" resultMap="inspectionMap" parameterType="String">
