@@ -44,6 +44,7 @@ public interface Verification {
             if (handler(onlyKey)) {
                 throw new TokenException("请勿重复提交");
             }
+            TokenContext.get().setOnlyKey(onlyKey);
             this.redisTemplate.opsForValue().set(onlyKey, "", this.time.get(ChronoUnit.SECONDS), TimeUnit.SECONDS);
         }
 
