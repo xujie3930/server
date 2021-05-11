@@ -176,6 +176,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
     static class BeginHandle extends CommonApplicationHandle {
 
         @Override
+        public ApplicationState preState() {
+            return BEGIN;
+        }
+
+        @Override
         public ApplicationState quoState() {
             return BEGIN;
         }
@@ -192,6 +197,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
     }
 
     static class ShipmentOrderHandle extends CommonApplicationHandle {
+        @Override
+        public ApplicationState preState() {
+            return BEGIN;
+        }
+
         @Override
         public ApplicationState quoState() {
             return SHIPMENT_ORDER;
@@ -241,6 +251,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
     static class ShipmentTrackingHandle extends CommonApplicationHandle {
         @Override
+        public ApplicationState preState() {
+            return SHIPMENT_ORDER;
+        }
+
+        @Override
         public ApplicationState quoState() {
             return SHIPMENT_TRACKING;
         }
@@ -272,6 +287,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
     }
 
     static class LabelHandle extends CommonApplicationHandle {
+        @Override
+        public ApplicationState preState() {
+            return SHIPMENT_TRACKING;
+        }
+
         @Override
         public ApplicationState quoState() {
             return LABEL;
@@ -330,6 +350,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
     static class ShipmentLabelHandle extends CommonApplicationHandle {
         @Override
+        public ApplicationState preState() {
+            return LABEL;
+        }
+
+        @Override
         public ApplicationState quoState() {
             return SHIPMENT_LABEL;
         }
@@ -378,6 +403,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
     static class ThawBalanceHandle extends CommonApplicationHandle {
         @Override
+        public ApplicationState preState() {
+            return SHIPMENT_LABEL;
+        }
+
+        @Override
         public ApplicationState quoState() {
             return THAW_BALANCE;
         }
@@ -419,6 +449,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
     }
 
     static class PrcPricingHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return THAW_BALANCE;
+        }
 
         @Override
         public ApplicationState quoState() {
@@ -489,6 +524,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
     static class FreezeBalanceHandle extends CommonApplicationHandle {
 
         @Override
+        public ApplicationState preState() {
+            return PRC_PRICING;
+        }
+
+        @Override
         public ApplicationState quoState() {
             return FREEZE_BALANCE;
         }
@@ -525,6 +565,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
     }
 
     static class ShipmentShippingHandle extends CommonApplicationHandle {
+        @Override
+        public ApplicationState preState() {
+            return FREEZE_BALANCE;
+        }
+
         @Override
         public ApplicationState quoState() {
             return SHIPMENT_SHIPPING;
@@ -573,6 +618,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
     }
 
     static class EndHandle extends BringVerifyEnum.CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return SHIPMENT_SHIPPING;
+        }
 
         @Override
         public ApplicationState quoState() {
