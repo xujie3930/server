@@ -16,6 +16,9 @@ public class InventoryInspectionQueryDTO {
     @ApiModelProperty(value = "客户代码")
     private String customCode;
 
+    @ApiModelProperty(value = "审核状态")
+    private Integer status;
+
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
 

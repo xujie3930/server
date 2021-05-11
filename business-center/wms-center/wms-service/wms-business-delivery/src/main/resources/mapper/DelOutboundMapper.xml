@@ -76,7 +76,7 @@
             t.order_no,
             t.create_time,
             t.custom_code,
-            (SELECT a.country FROM del_outbound_address a WHERE a.order_no = t.order_no LIMIT 1) AS country,
+            (SELECT a.country_code as country FROM del_outbound_address a WHERE a.order_no = t.order_no LIMIT 1) AS country,
             t.shipment_rule,
             t.tracking_no,
             t.weight,
