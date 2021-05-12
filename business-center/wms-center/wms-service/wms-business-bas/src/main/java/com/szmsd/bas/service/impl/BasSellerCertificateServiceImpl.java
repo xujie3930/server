@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -95,6 +97,9 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
             vatQueryWrapper.eq("country_code",vatQueryDto.getCountryCode());
             vatQueryWrapper.eq("is_active",true);
             vatQueryWrapper.eq("vaild","1");
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String dateString = formatter.format(new Date());
+            vatQueryWrapper.apply("'"+ dateString +"' < registration_date");
             return super.list(vatQueryWrapper);
         }
 
