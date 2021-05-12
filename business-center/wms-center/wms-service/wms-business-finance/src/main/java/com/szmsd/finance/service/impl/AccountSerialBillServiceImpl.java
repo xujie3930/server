@@ -74,6 +74,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             accountSerialBill.setWarehouseName(sysDictDataService.getWarehouseNameByCode(accountSerialBill.getWarehouseCode()));
         if (StringUtils.isBlank(accountSerialBill.getCurrencyName()))
             accountSerialBill.setCurrencyName(sysDictDataService.getCurrencyNameByCode(dto.getCurrencyCode()));
+        accountSerialBill.setBusinessCategory(accountSerialBill.getChargeCategory());//性质列内容，同费用类别
         return accountSerialBillMapper.insert(accountSerialBill);
     }
 
@@ -85,6 +86,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                 value.setWarehouseName(sysDictDataService.getWarehouseNameByCode(value.getWarehouseCode()));
             if (StringUtils.isBlank(value.getCurrencyName()))
                 value.setCurrencyName(sysDictDataService.getCurrencyNameByCode(value.getCurrencyCode()));
+            value.setBusinessCategory(value.getChargeCategory());//性质列内容，同费用类别
             return value;
         }).collect(Collectors.toList());
         boolean b = this.saveBatch(collect);
