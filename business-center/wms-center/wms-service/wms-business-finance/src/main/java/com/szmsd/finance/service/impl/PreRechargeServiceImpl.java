@@ -88,6 +88,7 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             custPayDTO.setCurrencyCode(preRecharge.getCurrencyCode());
             custPayDTO.setCurrencyName(preRecharge.getCurrencyName());
             custPayDTO.setOrderTime(preRecharge.getRemittanceTime());
+            custPayDTO.setNo(preRecharge.getSerialNo());
             R r = accountBalanceService.offlineIncome(custPayDTO);
             if (Constants.SUCCESS != r.getCode()) {
                 return r;
