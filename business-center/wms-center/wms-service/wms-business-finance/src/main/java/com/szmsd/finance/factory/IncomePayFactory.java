@@ -78,9 +78,8 @@ public class IncomePayFactory extends AbstractPayFactory {
     public void setSerialBillLog(CustPayDTO dto) {
         AccountSerialBillDTO serialBill = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
         serialBill.setNo(dto.getNo());
-        serialBill.setChargeCategory("人工充值");
+        serialBill.setChargeCategory(dto.getPayMethod().getPaymentName());
         serialBill.setChargeType(dto.getPayMethod().getPaymentName());
-        serialBill.setBusinessCategory("充值");
         serialBill.setProductCategory("充值成功");
         serialBill.setRemark(dto.getRemark());
         serialBill.setPaymentTime(new Date());
