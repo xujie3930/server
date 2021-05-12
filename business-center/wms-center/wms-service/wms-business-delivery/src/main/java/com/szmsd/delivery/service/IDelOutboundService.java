@@ -268,6 +268,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param dtoList       dtoList
      * @return List<DelOutboundDetailVO>
      */
+    @Deprecated
     List<DelOutboundDetailVO> importDetail(String warehouseCode, String sellerCode, List<DelOutboundDetailImportDto> dtoList);
 
     /**
