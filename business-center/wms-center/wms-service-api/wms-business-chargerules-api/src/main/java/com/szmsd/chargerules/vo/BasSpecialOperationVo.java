@@ -57,11 +57,17 @@ public class BasSpecialOperationVo {
     @ApiModelProperty(value = "计费单位")
     private String unit;
 
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
     @ApiModelProperty(value = "oms备注")
     private String omsRemark;
 
     @ApiModelProperty(value = "状态（审核结果）通过：1、不通过：2、待审批：3")
     private Integer status;
+
+    @ApiModelProperty(value = "不通过原因")
+    private String reason;
 
     @ApiModelProperty(value = "首件价格")
     private BigDecimal firstPrice;
