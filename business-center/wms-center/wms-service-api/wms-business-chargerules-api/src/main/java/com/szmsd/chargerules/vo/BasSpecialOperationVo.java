@@ -66,6 +66,9 @@ public class BasSpecialOperationVo {
     @ApiModelProperty(value = "状态（审核结果）通过：1、不通过：2、待审批：3")
     private Integer status;
 
+    @ApiModelProperty(value = "创建时间")
+    private String createTime;
+
     @ApiModelProperty(value = "不通过原因")
     private String reason;
 
