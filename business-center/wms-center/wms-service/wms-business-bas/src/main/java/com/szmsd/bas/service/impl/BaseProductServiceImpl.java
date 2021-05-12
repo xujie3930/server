@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
-import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
@@ -20,7 +19,6 @@ import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BaseProductMapper;
-import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.bas.service.IBasePackingService;
@@ -44,7 +42,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -68,29 +65,21 @@ import static java.math.BigDecimal.ROUND_HALF_UP;
 @Slf4j
 public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseProduct> implements IBaseProductService {
 
+    private static final String regex = "^[a-z0-9A-Z]+$";
     @Autowired
     private IBasSellerService basSellerService;
-
     @Resource
     private HtpBasFeignService htpBasFeignService;
-
     @Resource
     private IBasSerialNumberService baseSerialNumberService;
-
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
-
     @Resource
     private BaseProductMapper baseProductMapper;
-
     @Resource
     private BasSubFeignService basSubFeignService;
-
     @Autowired
     private IBasePackingService basePackingService;
-
-    private static final String  regex = "^[a-z0-9A-Z]+$";
-
 
     /**
      * 查询模块
@@ -126,8 +115,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             String[] sellerCodes = queryDto.getSellerCodes().split(",");
             queryWrapper.in("seller_code", sellerCodes);
         }
-        if(CollectionUtils.isNotEmpty(queryDto.getIds())){
-            queryWrapper.in("id",queryDto.getIds());
+        if (CollectionUtils.isNotEmpty(queryDto.getIds())) {
+            queryWrapper.in("id", queryDto.getIds());
         }
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", queryDto.getCategory());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
@@ -159,7 +148,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public TableDataInfo<BaseProductVO> selectBaseProductByCode(String code, String sellerCode, String category,int current,int size) {
+    public TableDataInfo<BaseProductVO> selectBaseProductByCode(String code, String sellerCode, String category, int current, int size) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", category);
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "code", code);
@@ -167,26 +156,26 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         queryWrapper.eq("is_active", true);
         int total = super.count(queryWrapper);
         queryWrapper.orderByAsc("code");
-        queryWrapper.last("limit "+(current-1)*size+","+size);
+        queryWrapper.last("limit " + (current - 1) * size + "," + size);
         List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductVO.class);
         baseProductVOList.forEach(b -> {
-                    if (b.getCode() != null) {
-                        List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
-                                .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(b.getCode()).setBusinessItemNo(null)).getData());
-                        if (CollectionUtils.isNotEmpty(attachment)) {
-                            List<AttachmentFileDTO> documentsFiles = new ArrayList();
-                            for (BasAttachment a : attachment) {
-                                documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
-                            }
-                            b.setDocumentsFiles(documentsFiles);
-                        }
+            if (b.getCode() != null) {
+                List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
+                        .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(b.getCode()).setBusinessItemNo(null)).getData());
+                if (CollectionUtils.isNotEmpty(attachment)) {
+                    List<AttachmentFileDTO> documentsFiles = new ArrayList();
+                    for (BasAttachment a : attachment) {
+                        documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
                     }
-                });
-            TableDataInfo table = new TableDataInfo();
-            table.setTotal(total);
-            table.setRows(baseProductVOList);
-            table.setCode(200);
-            return table;
+                    b.setDocumentsFiles(documentsFiles);
+                }
+            }
+        });
+        TableDataInfo table = new TableDataInfo();
+        table.setTotal(total);
+        table.setRows(baseProductVOList);
+        table.setCode(200);
+        return table;
     }
 
     @Override
@@ -197,42 +186,39 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         } else {
             queryWrapper.eq("is_active", true);
             queryWrapper.in("code", dto.getCodes());
-            QueryWrapperUtil.filter(queryWrapper,SqlKeyword.EQ,"seller_code",dto.getSellerCode());
+            QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", dto.getSellerCode());
         }
         return BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductMeasureDto.class);
     }
 
     @Override
     @Transactional
-    public void  importBaseProduct(List<BaseProductImportDto> list)
-    {
+    public void importBaseProduct(List<BaseProductImportDto> list) {
 
         //判断是否必填
         QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
-        basSellerQueryWrapper.eq("user_name",SecurityUtils.getLoginUser().getUsername());
+        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller seller = basSellerService.getOne(basSellerQueryWrapper);
-        verifyBaseProductRequired(list,seller.getSellerCode());
-        for(BaseProductImportDto b:list)
-        {
-            b.setHavePackingMaterial(b.getHavePackingMaterialName().equals("是")?true:false);
+        verifyBaseProductRequired(list, seller.getSellerCode());
+        for (BaseProductImportDto b : list) {
+            b.setHavePackingMaterial(b.getHavePackingMaterialName().equals("是") ? true : false);
         }
-        List<BaseProduct> baseProductList = BeanMapperUtil.mapList(list,BaseProduct.class);
+        List<BaseProduct> baseProductList = BeanMapperUtil.mapList(list, BaseProduct.class);
 
-        for(BaseProduct b:baseProductList)
-        {
+        for (BaseProduct b : baseProductList) {
             //b.setSource("01");
             b.setCategory(ProductConstant.SKU_NAME);
             b.setCategoryCode(ProductConstant.SKU);
             b.setSellerCode(seller.getSellerCode());
-            b.setInitHeight(new BigDecimal(b.getInitHeight()).setScale(2,ROUND_HALF_UP).doubleValue());
-            b.setInitLength(new BigDecimal(b.getInitLength()).setScale(2,ROUND_HALF_UP).doubleValue());
-            b.setInitWidth(new BigDecimal(b.getInitWidth()).setScale(2,ROUND_HALF_UP).doubleValue());
-            b.setInitWeight(new BigDecimal(b.getInitWeight()).setScale(2,ROUND_HALF_UP).doubleValue());
+            b.setInitHeight(new BigDecimal(b.getInitHeight()).setScale(2, ROUND_HALF_UP).doubleValue());
+            b.setInitLength(new BigDecimal(b.getInitLength()).setScale(2, ROUND_HALF_UP).doubleValue());
+            b.setInitWidth(new BigDecimal(b.getInitWidth()).setScale(2, ROUND_HALF_UP).doubleValue());
+            b.setInitWeight(new BigDecimal(b.getInitWeight()).setScale(2, ROUND_HALF_UP).doubleValue());
             b.setHeight(b.getInitHeight());
             b.setLength(b.getInitLength());
             b.setWidth(b.getInitWidth());
             b.setWeight(b.getInitWeight());
-            b.setInitVolume(new BigDecimal(b.getInitHeight()*b.getInitLength()*b.getInitWidth()).setScale(2,ROUND_HALF_UP));
+            b.setInitVolume(new BigDecimal(b.getInitHeight() * b.getInitLength() * b.getInitWidth()).setScale(2, ROUND_HALF_UP));
             b.setVolume(b.getInitVolume());
             b.setIsActive(true);
             b.setWarehouseAcceptance(false);
@@ -330,15 +316,15 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     public int insertBaseProduct(BaseProductDto baseProductDto) {
 
         if (StringUtils.isEmpty(baseProductDto.getCode())) {
-            if(ProductConstant.SKU_NAME.equals(baseProductDto.getCategory())){
+            if (ProductConstant.SKU_NAME.equals(baseProductDto.getCategory())) {
                 String skuCode = "S" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber(ProductConstant.SKU_NAME);
                 baseProductDto.setCode(skuCode);
-            }else{
-                baseProductDto.setCode("WL"+baseProductDto.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
+            } else {
+                baseProductDto.setCode("WL" + baseProductDto.getSellerCode() + baseSerialNumberService.generateNumber("MATERIAL"));
             }
-        }else{
-            if(baseProductDto.getCode().length()<2){
-                throw new BaseException(baseProductDto.getCategory()+"编码长度不能小于两个字符");
+        } else {
+            if (baseProductDto.getCode().length() < 2) {
+                throw new BaseException(baseProductDto.getCategory() + "编码长度不能小于两个字符");
             }
         }
         //验证 填写信息
@@ -346,7 +332,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", baseProductDto.getCode());
         if (super.count(queryWrapper) == 1) {
-            throw new BaseException(baseProductDto.getCategory()+"编码重复");
+            throw new BaseException(baseProductDto.getCategory() + "编码重复");
         }
         //默认激活
         baseProductDto.setIsActive(true);
@@ -379,20 +365,20 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProduct> BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos){
-        baseProductDtos.stream().forEach(o->{
+    public List<BaseProduct> BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos) {
+        baseProductDtos.stream().forEach(o -> {
             if (StringUtils.isEmpty(o.getCode())) {
-                if(ProductConstant.SKU_NAME.equals(o.getCategory())){
+                if (ProductConstant.SKU_NAME.equals(o.getCategory())) {
                     String skuCode = "S" + o.getSellerCode() + baseSerialNumberService.generateNumber(ProductConstant.SKU_NAME);
                     o.setCode(skuCode);
                     o.setCategoryCode("SKUtype");
-                }else{
-                    o.setCode("WL"+o.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
+                } else {
+                    o.setCode("WL" + o.getSellerCode() + baseSerialNumberService.generateNumber("MATERIAL"));
                     o.setCategoryCode("packagetype");
                 }
-            }else{
-                if(o.getCode().length()<2){
-                    throw new BaseException(o.getCategory()+"编码长度不能小于两个字符");
+            } else {
+                if (o.getCode().length() < 2) {
+                    throw new BaseException(o.getCategory() + "编码长度不能小于两个字符");
                 }
             }
             //验证 填写信息
@@ -400,7 +386,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("code", o.getCode());
             if (super.count(queryWrapper) == 1) {
-                throw new BaseException(o.getCategory()+"编码重复");
+                throw new BaseException(o.getCategory() + "编码重复");
             }
             //默认激活
             o.setIsActive(true);
@@ -410,7 +396,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         });
         List<BaseProduct> baseProducts = BeanMapperUtil.mapList(baseProductDtos, BaseProduct.class);
 
-        baseProducts.stream().forEach(o->{
+        baseProducts.stream().forEach(o -> {
             //包材不需要仓库测量尺寸
             o.setWarehouseAcceptance(true);
             //SKU需要仓库测量尺寸
@@ -425,8 +411,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             //验证wms
             toWms(r);
         });
-         super.saveBatch(baseProducts);
-         return baseProducts;
+        super.saveBatch(baseProducts);
+        return baseProducts;
     }
 
     /**
@@ -438,7 +424,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Override
     public int updateBaseProduct(BaseProductDto baseProductDto) throws IllegalAccessException {
         BaseProduct bp = super.getById(baseProductDto.getId());
-        if(bp.getCategory().equals(ProductConstant.SKU_NAME)){
+        if (bp.getCategory().equals(ProductConstant.SKU_NAME)) {
             baseProductDto.setCategory(ProductConstant.SKU_NAME);
         }
         verifyBaseProduct(baseProductDto);
@@ -519,6 +505,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         if (null != conditionQueryDto.getWarehouseCode()) {
             queryWrapper.eq(BaseProduct::getWarehouseCode, conditionQueryDto.getWarehouseCode());
         }
+        if (null != conditionQueryDto.getSellerCode()) {
+            queryWrapper.eq(BaseProduct::getSellerCode, conditionQueryDto.getSellerCode());
+        }
         queryWrapper.in(BaseProduct::getCode, conditionQueryDto.getSkus());
         return this.list(queryWrapper);
     }
@@ -541,11 +530,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         return list;
     }
 
-    private void verifyBaseProduct(BaseProductDto baseProductDto){
+    private void verifyBaseProduct(BaseProductDto baseProductDto) {
 
         //判断填的值是否符合需求
 
-        if(ProductConstant.SKU_NAME.equals(baseProductDto.getCategory())) {
+        if (ProductConstant.SKU_NAME.equals(baseProductDto.getCategory())) {
             if (StringUtils.isNotEmpty(baseProductDto.getProductAttribute())) {
                 if ("Battery".equals(baseProductDto.getProductAttribute())) {
                     if (StringUtils.isEmpty(baseProductDto.getElectrifiedMode()) || StringUtils.isEmpty(baseProductDto.getBatteryPackaging())) {
@@ -570,76 +559,70 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         }
     }
 
-    private void verifyBaseProductRequired(List<BaseProductImportDto> list,String sellerCode)
-    {
+    private void verifyBaseProductRequired(List<BaseProductImportDto> list, String sellerCode) {
 
         StringBuilder s1 = new StringBuilder("");
         BasePacking basePacking = new BasePacking();
         BaseProduct baseProduct = new BaseProduct();
         //查询包材
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("category",ProductConstant.BC_NAME);
-        queryWrapper.eq("seller_code",sellerCode);
+        queryWrapper.eq("category", ProductConstant.BC_NAME);
+        queryWrapper.eq("seller_code", sellerCode);
         //查询主子类别
-        Map<String, String> typeMap= basSubFeignService.getSubList(BaseMainEnum.SKU_TYPE.getCode()).getData();
-        Map<String, String> eleMap= basSubFeignService.getSubList(BaseMainEnum.SKU_ELE.getCode()).getData();
-        Map<String, String> elePackageMap= basSubFeignService.getSubList(BaseMainEnum.SKU_ELEPACKAGE.getCode()).getData();
+        Map<String, String> typeMap = basSubFeignService.getSubList(BaseMainEnum.SKU_TYPE.getCode()).getData();
+        Map<String, String> eleMap = basSubFeignService.getSubList(BaseMainEnum.SKU_ELE.getCode()).getData();
+        Map<String, String> elePackageMap = basSubFeignService.getSubList(BaseMainEnum.SKU_ELEPACKAGE.getCode()).getData();
         int count = 1;
-        for(BaseProductImportDto b:list)
-        {
+        for (BaseProductImportDto b : list) {
             StringBuilder s = new StringBuilder("");
-            if(StringUtils.isEmpty(b.getCode()))
-            {
+            if (StringUtils.isEmpty(b.getCode())) {
 
                 s.append("SKU未填写，");
-            }else{
-                if(!Pattern.matches(regex, b.getCode()))
-                {
+            } else {
+                if (!Pattern.matches(regex, b.getCode())) {
                     s.append("SKU不允许出现除了数字字母之外的其它字符，");
                 }
-                if(b.getCode().length()<2){
+                if (b.getCode().length() < 2) {
 
                     s.append("SKU长度小于两字符，");
                 }
                 QueryWrapper<BaseProduct> queryWrapper1 = new QueryWrapper<>();
                 queryWrapper1.eq("code", b.getCode());
-                if (super.count(queryWrapper1) >0) {
-                    s.append(b.getCode()+"编码重复录入,");
+                if (super.count(queryWrapper1) > 0) {
+                    s.append(b.getCode() + "编码重复录入,");
                 }
 
             }
-            if(StringUtils.isEmpty(b.getProductName()))
-            {
+            if (StringUtils.isEmpty(b.getProductName())) {
 
                 s.append("英文申报品名未填写,");
             }
-            if(StringUtils.isEmpty(b.getProductAttributeName()))
-            {
+            if (StringUtils.isEmpty(b.getProductAttributeName())) {
 
                 s.append("产品属性未填写,");
-            }else{
+            } else {
                 if ("带电".equals(b.getProductAttributeName())) {
                     if (StringUtils.isEmpty(b.getElectrifiedModeName()) || StringUtils.isEmpty(b.getBatteryPackagingName())) {
                         s.append("未填写完整带电信息,");
-                    }else{
+                    } else {
 
-                        if(!eleMap.isEmpty()){
-                            if(eleMap.containsKey(b.getElectrifiedModeName())){
+                        if (!eleMap.isEmpty()) {
+                            if (eleMap.containsKey(b.getElectrifiedModeName())) {
                                 b.setElectrifiedMode(eleMap.get(b.getElectrifiedModeName()));
-                            }else{
+                            } else {
                                 s.append("未找到对应电池类型，");
                             }
-                        }else{
+                        } else {
                             s.append("未找到对应电池类型，");
                         }
 
-                        if(!elePackageMap.isEmpty()){
-                            if(elePackageMap.containsKey(b.getBatteryPackagingName())){
+                        if (!elePackageMap.isEmpty()) {
+                            if (elePackageMap.containsKey(b.getBatteryPackagingName())) {
                                 b.setBatteryPackaging(elePackageMap.get(b.getBatteryPackagingName()));
-                            }else{
+                            } else {
                                 s.append("未找到对应电池包装，");
                             }
-                        }else{
+                        } else {
                             s.append("未找到对应电池包装，");
                         }
                     }
@@ -648,29 +631,28 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                         s.append("不能填写带电信息,");
                     }
                 }
-                if(!typeMap.isEmpty()){
-                    if(typeMap.containsKey(b.getProductAttributeName())){
+                if (!typeMap.isEmpty()) {
+                    if (typeMap.containsKey(b.getProductAttributeName())) {
                         b.setProductAttribute(typeMap.get(b.getProductAttributeName()));
-                    }else{
+                    } else {
                         s.append("未找到对应产品属性，");
                     }
-                }else{
+                } else {
                     s.append("未找到对应产品属性，");
                 }
             }
-            if(StringUtils.isEmpty(b.getHavePackingMaterialName()))
-            {
+            if (StringUtils.isEmpty(b.getHavePackingMaterialName())) {
                 s.append("是否自备包材未填写,");
-            }else{
+            } else {
                 if ("是".equals(b.getHavePackingMaterialName())) {
                     if (StringUtils.isEmpty(b.getBindCode())) {
                         s.append("未填写附带包材，");
-                    }else{
-                        queryWrapper.eq("code",b.getBindCode());
+                    } else {
+                        queryWrapper.eq("code", b.getBindCode());
                         baseProduct = super.getOne(queryWrapper);
-                        if(baseProduct!=null){
+                        if (baseProduct != null) {
                             b.setBindCodeName(baseProduct.getProductName());
-                        }else{
+                        } else {
                             s.append("未找到附带包材信息，");
                         }
                     }
@@ -681,93 +663,84 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                     }
                 }
             }
-            if(StringUtils.isEmpty(b.getSuggestPackingMaterial()))
-            {
+            if (StringUtils.isEmpty(b.getSuggestPackingMaterial())) {
                 s.append("物流包装未填写,");
-            }else{
+            } else {
                 basePacking.setName(b.getSuggestPackingMaterial());
                 List<BasePacking> basePackings = basePackingService.selectBasePackingList(basePacking);
-                if(CollectionUtils.isNotEmpty(basePackings)){
+                if (CollectionUtils.isNotEmpty(basePackings)) {
                     b.setSuggestPackingMaterialCode(basePackings.get(0).getCode());
-                }else{
+                } else {
                     s.append("未找到对应的物流包装,");
                 }
             }
-            if(b.getInitLength()==null)
-            {
+            if (b.getInitLength() == null) {
                 s.append("长未填写,");
             }
-            if(b.getInitHeight()==null)
-            {
+            if (b.getInitHeight() == null) {
                 s.append("高未填写,");
             }
-            if(b.getInitWeight()==null)
-            {
+            if (b.getInitWeight() == null) {
                 s.append("重量未填写,");
             }
-            if(b.getInitWidth()==null)
-            {
+            if (b.getInitWidth() == null) {
                 s.append("宽未填写,");
             }
-            if(b.getInitWidth()==null)
-            {
+            if (b.getInitWidth() == null) {
                 s.append("宽未填写,");
             }
-            if(b.getDeclaredValue()==null)
-            {
+            if (b.getDeclaredValue() == null) {
                 s.append("申报价值未填写,");
             }
-            if(StringUtils.isEmpty(b.getProductDescription())){
+            if (StringUtils.isEmpty(b.getProductDescription())) {
                 s.append("产品说明未填写,");
-            }else{
-                if(b.getProductDescription().length()>10){
+            } else {
+                if (b.getProductDescription().length() > 10) {
                     s.append("产品说明超过十个字符,");
                 }
             }
-            if(!s.toString().equals("")){
-                s1.append("<br/>第"+count+"条数据："+s);
+            if (!s.toString().equals("")) {
+                s1.append("<br/>第" + count + "条数据：" + s);
             }
             count++;
         }
 
-        Map<String,Integer> map = new HashMap<>();
-        for(BaseProductImportDto b:list){
-            if(map.containsKey(b.getCode())){
-                map.put(b.getCode(),map.get(b.getCode())+1);
-            }else{
-                map.put(b.getCode(),1);
+        Map<String, Integer> map = new HashMap<>();
+        for (BaseProductImportDto b : list) {
+            if (map.containsKey(b.getCode())) {
+                map.put(b.getCode(), map.get(b.getCode()) + 1);
+            } else {
+                map.put(b.getCode(), 1);
             }
         }
-        if(map.size()!=list.size()){
+        if (map.size() != list.size()) {
             s1.append("<br/>文件内填写sku有重复:");
             for (Object key : map.keySet()) {
-                Integer value = (Integer)map.get(key);
-                if(value>1){
-                    s1.append(key+",\n");
+                Integer value = (Integer) map.get(key);
+                if (value > 1) {
+                    s1.append(key + ",\n");
                 }
             }
 
         }
-        if(!s1.toString().equals("")){
+        if (!s1.toString().equals("")) {
             throw new BaseException(s1.toString());
         }
     }
 
-    private void toWms(R<ResponseVO> r){
-        if(r==null){
+    private void toWms(R<ResponseVO> r) {
+        if (r == null) {
             throw new BaseException("wms服务调用失败");
         }
-        if(r.getData()==null){
+        if (r.getData() == null) {
             throw new BaseException("传wms失败" + r.getData().getErrors());
-        }else{
-            if(r.getData().getSuccess()==null){
-                if(r.getData().getErrors()!=null)
-                {
+        } else {
+            if (r.getData().getSuccess() == null) {
+                if (r.getData().getErrors() != null) {
                     throw new BaseException("传wms失败" + r.getData().getErrors());
                 }
-            }else{
-                if(!r.getData().getSuccess())
-                {
+            } else {
+                if (!r.getData().getSuccess()) {
                     throw new BaseException("传wms失败" + r.getData().getMessage());
                 }
             }

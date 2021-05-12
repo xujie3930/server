@@ -80,7 +80,8 @@ public class DelOutboundOtherController extends BaseController {
                 new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName())
         ));
         if (CollectionUtils.isNotEmpty(dto.getSkus())) {
-            criteria.setIsElectriferous(ShipmentType.BATTERY.equals(this.baseProductClientService.buildShipmentType(dto.getWarehouseCode(), dto.getSkus())));
+            // fix:SKU不跟仓库关联，SKU跟卖家编码关联。
+            criteria.setIsElectriferous(ShipmentType.BATTERY.equals(this.baseProductClientService.buildShipmentType(dto.getClientCode(), dto.getSkus())));
         }
         if (CollectionUtils.isNotEmpty(dto.getProductAttributes())) {
             criteria.setIsElectriferous(ShipmentType.BATTERY.equals(ShipmentType.highest(dto.getProductAttributes())));

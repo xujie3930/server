@@ -417,7 +417,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     private String buildShipmentType(DelOutboundDto dto) {
         List<DelOutboundDetailDto> details = dto.getDetails();
-        return this.baseProductClientService.buildShipmentType(dto.getWarehouseCode(), details.stream().map(DelOutboundDetailDto::getSku).collect(Collectors.toList()));
+        return this.baseProductClientService.buildShipmentType(dto.getSellerCode(), details.stream().map(DelOutboundDetailDto::getSku).collect(Collectors.toList()));
     }
 
     /**

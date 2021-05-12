@@ -35,11 +35,11 @@ public interface BaseProductClientService {
     /**
      * 返回SKU属性
      *
-     * @param warehouseCode warehouseCode
-     * @param skus          sku
+     * @param sellerCode sellerCode
+     * @param skus       sku
      * @return String
      */
-    String buildShipmentType(String warehouseCode, List<String> skus);
+    String buildShipmentType(String sellerCode, List<String> skus);
 
     /**
      * 根据仓库，SKU查询产品信息
