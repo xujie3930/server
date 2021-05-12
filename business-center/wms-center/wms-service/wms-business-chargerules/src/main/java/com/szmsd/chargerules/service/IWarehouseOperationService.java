@@ -29,7 +29,7 @@ public interface IWarehouseOperationService {
     /**
      * 根据id查询详情
      * @param id id
-     * @return WarehouseOperation
+     * @return WarehouseOperationVo
      */
-    WarehouseOperation details(int id);
+    WarehouseOperationVo details(int id);
 }
