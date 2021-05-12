@@ -120,18 +120,18 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         inboundReceiptDetailDTOS.forEach(item -> item.setWarehouseNo(warehouseNo));
         iInboundReceiptDetailService.saveOrUpdate(inboundReceiptDetailDTOS, createInboundReceiptDTO.getReceiptDetailIds());
 
-        boolean isCollection = InboundReceiptEnum.OrderType.COLLECTION.getValue().equals(createInboundReceiptDTO.getOrderType());
+        boolean isPackageTransfer = InboundReceiptEnum.OrderType.PACKAGE_TRANSFER.getValue().equals(createInboundReceiptDTO.getOrderType());
         // 判断自动审核
         boolean inboundReceiptReview;
         // 转运自动审核
-        if (isCollection) {
+        if (isPackageTransfer) {
             log.info("---转运单自动审核---");
             inboundReceiptReview = true;
         } else {
             inboundReceiptReview = remoteComponent.inboundReceiptReview(createInboundReceiptDTO.getWarehouseCode());
         }
 
-        if (inboundReceiptReview && !isCollection) {
+        if (inboundReceiptReview && !isPackageTransfer) {
             // 审核 第三方接口推送
             String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
             this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));

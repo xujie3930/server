@@ -310,7 +310,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                 .setVat(transportWarehousingAddDTO.getVat())
                 .setWarehouseCode(transportWarehousingAddDTO.getWarehouseCode())
                 .setWarehouseMethodCode(transportWarehousingAddDTO.getWarehouseMethodCode())
-                .setOrderType(InboundReceiptEnum.OrderType.COLLECTION.getValue())
+                .setOrderType(InboundReceiptEnum.OrderType.PACKAGE_TRANSFER.getValue())
                 .setWarehouseCategoryCode(transportWarehousingAddDTO.getWarehouseCategoryCode())
                 .setDeliveryWayCode(transportWarehousingAddDTO.getDeliveryWay())
                 .setTotalDeclareQty(Integer.parseInt(sum + ""))

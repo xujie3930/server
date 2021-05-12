@@ -141,6 +141,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             serialBill.setChargeType(charge.getChargeNameCn());
                             serialBill.setOrderTime(delOutbound.getCreateTime());
                             serialBill.setPaymentTime(delOutbound.getShipmentsTime());
+                            serialBill.setProductCode(delOutbound.getShipmentRule());
                             serialBillInfoList.add(serialBill);
                         }
                         custPayDTO.setSerialBillInfoList(serialBillInfoList);

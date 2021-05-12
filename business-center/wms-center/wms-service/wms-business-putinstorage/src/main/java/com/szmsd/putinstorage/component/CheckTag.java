@@ -14,7 +14,7 @@ public class CheckTag {
     private static final ThreadLocal<Boolean> FROM_TRANSPORT = new ThreadLocal<>();
 
     public static void set(String orderType) {
-        FROM_TRANSPORT.set(InboundReceiptEnum.OrderType.COLLECTION.getValue().equals(orderType));
+        FROM_TRANSPORT.set(InboundReceiptEnum.OrderType.PACKAGE_TRANSFER.getValue().equals(orderType));
     }
     public static Boolean get() {
         return Optional.ofNullable(FROM_TRANSPORT.get()).orElse(false);
