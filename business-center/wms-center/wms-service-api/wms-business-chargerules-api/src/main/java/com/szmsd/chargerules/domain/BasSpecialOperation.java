@@ -33,6 +33,9 @@ public class BasSpecialOperation extends BaseEntity {
     @ApiModelProperty(value = "仓库")
     private String warehouseCode;
 
+    @ApiModelProperty(value = "客户编号")
+    private String customCode;
+
     @ApiModelProperty(value = "业务主键，用来做幂等校验")
     private String transactionId;
 
