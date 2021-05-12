@@ -24,6 +24,7 @@
             a.update_by_name,
             a.update_time,
             a.remark,
+            a.reason,
             b.first_price,
             b.next_price
     </sql>
