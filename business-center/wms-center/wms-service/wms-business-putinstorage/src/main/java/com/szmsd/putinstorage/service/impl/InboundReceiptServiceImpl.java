@@ -8,7 +8,6 @@ import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
-import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
@@ -132,17 +131,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceiptReview = remoteComponent.inboundReceiptReview(createInboundReceiptDTO.getWarehouseCode());
         }
 
-        if (inboundReceiptReview) {
-            // 审核
+        if (inboundReceiptReview && !isCollection) {
+            // 审核 第三方接口推送
             String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
             this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
-            if (!isCollection) {
-                // 第三方接口推送
-                InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
-                remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
-            } else {
-                log.info("转运单不推送第三方，由转运入库-提交 里面直接调用B3接口");
-            }
+        } else {
+            log.info("转运单不推送第三方，由转运入库-提交 里面直接调用B3接口");
         }
 
         log.info("创建入库单：操作完成");
