@@ -53,4 +53,39 @@ public class ImportValidationContainer<T> {
         }
         return ImportResult.buildFail(this.importContext.getMessageList());
     }
+
+    /**
+     * 验证
+     *
+     * @return ImportResult
+     */
+    public ImportResultData<T> validData() {
+        List<T> dataList = this.importContext.getDataList();
+        if (CollectionUtils.isEmpty(dataList)
+                || CollectionUtils.isEmpty(this.validationList)) {
+            return ImportResultData.buildSuccessData();
+        }
+        boolean isBreak = false;
+        for (ImportValidation<T> validation : this.validationList) {
+            if (!validation.before()) {
+                isBreak = true;
+            }
+        }
+        if (isBreak) {
+            return ImportResultData.buildFailData(this.importContext.getMessageList());
+        }
+        for (int i = 0; i < dataList.size(); i++) {
+            T object = dataList.get(i);
+            for (ImportValidation<T> validation : this.validationList) {
+                validation.valid(i + 1, object);
+            }
+        }
+        for (ImportValidation<T> validation : this.validationList) {
+            validation.after();
+        }
+        if (CollectionUtils.isEmpty(this.importContext.getMessageList())) {
+            return ImportResultData.buildSuccessData();
+        }
+        return ImportResultData.buildFailData(this.importContext.getMessageList());
+    }
 }

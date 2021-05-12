@@ -8,6 +8,8 @@ import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
  */
 public interface ImportValidationData {
 
+    boolean exists(String warehouseCode, String sku);
+
     boolean sub(String warehouseCode, String sku, int qty);
 
     InventoryAvailableListVO get(String warehouseCode, String sku);

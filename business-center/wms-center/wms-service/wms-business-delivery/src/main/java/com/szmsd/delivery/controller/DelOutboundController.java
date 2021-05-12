@@ -213,7 +213,7 @@ public class DelOutboundController extends BaseController {
             @ApiImplicitParam(paramType = "form", dataType = "String", name = "sellerCode", value = "客户编码", required = true),
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
-    public R<List<DelOutboundDetailVO>> importDetail(@RequestParam("warehouseCode") String warehouseCode, @RequestParam("sellerCode") String sellerCode, HttpServletRequest request) {
+    public R<ImportResultData<?>> importDetail(@RequestParam("warehouseCode") String warehouseCode, @RequestParam("sellerCode") String sellerCode, HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile file = multipartHttpServletRequest.getFile("file");
         AssertUtil.notNull(file, "上传文件不存在");
@@ -229,9 +229,22 @@ public class DelOutboundController extends BaseController {
             ExcelReaderSheetBuilder excelReaderSheetBuilder = EasyExcelFactory.read(file.getInputStream(), DelOutboundDetailImportDto.class, null).sheet(0);
             List<DelOutboundDetailImportDto> dtoList = excelReaderSheetBuilder.doReadSync();
             if (CollectionUtils.isEmpty(dtoList)) {
-                return R.ok();
+                return R.ok(ImportResultData.buildFailData(ImportMessage.build("导入数据不能为空")));
             }
-            return R.ok(delOutboundService.importDetail(warehouseCode, sellerCode, dtoList));
+            // SKU导入上下文
+            DelOutboundSkuImportContext importContext = new DelOutboundSkuImportContext(dtoList, warehouseCode, sellerCode);
+            // 初始化SKU数据验证器
+            DelOutboundDetailImportValidationData importValidationData = new DelOutboundDetailImportValidationData(sellerCode, this.inventoryFeignClientService);
+            // 初始化导入验证容器
+            ImportResultData<DelOutboundDetailImportDto> importResult = new ImportValidationContainer<>(importContext, ImportValidation.build(new DelOutboundSkuImportValidation(importContext, importValidationData))).validData();
+            // 验证SKU导入验证结果
+            if (!importResult.isStatus()) {
+                return R.ok(importResult);
+            }
+            // 获取导入的数据
+            List<DelOutboundDetailVO> voList = new DelOutboundSkuImportContainer(warehouseCode, dtoList, importValidationData).get();
+            // 返回成功的结果
+            return R.ok(ImportResultData.buildSuccessData(voList));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return R.failed("文件解析异常");
