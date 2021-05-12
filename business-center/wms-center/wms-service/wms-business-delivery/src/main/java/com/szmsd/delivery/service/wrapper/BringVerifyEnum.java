@@ -289,6 +289,31 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public void rollback(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setId(delOutbound.getId());
+            updateDelOutbound.setBringVerifyState(BEGIN.name());
+            // PRC计费
+            updateDelOutbound.setCalcWeight(BigDecimal.ZERO);
+            updateDelOutbound.setCalcWeightUnit("");
+            updateDelOutbound.setAmount(BigDecimal.ZERO);
+            updateDelOutbound.setCurrencyCode("");
+            // 产品信息
+            updateDelOutbound.setTrackingAcquireType("");
+            updateDelOutbound.setShipmentService("");
+            // 创建承运商物流订单
+            updateDelOutbound.setTrackingNo("");
+            updateDelOutbound.setShipmentOrderNumber("");
+            // 推单WMS
+            updateDelOutbound.setRefOrderNo("");
+            delOutboundService.updateById(updateDelOutbound);
+            super.rollback(context);
+        }
+
+        @Override
         public ApplicationState nextState() {
             return FREEZE_BALANCE;
         }
@@ -459,6 +484,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            if (null != delOutbound) {
+                throw new CommonException("999", "程序发生异常，中断本次操作");
+            }
             // 判断是否需要创建物流订单
             if (DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType())) {
                 // 创建承运商物流订单

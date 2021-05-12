@@ -28,10 +28,6 @@ public class ApplicationContainer {
         this.handleMap = register.register();
     }
 
-    public void setCurrentState(ApplicationState currentState) {
-        this.currentState = currentState;
-    }
-
     public void setEndState(ApplicationState endState) {
         this.endState = endState;
     }
