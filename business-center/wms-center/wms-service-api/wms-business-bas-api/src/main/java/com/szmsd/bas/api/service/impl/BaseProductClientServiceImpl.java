@@ -36,9 +36,10 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
     }
 
     @Override
-    public String buildShipmentType(String warehouseCode, List<String> skus) {
+    public String buildShipmentType(String sellerCode, List<String> skus) {
+        // fix:SKU不跟仓库关联，SKU跟卖家编码关联。
         BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
-        conditionQueryDto.setWarehouseCode(warehouseCode);
+        conditionQueryDto.setSellerCode(sellerCode);
         conditionQueryDto.setSkus(skus);
         List<String> listProductAttribute = this.listProductAttribute(conditionQueryDto);
         return ShipmentType.highest(listProductAttribute);
