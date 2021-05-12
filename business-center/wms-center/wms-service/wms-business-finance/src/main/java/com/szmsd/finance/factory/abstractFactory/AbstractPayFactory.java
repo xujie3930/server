@@ -48,7 +48,7 @@ public abstract class AbstractPayFactory {
 
     public abstract boolean updateBalance(CustPayDTO dto);
 
-    public void recordOpLog(CustPayDTO dto, BigDecimal result) {
+    public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
         AccountBalanceChange accountBalanceChange = new AccountBalanceChange();
         BeanUtils.copyProperties(dto, accountBalanceChange);
         if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
@@ -61,6 +61,7 @@ public abstract class AbstractPayFactory {
         setOpLogAmount(accountBalanceChange, dto.getAmount());
         accountBalanceChange.setCurrentBalance(result);
         accountBalanceChangeMapper.insert(accountBalanceChange);
+        return accountBalanceChange;
     }
 
     protected abstract void setOpLogAmount(AccountBalanceChange accountBalanceChange, BigDecimal amount);

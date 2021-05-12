@@ -66,6 +66,11 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         query.eq(BasSpecialOperation::getOperationOrderNo,basSpecialOperationRequestDTO.getOperationOrderNo());
         BasSpecialOperation basSpecialOperation = baseInfoMapper.selectOne(query);
         if(Objects.isNull(basSpecialOperation)) {
+            BasSpecialOperation basSpecial = new BasSpecialOperation();
+            basSpecial.setOrderType(basSpecialOperationRequestDTO.getOrderType());
+            basSpecial.setOrderNo(basSpecialOperationRequestDTO.getOrderNo());
+            String customCode = this.getCustomCode(basSpecial);
+            domain.setCustomCode(customCode);
             baseInfoMapper.insert(domain);
             log.info("#A3 已创建特殊操作");
         } else {
@@ -112,13 +117,16 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
     public List<BasSpecialOperationVo> list(BasSpecialOperationRequestDTO dto) {
         QueryWrapper<BasSpecialOperation> where = new QueryWrapper<>();
         if (StringUtils.isNotEmpty(dto.getOperationOrderNo())) {
-            where.eq("a.operation_order_no", dto.getOperationOrderNo());
+            where.in("a.operation_order_no", (Object[]) dto.getOperationOrderNo().split(","));
         }
         if (StringUtils.isNotEmpty(dto.getOrderNo())) {
-            where.eq("a.order_no", dto.getOrderNo());
+            where.in("a.order_no", (Object[]) dto.getOrderNo().split(","));
         }
         if (StringUtils.isNotEmpty(dto.getOperationType())) {
-            where.eq("b.operation_type", dto.getOperationType());
+            where.like("b.operation_type", dto.getOperationType());
+        }
+        if (StringUtils.isNotEmpty(dto.getCustomCode())) {
+            where.like("a.custom_code", dto.getCustomCode());
         }
         return baseInfoMapper.selectPageList(where);
     }
@@ -209,7 +217,10 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
      * @return customCode
      */
     private String getCustomCode(BasSpecialOperation basSpecialOperation) {
-        OrderType factory = orderTypeFactory.getFactory(OrderTypeEnum.getEn(basSpecialOperation.getOrderType()));
+        String en = OrderTypeEnum.getEn(basSpecialOperation.getOrderType());
+        String orderType = en;
+        if(en == null) orderType = basSpecialOperation.getOrderType();
+        OrderType factory = orderTypeFactory.getFactory(orderType);
         String customCode = factory.findOrderById(basSpecialOperation.getOrderNo());
         if (StringUtils.isEmpty(customCode)) {
             throw new CommonException("999", ErrorMessageEnum.ORDER_IS_NOT_EXIST.getMessage());

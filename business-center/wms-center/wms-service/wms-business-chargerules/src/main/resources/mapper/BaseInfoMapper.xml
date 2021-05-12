@@ -48,7 +48,7 @@
         <where>
             ${ew.sqlSegment}
         </where>
-        order by status desc
+        order by status DESC,create_time DESC
     </select>
 
 </mapper>
