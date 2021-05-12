@@ -3,6 +3,8 @@ package com.szmsd.common.core.feign;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestAttributes;
@@ -47,6 +49,11 @@ public class FeignRequestInterceptor implements RequestInterceptor {
                     template.header(name, value);
                 }
             }
+        }
+        // 追加header
+        String requestId = MDC.get("TID");
+        if (StringUtils.isNotBlank(requestId)) {
+            template.header("X-TID", requestId);
         }
     }
 
