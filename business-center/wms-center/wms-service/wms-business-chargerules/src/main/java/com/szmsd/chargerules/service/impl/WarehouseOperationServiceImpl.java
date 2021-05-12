@@ -89,8 +89,8 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
     }
 
     @Override
-    public WarehouseOperation details(int id) {
-        return warehouseOperationMapper.selectById(id);
+    public WarehouseOperationVo details(int id) {
+        return warehouseOperationMapper.selectDetailsById(id);
     }
 
 }

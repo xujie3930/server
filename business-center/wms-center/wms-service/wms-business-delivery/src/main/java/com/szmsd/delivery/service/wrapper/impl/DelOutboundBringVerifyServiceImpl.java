@@ -78,8 +78,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     throw new CommonException("999", "单据不存在");
                 }
                 // 可以提审的状态：待提审，审核失败
+                boolean isAuditFailed = DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState());
                 if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
-                        || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
+                        || isAuditFailed)) {
                     throw new CommonException("999", "单据状态不正确，不能提审");
                 }
                 ApplicationContext context = this.initContext(delOutbound);
@@ -89,9 +90,21 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     currentState = BringVerifyEnum.BEGIN;
                 } else {
                     currentState = BringVerifyEnum.get(bringVerifyState);
+                    // 兼容
+                    if (null == currentState) {
+                        currentState = BringVerifyEnum.BEGIN;
+                    }
                 }
                 ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
-                applicationContainer.action();
+                try {
+                    applicationContainer.action();
+                } catch (CommonException e) {
+                    // 回滚操作
+                    applicationContainer.setEndState(BringVerifyEnum.BEGIN);
+                    applicationContainer.rollback();
+                    // 抛出异常
+                    throw e;
+                }
             }
         }
         return delOutboundList.size();

@@ -8,7 +8,9 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
@@ -55,6 +57,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -100,6 +103,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private OperationFeignService operationFeignService;
     @Autowired
     private IDelOutboundPackingService delOutboundPackingService;
+    @Resource
+    private BasRegionFeignService basRegionFeignService;
 
     /**
      * 查询出库单模块
@@ -529,27 +534,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
     }
 
-    private void freeze(String orderType, String invoiceNo, String warehouseCode, List<DelOutboundDetailDto> details) {
-        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
-            return;
-        }
-        if (CollectionUtils.isEmpty(details)) {
-            return;
-        }
-        InventoryOperateListDto operateListDto = new InventoryOperateListDto();
-        operateListDto.setInvoiceNo(invoiceNo);
-        operateListDto.setWarehouseCode(warehouseCode);
-        long lineNo = 1L;
-        Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
-        for (DelOutboundDetailDto detail : details) {
-            detail.setLineNo(lineNo++);
-            DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
-        }
-        List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
-        operateListDto.setOperateList(operateList);
-        this.inventoryFeignClientService.freeze(operateListDto);
-    }
-
     /**
      * 取消冻结
      *
@@ -557,7 +541,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param orderNo       orderNo
      * @param warehouseCode warehouseCode
      */
-    private void unFreeze(String orderType, String orderNo, String warehouseCode) {
+    @Override
+    public void unFreeze(String orderType, String orderNo, String warehouseCode) {
         if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
             return;
         }
@@ -925,6 +910,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (!warehouseCode.equals(outbound.getWarehouseCode())) {
                 throw new CommonException("999", "只能同一个仓库下的出库单");
             }
+            String orderNo = outbound.getOrderNo();
+            delOutboundMap.put(orderNo, outbound);
             // 处理已完成，已取消的
             if (DelOutboundStateEnum.COMPLETED.getCode().equals(outbound.getState())
                     || DelOutboundStateEnum.CANCELLED.getCode().equals(outbound.getState())) {
@@ -932,7 +919,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 continue;
             }
             // 处理未提审，提审失败的
-            String orderNo = outbound.getOrderNo();
             if (DelOutboundStateEnum.REVIEWED.getCode().equals(outbound.getState())
                     || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(outbound.getState())) {
                 // 未提审的，提审失败的
@@ -941,7 +927,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             // 通知WMS处理的
             orderNos.add(orderNo);
-            delOutboundMap.put(orderNo, outbound);
         }
         // 判断有没有处理未提审，提审失败的
         if (CollectionUtils.isNotEmpty(reviewedList)) {
@@ -1085,7 +1070,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         List<QueryChargeVO> list = baseMapper.selectDelOutboundList(queryDto);
         for (QueryChargeVO queryChargeVO : list) {
             String orderNo = queryChargeVO.getOrderNo();
-
+            queryChargeVO.setCountry(getCountryName(queryChargeVO.getCountry()));
             List<DelOutboundDetail> delOutboundDetails = delOutboundDetailService.selectDelOutboundDetailList(new DelOutboundDetail().setOrderNo(orderNo));
             //计算数量 = 多个SKU的数量+包材（1个）
             queryChargeVO.setQty(ListUtils.emptyIfNull(delOutboundDetails).stream().map(value -> StringUtils.isBlank(value.getBindCode())
@@ -1096,6 +1081,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.setAmount(queryChargeVO, delOutboundCharges);
         }
         return list;
+    }
+
+    private String getCountryName(String country) {
+        if (StringUtils.isEmpty(country)) return country;
+        R<BasRegionSelectListVO> result = basRegionFeignService.queryByCountryCode(country);
+        if (result.getCode() == 200 && result.getData() != null) {
+            return result.getData().getName();
+        }
+        return "";
     }
 
     @Override

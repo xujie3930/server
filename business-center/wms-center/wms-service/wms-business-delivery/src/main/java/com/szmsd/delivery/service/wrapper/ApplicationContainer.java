@@ -17,7 +17,7 @@ public class ApplicationContainer {
     // context
     private final ApplicationContext context;
     // end state
-    private final ApplicationState endState;
+    private ApplicationState endState;
     // current state
     private ApplicationState currentState;
 
@@ -26,6 +26,10 @@ public class ApplicationContainer {
         this.currentState = currentState;
         this.endState = endState;
         this.handleMap = register.register();
+    }
+
+    public void setEndState(ApplicationState endState) {
+        this.endState = endState;
     }
 
     /**
@@ -69,6 +73,11 @@ public class ApplicationContainer {
         if (null == this.endState) {
             throw new RuntimeException("endState cannot be null");
         }
+        // 当前节点为失败节点，获取到上一个节点进行回滚
+        ApplicationHandle applicationHandle = this.handleMap.get(this.currentState.name());
+        if (null != applicationHandle) {
+            this.currentState = applicationHandle.preState();
+        }
         // end state != next state
         while (!this.endState.equals(this.currentState)) {
             ApplicationHandle handle = this.handleMap.get(this.currentState.name());
@@ -86,7 +95,7 @@ public class ApplicationContainer {
                     throw e;
                 }
             }
-            this.currentState = handle.quoState();
+            this.currentState = handle.preState();
         }
     }
 }

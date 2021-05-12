@@ -295,5 +295,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return
      */
     int setPurchaseNo(String purchaseNo, List<String> orderNoList);
+
+    /**
+     * 取消冻结库存
+     *
+     * @param orderType     orderType
+     * @param orderNo       orderNo
+     * @param warehouseCode warehouseCode
+     */
+    void unFreeze(String orderType, String orderNo, String warehouseCode);
 }
 

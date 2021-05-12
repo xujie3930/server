@@ -57,7 +57,7 @@ public class WarehouseOperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('WarehouseOperation:WarehouseOperation:details')")
     @ApiOperation(value = "仓储业务计费规则 - 详情")
     @GetMapping("/details/{id}")
-    public R<WarehouseOperation> details(@PathVariable int id) {
+    public R<WarehouseOperationVo> details(@PathVariable int id) {
         return R.ok(warehouseOperationService.details(id));
     }
 

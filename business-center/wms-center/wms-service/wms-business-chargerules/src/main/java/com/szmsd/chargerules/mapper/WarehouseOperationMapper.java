@@ -10,4 +10,6 @@ import java.util.List;
 public interface WarehouseOperationMapper extends BaseMapper<WarehouseOperation> {
 
     List<WarehouseOperationVo> listPage(WarehouseOperationDTO dto);
+
+    WarehouseOperationVo selectDetailsById(int id);
 }
