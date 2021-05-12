@@ -484,9 +484,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            if (null != delOutbound) {
-                throw new CommonException("999", "程序发生异常，中断本次操作");
-            }
             // 判断是否需要创建物流订单
             if (DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType())) {
                 // 创建承运商物流订单
