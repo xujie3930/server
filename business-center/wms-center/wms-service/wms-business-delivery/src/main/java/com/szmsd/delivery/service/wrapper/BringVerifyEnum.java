@@ -705,6 +705,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setId(delOutbound.getId());
             updateDelOutbound.setBringVerifyState(END.name());
             // PRC计费
+            updateDelOutbound.setLength(delOutbound.getLength());
+            updateDelOutbound.setWidth(delOutbound.getWidth());
+            updateDelOutbound.setHeight(delOutbound.getHeight());
+            updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
+            updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
+            updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             // 产品信息
