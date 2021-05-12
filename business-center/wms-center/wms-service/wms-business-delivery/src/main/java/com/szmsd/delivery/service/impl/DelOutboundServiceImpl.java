@@ -910,6 +910,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (!warehouseCode.equals(outbound.getWarehouseCode())) {
                 throw new CommonException("999", "只能同一个仓库下的出库单");
             }
+            String orderNo = outbound.getOrderNo();
+            delOutboundMap.put(orderNo, outbound);
             // 处理已完成，已取消的
             if (DelOutboundStateEnum.COMPLETED.getCode().equals(outbound.getState())
                     || DelOutboundStateEnum.CANCELLED.getCode().equals(outbound.getState())) {
@@ -917,7 +919,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 continue;
             }
             // 处理未提审，提审失败的
-            String orderNo = outbound.getOrderNo();
             if (DelOutboundStateEnum.REVIEWED.getCode().equals(outbound.getState())
                     || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(outbound.getState())) {
                 // 未提审的，提审失败的
@@ -926,7 +927,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             // 通知WMS处理的
             orderNos.add(orderNo);
-            delOutboundMap.put(orderNo, outbound);
         }
         // 判断有没有处理未提审，提审失败的
         if (CollectionUtils.isNotEmpty(reviewedList)) {
@@ -1084,9 +1084,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     private String getCountryName(String country) {
-        if(StringUtils.isEmpty(country)) return country;
+        if (StringUtils.isEmpty(country)) return country;
         R<BasRegionSelectListVO> result = basRegionFeignService.queryByCountryCode(country);
-        if(result.getCode() == 200 && result.getData() != null) {
+        if (result.getCode() == 200 && result.getData() != null) {
             return result.getData().getName();
         }
         return "";

@@ -21,4 +21,11 @@
         </where>
     </select>
 
+    <select id="selectDetailsById" resultMap="WarehouseOperationMap" parameterType="Integer">
+        SELECT id,create_time,warehouse_code,remark,currency_code,currency_name FROM `cha_warehouse_operation`
+        <where>
+            id = #{id}
+        </where>
+    </select>
+
 </mapper>
