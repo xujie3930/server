@@ -90,23 +90,21 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     currentState = BringVerifyEnum.BEGIN;
                 } else {
                     currentState = BringVerifyEnum.get(bringVerifyState);
+                    // 兼容
                     if (null == currentState) {
                         currentState = BringVerifyEnum.BEGIN;
                     }
                 }
-                ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.BEGIN, BringVerifyEnum.BEGIN);
-                // 如果是审核失败的，先回滚操作，然后再来重新提交
-                // 回滚之前先判断有没有超过 BringVerifyEnum.SHIPMENT_CREATE 节点，如果超过了这个节点，就不允许回滚。
-                if (isAuditFailed && currentState.ordinal() <= BringVerifyEnum.SHIPMENT_CREATE.ordinal()) {
-                    // 执行回滚操作
+                ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
+                try {
+                    applicationContainer.action();
+                } catch (CommonException e) {
+                    // 回滚操作
+                    applicationContainer.setEndState(BringVerifyEnum.BEGIN);
                     applicationContainer.rollback();
-                    // 状态重置
-                    currentState = BringVerifyEnum.BEGIN;
+                    // 抛出异常
+                    throw e;
                 }
-                // 重新设置状态
-                applicationContainer.setCurrentState(currentState);
-                applicationContainer.setEndState(BringVerifyEnum.END);
-                applicationContainer.action();
             }
         }
         return delOutboundList.size();
