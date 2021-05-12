@@ -188,6 +188,8 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         accountSerialBillDTO.setRemark(basSpecialOperation.getRemark());
         accountSerialBillDTO.setAmount(amount);
         accountSerialBillDTO.setCurrencyCode(specialOperation.getCurrencyCode());
+        accountSerialBillDTO.setOrderTime(basSpecialOperation.getCreateTime()); //下单时间 当前时间
+        accountSerialBillDTO.setPaymentTime(new Date());
         serialBillInfoList.add(accountSerialBillDTO);
         custPayDTO.setCusCode(customCode);
         custPayDTO.setPayType(BillEnum.PayType.PAYMENT_NO_FREEZE);
@@ -197,7 +199,6 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         custPayDTO.setNo(basSpecialOperation.getOrderNo());
         custPayDTO.setSerialBillInfoList(serialBillInfoList);
         custPayDTO.setOrderType(basSpecialOperation.getOperationType());
-        custPayDTO.setOrderTime(new Date()); //下单时间 当前时间
         return custPayDTO;
     }
 
