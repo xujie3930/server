@@ -4,6 +4,7 @@ import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 
 import java.util.ArrayList;
@@ -52,7 +53,12 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
             outboundDto.setDeliveryTime(dto.getDeliveryTime());
             outboundDto.setDeliveryAgent(dto.getDeliveryAgent());
             outboundDto.setDeliveryInfo(dto.getDeliveryInfo());
-            outboundDto.setAddress(this.buildAddress(dto));
+            // 自提，销毁，新SKU不处理地址信息
+            if (!(DelOutboundOrderTypeEnum.DESTROY.getCode().equals(outboundDto.getOrderType())
+                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(outboundDto.getOrderType())
+                    || DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(outboundDto.getOrderType()))) {
+                outboundDto.setAddress(this.buildAddress(dto));
+            }
             outboundDto.setDetails(this.buildDetails(dto));
             outboundDto.setSourceType(DelOutboundConstant.SOURCE_TYPE_IMP);
             outboundDtoList.add(outboundDto);

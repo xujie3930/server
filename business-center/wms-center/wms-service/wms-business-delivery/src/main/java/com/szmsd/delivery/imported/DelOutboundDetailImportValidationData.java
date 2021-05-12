@@ -19,6 +19,13 @@ public class DelOutboundDetailImportValidationData extends CacheContext.MapCache
     }
 
     @Override
+    public boolean exists(String warehouseCode, String sku) {
+        // 去查询sku是否存在
+        InventoryAvailableListVO data = this.getData(warehouseCode, sku);
+        return null != data && null != data.getSku();
+    }
+
+    @Override
     public boolean sub(String warehouseCode, String sku, int qty) {
         // 获取sku库存
         InventoryAvailableListVO vo = this.getData(warehouseCode, sku);
