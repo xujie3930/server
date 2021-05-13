@@ -59,7 +59,11 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 dto.setAmount(addAmount);
                 dto.setCurrencyCode(dto.getCurrencyCode2());
                 dto.setCurrencyName(dto.getCurrencyName2());
-                recordOpLog(dto, afterAdd.getCurrentBalance());
+                AccountBalanceChange afterBalanceChange = recordOpLog(dto, afterAdd.getCurrentBalance());
+                //设置流水账单
+                dto.setCurrencyCode(accountBalanceChange.getCurrencyCode());
+                dto.setCurrencyName(accountBalanceChange.getCurrencyName());
+                setSerialBillLog(dto,afterBalanceChange);
             }
             return true;
         } catch (Exception e) {
@@ -92,10 +96,12 @@ public class ExchangePayFactory extends AbstractPayFactory {
 
     public void setSerialBillLog(CustPayDTO dto,AccountBalanceChange accountBalanceChange) {
         AccountSerialBillDTO serialBill = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
-        serialBill.setAmount(dto.getAmount().negate());
+        serialBill.setCurrencyCode(accountBalanceChange.getCurrencyCode());
+        serialBill.setCurrencyName(accountBalanceChange.getCurrencyName());
+        serialBill.setAmount(accountBalanceChange.getAmountChange());
         serialBill.setChargeCategory(dto.getCurrencyName().concat("转").concat(dto.getCurrencyName2()));
-        serialBill.setChargeType(dto.getCurrencyCode().concat("转").concat(dto.getCurrencyCode2()));
-        serialBill.setBusinessCategory("余额转换");
+        serialBill.setChargeType(dto.getPayMethod().getPaymentName());
+        serialBill.setBusinessCategory(BillEnum.PayMethod.BALANCE_EXCHANGE.getPaymentName());
         serialBill.setProductCategory(serialBill.getBusinessCategory());
         serialBill.setRemark("汇率为: ".concat(dto.getRate().toString()));
         serialBill.setNo(accountBalanceChange.getSerialNum());

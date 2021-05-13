@@ -78,6 +78,10 @@ public class BillEnum implements Serializable {
          * 费用扣除
          */
         BALANCE_DEDUCTIONS("11","费用扣除"),
+        /**
+         * 余额转换
+         */
+        BALANCE_EXCHANGE("12","余额转换"),
         ;
 
 
