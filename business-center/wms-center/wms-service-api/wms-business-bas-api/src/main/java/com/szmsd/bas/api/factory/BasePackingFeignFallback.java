@@ -2,6 +2,7 @@ package com.szmsd.bas.api.factory;
 
 import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
@@ -20,6 +21,11 @@ public class BasePackingFeignFallback implements FallbackFactory<BasePackingFeig
 
             @Override
             public R<List<BasePacking>> queryPackingList(BaseProductConditionQueryDto conditionQueryDto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<BasePacking> queryByCode(BasePackingConditionQueryDto conditionQueryDto) {
                 return R.convertResultJson(throwable);
             }
         };
