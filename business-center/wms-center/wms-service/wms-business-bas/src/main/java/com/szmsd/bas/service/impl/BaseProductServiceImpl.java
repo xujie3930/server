@@ -155,7 +155,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", sellerCode);
         queryWrapper.eq("is_active", true);
         int total = super.count(queryWrapper);
-        queryWrapper.orderByAsc("code");
+        queryWrapper.orderByDesc("create_time");
         queryWrapper.last("limit " + (current - 1) * size + "," + size);
         List<BaseProductVO> baseProductVOList = BeanMapperUtil.mapList(super.list(queryWrapper), BaseProductVO.class);
         baseProductVOList.forEach(b -> {
