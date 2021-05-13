@@ -143,8 +143,8 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         }
         String data = result.getData();
         if (data == null)  return true;
-
-        if (data.equals("不验货")) return true;
+        log.info("客户{} 验货级别为{}",dto.getCusCode(),data);
+        if (data.equals("无需验货")) return true;
 
         if (data.equals("新SKU必验")) {
             List<String> skus = dto.getSkus();
