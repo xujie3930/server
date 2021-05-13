@@ -253,6 +253,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     int handler(DelOutboundHandlerDto dto);
 
     /**
+     * 继续处理
+     *
+     * @param dto dto
+     * @return int
+     */
+    int furtherHandler(DelOutboundFurtherHandlerDto dto);
+
+    /**
      * 获取标签
      *
      * @param response response

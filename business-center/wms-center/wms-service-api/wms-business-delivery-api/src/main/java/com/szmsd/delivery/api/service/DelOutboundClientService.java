@@ -1,9 +1,6 @@
 package com.szmsd.delivery.api.service;
 
-import com.szmsd.delivery.dto.PackageMeasureRequestDto;
-import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
-import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
-import com.szmsd.delivery.dto.ShipmentRequestDto;
+import com.szmsd.delivery.dto.*;
 
 /**
  * @author zhangyuyuan
@@ -34,4 +31,12 @@ public interface DelOutboundClientService {
      * @return Integer
      */
     int shipmentContainers(ShipmentContainersRequestDto dto);
+
+    /**
+     * 继续处理
+     *
+     * @param dto dto
+     * @return int
+     */
+    int furtherHandler(DelOutboundFurtherHandlerDto dto);
 }
