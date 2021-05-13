@@ -1003,6 +1003,27 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
+    public int furtherHandler(DelOutboundFurtherHandlerDto dto) {
+        DelOutbound delOutbound = this.getByOrderNo(dto.getOrderNo());
+        if (null == delOutbound) {
+            throw new CommonException("999", "单据不存在");
+        }
+        int result;
+        if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getOrderType())) {
+            // 仓库发货，调用完成的接口
+            this.delOutboundAsyncService.completed(delOutbound.getOrderNo());
+            result = 1;
+        } else if (DelOutboundStateEnum.WHSE_CANCELLED.getCode().equals(delOutbound.getOrderType())) {
+            // 仓库取消，调用取消的接口
+            this.delOutboundAsyncService.cancelled(delOutbound.getOrderNo());
+            result = 1;
+        } else {
+            result = this.delOutboundAsyncService.shipmentPacking(delOutbound.getId());
+        }
+        return result;
+    }
+
+    @Override
     public void label(HttpServletResponse response, DelOutboundLabelDto dto) {
         DelOutbound delOutbound = this.getById(dto.getId());
         if (null == delOutbound) {

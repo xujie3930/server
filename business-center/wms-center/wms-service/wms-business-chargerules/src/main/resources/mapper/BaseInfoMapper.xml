@@ -14,6 +14,7 @@
             b.operation_type,
             a.qty,
             a.coefficient,
+            a.custom_code,
             b.unit,
             a.oms_remark,
             a.status,
@@ -48,7 +49,7 @@
         <where>
             ${ew.sqlSegment}
         </where>
-        order by status desc
+        order by status DESC,create_time DESC
     </select>
 
 </mapper>

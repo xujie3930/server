@@ -48,18 +48,22 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 BalanceDTO afterSubtract = calculateBalance(beforeSubtract, substractAmount.negate());
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), afterSubtract);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
-                recordOpLog(dto, afterSubtract.getCurrentBalance());
+                AccountBalanceChange accountBalanceChange = recordOpLog(dto, afterSubtract.getCurrentBalance());
                 //2.再充值
                 BalanceDTO beforeAdd = getBalance(dto.getCusCode(), dto.getCurrencyCode2());
                 BigDecimal addAmount = dto.getRate().multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
                 BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
                 setBalance(dto.getCusCode(), dto.getCurrencyCode2(), afterAdd);
-                setSerialBillLog(dto);
+                setSerialBillLog(dto,accountBalanceChange);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
                 dto.setAmount(addAmount);
                 dto.setCurrencyCode(dto.getCurrencyCode2());
                 dto.setCurrencyName(dto.getCurrencyName2());
-                recordOpLog(dto, afterAdd.getCurrentBalance());
+                AccountBalanceChange afterBalanceChange = recordOpLog(dto, afterAdd.getCurrentBalance());
+                //设置流水账单
+                dto.setCurrencyCode(accountBalanceChange.getCurrencyCode());
+                dto.setCurrencyName(accountBalanceChange.getCurrencyName());
+                setSerialBillLog(dto,afterBalanceChange);
             }
             return true;
         } catch (Exception e) {
@@ -90,14 +94,17 @@ public class ExchangePayFactory extends AbstractPayFactory {
         return oldBalance;
     }
 
-    public void setSerialBillLog(CustPayDTO dto) {
+    public void setSerialBillLog(CustPayDTO dto,AccountBalanceChange accountBalanceChange) {
         AccountSerialBillDTO serialBill = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
-        serialBill.setAmount(dto.getAmount().negate());
+        serialBill.setCurrencyCode(accountBalanceChange.getCurrencyCode());
+        serialBill.setCurrencyName(accountBalanceChange.getCurrencyName());
+        serialBill.setAmount(accountBalanceChange.getAmountChange());
         serialBill.setChargeCategory(dto.getCurrencyName().concat("转").concat(dto.getCurrencyName2()));
-        serialBill.setChargeType(dto.getCurrencyCode().concat("转").concat(dto.getCurrencyCode2()));
-        serialBill.setBusinessCategory("余额转换");
+        serialBill.setChargeType(dto.getPayMethod().getPaymentName());
+        serialBill.setBusinessCategory(BillEnum.PayMethod.BALANCE_EXCHANGE.getPaymentName());
         serialBill.setProductCategory(serialBill.getBusinessCategory());
         serialBill.setRemark("汇率为: ".concat(dto.getRate().toString()));
+        serialBill.setNo(accountBalanceChange.getSerialNum());
         accountSerialBillService.add(serialBill);
     }
 

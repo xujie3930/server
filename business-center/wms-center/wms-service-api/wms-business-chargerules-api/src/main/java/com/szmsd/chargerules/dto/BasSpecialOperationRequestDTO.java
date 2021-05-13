@@ -29,6 +29,9 @@ public class BasSpecialOperationRequestDTO {
     @ApiModelProperty(value = "操作单号")
     private String operationOrderNo;
 
+    @ApiModelProperty(value = "客户编号")
+    private String customCode;
+
     @NotBlank(message = "订单号不能为空")
     @ApiModelProperty(value = "订单号")
     private String orderNo;

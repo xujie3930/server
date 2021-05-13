@@ -25,6 +25,9 @@ public class BasSpecialOperationVo {
     @ApiModelProperty(value = "操作时间")
     private String operateOn;
 
+    @ApiModelProperty(value = "客户编号")
+    private String customCode;
+
     @ApiModelProperty(value = "仓库")
     private String warehouseCode;
 

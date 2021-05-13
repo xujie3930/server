@@ -368,6 +368,14 @@ public class DelOutboundController extends BaseController {
         return R.ok(this.delOutboundService.handler(dto));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:furtherHandler')")
+    @PostMapping("/furtherHandler")
+    @ApiOperation(value = "出库管理 - 继续处理", position = 1210)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundFurtherHandlerDto")
+    public R<Integer> furtherHandler(@RequestBody @Validated DelOutboundFurtherHandlerDto dto) {
+        return R.ok(this.delOutboundService.furtherHandler(dto));
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:label')")
     @PostMapping("/label")
     @ApiOperation(value = "出库管理 - 获取标签", position = 1300)
