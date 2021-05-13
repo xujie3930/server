@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BasePackingQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.mapper.BasePackingMapper;
@@ -135,7 +136,7 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
     @Override
     public int deleteBasePackingByIds(List<Long> ids) {
         QueryWrapper queryWrapper = new QueryWrapper();
-        for(Long l:ids){
+        for (Long l : ids) {
 
         }
 
@@ -168,6 +169,17 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
             return Collections.emptyList();
         }
         return list;
+    }
+
+    @Override
+    public BasePacking queryByCode(BasePackingConditionQueryDto conditionQueryDto) {
+        LambdaQueryWrapper<BasePacking> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(BasePacking::getCode, conditionQueryDto.getCode());
+        List<BasePacking> list = this.list(queryWrapper);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        return list.get(0);
     }
 }
 

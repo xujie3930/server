@@ -1,6 +1,7 @@
 package com.szmsd.bas.controller;
 
 import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BasePackingQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.service.IBasSerialNumberService;
@@ -127,5 +128,12 @@ public class BasePackingController extends BaseController{
     @ApiOperation(value = "根据仓库，SKU查询产品信息")
     public R<List<BasePacking>> queryPackingList(@RequestBody BaseProductConditionQueryDto conditionQueryDto) {
         return R.ok(this.basePackingService.queryPackingList(conditionQueryDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:queryByCode')")
+    @PostMapping("/queryByCode")
+    @ApiOperation(value = "根据编码查询包装信息")
+    public R<BasePacking> queryByCode(@RequestBody BasePackingConditionQueryDto conditionQueryDto) {
+        return R.ok(this.basePackingService.queryByCode(conditionQueryDto));
     }
 }

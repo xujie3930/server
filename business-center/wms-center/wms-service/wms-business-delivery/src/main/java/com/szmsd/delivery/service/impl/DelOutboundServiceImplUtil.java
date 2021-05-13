@@ -119,6 +119,15 @@ public final class DelOutboundServiceImplUtil {
     }
 
     /**
+     * 扣减物料费用失败
+     *
+     * @param r r
+     */
+    public static void packageThrowCommonException(R<?> r) {
+        throwCommonException(r, "1930", "1931", "扣减物料费用失败");
+    }
+
+    /**
      * 对<code>R<?></code>结果集进行判断
      * 当结果集出现异常，执行抛出异常的动作
      *
