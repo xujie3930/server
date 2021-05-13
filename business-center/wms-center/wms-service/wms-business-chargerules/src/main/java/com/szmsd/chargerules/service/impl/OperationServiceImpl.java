@@ -17,6 +17,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -25,7 +26,6 @@ import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +33,8 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -49,27 +51,50 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     @Override
     public int save(OperationDTO dto) {
-        Operation domain = new Operation();
-        BeanUtils.copyProperties(dto, domain);
-        checkDuplicate(domain);
+        Operation domain = BeanMapperUtil.map(dto, Operation.class);
+        List<Operation> list = selectList(domain);
+        saveCheck(domain, list);
+        // 为空直接新增
         return operationMapper.insert(domain);
     }
 
-    /**
-     * 新增和修改时校验是否数据是否重复
-     *
-     * @param operation operation
-     */
-    private void checkDuplicate(Operation operation) {
-        int count = operationMapper.findCount(operation);
-        if (count > 0) {
-            throw new CommonException("999", "仓库+操作类型+订单类型 重量区间不能重合");
+    private void saveCheck(Operation domain, List<Operation> list) {
+        if(CollectionUtils.isNotEmpty(list)) {
+            // 转运/批量出库单-装箱费/批量出库单-贴标费 同一个仓库 只能存在一条配置
+            if(DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode().equals(domain.getOperationType())
+            || DelOutboundOrderEnum.BATCH_PACKING.getCode().equals(domain.getOperationType())
+            || DelOutboundOrderEnum.BATCH_LABEL.getCode().equals(domain.getOperationType())) {
+                throw new CommonException("999", Objects.requireNonNull(DelOutboundOrderEnum.get(domain.getOperationType())).getName().concat("+仓库+订单类型只能配置一条"));
+            }
+            // 同一个仓库只能配置同一个币种
+            if(!domain.getCurrencyCode().equals(list.get(0).getCurrencyCode())) {
+                throw new CommonException("999","同一个订单类型的仓库只能配置一种币种");
+            }
+            for (Operation operation : list) {
+                Double minimumWeight = domain.getMinimumWeight();
+                Double maximumWeight = domain.getMaximumWeight();
+                if (Math.max(minimumWeight, operation.getMinimumWeight()) < Math.min(maximumWeight, operation.getMaximumWeight())) {
+                    throw new CommonException("999", "区间存在重叠交叉！");
+                }
+            }
         }
+    }
+
+    private List<Operation> selectList(Operation domain) {
+        LambdaQueryWrapper<Operation> query = Wrappers.lambdaQuery();
+        query.eq(Operation::getWarehouseCode, domain.getWarehouseCode());
+        query.eq(Operation::getOperationType, domain.getOperationType());
+        query.eq(Operation::getOrderType, domain.getOrderType());
+        if(domain.getId() != null) {
+            query.ne(Operation::getId, domain.getId());
+        }
+        return operationMapper.selectList(query);
     }
 
     @Override
     public int update(Operation dto) {
-        checkDuplicate(dto);
+        List<Operation> list = selectList(dto);
+        saveCheck(dto, list);
         return operationMapper.updateById(dto);
     }
 
@@ -109,12 +134,17 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
             query.lt(Operation::getMinimumWeight, dto.getWeight());
             query.ge(Operation::getMaximumWeight, dto.getWeight());
         }
-        return operationMapper.selectOne(query);
+        try {
+            return operationMapper.selectOne(query);
+        } catch (Exception e) {
+            log.error("queryDetails() : {}",dto.toString());
+            throw e;
+        }
     }
 
     @Transactional
     @Override
-    public R delOutboundDeductions(DelOutboundOperationVO dto) {
+    public R<?> delOutboundDeductions(DelOutboundOperationVO dto) {
         ChargeLog chargeLog = this.selectLog(dto.getOrderNo());
         AssertUtil.notNull(chargeLog, "该单没有冻结金额，无法扣款 orderNo: " + dto.getOrderNo());
         chargeLog.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS.name());
@@ -134,7 +164,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     @Transactional
     @Override
-    public R delOutboundFreeze(DelOutboundOperationVO dto) {
+    public R<?> delOutboundFreeze(DelOutboundOperationVO dto) {
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
         if (CollectionUtils.isEmpty(details)) {
             log.error("calculate() 出库单的详情信息为空");
@@ -147,7 +177,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         }
 
         if (dto.getOrderType().equals(DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode())) {
-            return packageTransfer(dto);
+            return packageTransfer(dto,amount);
         }
 
         if (dto.getOrderType().equals(DelOutboundOrderEnum.BATCH.getCode())) {
@@ -159,14 +189,20 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     }
 
     /**
-     * 转运出库单 转运单没有重量，数量为1
+     * 转运出库单 转运单没有重量，有数量
      *
      * @param dto dto
      * @return result
      */
-    private R<?> packageTransfer(DelOutboundOperationVO dto) {
+    private R<?> packageTransfer(DelOutboundOperationVO dto,BigDecimal amount) {
+        List<DelOutboundOperationDetailVO> details = dto.getDetails();
+        Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
         Operation operation = getOperationDetails(dto, null, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
-        return this.freezeBalance(dto, 1L, operation.getFirstPrice(), operation);
+        for (DelOutboundOperationDetailVO vo : details) {
+            amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
+            log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
+        }
+        return this.freezeBalance(dto, count, operation.getFirstPrice(), operation);
     }
 
     /**
