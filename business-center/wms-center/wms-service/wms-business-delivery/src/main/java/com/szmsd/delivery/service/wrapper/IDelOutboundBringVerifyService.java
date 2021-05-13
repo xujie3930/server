@@ -2,10 +2,13 @@ package com.szmsd.delivery.service.wrapper;
 
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
+import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.http.dto.ChargeWrapper;
 import com.szmsd.http.dto.ProblemDetails;
 import com.szmsd.http.dto.ResponseObject;
 import com.szmsd.http.dto.ShipmentOrderResult;
+
+import java.util.List;
 
 /**
  * 提审业务
@@ -19,9 +22,9 @@ public interface IDelOutboundBringVerifyService {
      * 提审
      *
      * @param dto dto
-     * @return int
+     * @return List<DelOutboundBringVerifyVO>
      */
-    int bringVerify(DelOutboundBringVerifyDto dto);
+    List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto);
 
     /**
      * 初始化
