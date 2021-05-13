@@ -1,5 +1,8 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
+import com.szmsd.bas.api.service.BasePackingClientService;
+import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
@@ -22,6 +25,7 @@ import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
@@ -33,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -57,6 +62,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private IDelOutboundChargeService delOutboundChargeService;
     @Autowired
     private OperationFeignService operationFeignService;
+    @Autowired
+    private BasePackingClientService basePackingClientService;
 
     @Transactional
     @Override
@@ -89,7 +96,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 1.扣减库存              DE
         // 2.1扣减费用             FEE_DE
         // 2.2扣减操作费用         OP_FEE_DE
-        // TODO 2.3扣减物料费           PM_FEE_DE
+        // 2.3扣减物料费           PM_FEE_DE
         // 3.更新状态为已完成       MODIFY
         // 4.完成                  END
         DelOutbound delOutbound = this.delOutboundService.getByOrderNo(orderNo);
@@ -160,6 +167,29 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 delOutboundOperationVO.setOrderNo(orderNo);
                 R<?> r = this.operationFeignService.delOutboundCharge(delOutboundOperationVO);
                 DelOutboundServiceImplUtil.chargeOperationThrowCommonException(r);
+                completedState = "PM_FEE_DE";
+            }
+            if ("PM_FEE_DE".equalsIgnoreCase(completedState)) {
+                // 根据出库单上的包材类型进行扣去物料费。
+                String packingMaterial = delOutbound.getPackingMaterial();
+                if (StringUtils.isNotEmpty(packingMaterial)) {
+                    BasePackingConditionQueryDto conditionQueryDto = new BasePackingConditionQueryDto();
+                    conditionQueryDto.setCode(packingMaterial);
+                    // 查询包材信息
+                    BasePacking basePacking = this.basePackingClientService.queryByCode(conditionQueryDto);
+                    if (null != basePacking && null != basePacking.getPrice()) {
+                        CustPayDTO custPayDTO = new CustPayDTO();
+                        custPayDTO.setCusCode(delOutbound.getSellerCode());
+                        custPayDTO.setPayType(BillEnum.PayType.PAYMENT_NO_FREEZE);
+                        custPayDTO.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
+                        custPayDTO.setCurrencyCode(HttpRechargeConstants.RechargeCurrencyCode.CNY.name());
+                        custPayDTO.setAmount(BigDecimal.valueOf(basePacking.getPrice()));
+                        custPayDTO.setNo(delOutbound.getOrderNo());
+                        custPayDTO.setOrderType(delOutbound.getOrderType());
+                        R<?> r = this.rechargesFeignService.warehouseFeeDeductions(custPayDTO);
+                        DelOutboundServiceImplUtil.chargeOperationThrowCommonException(r);
+                    }
+                }
                 completedState = "MODIFY";
             }
             if ("MODIFY".equals(completedState)) {

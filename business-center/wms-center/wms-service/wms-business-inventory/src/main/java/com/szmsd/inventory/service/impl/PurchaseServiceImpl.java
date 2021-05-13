@@ -164,9 +164,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
         boolean present = Optional.of(purchaseAddDTO).map(PurchaseAddDTO::getPurchaseNo).isPresent();
         if (!present) {
-            String purchaseNo = serialNumberClientService.generateNumber("PURCHASE_ORDER");
+            String purchaseNo = serialNumberClientService.generateNumber("PURCHASE_ORDER_CG");
             SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
             String customCode = loginUserInfo.getSellerCode();
+            //生成规则 CG + customCode+ yyyyMMdd+6
+            purchaseNo = "CG"+customCode+purchaseNo;
             purchaseAddDTO.setCustomCode(customCode);
             purchaseAddDTO.setPurchaseNo(purchaseNo);
         }
@@ -179,16 +181,20 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
         //插入采购单数据
         List<PurchaseDetailsAddDTO> purchaseDetailsAddList = purchaseAddDTO.getPurchaseDetailsAddList();
-        Optional.ofNullable(purchaseDetailsAddList).filter(CollectionUtils::isNotEmpty).ifPresent(
-                purchaseDetailList -> {
-                    List<PurchaseDetails> entityList = IBOConvert.copyListProperties(purchaseDetailList, PurchaseDetails::new);
-                    entityList.forEach(x -> x.setAssociationId(associationId));
-                    iPurchaseDetailsService.saveOrUpdateBatch(entityList);
-                });
-        //添加采购单创建流程
+        if (CollectionUtils.isNotEmpty(purchaseDetailsAddList)){
+            Optional.of(purchaseDetailsAddList).filter(CollectionUtils::isNotEmpty).ifPresent(
+                    purchaseDetailList -> {
+                        List<PurchaseDetails> entityList = IBOConvert.copyListProperties(purchaseDetailList, PurchaseDetails::new);
+                        entityList.forEach(x -> x.setAssociationId(associationId));
+                        iPurchaseDetailsService.saveOrUpdateBatch(entityList);
+                    });
+            //添加采购单创建流程
+            //调用批量入库
+            purchaseOrderStorage(associationId, purchaseAddDTO);
+        }
+        //日志
         iPurchaseLogService.addLog(associationId, purchaseAddDTO);
-        //调用批量入库
-        purchaseOrderStorage(associationId, purchaseAddDTO);
+
         //回调出库表 回写采购单号
         remoteComponent.setPurchaseNo(purchaseAddDTO.getPurchaseNo(), purchaseAddDTO.getOrderNo());
         return saveBoolean ? 1 : 0;

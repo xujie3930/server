@@ -3,6 +3,7 @@ package com.szmsd.bas.api.feign;
 import com.szmsd.bas.api.BusinessBasInterface;
 import com.szmsd.bas.api.factory.BasePackingFeignFallback;
 import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -22,4 +23,13 @@ public interface BasePackingFeignService {
      */
     @PostMapping("/base/packing/queryPackingList")
     R<List<BasePacking>> queryPackingList(@RequestBody BaseProductConditionQueryDto conditionQueryDto);
+
+    /**
+     * 根据编码查询
+     *
+     * @param conditionQueryDto conditionQueryDto
+     * @return BasePacking
+     */
+    @PostMapping("/base/packing/queryByCode")
+    R<BasePacking> queryByCode(@RequestBody BasePackingConditionQueryDto conditionQueryDto);
 }

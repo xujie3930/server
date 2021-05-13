@@ -2,6 +2,7 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BasePackingQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 
@@ -82,5 +83,13 @@ public interface IBasePackingService extends IService<BasePacking> {
      * @return BaseProduct
      */
     List<BasePacking> queryPackingList(BaseProductConditionQueryDto conditionQueryDto);
+
+    /**
+     * 根据编码查询
+     *
+     * @param conditionQueryDto conditionQueryDto
+     * @return BasePacking
+     */
+    BasePacking queryByCode(BasePackingConditionQueryDto conditionQueryDto);
 }
 
