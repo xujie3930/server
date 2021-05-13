@@ -25,6 +25,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.http.api.feign.HtpExceptionFeignService;
 import com.szmsd.http.dto.ExceptionProcessRequest;
 import com.szmsd.http.vo.ResponseVO;
+import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.XSlf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,7 @@ import java.util.TimeZone;
 * @since 2021-03-30
 */
 @Service
+@Slf4j
 public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, ExceptionInfo> implements IExceptionInfoService {
 
     @Resource
@@ -169,7 +172,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                     delOutboundFurtherHandlerDto.setOrderNo(exception.getOrderNo());
                     delOutboundClientService.furtherHandler(delOutboundFurtherHandlerDto);
                 }catch (Exception e){
-                    throw new BaseException("不能继续发货，请选择其它处理方式");
+                    log.info(exception.getOrderNo());
                 }
             }
             R<ResponseVO> r = htpExceptionFeignService.processing(exceptionProcessRequest);
