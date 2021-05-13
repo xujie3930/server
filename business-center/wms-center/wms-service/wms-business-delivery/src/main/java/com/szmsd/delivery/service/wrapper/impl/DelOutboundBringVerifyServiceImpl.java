@@ -192,7 +192,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
             packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                     new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                    , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO));
+                    , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
         } else {
             if (PricingEnum.SKU.equals(pricingEnum)) {
                 // 查询包材的信息
@@ -224,7 +224,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
                             new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
-                            Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO));
+                            Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO, product.getProductAttribute()));
                     // 判断有没有包材
                     String bindCode = detail.getBindCode();
                     if (StringUtils.isNotEmpty(bindCode)) {
@@ -234,13 +234,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         }
                         packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(baseProduct.getWeight()), "g"),
                                 new Packing(Utils.valueOf(baseProduct.getLength()), Utils.valueOf(baseProduct.getWidth()), Utils.valueOf(baseProduct.getHeight()), "cm"),
-                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO));
+                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
                     }
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                        , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO));
+                        , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
             }
         }
         // 计算包裹费用

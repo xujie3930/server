@@ -31,4 +31,6 @@ public class PackageInfo {
     @ApiModelProperty(value = "申报价值")
     private BigDecimal declareValue;
 
+    @ApiModelProperty(value = "发货类型---普货，电池，粉末等")
+    private String shipmentType;
 }
