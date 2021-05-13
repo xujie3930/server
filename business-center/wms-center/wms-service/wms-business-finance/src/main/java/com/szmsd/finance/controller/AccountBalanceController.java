@@ -59,7 +59,6 @@ public class AccountBalanceController extends FssBaseController {
     @PostMapping("/rechargeCallback")
     @ApiOperation(value = "第三方充值接口回调")
     public R rechargeCallback(@RequestBody RechargesCallbackRequestDTO requestDTO){
-        log.info("------------------------requestDTO:{}",requestDTO);
         return accountBalanceService.rechargeCallback(requestDTO);
     }
 
