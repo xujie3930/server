@@ -4,10 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
-import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
-import com.szmsd.delivery.dto.ShipmentRequestDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.finance.dto.QueryChargeDto;
@@ -68,6 +65,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
 
             @Override
             public R setPurchaseNo(String purchaseNo, List<String> orderNoList) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<Integer> furtherHandler(DelOutboundFurtherHandlerDto dto) {
                 return R.convertResultJson(throwable);
             }
         };

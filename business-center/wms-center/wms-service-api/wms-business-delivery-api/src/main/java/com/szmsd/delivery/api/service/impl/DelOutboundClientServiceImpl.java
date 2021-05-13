@@ -3,6 +3,7 @@ package com.szmsd.delivery.api.service.impl;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
+import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
 import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.dto.ShipmentRequestDto;
@@ -32,5 +33,10 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     @Override
     public int shipmentContainers(ShipmentContainersRequestDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.shipmentContainers(dto));
+    }
+
+    @Override
+    public int furtherHandler(DelOutboundFurtherHandlerDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.furtherHandler(dto));
     }
 }

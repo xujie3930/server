@@ -9,6 +9,8 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.delivery.api.service.DelOutboundClientService;
+import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
 import com.szmsd.exception.domain.ExceptionInfo;
 import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.ExceptionInfoQueryDto;
@@ -53,6 +55,9 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
 
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
+
+    @Autowired
+    private DelOutboundClientService delOutboundClientService;
 
     /**
         * 查询模块
@@ -158,6 +163,15 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             ExceptionProcessRequest exceptionProcessRequest = BeanMapperUtil.map(exceptionInfo,ExceptionProcessRequest.class);
             exceptionProcessRequest.setWarehouseCode(exception.getWarehouseCode());
             exceptionProcessRequest.setExceptionNo(exception.getExceptionNo());
+            if(exceptionInfo.getProcessType().equals(ProcessTypeEnum.GOONSHIPPING.getCode())){
+                try {
+                    DelOutboundFurtherHandlerDto delOutboundFurtherHandlerDto = new DelOutboundFurtherHandlerDto();
+                    delOutboundFurtherHandlerDto.setOrderNo(exception.getOrderNo());
+                    delOutboundClientService.furtherHandler(delOutboundFurtherHandlerDto);
+                }catch (Exception e){
+                    throw new BaseException("不能继续发货，请选择其它处理方式");
+                }
+            }
             R<ResponseVO> r = htpExceptionFeignService.processing(exceptionProcessRequest);
             if(r.getData().getSuccess()==null){
                 if(r.getData().getErrors()!=null)

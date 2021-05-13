@@ -5,16 +5,14 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
-import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
-import com.szmsd.delivery.dto.ShipmentRequestDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -108,4 +106,13 @@ public interface DelOutboundFeignService {
     @GetMapping(value = "/api/outbound/purchase/setPurchaseNo/{purchaseNo}/{orderNoList}")
     @ApiOperation(value = "出库-实际创建采购单后回写采购单号")
     R setPurchaseNo(@PathVariable("purchaseNo") String purchaseNo, @PathVariable("orderNoList") List<String> orderNoList);
+
+    /**
+     * 继续处理
+     *
+     * @param dto dto
+     * @return R<Integer>
+     */
+    @PostMapping("/api/outbound/furtherHandler")
+    R<Integer> furtherHandler(@RequestBody @Validated DelOutboundFurtherHandlerDto dto);
 }
