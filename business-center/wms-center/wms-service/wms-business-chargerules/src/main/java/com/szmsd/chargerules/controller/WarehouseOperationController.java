@@ -1,6 +1,5 @@
 package com.szmsd.chargerules.controller;
 
-import com.szmsd.chargerules.domain.WarehouseOperation;
 import com.szmsd.chargerules.dto.WarehouseOperationDTO;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.chargerules.vo.WarehouseOperationVo;
@@ -9,7 +8,6 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,14 +26,7 @@ public class WarehouseOperationController extends BaseController {
     @ApiOperation(value = "仓储业务计费规则 - 保存")
     @PostMapping("/save")
     public R save(@RequestBody WarehouseOperationDTO dto) {
-        int save = 0;
-        try {
-            save = warehouseOperationService.save(dto);
-        } catch (DuplicateKeyException e) {
-            log.error(e.getMessage(), e);
-            R.failed("仓库+计费天数不能重复");
-        }
-        return toOk(save);
+        return toOk(warehouseOperationService.save(dto));
     }
 
     @PreAuthorize("@ss.hasPermi('WarehouseOperation:WarehouseOperation:edit')")

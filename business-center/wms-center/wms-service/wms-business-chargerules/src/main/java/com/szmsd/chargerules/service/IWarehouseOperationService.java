@@ -1,7 +1,6 @@
 package com.szmsd.chargerules.service;
 
 
-import com.szmsd.chargerules.domain.WarehouseOperation;
 import com.szmsd.chargerules.dto.WarehouseOperationDTO;
 import com.szmsd.chargerules.vo.WarehouseOperationVo;
 
