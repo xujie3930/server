@@ -186,7 +186,16 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         custPayDTO.setAmount(BigDecimal.valueOf(basePacking.getPrice()));
                         custPayDTO.setNo(delOutbound.getOrderNo());
                         custPayDTO.setOrderType(delOutbound.getOrderType());
-                        R<?> r = this.rechargesFeignService.warehouseFeeDeductions(custPayDTO);
+                        List<AccountSerialBillDTO> list = new ArrayList<>();
+                        AccountSerialBillDTO dto = new AccountSerialBillDTO();
+                        dto.setCurrencyCode(custPayDTO.getCurrencyCode());
+                        dto.setAmount(custPayDTO.getAmount());
+                        dto.setProductCategory(BillEnum.PayMethod.BALANCE_DEDUCTIONS.getPaymentName());
+                        dto.setChargeCategory("物料费");
+                        dto.setChargeType(BillEnum.PayMethod.BALANCE_DEDUCTIONS.getPaymentName());
+                        list.add(dto);
+                        custPayDTO.setSerialBillInfoList(list);
+                        R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
                         DelOutboundServiceImplUtil.chargeOperationThrowCommonException(r);
                     }
                 }
