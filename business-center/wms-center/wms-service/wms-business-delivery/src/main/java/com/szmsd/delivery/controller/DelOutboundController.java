@@ -185,7 +185,7 @@ public class DelOutboundController extends BaseController {
     @PostMapping("/bringVerify")
     @ApiOperation(value = "出库管理 - 提审", position = 600)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundBringVerifyDto")
-    public R<Integer> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto) {
+    public R<List<DelOutboundBringVerifyVO>> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto) {
         return R.ok(delOutboundBringVerifyService.bringVerify(dto));
     }
 

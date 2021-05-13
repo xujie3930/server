@@ -20,6 +20,7 @@ import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
+import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
@@ -65,15 +66,19 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IHtpCarrierClientService htpCarrierClientService;
 
     @Override
-    public int bringVerify(DelOutboundBringVerifyDto dto) {
+    public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
         List<Long> ids = dto.getIds();
         if (CollectionUtils.isEmpty(ids)) {
-            return 0;
+            throw new CommonException("999", "请求参数不能为空");
         }
         // 根据id查询出库信息
         List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
-        if (CollectionUtils.isNotEmpty(delOutboundList)) {
-            for (DelOutbound delOutbound : delOutboundList) {
+        if (CollectionUtils.isEmpty(delOutboundList)) {
+            throw new CommonException("999", "单据不存在");
+        }
+        List<DelOutboundBringVerifyVO> resultList = new ArrayList<>();
+        for (DelOutbound delOutbound : delOutboundList) {
+            try {
                 if (Objects.isNull(delOutbound)) {
                     throw new CommonException("999", "单据不存在");
                 }
@@ -105,9 +110,17 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     // 抛出异常
                     throw e;
                 }
+                resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), true, "处理成功"));
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                if (null != delOutbound) {
+                    resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), false, e.getMessage()));
+                } else {
+                    resultList.add(new DelOutboundBringVerifyVO("未知单号", false, e.getMessage()));
+                }
             }
         }
-        return delOutboundList.size();
+        return resultList;
     }
 
     @Override
