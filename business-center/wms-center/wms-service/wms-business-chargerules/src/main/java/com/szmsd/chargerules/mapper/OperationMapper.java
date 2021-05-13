@@ -5,6 +5,4 @@ import com.szmsd.chargerules.domain.Operation;
 
 public interface OperationMapper extends BaseMapper<Operation> {
 
-    int findCount(Operation operation);
-
 }
