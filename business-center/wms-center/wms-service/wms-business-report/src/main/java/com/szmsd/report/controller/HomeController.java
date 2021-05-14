@@ -35,7 +35,7 @@ public class HomeController {
     }
 
     @PreAuthorize("@ss.hasPermi('home:querydocuments')")
-    @GetMapping("/queryDocuments/{cusCode}")
+    @GetMapping("/{cusCode}/queryDocuments")
     @ApiOperation(value = "订单数据", notes = "" +
             "当天提审量（当天出库订单的提审包裹数量）" +
             "当天到仓量（当天入库单的数量）" +
@@ -47,14 +47,14 @@ public class HomeController {
     }
 
     @PreAuthorize("@ss.hasPermi('home:querymsg')")
-    @GetMapping("/queryMsg/{cusCode}")
+    @GetMapping("/{cusCode}/queryMsg")
     @ApiOperation(value = "消息通知", notes = "消息通知")
     public R queryMsg(@PathVariable("cusCode") String cusCode) {
         return R.ok();
     }
 
     @PreAuthorize("@ss.hasPermi('home:queryproblem')")
-    @GetMapping("/queryProblem/{cusCode}")
+    @GetMapping("/{cusCode}/queryProblem")
     @ApiOperation(value = "问题件处理", notes = "问题件处理")
     public R<List<DocumentVO>> queryProblem(@PathVariable("cusCode") String cusCode) {
         List<DocumentVO> documents = homeService.selectProblem(cusCode);
@@ -62,7 +62,7 @@ public class HomeController {
     }
 
     @PreAuthorize("@ss.hasPermi('home:queryorder7report')")
-    @GetMapping("/queryOrder7Report/{cusCode}")
+    @GetMapping("/{cusCode}/queryOrder7Report")
     @ApiOperation(value = "近7天订单报表", notes = "近7天订单报表")
     public R<List<List<String>>> queryOrder7Report(@PathVariable("cusCode") String cusCode) {
         List<List<String>> report = homeService.queryOrder7Report(cusCode);
