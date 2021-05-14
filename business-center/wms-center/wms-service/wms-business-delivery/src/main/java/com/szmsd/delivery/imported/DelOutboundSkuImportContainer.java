@@ -27,6 +27,11 @@ public class DelOutboundSkuImportContainer {
 
     public List<DelOutboundDetailVO> get() {
         List<DelOutboundDetailVO> voList = new ArrayList<>(this.dataList.size());
+        // 重新把扣减的库存加回去
+        for (DelOutboundDetailImportDto dto : this.dataList) {
+            this.importValidationData.resetQty(this.warehouseCode, dto.getSku(), Math.toIntExact(dto.getQty()));
+        }
+        // 处理返回值
         for (DelOutboundDetailImportDto dto : this.dataList) {
             InventoryAvailableListVO available = importValidationData.get(this.warehouseCode, dto.getSku());
             DelOutboundDetailVO vo = BeanMapperUtil.map(available, DelOutboundDetailVO.class);

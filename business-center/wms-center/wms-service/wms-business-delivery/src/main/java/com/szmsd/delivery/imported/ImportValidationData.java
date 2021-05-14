@@ -13,4 +13,13 @@ public interface ImportValidationData {
     boolean sub(String warehouseCode, String sku, int qty);
 
     InventoryAvailableListVO get(String warehouseCode, String sku);
+
+    /**
+     * 重置数量
+     *
+     * @param warehouseCode warehouseCode
+     * @param sku           sku
+     * @param qty           qty
+     */
+    void resetQty(String warehouseCode, String sku, int qty);
 }

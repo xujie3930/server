@@ -41,6 +41,8 @@ public class ContextFilter implements Filter {
             requestId = UUIDUtil.uuid();
         }
         MDC.put("TID", requestId);
+        // 响应头上返回id
+        response.setHeader("X-TID", requestId);
 
         String uri = request.getRequestURI();
         String method = request.getMethod();
@@ -76,8 +78,6 @@ public class ContextFilter implements Filter {
             builder.append("\"responseBody\":").append(responseBody).append("}");
             logger.info(builder.toString());
         }
-        // 响应头上返回id
-        response.setHeader("X-TID", requestId);
 
         long endTime = System.currentTimeMillis();
         long times = (endTime - startTime);

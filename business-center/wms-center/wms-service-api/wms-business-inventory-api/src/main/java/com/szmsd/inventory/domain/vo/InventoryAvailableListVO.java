@@ -96,4 +96,8 @@ public class InventoryAvailableListVO {
     public void subAvailableInventory(int num) {
         this.availableInventory = this.availableInventory - num;
     }
+
+    public void addAvailableInventory(int num) {
+        this.availableInventory = this.availableInventory + num;
+    }
 }
