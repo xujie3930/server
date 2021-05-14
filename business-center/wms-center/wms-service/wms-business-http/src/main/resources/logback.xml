@@ -71,4 +71,10 @@
         <appender-ref ref="file_info" />
         <appender-ref ref="file_error" />
     </root>
+
+    <include resource="logback-sql.xml"/>
+    <logger name="com.szmsd.http.mapper" level="trace" additivity="false">
+        <appender-ref ref="console"/>
+        <appender-ref ref="file_sql"/>
+    </logger>
 </configuration>
