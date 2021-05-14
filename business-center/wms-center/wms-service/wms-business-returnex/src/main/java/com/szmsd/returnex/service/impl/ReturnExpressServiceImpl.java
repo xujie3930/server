@@ -474,7 +474,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .last("LIMIT 1")
         );
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
-        List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getDetails();
+        List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
         returnExpressGoodService.addOrUpdateGoodInfoBatch(details, expressUpdateDTO.getId());
 
         //处理结果推送WMS
@@ -504,7 +504,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             boolean unpackAndPutOnTheShelf = configStatus.getPutawayByDetail().equals(processType);
             if (unpackAndPutOnTheShelf) {
                 // 如果是按明细上架，则所有的明细需要设置相对应的数量和sku sku 可以相同
-                List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getDetails();
+                List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
                 AssertUtil.isTrue(CollectionUtils.isNotEmpty(details), "按明细上架，明细列表不能为空!");
                 Optional.of(details).filter(CollectionUtils::isNotEmpty).ifPresent(x -> {
                     AtomicBoolean mustHadOne = new AtomicBoolean(false);

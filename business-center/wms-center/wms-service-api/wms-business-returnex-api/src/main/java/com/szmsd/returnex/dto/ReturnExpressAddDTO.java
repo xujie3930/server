@@ -85,7 +85,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
 
     @Valid
     @ApiModelProperty(value = "商品sku列表数据")
-    private List<ReturnExpressGoodAddDTO> details;
+    private List<ReturnExpressGoodAddDTO> goodList;
 
 
     @Override

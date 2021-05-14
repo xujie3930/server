@@ -190,7 +190,7 @@ public class HomeServiceImpl implements HomeService {
         // 已出库订单（状态为已完成）：Order Shipped
         List<DelOutboundReportListVO> shipped = remoteComponent.outboundData(outQueryDto);
 
-        for (int i = 1; i < 7; i++) {
+        for (int i = 7; i > 0; i--) {
             String time = DateUtils.getPastDate(i);
             Integer createdCount = created.stream().filter(item -> time.equals(item.getDate())).map(DelOutboundReportListVO::getCount).reduce(Integer::sum).orElse(0);
             Integer submitedCount = submited.stream().filter(item -> time.equals(item.getDate())).map(DelOutboundReportListVO::getCount).reduce(Integer::sum).orElse(0);
