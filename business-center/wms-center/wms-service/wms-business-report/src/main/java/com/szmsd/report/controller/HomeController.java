@@ -27,7 +27,7 @@ public class HomeController {
     private HomeService homeService;
 
     @PreAuthorize("@ss.hasPermi('home:querycuswallet')")
-    @GetMapping("/queryCusWallet/{cusCode}")
+    @GetMapping("/{cusCode}/queryCusWallet")
     @ApiOperation(value = "我的钱包", notes = "对应客户钱包")
     public R myWallet(@PathVariable("cusCode") String cusCode) {
         List<CusWalletVO> collect = homeService.selectCusWallet(cusCode);
