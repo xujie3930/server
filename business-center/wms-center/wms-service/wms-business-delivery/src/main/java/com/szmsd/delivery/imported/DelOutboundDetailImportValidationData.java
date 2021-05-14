@@ -49,6 +49,18 @@ public class DelOutboundDetailImportValidationData extends CacheContext.MapCache
         return this.getData(warehouseCode, sku);
     }
 
+    @Override
+    public void resetQty(String warehouseCode, String sku, int qty) {
+        // 获取sku库存
+        InventoryAvailableListVO vo = this.getData(warehouseCode, sku);
+        if (null == vo) {
+            return;
+        }
+        vo.addAvailableInventory(qty);
+        // 刷新缓存中的可用数量
+        this.put(this.buildKey(warehouseCode, sku), vo);
+    }
+
     private InventoryAvailableListVO getData(String warehouseCode, String sku) {
         String key = this.buildKey(warehouseCode, sku);
         if (this.containsKey(key)) {
