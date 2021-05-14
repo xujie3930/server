@@ -78,7 +78,37 @@
     </select>
 
     <select id="queryAvailableList" resultType="com.szmsd.inventory.domain.vo.InventoryAvailableListVO">
-        select warehouse_code, sku, total_inventory, available_inventory from inventory
+        SELECT
+            t.cus_code,
+            t.warehouse_code,
+            t.sku,
+            t.total_inventory,
+            t.available_inventory,
+            sku.product_name,
+            sku.`code`,
+            sku.init_weight,
+            sku.init_length,
+            sku.init_width,
+            sku.init_height,
+            sku.init_volume,
+            sku.weight,
+            sku.length,
+            sku.width,
+            sku.height,
+            sku.volume,
+            sku.bind_code,
+            sku.bind_code_name,
+            sku.product_name_chinese,
+            sku.declared_value,
+            sku.product_description,
+            sku.product_attribute,
+            sku.product_attribute_name,
+            sku.electrified_mode,
+            sku.electrified_mode_name,
+            sku.battery_packaging,
+            sku.battery_packaging_name
+        FROM inventory t
+        LEFT JOIN base_product sku ON t.sku = sku.`code`
         ${ew.customSqlSegment}
     </select>
 

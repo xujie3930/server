@@ -150,11 +150,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             return R.failed("没有找到对应的充值记录");
         }
         String rechargeStatus = HttpRechargeConstants.RechargeStatusCode.Successed.name();
-        try {
-            webSocketServer.sendMessage(thirdRechargeRecord.getCusCode(), requestDTO.getStatus());
-        } catch (IOException e) {
-            log.error("充值接口通知客户端失败", e);
-        }
         //如果充值成功进行充值
         if (StringUtils.equals(thirdRechargeRecord.getRechargeStatus(), rechargeStatus)) {
             CustPayDTO dto = new CustPayDTO();

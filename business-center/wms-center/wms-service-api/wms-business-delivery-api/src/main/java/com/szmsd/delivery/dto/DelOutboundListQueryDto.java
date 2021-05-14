@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * @author zhangyuyuan
  * @date 2021-03-05 14:21
@@ -44,5 +46,8 @@ public class DelOutboundListQueryDto extends QueryDto {
 
     @ApiModelProperty(value = "修改时间")
     private String updateTime;
+
+    @ApiModelProperty(value = "选中的ID")
+    private List<Long> selectIds;
 
 }
