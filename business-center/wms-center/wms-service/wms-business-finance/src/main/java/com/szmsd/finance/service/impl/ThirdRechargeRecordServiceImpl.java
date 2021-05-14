@@ -1,7 +1,8 @@
 package com.szmsd.finance.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.szmsd.common.core.domain.R;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -64,4 +65,13 @@ public class ThirdRechargeRecordServiceImpl implements IThirdRechargeRecordServi
         }
         return null;
     }
+
+    @Override
+    public String getRechargeResult(String serialNo) {
+        LambdaQueryWrapper<ThirdRechargeRecord> query = Wrappers.lambdaQuery();
+        query.eq(ThirdRechargeRecord::getSerialNo,serialNo);
+        ThirdRechargeRecord thirdRechargeRecord = thirdRechargeRecordMapper.selectOne(query);
+        return thirdRechargeRecord.getRechargeStatus();
+    }
+
 }
