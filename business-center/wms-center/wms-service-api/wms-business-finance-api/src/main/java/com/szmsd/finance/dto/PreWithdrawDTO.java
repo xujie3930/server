@@ -42,6 +42,9 @@ public class PreWithdrawDTO {
     @ApiModelProperty(value = "审核状态(默认0=未审核，1=审核，2=审核未通过)")
     private String verifyStatus;
 
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
     @ApiModelProperty(value = "审核备注")
     private String verifyRemark;
 
