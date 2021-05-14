@@ -30,4 +30,6 @@ public class InventoryAvailableQueryDto implements Serializable {
 
     @ApiModelProperty(value = "查询类型，1可用库存为0时不查询。2可用库存为0时查询。默认1")
     private Integer queryType = 1;
+
+    private String querySku;
 }

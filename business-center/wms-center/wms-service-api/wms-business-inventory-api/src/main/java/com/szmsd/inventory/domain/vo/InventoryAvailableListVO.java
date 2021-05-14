@@ -12,6 +12,9 @@ import java.math.BigDecimal;
 @Data
 public class InventoryAvailableListVO {
 
+    @ApiModelProperty(value = "客户编码")
+    private String cusCode;
+
     @ApiModelProperty(value = "目的仓库编码")
     private String warehouseCode;
 

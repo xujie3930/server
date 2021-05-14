@@ -2,6 +2,7 @@ package com.szmsd.delivery.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -125,7 +126,13 @@ public class DelOutboundDetailServiceImpl extends ServiceImpl<DelOutboundDetailM
     @Override
     public List<DelOutboundExportItemListDto> exportList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
+        if (CollectionUtils.isNotEmpty(queryDto.getSelectIds())) {
+            queryWrapper.in("o.id", queryDto.getSelectIds());
+            // 按照创建时间倒序
+            queryWrapper.orderByDesc("o.create_time");
+        } else {
+            DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
+        }
         return this.baseMapper.exportList(queryWrapper);
     }
 }
