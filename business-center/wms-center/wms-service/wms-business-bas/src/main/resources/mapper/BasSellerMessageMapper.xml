@@ -31,7 +31,10 @@
         </sql>
 
     <delete id="deleteBasSellerMessage">
-        delete from bas_seller_message where message_id in #{ids}
+        delete from bas_seller_message where message_id in
+        <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
     </delete>
 
     <select id="selectBasSellerMessage" resultType="com.szmsd.bas.dto.BasMessageDto">
