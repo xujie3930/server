@@ -12,4 +12,6 @@ public interface IThirdRechargeRecordService {
     void saveRecord(CustPayDTO dto, RechargesResponseVo vo);
 
     ThirdRechargeRecord updateRecordIfSuccess(RechargesCallbackRequestDTO dto);
+
+    String getRechargeResult(String serialNo);
 }

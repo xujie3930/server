@@ -1117,7 +1117,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundExportListDto> exportList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
+        // 界面上选择了记录进行导出
+        if (CollectionUtils.isNotEmpty(queryDto.getSelectIds())) {
+            queryWrapper.in("o.id", queryDto.getSelectIds());
+            // 按照创建时间倒序
+            queryWrapper.orderByDesc("o.create_time");
+        } else {
+            DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
+        }
         return this.baseMapper.exportList(queryWrapper);
     }
 

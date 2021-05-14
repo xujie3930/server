@@ -111,6 +111,29 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         return baseMapper.selectListVO(inventorySkuQueryDTO);
     }
 
+    private void handlerSkuQueryWrapper(QueryWrapper<InventoryAvailableQueryDto> queryWrapper, InventoryAvailableQueryDto queryDto) {
+        queryWrapper.eq("t.warehouse_code", queryDto.getWarehouseCode());
+        queryWrapper.eq("t.cus_code", queryDto.getCusCode());
+        if (StringUtils.isNotEmpty(queryDto.getSku())) {
+            queryWrapper.like("t.sku", queryDto.getSku());
+        }
+        if (StringUtils.isNotEmpty(queryDto.getEqSku())) {
+            queryWrapper.eq("t.sku", queryDto.getEqSku());
+        }
+        if (CollectionUtils.isNotEmpty(queryDto.getSkus())) {
+            queryWrapper.in("t.sku", queryDto.getSkus());
+        }
+        if (null != queryDto.getQueryType() && 1 == queryDto.getQueryType()) {
+            // 可用库存大于0
+            queryWrapper.gt("t.available_inventory", 0);
+        }
+        if ("SKU".equalsIgnoreCase(queryDto.getQuerySku())) {
+            // 这里查询包括SKU的库存和包材的库存
+            // 只查询SKU的库存
+            queryWrapper.eq("sku.category", "SKU");
+        }
+    }
+
     private void handlerQueryWrapper(QueryWrapper<InventoryAvailableQueryDto> queryWrapper, InventoryAvailableQueryDto queryDto) {
         queryWrapper.eq("warehouse_code", queryDto.getWarehouseCode());
         queryWrapper.eq("cus_code", queryDto.getCusCode());
@@ -131,13 +154,13 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     @Override
     public List<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto) {
-        if (StringUtils.isEmpty(queryDto.getWarehouseCode())) {
+        if (StringUtils.isEmpty(queryDto.getWarehouseCode()) || StringUtils.isEmpty(queryDto.getCusCode())) {
             return Collections.emptyList();
         }
         QueryWrapper<InventoryAvailableQueryDto> queryWrapper = Wrappers.query();
-        this.handlerQueryWrapper(queryWrapper, queryDto);
+        this.handlerSkuQueryWrapper(queryWrapper, queryDto);
         List<InventoryAvailableListVO> voList = this.baseMapper.queryAvailableList(queryWrapper);
-        if (CollectionUtils.isNotEmpty(voList)) {
+        /*if (CollectionUtils.isNotEmpty(voList)) {
             // 填充SKU属性信息
             List<String> skus = voList.stream().map(InventoryAvailableListVO::getSku).collect(Collectors.toList());
             BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
@@ -152,7 +175,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             for (InventoryAvailableListVO vo : voList) {
                 this.setFieldValue(vo, productMap.get(vo.getSku()));
             }
-        }
+        }*/
         return voList;
     }
 
@@ -356,7 +379,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     @Override
     public List<Inventory> getWarehouseSku() {
         LambdaQueryWrapper<Inventory> query = Wrappers.lambdaQuery();
-        query.gt(Inventory::getAvailableInventory,0);
+        query.gt(Inventory::getAvailableInventory, 0);
         return this.list(query);
     }
 
