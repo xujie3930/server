@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -87,18 +88,20 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
     public R selectRate(String currencyFromCode, String currencyToCode) {
         ExchangeRate rate=exchangeRateMapper.selectOne(new QueryWrapper<ExchangeRate>().lambda()
                 .eq(ExchangeRate::getExchangeFromCode,currencyFromCode)
-                .eq(ExchangeRate::getExchangeToCode,currencyToCode));
+                .eq(ExchangeRate::getExchangeToCode,currencyToCode)
+                .and(v -> v.gt(ExchangeRate::getExpireTime,new Date()).or().isNull(ExchangeRate::getExpireTime)));
         if(rate!=null){
             return R.ok(rate.getRate());
         }
         rate=exchangeRateMapper.selectOne(new QueryWrapper<ExchangeRate>().lambda()
                 .eq(ExchangeRate::getExchangeFromCode,currencyToCode)
-                .eq(ExchangeRate::getExchangeToCode,currencyFromCode));
+                .eq(ExchangeRate::getExchangeToCode,currencyFromCode)
+                .and(v -> v.gt(ExchangeRate::getExpireTime,new Date()).or().isNull(ExchangeRate::getExpireTime)));
         if(rate!=null){
             return R.ok(BigDecimal.ONE.divide(rate.getRate(),4,BigDecimal.ROUND_FLOOR));
         }
         //尝试递归查询汇率
-        List<ExchangeRate> exchangeRates=exchangeRateMapper.selectList(new QueryWrapper<ExchangeRate>());
+        List<ExchangeRate> exchangeRates=exchangeRateMapper.selectList(new QueryWrapper<ExchangeRate>().lambda().gt(ExchangeRate::getExpireTime,new Date()).or().isNull(ExchangeRate::getExpireTime));
         RateCalculateUtil rateCalculateUtil = RateCalculateUtil.buildRateTree(currencyFromCode, currencyToCode, exchangeRates);
         BigDecimal fromToRate = rateCalculateUtil.getFromToRate();
         if(fromToRate!=null){
