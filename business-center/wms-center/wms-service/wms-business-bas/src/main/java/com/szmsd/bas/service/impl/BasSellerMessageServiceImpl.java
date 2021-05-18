@@ -8,10 +8,13 @@ import com.szmsd.bas.dto.BasMessageQueryDTO;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerMessageQueryDTO;
 import com.szmsd.bas.mapper.BasSellerMessageMapper;
+import com.szmsd.bas.service.IBasMessageService;
 import com.szmsd.bas.service.IBasSellerMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -36,6 +39,9 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
     @Autowired
     private IBasSellerService basSellerService;
 
+    @Resource
+    private IBasMessageService basMessageService;
+
         /**
         * 查询模块
         *
@@ -46,6 +52,23 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         public BasSellerMessage selectBasSellerMessageById(String id)
         {
         return baseMapper.selectById(id);
+        }
+
+        @Override
+        public BasMessageDto getBulletMessage(String sellerCode){
+            QueryWrapper<BasSellerMessage> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("sellerCode",sellerCode);
+            queryWrapper.orderByDesc("create_time");
+            List<BasSellerMessage> list = super.list(queryWrapper);
+
+            if(CollectionUtils.isNotEmpty(list)){
+                BasSellerMessage basSellerMessage =  list.get(0);
+                if(basSellerMessage.getBullet()){
+                    BasMessageDto basMessageDto = basMessageService.selectBasMessageById(basSellerMessage.getMessageId());
+                    return basMessageDto;
+                }
+            }
+            return null;
         }
 
         /**
@@ -83,7 +106,11 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
                 basSellerMessage.setSellerCode(s);
                 basSellerMessage.setMessageId(id);
                 basSellerMessage.setBullet(bullet);
-                basSellerMessage.setReadable(false);
+                if(bullet == true){
+                    basSellerMessage.setReadable(true);
+                }else{
+                    basSellerMessage.setReadable(false);
+                }
                 super.save(basSellerMessage);
             }
         }

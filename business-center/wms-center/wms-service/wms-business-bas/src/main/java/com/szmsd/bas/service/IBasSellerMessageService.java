@@ -1,5 +1,6 @@
 package com.szmsd.bas.service;
 
+import com.szmsd.bas.domain.BasMessage;
 import com.szmsd.bas.domain.BasSellerMessage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.dto.BasMessageDto;
@@ -25,6 +26,8 @@ public interface IBasSellerMessageService extends IService<BasSellerMessage> {
         * @return 模块
         */
         BasSellerMessage selectBasSellerMessageById(String id);
+
+        BasMessageDto getBulletMessage(String sellerCode);
 
         /**
         * 查询模块列表

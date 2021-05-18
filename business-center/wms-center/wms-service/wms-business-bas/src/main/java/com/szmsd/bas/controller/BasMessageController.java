@@ -1,4 +1,5 @@
 package com.szmsd.bas.controller;
+import com.szmsd.bas.dto.BasMessageDto;
 import com.szmsd.bas.dto.BasMessageQueryDTO;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
@@ -69,7 +70,7 @@ public class BasMessageController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BasMessage:BasMessage:query')")
     @GetMapping(value = "getInfo/{id}")
     @ApiOperation(value = "获取模块详细信息",notes = "获取模块详细信息")
-    public R getInfo(@PathVariable("id") String id)
+    public R getInfo(@PathVariable("id") Long id)
     {
     return R.ok(basMessageService.selectBasMessageById(id));
     }
@@ -81,7 +82,7 @@ public class BasMessageController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("add")
     @ApiOperation(value = "新增模块",notes = "新增模块")
-    public R add(@RequestBody BasMessage basMessage)
+    public R add(@RequestBody BasMessageDto basMessage)
     {
         basMessageService.insertBasMessage(basMessage);
         return R.ok();

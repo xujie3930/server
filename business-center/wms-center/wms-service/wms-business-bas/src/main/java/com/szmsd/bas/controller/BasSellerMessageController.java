@@ -1,4 +1,5 @@
 package com.szmsd.bas.controller;
+import com.szmsd.bas.domain.BasMessage;
 import com.szmsd.bas.dto.BasMessageDto;
 import com.szmsd.bas.dto.BasSellerMessageQueryDTO;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -73,6 +74,14 @@ public class BasSellerMessageController extends BaseController{
     public R getInfo(@PathVariable("id") String id)
     {
     return R.ok(basSellerMessageService.selectBasSellerMessageById(id));
+    }
+
+    @PreAuthorize("@ss.hasPermi('BasSellerMessage:BasSellerMessage:query')")
+    @GetMapping(value = "/Bullet")
+    @ApiOperation(value = "查询弹框信息",notes = "查询弹框信息")
+    public R<BasMessageDto> Bullet(@RequestParam String sellerCode)
+    {
+        return R.ok(basSellerMessageService.getBulletMessage(sellerCode));
     }
 
     /**
