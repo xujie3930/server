@@ -3,7 +3,6 @@ package com.szmsd.chargerules.service.impl;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
-import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.chargerules.dto.CreateProductDTO;
 import com.szmsd.chargerules.dto.FreightCalculationDTO;
 import com.szmsd.chargerules.dto.PricedProductQueryDTO;
@@ -64,14 +63,11 @@ public class PricedProductServiceImpl implements IPricedProductService {
         getPricedProductsCommand.setPackageInfos(Arrays.asList(packageInfo));
 
         Address fromAddress = new Address();
-        String dealPoint = freightCalculationDTO.getDealPoint();
-        R<BasWarehouse> warehouseR = basWarehouseFeignService.queryByWarehouseCode(dealPoint);
-        if (warehouseR != null && null != warehouseR.getData()) {
-            BasWarehouse warehouse = warehouseR.getData();
-            fromAddress.setStreet1(warehouse.getStreet1()).setStreet2(warehouse.getStreet2());
-            fromAddress.setProvince(warehouse.getProvince()).setCity(warehouse.getCity());
-            fromAddress.setPostCode(warehouse.getPostcode());
-            fromAddress.setCountry(new CountryInfo(warehouse.getCountryCode(), null, warehouse.getCountryName(), warehouse.getCountryChineseName()));
+//        R<BasWarehouse> warehouseR = basWarehouseFeignService.queryByWarehouseCode(dealPoint);
+        R<BasRegionSelectListVO> fromCountry = basCountryFeignService.queryByCountryCode(freightCalculationDTO.getDealPoint());
+        if (fromCountry != null && null != fromCountry.getData()) {
+            BasRegionSelectListVO country = fromCountry.getData();
+            fromAddress.setCountry(new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName()));
         }
         getPricedProductsCommand.setFromAddress(fromAddress);
 
