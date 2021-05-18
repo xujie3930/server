@@ -2,6 +2,7 @@ package com.szmsd.bas.service;
 
 import com.szmsd.bas.domain.BasMessage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.bas.dto.BasMessageDto;
 import com.szmsd.bas.dto.BasMessageQueryDTO;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public interface IBasMessageService extends IService<BasMessage> {
         * @param id 模块ID
         * @return 模块
         */
-        BasMessage selectBasMessageById(String id);
+        BasMessageDto selectBasMessageById(Long id);
 
         /**
         * 查询模块列表
@@ -38,7 +39,7 @@ public interface IBasMessageService extends IService<BasMessage> {
         * @param basMessage 模块
         * @return 结果
         */
-        void insertBasMessage(BasMessage basMessage);
+        void insertBasMessage(BasMessageDto basMessage);
 
         /**
         * 修改模块
