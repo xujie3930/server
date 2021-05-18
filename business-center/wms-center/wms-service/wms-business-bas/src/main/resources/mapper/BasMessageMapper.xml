@@ -29,7 +29,7 @@
                 remark,
             id, create_by, update_by, del_flag, version, title, content, type, bullet
         </sql>
-    <insert id="insertBasMessage" useGeneratedKeys="true" keyProperty="id" parameterType="com.szmsd.bas.domain.BasMessage">
+    <insert id="insertBasMessage" useGeneratedKeys="true" keyProperty="id" parameterType="com.szmsd.bas.dto.BasMessageDto">
         insert into bas_message (create_by_name,create_time,
             id, del_flag,title, content, `type`, bullet)
         values(#{createByName},now(),#{id},'0',#{title},#{content},#{type},#{bullet})

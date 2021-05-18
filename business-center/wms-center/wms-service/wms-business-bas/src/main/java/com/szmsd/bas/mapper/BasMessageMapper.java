@@ -2,6 +2,7 @@ package com.szmsd.bas.mapper;
 
 import com.szmsd.bas.domain.BasMessage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.szmsd.bas.dto.BasMessageDto;
 
 /**
  * <p>
@@ -12,6 +13,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2021-04-25
  */
 public interface BasMessageMapper extends BaseMapper<BasMessage> {
-    int insertBasMessage(BasMessage basMessage);
+    int insertBasMessage(BasMessageDto basMessage);
 
 }

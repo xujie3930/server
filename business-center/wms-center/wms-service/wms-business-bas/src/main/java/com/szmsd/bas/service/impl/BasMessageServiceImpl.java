@@ -1,21 +1,32 @@
 package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.domain.BasMessage;
+import com.szmsd.bas.dto.BasMessageDto;
 import com.szmsd.bas.dto.BasMessageQueryDTO;
 import com.szmsd.bas.mapper.BasMessageMapper;
 import com.szmsd.bas.mapper.BasSellerMessageMapper;
 import com.szmsd.bas.service.IBasMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.service.IBasSellerMessageService;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.domain.R;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +45,9 @@ public class BasMessageServiceImpl extends ServiceImpl<BasMessageMapper, BasMess
     @Autowired
     private IBasSellerMessageService basSellerMessageService;
 
+    @Autowired
+    private RemoteAttachmentService remoteAttachmentService;
+
         /**
         * 查询模块
         *
@@ -41,9 +55,20 @@ public class BasMessageServiceImpl extends ServiceImpl<BasMessageMapper, BasMess
         * @return 模块
         */
         @Override
-        public BasMessage selectBasMessageById(String id)
+        public BasMessageDto selectBasMessageById(Long id)
         {
-        return baseMapper.selectById(id);
+            BasMessageDto basMessageDto = BeanMapperUtil.map(baseMapper.selectById(id),BasMessageDto.class);
+            List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
+                            .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.MESSAGE_IMAGE.getAttachmentType()).setBusinessNo(id.toString()).setBusinessItemNo(null)).getData());
+                    if (CollectionUtils.isNotEmpty(attachment)) {
+                        List<AttachmentFileDTO> documentsFiles = new ArrayList();
+                        for (BasAttachment a : attachment) {
+                            documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
+                        }
+                        basMessageDto.setRevealDocumentsFiles(documentsFiles);
+                    }
+
+            return basMessageDto;
         }
 
         /**
@@ -68,10 +93,14 @@ public class BasMessageServiceImpl extends ServiceImpl<BasMessageMapper, BasMess
         * @return 结果
         */
         @Override
-        public void insertBasMessage(BasMessage basMessage)
+        public void insertBasMessage(BasMessageDto basMessage)
         {
             /*basMessage.setCreateByName(SecurityUtils.getLoginUser().getUsername());*/
             baseMapper.insertBasMessage(basMessage);
+            if (CollectionUtils.isNotEmpty(basMessage.getDocumentsFiles())) {
+                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(basMessage.getId().toString()).businessItemNo(null).fileList(basMessage.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.MESSAGE_IMAGE).build();
+                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+            }
             //同步数据到用户
             basSellerMessageService.insertBasSellerMessage(basMessage.getId(),basMessage.getBullet());
         }
