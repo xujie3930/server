@@ -57,7 +57,7 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         @Override
         public BasMessageDto getBulletMessage(String sellerCode){
             QueryWrapper<BasSellerMessage> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("sellerCode",sellerCode);
+            queryWrapper.eq("seller_code",sellerCode);
             queryWrapper.orderByDesc("create_time");
             List<BasSellerMessage> list = super.list(queryWrapper);
 
