@@ -29,7 +29,7 @@ public class HtpCarrierClientServiceImpl implements IHtpCarrierClientService {
     }
 
     @Override
-    public ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(String orderNumber) {
-        return R.getDataAndException(this.htpCarrierFeignService.label(orderNumber));
+    public ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(CreateShipmentOrderCommand command) {
+        return R.getDataAndException(this.htpCarrierFeignService.label(command));
     }
 }

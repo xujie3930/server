@@ -22,7 +22,9 @@ import com.szmsd.common.core.domain.R;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * <p>
@@ -55,20 +57,18 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         }
 
         @Override
-        public BasMessageDto getBulletMessage(String sellerCode){
+        public List<BasMessageDto> getBulletMessage(String sellerCode){
             QueryWrapper<BasSellerMessage> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("seller_code",sellerCode);
+            queryWrapper.eq("bullet",true);
             queryWrapper.orderByDesc("create_time");
             List<BasSellerMessage> list = super.list(queryWrapper);
-
+            List<Long> ids = list.stream().map(o->o.getMessageId()).collect(Collectors.toList());
             if(CollectionUtils.isNotEmpty(list)){
-                BasSellerMessage basSellerMessage =  list.get(0);
-                if(basSellerMessage.getBullet()){
-                    BasMessageDto basMessageDto = basMessageService.selectBasMessageById(basSellerMessage.getMessageId());
-                    return basMessageDto;
-                }
+                List<BasMessageDto> basMessageDtos = basMessageService.selectBasMessageById(ids);
+                return basMessageDtos;
             }
-            return null;
+            return Collections.EMPTY_LIST;
         }
 
         /**
@@ -106,11 +106,7 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
                 basSellerMessage.setSellerCode(s);
                 basSellerMessage.setMessageId(id);
                 basSellerMessage.setBullet(bullet);
-                if(bullet == true){
-                    basSellerMessage.setReadable(true);
-                }else{
-                    basSellerMessage.setReadable(false);
-                }
+                basSellerMessage.setReadable(false);
                 super.save(basSellerMessage);
             }
         }

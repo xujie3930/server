@@ -1,5 +1,6 @@
 package com.szmsd.http.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
@@ -7,6 +8,10 @@ import lombok.Data;
 
 @Data
 public class MaterialRequest {
+
+    // 仓库编码 - 非业务数据
+    @JSONField(serialize = false)
+    private String warehouseCode;
 
     @ApiModelProperty(value = "初始重量g")
     @Excel(name = "初始重量g")

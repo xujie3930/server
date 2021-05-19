@@ -79,7 +79,7 @@ public class BasSellerMessageController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BasSellerMessage:BasSellerMessage:query')")
     @GetMapping(value = "/Bullet")
     @ApiOperation(value = "查询弹框信息",notes = "查询弹框信息")
-    public R<BasMessageDto> Bullet(@RequestParam String sellerCode)
+    public R<List<BasMessageDto>> Bullet(@RequestParam String sellerCode)
     {
         return R.ok(basSellerMessageService.getBulletMessage(sellerCode));
     }
