@@ -123,7 +123,7 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         {
             UpdateWrapper<BasSellerMessage> updateWrapper = new UpdateWrapper<BasSellerMessage>();
             updateWrapper.eq("seller_code",basSellerMessage.getSellerCode());
-            updateWrapper.eq("messgae_id",basSellerMessage.getMessageId());
+            updateWrapper.eq("message_id",basSellerMessage.getMessageId());
             updateWrapper.set("bullet",basSellerMessage.getBullet());
             updateWrapper.set("readable",basSellerMessage.getReadable());
              super.update(updateWrapper);
