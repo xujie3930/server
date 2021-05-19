@@ -108,5 +108,11 @@ public interface IBasSellerService extends IService<BasSeller> {
 
         List<String> getAllSellerCode();
 
+    /**
+     * 查询业务经理/客服下所属的客户编码
+     * @param conditionDto conditionDto
+     * @return String
+     */
+    List<String> queryByServiceCondition(ServiceConditionDto conditionDto);
 }
 

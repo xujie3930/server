@@ -1,12 +1,13 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.code.kaptcha.Producer;
 import com.szmsd.bas.api.domain.BasAttachment;
-import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
@@ -54,6 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -449,7 +451,32 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             return super.list(queryWrapper).stream().map(o->o.getSellerCode()).collect(Collectors.toList());
         }
 
-        private String sellerCode(){
+    @Override
+    public List<String> queryByServiceCondition(ServiceConditionDto conditionDto) {
+        if (StringUtils.isEmpty(conditionDto.getServiceManager())
+            && StringUtils.isEmpty(conditionDto.getServiceStaff())) {
+            return Collections.emptyList();
+        }
+        LambdaQueryWrapper<BasSeller> queryWrapper = Wrappers.lambdaQuery();
+        // 处理查询条件
+        if (StringUtils.isNotEmpty(conditionDto.getServiceManager())) {
+            queryWrapper.eq(BasSeller::getServiceManager, conditionDto.getServiceManager());
+        }
+        if (StringUtils.isNotEmpty(conditionDto.getServiceStaff())) {
+            if (StringUtils.isEmpty(conditionDto.getServiceManager())) {
+                queryWrapper.eq(BasSeller::getServiceStaff, conditionDto.getServiceStaff());
+            } else {
+                queryWrapper.or().eq(BasSeller::getServiceStaff, conditionDto.getServiceStaff());
+            }
+        }
+        List<BasSeller> list = this.list(queryWrapper);
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        return list.stream().map(BasSeller::getSellerCode).collect(Collectors.toList());
+    }
+
+    private String sellerCode(){
 
             int  maxNum = 8;
             int  maxStr = 26;
