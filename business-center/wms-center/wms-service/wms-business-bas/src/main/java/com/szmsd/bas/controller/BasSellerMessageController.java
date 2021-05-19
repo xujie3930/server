@@ -105,7 +105,8 @@ public class BasSellerMessageController extends BaseController{
     @ApiOperation(value = " 修改模块",notes = "修改模块")
     public R edit(@RequestBody BasSellerMessage basSellerMessage)
     {
-    return toOk(basSellerMessageService.updateBasSellerMessage(basSellerMessage));
+    basSellerMessageService.updateBasSellerMessage(basSellerMessage);
+    return R.ok();
     }
 
     /**

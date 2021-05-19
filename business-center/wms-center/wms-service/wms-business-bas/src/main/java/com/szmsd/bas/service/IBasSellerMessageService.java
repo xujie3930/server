@@ -58,7 +58,7 @@ public interface IBasSellerMessageService extends IService<BasSellerMessage> {
         * @param basSellerMessage 模块
         * @return 结果
         */
-        int updateBasSellerMessage(BasSellerMessage basSellerMessage);
+        void updateBasSellerMessage(BasSellerMessage basSellerMessage);
 
         /**
         * 批量删除模块

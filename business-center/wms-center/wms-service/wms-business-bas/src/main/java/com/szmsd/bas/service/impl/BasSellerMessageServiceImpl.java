@@ -1,5 +1,6 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.szmsd.bas.domain.BasMessage;
 import com.szmsd.bas.domain.BasSellerMessage;
@@ -118,9 +119,14 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         * @return 结果
         */
         @Override
-        public int updateBasSellerMessage(BasSellerMessage basSellerMessage)
+        public void updateBasSellerMessage(BasSellerMessage basSellerMessage)
         {
-        return baseMapper.updateById(basSellerMessage);
+            UpdateWrapper<BasSellerMessage> updateWrapper = new UpdateWrapper<BasSellerMessage>();
+            updateWrapper.eq("seller_code",basSellerMessage.getSellerCode());
+            updateWrapper.eq("messgae_id",basSellerMessage.getMessageId());
+            updateWrapper.set("bullet",basSellerMessage.getBullet());
+            updateWrapper.set("readable",basSellerMessage.getReadable());
+             super.update(updateWrapper);
         }
 
         /**
