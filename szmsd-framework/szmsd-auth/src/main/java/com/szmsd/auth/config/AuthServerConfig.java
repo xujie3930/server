@@ -133,6 +133,9 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter
                     additionalInformation.put(SecurityConstants.DETAILS_USERNAME, authentication.getName());
                     additionalInformation.put(SecurityConstants.DETAILS_USER_ID, user.getUserId());
                     additionalInformation.put("code", HttpStatus.SUCCESS);
+                    additionalInformation.put("sellerCode", user.getSellerCode());
+                    additionalInformation.put("allDataScope", user.isAllDataScope());
+                    additionalInformation.put("permissions", user.getPermissions());
                     token.setAdditionalInformation(additionalInformation);
                 }
                 return accessToken;
