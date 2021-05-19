@@ -1,5 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.common.datascope.service.AwaitUserService,\
-  com.szmsd.common.datascope.aspect.DataScopeAspect
+  com.szmsd.common.datascope.aspect.DataScopeAspect,\
+  com.szmsd.common.datascope.plugins.MyBatisConfig
 
   
