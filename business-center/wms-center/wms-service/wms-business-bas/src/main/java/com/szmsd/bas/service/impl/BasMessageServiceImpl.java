@@ -71,6 +71,27 @@ public class BasMessageServiceImpl extends ServiceImpl<BasMessageMapper, BasMess
             return basMessageDto;
         }
 
+        @Override
+        public List<BasMessageDto> selectBasMessageById(List<Long> ids){
+            QueryWrapper<BasMessage> basMessageQueryWrapper = new QueryWrapper<>();
+            basMessageQueryWrapper.in("id",ids);
+            List<BasMessageDto> basMessageDtos = BeanMapperUtil.mapList(super.list(basMessageQueryWrapper),BasMessageDto.class);
+            basMessageDtos.stream().forEach(b-> {
+                List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
+                        .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.MESSAGE_IMAGE.getAttachmentType()).setBusinessNo(b.getId().toString()).setBusinessItemNo(null)).getData());
+                if (CollectionUtils.isNotEmpty(attachment)) {
+                    List<AttachmentFileDTO> documentsFiles = new ArrayList();
+                    for (BasAttachment a : attachment) {
+                        documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
+                    }
+                    b.setRevealDocumentsFiles(documentsFiles);
+                }
+            }
+
+        );
+            return basMessageDtos;
+}
+
         /**
         * 查询模块列表
         *
