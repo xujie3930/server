@@ -9,7 +9,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author zhangyuyuan
@@ -25,5 +24,5 @@ public interface HtpCarrierFeignService {
     R<ResponseObject.ResponseObjectWrapper<CancelShipmentOrderBatchResult, ErrorDataDto>> cancellation(@RequestBody CancelShipmentOrderCommand command);
 
     @GetMapping("/api/carrier/http/label")
-    R<ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>> label(@RequestParam("orderNumber") String orderNumber);
+    R<ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>> label(@RequestBody CreateShipmentOrderCommand command);
 }

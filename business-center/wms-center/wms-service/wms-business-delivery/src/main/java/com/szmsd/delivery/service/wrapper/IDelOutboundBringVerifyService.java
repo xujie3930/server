@@ -54,11 +54,12 @@ public interface IDelOutboundBringVerifyService {
     /**
      * 取消承运商物流订单（客户端）
      *
+     * @param warehouseCode       warehouseCode
      * @param referenceNumber     referenceNumber
      * @param shipmentOrderNumber shipmentOrderNumber
      * @param trackingNo          trackingNo
      */
-    void cancellation(String referenceNumber, String shipmentOrderNumber, String trackingNo);
+    void cancellation(String warehouseCode, String referenceNumber, String shipmentOrderNumber, String trackingNo);
 
     /**
      * 创建出库单

@@ -303,6 +303,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
         // 创建承运商物流订单
         CreateShipmentOrderCommand createShipmentOrderCommand = new CreateShipmentOrderCommand();
+        createShipmentOrderCommand.setWarehouseCode(delOutbound.getWarehouseCode());
         createShipmentOrderCommand.setReferenceNumber(String.valueOf(delOutbound.getId()));
         createShipmentOrderCommand.setOrderNumber(delOutbound.getOrderNo());
         createShipmentOrderCommand.setClientNumber(delOutbound.getSellerCode());
@@ -388,8 +389,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     @Override
-    public void cancellation(String referenceNumber, String shipmentOrderNumber, String trackingNo) {
+    public void cancellation(String warehouseCode, String referenceNumber, String shipmentOrderNumber, String trackingNo) {
         CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
+        command.setWarehouseCode(warehouseCode);
         command.setReferenceNumber(referenceNumber);
         List<CancelShipmentOrder> cancelShipmentOrders = new ArrayList<>();
         cancelShipmentOrders.add(new CancelShipmentOrder(shipmentOrderNumber, trackingNo));
