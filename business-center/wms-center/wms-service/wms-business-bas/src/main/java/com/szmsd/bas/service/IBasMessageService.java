@@ -25,6 +25,13 @@ public interface IBasMessageService extends IService<BasMessage> {
         */
         BasMessageDto selectBasMessageById(Long id);
 
+         /** 查询模块
+        *
+                * @param ids 模块ID
+        * @return 模块
+        */
+         List<BasMessageDto> selectBasMessageById(List<Long> ids);
+
         /**
         * 查询模块列表
         *

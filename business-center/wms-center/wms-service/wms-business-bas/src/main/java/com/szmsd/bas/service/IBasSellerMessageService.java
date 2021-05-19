@@ -27,7 +27,7 @@ public interface IBasSellerMessageService extends IService<BasSellerMessage> {
         */
         BasSellerMessage selectBasSellerMessageById(String id);
 
-        BasMessageDto getBulletMessage(String sellerCode);
+        List<BasMessageDto> getBulletMessage(String sellerCode);
 
         /**
         * 查询模块列表
