@@ -36,7 +36,7 @@ public class CarrierController extends BaseController {
 
     @GetMapping("/label")
     @ApiOperation(value = "根据订单号返回标签文件流")
-    public R<ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>> label(@RequestParam("orderNumber") String orderNumber) {
-        return R.ok(carrierService.label(orderNumber));
+    public R<ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>> label(@RequestBody CreateShipmentOrderCommand command) {
+        return R.ok(carrierService.label(command));
     }
 }

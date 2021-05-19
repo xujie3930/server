@@ -231,7 +231,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
                 String referenceNumber = String.valueOf(delOutbound.getId());
                 IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
-                delOutboundBringVerifyService.cancellation(referenceNumber, shipmentOrderNumber, trackingNo);
+                delOutboundBringVerifyService.cancellation(delOutbound.getWarehouseCode(), referenceNumber, shipmentOrderNumber, trackingNo);
             }
         }
 
@@ -266,6 +266,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             // 更新WMS挂号
             ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto = new ShipmentTrackingChangeRequestDto();
+            shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
             shipmentTrackingChangeRequestDto.setOrderNo(delOutbound.getRefOrderNo());
             shipmentTrackingChangeRequestDto.setTrackingNo(delOutbound.getTrackingNo());
             IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
@@ -304,7 +305,10 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             String orderNumber = delOutbound.getShipmentOrderNumber();
             // 获取标签
             IHtpCarrierClientService htpCarrierClientService = SpringUtils.getBean(IHtpCarrierClientService.class);
-            ResponseObject<FileStream, ProblemDetails> responseObject = htpCarrierClientService.label(orderNumber);
+            CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
+            command.setWarehouseCode(delOutbound.getWarehouseCode());
+            command.setOrderNumber(orderNumber);
+            ResponseObject<FileStream, ProblemDetails> responseObject = htpCarrierClientService.label(command);
             if (null != responseObject) {
                 if (responseObject.isSuccess()) {
                     FileStream fileStream = responseObject.getObject();
@@ -372,6 +376,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
                 String encode = Base64.encode(byteArray);
                 ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+                shipmentLabelChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
                 shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
                 shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
                 shipmentLabelChangeRequestDto.setLabel(encode);

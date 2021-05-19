@@ -50,8 +50,8 @@ public class CarrierServiceImpl extends SaaSCarrierServiceAdminRequest implement
     }
 
     @Override
-    public ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(String orderNumber) {
-        HttpResponseBody httpResponseBody = httpGetFile(null, "shipment-order.label", null, orderNumber);
+    public ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(CreateShipmentOrderCommand command) {
+        HttpResponseBody httpResponseBody = httpGetFile(command.getWarehouseCode(), "shipment-order.label", null, command.getOrderNumber());
         ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> responseObject = new ResponseObject.ResponseObjectWrapper<>();
         if (httpResponseBody instanceof HttpResponseBody.HttpResponseByteArrayWrapper) {
             HttpResponseBody.HttpResponseByteArrayWrapper httpResponseByteArrayWrapper = (HttpResponseBody.HttpResponseByteArrayWrapper) httpResponseBody;

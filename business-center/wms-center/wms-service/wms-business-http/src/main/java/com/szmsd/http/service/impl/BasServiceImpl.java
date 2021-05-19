@@ -18,41 +18,41 @@ public class BasServiceImpl extends WmsRequest implements IBasService {
 
     @Override
     public ResponseVO createPacking(PackingRequest packingRequest) {
-        return JSON.parseObject(httpPost("", "baseInfo.packings", packingRequest), ResponseVO.class);
+        return JSON.parseObject(httpPost(packingRequest.getWarehouseCode(), "baseInfo.packings", packingRequest), ResponseVO.class);
     }
 
     @Override
     public ResponseVO createProduct(ProductRequest productRequest) {
-        return JSON.parseObject(httpPost("", "baseInfo.products", productRequest), ResponseVO.class);
+        return JSON.parseObject(httpPost(productRequest.getWarehouseCode(), "baseInfo.products", productRequest), ResponseVO.class);
     }
 
     @Override
     public ResponseVO createMaterial(MaterialRequest materialRequest) {
-        return JSON.parseObject(httpPost("", "baseInfo.products", materialRequest), ResponseVO.class);
+        return JSON.parseObject(httpPost(materialRequest.getWarehouseCode(), "baseInfo.products", materialRequest), ResponseVO.class);
     }
 
     @Override
     public ResponseVO createSeller(SellerRequest sellerRequest) {
-        return JSON.parseObject(httpPost("", "baseInfo.seller", sellerRequest), ResponseVO.class);
+        return JSON.parseObject(httpPost(sellerRequest.getWarehouseCode(), "baseInfo.seller", sellerRequest), ResponseVO.class);
     }
 
     @Override
     public ResponseVO save(SpecialOperationRequest specialOperationRequest) {
-        return JSON.parseObject(httpPost("", "baseInfo.operationType", specialOperationRequest), ResponseVO.class);
+        return JSON.parseObject(httpPost(specialOperationRequest.getWarehouseCode(), "baseInfo.operationType", specialOperationRequest), ResponseVO.class);
     }
 
     @Override
     public ResponseVO update(SpecialOperationResultRequest specialOperationResultRequest) {
-        return JSON.parseObject(httpPut("", "baseInfo.operationResult", specialOperationResultRequest), ResponseVO.class);
+        return JSON.parseObject(httpPut(specialOperationResultRequest.getWarehouseCode(), "baseInfo.operationResult", specialOperationResultRequest), ResponseVO.class);
     }
 
     @Override
     public BaseOperationResponse shipmentRule(AddShipmentRuleRequest addShipmentRuleRequest) {
-        return JSON.parseObject(httpPost("", "baseInfo.shipmentRule", addShipmentRuleRequest), BaseOperationResponse.class);
+        return JSON.parseObject(httpPost(addShipmentRuleRequest.getWarehouseCode(), "baseInfo.shipmentRule", addShipmentRuleRequest), BaseOperationResponse.class);
     }
 
     @Override
     public ResponseVO inspection(AddSkuInspectionRequest request) {
-        return JSON.parseObject(httpPost("", "baseInfo.inspection", request), ResponseVO.class);
+        return JSON.parseObject(httpPost(request.getWarehouseCode(), "baseInfo.inspection", request), ResponseVO.class);
     }
 }

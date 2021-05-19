@@ -1,5 +1,6 @@
 package com.szmsd.http.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.http.annotation.LogIgnore;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,6 +9,11 @@ import lombok.Data;
 @Data
 @LogIgnore({"productImage"})
 public class ProductRequest {
+
+    // 仓库编码 - 非业务数据
+    @JSONField(serialize = false)
+    private String warehouseCode;
+
     @ApiModelProperty(value = "产品名称")
     @Excel(name = "产品名称")
     private String productName;

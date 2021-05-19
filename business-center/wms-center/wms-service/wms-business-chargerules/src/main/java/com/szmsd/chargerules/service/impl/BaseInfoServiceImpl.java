@@ -137,6 +137,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
      */
     private void sendResult(BasSpecialOperation basSpecialOperation,String status) {
         SpecialOperationResultRequest request = new SpecialOperationResultRequest();
+        request.setWarehouseCode(basSpecialOperation.getWarehouseCode());
         request.setOperationOrderNo(basSpecialOperation.getOperationOrderNo());
         request.setStatus(status);
         request.setRemark(basSpecialOperation.getOmsRemark());

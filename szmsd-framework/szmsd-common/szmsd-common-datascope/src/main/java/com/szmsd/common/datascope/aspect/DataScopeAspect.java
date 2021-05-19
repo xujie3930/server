@@ -46,16 +46,21 @@ public class DataScopeAspect {
         // or x.id in ('1', '2', '3') or x.id2 in ('1', '2', '3') or x.id3 in ('1', '2', '3')
         List<String> permissions = loginUser.getPermissions();
         if (CollectionUtils.isNotEmpty(permissions)) {
-            // 处理纬度超过900
-            boolean maxDimension = permissions.size() > DIMENSION_VALUE_COUNT;
-            if (maxDimension) {
-                sqlString.append(orExpress(fieldName, permissions));
+            if (permissions.size() == 1) {
+                sqlString.append(fieldName).append(" = '").append(permissions.get(0)).append("'");
             } else {
-                sqlString.append(inExpress(fieldName, permissions));
+                // 处理纬度超过900
+                boolean maxDimension = permissions.size() > DIMENSION_VALUE_COUNT;
+                if (maxDimension) {
+                    sqlString.append(orExpress(fieldName, permissions));
+                } else {
+                    sqlString.append(inExpress(fieldName, permissions));
+                }
             }
         }
-        if (StringUtils.isNotBlank(sqlString.toString())) {
-            SqlContext.getCurrentContext().setSql("(" + sqlString.substring(4) + ")");
+        String cs = sqlString.toString();
+        if (StringUtils.isNotBlank(cs)) {
+            SqlContext.getCurrentContext().setSql("(" + cs + ")");
         }
     }
 
