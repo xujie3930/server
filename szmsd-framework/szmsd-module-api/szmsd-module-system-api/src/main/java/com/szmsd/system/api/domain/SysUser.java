@@ -1,14 +1,12 @@
 package com.szmsd.system.api.domain;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
 import com.baomidou.mybatisplus.annotation.*;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.annotation.Excel.ColumnType;
+import com.szmsd.common.core.annotation.Excel.Type;
+import com.szmsd.common.core.annotation.Excels;
+import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -16,12 +14,12 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.common.core.annotation.Excel.ColumnType;
-import com.szmsd.common.core.annotation.Excel.Type;
-import com.szmsd.common.core.annotation.Excels;
-import com.szmsd.common.core.web.domain.BaseEntity;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 用户对象 sys_user
@@ -142,6 +140,14 @@ public class SysUser extends BaseEntity {
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
     private String sellerCode;
+
+    @ApiModelProperty(value = "判断角色里面有没有全部数据权限的")
+    @TableField(exist = false)
+    private boolean allDataScope;
+
+    @ApiModelProperty(value = "允许查询的数据范围")
+    @TableField(exist = false)
+    private List<String> permissions;
 
     public SysUser() {
 

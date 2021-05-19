@@ -3,6 +3,7 @@ package com.szmsd.delivery.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundExportListDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
@@ -30,6 +31,7 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
      * @param queryWrapper queryWrapper
      * @return DelOutboundListVO
      */
+    @DataScope("o.seller_code")
     List<DelOutboundListVO> pageList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
 
     /**
