@@ -28,8 +28,8 @@ public interface IHtpCarrierClientService {
     /**
      * 根据订单号返回标签文件流
      *
-     * @param orderNumber orderNumber
+     * @param command command
      * @return ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>
      */
-    ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(String orderNumber);
+    ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(CreateShipmentOrderCommand command);
 }

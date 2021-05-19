@@ -1,11 +1,17 @@
 package com.szmsd.http.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
 public class SellerRequest {
+
+    // 仓库编码 - 非业务数据
+    @JSONField(serialize = false)
+    private String warehouseCode;
+
     @ApiModelProperty(value = "中文名")
     @Excel(name = "中文名")
     private String nameCn;

@@ -445,6 +445,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             // 调用新增/修改发货规则
             AddShipmentRuleRequest addShipmentRuleRequest = new AddShipmentRuleRequest();
+            addShipmentRuleRequest.setWarehouseCode(delOutbound.getWarehouseCode());
             addShipmentRuleRequest.setShipmentRule(delOutbound.getShipmentRule());
             addShipmentRuleRequest.setGetLabelType(delOutbound.getTrackingAcquireType());
             IHtpIBasClientService htpIBasClientService = SpringUtils.getBean(IHtpIBasClientService.class);
@@ -504,7 +505,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
                 String referenceNumber = String.valueOf(delOutbound.getId());
                 IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
-                delOutboundBringVerifyService.cancellation(referenceNumber, shipmentOrderNumber, trackingNo);
+                delOutboundBringVerifyService.cancellation(delOutbound.getWarehouseCode(), referenceNumber, shipmentOrderNumber, trackingNo);
                 delOutbound.setTrackingNo("");
                 delOutbound.setShipmentOrderNumber("");
             }
@@ -768,6 +769,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
                 String encode = Base64.encode(byteArray);
                 ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+                shipmentLabelChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
                 shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
                 shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
                 shipmentLabelChangeRequestDto.setLabel(encode);
