@@ -160,4 +160,11 @@ public class BasSellerController extends BaseController{
     return R.ok(basSellerService.deleteBasSellerByIds(activeDto));
     }
 
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:queryByServiceCondition')")
+    @PostMapping("/queryByServiceCondition")
+    @ApiOperation(value = "查询业务经理/客服下所属的客户编码")
+    public R<List<String>> queryByServiceCondition(@RequestBody ServiceConditionDto conditionDto) {
+        return R.ok(this.basSellerService.queryByServiceCondition(conditionDto));
+    }
+
 }

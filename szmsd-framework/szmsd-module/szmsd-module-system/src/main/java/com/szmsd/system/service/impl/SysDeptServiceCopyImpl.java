@@ -1,22 +1,19 @@
 package com.szmsd.system.service.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.szmsd.common.core.exception.web.BaseException;
-import org.springframework.stereotype.Service;
-
 import com.szmsd.common.core.constant.UserConstants;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.system.api.domain.SysDept;
 import com.szmsd.system.domain.vo.TreeSelect;
 import com.szmsd.system.mapper.SysDeptMapperCopy;
 import com.szmsd.system.service.ISysDeptServiceCopy;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 部门管理 服务实现
@@ -36,7 +33,6 @@ public class SysDeptServiceCopyImpl implements ISysDeptServiceCopy
      * @return 部门信息集合
      */
     @Override
-    @DataScope(deptAlias = "d")
     public List<SysDept> selectDeptList(SysDept dept)
     {
         return deptMapper.selectDeptList(dept);

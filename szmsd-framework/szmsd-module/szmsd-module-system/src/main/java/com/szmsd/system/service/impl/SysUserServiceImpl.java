@@ -1,35 +1,32 @@
 package com.szmsd.system.service.impl;
 
+import com.szmsd.bas.api.feign.BasSellerFeignService;
+import com.szmsd.bas.dto.ServiceConditionDto;
+import com.szmsd.common.core.constant.UserConstants;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.system.api.constant.DataScopeConstant;
+import com.szmsd.system.api.domain.SysRole;
+import com.szmsd.system.api.domain.SysUser;
+import com.szmsd.system.domain.SysPost;
+import com.szmsd.system.domain.SysUserRole;
+import com.szmsd.system.mapper.*;
+import com.szmsd.system.service.ISysConfigService;
+import com.szmsd.system.service.ISysUserService;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.web.BaseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.szmsd.common.core.constant.UserConstants;
-import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.datascope.annotation.DataScope;
-import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.system.api.domain.SysRole;
-import com.szmsd.system.api.domain.SysUser;
-import com.szmsd.system.domain.SysPost;
-import com.szmsd.system.domain.SysUserPost;
-import com.szmsd.system.domain.SysUserRole;
-import com.szmsd.system.mapper.SysPostMapper;
-import com.szmsd.system.mapper.SysRoleMapper;
-import com.szmsd.system.mapper.SysUserMapper;
-import com.szmsd.system.mapper.SysUserPostMapper;
-import com.szmsd.system.mapper.SysUserRoleMapper;
-import com.szmsd.system.service.ISysConfigService;
-import com.szmsd.system.service.ISysUserService;
-
-import javax.annotation.Resource;
 
 /**
  * 用户 业务层处理
@@ -58,6 +55,9 @@ public class SysUserServiceImpl implements ISysUserService {
     @Resource
     private ISysConfigService configService;
 
+    @Autowired
+    private BasSellerFeignService basSellerFeignService;
+
     /**
      * 根据条件分页查询用户列表
      *
@@ -77,8 +77,53 @@ public class SysUserServiceImpl implements ISysUserService {
      * @return 用户对象信息
      */
     @Override
-    public SysUser selectUserByUserName(String userName,String userType) {
-        return userMapper.selectUserByUserName(userName,userType);
+    public SysUser selectUserByUserName(String userName, String userType) {
+        SysUser sysUser = userMapper.selectUserByUserName(userName, userType);
+        if (null == sysUser) {
+            return null;
+        }
+        List<SysRole> roles = sysUser.getRoles();
+        if (CollectionUtils.isNotEmpty(roles)) {
+            boolean allDataScope = false;
+            // 判断有没有所有权限
+            for (SysRole role : roles) {
+                String dataScope = role.getDataScope();
+                if (DataScopeConstant.DATA_SCOPE_ALL.equals(dataScope)) {
+                    // 所有权限
+                    allDataScope = true;
+                    break;
+                }
+            }
+            if (!allDataScope) {
+                boolean hasServiceManager = false;
+                boolean hasServiceStaff = false;
+                for (SysRole role : roles) {
+                    if (DataScopeConstant.DATA_SCOPE_SERVICE_MANAGER.equals(role.getDataScope())) {
+                        hasServiceManager = true;
+                    }
+                    if (DataScopeConstant.DATA_SCOPE_SERVICE_STAFF.equals(role.getDataScope())) {
+                        hasServiceStaff = true;
+                    }
+                }
+                // 查询归属客户编号
+                ServiceConditionDto conditionDto = new ServiceConditionDto();
+                if (hasServiceManager) {
+                    conditionDto.setServiceManager(String.valueOf(sysUser.getUserId()));
+                }
+                if (hasServiceStaff) {
+                    conditionDto.setServiceStaff(String.valueOf(sysUser.getUserId()));
+                }
+                if (hasServiceManager || hasServiceStaff) {
+                    R<List<String>> listR = this.basSellerFeignService.queryByServiceCondition(conditionDto);
+                    if (null != listR) {
+                        // 授权信息
+                        sysUser.setPermissions(listR.getData());
+                    }
+                }
+            }
+            sysUser.setAllDataScope(allDataScope);
+        }
+        return sysUser;
     }
 
     /**
@@ -173,7 +218,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public String checkEmailUnique(SysUser user) {
         Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
-        if(StringUtils.isNotEmpty(user.getEmail())) {
+        if (StringUtils.isNotEmpty(user.getEmail())) {
             SysUser info = userMapper.checkEmailUnique(user.getEmail());
             if (StringUtils.isNotNull(info) && info.getUserId().longValue() != userId.longValue()) {
                 return UserConstants.NOT_UNIQUE;
@@ -210,11 +255,11 @@ public class SysUserServiceImpl implements ISysUserService {
 //        insertUserPost(user);
         // 新增用户与角色管理
         insertUserRole(user);
-        Map map=new HashMap<>();
-        map.put("userId",user.getUserId());
+        Map map = new HashMap<>();
+        map.put("userId", user.getUserId());
         if (rows > 0) {
             return R.ok(map);
-        }else{
+        } else {
             return R.failed();
         }
 
@@ -230,23 +275,23 @@ public class SysUserServiceImpl implements ISysUserService {
     @Transactional
     public int updateUser(SysUser user) {
         Long userId = user.getUserId();
-        Integer roleType=UserConstants.ROLE_TYPE_PC;
+        Integer roleType = UserConstants.ROLE_TYPE_PC;
         //判断是 E3还是大客户用户,选择删除角色类型1-PC，2-APP，3-VIP,默认删除E3
 
-        if(UserConstants.USER_TYPE_VIP.equals(user.getUserType())){
-            roleType=UserConstants.ROLE_TYPE_VIP;
+        if (UserConstants.USER_TYPE_VIP.equals(user.getUserType())) {
+            roleType = UserConstants.ROLE_TYPE_VIP;
         }
 
 
         // 删除用户与角色关联
-        userRoleMapper.deleteUserRoleOtherByUserId(userId,roleType);// todo 只删除角色为E3/相关的
+        userRoleMapper.deleteUserRoleOtherByUserId(userId, roleType);// todo 只删除角色为E3/相关的
         // 新增用户与角色管理
         insertUserRole(user);
 //        // 删除用户与岗位关联
 //        userPostMapper.deleteUserPostByUserId(userId);
 //        // 新增用户与岗位管理
 //        insertUserPost(user);
-        return  userMapper.updateById(user);
+        return userMapper.updateById(user);
 //        return userMapper.updateUser(user);
     }
 
@@ -272,14 +317,14 @@ public class SysUserServiceImpl implements ISysUserService {
     public int updateUserApp(SysUser user) {
         Long userId = user.getUserId();
         // 删除用户与角色关联
-        userRoleMapper.deleteUserRoleOtherByUserId(userId,UserConstants.ROLE_TYPE_APP);// todo 只删除角色为app相关的
+        userRoleMapper.deleteUserRoleOtherByUserId(userId, UserConstants.ROLE_TYPE_APP);// todo 只删除角色为app相关的
         // 新增用户与角色管理
         insertUserRole(user);
 //        // 删除用户与岗位关联
 //        userPostMapper.deleteUserPostByUserId(userId);
 //        // 新增用户与岗位管理
 //        insertUserPost(user);
-        return  userMapper.updateById(user);
+        return userMapper.updateById(user);
 //        return userMapper.updateUser(user);
     }
 
@@ -415,7 +460,7 @@ public class SysUserServiceImpl implements ISysUserService {
     }
 
     @Override
-    public int  deleteUserByemail(String email){
+    public int deleteUserByemail(String email) {
         SysUser info = userMapper.checkEmailUnique(email);
         Long userId = info.getUserId();
         // 删除用户与角色关联
@@ -461,7 +506,7 @@ public class SysUserServiceImpl implements ISysUserService {
         for (SysUser user : userList) {
             try {
                 // 验证是否存在这个用户
-                SysUser u = userMapper.selectUserByUserName(user.getUserName(),"");
+                SysUser u = userMapper.selectUserByUserName(user.getUserName(), "");
                 if (StringUtils.isNull(u)) {
                     user.setPassword(SecurityUtils.encryptPassword(password));
                     user.setCreateByName(operName);
