@@ -63,7 +63,7 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
             queryWrapper.eq("bullet",true);
             queryWrapper.orderByDesc("create_time");
             List<BasSellerMessage> list = super.list(queryWrapper);
-            List<Long> ids = list.stream().map(o->o.getId()).collect(Collectors.toList());
+            List<Long> ids = list.stream().map(o->o.getMessageId()).collect(Collectors.toList());
             if(CollectionUtils.isNotEmpty(list)){
                 List<BasMessageDto> basMessageDtos = basMessageService.selectBasMessageById(ids);
                 return basMessageDtos;
