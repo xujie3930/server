@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -26,5 +27,8 @@ public class PricedProductInServiceCriteria implements Serializable {
     private Address fromAddress;
 
     // 是否带电
-    private Boolean isElectriferous;
+    // private Boolean isElectriferous;
+
+    // sku的属性
+    private List<String> shipmentTypes;
 }

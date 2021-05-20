@@ -4,8 +4,8 @@ import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
-import com.szmsd.bas.constant.ShipmentType;
 import com.szmsd.bas.domain.BasWarehouse;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -81,10 +81,13 @@ public class DelOutboundOtherController extends BaseController {
         ));
         if (CollectionUtils.isNotEmpty(dto.getSkus())) {
             // fix:SKU不跟仓库关联，SKU跟卖家编码关联。
-            criteria.setIsElectriferous(ShipmentType.BATTERY.equals(this.baseProductClientService.buildShipmentType(dto.getClientCode(), dto.getSkus())));
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            conditionQueryDto.setSellerCode(dto.getClientCode());
+            conditionQueryDto.setSkus(dto.getSkus());
+            criteria.setShipmentTypes(this.baseProductClientService.listProductAttribute(conditionQueryDto));
         }
         if (CollectionUtils.isNotEmpty(dto.getProductAttributes())) {
-            criteria.setIsElectriferous(ShipmentType.BATTERY.equals(ShipmentType.highest(dto.getProductAttributes())));
+            criteria.setShipmentTypes(dto.getProductAttributes());
         }
         return R.ok(this.htpPricedProductClientService.inService(criteria));
     }
