@@ -19,6 +19,7 @@ import com.szmsd.inventory.domain.dto.InventoryInspectionDTO;
 import com.szmsd.inventory.domain.dto.InventoryInspectionDetailsDTO;
 import com.szmsd.inventory.domain.dto.InventoryInspectionQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryInspectionVo;
+import com.szmsd.inventory.enums.InventoryInspectionEnum;
 import com.szmsd.inventory.enums.InventoryStatusEnum;
 import com.szmsd.inventory.mapper.InventoryInspectionMapper;
 import com.szmsd.inventory.service.IInventoryInspectionDetailsService;
@@ -143,10 +144,9 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         }
         String data = result.getData();
         if (data == null)  return true;
-        log.info("客户{} 验货级别为{}",dto.getCusCode(),data);
-        if (data.equals("无需验货")) return true;
+        if (InventoryInspectionEnum.NO_REQ.getCode().equals(data)) return true;
 
-        if (data.equals("新SKU必验")) {
+        if (InventoryInspectionEnum.NEW_SKU_REQ.getCode().equals(data)) {
             List<String> skus = dto.getSkus();
             List<String> skuList = new ArrayList<>();
             for (String sku : skus) {
@@ -163,7 +163,11 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
             return true;
         }
         // 入库必验
-        return createInventory(dto);
+        if (InventoryInspectionEnum.ALL_REQ.getCode().equals(data)) {
+            return createInventory(dto);
+        }
+        log.info("客户{} 验货级别未找到{}",dto.getCusCode(),data);
+        return true;
     }
 
     /**
