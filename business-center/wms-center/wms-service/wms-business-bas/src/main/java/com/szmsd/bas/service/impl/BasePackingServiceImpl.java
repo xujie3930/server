@@ -98,8 +98,21 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
         PackingRequest packingRequest = BeanMapperUtil.map(basePacking, PackingRequest.class);
         if (basePacking.getPId() != null) {
             R<ResponseVO> r = htpBasFeignService.createPacking(packingRequest);
-            if (!r.getData().getSuccess()) {
-                throw new BaseException("传wms失败:" + r.getData().getMessage());
+            if (r == null) {
+                throw new BaseException("wms服务调用失败");
+            }
+            if (r.getData() == null) {
+                throw new BaseException("传wms失败");
+            } else {
+                if (r.getData().getSuccess() == null) {
+                    if (r.getData().getErrors() != null) {
+                        throw new BaseException("传wms失败" + r.getData().getErrors());
+                    }
+                } else {
+                    if (!r.getData().getSuccess()) {
+                        throw new BaseException("传wms失败" + r.getData().getMessage());
+                    }
+                }
             }
         }
         return baseMapper.insert(basePacking);

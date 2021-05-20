@@ -176,6 +176,12 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                 }
             }
             R<ResponseVO> r = htpExceptionFeignService.processing(exceptionProcessRequest);
+            if (r == null) {
+                throw new BaseException("wms服务调用失败");
+            }
+            if (r.getData() == null) {
+                throw new BaseException("传wms失败");
+            }
             if(r.getData().getSuccess()==null){
                 if(r.getData().getErrors()!=null)
                 {

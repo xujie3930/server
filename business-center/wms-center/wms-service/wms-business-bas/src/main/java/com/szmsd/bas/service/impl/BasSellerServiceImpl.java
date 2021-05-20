@@ -514,7 +514,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             throw new BaseException("wms服务调用失败");
         }
         if(r.getData()==null){
-            throw new BaseException("传wms失败" + r.getData().getErrors());
+            throw new BaseException("传wms失败");
         }else{
             if(r.getData().getSuccess()==null){
                 if(r.getData().getErrors()!=null)
