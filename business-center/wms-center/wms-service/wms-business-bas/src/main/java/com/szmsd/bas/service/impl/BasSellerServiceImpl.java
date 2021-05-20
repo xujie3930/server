@@ -119,13 +119,6 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         int count = baseMapper.countBasSeller(where,basSeller.getReviewState());
        /* where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());*/
         List<BasSellerSysDto> basSellerSysDtos = baseMapper.selectBasSeller(where,basSeller.getReviewState(),(basSeller.getPageNum()-1)*basSeller.getPageSize(),basSeller.getPageSize());
-        for(BasSellerSysDto b:basSellerSysDtos){
-            SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
-            sysUserByTypeAndUserType.setUserType("01");
-            sysUserByTypeAndUserType.setUsername(b.getUserName());
-            UserInfo userInfo= remoteUserService.getUserInfo(sysUserByTypeAndUserType).getData();
-            b.setSysId(userInfo.getSysUser().getUserId());
-        }
             TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
             table.setCode(200);
             return table;
@@ -379,6 +372,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         */
         @Override
         public boolean deleteBasSellerByIds(ActiveDto activeDto) throws IllegalAccessException {
+            BasSeller basSeller = super.getById(activeDto.getId());
            UpdateWrapper<BasSeller> updateWrapper = new UpdateWrapper();
            updateWrapper.in("id",activeDto.getId());
            updateWrapper.set("is_active",activeDto.getIsActive());
@@ -395,14 +389,22 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                    toWms(r);
                }
             SysUserDto userDto = new SysUserDto();
-            userDto.setUserId(activeDto.getSysId());
-               //禁用系统用户表
-            if(activeDto.getIsActive()==true){
-               userDto.setStatus("0");
-            }else{
-                userDto.setStatus("1");
-            }
-            remoteUserService.changeStatus(userDto);
+               SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
+               sysUserByTypeAndUserType.setUserType("01");
+               sysUserByTypeAndUserType.setUsername(basSeller.getUserName());
+               UserInfo userInfo= remoteUserService.getUserInfo(sysUserByTypeAndUserType).getData();
+               if(userInfo!=null){
+                   userDto.setUserId(userInfo.getSysUser().getUserId());
+                   //禁用系统用户表
+                   if(activeDto.getIsActive()==true){
+                       userDto.setStatus("0");
+                   }else{
+                       userDto.setStatus("1");
+                   }
+                   remoteUserService.changeStatus(userDto);
+               }
+
+
            return super.update(updateWrapper);
        }
 
