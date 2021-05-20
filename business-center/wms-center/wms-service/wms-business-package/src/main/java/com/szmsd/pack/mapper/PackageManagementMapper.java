@@ -1,5 +1,6 @@
 package com.szmsd.pack.mapper;
 
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.pack.domain.PackageManagement;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
@@ -18,5 +19,6 @@ import java.util.List;
  */
 public interface PackageManagementMapper extends BaseMapper<PackageManagement> {
 
+    @DataScope("seller_code")
     List<PackageMangVO> selectPackageManagementList(@Param(value = "cm") PackageMangQueryDTO packageManagement);
 }
