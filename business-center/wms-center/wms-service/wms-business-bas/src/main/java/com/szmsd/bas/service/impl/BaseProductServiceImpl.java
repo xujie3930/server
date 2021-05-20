@@ -733,7 +733,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             throw new BaseException("wms服务调用失败");
         }
         if (r.getData() == null) {
-            throw new BaseException("传wms失败");
+            throw new BaseException("wms服务调用失败");
         } else {
             if (r.getData().getSuccess() == null) {
                 if (r.getData().getErrors() != null) {
