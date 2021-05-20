@@ -23,7 +23,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLSyntaxErrorException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+
+import static com.github.pagehelper.util.ExecutorUtil.getAdditionalParameter;
 
 /**
  * @author zhangyuyuan
@@ -80,6 +83,13 @@ public class SqlDataScopeInterceptor implements Interceptor {
                 // 处理sql
                 String dataScopeSql = parserSql(originalSql, sqlContextSql);
                 BoundSql dataScopeBoundSql = new BoundSql(mappedStatement.getConfiguration(), dataScopeSql, boundSql.getParameterMappings(), parameter);
+
+                Map<String, Object> additionalParameters = getAdditionalParameter(boundSql);
+                //当使用动态 SQL 时，可能会产生临时的参数，这些参数需要手动设置到新的 BoundSql 中
+                for (String key : additionalParameters.keySet()) {
+                    dataScopeBoundSql.setAdditionalParameter(key, additionalParameters.get(key));
+                }
+
                 return executor.query(mappedStatement, parameter, rowBounds, resultHandler, cacheKey, dataScopeBoundSql);
             }
         }

@@ -45,6 +45,10 @@ public class SysRole extends BaseEntity {
     @Excel(name = "角色类型")
     private Integer type;
 
+    @ApiModelProperty(value = "角色类型：1-PC，2-APP,3-VIP")
+    @Excel(name = "角色类型")
+    private String roleType;
+
     @ApiModelProperty(value = "网点机构级别Code")
     @Excel(name = "网点机构级别Code")
     private String siteRankCode;
