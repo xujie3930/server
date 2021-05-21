@@ -57,6 +57,12 @@ public interface RemoteUserService {
     R baseCopyUserAdd(@RequestBody SysUserDto userDto);
 
     /**
+     * 新增用户
+     */
+    @PostMapping(value = "/user/baseCopyUserAddCus")
+    R baseCopyUserAddCus(@RequestBody SysUserDto userDto);
+
+    /**
      * 修改用户
      */
     @PutMapping(value = "/user/baseCopyUserEdit")

@@ -238,9 +238,9 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             //注册到wms
             SellerRequest sellerRequest = BeanMapperUtil.map(dto,SellerRequest.class);
             sellerRequest.setIsActive(true);
-            R sysUserResult = remoteUserService.baseCopyUserAdd(sysUserDto);
+            R sysUserResult = remoteUserService.baseCopyUserAddCus(sysUserDto);
             if(sysUserResult.getCode() == -200){
-                throw new BaseException("用户注册失败");
+                throw new BaseException(sysUserResult.getMsg());
             }
             //注册信息到卖家表
             baseMapper.insert(basSeller);

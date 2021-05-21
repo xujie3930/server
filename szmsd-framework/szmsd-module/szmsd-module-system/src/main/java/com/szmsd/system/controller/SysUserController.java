@@ -327,6 +327,26 @@ public class SysUserController extends BaseController {
         return userService.insertUser(user);
     }
 
+    @Log(title = "员工资料同步用户管理新增", businessType = BusinessType.INSERT)
+    @PostMapping("baseCopyUserAddCus")
+    @ApiOperation(httpMethod = "POST", value = "员工资料同步用户管理新增")
+    public R baseCopyUserAddCus(@Validated @RequestBody SysUserDto userDto) {
+        SysUser user = new SysUser();
+        BeanUtils.copyBeanProp(user, userDto);
+        if (UserConstants.NOT_UNIQUE.equals(userService.checkUserNameUniqueCus(user.getUserName()))) {
+            return R.failed("新增用户'" + user.getUserName() + "'失败，登录账号已存在");
+        } /*else if (UserConstants.NOT_UNIQUE.equals(userService.checkPhoneUnique(user))) {
+            return R.failed("新增用户'" + user.getUserName() + "'失败，手机号码已存在");
+        } */else if (UserConstants.NOT_UNIQUE.equals(userService.checkEmailUniqueCus(user))) {
+            return R.failed("新增用户'" + user.getUserName() + "'失败，邮箱账号已存在");
+        }
+
+        //user.setCreateByName(userDto.getCreateByName());
+//        user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
+//        user.setSpearPassword(SecurityUtils.encryptPassword(user.getSpearPassword()));
+        return userService.insertUser(user);
+    }
+
     /**
      * 员工资料同步修改用户
      */
