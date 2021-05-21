@@ -193,6 +193,21 @@ public class SysUserServiceImpl implements ISysUserService {
     /**
      * 校验用户名称是否唯一
      *
+     * @param userName 用户名称
+     * @return 结果
+     */
+    @Override
+    public String checkUserNameUniqueCus(String userName) {
+        int count = userMapper.checkUserNameUniqueCus(userName);
+        if (count > 0) {
+            return UserConstants.NOT_UNIQUE;
+        }
+        return UserConstants.UNIQUE;
+    }
+
+    /**
+     * 校验用户名称是否唯一
+     *
      * @param user 用户信息
      * @return
      */
@@ -220,6 +235,24 @@ public class SysUserServiceImpl implements ISysUserService {
         Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
         if (StringUtils.isNotEmpty(user.getEmail())) {
             SysUser info = userMapper.checkEmailUnique(user.getEmail());
+            if (StringUtils.isNotNull(info) && info.getUserId().longValue() != userId.longValue()) {
+                return UserConstants.NOT_UNIQUE;
+            }
+        }
+        return UserConstants.UNIQUE;
+    }
+
+    /**
+     * 校验email是否唯一
+     *
+     * @param user 用户信息
+     * @return
+     */
+    @Override
+    public String checkEmailUniqueCus(SysUser user) {
+        Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
+        if (StringUtils.isNotEmpty(user.getEmail())) {
+            SysUser info = userMapper.checkEmailUniqueCus(user.getEmail());
             if (StringUtils.isNotNull(info) && info.getUserId().longValue() != userId.longValue()) {
                 return UserConstants.NOT_UNIQUE;
             }

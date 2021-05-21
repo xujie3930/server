@@ -52,6 +52,12 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
                 return null;
             }
 
+
+            @Override
+            public R baseCopyUserAddCus(SysUserDto userDto) {
+                return null;
+            }
+
             @Override
             public R baseCopyUserEdit(SysUserDto userDto) {
                 return null;

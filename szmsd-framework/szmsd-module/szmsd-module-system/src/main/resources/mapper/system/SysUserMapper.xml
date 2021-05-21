@@ -142,12 +142,20 @@
 		select count(1) from sys_user where user_name = #{userName}
 	</select>
 
+    <select id="checkUserNameUniqueCus" parameterType="String" resultType="int">
+		select count(1) from sys_user where user_name = #{userName} and user_type = '01'
+	</select>
+
     <select id="checkPhoneUnique" parameterType="String" resultMap="SysUserResult">
 		select user_id, phonenumber from sys_user where phonenumber = #{phonenumber}
 	</select>
 
     <select id="checkEmailUnique" parameterType="String" resultMap="SysUserResult">
 		select user_id, email from sys_user where email = #{email}
+	</select>
+
+    <select id="checkEmailUniqueCus" parameterType="String" resultMap="SysUserResult">
+		select user_id, email from sys_user where email = #{email} and user_type = '01'
 	</select>
 
     <insert id="insertUser" parameterType="com.szmsd.system.api.domain.SysUser" useGeneratedKeys="true"
