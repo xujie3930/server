@@ -10,6 +10,7 @@ import com.google.code.kaptcha.Producer;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.enums.BaseMainEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.config.DefaultBasConfig;
 import com.szmsd.bas.domain.BasSeller;
@@ -203,6 +204,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             }
             BasSeller basSeller = BeanMapperUtil.map(dto, BasSeller.class);
             basSeller.setState(true);
+            basSeller.setInspectionRequirement(BaseMainEnum.NEW_SKU_REQ.getCode());
             basSeller.setIsActive(true);
             basSeller.setEmail(basSeller.getInitEmail());
 
