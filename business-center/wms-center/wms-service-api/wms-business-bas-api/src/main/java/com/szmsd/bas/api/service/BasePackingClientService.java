@@ -3,6 +3,8 @@ package com.szmsd.bas.api.service;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.dto.CreatePackingRequest;
+import com.szmsd.common.core.domain.R;
 
 import java.util.List;
 
@@ -23,4 +25,6 @@ public interface BasePackingClientService {
      * @return BasePacking
      */
     BasePacking queryByCode(BasePackingConditionQueryDto conditionQueryDto);
+
+    R createPackings(CreatePackingRequest createPackingRequest);
 }

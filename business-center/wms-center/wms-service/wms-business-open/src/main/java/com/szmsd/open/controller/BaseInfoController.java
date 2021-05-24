@@ -1,8 +1,10 @@
 package com.szmsd.open.controller;
 
 import com.szmsd.bas.api.service.BasWarehouseClientService;
+import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.dto.AddWarehouseRequest;
+import com.szmsd.bas.dto.CreatePackingRequest;
 import com.szmsd.bas.dto.MeasuringProductRequest;
 import com.szmsd.chargerules.api.service.SpecialOperationClientService;
 import com.szmsd.chargerules.dto.BasSpecialOperationRequestDTO;
@@ -32,6 +34,9 @@ public class BaseInfoController extends BaseController {
     @Resource
     private SpecialOperationClientService specialOperationClientService;
 
+    @Resource
+    private BasePackingClientService basePackingClientService;
+
     @PostMapping("/warehouse")
     @ApiOperation(value = "#A1 创建/更新仓库")
     public ResponseVO add(@RequestBody @Validated AddWarehouseRequest addWarehouseRequest) {
@@ -50,6 +55,14 @@ public class BaseInfoController extends BaseController {
     @ApiOperation(value = "#A3 创建/更新特殊操作")
     public ResponseVO specialOperation(@RequestBody @Validated BasSpecialOperationRequestDTO basSpecialOperationRequestDTO) {
         R.getDataAndException(specialOperationClientService.add(basSpecialOperationRequestDTO));
+        return ResponseVO.ok();
+    }
+
+
+    @PostMapping("/packings")
+    @ApiOperation(value = "#A4 新增/修改包材信息")
+    public ResponseVO createPackings(@RequestBody @Validated CreatePackingRequest createPackingRequest) {
+        R.getDataAndException(basePackingClientService.createPackings(createPackingRequest));
         return ResponseVO.ok();
     }
 
