@@ -32,7 +32,6 @@
         from
         inventory_check a
         <where>
-            status = 3
             <if test="customCode != null and customCode != ''">
                 AND a.custom_code = #{customCode}
             </if>
@@ -49,6 +48,7 @@
                 AND a.create_time >= #{createTimeStart} and a.create_time &lt;= #{createTimeEnd}
             </if>
         </where>
+         order by a.status DESC,a.create_time DESC
     </select>
 
     <resultMap id="InventoryCheckDetailsMap" type="com.szmsd.inventory.domain.InventoryCheckDetails">
