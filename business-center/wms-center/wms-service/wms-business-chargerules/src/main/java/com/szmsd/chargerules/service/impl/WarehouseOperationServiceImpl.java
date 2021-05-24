@@ -37,7 +37,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
     @Resource
     private IWarehouseOperationDetailsService warehouseOperationDetailsService;
 
-    private final String REGEX = "\\d*D\\d*";
+    private final String REGEX = "\\d+D\\d+";
 
     @Transactional
     @Override
