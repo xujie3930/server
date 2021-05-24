@@ -11,6 +11,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+
 
 /**
 * <p>
@@ -44,40 +48,13 @@ public class BasePacking extends BaseEntity {
     @ApiModelProperty(value = "删除标识：0未删除 1已删除")
     private String delFlag;
 
-    @ApiModelProperty(value = "物料名称")
-    @Excel(name = "物料名称")
-    @TableField("`name`")
-    private String name;
-
-    @ApiModelProperty(value = "物料编码")
-    @Excel(name = "物料编码")
-    @TableField("`code`")
-    private String code;
-
-    @ApiModelProperty(value = "客户（卖家）编码")
-    @Excel(name = "客户（卖家）编码")
-    private String sellerCode;
-
-    @ApiModelProperty(value = "类型")
-    @Excel(name = "类型")
-    private String category;
-
     @ApiModelProperty(value = "价格")
     @Excel(name = "价格")
     private Double price;
 
-    @ApiModelProperty(value = "优先值")
-    @Excel(name = "优先值")
-    private Integer priorityLevel;
-
-    @ApiModelProperty(value = "类型名")
-    @Excel(name = "类型名")
-    private String categoryName;
-
-    @ApiModelProperty(value = "描述")
-    @Excel(name = "描述")
-    @TableField("`describe`")
-    private String describe;
+    @ApiModelProperty(value = "币别")
+    @Excel(name = "币别")
+    private String currency;
 
     @ApiModelProperty(value = "属性1")
     @Excel(name = "属性1")
@@ -99,10 +76,6 @@ public class BasePacking extends BaseEntity {
     @Excel(name = "属性5")
     private String attribute5;
 
-    @ApiModelProperty(value = "父id")
-    @Excel(name = "父id")
-    private Long pId;
-
     @ApiModelProperty(value = "是否激活")
     @Excel(name = "是否激活")
     private Boolean isActive;
@@ -110,7 +83,24 @@ public class BasePacking extends BaseEntity {
     @ApiModelProperty(value = "仓库编码")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "仓库名")
-    private String warehouseName;
+    @ApiModelProperty(value = "包材类别")
+    private String packingMaterialType;
+
+    @ApiModelProperty(value = "包材代码，例如B001")
+    private String packageMaterialCode;
+
+    @ApiModelProperty(value = "包材名称")
+    private String packageMaterialName;
+
+    @ApiModelProperty(value = "包材规格")
+    private String packageMaterialSize;
+    
+    @ApiModelProperty(value = "操作员")
+    @Excel(name = "操作员")
+    private String operator;
+
+    @ApiModelProperty(value = "操作时间")
+    private Date operateOn;
+
 
 }

@@ -5,6 +5,8 @@ import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BasePackingQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.dto.CreatePackingRequest;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -91,5 +93,7 @@ public interface IBasePackingService extends IService<BasePacking> {
      * @return BasePacking
      */
     BasePacking queryByCode(BasePackingConditionQueryDto conditionQueryDto);
+
+    void createPackings(CreatePackingRequest createPackingRequest);
 }
 
