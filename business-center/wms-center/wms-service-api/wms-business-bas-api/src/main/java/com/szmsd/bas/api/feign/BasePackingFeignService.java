@@ -5,6 +5,7 @@ import com.szmsd.bas.api.factory.BasePackingFeignFallback;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.dto.CreatePackingRequest;
 import com.szmsd.common.core.domain.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,4 +33,7 @@ public interface BasePackingFeignService {
      */
     @PostMapping("/base/packing/queryByCode")
     R<BasePacking> queryByCode(@RequestBody BasePackingConditionQueryDto conditionQueryDto);
+
+    @PostMapping("/base/packing/createPackings")
+    R createPackings(@RequestBody CreatePackingRequest createPackingRequest);
 }

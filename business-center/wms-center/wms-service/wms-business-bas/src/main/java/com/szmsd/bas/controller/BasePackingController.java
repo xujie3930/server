@@ -1,9 +1,7 @@
 package com.szmsd.bas.controller;
 
 import com.szmsd.bas.domain.BasePacking;
-import com.szmsd.bas.dto.BasePackingConditionQueryDto;
-import com.szmsd.bas.dto.BasePackingQueryDto;
-import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.bas.service.IBasePackingService;
 import com.szmsd.common.core.domain.R;
@@ -136,4 +134,14 @@ public class BasePackingController extends BaseController{
     public R<BasePacking> queryByCode(@RequestBody BasePackingConditionQueryDto conditionQueryDto) {
         return R.ok(this.basePackingService.queryByCode(conditionQueryDto));
     }
+
+    @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:add')")
+    @PostMapping("/createPackings")
+    @ApiOperation(value = "新增 修改物料", notes = "新增 修改物料")
+    public R createPackings(@RequestBody CreatePackingRequest createPackingRequest) {
+        this.basePackingService.createPackings(createPackingRequest);
+        return R.ok();
+    }
+
+
 }
