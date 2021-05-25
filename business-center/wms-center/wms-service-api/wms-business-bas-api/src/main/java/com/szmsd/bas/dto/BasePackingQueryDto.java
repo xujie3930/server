@@ -6,13 +6,11 @@ import lombok.Data;
 
 @Data
 public class BasePackingQueryDto {
-    @ApiModelProperty(value = "物料名称")
-    @Excel(name = "物料名称")
-    private String name;
+    @ApiModelProperty(value = "编码")
+    private String packageMaterialCode;
 
-    @ApiModelProperty(value = "物料编码")
-    @Excel(name = "物料编码")
-    private String code;
+    @ApiModelProperty(value = "名称")
+    private String packageMaterialName;
 
     @ApiModelProperty(value = "仓库编码")
     private String warehouseCode;
