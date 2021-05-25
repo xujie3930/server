@@ -74,17 +74,17 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
     @Override
     public List<BasePacking> selectBasePackingPage(BasePackingQueryDto basePackingQueryDto) {
         QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<BasePacking>();
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", basePackingQueryDto.getPackageMaterialCode());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "name", basePackingQueryDto.getPackageMaterialName());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "package_material_code", basePackingQueryDto.getPackageMaterialCode());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "package_material_name", basePackingQueryDto.getPackageMaterialName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "warehouse_code", basePackingQueryDto.getWarehouseCode());
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
     }
 
     @Override
-    public List<BasePacking> selectBasePackingParent() {
+    public List<BasePacking> selectBasePacking() {
         QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<BasePacking>();
-        queryWrapper.orderByDesc("name");
+        queryWrapper.orderByDesc("package_material_name");
         return super.list(queryWrapper);
     }
 

@@ -43,7 +43,7 @@ public interface IBasePackingService extends IService<BasePacking> {
      *
      * @return
      */
-    List<BasePacking> selectBasePackingParent();
+    List<BasePacking> selectBasePacking();
 
 
     /**
