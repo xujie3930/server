@@ -84,7 +84,6 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
     @Override
     public List<BasePacking> selectBasePackingParent() {
         QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<BasePacking>();
-        queryWrapper.isNull("p_id");
         queryWrapper.orderByDesc("name");
         return super.list(queryWrapper);
     }
