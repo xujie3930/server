@@ -13,4 +13,7 @@ public class BasePackingQueryDto {
     @ApiModelProperty(value = "物料编码")
     @Excel(name = "物料编码")
     private String code;
+
+    @ApiModelProperty(value = "仓库编码")
+    private String warehouseCode;
 }

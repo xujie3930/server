@@ -76,6 +76,7 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
         QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<BasePacking>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", basePackingQueryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "name", basePackingQueryDto.getName());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "warehouse_code", basePackingQueryDto.getWarehouseCode());
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
     }
