@@ -331,8 +331,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             inboundReceiptDetailDTO
                     .setDeclareQty(Integer.parseInt(addSku.getQty() + ""))
 //                    .setDeclareQty(10)
-                    // 设置sku为出库单号
-                    .setSku(addSku.getOrderNo())
+                    // 设置sku为出库单号 0526-取消加入sku
+//                    .setSku(addSku.getOrderNo())
                     //出库单号
                     .setDeliveryNo(addSku.getOrderNo())
                     .setSkuName(addSku.getProductName())

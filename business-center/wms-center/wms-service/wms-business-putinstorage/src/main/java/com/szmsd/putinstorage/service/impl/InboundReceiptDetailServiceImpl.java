@@ -7,6 +7,7 @@ import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.domain.InboundReceiptDetail;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
@@ -101,8 +102,13 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         log.info("保存入库单明细：SIZE={}", inboundReceiptDetailDTOS.size());
 
         // 是否有重复的sku
-        Map<String, Long> collect = inboundReceiptDetailDTOS.stream().map(InboundReceiptDetailDTO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
-        collect.entrySet().forEach(item -> AssertUtil.isTrue(!(item.getValue() > 1L), "入库单明细存在重复SKU"));
+        if (CheckTag.get()) {
+            //转运单没有sku 故不校验 0526
+            log.info("转运单没有sku 跳过校验是否有重复的sku");
+        } else {
+            Map<String, Long> collect = inboundReceiptDetailDTOS.stream().map(InboundReceiptDetailDTO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
+            collect.entrySet().forEach(item -> AssertUtil.isTrue(!(item.getValue() > 1L), "入库单明细存在重复SKU"));
+        }
 
         inboundReceiptDetailDTOS.forEach(this::saveOrUpdate);
         log.info("保存入库单明细：操作成功");
