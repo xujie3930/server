@@ -1,5 +1,6 @@
 package com.szmsd.finance.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,33 +14,43 @@ import lombok.experimental.Accessors;
 @ApiModel(value = "RechargesCallbackRequestDTO")
 public class RechargesCallbackRequestDTO {
 
+    @JsonProperty("RechargeNo")
     @ApiModelProperty(value = "充值编号")
-    private String RechargeNo;
+    private String rechargeNo;
 
+    @JsonProperty("RechargeAmount")
     @ApiModelProperty(value = "充值金额")
-    private RechargesCallbackAmountDTO RechargeAmount;
+    private RechargesCallbackAmountDTO rechargeAmount;
 
+    @JsonProperty("TransactionFee")
     @ApiModelProperty(value = "手续费")
-    private RechargesCallbackAmountDTO TransactionFee;
+    private RechargesCallbackAmountDTO transactionFee;
 
+    @JsonProperty("ActualRechargeAmount")
     @ApiModelProperty(value = "实际到账金额")
-    private RechargesCallbackAmountDTO ActualRechargeAmount;
+    private RechargesCallbackAmountDTO actualRechargeAmount;
 
+    @JsonProperty("Status")
     @ApiModelProperty(value = "充值状态")
-    private String Status;
+    private String status;
 
+    @JsonProperty("RechargeUrl")
     @ApiModelProperty(value = "第三方充值地址")
-    private String RechargeUrl;
+    private String rechargeUrl;
 
+    @JsonProperty("SerialNo")
     @ApiModelProperty(value = "请求参数唯一标识")
-    private String SerialNo;
+    private String serialNo;
 
+    @JsonProperty("Remark")
     @ApiModelProperty(value = "备注")
-    private String Remark;
+    private String remark;
 
+    @JsonProperty("Message")
     @ApiModelProperty(value = "返回消息")
-    private String Message;
+    private String message;
 
+    @JsonProperty("Code")
     @ApiModelProperty(value = "错误编码")
-    private String Code;
+    private String code;
 }
