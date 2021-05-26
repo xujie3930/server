@@ -138,7 +138,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         } else {
             log.info("转运单不推送第三方，由转运入库-提交 里面直接调用B3接口");
         }
-
+        CheckTag.remove();
         log.info("创建入库单：操作完成");
         return this.queryInfo(warehouseNo, false);
     }
