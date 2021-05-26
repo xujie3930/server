@@ -54,11 +54,11 @@ public class BasePackingController extends BaseController{
       }
 
     @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:list')")
-    @GetMapping("/listParent")
-    @ApiOperation(value = "查询父类列表",notes = "查询父类列表")
+    @GetMapping("/listPacking")
+    @ApiOperation(value = "查询列表",notes = "查询列表")
     public R listParent()
     {
-        List<BasePacking> list = basePackingService.selectBasePackingParent();
+        List<BasePacking> list = basePackingService.selectBasePacking();
         return R.ok(list);
     }
     /**
