@@ -27,9 +27,8 @@ public class RechargeCallbackController extends BaseController {
 
     @PostMapping("/rechargeCallback")
     @ApiOperation(value = "充值回调", notes = "充值回调")
-    public String rechargeCallback(@RequestBody JSONObject json) {
-        System.out.println(json);
-        RechargesCallbackRequestDTO dto = JSON.parseObject(json.toJSONString(), RechargesCallbackRequestDTO.class);
+    public String rechargeCallback(@RequestBody RechargesCallbackRequestDTO dto) {
+        log.info("dto: {}",dto);
         R r = rechargesFeignService.rechargeCallback(dto);
         R.getDataAndException(r);
         if(r.getCode()!=200){
