@@ -233,7 +233,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                     .setCusCode(sellerCode)
                     .setVat(purchaseAddDTO.getVat())
                     .setWarehouseCode(purchaseAddDTO.getWarehouseCode())
-                    .setOrderType(InboundReceiptEnum.OrderType.PURCHASE.getValue())
+                    .setOrderType(InboundReceiptEnum.OrderType.COLLECTION.getValue())
                     .setWarehouseCategoryCode(purchaseAddDTO.getWarehouseCategoryCode())
                     .setDeliveryWayCode(purchaseAddDTO.getDeliveryWay())
                     .setTotalDeclareQty(sum)
