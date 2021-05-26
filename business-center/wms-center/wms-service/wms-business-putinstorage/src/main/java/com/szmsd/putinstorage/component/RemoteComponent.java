@@ -160,7 +160,6 @@ public class RemoteComponent {
     public void vailSku(String sku) {
         log.info("SKU验证：SKU={}", sku);
         if (CheckTag.get()) {
-            CheckTag.remove();
             log.info("|转运入库单不校验sku");
             return;
         }
