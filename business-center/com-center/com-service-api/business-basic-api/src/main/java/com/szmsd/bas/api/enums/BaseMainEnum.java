@@ -7,6 +7,8 @@ public enum BaseMainEnum {
     SKU_ELE("060","基础信息_带电信息"),
     SKU_ELEPACKAGE("061","基础信息_电池包装"),
     NEW_SKU_REQ("081001","新SKU必验"),
+    COLLECT_IN("084001","集运录入"),
+    NORMAL_IN("084002","正常录入"),
     ;
 
     private final String code;

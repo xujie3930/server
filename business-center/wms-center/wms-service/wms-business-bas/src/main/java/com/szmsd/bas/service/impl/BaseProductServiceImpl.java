@@ -221,6 +221,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             b.setInitVolume(new BigDecimal(b.getInitHeight() * b.getInitLength() * b.getInitWidth()).setScale(2, ROUND_HALF_UP));
             b.setVolume(b.getInitVolume());
             b.setIsActive(true);
+            b.setSource(BaseMainEnum.NORMAL_IN.getCode());
             b.setWarehouseAcceptance(false);
             ProductRequest productRequest = BeanMapperUtil.map(b, ProductRequest.class);
             R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
@@ -345,7 +346,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         //SKU需要仓库测量尺寸
         baseProduct.setWarehouseAcceptance(false);
-        //baseProduct.setSource("01");
+        baseProduct.setSource(BaseMainEnum.NORMAL_IN.getCode());
         baseProduct.setWeight(baseProduct.getInitWeight());
         baseProduct.setWidth(baseProduct.getInitWidth());
         baseProduct.setLength(baseProduct.getInitLength());
@@ -390,6 +391,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }
             //默认激活
             o.setIsActive(true);
+            o.setSource(BaseMainEnum.COLLECT_IN.getCode());
             //o.setSource("02");
             //默认仓库没有验收
             o.setWarehouseAcceptance(false);

@@ -191,4 +191,7 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "关联单号")
     private String orderNo;
 
+    @ApiModelProperty(value = "来源 01基础资料 02转运集运")
+    private String source;
+
 }
