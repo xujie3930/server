@@ -33,4 +33,7 @@ public class InventoryAvailableQueryDto implements Serializable {
 
     @ApiModelProperty(value = "只查询SKU，传值SKU")
     private String querySku;
+
+    @ApiModelProperty(value = "SKU来源，不传默认084002")
+    private String source;
 }
