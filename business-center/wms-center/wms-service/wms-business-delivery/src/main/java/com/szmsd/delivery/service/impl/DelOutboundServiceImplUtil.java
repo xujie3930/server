@@ -205,7 +205,15 @@ public final class DelOutboundServiceImplUtil {
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.shipment_rule", queryDto.getShipmentRule());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.warehouse_code", queryDto.getWarehouseCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.state", queryDto.getState());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.order_type", queryDto.getOrderType());
+        String orderType = queryDto.getOrderType();
+        if (StringUtils.isNotEmpty(orderType)) {
+            if (orderType.contains(",")) {
+                String[] split = orderType.split(",");
+                queryWrapper.in("o.order_type", Arrays.asList(split));
+            } else {
+                queryWrapper.eq("o.order_type", orderType);
+            }
+        }
         QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
         QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
         // 按照创建时间倒序
