@@ -1,6 +1,7 @@
 package com.szmsd.putinstorage.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -13,6 +14,7 @@ import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
 import com.szmsd.putinstorage.domain.InboundReceipt;
+import com.szmsd.putinstorage.domain.InboundReceiptDetail;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
@@ -99,6 +101,20 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     }
 
     /**
+     * 转运入库只能新建一次
+     */
+    private void packageTransferCheck(CreateInboundReceiptDTO createInboundReceiptDTO) {
+        if (CheckTag.get()) {
+            log.info("校验是否已添加过转运入库单");
+            List<InboundReceiptDetailDTO> inboundReceiptDetails = createInboundReceiptDTO.getInboundReceiptDetails();
+            if (CollectionUtils.isNotEmpty(inboundReceiptDetails) && null == createInboundReceiptDTO.getId()) {
+                String deliveryNo = Optional.ofNullable(inboundReceiptDetails.get(0)).map(InboundReceiptDetailDTO::getDeliveryNo).orElse("");
+                Integer integer = iInboundReceiptDetailService.getBaseMapper().selectCount(Wrappers.<InboundReceiptDetail>lambdaQuery().eq(InboundReceiptDetail::getDeliveryNo, deliveryNo));
+                AssertUtil.isTrue(integer == 0, "请检查改出库单是否已添加过转运入库单!");
+            }
+        }
+    }
+    /**
      * 创建入库单
      * @param createInboundReceiptDTO
      */
@@ -107,6 +123,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     public InboundReceiptInfoVO saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO) {
         log.info("创建入库单：{}", createInboundReceiptDTO);
         CheckTag.set(createInboundReceiptDTO.getOrderType());
+        packageTransferCheck(createInboundReceiptDTO);
         Integer totalDeclareQty = createInboundReceiptDTO.getTotalDeclareQty();
         AssertUtil.isTrue(totalDeclareQty > 0, "合计申报数量不能为" + totalDeclareQty);
 
