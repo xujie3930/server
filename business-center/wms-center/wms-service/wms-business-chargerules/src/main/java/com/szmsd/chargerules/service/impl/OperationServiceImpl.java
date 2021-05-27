@@ -236,7 +236,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R<?> chargeCollection(DelOutboundOperationVO dto, List<DelOutboundOperationDetailVO> details) {
         BigDecimal amount = BigDecimal.ZERO;
         if (details.size() > 1) {
-            dto.setOrderType(dto.getOrderType().concat(DelOutboundOrderEnum.COLLECTION_MANY_SKU.getCode()));
+            dto.setOrderType(DelOutboundOrderEnum.COLLECTION_MANY_SKU.getCode());
             return this.calculateFreeze(dto, details, amount);
         }
         return this.calculateFreeze(dto, details, amount);
