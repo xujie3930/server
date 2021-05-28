@@ -2,10 +2,7 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BasePacking;
-import com.szmsd.bas.dto.BasePackingConditionQueryDto;
-import com.szmsd.bas.dto.BasePackingQueryDto;
-import com.szmsd.bas.dto.BaseProductConditionQueryDto;
-import com.szmsd.bas.dto.CreatePackingRequest;
+import com.szmsd.bas.dto.*;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -34,7 +31,7 @@ public interface IBasePackingService extends IService<BasePacking> {
      * @param basePacking 模块
      * @return 模块集合
      */
-    List<BasePacking> selectBasePackingList(BasePacking basePacking);
+    List<BasePackingDto> selectBasePackingList(BasePacking basePacking);
 
     List<BasePacking> selectBasePackingPage(BasePackingQueryDto basePackingQueryDto);
 
@@ -43,7 +40,7 @@ public interface IBasePackingService extends IService<BasePacking> {
      *
      * @return
      */
-    List<BasePacking> selectBasePacking();
+    List<BasePackingDto> selectBasePacking();
 
 
     /**

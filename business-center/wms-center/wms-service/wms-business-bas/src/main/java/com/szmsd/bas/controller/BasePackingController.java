@@ -58,7 +58,7 @@ public class BasePackingController extends BaseController{
     @ApiOperation(value = "查询列表",notes = "查询列表")
     public R listParent()
     {
-        List<BasePacking> list = basePackingService.selectBasePacking();
+        List<BasePackingDto> list = basePackingService.selectBasePacking();
         return R.ok(list);
     }
     /**
@@ -69,9 +69,9 @@ public class BasePackingController extends BaseController{
      @GetMapping("/export")
      @ApiOperation(value = "导出模块列表",notes = "导出模块列表")
      public void export(HttpServletResponse response, BasePacking basePacking) throws IOException {
-     List<BasePacking> list = basePackingService.selectBasePackingList(basePacking);
+     /*List<BasePacking> list = basePackingService.selectBasePackingList(basePacking);
      ExcelUtil<BasePacking> util = new ExcelUtil<BasePacking>(BasePacking.class);
-        util.exportExcel(response,list, "BasePacking");
+        util.exportExcel(response,list, "BasePacking");*/
 
      }
 

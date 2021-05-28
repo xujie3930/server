@@ -7,31 +7,21 @@ import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasePacking;
-import com.szmsd.bas.dto.BasePackingConditionQueryDto;
-import com.szmsd.bas.dto.BasePackingQueryDto;
-import com.szmsd.bas.dto.BaseProductConditionQueryDto;
-import com.szmsd.bas.dto.CreatePackingRequest;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BasePackingMapper;
 import com.szmsd.bas.service.IBasePackingService;
-import com.szmsd.bas.util.ObjectUtil;
-import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.http.api.feign.HtpBasFeignService;
-import com.szmsd.http.dto.PackingRequest;
-import com.szmsd.http.vo.ResponseVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * <p>
@@ -65,10 +55,8 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
      * @return 模块
      */
     @Override
-    public List<BasePacking> selectBasePackingList(BasePacking basePacking) {
-        QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<BasePacking>();
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "package_material_name", basePacking.getPackageMaterialName());
-        return baseMapper.selectList(queryWrapper);
+    public List<BasePackingDto> selectBasePackingList(BasePacking basePacking) {
+        return baseMapper.selectBasePackingGroup(basePacking.getPackingMaterialType());
     }
 
     @Override
@@ -82,10 +70,8 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
     }
 
     @Override
-    public List<BasePacking> selectBasePacking() {
-        QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<BasePacking>();
-        queryWrapper.orderByDesc("package_material_name");
-        return super.list(queryWrapper);
+    public List<BasePackingDto> selectBasePacking() {
+        return baseMapper.selectBasePackingGroup(null);
     }
 
     /**
@@ -107,6 +93,23 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
      */
     @Override
     public int updateBasePacking(BasePacking basePacking) throws IllegalAccessException {
+        if(StringUtils.isNotEmpty(basePacking.getCurrency())){
+            BasePacking basePacking1 = super.getById(basePacking.getId());
+            QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("warehouse_code",basePacking1.getWarehouseCode());
+            queryWrapper.eq("packing_material_type",basePacking1.getPackingMaterialType());
+            queryWrapper.isNotNull("currency");
+            queryWrapper.select("count(distinct currency) as count,currency");
+            queryWrapper.groupBy("currency");
+            Map<String, Object> map = super.getMap(queryWrapper);
+            if((Long)map.get("count")!=0L){
+                if(basePacking.getCurrency().equals(map.get("currency"))){
+                    return baseMapper.updateById(basePacking);
+                }else {
+                    throw  new BaseException("该仓库该物料货币唯一，请勿添加其他货币");
+                }
+            }
+        }
         return baseMapper.updateById(basePacking);
     }
 

@@ -668,10 +668,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             if (StringUtils.isEmpty(b.getSuggestPackingMaterial())) {
                 s.append("物流包装未填写,");
             } else {
-                basePacking.setPackageMaterialName(b.getSuggestPackingMaterial());
-                List<BasePacking> basePackings = basePackingService.selectBasePackingList(basePacking);
+                basePacking.setPackingMaterialType(b.getSuggestPackingMaterial());
+                List<BasePackingDto> basePackings = basePackingService.selectBasePackingList(basePacking);
                 if (CollectionUtils.isNotEmpty(basePackings)) {
                     b.setSuggestPackingMaterialCode(basePackings.get(0).getPackageMaterialCode());
+                    b.setPriceRange(basePackings.get(0).getPriceRange());
                 } else {
                     s.append("未找到对应的物流包装,");
                 }

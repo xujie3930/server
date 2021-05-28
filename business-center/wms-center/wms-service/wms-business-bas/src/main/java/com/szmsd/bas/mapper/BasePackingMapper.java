@@ -2,6 +2,10 @@ package com.szmsd.bas.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.dto.BasePackingDto;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,5 +16,6 @@ import com.szmsd.bas.domain.BasePacking;
  * @since 2021-03-06
  */
 public interface BasePackingMapper extends BaseMapper<BasePacking> {
+    List<BasePackingDto> selectBasePackingGroup(@Param("packingMaterialType") String packingMaterialType);
 
 }

@@ -32,6 +32,17 @@
                 remark,
             id, create_by, update_by, del_flag, name, code, seller_code, category, price, priority_level, category_name, describe
         </sql>
+    <select id="selectBasePackingGroup" resultType="com.szmsd.bas.dto.BasePackingDto">
+    select CONCAT(max(price),"-",min(price)) as priceRange,packing_material_type from base_packing
+    where
+    price is not null
+    and currency is not null
+    and is_active = 1
+    <if test="packingMaterialType !=null and packingMaterialType != '' ">
+            and packing_material_type =#{packingMaterialType}
+        </if>
+    group by warehouse_code, packing_material_type
+    </select>
 
 
 </mapper>

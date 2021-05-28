@@ -93,6 +93,9 @@ public class BaseProductImportDto {
     @ApiModelProperty(value = "是否自备包材")
     private Boolean havePackingMaterial;
 
+    @ApiModelProperty(value = "价格区间")
+    private String priceRange;
+
 
 
 }
