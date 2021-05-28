@@ -218,7 +218,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
         Operation operation = new Operation();
         for (DelOutboundOperationDetailVO vo : details) {
-            operation = getOperationDetails(dto, vo.getWeight(), "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
+            operation = getOperationDetails(dto, vo.getWeight(), "未找到" + DelOutboundOrderEnum.getName(dto.getOrderType()) + "业务费用规则，请联系管理员");
             qty = vo.getQty();
             amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), qty).add(amount);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
@@ -268,7 +268,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     private BigDecimal getBatchAmount(DelOutboundOperationVO dto, BigDecimal amount, Integer count, String type) {
         if (count != null && count > 0) {
-            Operation labelOperation = getOperationDetails(dto, null, "未找到" + type + "业务费用规则，请联系管理员");
+            Operation labelOperation = getOperationDetails(dto, null, "未找到" + DelOutboundOrderEnum.getName(type) + "业务费用规则，请联系管理员");
             BigDecimal calculate = payService.calculate(labelOperation.getFirstPrice(), labelOperation.getNextPrice(), count.longValue());
             amount = amount.add(calculate);
         }

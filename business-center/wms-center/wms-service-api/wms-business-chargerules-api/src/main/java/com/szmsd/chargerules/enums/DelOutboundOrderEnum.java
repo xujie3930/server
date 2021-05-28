@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.enums;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public enum DelOutboundOrderEnum {
@@ -33,6 +34,10 @@ public enum DelOutboundOrderEnum {
             }
         }
         return null;
+    }
+
+    public static String getName(String code) {
+        return Arrays.stream(DelOutboundOrderEnum.values()).filter(value -> value.getCode().equals(code)).map(DelOutboundOrderEnum::getName).findFirst().orElse(code);
     }
 
     public static String getCode(String name) {
