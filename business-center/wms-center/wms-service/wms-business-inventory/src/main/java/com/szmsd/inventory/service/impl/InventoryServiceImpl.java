@@ -132,6 +132,9 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             // 只查询SKU的库存
             queryWrapper.eq("sku.category", "SKU");
         }
+        if ("084002".equals(queryDto.getSource())) {
+            queryWrapper.eq("sku.source", "084002");
+        }
     }
 
     private void handlerQueryWrapper(QueryWrapper<InventoryAvailableQueryDto> queryWrapper, InventoryAvailableQueryDto queryDto) {

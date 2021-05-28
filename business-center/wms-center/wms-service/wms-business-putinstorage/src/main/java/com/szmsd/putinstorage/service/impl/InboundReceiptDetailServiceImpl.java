@@ -55,10 +55,10 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
     public List<InboundReceiptDetailVO> selectList(InboundReceiptDetailQueryDTO queryDto, boolean isContainFile) {
         List<InboundReceiptDetailVO> inboundReceiptDetailVOS = baseMapper.selectList(queryDto);
         if (isContainFile) {
-            inboundReceiptDetailVOS.forEach(inboundReceiptDetailVO -> {
-                List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.INBOUND_RECEIPT_EDITION_IMAGE.getAttachmentType()).setBusinessNo(inboundReceiptDetailVO.getWarehouseNo()).setBusinessItemNo(inboundReceiptDetailVO.getId().toString()));
+            inboundReceiptDetailVOS.forEach(item -> {
+                List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(item.getSku()));
                 if (CollectionUtils.isNotEmpty(attachment)) {
-                    inboundReceiptDetailVO.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
+                    item.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
                 }
             });
         }

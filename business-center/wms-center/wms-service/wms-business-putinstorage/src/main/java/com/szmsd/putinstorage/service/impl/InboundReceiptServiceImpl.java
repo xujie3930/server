@@ -473,6 +473,18 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     }
 
     /**
+     * 提审
+     * @param warehouseNos
+     */
+    @Override
+    public void arraigned(List<String> warehouseNos) {
+        if (warehouseNos == null) {
+            return;
+        }
+        warehouseNos.forEach(warehouseNo -> this.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.ARRAIGNED.getValue())));
+    }
+
+    /**
      * 异步删除附件
      * @param warehouseNo
      */

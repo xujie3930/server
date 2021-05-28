@@ -10,10 +10,8 @@ import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.putinstorage.component.RemoteComponent;
-import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
-import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -174,10 +172,10 @@ public class InboundReceiptController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:arraigned')")
-    @PutMapping("/arraigned/{warehouseNo}")
+    @PutMapping("/arraigned")
     @ApiOperation(value = "提审", notes = "客户端提审")
-    public R arraigned(@PathVariable("warehouseNo") String warehouseNo) {
-        iInboundReceiptService.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.ARRAIGNED.getValue()));
+    public R arraigned(@RequestBody List<String> warehouseNos) {
+        iInboundReceiptService.arraigned(warehouseNos);
         return R.ok();
     }
 

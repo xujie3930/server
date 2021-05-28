@@ -138,6 +138,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             inventoryAvailableQueryDto.setSkus(skus);
             // 可用库存为0的也需要查询出来
             inventoryAvailableQueryDto.setQueryType(2);
+            // 集运出库的
+            if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())) {
+                inventoryAvailableQueryDto.setSource("084002");
+            }
             List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
             Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(availableList)) {

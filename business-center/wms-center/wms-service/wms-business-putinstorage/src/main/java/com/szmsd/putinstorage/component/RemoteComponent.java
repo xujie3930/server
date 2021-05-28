@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 远程接口
@@ -242,6 +243,19 @@ public class RemoteComponent {
             return ListUtil.empty();
         }
         return data;
+    }
+
+    /**
+     * 获取SKU信息
+     *
+     * @param code
+     * @return
+     */
+    public BaseProduct getSku(String code, String sellerCode) {
+        R<BaseProduct> result = baseProductFeignService.getSku(new BaseProduct().setCode(code).setSellerCode(sellerCode));
+        BaseProduct sku = Optional.ofNullable(result.getData()).orElseGet(BaseProduct::new);
+        log.info("远程接口：查询SKU, code={}, {}", code, sku);
+        return sku;
     }
 
 }
