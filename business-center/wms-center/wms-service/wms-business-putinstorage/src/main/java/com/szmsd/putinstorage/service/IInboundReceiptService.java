@@ -48,5 +48,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     void exportSku(Workbook excel, List<InboundReceiptDetailVO> details);
 
     List<InboundCountVO> statistics(InboundReceiptQueryDTO queryDTO);
+
+    void arraigned(List<String> warehouseNos);
 }
 
