@@ -1,6 +1,5 @@
 package com.szmsd.delivery.controller;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
@@ -200,9 +199,10 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:exportTemplate')")
     @GetMapping("/exportTemplate")
     @ApiOperation(value = "出库管理 - 新增 - SKU导入模板", position = 800)
-    public void exportTemplate(HttpServletResponse response) throws UnsupportedEncodingException {
-        List<String> rows = CollUtil.newArrayList("SKU", "数量");
-        super.excelExportTitle(response, rows, "出库单SKU导入");
+    public void exportTemplate(HttpServletResponse response) {
+        String filePath = "/template/Del_sku_import.xlsx";
+        String fileName = "出库单SKU导入";
+        this.downloadTemplate(response, filePath, fileName);
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:importdetail')")
@@ -224,7 +224,7 @@ public class DelOutboundController extends BaseController {
         int lastIndexOf = originalFilename.lastIndexOf(".");
         String suffix = originalFilename.substring(lastIndexOf + 1);
         boolean isXlsx = "xlsx".equals(suffix);
-        AssertUtil.isTrue(isXlsx, "请上传xls或xlsx文件");
+        AssertUtil.isTrue(isXlsx, "请上传xlsx文件");
         try {
             ExcelReaderSheetBuilder excelReaderSheetBuilder = EasyExcelFactory.read(file.getInputStream(), DelOutboundDetailImportDto.class, null).sheet(0);
             List<DelOutboundDetailImportDto> dtoList = excelReaderSheetBuilder.doReadSync();
@@ -255,10 +255,22 @@ public class DelOutboundController extends BaseController {
     @GetMapping("/delOutboundImportTemplate")
     @ApiOperation(value = "出库管理 - 列表 - 出库单导入模板", position = 1000)
     public void delOutboundImportTemplate(HttpServletResponse response) {
+        String filePath = "/template/DM.xls";
+        String fileName = "DM出库（正常，自提，销毁）模板";
+        this.downloadTemplate(response, filePath, fileName);
+    }
+
+    /**
+     * 下载模板
+     *
+     * @param response response
+     * @param filePath 文件存放路径，${server.tomcat.basedir}配置的目录和resources目录下
+     * @param fileName 文件名称
+     */
+    private void downloadTemplate(HttpServletResponse response, String filePath, String fileName) {
         // 先去模板目录中获取模板
         // 模板目录中没有模板再从项目中获取模板
         String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery");
-        String filePath = "/template/DM.xls";
         File file = new File(basedir + "/" + filePath);
         InputStream inputStream = null;
         ServletOutputStream outputStream = null;
@@ -275,7 +287,7 @@ public class DelOutboundController extends BaseController {
             //response为HttpServletResponse对象
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String("DM出库（正常，自提，销毁）模板".getBytes("gb2312"), "ISO8859-1") + ".xls");
+            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), "ISO8859-1") + ".xls");
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
