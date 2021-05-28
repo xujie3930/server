@@ -2,8 +2,9 @@ package com.szmsd.putinstorage.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
-import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.putinstorage.component.CheckTag;
@@ -55,15 +56,11 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         List<InboundReceiptDetailVO> inboundReceiptDetailVOS = baseMapper.selectList(queryDto);
         if (isContainFile) {
             inboundReceiptDetailVOS.forEach(item -> {
-                BaseProduct sku = remoteComponent.getSku(item.getSku(), "");
-                item.setEditionImage(new AttachmentFileDTO().setAttachmentUrl(sku.getProductImage()));
+                List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(item.getSku()));
+                if (CollectionUtils.isNotEmpty(attachment)) {
+                    item.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
+                }
             });
-//            inboundReceiptDetailVOS.forEach(inboundReceiptDetailVO -> {
-//                List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.INBOUND_RECEIPT_EDITION_IMAGE.getAttachmentType()).setBusinessNo(inboundReceiptDetailVO.getWarehouseNo()).setBusinessItemNo(inboundReceiptDetailVO.getId().toString()));
-//                if (CollectionUtils.isNotEmpty(attachment)) {
-//                    inboundReceiptDetailVO.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
-//                }
-//            });
         }
         return inboundReceiptDetailVOS;
     }
