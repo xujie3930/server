@@ -160,7 +160,7 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
     @Override
     public BasePacking queryByCode(BasePackingConditionQueryDto conditionQueryDto) {
         LambdaQueryWrapper<BasePacking> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(BasePacking::getWarehouseCode, conditionQueryDto.getCode());
+        queryWrapper.eq(BasePacking::getPackageMaterialCode, conditionQueryDto.getCode());
         List<BasePacking> list = this.list(queryWrapper);
         if (CollectionUtils.isEmpty(list)) {
             return null;
