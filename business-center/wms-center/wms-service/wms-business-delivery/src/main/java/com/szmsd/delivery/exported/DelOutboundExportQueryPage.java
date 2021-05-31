@@ -58,6 +58,6 @@ public class DelOutboundExportQueryPage implements QueryPage<DelOutboundExportLi
     @Override
     public void nextPage() {
         // 下一页
-        delOutboundListQueryDto.setPageNum(delOutboundListQueryDto.getPageNum() + 1);
+        queryDto.setPageNum(queryDto.getPageNum() + 1);
     }
 }
