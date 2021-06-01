@@ -6,6 +6,7 @@ import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,6 +84,9 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
     public List<DelOutboundDetailDto> buildDetails(DelOutboundImportDto dto) {
         List<DelOutboundDetailDto> details = new ArrayList<>();
         List<DelOutboundDetailImportDto2> list = this.detailMapList.get(dto.getSort());
+        if (CollectionUtils.isEmpty(list)) {
+            return details;
+        }
         String warehouseCode = dto.getWarehouseCode();
         for (DelOutboundDetailImportDto2 dto2 : list) {
             DelOutboundDetailDto detail = new DelOutboundDetailDto();
