@@ -1,6 +1,7 @@
 package com.szmsd.common.core.web.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.github.pagehelper.PageHelper;
@@ -253,9 +254,9 @@ public class BaseController {
     }
 
     public void excelExportTitle(HttpServletResponse response, List<String> rows, String fileName) {
-        try (ExcelWriter excel = cn.hutool.poi.excel.ExcelUtil.getWriter();
+        try (ExcelWriter excel = cn.hutool.poi.excel.ExcelUtil.getWriter(true);
              ServletOutputStream out = response.getOutputStream()) {
-            excel.write(CollUtil.newArrayList(rows, new ArrayList<>()), true);
+            excel.write(CollUtil.newArrayList(rows, ListUtil.empty()), true);
             //response为HttpServletResponse对象
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
