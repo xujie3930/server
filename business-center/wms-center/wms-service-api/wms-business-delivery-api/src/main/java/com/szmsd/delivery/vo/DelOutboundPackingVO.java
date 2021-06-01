@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-@ApiModel(value = "装箱信息", description = "DelOutboundPackingVO对象")
+@ApiModel(value = "DelOutboundPackingVO", description = "DelOutboundPackingVO对象")
 public class DelOutboundPackingVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
