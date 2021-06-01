@@ -1,5 +1,6 @@
 package com.szmsd.delivery.vo;
 
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -101,4 +102,7 @@ public class DelOutboundDetailVO implements Serializable {
 
     @ApiModelProperty(value = "出库单号")
     private String orderNo;
+
+    @ApiModelProperty(value = "对版图片")
+    private AttachmentFileDTO editionImage;
 }
