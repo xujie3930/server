@@ -79,13 +79,13 @@ public class DelOutboundImportValidation implements ImportValidation<DelOutbound
             // 收件人姓名不能为空
             this.importContext.isEmpty(object.getConsignee(), rowIndex, 5, null, "收件人姓名不能为空");
             // 街道1不能为空
-            this.importContext.isEmpty(object.getStreet1(), rowIndex, 6, null, "收件人姓名不能为空");
+            this.importContext.isEmpty(object.getStreet1(), rowIndex, 6, null, "街道1不能为空");
             // 城镇/城市不能为空
-            this.importContext.isEmpty(object.getCity(), rowIndex, 8, null, "收件人姓名不能为空");
+            this.importContext.isEmpty(object.getCity(), rowIndex, 8, null, "城镇/城市不能为空");
             // 州/省不能为空
-            this.importContext.isEmpty(object.getStateOrProvince(), rowIndex, 9, null, "收件人姓名不能为空");
+            this.importContext.isEmpty(object.getStateOrProvince(), rowIndex, 9, null, "州/省不能为空");
             // 邮编不能为空
-            this.importContext.isEmpty(object.getPostCode(), rowIndex, 10, null, "收件人姓名不能为空");
+            this.importContext.isEmpty(object.getPostCode(), rowIndex, 10, null, "邮编不能为空");
             // 国家不能为空
             String country = object.getCountry();
             if (this.importContext.isEmpty(country, rowIndex, 11, null, "国家不能为空")) {

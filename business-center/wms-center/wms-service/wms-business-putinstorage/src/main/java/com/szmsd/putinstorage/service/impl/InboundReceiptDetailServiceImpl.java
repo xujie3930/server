@@ -107,7 +107,7 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
             log.info("转运单没有sku 跳过校验是否有重复的sku");
         } else {
             Map<String, Long> collect = inboundReceiptDetailDTOS.stream().map(InboundReceiptDetailDTO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
-            collect.entrySet().forEach(item -> AssertUtil.isTrue(!(item.getValue() > 1L), "入库单明细存在重复SKU"));
+            collect.forEach((key, value) -> AssertUtil.isTrue(!(value > 1L), "入库单明细存在重复SKU"));
         }
 
         inboundReceiptDetailDTOS.forEach(this::saveOrUpdate);
