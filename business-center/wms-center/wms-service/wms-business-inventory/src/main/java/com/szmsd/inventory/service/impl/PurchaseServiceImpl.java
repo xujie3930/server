@@ -3,6 +3,10 @@ package com.szmsd.inventory.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -14,14 +18,15 @@ import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.PurchaseDetails;
 import com.szmsd.inventory.domain.PurchaseStorageDetails;
 import com.szmsd.inventory.domain.dto.*;
+import com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
-import com.szmsd.inventory.enums.PurchaseEnum;
 import com.szmsd.inventory.mapper.PurchaseMapper;
 import com.szmsd.inventory.service.IPurchaseDetailsService;
 import com.szmsd.inventory.service.IPurchaseLogService;
 import com.szmsd.inventory.service.IPurchaseService;
 import com.szmsd.inventory.service.IPurchaseStorageDetailsService;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
@@ -29,12 +34,13 @@ import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -60,10 +66,27 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     private IPurchaseStorageDetailsService iPurchaseStorageDetailsService;
     @Resource
     private RemoteRequest remoteRequest;
+    @Autowired
+    private RemoteAttachmentService remoteAttachmentService;
 
     @Override
     public PurchaseInfoVO selectPurchaseByPurchaseNo(String purchaseNo) {
-        return baseMapper.selectPurchaseByPurchaseNo(purchaseNo);
+        PurchaseInfoVO purchaseInfoVO = baseMapper.selectPurchaseByPurchaseNo(purchaseNo);
+        if (null != purchaseInfoVO) {
+            List<PurchaseInfoDetailVO> purchaseDetailsAddList = purchaseInfoVO.getPurchaseDetailsAddList();
+            //添加图片
+            purchaseDetailsAddList.forEach(x -> {
+                BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(x.getSku());
+                List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService.list(basAttachmentQueryDTO).getData());
+                if (CollectionUtils.isNotEmpty(attachment)) {
+                    BasAttachment basAttachment = attachment.get(0);
+                    String attachmentUrl = basAttachment.getAttachmentUrl();
+                    x.setAttachmentUrl(attachmentUrl);
+                    x.setEditionImage(new AttachmentFileDTO().setId(basAttachment.getId()).setAttachmentName(basAttachment.getAttachmentName()).setAttachmentUrl(basAttachment.getAttachmentUrl()));
+                }
+            });
+        }
+        return purchaseInfoVO;
     }
 
     /**
