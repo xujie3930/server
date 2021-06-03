@@ -8,15 +8,13 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
+import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -115,4 +113,9 @@ public interface DelOutboundFeignService {
      */
     @PostMapping("/api/outbound/furtherHandler")
     R<Integer> furtherHandler(@RequestBody @Validated DelOutboundFurtherHandlerDto dto);
+
+
+    @PostMapping("/api/outbound/page")
+    @ApiOperation(value = "出库管理 - 分页", position = 100)
+    TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto queryDto);
 }

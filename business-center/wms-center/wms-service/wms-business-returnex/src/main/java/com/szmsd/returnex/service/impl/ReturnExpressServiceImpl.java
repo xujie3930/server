@@ -11,6 +11,10 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
 import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
 import com.szmsd.http.dto.returnex.ReturnDetail;
@@ -82,6 +86,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     @Resource
     private InventoryFeignService inventoryFeignService;
+
+    @Resource
+    private DelOutboundFeignService delOutboundFeignService;
 
     /**
      * 获取用户sellerCode
@@ -236,6 +243,22 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @param returnExpressAddDTO
      */
     private void handleExpectedCreate(ReturnExpressAddDTO returnExpressAddDTO) {
+        //判断如果是待提审状态的订单则不能提交
+        DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
+        delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
+        TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);
+        if (page!=null && page.getCode() == 200) {
+            List<DelOutboundListVO> rows = page.getRows();
+            if (CollectionUtils.isNotEmpty(rows)) {
+                DelOutboundListVO delOutboundListVO = rows.get(0);
+                boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.REVIEWED.getCode());
+                AssertUtil.isTrue(!equals, "该原出库单号未提审/不存在!");
+            } else {
+                AssertUtil.isTrue(false, "该原出库单号不存在!");
+            }
+        } else {
+            throw new BaseException("获取原出库单信息失败,请重试!");
+        }
         // 创建退报单 推给VMS仓库
         CreateExpectedReqDTO createExpectedReqDTO = returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class);
         createExpectedReqDTO.setRefOrderNo(returnExpressAddDTO.getFromOrderNo());
@@ -246,8 +269,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     private void checkSubmit(ReturnExpressAddDTO returnExpressAddDTO) {
         //整包上架必须有sku
-        Optional.of(returnExpressAddDTO).map(ReturnExpressAddDTO::getProcessType).ifPresent(x->{
-            boolean equals =configStatus.getWholePackageOnShelves().equals(x);
+        Optional.of(returnExpressAddDTO).map(ReturnExpressAddDTO::getProcessType).ifPresent(x -> {
+            boolean equals = configStatus.getWholePackageOnShelves().equals(x);
             if (equals) {
                 AssertUtil.isTrue(StringUtils.isNotBlank(returnExpressAddDTO.getSku()), "整包上架，sku必填");
             }
