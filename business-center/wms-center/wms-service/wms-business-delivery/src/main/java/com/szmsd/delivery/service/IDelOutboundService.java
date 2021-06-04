@@ -313,5 +313,13 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param warehouseCode warehouseCode
      */
     void unFreeze(String orderType, String orderNo, String warehouseCode);
+
+    /**
+     * 打印
+     *
+     * @param dto dto
+     * @return boolean
+     */
+    boolean toPrint(DelOutboundToPrintDto dto);
 }
 

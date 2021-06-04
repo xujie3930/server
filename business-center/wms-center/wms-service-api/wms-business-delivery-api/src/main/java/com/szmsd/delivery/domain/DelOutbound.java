@@ -203,4 +203,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "来源")
     private String sourceType;
+
+    @ApiModelProperty(value = "是否打印标签")
+    private Boolean isPrint;
 }

@@ -578,6 +578,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
     }
 
+    @Transactional
+    @Override
+    public boolean toPrint(DelOutboundToPrintDto dto) {
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getIsPrint, true);
+        updateWrapper.eq(DelOutbound::getId, dto.getId());
+        return super.update(updateWrapper);
+    }
+
     /**
      * 批量删除出库单模块
      *

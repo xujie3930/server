@@ -475,4 +475,11 @@ public class DelOutboundController extends BaseController {
         return R.ok(getDataTable(delOutboundService.getDelOutboundCharge(queryDto)));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:toPrint')")
+    @PutMapping("/toPrint")
+    @ApiOperation(value = "出库管理 - 打印", position = 10200)
+    @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundToPrintDto")
+    public R<Boolean> toPrint(@RequestBody DelOutboundToPrintDto dto) {
+        return R.ok(delOutboundService.toPrint(dto));
+    }
 }
