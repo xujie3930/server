@@ -12,6 +12,7 @@ import com.szmsd.bas.mapper.BasSellerCertificateMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBasSerialNumberService;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,7 +22,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
 * <p>
@@ -110,8 +113,19 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
      */
     @Override
         public Boolean insertBasSellerCertificateList(List<BasSellerCertificateDto> basSellerCertificateList){
-
+        Map<String,String> map = new HashMap<>();
+        for(BasSellerCertificateDto b:basSellerCertificateList) {
+            QueryWrapper<BasSellerCertificate> vatQueryWrapper = new QueryWrapper();
+            vatQueryWrapper.eq("seller_code",b.getSellerCode());
+            //判断是否有相同的vat
+            if(map.containsKey(b.getVat())){
+                throw new BaseException("vat填写重复");
+            }else{
+                map.put(b.getVat(),b.getVat());
+            }
+        }
         for(BasSellerCertificateDto b:basSellerCertificateList){
+            //判断是否有相同的vat
             if(CollectionUtils.isNotEmpty(b.getDocumentsFiles())){
                 String imageCode;
                 if(StringUtils.isNotEmpty(b.getAttachment())){
