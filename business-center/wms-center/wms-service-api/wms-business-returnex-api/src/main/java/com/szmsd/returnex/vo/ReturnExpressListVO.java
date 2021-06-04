@@ -110,7 +110,8 @@ public class ReturnExpressListVO implements Serializable {
 
     @ApiModelProperty(value = "处理备注")
     private String processRemark;
-
+    @ApiModelProperty(value = "WMS备注")
+    private String remark;
     @ApiModelProperty(value = "类型[默认：1：退件预报，2：VMS通知退件]")
     private String returnSource;
     @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
