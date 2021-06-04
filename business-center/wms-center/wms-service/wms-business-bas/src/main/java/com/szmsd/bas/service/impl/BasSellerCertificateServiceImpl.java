@@ -115,8 +115,6 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         public Boolean insertBasSellerCertificateList(List<BasSellerCertificateDto> basSellerCertificateList){
         Map<String,String> map = new HashMap<>();
         for(BasSellerCertificateDto b:basSellerCertificateList) {
-            QueryWrapper<BasSellerCertificate> vatQueryWrapper = new QueryWrapper();
-            vatQueryWrapper.eq("seller_code",b.getSellerCode());
             //判断是否有相同的vat
             if(map.containsKey(b.getVat())){
                 throw new BaseException("vat填写重复");
