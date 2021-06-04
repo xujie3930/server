@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
+
 /**
  * @author zhangyuyuan
  * @date 2021-03-30 14:53
@@ -71,7 +73,9 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                         shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
                         shipmentUpdateRequestDto.setIsEx(true);
                         shipmentUpdateRequestDto.setExType("OutboundIntercept");
-                        shipmentUpdateRequestDto.setExRemark("重量误差为 " + deviation + "，实际误差为" + abs);
+                        String templateFormat = "仓库称重{0}g，客户下单重量{1}g，差异值{2}g，超过误差范围{3}g，已拦截，请尽快提供处理意见。";
+                        String exRemark = MessageFormat.format(templateFormat, weight, weight1, abs, deviation);
+                        shipmentUpdateRequestDto.setExRemark(exRemark);
                         shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
                         this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
                     }
