@@ -98,4 +98,6 @@ public class DelOutboundListVO implements Serializable {
     @ApiModelProperty(value = "收件人")
     private String consignee;
 
+    @ApiModelProperty(value = "是否打印标签")
+    private Boolean isPrint;
 }

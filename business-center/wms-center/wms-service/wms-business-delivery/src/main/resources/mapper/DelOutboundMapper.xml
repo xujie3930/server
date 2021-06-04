@@ -42,7 +42,8 @@
             o.custom_code,
             o.create_by_name,
             o.create_time,
-            a.consignee
+            a.consignee,
+            o.is_print
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
