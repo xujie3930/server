@@ -601,61 +601,63 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 处理明细
             List<DelOutboundDetail> details = delOutboundWrapperContext.getDetailList();
             List<DelOutboundOperationDetailVO> detailVOList = new ArrayList<>(details.size());
-            /*if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+            if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
                 DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
-                detailVO.setQty(1L);
+                // 统计sku的数量
+                long qty = details.stream().mapToLong(DelOutboundDetail::getQty).sum();
+                detailVO.setQty(qty);
                 detailVO.setWeight(delOutbound.getWeight());
                 detailVOList.add(detailVO);
-            } else {*/
-            // 统计包材信息
-            Set<String> skus = new HashSet<>();
-            for (DelOutboundDetail detail : details) {
-                // sku信息
-                skus.add(detail.getSku());
-                // sku包材信息
-                if (StringUtils.isNotEmpty(detail.getBindCode())) {
-                    skus.add(detail.getBindCode());
+            } else {
+                // 统计包材信息
+                Set<String> skus = new HashSet<>();
+                for (DelOutboundDetail detail : details) {
+                    // sku信息
+                    skus.add(detail.getSku());
+                    // sku包材信息
+                    if (StringUtils.isNotEmpty(detail.getBindCode())) {
+                        skus.add(detail.getBindCode());
+                    }
+                }
+                Map<String, BaseProduct> productMap = null;
+                if (CollectionUtils.isNotEmpty(skus)) {
+                    BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
+                    baseProductConditionQueryDto.setSkus(new ArrayList<>(skus));
+                    BaseProductClientService baseProductClientService = SpringUtils.getBean(BaseProductClientService.class);
+                    List<BaseProduct> productList = baseProductClientService.queryProductList(baseProductConditionQueryDto);
+                    if (CollectionUtils.isNotEmpty(productList)) {
+                        productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v1, v2) -> v1));
+                    }
+                }
+                // 没有查询到SKU信息
+                if (null == productMap) {
+                    throw new CommonException("999", "查询SKU信息失败");
+                }
+                // 处理操作费用参数
+                for (DelOutboundDetail detail : details) {
+                    String sku = detail.getSku();
+                    BaseProduct product = productMap.get(sku);
+                    if (null == product) {
+                        throw new CommonException("999", "SKU[" + sku + "]信息不存在");
+                    }
+                    // 操作费对象
+                    DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
+                    detailVO.setSku(sku);
+                    detailVO.setQty(detail.getQty());
+                    detailVO.setWeight(Utils.defaultValue(product.getWeight()));
+                    detailVOList.add(detailVO);
+                    // 判断有没有包材
+                    String bindCode = detail.getBindCode();
+                    if (StringUtils.isNotEmpty(bindCode) && productMap.containsKey(bindCode)) {
+                        BaseProduct baseProduct = productMap.get(bindCode);
+                        DelOutboundOperationDetailVO vo = new DelOutboundOperationDetailVO();
+                        vo.setSku(bindCode);
+                        vo.setQty(detail.getQty());
+                        vo.setWeight(Utils.defaultValue(baseProduct.getWeight()));
+                        detailVOList.add(vo);
+                    }
                 }
             }
-            Map<String, BaseProduct> productMap = null;
-            if (CollectionUtils.isNotEmpty(skus)) {
-                BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
-                baseProductConditionQueryDto.setSkus(new ArrayList<>(skus));
-                BaseProductClientService baseProductClientService = SpringUtils.getBean(BaseProductClientService.class);
-                List<BaseProduct> productList = baseProductClientService.queryProductList(baseProductConditionQueryDto);
-                if (CollectionUtils.isNotEmpty(productList)) {
-                    productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v1, v2) -> v1));
-                }
-            }
-            // 没有查询到SKU信息
-            if (null == productMap) {
-                throw new CommonException("999", "查询SKU信息失败");
-            }
-            // 处理操作费用参数
-            for (DelOutboundDetail detail : details) {
-                String sku = detail.getSku();
-                BaseProduct product = productMap.get(sku);
-                if (null == product) {
-                    throw new CommonException("999", "SKU[" + sku + "]信息不存在");
-                }
-                // 操作费对象
-                DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
-                detailVO.setSku(sku);
-                detailVO.setQty(detail.getQty());
-                detailVO.setWeight(Utils.defaultValue(product.getWeight()));
-                detailVOList.add(detailVO);
-                // 判断有没有包材
-                String bindCode = detail.getBindCode();
-                if (StringUtils.isNotEmpty(bindCode) && productMap.containsKey(bindCode)) {
-                    BaseProduct baseProduct = productMap.get(bindCode);
-                    DelOutboundOperationDetailVO vo = new DelOutboundOperationDetailVO();
-                    vo.setSku(bindCode);
-                    vo.setQty(detail.getQty());
-                    vo.setWeight(Utils.defaultValue(baseProduct.getWeight()));
-                    detailVOList.add(vo);
-                }
-            }
-            /*}*/
             delOutboundOperationVO.setDetails(detailVOList);
             OperationFeignService operationFeignService = SpringUtils.getBean(OperationFeignService.class);
             R<?> r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
