@@ -603,7 +603,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             List<DelOutboundOperationDetailVO> detailVOList = new ArrayList<>(details.size());
             if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
                 DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
-                detailVO.setQty(1L);
+                // 统计sku的数量
+                long qty = details.stream().mapToLong(DelOutboundDetail::getQty).sum();
+                detailVO.setQty(qty);
                 detailVO.setWeight(delOutbound.getWeight());
                 detailVOList.add(detailVO);
             } else {

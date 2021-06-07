@@ -48,6 +48,7 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
      * @param query query
      * @return list
      */
+    @DataScope("t.custom_code")
     List<QueryChargeVO> selectDelOutboundList(QueryChargeDto query);
 
     /**
