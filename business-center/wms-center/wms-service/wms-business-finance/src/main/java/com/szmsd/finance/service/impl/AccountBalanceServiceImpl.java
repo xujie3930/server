@@ -20,6 +20,7 @@ import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.service.IThirdRechargeRecordService;
 import com.szmsd.finance.util.SnowflakeId;
+import com.szmsd.finance.vo.PreOnlineIncomeVo;
 import com.szmsd.finance.ws.WebSocketServer;
 import com.szmsd.http.api.feign.HttpRechargeFeignService;
 import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
@@ -138,10 +139,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (StringUtils.isEmpty(rechargeUrl)) {
             return R.failed();
         }
-        HashMap<String, String> map = new HashMap<>();
-        String serialNo = rechargesRequestDTO.getSerialNo();
-        map.put(serialNo,rechargeUrl);
-        return R.ok(map);
+        return R.ok(new PreOnlineIncomeVo(rechargesRequestDTO.getSerialNo(),rechargeUrl));
     }
 
     @Override
