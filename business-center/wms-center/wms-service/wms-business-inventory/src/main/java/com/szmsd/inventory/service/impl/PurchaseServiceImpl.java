@@ -362,7 +362,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             ;
             inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
         });
-        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
+        //以出库单为单位，每个数量1
+        Collection<InboundReceiptDetailDTO> values = inboundReceiptDetailAddList.stream().collect(Collectors.toMap(InboundReceiptDetailDTO::getDeliveryNo, x -> x, (x1, x2) -> x1)).values();
+        List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = new ArrayList<>(values);
+        inboundReceiptDetailDTOS.forEach(x -> x.setDeclareQty(1));
+        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailDTOS);
 
         InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
 
