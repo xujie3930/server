@@ -153,7 +153,6 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
             this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
         }
-        CheckTag.remove();
         log.info("创建入库单：操作完成");
         return this.queryInfo(warehouseNo, false);
     }
@@ -320,6 +319,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceipt.setWarehouseNo(warehouseNo);
             // 审核通过 第三方接口推送
             if (!InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(inboundReceiptReviewDTO.getStatus())) {
+                return;
+            }
+            if (CheckTag.get()) {
+                log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
                 return;
             }
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
