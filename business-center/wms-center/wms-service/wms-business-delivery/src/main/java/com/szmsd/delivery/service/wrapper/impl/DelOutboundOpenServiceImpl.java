@@ -52,7 +52,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                 String orderType = delOutbound.getOrderType();
                 boolean overWeight = false;
                 // 验证重量有没有超出返回
-                if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(orderType)
+                if ((DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(orderType) || DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType))
                         // 需要确认重量信息
                         && "076002".equals(delOutbound.getPackageConfirm())) {
                     // 仓库重量
