@@ -148,12 +148,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceiptReview = remoteComponent.inboundReceiptReview(createInboundReceiptDTO.getWarehouseCode());
         }
 
-        if (inboundReceiptReview && !isPackageTransfer) {
+        if (inboundReceiptReview) {
             // 审核 第三方接口推送
             String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
             this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
-        } else {
-            log.info("转运单不推送第三方，由转运入库-提交 里面直接调用B3接口");
         }
         CheckTag.remove();
         log.info("创建入库单：操作完成");
