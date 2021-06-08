@@ -33,8 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -138,7 +138,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (StringUtils.isEmpty(rechargeUrl)) {
             return R.failed();
         }
-        return R.ok(rechargeUrl);
+        HashMap<String, String> map = new HashMap<>();
+        String serialNo = rechargesRequestDTO.getSerialNo();
+        map.put(serialNo,rechargeUrl);
+        return R.ok(map);
     }
 
     @Override
