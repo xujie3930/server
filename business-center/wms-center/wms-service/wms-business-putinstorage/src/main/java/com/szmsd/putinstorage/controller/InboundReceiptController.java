@@ -9,6 +9,7 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
@@ -67,7 +68,12 @@ public class InboundReceiptController extends BaseController {
     @PostMapping("/receipt/saveOrUpdate")
     @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
     public R<InboundReceiptInfoVO> saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
-        InboundReceiptInfoVO info = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
+        InboundReceiptInfoVO info;
+        try {
+            info = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
+        } finally {
+            CheckTag.remove();
+        }
         return R.ok(info);
     }
 
