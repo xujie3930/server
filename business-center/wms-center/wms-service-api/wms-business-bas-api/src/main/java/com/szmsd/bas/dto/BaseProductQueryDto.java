@@ -47,4 +47,7 @@ public class BaseProductQueryDto {
     @ApiModelProperty(value = "是否激活")
     private Boolean isActive;
 
+    @ApiModelProperty(value = "来源")
+    private String source;
+
 }

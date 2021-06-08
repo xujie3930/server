@@ -119,6 +119,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             queryWrapper.in("id", queryDto.getIds());
         }
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "category", queryDto.getCategory());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "source", queryDto.getSource());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name_chinese", queryDto.getProductNameChinese());
