@@ -19,6 +19,7 @@ import com.szmsd.exception.dto.ProcessExceptionRequest;
 import com.szmsd.exception.enums.ExceptionTypeEnum;
 import com.szmsd.exception.enums.OrderTypeEnum;
 import com.szmsd.exception.enums.ProcessTypeEnum;
+import com.szmsd.exception.enums.StateSubEnum;
 import com.szmsd.exception.mapper.ExceptionInfoMapper;
 import com.szmsd.exception.service.IExceptionInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -128,8 +129,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             }
             exceptionInfo.setExceptionTypeName(ExceptionTypeEnum.get(exceptionInfo.getExceptionType()).getName());
             exceptionInfo.setOrderTypeName(OrderTypeEnum.get(exceptionInfo.getOrderType()).getName());
-            exceptionInfo.setState(false);
-            exceptionInfo.setDeal(false);
+            exceptionInfo.setState(StateSubEnum.DAICHULI.getCode());
             baseMapper.insert(exceptionInfo);
         }
         @Override
@@ -147,7 +147,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                 exceptionInfo.setOperateOn(d);
             }
             exceptionInfo.setSolveRemark(processExceptionRequest.getRemark());
-            exceptionInfo.setState(true);
+            exceptionInfo.setState(StateSubEnum.YIWANCHENG.getCode());
             UpdateWrapper<ExceptionInfo> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("exception_no",processExceptionRequest.getExceptionNo());
             super.update(exceptionInfo,updateWrapper);
@@ -194,7 +194,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                 }
             }
             exceptionInfo.setProcessTypeName(ProcessTypeEnum.get(exceptionInfo.getProcessType()).getName());
-            exceptionInfo.setDeal(true);
+            exceptionInfo.setState(StateSubEnum.YICHULI.getCode());
             if (CollectionUtils.isNotEmpty(exceptionInfo.getDocumentsFiles())) {
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(exception.getExceptionNo()).businessItemNo(null).fileList(exceptionInfo.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.EXCEPTION_DOCUMENT).build();
                 this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
