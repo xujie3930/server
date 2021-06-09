@@ -367,7 +367,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = new ArrayList<>(values);
         inboundReceiptDetailDTOS.forEach(x -> x.setDeclareQty(1));
         createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailDTOS);
-
+        Integer integer = inboundReceiptDetailDTOS.stream().map(InboundReceiptDetailDTO::getDeclareQty).reduce(Integer::sum).orElse(0);
+        createInboundReceiptDTO.setTotalDeclareQty(integer);
         InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
 
         //创建WMS入库单
