@@ -4,6 +4,7 @@ import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.ExceptionInfoQueryDto;
 import com.szmsd.exception.dto.NewExceptionRequest;
 import com.szmsd.exception.dto.ProcessExceptionRequest;
+import com.szmsd.exception.enums.StateSubEnum;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +61,7 @@ public class ExceptionInfoController extends BaseController{
     {
         QueryWrapper<ExceptionInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seller_code",sellerCode);
-        queryWrapper.eq("deal",false);
+        queryWrapper.eq("state", StateSubEnum.DAICHULI.getCode());
          return R.ok(exceptionInfoService.count(queryWrapper));
 
     }
