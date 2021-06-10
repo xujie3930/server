@@ -1,5 +1,6 @@
 package com.szmsd.delivery.vo;
 
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
 import io.swagger.annotations.ApiModel;
@@ -101,6 +102,18 @@ public class DelOutboundVO implements Serializable {
 
     @ApiModelProperty(value = "规格")
     private String specifications;
+
+    @ApiModelProperty(value = "出货渠道")
+    private String shipmentChannel;
+
+    @ApiModelProperty(value = "是否默认仓库装箱数据")
+    private Boolean isDefaultWarehouse;
+
+    @ApiModelProperty(value = "是否贴箱标")
+    private Boolean isLabelBox;
+
+    @ApiModelProperty(value = "装箱数量")
+    private Long boxNumber;
 
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressVO address;

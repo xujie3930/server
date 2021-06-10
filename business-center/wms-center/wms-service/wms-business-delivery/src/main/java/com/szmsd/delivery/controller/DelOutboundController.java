@@ -331,6 +331,10 @@ public class DelOutboundController extends BaseController {
             if (defaultAnalysisEventListener1.isError()) {
                 return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
             }
+            List<DelOutboundDetailImportDto2> detailList = defaultAnalysisEventListener1.getList();
+            if (CollectionUtils.isEmpty(detailList)) {
+                return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据明细不能为空")));
+            }
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,058");
             List<BasSubWrapperVO> orderTypeList = listMap.get("063");
@@ -349,7 +353,6 @@ public class DelOutboundController extends BaseController {
                 return R.ok(importResult);
             }
             // 初始化SKU导入上下文
-            List<DelOutboundDetailImportDto2> detailList = defaultAnalysisEventListener1.getList();
             DelOutboundDetailImportContext importContext1 = new DelOutboundDetailImportContext(detailList);
             // 初始化SKU数据验证器
             DelOutboundDetailImportValidationData importValidationData = new DelOutboundDetailImportValidationData(sellerCode, inventoryFeignClientService);
@@ -472,4 +475,11 @@ public class DelOutboundController extends BaseController {
         return R.ok(getDataTable(delOutboundService.getDelOutboundCharge(queryDto)));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:toPrint')")
+    @PutMapping("/toPrint")
+    @ApiOperation(value = "出库管理 - 打印", position = 10200)
+    @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundToPrintDto")
+    public R<Boolean> toPrint(@RequestBody DelOutboundToPrintDto dto) {
+        return R.ok(delOutboundService.toPrint(dto));
+    }
 }

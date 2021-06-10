@@ -119,6 +119,7 @@ public class DelOutboundPackingServiceImpl extends ServiceImpl<DelOutboundPackin
             List<DelOutboundPackingDetail> details = new ArrayList<>();
             for (DelOutboundPackingDto packing : packings) {
                 DelOutboundPacking p = BeanMapperUtil.map(packing, DelOutboundPacking.class);
+                p.setOrderNo(orderNo);
                 p.setType(DelOutboundPackingTypeConstant.TYPE_1);
                 // 保存装箱信息
                 this.save(p);

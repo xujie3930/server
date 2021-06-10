@@ -7,7 +7,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-@ApiModel(value = "装箱明细信息", description = "DelOutboundPackingDetailVO对象")
+@ApiModel(value = "DelOutboundPackingDetailVO", description = "DelOutboundPackingDetailVO对象")
 public class DelOutboundPackingDetailVO implements Serializable {
     private static final long serialVersionUID = 1L;
 

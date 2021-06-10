@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.finance.mapper.AccountSerialBillMapper">
+
+    <select id="selectPageList" resultType="com.szmsd.finance.domain.AccountSerialBill">
+        SELECT
+           id,no,tracking_no,cus_code,cus_name,currency_code,currency_name,amount,
+           warehouse_code,warehouse_name,pay_method,business_category,product_code,product_category,
+            charge_category,charge_type,create_by_name,create_time,update_by_name,update_time,
+           create_by,update_by,remark,order_time,payment_time
+        FROM
+            `fss_account_serial_bill`
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        ORDER BY payment_time DESC
+    </select>
+
+</mapper>

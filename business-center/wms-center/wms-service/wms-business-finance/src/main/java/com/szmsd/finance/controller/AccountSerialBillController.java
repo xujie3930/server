@@ -1,5 +1,6 @@
 package com.szmsd.finance.controller;
 
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.finance.domain.AccountSerialBill;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Api(tags = {"流水账单"})
 @RestController
@@ -28,6 +31,15 @@ public class AccountSerialBillController extends BaseController {
     public TableDataInfo<AccountSerialBill> listPage(AccountSerialBillDTO dto) {
         startPage();
         return getDataTable(accountSerialBillService.listPage(dto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('AccountSerialBill:export')")
+    @ApiOperation(value = "流水账单 - 列表导出")
+    @GetMapping("/export")
+    public void export(HttpServletResponse response, AccountSerialBillDTO dto) {
+        List<AccountSerialBill> list = accountSerialBillService.listPage(dto);
+        ExcelUtil<AccountSerialBill> util = new ExcelUtil<>(AccountSerialBill.class);
+        util.exportExcel(response,list,"业务明细");
     }
 
 }

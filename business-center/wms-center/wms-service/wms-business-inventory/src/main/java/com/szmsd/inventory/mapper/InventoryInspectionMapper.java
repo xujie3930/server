@@ -1,6 +1,7 @@
 package com.szmsd.inventory.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.inventory.domain.InventoryInspection;
 import com.szmsd.inventory.domain.dto.InventoryInspectionQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryInspectionDetailsVo;
@@ -16,6 +17,7 @@ public interface InventoryInspectionMapper extends BaseMapper<InventoryInspectio
      * @param dto dto
      * @return result
      */
+    @DataScope("a.custom_code")
     List<InventoryInspectionVo> selectListPage(InventoryInspectionQueryDTO dto);
 
     /**

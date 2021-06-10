@@ -102,11 +102,14 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "出货渠道")
     private String shipmentChannel;
 
-    @ApiModelProperty(value = "是否必须按要求装箱")
+    @ApiModelProperty(value = "是否默认仓库装箱数据")
     private Boolean isDefaultWarehouse;
 
-    @ApiModelProperty(value = "是否优先发货")
+    @ApiModelProperty(value = "是否贴箱标")
     private Boolean isLabelBox;
+
+    @ApiModelProperty(value = "装箱数量")
+    private Long boxNumber;
 
     @ApiModelProperty(value = "来源")
     private String sourceType;

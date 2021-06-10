@@ -106,13 +106,9 @@ public class ExceptionInfo extends BaseEntity {
     @Excel(name = "解决备注")
     private String solveRemark;
 
-    @ApiModelProperty(value = "是否解决")
-    @Excel(name = "是否解决")
-    private Boolean state;
-
-    @ApiModelProperty(value = "是否处理")
-    @Excel(name = "是否处理")
-    private Boolean deal;
+    @ApiModelProperty(value = "类型")
+    @Excel(name = "类型")
+    private String state;
 
     @ApiModelProperty(value = "处理人")
     @Excel(name = "处理人")

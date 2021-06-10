@@ -7,6 +7,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
+import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import feign.hystrix.FallbackFactory;
@@ -71,6 +72,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             @Override
             public R<Integer> furtherHandler(DelOutboundFurtherHandlerDto dto) {
                 return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public TableDataInfo<DelOutboundListVO> page(DelOutboundListQueryDto queryDto) {
+                return null;
             }
         };
     }

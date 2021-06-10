@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.List;
@@ -64,7 +65,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     private String warehouseCodeStr;
     @ApiModelProperty(value = "退货渠道", example = "客户自选")
     private String returnChannel;
-
+    @NotBlank(message = "退货Tracking号不能为空")
     @ApiModelProperty(value = "退货Tracking 号", example = "TID123456", required = true)
     private String scanCode;
     /**

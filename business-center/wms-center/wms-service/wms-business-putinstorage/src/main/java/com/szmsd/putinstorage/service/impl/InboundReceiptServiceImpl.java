@@ -110,7 +110,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             if (CollectionUtils.isNotEmpty(inboundReceiptDetails) && null == createInboundReceiptDTO.getId()) {
                 String deliveryNo = Optional.ofNullable(inboundReceiptDetails.get(0)).map(InboundReceiptDetailDTO::getDeliveryNo).orElse("");
                 Integer integer = iInboundReceiptDetailService.getBaseMapper().selectCount(Wrappers.<InboundReceiptDetail>lambdaQuery().eq(InboundReceiptDetail::getDeliveryNo, deliveryNo));
-                AssertUtil.isTrue(integer == 0, "请检查改出库单是否已添加过转运入库单!");
+                AssertUtil.isTrue(integer == 0, "该出库单已添加过转运入库单!");
             }
         }
     }
@@ -148,14 +148,11 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceiptReview = remoteComponent.inboundReceiptReview(createInboundReceiptDTO.getWarehouseCode());
         }
 
-        if (inboundReceiptReview && !isPackageTransfer) {
+        if (inboundReceiptReview) {
             // 审核 第三方接口推送
             String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
             this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
-        } else {
-            log.info("转运单不推送第三方，由转运入库-提交 里面直接调用B3接口");
         }
-        CheckTag.remove();
         log.info("创建入库单：操作完成");
         return this.queryInfo(warehouseNo, false);
     }
@@ -326,7 +323,11 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             }
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
             try {
-                remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+                if (CheckTag.get()) {
+                    log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
+                } else {
+                    remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+                }
                 this.updateByWarehouseNo(inboundReceipt);
                 this.inbound(inboundReceiptInfoVO);
             } catch (Exception e) {

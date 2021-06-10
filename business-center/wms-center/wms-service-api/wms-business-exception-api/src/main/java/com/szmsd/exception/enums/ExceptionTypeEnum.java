@@ -18,6 +18,7 @@ public enum ExceptionTypeEnum {
     OVERWEIGHT("OutboundOverWeight","出库-超重件"),
     BADPACKAGE("OutboundBadPackage","出库-包装不符"),
     GETTRACKINGFAILED("OutboundGetTrackingFailed","出库-获取挂号失败"),
+    OUTBOUNDINTERCEPT("OutboundIntercept","出库-拦截"),
     ;
 
     private final String code;

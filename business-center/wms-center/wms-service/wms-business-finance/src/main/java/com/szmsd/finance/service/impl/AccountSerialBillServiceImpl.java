@@ -63,8 +63,10 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         if (StringUtils.isNotBlank(dto.getCreateTimeEnd())) {
             query.le(AccountSerialBill::getCreateTime, dto.getCreateTimeEnd());
         }
-        query.orderByDesc(AccountSerialBill::getPaymentTime);
-        return accountSerialBillMapper.selectList(query);
+        if(StringUtils.isNotBlank(dto.getIds())) {
+            query.in(AccountSerialBill::getId, (Object[]) dto.getIds().split(","));
+        }
+        return accountSerialBillMapper.selectPageList(query);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.szmsd.inventory.domain.vo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -72,6 +73,9 @@ public class PurchaseInfoDetailVO {
     @ApiModelProperty(value = "附件图片地址")
     @Excel(name = "附件图片地址")
     private String attachmentUrl;
+
+    @ApiModelProperty(value = "对版图片")
+    private AttachmentFileDTO editionImage;
 
 
 }
