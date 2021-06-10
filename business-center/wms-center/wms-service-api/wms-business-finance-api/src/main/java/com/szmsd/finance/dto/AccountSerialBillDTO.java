@@ -75,6 +75,9 @@ public class AccountSerialBillDTO {
     @ApiModelProperty(value = "备注")
     private String remark;
 
+    @ApiModelProperty(value = "选择导出的id")
+    private String ids;
+
     public AccountSerialBillDTO(CustPayDTO dto, AccountSerialBillDTO details) {
         this.no = dto.getNo();
         this.trackingNo = details.getTrackingNo();
