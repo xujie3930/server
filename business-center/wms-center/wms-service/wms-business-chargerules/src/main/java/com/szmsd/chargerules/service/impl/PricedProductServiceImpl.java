@@ -127,6 +127,7 @@ public class PricedProductServiceImpl implements IPricedProductService {
         pricedProductSearchCriteria.setPageNumber(pricedProductQueryDTO.getPageNum());
         pricedProductSearchCriteria.setPageSize(pricedProductQueryDTO.getPageSize());
         pricedProductSearchCriteria.setCode(pricedProductQueryDTO.getCode());
+        pricedProductSearchCriteria.setName(pricedProductQueryDTO.getName());
         log.info("分页查询产品列表：{}", pricedProductSearchCriteria);
         R<PageVO<PricedProduct>> pageResult = htpPricedProductFeignService.pageResult(pricedProductSearchCriteria);
         AssertUtil.notNull(pageResult.getData(), pageResult.getMsg());
