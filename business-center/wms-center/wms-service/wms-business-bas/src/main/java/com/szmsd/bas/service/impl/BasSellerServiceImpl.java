@@ -8,11 +8,13 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.code.kaptcha.Producer;
 import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.enums.BaseMainEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.config.DefaultBasConfig;
+import com.szmsd.bas.config.StateConfig;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.*;
@@ -206,6 +208,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             basSeller.setState(true);
             basSeller.setInspectionRequirement(BaseMainEnum.NEW_SKU_REQ.getCode());
             basSeller.setIsActive(true);
+            basSeller.setRealState(StateConfig.noReal);
             basSeller.setEmail(basSeller.getInitEmail());
 
             //查询客户经理
@@ -361,7 +364,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             if(CollectionUtils.isNotEmpty(basSellerInfoDto.getBasSellerCertificateList())) {
                 basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
             }
-            // 附件信息
+            //判断是否有相同的vat
+            if(CollectionUtils.isNotEmpty(basSellerInfoDto.getDocumentsFiles())) {
+                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(basSellerInfoDto.getId().toString()).businessItemNo(null).fileList(basSellerInfoDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SELLER_IMAGE).build();
+                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+            }
             return baseMapper.updateById(basSeller);
         }
 
