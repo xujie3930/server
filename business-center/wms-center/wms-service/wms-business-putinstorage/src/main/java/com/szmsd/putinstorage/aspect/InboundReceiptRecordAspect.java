@@ -71,13 +71,13 @@ public class InboundReceiptRecordAspect {
         }
 
         if (arg instanceof List) {
-            inboundReceiptRecord.setWarehouseNo(String.join(",", (List<String>) arg));
+            inboundReceiptRecord.setWarehouseNo(String.join(",", getStr(arg)));
             inboundReceiptRecordAsyncService.saveRecord(inboundReceiptRecord);
             return;
         }
 
         List<String> reflexFills = recordEnum.getContentFill();
-        Map<String,Object> sourceMap = JSONObject.parseObject(JSON.toJSONString(arg));
+        Map<String, Object> sourceMap = JSONObject.parseObject(JSON.toJSONString(arg));
 
         List<String> params = null;
         if (CollectionUtils.isNotEmpty(reflexFills)) {
@@ -103,12 +103,16 @@ public class InboundReceiptRecordAspect {
         inboundReceiptRecordAsyncService.saveRecord(inboundReceiptRecord);
     }
 
+    @SuppressWarnings("unchecked")
     public String getStr(Object val) {
         if (val == null) {
             return null;
         }
         if (val instanceof List) {
-            return String.join(",", (List<String>) val);
+            try {
+                return String.join(",", (List<String>) val);
+            } catch (ClassCastException ignored) {
+            }
         }
         return val.toString();
     }

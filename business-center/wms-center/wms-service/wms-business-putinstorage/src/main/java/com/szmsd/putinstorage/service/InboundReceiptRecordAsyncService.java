@@ -1,7 +1,7 @@
 package com.szmsd.putinstorage.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.putinstorage.domain.InboundReceiptRecord;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -24,7 +24,7 @@ public class InboundReceiptRecordAsyncService {
     @Async
     public void saveRecord(InboundReceiptRecord inboundReceiptRecord) {
         if ("创建".equals(inboundReceiptRecord.getType())) {
-            LambdaQueryWrapper<InboundReceiptRecord> queryWrapper = new QueryWrapper<InboundReceiptRecord>().lambda();
+            LambdaQueryWrapper<InboundReceiptRecord> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.eq(InboundReceiptRecord::getType, inboundReceiptRecord.getType()).eq(InboundReceiptRecord::getWarehouseNo, inboundReceiptRecord.getWarehouseNo());
             InboundReceiptRecord one = iInboundReceiptRecordService.getOne(queryWrapper);
             if (one != null) {
