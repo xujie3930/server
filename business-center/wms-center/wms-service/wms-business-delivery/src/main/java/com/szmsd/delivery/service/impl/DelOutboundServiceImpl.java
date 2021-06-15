@@ -762,8 +762,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.delOutboundPackingService.save(dto.getOrderNo(), containerList);
         // 修改装箱状态
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getContainerState, DelOutboundConstant.CONTAINER_STATE_1);
         updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
-        updateWrapper.eq(DelOutbound::getContainerState, DelOutboundConstant.CONTAINER_STATE_1);
         return this.baseMapper.update(null, updateWrapper);
     }
 
