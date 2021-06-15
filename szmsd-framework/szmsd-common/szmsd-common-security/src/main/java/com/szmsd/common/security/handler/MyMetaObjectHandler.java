@@ -1,11 +1,15 @@
 package com.szmsd.common.security.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.system.api.domain.SysUser;
+import com.szmsd.system.api.feign.RemoteUserService;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 
@@ -26,23 +30,54 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     private final String updateByName = "updateByName";
     private final String version = "version";
 
+    @Resource
+    private RemoteUserService remoteUserService;
+
     @Override
     public void insertFill(MetaObject metaObject) {
-        LoginUser loginUser = SecurityUtils.getLoginUser();
-        this.setFieldValByName(createTime, new Date(), metaObject);
-        this.setFieldValByName(createBy, loginUser == null ? "1" : loginUser.getUserId() + "", metaObject);
-        this.setFieldValByName(createByName, loginUser == null ? "admin" : loginUser.getUsername(), metaObject);
+        if (valid(createTime, metaObject)) {
+            this.setFieldValByName(createTime, new Date(), metaObject);
+        }
+        if (valid(createBy, metaObject)) {
+            this.setFieldValByName(createBy, StringUtils.isEmpty(getUser().getUserName()) ? "admin" : getUser().getUserName(), metaObject);
+        }
+        if (valid(createByName, metaObject)) {
+            this.setFieldValByName(createByName, StringUtils.isEmpty(getUser().getNickName()) ? "系统" : getUser().getNickName(), metaObject);
+        }
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        LoginUser loginUser = SecurityUtils.getLoginUser();
-        this.setFieldValByName(updateTime, new Date(), metaObject);
-        this.setFieldValByName(updateBy, loginUser == null ? "1" : loginUser.getUserId() + "", metaObject);
-        this.setFieldValByName(updateByName, loginUser == null ? "admin" : loginUser.getUsername(), metaObject);
+        if (valid(updateTime, metaObject)) {
+            this.setFieldValByName(updateTime, new Date(), metaObject);
+        }
+        if (valid(updateBy, metaObject)) {
+            this.setFieldValByName(updateBy, StringUtils.isEmpty(getUser().getUserName()) ? "admin" : getUser().getUserName(), metaObject);
+        }
+        if (valid(updateByName, metaObject)) {
+            this.setFieldValByName(updateByName, StringUtils.isEmpty(getUser().getNickName()) ? "系统" : getUser().getNickName(), metaObject);
+        }
     }
 
-    private boolean existsValue(String name, MetaObject mataObejct) {
-        return this.getFieldValByName(name, mataObejct) == null ? false : true;
+    public SysUser getUser() {
+        SysUser user = new SysUser();
+        if (null != SecurityUtils.getLoginUser()) {
+            R<SysUser> sysUserR = remoteUserService.queryGetInfoByUserId(SecurityUtils.getLoginUser().getUserId());
+            if (null != sysUserR && 200 == sysUserR.getCode() && null != sysUserR.getData()) {
+                user = sysUserR.getData();
+            }
+        }
+        return user;
+    }
+
+    /**
+     * 验证
+     *
+     * @param name
+     * @param mataObejct
+     * @return
+     */
+    private boolean valid(String name, MetaObject mataObejct) {
+        return (mataObejct.hasGetter(name) && this.getFieldValByName(name, mataObejct) == null) ? true : false;
     }
 }
