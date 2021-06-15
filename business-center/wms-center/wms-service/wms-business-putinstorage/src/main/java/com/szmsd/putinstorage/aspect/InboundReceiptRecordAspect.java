@@ -76,9 +76,9 @@ public class InboundReceiptRecordAspect {
             return;
         }
 
-        List<String> reflexFills = recordEnum.getContentFill();
         Map<String, Object> sourceMap = JSONObject.parseObject(JSON.toJSONString(arg));
 
+        List<String> reflexFills = recordEnum.getContentFill();
         List<String> params = null;
         if (CollectionUtils.isNotEmpty(reflexFills)) {
             params = new ArrayList<>();
@@ -86,6 +86,8 @@ public class InboundReceiptRecordAspect {
                 params.add(sourceMap.get(reflexFill) + "");
             }
         }
+        inboundReceiptRecord.setRemark(recordEnum.get(params));
+
         if (StringUtils.isNotEmpty(recordEnum.getCreateBy())) {
             inboundReceiptRecord.setCreateBy(getStr(sourceMap.get(recordEnum.getCreateBy())));
         }
@@ -98,8 +100,6 @@ public class InboundReceiptRecordAspect {
         if (StringUtils.isNotEmpty(recordEnum.getSku())) {
             inboundReceiptRecord.setSku(getStr(sourceMap.get(recordEnum.getSku())));
         }
-        String record = recordEnum.get(params);
-        inboundReceiptRecord.setRemark(record);
         inboundReceiptRecordAsyncService.saveRecord(inboundReceiptRecord);
     }
 
