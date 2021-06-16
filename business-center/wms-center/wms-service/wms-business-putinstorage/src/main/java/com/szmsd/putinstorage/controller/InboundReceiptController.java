@@ -231,8 +231,9 @@ public class InboundReceiptController extends BaseController {
 
     @GetMapping("/receipt/queryRecord")
     @ApiOperation(value = "日志", notes = "入库单日志")
-    public R<List<InboundReceiptRecord>> queryRecord(InboundReceiptRecordQueryDTO queryDTO) {
-        return R.ok(iInboundReceiptRecordService.selectList(queryDTO));
+    public TableDataInfo<InboundReceiptRecord> queryRecord(InboundReceiptRecordQueryDTO queryDTO) {
+        startPage();
+        return getDataTable(iInboundReceiptRecordService.selectList(queryDTO));
     }
 
 }
