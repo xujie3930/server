@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.putinstorage.annotation.InboundReceiptLog;
 import com.szmsd.putinstorage.domain.InboundReceiptRecord;
 import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
@@ -24,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Aspect
 @Component
@@ -76,9 +79,9 @@ public class InboundReceiptRecordAspect {
             return;
         }
 
-        List<String> reflexFills = recordEnum.getContentFill();
         Map<String, Object> sourceMap = JSONObject.parseObject(JSON.toJSONString(arg));
 
+        List<String> reflexFills = recordEnum.getContentFill();
         List<String> params = null;
         if (CollectionUtils.isNotEmpty(reflexFills)) {
             params = new ArrayList<>();
@@ -86,11 +89,18 @@ public class InboundReceiptRecordAspect {
                 params.add(sourceMap.get(reflexFill) + "");
             }
         }
+        inboundReceiptRecord.setRemark(recordEnum.get(params));
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
         if (StringUtils.isNotEmpty(recordEnum.getCreateBy())) {
             inboundReceiptRecord.setCreateBy(getStr(sourceMap.get(recordEnum.getCreateBy())));
+        } else {
+            Optional.ofNullable(loginUser).ifPresent(user -> inboundReceiptRecord.setCreateBy(user.getUserId() + ""));
         }
         if (StringUtils.isNotEmpty(recordEnum.getCreateByName())) {
-            inboundReceiptRecord.setCreateByName(getStr(sourceMap.get(recordEnum.getCreateByName())));
+            inboundReceiptRecord.setCreateBy(getStr(sourceMap.get(recordEnum.getCreateByName())));
+        } else {
+            Optional.ofNullable(loginUser).ifPresent(user -> inboundReceiptRecord.setCreateByName(user.getUsername()));
         }
         if (StringUtils.isNotEmpty(recordEnum.getWarehouseNo())) {
             inboundReceiptRecord.setWarehouseNo(getStr(sourceMap.get(recordEnum.getWarehouseNo())));
@@ -98,8 +108,6 @@ public class InboundReceiptRecordAspect {
         if (StringUtils.isNotEmpty(recordEnum.getSku())) {
             inboundReceiptRecord.setSku(getStr(sourceMap.get(recordEnum.getSku())));
         }
-        String record = recordEnum.get(params);
-        inboundReceiptRecord.setRemark(record);
         inboundReceiptRecordAsyncService.saveRecord(inboundReceiptRecord);
     }
 

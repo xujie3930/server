@@ -305,8 +305,17 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                     }
                 }
                 });
-
             BasSellerInfoVO basSellerInfoVO = BeanMapperUtil.map(basSeller,BasSellerInfoVO.class);
+            //实名认证图片
+            List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
+                    .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SELLER_IMAGE.getAttachmentType()).setBusinessNo(basSeller.getId().toString()).setBusinessItemNo(null)).getData());
+            if (CollectionUtils.isNotEmpty(attachment)) {
+                List<AttachmentFileDTO> documentsFiles = new ArrayList();
+                for(BasAttachment a:attachment){
+                    documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
+                }
+                basSellerInfoVO.setDocumentsFiles(documentsFiles);
+            }
             basSellerInfoVO.setBasSellerCertificateList(basSellerCertificateVOS);
             return basSellerInfoVO;
         }
