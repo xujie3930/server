@@ -67,8 +67,4 @@ public class InventoryRecordVO {
     @ApiModelProperty(value = "日志")
     private String logs;
 
-    @ApiModelProperty(value = "日志 - 系统语言")
-    @FieldJsonI18n(isPlaceholder = true, localLanguageType = LocalLanguageTypeEnum.INVENTORY_RECORD_LOGS)
-    private String logsLanguage;
-
 }
