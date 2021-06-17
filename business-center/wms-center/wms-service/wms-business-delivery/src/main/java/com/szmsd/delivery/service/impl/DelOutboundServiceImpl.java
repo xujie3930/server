@@ -369,17 +369,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             double width = Utils.defaultValue(dto.getWidth());
             double height = Utils.defaultValue(dto.getHeight());
             double weight = Utils.defaultValue(dto.getWeight());
-            long boxNumber = 0L;
-            for (DelOutboundDetailDto detail : details) {
-                boxNumber += Utils.defaultValue(detail.getQty());
-            }
             delOutbound.setLength(length);
             delOutbound.setWidth(width);
             delOutbound.setHeight(height);
             delOutbound.setWeight(weight);
             // 规格，长*宽*高
             delOutbound.setSpecifications(length + "*" + width + "*" + height);
-            delOutbound.setBoxNumber(boxNumber);
         } else {
             // 查询包材的信息
             Set<String> skus = new HashSet<>();
@@ -403,7 +398,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             double weight = 0.0;
             List<PackageInfo> packageInfoList = new ArrayList<>();
-            long boxNumber = 0L;
             for (DelOutboundDetailDto detail : details) {
                 // sku信息
                 weight += Utils.defaultValue(detail.getWeight());
@@ -416,7 +410,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         packageInfoList.add(new PackageInfo(product.getLength(), product.getWidth(), product.getHeight()));
                     }
                 }
-                boxNumber += Utils.defaultValue(detail.getQty());
             }
             delOutbound.setWeight(weight);
             PackageInfo packageInfo = PackageUtil.count(packageInfoList);
@@ -425,7 +418,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutbound.setHeight(packageInfo.getHeight());
             // 规格，长*宽*高
             delOutbound.setSpecifications(packageInfo.getLength() + "*" + packageInfo.getWidth() + "*" + packageInfo.getHeight());
-            delOutbound.setBoxNumber(boxNumber);
         }
     }
 
