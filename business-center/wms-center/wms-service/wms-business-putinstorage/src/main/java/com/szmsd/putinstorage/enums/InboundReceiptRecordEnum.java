@@ -1,5 +1,7 @@
 package com.szmsd.putinstorage.enums;
 
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
+import com.szmsd.common.core.language.util.LanguageUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -22,10 +24,17 @@ public enum InboundReceiptRecordEnum {
     CANCEL("取消", "", "", "取消", null, "", "", "",
             (param) -> InboundReceiptRecordEnum.valueOf("CANCEL").getContent()),
 
-    REVIEW("审核", "warehouseNos", "", "审核", null, "", "", "",
-            (param) -> InboundReceiptRecordEnum.valueOf("REVIEW").getContent()),
+    REVIEW("审核", "warehouseNos", "", "{0}，{1}", Arrays.asList("status", "reviewRemark"), "", "", "",
+            (param) -> {
+                if (CollectionUtils.isEmpty(param)) {
+                    return "";
+                }
+                String arg0 = LanguageUtil.getLanguage(LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS, param.get(0));
+                String arg1 = param.get(1);
+                return MessageFormat.format(InboundReceiptRecordEnum.valueOf("REVIEW").getContent(), arg0, arg1);
+            }),
 
-    PUT("上架", "orderNo", "sku", "SKU[{0}]，上架[{1}]", Arrays.asList("sku", "qty"), "operator", "operator", "operateOn",
+    PUT("上架", "orderNo", "sku", "SKU[{0}]，上架数量[{1}]", Arrays.asList("sku", "qty"), "operator", "operator", "operateOn",
             (param) -> CollectionUtils.isEmpty(param) ? InboundReceiptRecordEnum.valueOf("PUT").getContent() : MessageFormat.format(InboundReceiptRecordEnum.valueOf("PUT").getContent(), param.toArray())),
 
     COMPLETED("完成", "orderNo", "", "完成", null, "operator", "operator", "operateOn",
