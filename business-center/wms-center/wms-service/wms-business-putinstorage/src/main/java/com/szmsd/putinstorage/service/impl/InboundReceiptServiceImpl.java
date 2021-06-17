@@ -193,8 +193,14 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         InboundReceiptVO inboundReceiptVO = this.selectByWarehouseNo(warehouseNo);
         AssertUtil.notNull(inboundReceiptVO, "入库单[" + warehouseNo + "]不存在");
 
-        // 第三方接口推送
-        remoteRequest.cancelInboundReceipt(inboundReceiptVO.getWarehouseNo(), inboundReceiptVO.getWarehouseName());
+        /** 审核通过、处理中、已完成3个状态需要调第三方接口 **/
+        String status = inboundReceiptVO.getStatus();
+        if (InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(status)
+            || InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue().equals(status)
+            || InboundReceiptEnum.InboundReceiptStatus.COMPLETED.getValue().equals(status)) {
+            // 第三方接口推送
+            remoteRequest.cancelInboundReceipt(inboundReceiptVO.getWarehouseNo(), inboundReceiptVO.getWarehouseName());
+        }
 
         // 修改为取消状态
         this.updateStatus(warehouseNo, InboundReceiptEnum.InboundReceiptStatus.CANCELLED);
