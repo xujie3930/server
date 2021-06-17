@@ -3,6 +3,7 @@ package com.szmsd.putinstorage.aspect;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -98,9 +99,12 @@ public class InboundReceiptRecordAspect {
             Optional.ofNullable(loginUser).ifPresent(user -> inboundReceiptRecord.setCreateBy(user.getUserId() + ""));
         }
         if (StringUtils.isNotEmpty(recordEnum.getCreateByName())) {
-            inboundReceiptRecord.setCreateBy(getStr(sourceMap.get(recordEnum.getCreateByName())));
+            inboundReceiptRecord.setCreateByName(getStr(sourceMap.get(recordEnum.getCreateByName())));
         } else {
             Optional.ofNullable(loginUser).ifPresent(user -> inboundReceiptRecord.setCreateByName(user.getUsername()));
+        }
+        if (StringUtils.isNotEmpty(recordEnum.getCreateTime())) {
+            inboundReceiptRecord.setCreateTime(DateUtils.parseDate(sourceMap.get(recordEnum.getCreateTime())));
         }
         if (StringUtils.isNotEmpty(recordEnum.getWarehouseNo())) {
             inboundReceiptRecord.setWarehouseNo(getStr(sourceMap.get(recordEnum.getWarehouseNo())));
