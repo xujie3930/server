@@ -435,6 +435,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
             createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryInfo());
             createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+        } else if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+            if ("079001".equals(delOutbound.getShipmentChannel())) {
+                createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryInfo());
+                createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+            }
         }
         createShipmentRequestDto.setRemark(delOutbound.getRemark());
         createShipmentRequestDto.setRefOrderNo(delOutbound.getOrderNo());
@@ -484,7 +489,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setIsFirst(delOutbound.getIsFirst());
         createShipmentRequestDto.setNewSKU(delOutbound.getNewSku());
         // 批量出口增加装箱要求
-        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
             List<DelOutboundPackingVO> packingList = this.delOutboundPackingService.listByOrderNo(delOutbound.getOrderNo(), DelOutboundPackingTypeConstant.TYPE_1);
             if (CollectionUtils.isNotEmpty(packingList)) {
                 PackingRequirementInfoDto packingRequirementInfoDto = new PackingRequirementInfoDto();
