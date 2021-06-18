@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -71,20 +72,20 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
             vo.setVolumeWeightStandards(item.getVolumeWeightStandards());
             vo.setVolumeWeightReduce(item.getVolumeWeightReduce());
 
-            PackageLimit packageLimit = item.getPackageLimit();
+            PackageLimit packageLimit = Optional.ofNullable(item.getPackageLimit()).orElseGet(PackageLimit::new);
             vo.setMinPhysicalWeight(packageLimit.getMinPhysicalWeight());
             vo.setMaxPhysicalWeight(packageLimit.getMaxPhysicalWeight());
             vo.setVolumeLong(packageLimit.getVolumeLong());
             vo.setVolume(packageLimit.getVolume());
             vo.setPerimeter(packageLimit.getPerimeter());
 
-            Packing packingLimit = packageLimit.getPackingLimit();
+            Packing packingLimit = Optional.ofNullable(packageLimit.getPackingLimit()).orElseGet(Packing::new);
             vo.setPackingLimitStr(packingLimit.getLength() + "*" + packingLimit.getWidth() + "*" + packingLimit.getHeight());
             return vo;
         }).collect(Collectors.toList());
         result.setVolumeWeights(volumeWeights);
 
-        PackageLimitVO limitVo = result.getLimit();
+        PackageLimitVO limitVo = Optional.ofNullable(result.getLimit()).orElseGet(PackageLimitVO::new);
         PackageLimit limit = data.getLimit();
         if (limit != null) {
             Packing minPackingLimit = limit.getMinPackingLimit();
