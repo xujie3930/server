@@ -42,8 +42,7 @@ public class PricedProductController extends BaseController {
     @GetMapping("/page")
     @ApiOperation(value = "分页查询产品列表，返回指定页面的数据，以及统计总记录数")
     public TableDataInfo<PricedProduct> page(PricedProductQueryDTO pricedProductQueryDTO) {
-        TableDataInfo<PricedProduct> pricedProductList = iPricedProductService.selectPage(pricedProductQueryDTO);
-        return pricedProductList;
+        return iPricedProductService.selectPage(pricedProductQueryDTO);
     }
 
     @PreAuthorize("@ss.hasPermi('products:keyvaluepairs')")
