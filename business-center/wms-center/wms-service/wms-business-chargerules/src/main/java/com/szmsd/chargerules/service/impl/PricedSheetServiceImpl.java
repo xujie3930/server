@@ -6,6 +6,7 @@ import com.szmsd.chargerules.service.IPricedSheetService;
 import com.szmsd.chargerules.vo.*;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
@@ -233,7 +234,7 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
             if (StringUtils.isNotEmpty(packingLimit)) {
                 String[] split = packingLimit.split("\\*");
                 AssertUtil.isTrue(split.length == 3, "包裹总尺寸填写不符合规则(L*W*H)");
-                Packing packing = new Packing().setLength(new BigDecimal(split[0])).setWidth(new BigDecimal(split[1])).setHeight(new BigDecimal(split[2])).setLengthUnit("CM");
+                Packing packing = getPacking(split, "包裹总尺寸填写不符合规则(L*W*H)");
                 packageLimit.setPackingLimit(packing);
             }
 
@@ -252,7 +253,7 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         if (StringUtils.isNotEmpty(minPackingLimit)) {
             String[] split = minPackingLimit.split("\\*");
             AssertUtil.isTrue(split.length == 3, "最小尺寸填写不符合规则(L*W*H)");
-            Packing minPacking = new Packing().setLength(new BigDecimal(split[0])).setWidth(new BigDecimal(split[1])).setHeight(new BigDecimal(split[2])).setLengthUnit("CM");
+            Packing minPacking = getPacking(split, "最小尺寸填写不符合规则(L*W*H)");
             limit.setMinPackingLimit(minPacking);
         }
 
@@ -260,7 +261,7 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         if (StringUtils.isNotEmpty(packingLimit)) {
             String[] split2 = packingLimit.split("\\*");
             AssertUtil.isTrue(split2.length == 3, "最大尺寸填写不符合规则(L*W*H)");
-            Packing packing = new Packing().setLength(new BigDecimal(split2[0])).setWidth(new BigDecimal(split2[1])).setHeight(new BigDecimal(split2[2])).setLengthUnit("CM");
+            Packing packing = getPacking(split2, "最大尺寸填写不符合规则(L*W*H)");
             limit.setPackingLimit(packing);
         }
 
@@ -272,6 +273,16 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
             UpdatePricedSheetCommand update = (UpdatePricedSheetCommand) t;
             update.setVolumeWeights(volumeWeights);
             update.setLimit(limit);
+        }
+    }
+
+    private static Packing getPacking(String[] split, String throwMsg) {
+        AssertUtil.isTrue(split.length == 3, throwMsg);
+        try {
+            return new Packing().setLength(new BigDecimal(split[0])).setWidth(new BigDecimal(split[1])).setHeight(new BigDecimal(split[2])).setLengthUnit("CM");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new BaseException(throwMsg);
         }
     }
 
