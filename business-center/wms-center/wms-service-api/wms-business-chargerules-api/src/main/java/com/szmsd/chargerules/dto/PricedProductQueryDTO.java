@@ -16,4 +16,10 @@ public class PricedProductQueryDTO extends PageDomain {
     @ApiModelProperty(value = "产品代码")
     private String code;
 
+    @ApiModelProperty(value = "产品名称")
+    private String name;
+
+    @ApiModelProperty(value = "产品类型--普通产品类型(Basic),组合产品类型(Group)")
+    private String type;
+
 }

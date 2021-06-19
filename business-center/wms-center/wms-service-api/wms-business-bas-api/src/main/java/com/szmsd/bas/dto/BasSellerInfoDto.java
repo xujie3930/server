@@ -16,4 +16,7 @@ public class BasSellerInfoDto extends BasSeller {
     @Excel(name = "创建人")
     private List<BasSellerCertificateDto> basSellerCertificateList;
 
+    @ApiModelProperty(value = "文件信息")
+    private List<AttachmentDataDTO> documentsFiles;
+
 }

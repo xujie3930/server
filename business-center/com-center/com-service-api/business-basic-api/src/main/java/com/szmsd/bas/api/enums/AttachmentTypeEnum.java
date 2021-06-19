@@ -24,7 +24,8 @@ public enum AttachmentTypeEnum {
     DEL_OUTBOUND_DOCUMENT("DEL_OUTBOUND_DOCUMENT","出库单","物流面单","delOutboundDocument"),
     DEL_OUTBOUND_BATCH_LABEL("DEL_OUTBOUND_BATCH_LABEL","出库单批量出库箱标","出库箱标","delOutboundBatchLabel"),
     EXCEPTION_DOCUMENT("EXCEPTION_DOCUMENT","异常信息","异常处理附件","exceptionDocument"),
-    MESSAGE_IMAGE("MESSAGE_IMAGE","信息通知","信息通知图片","messageImage")
+    MESSAGE_IMAGE("MESSAGE_IMAGE","信息通知","信息通知图片","messageImage"),
+    SELLER_IMAGE("SELLER_IMAGE","基础信息","客户实名认证图片","sellerImage"),
     ;
 
     /** 业务编码 **/

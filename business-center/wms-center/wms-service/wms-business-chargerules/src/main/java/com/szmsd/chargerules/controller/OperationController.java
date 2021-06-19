@@ -79,6 +79,7 @@ public class OperationController extends BaseController {
     @ApiOperation(value = "业务计费 - 出库冻结余额")
     @PostMapping("/delOutboundFreeze")
     public R delOutboundFreeze(@RequestBody DelOutboundOperationVO delOutboundVO) {
+        log.info("请求---------------------------- {}",delOutboundVO);
         return operationService.delOutboundFreeze(delOutboundVO);
     }
 

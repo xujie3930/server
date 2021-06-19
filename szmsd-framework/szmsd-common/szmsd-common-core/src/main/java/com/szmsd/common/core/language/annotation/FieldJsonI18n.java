@@ -28,6 +28,12 @@ public @interface FieldJsonI18n {
     String value() default "";
 
     /**
+     * 是否多个,隔开 value,value2,value3
+     * @return
+     */
+    boolean isMultiple() default false;
+
+    /**
      * 自定义获取语言 LanguageEnum.sysName 为当前系统语言
      * @return
      */
@@ -38,12 +44,5 @@ public @interface FieldJsonI18n {
      * @return
      */
     LocalLanguageTypeEnum localLanguageType() default LocalLanguageTypeEnum.SYSTEM_LANGUAGE;
-
-    /**
-     * 格式 value&{0},{1}····
-     * 是否是占位符，多个值用 “," 隔开
-     * @return
-     */
-    boolean isPlaceholder() default false;
 
 }

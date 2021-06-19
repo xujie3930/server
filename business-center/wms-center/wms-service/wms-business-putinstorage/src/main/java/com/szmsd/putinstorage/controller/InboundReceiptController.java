@@ -9,10 +9,14 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.putinstorage.annotation.InboundReceiptLog;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
+import com.szmsd.putinstorage.domain.InboundReceiptRecord;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
+import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
+import com.szmsd.putinstorage.service.IInboundReceiptRecordService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -53,6 +57,9 @@ public class InboundReceiptController extends BaseController {
     private IInboundReceiptService iInboundReceiptService;
 
     @Resource
+    private IInboundReceiptRecordService iInboundReceiptRecordService;
+
+    @Resource
     private RemoteComponent remoteComponent;
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
@@ -67,19 +74,19 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @PostMapping("/receipt/saveOrUpdate")
     @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.CREATE)
     public R<InboundReceiptInfoVO> saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
-        InboundReceiptInfoVO info;
         try {
-            info = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
+            return R.ok(iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO));
         } finally {
             CheckTag.remove();
         }
-        return R.ok(info);
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @DeleteMapping("/receipt/cancel/{warehouseNo}")
     @ApiOperation(value = "取消", notes = "入库管理 - 取消")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.CANCEL)
     public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
         iInboundReceiptService.cancel(warehouseNo);
         return R.ok();
@@ -164,6 +171,7 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:receiving')")
     @PostMapping("/receiving")
     @ApiOperation(value = "#B1 接收入库上架", notes = "#B1 接收入库上架")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.PUT)
     public R receiving(@RequestBody ReceivingRequest receivingRequest) {
         iInboundReceiptService.receiving(receivingRequest);
         return R.ok();
@@ -172,6 +180,7 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:receiving:completed')")
     @PostMapping("/receiving/completed")
     @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.COMPLETED)
     public R completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest) {
         iInboundReceiptService.completed(receivingCompletedRequest);
         return R.ok();
@@ -180,6 +189,7 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:arraigned')")
     @PutMapping("/arraigned")
     @ApiOperation(value = "提审", notes = "客户端提审")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.ARRAIGNED)
     public R arraigned(@RequestBody List<String> warehouseNos) {
         iInboundReceiptService.arraigned(warehouseNos);
         return R.ok();
@@ -188,6 +198,7 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:review')")
     @PostMapping("/review")
     @ApiOperation(value = "审核", notes = "入库单审核")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.REVIEW)
     public R review(@RequestBody InboundReceiptReviewDTO inboundReceiptReviewDTO) {
         iInboundReceiptService.review(inboundReceiptReviewDTO);
         return R.ok();
@@ -216,6 +227,13 @@ public class InboundReceiptController extends BaseController {
     public R<List<InboundCountVO>> statistics(InboundReceiptQueryDTO queryDTO) {
         List<InboundCountVO> statistics = iInboundReceiptService.statistics(queryDTO);
         return R.ok(statistics);
+    }
+
+    @GetMapping("/receipt/queryRecord")
+    @ApiOperation(value = "日志", notes = "入库单日志")
+    public TableDataInfo<InboundReceiptRecord> queryRecord(InboundReceiptRecordQueryDTO queryDTO) {
+        startPage();
+        return getDataTable(iInboundReceiptRecordService.selectList(queryDTO));
     }
 
 }

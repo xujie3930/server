@@ -48,6 +48,9 @@ public class PricedProductInfoVO {
     @ApiModelProperty(value = "支持发货类型")
     private List<String> shipmentTypeSupported;
 
+    @ApiModelProperty(value = "子产品")
+    private List<String> subProducts;
+
     @ApiModelProperty(value = "系统可查询 - 是否可查询")
     private Boolean isShow;
 
