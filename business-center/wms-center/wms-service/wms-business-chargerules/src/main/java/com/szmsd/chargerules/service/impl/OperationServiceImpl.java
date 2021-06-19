@@ -120,6 +120,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     }
 
     public Operation queryDetails(OperationDTO dto) {
+        log.info("测试日志5-------------------- {}",dto);
         LambdaQueryWrapper<Operation> query = Wrappers.lambdaQuery();
         if (StringUtils.isNotBlank(dto.getOrderType())) {
             query.eq(Operation::getOrderType, dto.getOrderType());
@@ -170,7 +171,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
             log.error("calculate() 出库单的详情信息为空");
             return R.failed("出库单的详情信息为空");
         }
-
+        log.info("测试日志1-------------------- {}",dto.getOrderType());
         BigDecimal amount = BigDecimal.ZERO;
         if (dto.getOrderType().equals(DelOutboundOrderEnum.COLLECTION.getCode())) {
             return chargeCollection(dto, details);
@@ -235,8 +236,10 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
      */
     private R<?> chargeCollection(DelOutboundOperationVO dto, List<DelOutboundOperationDetailVO> details) {
         BigDecimal amount = BigDecimal.ZERO;
+        log.info("测试日志2-------------------- {}",dto.getOrderType());
         if (details.size() > 1) {
             dto.setOrderType(DelOutboundOrderEnum.COLLECTION_MANY_SKU.getCode());
+            log.info("测试日志3-------------------- {}",dto.getOrderType());
             return this.calculateFreeze(dto, details, amount);
         }
         return this.calculateFreeze(dto, details, amount);
@@ -276,6 +279,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     }
 
     private Operation getOperationDetails(DelOutboundOperationVO dto, Double weight, String message) {
+        log.info("测试日志4-------------------- {},{},{},{}",dto.getOrderType(),OrderTypeEnum.Shipment.name(),dto.getWarehouseCode(),weight);
         OperationDTO operationDTO = new OperationDTO(dto.getOrderType(), OrderTypeEnum.Shipment.name(), dto.getWarehouseCode(), weight);
         Operation operation = this.queryDetails(operationDTO);
         AssertUtil.notNull(operation, message);
