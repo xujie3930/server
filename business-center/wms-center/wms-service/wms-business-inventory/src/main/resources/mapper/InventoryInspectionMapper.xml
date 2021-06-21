@@ -66,7 +66,7 @@
                 </foreach>
             </if>
             <if test="createTimeStart != null and createTimeEnd != null and createTimeStart != '' and createTimeEnd != ''">
-                AND a.create_time >= #{createTimeStart} and a.create_time &lt;= #{createTimeEnd}
+                AND DATE_FORMAT(a.create_time,'%Y-%m-%d') >= #{createTimeStart} and DATE_FORMAT(a.create_time,'%Y-%m-%d') &lt;= #{createTimeEnd}
             </if>
         </where>
         order by a.status,a.audit_time

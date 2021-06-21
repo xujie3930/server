@@ -193,8 +193,14 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         InboundReceiptVO inboundReceiptVO = this.selectByWarehouseNo(warehouseNo);
         AssertUtil.notNull(inboundReceiptVO, "入库单[" + warehouseNo + "]不存在");
 
-        // 第三方接口推送
-        remoteRequest.cancelInboundReceipt(inboundReceiptVO.getWarehouseNo(), inboundReceiptVO.getWarehouseName());
+        /** 审核通过、处理中、已完成3个状态需要调第三方接口 **/
+        String status = inboundReceiptVO.getStatus();
+        if (InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(status)
+            || InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue().equals(status)
+            || InboundReceiptEnum.InboundReceiptStatus.COMPLETED.getValue().equals(status)) {
+            // 第三方接口推送
+            remoteRequest.cancelInboundReceipt(inboundReceiptVO.getWarehouseNo(), inboundReceiptVO.getWarehouseName());
+        }
 
         // 修改为取消状态
         this.updateStatus(warehouseNo, InboundReceiptEnum.InboundReceiptStatus.CANCELLED);
@@ -307,6 +313,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
         InboundReceipt inboundReceipt = new InboundReceipt();
         InboundReceiptEnum.InboundReceiptEnumMethods anEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.InboundReceiptStatus.class, inboundReceiptReviewDTO.getStatus());
+        anEnum = anEnum == null ? InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE : anEnum;
         inboundReceipt.setStatus(anEnum.getValue());
         inboundReceipt.setReviewRemark(inboundReceiptReviewDTO.getReviewRemark());
         inboundReceipt.setReviewBy(loginUserInfo.getUserId() + "");
@@ -319,6 +326,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceipt.setWarehouseNo(warehouseNo);
             // 审核通过 第三方接口推送
             if (!InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(inboundReceiptReviewDTO.getStatus())) {
+                this.updateByWarehouseNo(inboundReceipt);
                 return;
             }
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
@@ -327,8 +335,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                     log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
                 } else {
                     remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+                    this.updateByWarehouseNo(inboundReceipt);
                 }
-                this.updateByWarehouseNo(inboundReceipt);
                 this.inbound(inboundReceiptInfoVO);
             } catch (Exception e) {
                 log.error(e.getMessage());

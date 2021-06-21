@@ -1,9 +1,8 @@
 package com.szmsd.putinstorage.domain;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
+import com.szmsd.common.core.language.annotation.FieldJsonI18n;
+import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -37,6 +36,11 @@ public class InboundReceiptRecord implements Serializable {
 
     @ApiModelProperty(value = "仓库")
     private String warehouseCode;
+
+    @ApiModelProperty(value = "仓库")
+    @TableField(value = "warehouse_code", updateStrategy = FieldStrategy.NEVER, insertStrategy = FieldStrategy.NEVER)
+    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+    private String warehouseCodeName;
 
     @ApiModelProperty(value = "入库单号")
     private String warehouseNo;

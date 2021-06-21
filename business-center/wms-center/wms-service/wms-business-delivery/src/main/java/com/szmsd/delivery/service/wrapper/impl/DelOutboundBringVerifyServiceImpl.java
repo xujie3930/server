@@ -14,13 +14,17 @@ import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
+import com.szmsd.delivery.service.IDelOutboundPackingService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
+import com.szmsd.delivery.vo.DelOutboundPackingDetailVO;
+import com.szmsd.delivery.vo.DelOutboundPackingVO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
@@ -64,6 +68,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IHtpOutboundClientService htpOutboundClientService;
     @Autowired
     private IHtpCarrierClientService htpCarrierClientService;
+    @Autowired
+    private IDelOutboundPackingService delOutboundPackingService;
 
     @Override
     public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
@@ -429,6 +435,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
             createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryInfo());
             createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+        } else if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+            if ("079001".equals(delOutbound.getShipmentChannel())) {
+                createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryInfo());
+                createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+            }
         }
         createShipmentRequestDto.setRemark(delOutbound.getRemark());
         createShipmentRequestDto.setRefOrderNo(delOutbound.getOrderNo());
@@ -477,6 +488,27 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setIsPackingByRequired(delOutbound.getIsPackingByRequired());
         createShipmentRequestDto.setIsFirst(delOutbound.getIsFirst());
         createShipmentRequestDto.setNewSKU(delOutbound.getNewSku());
+        // 批量出口增加装箱要求
+        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+            List<DelOutboundPackingVO> packingList = this.delOutboundPackingService.listByOrderNo(delOutbound.getOrderNo(), DelOutboundPackingTypeConstant.TYPE_1);
+            if (CollectionUtils.isNotEmpty(packingList)) {
+                PackingRequirementInfoDto packingRequirementInfoDto = new PackingRequirementInfoDto();
+                packingRequirementInfoDto.setQty((long) packingList.size());
+                List<DelOutboundPackingDetailVO> details1 = packingList.get(0).getDetails();
+                if (CollectionUtils.isNotEmpty(details1)) {
+                    List<ShipmentDetailInfoDto> shipmentDetailInfoDtos = new ArrayList<>();
+                    for (DelOutboundPackingDetailVO delOutboundPackingDetailVO : details1) {
+                        ShipmentDetailInfoDto shipmentDetailInfoDto = new ShipmentDetailInfoDto();
+                        shipmentDetailInfoDto.setSku(delOutboundPackingDetailVO.getSku());
+                        shipmentDetailInfoDto.setQty(delOutboundPackingDetailVO.getQty());
+                        shipmentDetailInfoDto.setNewLabelCode(delOutboundPackingDetailVO.getNewLabelCode());
+                        shipmentDetailInfoDtos.add(shipmentDetailInfoDto);
+                    }
+                    packingRequirementInfoDto.setDetails(shipmentDetailInfoDtos);
+                }
+                createShipmentRequestDto.setPackingRequirement(packingRequirementInfoDto);
+            }
+        }
         CreateShipmentResponseVO createShipmentResponseVO = this.htpOutboundClientService.shipmentCreate(createShipmentRequestDto);
         if (null != createShipmentResponseVO) {
             if (null != createShipmentResponseVO.getSuccess()) {

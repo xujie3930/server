@@ -3,7 +3,10 @@ package com.szmsd.putinstorage.aspect;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.putinstorage.annotation.InboundReceiptLog;
 import com.szmsd.putinstorage.domain.InboundReceiptRecord;
 import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
@@ -24,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Aspect
 @Component
@@ -88,11 +92,19 @@ public class InboundReceiptRecordAspect {
         }
         inboundReceiptRecord.setRemark(recordEnum.get(params));
 
+        LoginUser loginUser = SecurityUtils.getLoginUser();
         if (StringUtils.isNotEmpty(recordEnum.getCreateBy())) {
             inboundReceiptRecord.setCreateBy(getStr(sourceMap.get(recordEnum.getCreateBy())));
+        } else {
+            Optional.ofNullable(loginUser).ifPresent(user -> inboundReceiptRecord.setCreateBy(user.getUserId() + ""));
         }
         if (StringUtils.isNotEmpty(recordEnum.getCreateByName())) {
             inboundReceiptRecord.setCreateByName(getStr(sourceMap.get(recordEnum.getCreateByName())));
+        } else {
+            Optional.ofNullable(loginUser).ifPresent(user -> inboundReceiptRecord.setCreateByName(user.getUsername()));
+        }
+        if (StringUtils.isNotEmpty(recordEnum.getCreateTime())) {
+            inboundReceiptRecord.setCreateTime(DateUtils.parseDate(sourceMap.get(recordEnum.getCreateTime())));
         }
         if (StringUtils.isNotEmpty(recordEnum.getWarehouseNo())) {
             inboundReceiptRecord.setWarehouseNo(getStr(sourceMap.get(recordEnum.getWarehouseNo())));
