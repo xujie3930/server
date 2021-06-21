@@ -32,6 +32,11 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
             public R<List<String>> queryByServiceCondition(ServiceConditionDto conditionDto) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<List<String>> queryAllSellerCode() {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

@@ -31,4 +31,7 @@ public interface BasSellerFeignService {
 
     @PostMapping("/bas/seller/queryByServiceCondition")
     R<List<String>> queryByServiceCondition(@RequestBody ServiceConditionDto conditionDto);
+
+    @PostMapping("/bas/seller/queryAllSellerCode")
+    R<List<String>> queryAllSellerCode();
 }

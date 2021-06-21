@@ -468,6 +468,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         public List<String> getAllSellerCode(){
             QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
             queryWrapper.select("seller_code");
+            queryWrapper.eq("is_active",true);
             return super.list(queryWrapper).stream().map(o->o.getSellerCode()).collect(Collectors.toList());
         }
 
@@ -495,6 +496,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
         return list.stream().map(BasSeller::getSellerCode).collect(Collectors.toList());
     }
+
 
     private String sellerCode(){
 

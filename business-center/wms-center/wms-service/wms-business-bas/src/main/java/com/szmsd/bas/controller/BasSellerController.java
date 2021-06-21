@@ -167,4 +167,11 @@ public class BasSellerController extends BaseController{
         return R.ok(this.basSellerService.queryByServiceCondition(conditionDto));
     }
 
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:queryByServiceCondition')")
+    @PostMapping("/queryAllSellerCode")
+    @ApiOperation(value = "查询所有客户编码")
+    public R<List<String>> queryAllSellerCode() {
+        return R.ok(this.basSellerService.getAllSellerCode());
+    }
+
 }
