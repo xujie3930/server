@@ -497,6 +497,14 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         return list.stream().map(BasSeller::getSellerCode).collect(Collectors.toList());
     }
 
+    @Override
+    public List<BasSellerEmailDto> queryAllSellerCodeAndEmail() {
+        QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("is_active",true);
+        List<BasSellerEmailDto> basSellerEmailDtos = BeanMapperUtil.mapList(super.list(queryWrapper),BasSellerEmailDto.class);
+        return basSellerEmailDtos;
+    }
+
 
     private String sellerCode(){
 

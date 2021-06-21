@@ -2,6 +2,7 @@ package com.szmsd.bas.api.factory;
 
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.dto.BasSellerEmailDto;
 import com.szmsd.bas.dto.ServiceConditionDto;
 import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
@@ -34,7 +35,7 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
             }
 
             @Override
-            public R<List<String>> queryAllSellerCode() {
+            public R<List<BasSellerEmailDto>> queryAllSellerCodeAndEmail() {
                 return R.convertResultJson(throwable);
             }
         };
