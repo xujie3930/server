@@ -29,10 +29,14 @@ public class EmailUtil {
     @Getter
     private String fromEmail;
 
+    @Value("${spring.mail.username2}")
+    @Getter
+    private String[] toEmail;
+
     @Autowired
     private FreeMarkerConfigurer freeMarkerConfigurer;
 
-    public boolean sendTemplateMail(String to, String subject, String template, Map<String, Object> model) {
+    public boolean sendTemplateMail(String[] to, String subject, String template, Map<String, Object> model) {
         try {
             Template template1 = freeMarkerConfigurer.getConfiguration().getTemplate(template);
             String templateHtml = FreeMarkerTemplateUtils.processTemplateIntoString(template1, model);
@@ -44,7 +48,7 @@ public class EmailUtil {
         return false;
     }
 
-    public void sendHtmlMail(String to, String subject, String content) throws Exception {
+    public void sendHtmlMail(String[] to, String subject, String content) throws Exception {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
