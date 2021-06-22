@@ -16,4 +16,6 @@ public interface IInventoryWarningService extends IService<InventoryWarning> {
     List<InventoryWarning> selectList(InventoryWarningQueryDTO queryDTO);
 
     void sendEmail(InventoryWarningSendEmailDTO sendEmailDTO);
+
+    List<String> selectBatch();
 }
