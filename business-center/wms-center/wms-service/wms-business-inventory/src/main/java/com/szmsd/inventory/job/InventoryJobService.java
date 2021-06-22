@@ -82,7 +82,7 @@ public class InventoryJobService {
             }
             List<InventoryWarning> inventoryWarning = BeanMapperUtil.mapList(data, InventoryWarning.class);
             inventoryWarning.forEach(item -> item.setCusCode(customer.getSellerCode()).setBatchNo(batchNo).setEmail("liangchao@szmsd.com"));
-            iInventoryWarningService.createAndSendEmail(customer.getInitEmail(), inventoryWarning);
+            iInventoryWarningService.createAndSendEmail("liangchao@szmsd.com", inventoryWarning);
         }, inventoryTaskExecutor).exceptionally(e -> {
             e.printStackTrace();
             return null;
