@@ -8,8 +8,10 @@ import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
+import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
@@ -150,6 +152,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             delOutboundService.shipmentFail(updateDelOutbound);
+            delOutbound.setExceptionState(DelOutboundExceptionStateEnum.ABNORMAL.getCode());
+            delOutbound.setExceptionMessage(exceptionMessage);
+            DelOutboundOperationLogEnum.SMT_SHIPMENT_SHIPPING.listener(delOutbound);
             // 冻结费用失败 - OutboundNoMoney
             // 其余的都归类为 - OutboundGetTrackingFailed
             String exType;
@@ -219,6 +224,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 返回值
             delOutbound.setTrackingNo(trackingNo);
             delOutbound.setShipmentOrderNumber(orderNumber);
+            DelOutboundOperationLogEnum.SMT_SHIPMENT_ORDER.listener(delOutbound);
         }
 
         @Override
@@ -264,6 +270,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.SMT_SHIPMENT_TRACKING.listener(delOutbound);
             // 更新WMS挂号
             ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto = new ShipmentTrackingChangeRequestDto();
             shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
@@ -303,6 +310,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             String orderNumber = delOutbound.getShipmentOrderNumber();
+            DelOutboundOperationLogEnum.SMT_LABEL.listener(delOutbound);
             // 获取标签
             IHtpCarrierClientService htpCarrierClientService = SpringUtils.getBean(IHtpCarrierClientService.class);
             CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
@@ -367,6 +375,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
             String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
             File labelFile = new File(pathname);
             if (!labelFile.exists()) {
@@ -421,6 +430,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.SMT_THAW_BALANCE.listener(delOutbound);
             // 取消冻结费用
             CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
             cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
@@ -512,6 +522,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     delOutboundChargeService.saveCharges(delOutboundCharges);
                     delOutbound.setAmount(totalAmount);
                     delOutbound.setCurrencyCode(totalCurrencyCode);
+                    DelOutboundOperationLogEnum.SMT_PRC_PRICING.listener(delOutbound);
                 } else {
                     // 计算失败
                     String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "计算包裹费用失败2");
@@ -542,6 +553,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.SMT_FREEZE_BALANCE.listener(delOutbound);
             // 冻结费用
             CusFreezeBalanceDTO cusFreezeBalanceDTO2 = new CusFreezeBalanceDTO();
             cusFreezeBalanceDTO2.setAmount(delOutbound.getAmount());
@@ -614,6 +626,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             delOutboundService.shipmentSuccess(updateDelOutbound);
+            delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
+            DelOutboundOperationLogEnum.SMT_SHIPMENT_SHIPPING.listener(delOutbound);
         }
 
         @Override
