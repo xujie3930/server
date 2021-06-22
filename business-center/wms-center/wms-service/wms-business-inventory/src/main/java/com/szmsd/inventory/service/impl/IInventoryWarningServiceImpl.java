@@ -42,12 +42,15 @@ public class IInventoryWarningServiceImpl extends ServiceImpl<InventoryWarningMa
             return;
         }
         super.saveBatch(inventoryWarningList);
+        List<String> toEmail;
         if (!EmailUtil.isEmail(email)) {
-            return;
+            toEmail = Arrays.asList(emailUtil.getToEmail());
+        } else {
+            toEmail = Collections.singletonList(email);
         }
         InventoryWarning inventoryWarning = inventoryWarningList.get(0);
         String cusName = LanguageUtil.getLanguage(RedisLanguageTable.BAS_CUSTOMER, inventoryWarning.getCusCode());
-        boolean b = sendEmail(cusName, inventoryWarning.getBatchNo(), inventoryWarningList, email);
+        boolean b = sendEmail(cusName, inventoryWarning.getBatchNo(), inventoryWarningList, toEmail.toArray(new String[]{}));
         if (b) {
             LambdaUpdateWrapper<InventoryWarning> updateBy = Wrappers.lambdaUpdate();
             updateBy.set(InventoryWarning::getSendEmailFlag, "1");
@@ -66,14 +69,17 @@ public class IInventoryWarningServiceImpl extends ServiceImpl<InventoryWarningMa
     public void sendEmail(InventoryWarningSendEmailDTO sendEmailDTO) {
         Long id = sendEmailDTO.getId();
         String batchNo = sendEmailDTO.getBatchNo();
-        String toEmail = sendEmailDTO.getToEmail();
-        toEmail = StringUtils.isEmpty(toEmail) ? "liangchao@szmsd.com" : toEmail;
-        String finalToEmail = toEmail;
+        List<String> toEmail;
+        if (!EmailUtil.isEmail(sendEmailDTO.getToEmail())) {
+            toEmail = Arrays.asList(emailUtil.getToEmail());
+        } else {
+            toEmail = Collections.singletonList(sendEmailDTO.getToEmail());
+        }
         CompletableFuture.runAsync(() -> {
             if (id != null) {
                 Optional.ofNullable(super.getById(id)).ifPresent(item -> {
                     String cusName = LanguageUtil.getLanguage(RedisLanguageTable.BAS_CUSTOMER, item.getCusCode());
-                    boolean b = sendEmail(cusName, item.getBatchNo(), Collections.singletonList(item), finalToEmail);
+                    boolean b = sendEmail(cusName, item.getBatchNo(), Collections.singletonList(item), toEmail.toArray(new String[]{}));
                     if (b) {
                         baseMapper.updateById(item.setSendEmailFlag("1"));
                     }
@@ -84,7 +90,7 @@ public class IInventoryWarningServiceImpl extends ServiceImpl<InventoryWarningMa
                 if (CollectionUtils.isNotEmpty(inventoryWarnings)) {
                     InventoryWarning inventoryWarning = inventoryWarnings.get(0);
                     String cusName = LanguageUtil.getLanguage(RedisLanguageTable.BAS_CUSTOMER, inventoryWarning.getCusCode());
-                    boolean b = sendEmail(cusName, inventoryWarning.getBatchNo(), inventoryWarnings, finalToEmail);
+                    boolean b = sendEmail(cusName, inventoryWarning.getBatchNo(), inventoryWarnings, toEmail.toArray(new String[]{}));
                     if (b) {
                         LambdaUpdateWrapper<InventoryWarning> updateBy = Wrappers.lambdaUpdate();
                         updateBy.set(InventoryWarning::getSendEmailFlag, "1");
@@ -101,13 +107,13 @@ public class IInventoryWarningServiceImpl extends ServiceImpl<InventoryWarningMa
         return baseMapper.selectBatch();
     }
 
-    public boolean sendEmail(String cusName, String batchNo, List<InventoryWarning> data, String toEmail) {
+    public boolean sendEmail(String cusName, String batchNo, List<InventoryWarning> data, String[] toEmail) {
         Map<String, Object> model = new HashMap<>();
         model.put("cusName", cusName);
         model.put("batchNo", batchNo);
         model.put("sysEmail", emailUtil.getFromEmail());
         model.put("compareTime", DateUtils.dateTimeStr(data.get(0).getCreateTime()));
         model.put("data", data);
-        return emailUtil.sendTemplateMail(toEmail, "CK1 - SKU库存对比", "email.html", model);
+        return emailUtil.sendTemplateMail(toEmail, "DM FULFILLMENT - SKU库存对比", "email.html", model);
     }
 }
