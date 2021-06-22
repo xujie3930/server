@@ -5,6 +5,7 @@ import com.szmsd.bas.api.factory.BasSellerFeignFallback;
 import com.szmsd.bas.api.factory.BaseProductFeignFallback;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BasSellerEmailDto;
 import com.szmsd.bas.dto.ServiceConditionDto;
 import com.szmsd.common.core.domain.R;
 import io.swagger.annotations.ApiOperation;
@@ -31,4 +32,11 @@ public interface BasSellerFeignService {
 
     @PostMapping("/bas/seller/queryByServiceCondition")
     R<List<String>> queryByServiceCondition(@RequestBody ServiceConditionDto conditionDto);
+
+    /**
+     * 查询所有用户编码 和邮箱地址
+     * @return
+     */
+    @PostMapping("/bas/seller/queryAllSellerCodeAndEmail")
+    R<List<BasSellerEmailDto>> queryAllSellerCodeAndEmail();
 }
