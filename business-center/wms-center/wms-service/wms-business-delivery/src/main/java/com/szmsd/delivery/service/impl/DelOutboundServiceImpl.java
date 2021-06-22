@@ -536,7 +536,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             // 更新
             int i = baseMapper.updateById(inputDelOutbound);
-            DelOutboundOperationLogEnum.UPDATE.listener(inputDelOutbound);
+            DelOutboundOperationLogEnum.UPDATE.listener(delOutbound);
             return i;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
