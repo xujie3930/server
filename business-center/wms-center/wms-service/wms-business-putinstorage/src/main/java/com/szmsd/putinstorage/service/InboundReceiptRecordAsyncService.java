@@ -48,7 +48,7 @@ public class InboundReceiptRecordAsyncService {
         } else {
             inboundReceiptRecord.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
             if (!InboundReceiptRecordEnum.PUT.getType().equals(type)) {
-                String sku = ListUtils.emptyIfNull(inboundReceiptInfoVO.getInboundReceiptDetails()).stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.joining());
+                String sku = ListUtils.emptyIfNull(inboundReceiptInfoVO.getInboundReceiptDetails()).stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.joining(","));
                 inboundReceiptRecord.setSku(sku);
             }
         }

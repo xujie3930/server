@@ -6,7 +6,10 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import java.lang.management.ManagementFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 时间工具类
@@ -28,7 +31,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
             "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM",
             "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",
             "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd HH:mm", "yyyy.MM",
-            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'","yyyy-MM-dd'T'HH:mm:ss+08:00"
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'","yyyy-MM-dd'T'HH:mm:ss+08:00",
+            "yyyy-MM-dd HH:mm:ss.SSS"
     };
 
     /**
@@ -279,19 +283,31 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         }
 
     }
-    public static String formatStrUTCToDateStr(String utcTime) {
-        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        TimeZone utcZone = TimeZone.getTimeZone("UTC");
-        sf.setTimeZone(utcZone);
-        Date date = null;
-        String dateTime = "";
+
+    public static Date utcAddToDate(String utcTime, int hour) {
+        return parseDate(utcAdd(utcTime, hour));
+    }
+
+    public static String utcAdd(String utcTime, int hour) {
         try {
-            date = sf.parse(utcTime);
-            dateTime = sdf.format(date);
-        } catch (ParseException e) {
+            if (StringUtils.isEmpty(utcTime)) {
+                return "";
+            }
+            if (utcTime.contains("T") && utcTime.contains("Z")) {
+                return addHour(parseDate(utcTime), hour);
+            }
+            return utcTime;
+        } catch (Exception e) {
             e.printStackTrace();
+            return "";
         }
-        return dateTime;
+    }
+
+    public static String addHour(Date date, int hour) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.HOUR, hour);// 24小时制
+        date = cal.getTime();
+        return dateTimeStr(date);
     }
 }
