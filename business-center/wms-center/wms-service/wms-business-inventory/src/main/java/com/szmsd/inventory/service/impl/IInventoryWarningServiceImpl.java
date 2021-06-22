@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.common.core.language.util.LanguageUtil;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.inventory.domain.InventoryWarning;
 import com.szmsd.inventory.domain.dto.InventoryWarningQueryDTO;
 import com.szmsd.inventory.domain.dto.InventoryWarningSendEmailDTO;
@@ -105,6 +106,7 @@ public class IInventoryWarningServiceImpl extends ServiceImpl<InventoryWarningMa
         model.put("cusName", cusName);
         model.put("batchNo", batchNo);
         model.put("sysEmail", emailUtil.getFromEmail());
+        model.put("compareTime", DateUtils.dateTimeStr(data.get(0).getCreateTime()));
         model.put("data", data);
         return emailUtil.sendTemplateMail(toEmail, "CK1 - SKU库存对比", "email.html", model);
     }
