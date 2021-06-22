@@ -10,4 +10,5 @@ public interface InventoryWarningMapper extends BaseMapper<InventoryWarning> {
 
     List<InventoryWarning> selectList(InventoryWarningQueryDTO queryDTO);
 
+    List<String> selectBatch();
 }

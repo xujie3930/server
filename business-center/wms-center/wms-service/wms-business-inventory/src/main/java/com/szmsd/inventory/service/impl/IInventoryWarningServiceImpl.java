@@ -1,6 +1,5 @@
 package com.szmsd.inventory.service.impl;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -38,14 +37,17 @@ public class IInventoryWarningServiceImpl extends ServiceImpl<InventoryWarningMa
 
     @Override
     public void createAndSendEmail(String email, List<InventoryWarning> inventoryWarningList) {
-        if (!EmailUtil.isEmail(email) || CollectionUtils.isEmpty(inventoryWarningList)) {
+        if (CollectionUtils.isEmpty(inventoryWarningList)) {
             return;
         }
         super.saveBatch(inventoryWarningList);
+        if (!EmailUtil.isEmail(email)) {
+            return;
+        }
         InventoryWarning inventoryWarning = inventoryWarningList.get(0);
         String cusName = LanguageUtil.getLanguage(RedisLanguageTable.BAS_CUSTOMER, inventoryWarning.getCusCode());
-        Boolean b = sendEmail(cusName, inventoryWarning.getBatchNo(), inventoryWarningList, email).join();
-        if (BooleanUtil.isTrue(b)) {
+        boolean b = sendEmail(cusName, inventoryWarning.getBatchNo(), inventoryWarningList, email);
+        if (b) {
             LambdaUpdateWrapper<InventoryWarning> updateBy = Wrappers.lambdaUpdate();
             updateBy.set(InventoryWarning::getSendEmailFlag, "1");
             updateBy.eq(InventoryWarning::getCusCode, inventoryWarning.getCusCode());
@@ -65,32 +67,45 @@ public class IInventoryWarningServiceImpl extends ServiceImpl<InventoryWarningMa
         String batchNo = sendEmailDTO.getBatchNo();
         String toEmail = sendEmailDTO.getToEmail();
         toEmail = StringUtils.isEmpty(toEmail) ? "liangchao@szmsd.com" : toEmail;
-        if (id != null) {
-            String finalToEmail = toEmail;
-            Optional.ofNullable(super.getById(id)).ifPresent(item -> {
-                String cusName = LanguageUtil.getLanguage(RedisLanguageTable.BAS_CUSTOMER, item.getCusCode());
-                sendEmail(cusName, item.getBatchNo(), Collections.singletonList(item), finalToEmail);
-            });
-        }
-        List<InventoryWarning> inventoryWarnings = this.selectList(new InventoryWarningQueryDTO().setBatchNo(batchNo));
-        if (CollectionUtils.isNotEmpty(inventoryWarnings)) {
-            InventoryWarning inventoryWarning = inventoryWarnings.get(0);
-            String cusName = LanguageUtil.getLanguage(RedisLanguageTable.BAS_CUSTOMER, inventoryWarning.getCusCode());
-            sendEmail(cusName, inventoryWarning.getBatchNo(), inventoryWarnings, toEmail);
-        }
+        String finalToEmail = toEmail;
+        CompletableFuture.runAsync(() -> {
+            if (id != null) {
+                Optional.ofNullable(super.getById(id)).ifPresent(item -> {
+                    String cusName = LanguageUtil.getLanguage(RedisLanguageTable.BAS_CUSTOMER, item.getCusCode());
+                    boolean b = sendEmail(cusName, item.getBatchNo(), Collections.singletonList(item), finalToEmail);
+                    if (b) {
+                        baseMapper.updateById(item.setSendEmailFlag("1"));
+                    }
+                });
+            }
+            if (StringUtils.isNotEmpty(batchNo)) {
+                List<InventoryWarning> inventoryWarnings = this.selectList(new InventoryWarningQueryDTO().setBatchNo(batchNo));
+                if (CollectionUtils.isNotEmpty(inventoryWarnings)) {
+                    InventoryWarning inventoryWarning = inventoryWarnings.get(0);
+                    String cusName = LanguageUtil.getLanguage(RedisLanguageTable.BAS_CUSTOMER, inventoryWarning.getCusCode());
+                    boolean b = sendEmail(cusName, inventoryWarning.getBatchNo(), inventoryWarnings, finalToEmail);
+                    if (b) {
+                        LambdaUpdateWrapper<InventoryWarning> updateBy = Wrappers.lambdaUpdate();
+                        updateBy.set(InventoryWarning::getSendEmailFlag, "1");
+                        updateBy.eq(InventoryWarning::getBatchNo, inventoryWarning.getBatchNo());
+                        this.update(updateBy);
+                    }
+                }
+            }
+        }, inventoryTaskExecutor);
     }
 
-    public CompletableFuture<Boolean> sendEmail(String cusName, String batchNo, List<InventoryWarning> data, String toEmail) {
-        return CompletableFuture.supplyAsync(() -> {
-            Map<String, Object> model = new HashMap<>();
-            model.put("cusName", cusName);
-            model.put("batchNo", batchNo);
-            model.put("sysEmail", emailUtil.getFromEmail());
-            model.put("data", data);
-            return emailUtil.sendTemplateMail(toEmail, "CK1 - SKU库存对比", "email.html", model);
-        }, inventoryTaskExecutor).exceptionally(e -> {
-            e.printStackTrace();
-            return false;
-        });
+    @Override
+    public List<String> selectBatch() {
+        return baseMapper.selectBatch();
+    }
+
+    public boolean sendEmail(String cusName, String batchNo, List<InventoryWarning> data, String toEmail) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("cusName", cusName);
+        model.put("batchNo", batchNo);
+        model.put("sysEmail", emailUtil.getFromEmail());
+        model.put("data", data);
+        return emailUtil.sendTemplateMail(toEmail, "CK1 - SKU库存对比", "email.html", model);
     }
 }
