@@ -2,19 +2,18 @@ package com.szmsd.inventory.component;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.http.api.feign.HtpInboundFeignService;
-import com.szmsd.http.dto.*;
-import com.szmsd.http.vo.CreateReceiptResponse;
+import com.szmsd.http.api.feign.HtpInventoryFeignService;
+import com.szmsd.http.dto.CreatePackageReceiptRequest;
+import com.szmsd.http.dto.ReceiptDetailPackageInfo;
+import com.szmsd.http.vo.InventoryInfo;
 import com.szmsd.http.vo.ResponseVO;
-import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
-import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 远程请求
@@ -25,6 +24,9 @@ public class RemoteRequest {
 
     @Resource
     private HtpInboundFeignService htpInboundFeignService;
+
+    @Resource
+    private HtpInventoryFeignService htpInventoryFeignService;
 
     /**
      * 调用WMS创建单
@@ -58,6 +60,18 @@ public class RemoteRequest {
         log.info("调用WMS创建入库单{}",createPackageReceiptRequest);
         R<ResponseVO> aPackage = htpInboundFeignService.createPackage(createPackageReceiptRequest);
         ResponseVO.resultAssert(aPackage, "创建转运入库单");
+    }
+
+    /**
+     * 查询WMS库存
+     * @return
+     */
+    public List<InventoryInfo> listing(String warehouseCode, String sku) {
+        R<List<InventoryInfo>> listing = htpInventoryFeignService.listing(warehouseCode, sku);
+        if (listing == null) {
+            return null;
+        }
+        return listing.getData();
     }
 
 }
