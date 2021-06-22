@@ -7,6 +7,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.event.ShipmentPackingEvent;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -46,7 +47,8 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             }
             // 更新包裹信息
             int result;
-            if (dto.isPackingMaterial()) {
+            boolean isPackingMaterial = dto.isPackingMaterial();
+            if (isPackingMaterial) {
                 result = this.delOutboundService.shipmentPackingMaterial(dto);
             } else {
                 String orderType = delOutbound.getOrderType();
@@ -88,6 +90,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                     EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
                 }
             }
+            DelOutboundOperationLogEnum.OPN_PACKING.listener(new Object[]{delOutbound, isPackingMaterial});
             return result;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -105,6 +108,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             if (null == delOutbound) {
                 throw new CommonException("999", "单据不存在");
             }
+            DelOutboundOperationLogEnum.OPN_CONTAINERS.listener(delOutbound);
             // 更新包裹信息
             this.delOutboundService.shipmentContainers(dto);
             // 执行异步任务
