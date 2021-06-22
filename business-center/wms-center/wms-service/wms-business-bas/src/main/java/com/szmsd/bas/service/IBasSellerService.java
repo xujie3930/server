@@ -114,5 +114,7 @@ public interface IBasSellerService extends IService<BasSeller> {
      * @return String
      */
     List<String> queryByServiceCondition(ServiceConditionDto conditionDto);
+
+    List<BasSellerEmailDto> queryAllSellerCodeAndEmail();
 }
 
