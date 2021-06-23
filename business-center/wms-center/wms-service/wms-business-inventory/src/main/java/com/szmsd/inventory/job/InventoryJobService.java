@@ -126,17 +126,13 @@ public class InventoryJobService {
 
     public WarehouseSkuCompare compare(SkuQty skuQty, BiFunction<String, String, InventoryInfo> consumer) {
         InventoryInfo inventoryInfo = consumer.apply(skuQty.warehouse, skuQty.getSku());
-        WarehouseSkuCompare warehouseSkuCompares;
         if (inventoryInfo == null) {
-            warehouseSkuCompares = new WarehouseSkuCompare(skuQty, 0);
-            warehouseSkuCompares.setExistQty(0);
-        } else {
-            if (new SkuQty(inventoryInfo).equals(skuQty)) {
-                return null;
-            }
-            warehouseSkuCompares = new WarehouseSkuCompare(skuQty, inventoryInfo.getQty());
+            return new WarehouseSkuCompare(skuQty, 0);
         }
-        return warehouseSkuCompares;
+        if (new SkuQty(inventoryInfo).equals(skuQty)) {
+            return null;
+        }
+        return new WarehouseSkuCompare(skuQty, inventoryInfo.getQty());
     }
 
     @Data
