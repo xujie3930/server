@@ -93,20 +93,24 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
      */
     @Override
     public int updateBasePacking(BasePacking basePacking) throws IllegalAccessException {
-        if(StringUtils.isNotEmpty(basePacking.getCurrency())){
+        if(StringUtils.isNotEmpty(basePacking.getCurrency())) {
             BasePacking basePacking1 = super.getById(basePacking.getId());
             QueryWrapper<BasePacking> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("warehouse_code",basePacking1.getWarehouseCode());
-            queryWrapper.eq("packing_material_type",basePacking1.getPackingMaterialType());
+            queryWrapper.eq("warehouse_code", basePacking1.getWarehouseCode());
+            queryWrapper.eq("packing_material_type", basePacking1.getPackingMaterialType());
             queryWrapper.isNotNull("currency");
             queryWrapper.select("count(distinct currency) as count,currency");
             queryWrapper.groupBy("currency");
             Map<String, Object> map = super.getMap(queryWrapper);
-            if((Long)map.get("count")!=0L){
-                if(basePacking.getCurrency().equals(map.get("currency"))){
-                    return baseMapper.updateById(basePacking);
-                }else {
-                    throw  new BaseException("该仓库该物料货币唯一，请勿添加其他货币");
+            if (map.get("count") == null) {
+                return baseMapper.updateById(basePacking);
+            } else {
+                if ((Long) map.get("count") != 0L) {
+                    if (basePacking.getCurrency().equals(map.get("currency"))) {
+                        return baseMapper.updateById(basePacking);
+                    } else {
+                        throw new BaseException("该仓库该物料货币唯一，请勿添加其他货币");
+                    }
                 }
             }
         }
