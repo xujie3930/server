@@ -5,7 +5,6 @@ import com.szmsd.bas.dto.BasSellerEmailDto;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.common.redis.service.RedisService;
 import com.szmsd.http.vo.InventoryInfo;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.component.RemoteRequest;
@@ -39,9 +38,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class InventoryJobService {
-
-    @Resource
-    private RedisService redisService;
 
     @Resource
     private RedissonClient redissonClient;
@@ -81,8 +77,8 @@ public class InventoryJobService {
                 return;
             }
             List<InventoryWarning> inventoryWarning = BeanMapperUtil.mapList(data, InventoryWarning.class);
-            inventoryWarning.forEach(item -> item.setCusCode(customer.getSellerCode()).setBatchNo(batchNo).setEmail("liangchao@szmsd.com"));
-            iInventoryWarningService.createAndSendEmail("liangchao@szmsd.com", inventoryWarning);
+            inventoryWarning.forEach(item -> item.setCusCode(customer.getSellerCode()).setBatchNo(batchNo));
+            iInventoryWarningService.createAndSendEmail(null, inventoryWarning);
         }, inventoryTaskExecutor).exceptionally(e -> {
             e.printStackTrace();
             return null;
@@ -106,7 +102,13 @@ public class InventoryJobService {
             // WMS 库存
             List<WarehouseSkuCompare> compareList = ListUtils.synchronizedList(new ArrayList<>());
             inventoryMapOms.forEach((key, value) -> value.forEach(item -> {
-                WarehouseSkuCompare compare = compare(item, (warehouseCode, sku) -> remoteRequest.listing(warehouseCode, sku));
+                WarehouseSkuCompare compare = compare(item, (warehouseCode, sku) -> {
+                    List<InventoryInfo> listing = remoteRequest.listing(warehouseCode, sku);
+                    if (CollectionUtils.isEmpty(listing)) {
+                        return null;
+                    }
+                    return listing.get(0);
+                });
                 if (compare == null) {
                     log.info("客户[{}], 仓库[{}], SKU[{}], 没有产生差异", cusCode, key, item.getSku());
                     return;
@@ -122,19 +124,15 @@ public class InventoryJobService {
         return null;
     }
 
-    public WarehouseSkuCompare compare(SkuQty skuQty, BiFunction<String, String, List<InventoryInfo>> consumer) {
-        List<InventoryInfo> listing = consumer.apply(skuQty.warehouse, skuQty.getSku());
-        WarehouseSkuCompare warehouseSkuCompares;
-        if (CollectionUtils.isEmpty(listing)) {
-            warehouseSkuCompares = new WarehouseSkuCompare(skuQty, 0);
-            warehouseSkuCompares.setExistQty(0);
-        } else {
-            if (skuQty.equals(new SkuQty(listing.get(0)))) {
-                return null;
-            }
-            warehouseSkuCompares = new WarehouseSkuCompare(skuQty, listing.get(0).getQty());
+    public WarehouseSkuCompare compare(SkuQty skuQty, BiFunction<String, String, InventoryInfo> consumer) {
+        InventoryInfo inventoryInfo = consumer.apply(skuQty.warehouse, skuQty.getSku());
+        if (inventoryInfo == null) {
+            return new WarehouseSkuCompare(skuQty, 0);
         }
-        return warehouseSkuCompares;
+        if (new SkuQty(inventoryInfo).equals(skuQty)) {
+            return null;
+        }
+        return new WarehouseSkuCompare(skuQty, inventoryInfo.getQty());
     }
 
     @Data

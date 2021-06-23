@@ -45,6 +45,14 @@ public enum DelOutboundOrderTypeEnum {
         return null;
     }
 
+    public static String getOriginName(String code) {
+        DelOutboundOrderTypeEnum anEnum = get(code);
+        if (null != anEnum) {
+            return anEnum.getName();
+        }
+        return "";
+    }
+
     public static boolean has(String code) {
         return Objects.nonNull(get(code));
     }
