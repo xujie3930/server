@@ -31,6 +31,7 @@ import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.*;
+import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
@@ -308,6 +309,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (insert == 0) {
                 throw new CommonException("999", "保存出库单失败！");
             }
+            DelOutboundOperationLogEnum.CREATE.listener(delOutbound);
             // 保存地址
             this.saveAddress(dto, delOutbound.getOrderNo());
             // 保存明细
@@ -533,7 +535,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 this.remoteAttachmentService.saveAndUpdate(batchLabel);
             }
             // 更新
-            return baseMapper.updateById(inputDelOutbound);
+            int i = baseMapper.updateById(inputDelOutbound);
+            DelOutboundOperationLogEnum.UPDATE.listener(delOutbound);
+            return i;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
@@ -638,6 +642,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     this.unfreezeOperation(orderNo, delOutbound1.getOrderType());
                 }
             }
+            DelOutboundOperationLogEnum.DELETE.listener(delOutbound1);
         }
         // 删除明细
         LambdaQueryWrapper<DelOutboundDetail> detailLambdaQueryWrapper = Wrappers.lambdaQuery();
@@ -688,22 +693,34 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getOperationType, dto.getOperationType());
         updateWrapper.set(DelOutbound::getOperationTime, dto.getOperationTime());
         updateWrapper.set(DelOutbound::getRemark, dto.getRemark());
+        String state = null;
         // 仓库开始处理
         if (DelOutboundOperationTypeEnum.PROCESSING.getCode().equals(dto.getOperationType())) {
-            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_PROCESSING.getCode());
+            updateWrapper.set(DelOutbound::getState, state = DelOutboundStateEnum.WHSE_PROCESSING.getCode());
             updateWrapper.set(DelOutbound::getArrivalTime, new Date());
         }
         // 仓库已发货
         else if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
-            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_COMPLETED.getCode());
+            updateWrapper.set(DelOutbound::getState, state = DelOutboundStateEnum.WHSE_COMPLETED.getCode());
             // 增加出库单已完成记录
             this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.SHIPPED.getCode());
         }
         // 仓库取消
         else if (DelOutboundOperationTypeEnum.CANCELED.getCode().equals(dto.getOperationType())) {
-            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELLED.getCode());
+            updateWrapper.set(DelOutbound::getState, state = DelOutboundStateEnum.WHSE_CANCELLED.getCode());
             // 增加出库单已取消记录
             this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
+        }
+        if (null != state) {
+            LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.in(DelOutbound::getOrderNo, orderNos);
+            List<DelOutbound> list = super.list(queryWrapper);
+            if (CollectionUtils.isNotEmpty(list)) {
+                for (DelOutbound delOutbound : list) {
+                    delOutbound.setState(state);
+                    DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
+                }
+            }
         }
         return this.baseMapper.update(null, updateWrapper);
     }
@@ -967,6 +984,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         this.unfreezeOperation(orderNo, delOutbound.getOrderType());
                     }
                 }
+                DelOutboundOperationLogEnum.CANCEL.listener(delOutbound);
             }
         }
         // 判断是否需要WMS处理
@@ -1002,6 +1020,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         int result = 0;
         for (Long id : ids) {
             DelOutbound delOutbound = this.getById(id);
+            DelOutboundOperationLogEnum.HANDLER.listener(delOutbound);
             if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getOrderType())) {
                 // 仓库发货，调用完成的接口
                 this.delOutboundAsyncService.completed(delOutbound.getOrderNo());
@@ -1023,6 +1042,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (null == delOutbound) {
             throw new CommonException("999", "单据不存在");
         }
+        DelOutboundOperationLogEnum.FURTHER_HANDLER.listener(delOutbound);
         int result;
         if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getOrderType())) {
             // 仓库发货，调用完成的接口

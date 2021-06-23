@@ -2,7 +2,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>CK1 - SKU库存对比</title>
+    <title>DM FULFILLMENT - SKU库存对比</title>
     <style type="text/css">
         * {
             margin: 0;
@@ -95,10 +95,11 @@
 <body>
 <div class="container">
     <div class="header">
-        <h2>CK1 - SKU库存对比</h2>
+        <h2>DM FULFILLMENT - SKU库存对比</h2>
     </div>
     <div class="content">
-        <h2>亲爱的${cusName}您好，您的库存比对已产生，批次号为：${batchNo}</h2>
+<!--        <h2>亲爱的${cusName}您好，您的库存比对已产生，批次号为：${batchNo}</h2>-->
+        <h2>批次号：${batchNo}</h2>
         <table class="hovertable">
             <tr>
                 <th>仓库</th>
@@ -118,7 +119,8 @@
             </#list>
         </table>
         <p></p>
-        <p>如果您有什么疑问可以联系管理员，Email: <b>${sysEmail}</b></p>
+<!--        <p>如果您有什么疑问可以联系管理员，Email: <b>${sysEmail}</b></p>-->
+        <p>共<span style="color: red">${data?size}</span>条，差异对比时间: <b>${compareTime}</b></p>
     </div>
     <div class="footer">
         <p>此为系统邮件，请勿回复</p>

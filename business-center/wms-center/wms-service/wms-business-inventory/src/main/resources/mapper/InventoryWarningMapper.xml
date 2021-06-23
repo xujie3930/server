@@ -45,7 +45,11 @@
             <if test="startTime != null and startTime != ''"><![CDATA[ AND DATE_FORMAT(t.create_time, '%Y-%m-%d') = #{startTime} ]]></if>
             <if test="endTime != null and endTime != ''"><![CDATA[ AND DATE_FORMAT(t.create_time, '%Y-%m-%d') = #{endTime} ]]></if>
         </where>
-        ORDER BY t.warehouse, t.create_time DESC
+        ORDER BY t.create_time DESC, t.warehouse DESC
+    </select>
+    <select id="selectBatch" resultType="java.lang.String">
+        SELECT DISTINCT batch_no FROM inventory_warning
+        ORDER BY create_time DESC
     </select>
 
 </mapper>

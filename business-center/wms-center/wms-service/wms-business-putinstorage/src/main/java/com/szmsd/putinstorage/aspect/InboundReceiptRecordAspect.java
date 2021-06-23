@@ -104,7 +104,7 @@ public class InboundReceiptRecordAspect {
             Optional.ofNullable(loginUser).ifPresent(user -> inboundReceiptRecord.setCreateByName(user.getUsername()));
         }
         if (StringUtils.isNotEmpty(recordEnum.getCreateTime())) {
-            inboundReceiptRecord.setCreateTime(DateUtils.parseDate(sourceMap.get(recordEnum.getCreateTime())));
+            inboundReceiptRecord.setCreateTime(DateUtils.utcAddToDate(sourceMap.get(recordEnum.getCreateTime()) + "", 8));
         }
         if (StringUtils.isNotEmpty(recordEnum.getWarehouseNo())) {
             inboundReceiptRecord.setWarehouseNo(getStr(sourceMap.get(recordEnum.getWarehouseNo())));
