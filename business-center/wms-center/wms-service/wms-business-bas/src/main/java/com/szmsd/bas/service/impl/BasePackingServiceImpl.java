@@ -102,14 +102,16 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
             queryWrapper.select("count(distinct currency) as count,currency");
             queryWrapper.groupBy("currency");
             Map<String, Object> map = super.getMap(queryWrapper);
-            if (map.get("count") == null) {
-                return baseMapper.updateById(basePacking);
-            } else {
-                if ((Long) map.get("count") != 0L) {
-                    if (basePacking.getCurrency().equals(map.get("currency"))) {
-                        return baseMapper.updateById(basePacking);
-                    } else {
-                        throw new BaseException("该仓库该物料货币唯一，请勿添加其他货币");
+            if (map.containsKey("count")) {
+                if (map.get("count") == null) {
+                    return baseMapper.updateById(basePacking);
+                } else {
+                    if ((Long) map.get("count") != 0L) {
+                        if (basePacking.getCurrency().equals(map.get("currency"))) {
+                            return baseMapper.updateById(basePacking);
+                        } else {
+                            throw new BaseException("该仓库该物料货币唯一，请勿添加其他货币");
+                        }
                     }
                 }
             }
