@@ -1,0 +1,131 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>DM FULFILLMENT - SKU库存对比</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: #ECECEC;
+        }
+
+        .container {
+            width: 800px;
+            margin: 50px auto;
+        }
+
+        .header {
+            height: 80px;
+            background-color: #49bcff;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            padding-left: 30px;
+        }
+
+        .header h2 {
+            padding-top: 25px;
+            color: white;
+        }
+
+        .content {
+            background-color: #fff;
+            padding-left: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .content h2 {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .content p {
+            padding-top: 10px;
+        }
+
+        .footer {
+            background-color: #fff;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            padding: 35px;
+        }
+
+        .footer p {
+            color: #747474;
+            padding-top: 10px;
+        }
+
+        table.hovertable {
+            font-family: verdana, arial, sans-serif;
+            font-size: 11px;
+            color: #333333;
+            border-width: 1px;
+            border-color: #999999;
+            border-collapse: collapse;
+        }
+
+        table.hovertable th {
+            background-color: #c3dde0;
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #a9c6c9;
+            width: 150px;
+        }
+
+        table.hovertable tr {
+            background-color: #d4e3e5;
+        }
+
+        table.hovertable td {
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #a9c6c9;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="header">
+        <h2>DM FULFILLMENT - SKU库存对比</h2>
+    </div>
+    <div class="content">
+<!--        <h2>亲爱的${cusName}您好，您的库存比对已产生，批次号为：${batchNo}</h2>-->
+        <h2>批次号：${batchNo}</h2>
+        <table class="hovertable">
+            <tr>
+                <th>仓库</th>
+                <th>SKU</th>
+                <th>OMS库存</th>
+                <th>WMS库存</th>
+                <th>对比</th>
+            </tr>
+            <#list data as item>
+                <tr onmouseover="this.style.backgroundColor='#ffff66';" onmouseout="this.style.backgroundColor='#d4e3e5';">
+                    <th>${item.warehouse}</th>
+                    <th>${item.sku}</th>
+                    <th>${item.qty}</th>
+                    <th>${item.existQty}</th>
+                    <th style="color: red">${item.qty - item.existQty}</th>
+                </tr>
+            </#list>
+        </table>
+        <p></p>
+<!--        <p>如果您有什么疑问可以联系管理员，Email: <b>${sysEmail}</b></p>-->
+        <p>共<span style="color: red">${data?size}</span>条，差异对比时间: <b>${compareTime}</b></p>
+    </div>
+    <div class="footer">
+        <p>此为系统邮件，请勿回复</p>
+    </div>
+</div>
+</body>
+
+</html>

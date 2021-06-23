@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,7 +60,7 @@ public class PricedProductServiceImpl implements IPricedProductService {
         packageInfo.setWeight(new Weight().setValue(freightCalculationDTO.getWeight()).setUnit("KG"));
         packageInfo.setPacking(new Packing().setLength(freightCalculationDTO.getExtent()).setWidth(freightCalculationDTO.getWidth()).setHeight(freightCalculationDTO.getHeight()).setLengthUnit("CM"));
         packageInfo.setQuantity(freightCalculationDTO.getQuantity());
-        getPricedProductsCommand.setPackageInfos(Arrays.asList(packageInfo));
+        getPricedProductsCommand.setPackageInfos(Collections.singletonList(packageInfo));
 
         Address fromAddress = new Address();
 //        R<BasWarehouse> warehouseR = basWarehouseFeignService.queryByWarehouseCode(dealPoint);

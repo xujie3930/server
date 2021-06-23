@@ -19,6 +19,7 @@ import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
+import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
@@ -280,6 +281,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     // 更新值
                     delOutbound.setAmount(totalAmount);
                     delOutbound.setCurrencyCode(totalCurrencyCode);
+                    DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);
                 } else {
                     // 计算失败
                     String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "计算包裹费用失败2");
@@ -335,6 +337,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.BRV_FREEZE_BALANCE.listener(delOutbound);
             CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
             cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
             cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
@@ -360,6 +363,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void rollback(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.RK_BRV_FREEZE_BALANCE.listener(delOutbound);
             CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
             cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
             cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
@@ -406,6 +410,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if (null != pricedProductInfo) {
                 delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
                 delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
+                DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
             } else {
                 // 异常信息
                 throw new CommonException("999", "查询产品[" + productCode + "]信息失败");
@@ -443,6 +448,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.BRV_SHIPMENT_RULE.listener(delOutbound);
             // 调用新增/修改发货规则
             AddShipmentRuleRequest addShipmentRuleRequest = new AddShipmentRuleRequest();
             addShipmentRuleRequest.setWarehouseCode(delOutbound.getWarehouseCode());
@@ -492,6 +498,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
                 delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
                 delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                DelOutboundOperationLogEnum.BRV_SHIPMENT_ORDER.listener(delOutbound);
             }
         }
 
@@ -500,6 +507,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 取消承运商物流订单
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.RK_BRV_SHIPMENT_ORDER.listener(delOutbound);
             String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
             String trackingNo = delOutbound.getTrackingNo();
             if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
@@ -549,8 +557,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             for (DelOutboundDetail detail : details) {
                 DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
             }
-            operateListDto.setOperateList(new ArrayList<>(inventoryOperateDtoMap.values()));
+            Collection<InventoryOperateDto> inventoryOperateDtos = inventoryOperateDtoMap.values();
+            operateListDto.setOperateList(new ArrayList<>(inventoryOperateDtos));
             try {
+                DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, inventoryOperateDtos});
                 InventoryFeignClientService inventoryFeignClientService = SpringUtils.getBean(InventoryFeignClientService.class);
                 inventoryFeignClientService.freeze(operateListDto);
             } catch (CommonException e) {
@@ -566,6 +576,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void rollback(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.RK_BRV_FREEZE_INVENTORY.listener(delOutbound);
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             delOutboundService.unFreeze(delOutbound.getOrderType(), delOutbound.getOrderNo(), delOutbound.getWarehouseCode());
             super.rollback(context);
@@ -659,6 +670,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 }
             }
             delOutboundOperationVO.setDetails(detailVOList);
+            DelOutboundOperationLogEnum.BRV_FREEZE_OPERATION.listener(new Object[]{delOutbound, detailVOList});
             OperationFeignService operationFeignService = SpringUtils.getBean(OperationFeignService.class);
             R<?> r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
             DelOutboundServiceImplUtil.freezeOperationThrowErrorMessage(r);
@@ -668,6 +680,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void rollback(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.RK_BRV_FREEZE_OPERATION.listener(delOutbound);
             DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
             delOutboundOperationVO.setOrderType(delOutbound.getOrderType());
             delOutboundOperationVO.setOrderNo(delOutbound.getOrderNo());
@@ -702,6 +715,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 推单到WMS
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
             String refOrderNo = delOutboundBringVerifyService.shipmentCreate(delOutboundWrapperContext, delOutbound.getTrackingNo());
+            delOutbound.setRefOrderNo(refOrderNo);
+            DelOutboundOperationLogEnum.BRV_SHIPMENT_CREATE.listener(delOutbound);
             // 保存信息
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
@@ -748,6 +763,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.BRV_SHIPMENT_LABEL.listener(delOutbound);
             // 查询上传文件信息
             RemoteAttachmentService remoteAttachmentService = SpringUtils.getBean(RemoteAttachmentService.class);
             BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();

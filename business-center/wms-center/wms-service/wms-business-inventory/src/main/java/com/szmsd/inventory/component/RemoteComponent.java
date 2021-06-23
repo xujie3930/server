@@ -1,8 +1,10 @@
 package com.szmsd.inventory.component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BasSellerEmailDto;
 import com.szmsd.bas.dto.BaseProductBatchQueryDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
@@ -19,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -46,6 +47,9 @@ public class RemoteComponent {
 
     @Resource
     private DelOutboundFeignService delOutboundFeignService;
+
+    @Resource
+    private BasSellerFeignService basSellerFeignService;
 
     /**
      * 获取登录人信息
@@ -125,5 +129,13 @@ public class RemoteComponent {
         log.info("出库-创建采购单后回写出库单采购单号{}-采购单号{}", JSONObject.toJSONString(orderNoList), purchaseNo);
         if (CollectionUtils.isEmpty(orderNoList)) return;
         delOutboundFeignService.setPurchaseNo(purchaseNo, orderNoList);
+    }
+
+    /**
+     * 查询所有客户
+     */
+    public List<BasSellerEmailDto> queryCusAll() {
+        R<List<BasSellerEmailDto>> listR = basSellerFeignService.queryAllSellerCodeAndEmail();
+        return listR == null ? null : listR.getData();
     }
 }
