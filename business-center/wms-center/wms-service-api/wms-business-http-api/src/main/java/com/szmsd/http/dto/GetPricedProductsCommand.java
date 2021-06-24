@@ -12,15 +12,12 @@ import java.util.List;
 @ApiModel(value = "GetPricedProductsCommand")
 public class GetPricedProductsCommand {
 
-    @ApiModelProperty(value = "客户代码")
-    private String clientCode;
-
-    @ApiModelProperty(value = "发货类型---普货，电池，粉末等")
-    private String shipmentType;
-
     @ApiModelProperty(value = "包裹信息")
     List<PackageInfo> packageInfos;
-
+    @ApiModelProperty(value = "客户代码")
+    private String clientCode;
+    @ApiModelProperty(value = "发货类型---普货，电池，粉末等")
+    private String shipmentType;
     @ApiModelProperty
     private Address fromAddress;
 
@@ -50,5 +47,8 @@ public class GetPricedProductsCommand {
 
     @ApiModelProperty(value = "需要忽略计算的费用类型")
     private List<String> ignoreChargeTypes;
+
+    @ApiModelProperty(value = "增值税号")
+    private String ioss;
 
 }

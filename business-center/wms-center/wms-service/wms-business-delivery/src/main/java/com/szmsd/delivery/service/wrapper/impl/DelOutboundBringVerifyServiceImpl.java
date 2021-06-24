@@ -270,6 +270,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         calcShipmentFeeCommand.setProductCode(delOutbound.getShipmentRule());
         calcShipmentFeeCommand.setClientCode(delOutbound.getCustomCode());
         calcShipmentFeeCommand.setShipmentType(delOutbound.getShipmentType());
+        calcShipmentFeeCommand.setIoss(delOutbound.getIoss());
         calcShipmentFeeCommand.setPackageInfos(packageInfos);
         // 收货地址
         calcShipmentFeeCommand.setToAddress(new Address(address.getStreet1(),
@@ -333,6 +334,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 warehouse.getProvince(),
                 warehouse.getPostcode(),
                 warehouse.getCountryName()));
+        // 税号信息
+        String ioss = delOutbound.getIoss();
+        if (StringUtils.isNotEmpty(ioss)) {
+            List<Taxation> taxations = new ArrayList<>();
+            taxations.add(new Taxation("", ioss));
+            createShipmentOrderCommand.setTaxations(taxations);
+        }
         // 包裹信息
         List<Package> packages = new ArrayList<>();
         List<PackageItem> packageItems = new ArrayList<>();

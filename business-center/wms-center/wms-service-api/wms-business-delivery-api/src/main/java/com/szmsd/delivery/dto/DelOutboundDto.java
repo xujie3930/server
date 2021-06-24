@@ -114,6 +114,9 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "来源")
     private String sourceType;
 
+    @ApiModelProperty(value = "增值税号")
+    private String ioss;
+
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;
