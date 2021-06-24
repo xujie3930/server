@@ -194,4 +194,7 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "来源")
     private String source;
 
+    @ApiModelProperty(value = "海关编码")
+    private String hsCode;
+
 }
