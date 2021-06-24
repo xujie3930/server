@@ -21,6 +21,9 @@ public class PackageItem {
     @ApiModelProperty(value = "申报名称")
     private String declareName;
 
+    @ApiModelProperty(value = "中文申报名称")
+    private String declareNameCn;
+
     @ApiModelProperty(value = "单件申报价值")
     private Double declareValue;
 
