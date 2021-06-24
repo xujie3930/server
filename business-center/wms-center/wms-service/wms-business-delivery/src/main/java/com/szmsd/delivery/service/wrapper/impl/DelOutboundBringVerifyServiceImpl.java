@@ -16,7 +16,6 @@ import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundPackingService;
@@ -338,7 +337,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         List<Package> packages = new ArrayList<>();
         List<PackageItem> packageItems = new ArrayList<>();
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
-            packageItems.add(new PackageItem(delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), Utils.valueOfDouble(delOutbound.getWeight()),
+            packageItems.add(new PackageItem(delOutbound.getOrderNo(), delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), Utils.valueOfDouble(delOutbound.getWeight()),
                     new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                     1, "", String.valueOf(delOutbound.getId()), delOutbound.getOrderNo()));
         } else {
@@ -351,9 +350,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 if (null == product) {
                     throw new CommonException("999", "查询SKU[" + sku + "]信息失败");
                 }
-                packageItems.add(new PackageItem(sku, product.getDeclaredValue(), Utils.valueOfDouble(product.getWeight()),
+                packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), Utils.valueOfDouble(product.getWeight()),
                         new Size(product.getLength(), product.getWidth(), product.getHeight()),
-                        Utils.valueOfLong(detail.getQty()), "", String.valueOf(detail.getId()), sku));
+                        Utils.valueOfLong(detail.getQty()), product.getHsCode(), String.valueOf(detail.getId()), sku));
             }
         }
         packages.add(new Package(delOutbound.getOrderNo(), String.valueOf(delOutbound.getId()),
