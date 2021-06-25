@@ -83,7 +83,7 @@ public class InventoryController extends BaseController {
     @PostMapping("/queryAvailableList")
     @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 分页")
     public TableDataInfo<InventoryAvailableListVO> queryAvailableList(@RequestBody InventoryAvailableQueryDto queryDto) {
-        startPage();
+        startPage(queryDto);
         return getDataTable(this.inventoryService.queryAvailableList(queryDto));
     }
 
