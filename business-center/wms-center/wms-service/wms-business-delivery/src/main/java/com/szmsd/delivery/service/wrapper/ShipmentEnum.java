@@ -274,7 +274,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 更新WMS挂号
             ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto = new ShipmentTrackingChangeRequestDto();
             shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
-            shipmentTrackingChangeRequestDto.setOrderNo(delOutbound.getRefOrderNo());
+            shipmentTrackingChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
             shipmentTrackingChangeRequestDto.setTrackingNo(delOutbound.getTrackingNo());
             IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
             htpOutboundClientService.shipmentTracking(shipmentTrackingChangeRequestDto);
