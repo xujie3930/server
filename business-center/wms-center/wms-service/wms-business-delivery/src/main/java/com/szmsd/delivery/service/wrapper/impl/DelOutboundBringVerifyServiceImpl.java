@@ -370,14 +370,14 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentOrderCommand.setCarrier(new Carrier(delOutbound.getShipmentService()));
         ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
         if (null == responseObjectWrapper) {
-            throw new CommonException("999", "创建承运商物流订单失败");
+            throw new CommonException("999", "创建承运商物流订单失败，调用承运商系统无响应");
         }
         if (responseObjectWrapper.isSuccess()) {
             // 保存挂号
             // 判断结果集是不是正确的
             ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
             if (null == shipmentOrderResult) {
-                throw new CommonException("999", "创建承运商物流订单失败3");
+                throw new CommonException("999", "创建承运商物流订单失败，调用承运商系统返回数据为空");
             }
             if (null == shipmentOrderResult.getSuccess() || !shipmentOrderResult.getSuccess()) {
                 // 判断有没有错误信息
@@ -391,13 +391,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     builder.append(error.getMessage());
                 } else {
-                    builder.append("创建承运商物流订单失败4");
+                    builder.append("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空");
                 }
                 throw new CommonException("999", builder.toString());
             }
             return shipmentOrderResult;
         } else {
-            String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败2");
+            String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
             throw new CommonException("999", exceptionMessage);
         }
     }
