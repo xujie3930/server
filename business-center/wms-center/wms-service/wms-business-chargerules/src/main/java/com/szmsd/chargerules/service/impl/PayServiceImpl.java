@@ -46,6 +46,13 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setHasFreeze(false);
         String code = DelOutboundOrderEnum.getCode(custPayDTO.getOrderType());
         if(code != null) custPayDTO.setOrderType(code);
+        if(BigDecimal.ZERO.compareTo(custPayDTO.getAmount()) >= 0) {
+            log.info("扣款金额为: {} 不执行操作", custPayDTO.getAmount());
+            chargeLog.setSuccess(true);
+            chargeLog.setMessage("成功");
+            chargeLogService.save(chargeLog);
+            return R.ok();
+        }
         R r = rechargesFeignService.warehouseFeeDeductions(custPayDTO);
         updateAndSave(chargeLog, r);
         return r;
@@ -58,6 +65,13 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setAmount(dto.getAmount());
         String code = DelOutboundOrderEnum.getCode(dto.getOrderType());
         if(code != null) dto.setOrderType(code);
+        if(BigDecimal.ZERO.compareTo(dto.getAmount()) >= 0) {
+            log.info("冻结金额为: {} 不执行操作", dto.getAmount());
+            chargeLog.setSuccess(true);
+            chargeLog.setMessage("成功");
+            chargeLogService.save(chargeLog);
+            return R.ok();
+        }
         R r = rechargesFeignService.freezeBalance(dto);
         if (r.getCode() != 200)
             log.error("freezeBalance() pay failed.. msg: {},data: {}", r.getMsg(), r.getData());
@@ -78,6 +92,13 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setHasFreeze(false);
         String code = DelOutboundOrderEnum.getCode(dto.getOrderType());
         if(code != null) dto.setOrderType(code);
+        if(BigDecimal.ZERO.compareTo(dto.getAmount()) >= 0) {
+            log.info("解冻金额为: {} 不执行操作", dto.getAmount());
+            chargeLog.setSuccess(true);
+            chargeLog.setMessage("成功");
+            chargeLogService.save(chargeLog);
+            return R.ok();
+        }
         R r = rechargesFeignService.thawBalance(dto);
         updateAndSave(chargeLog, r);
         return r;
