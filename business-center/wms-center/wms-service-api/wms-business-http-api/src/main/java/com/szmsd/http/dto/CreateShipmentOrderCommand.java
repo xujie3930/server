@@ -40,4 +40,7 @@ public class CreateShipmentOrderCommand implements Serializable {
 
     @ApiModelProperty(value = "物流承运商")
     private Carrier carrier;
+
+    @ApiModelProperty(value = "税号")
+    private List<Taxation> taxations;
 }

@@ -1,7 +1,9 @@
 package com.szmsd.inventory.domain.dto;
 
+import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,8 +12,9 @@ import java.util.List;
  * @author zhangyuyuan
  * @date 2021-03-25 15:06
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class InventoryAvailableQueryDto implements Serializable {
+public class InventoryAvailableQueryDto extends QueryDto implements Serializable {
 
     @ApiModelProperty(value = "目的仓库编码")
     private String warehouseCode;

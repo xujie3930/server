@@ -105,4 +105,7 @@ public class DelOutboundDetailVO implements Serializable {
 
     @ApiModelProperty(value = "对版图片")
     private AttachmentFileDTO editionImage;
+
+    @ApiModelProperty(value = "增值税号")
+    private String ioss;
 }

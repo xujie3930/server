@@ -206,4 +206,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "是否打印标签")
     private Boolean isPrint;
+
+    @ApiModelProperty(value = "增值税号")
+    private String ioss;
 }
