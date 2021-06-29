@@ -121,6 +121,7 @@ public class PackageMangAddDTO implements BOConvert {
     @Excel(name = "期望收货日期")
     private LocalDate expectedDeliveryTime;
 
+    @Min(value = 1,message = "揽件数量最小为1")
     @ApiModelProperty(value = "揽件数量")
     @Excel(name = "揽件数量")
     private Integer packageNum;
