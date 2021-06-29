@@ -339,7 +339,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         String ioss = delOutbound.getIoss();
         if (StringUtils.isNotEmpty(ioss)) {
             List<Taxation> taxations = new ArrayList<>();
-            taxations.add(new Taxation("", ioss));
+            taxations.add(new Taxation("IOSS", ioss));
             createShipmentOrderCommand.setTaxations(taxations);
         }
         // 包裹信息
