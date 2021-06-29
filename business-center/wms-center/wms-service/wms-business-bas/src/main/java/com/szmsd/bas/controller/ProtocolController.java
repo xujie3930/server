@@ -23,6 +23,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author zhangyuyuan
@@ -47,12 +48,11 @@ public class ProtocolController {
         if (null == list || list.length == 0) {
             throw new CommonException("999", "文件不存在");
         }
-//        String filePath = "国际物流服务合作协议-DM.docx";
         String filePath;
         if (list.length > 1) {
-            filePath = list[list.length - 2];
+            filePath = "国际物流服务合作协议-DM (" + (list.length - 1) + ").docx";
         } else {
-            filePath = list[0];
+            filePath = "国际物流服务合作协议-DM.docx";
         }
         String fileName = "国际物流服务合作协议-DM";
         File file = new File(basedir + "/" + filePath);
@@ -67,7 +67,7 @@ public class ProtocolController {
             response.setContentType("application/octet-stream;charset=utf-8");
             response.setContentLengthLong(file.length());
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), "ISO8859-1") + ".docx");
+            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), StandardCharsets.UTF_8) + ".docx");
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
