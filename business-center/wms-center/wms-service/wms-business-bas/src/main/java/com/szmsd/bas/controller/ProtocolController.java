@@ -59,6 +59,8 @@ public class ProtocolController {
         InputStream inputStream = null;
         ServletOutputStream outputStream = null;
         try {
+            response.setHeader("File-Size", "" + list.length);
+            response.setHeader("File-Name", filePath);
             inputStream = new FileInputStream(file);
             outputStream = response.getOutputStream();
             //response为HttpServletResponse对象
