@@ -19,6 +19,8 @@ public class InboundReceiptEnum {
         COLLECTION("Collection", "集运入库"),
         /** 入库单类型：新SKU入库 **/
         NEW_SKU("NewSku", "新SKU入库"),
+        /** 入库单类型：拆分SKU入库 **/
+        SPLIT_SKU("SplitSku", "拆分SKU入库"),
         /** 入库单类型：采购入库 **/
         PURCHASE("Purchase", "采购入库"),
         /** 入库单类型：上架入库 **/

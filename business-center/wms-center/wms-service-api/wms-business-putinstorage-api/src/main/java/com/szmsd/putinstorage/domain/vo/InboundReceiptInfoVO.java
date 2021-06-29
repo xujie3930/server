@@ -31,8 +31,10 @@ public class InboundReceiptInfoVO {
             "集运入库（OMS用）：Collection" +
             "包裹转运入库（OMS用）：PackageTransfer" +
             "新SKU入库（OMS用）：NewSku" +
+            "拆分SKU入库（OMS用）：SplitSku" +
             "上架入库（Yewu用）：Putaway" +
-            "点数入库（Yewu用）：Counting")
+            "点数入库（Yewu用）：Counting" +
+            "包裹转运入库（OMS用）：PackageTransfer")
     private String orderType;
 
     @ApiModelProperty(value = "目的仓库编码")
