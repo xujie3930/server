@@ -1,6 +1,7 @@
 package com.szmsd.http.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -93,6 +94,14 @@ public class HtpRequestLog extends BaseEntity {
     @ApiModelProperty(value = "响应时间")
     @Excel(name = "响应时间")
     private Date responseTime;
+    @TableField(exist = false)
+    @ApiModelProperty(value = "请求时间-开始")
+    @Excel(name = "请求时间")
+    private Date requestTimeStart;
+    @TableField(exist = false)
+    @ApiModelProperty(value = "请求时间-结束")
+    @Excel(name = "请求时间")
+    private Date requestTimeEnd;
 
 
 }
