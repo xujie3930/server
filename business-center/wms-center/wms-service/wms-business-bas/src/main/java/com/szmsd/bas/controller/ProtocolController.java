@@ -39,8 +39,8 @@ public class ProtocolController {
     @GetMapping("/download")
     @ApiOperation(value = "注册协议 - 下载文件", position = 100)
     public void download(HttpServletResponse response) {
-        String basedir = "/u01/www/ck1/delivery/protocol";
-        File dirFile = new File(basedir);
+        String defaultPath = "/u01/www/ck1/delivery/protocol";
+        File dirFile = new File(defaultPath);
         if (!dirFile.exists()) {
             throw new CommonException("999", "文件夹不存在");
         }
@@ -48,14 +48,11 @@ public class ProtocolController {
         if (null == list || list.length == 0) {
             throw new CommonException("999", "文件不存在");
         }
-        String filePath;
-        if (list.length > 1) {
-            filePath = "国际物流服务合作协议-DM (" + (list.length - 1) + ").docx";
-        } else {
-            filePath = "国际物流服务合作协议-DM.docx";
-        }
-        String fileName = "国际物流服务合作协议-DM";
-        File file = new File(basedir + "/" + filePath);
+        String downloadName = "国际物流服务合作协议-DM.docx";
+        String fileName = downloadName;
+        fileName = getCurrentFileName(defaultPath, fileName);
+        String filePath = defaultPath + "/" + fileName;
+        File file = new File(filePath);
         InputStream inputStream = null;
         ServletOutputStream outputStream = null;
         try {
@@ -67,7 +64,7 @@ public class ProtocolController {
             response.setContentType("application/octet-stream;charset=utf-8");
             response.setContentLengthLong(file.length());
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), StandardCharsets.UTF_8) + ".docx");
+            response.setHeader("Content-Disposition", "attachment;filename=" + new String(downloadName.getBytes("GBK"), StandardCharsets.ISO_8859_1));
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
@@ -102,6 +99,34 @@ public class ProtocolController {
             }
         }
         String fileName = "国际物流服务合作协议-DM.docx";
+        fileName = getFileName(defaultPath, fileName);
+        String filePath = defaultPath + "/" + fileName;
+        try {
+            writeFile(filePath, file.getBytes());
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new CommonException("999", "保存文件失败，" + e.getMessage());
+        }
+        return R.ok(filePath);
+    }
+
+    private String getCurrentFileName(String defaultPath, String fileName) {
+        int index = 0;
+        boolean isEnd = true;
+        do {
+            File f = new File(defaultPath + "/" + fileName);
+            if (f.exists()) {
+                index++;
+            } else {
+                isEnd = false;
+                index--;
+            }
+            fileName = "国际物流服务合作协议-DM (" + index + ").docx";
+        } while (isEnd);
+        return fileName;
+    }
+
+    private String getFileName(String defaultPath, String fileName) {
         int index = 0;
         boolean isEnd = true;
         do {
@@ -113,14 +138,7 @@ public class ProtocolController {
                 isEnd = false;
             }
         } while (isEnd);
-        String filePath = defaultPath + "/" + fileName;
-        try {
-            writeFile(filePath, file.getBytes());
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            throw new CommonException("999", "保存文件失败，" + e.getMessage());
-        }
-        return R.ok(filePath);
+        return fileName;
     }
 
     public void writeFile(String filePath, byte[] bytes) {
