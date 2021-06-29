@@ -48,8 +48,9 @@ public class ProtocolController {
         if (null == list || list.length == 0) {
             throw new CommonException("999", "文件不存在");
         }
-        String fileName = "国际物流服务合作协议-DM.docx";
-        fileName = getFileName(defaultPath, fileName);
+        String downloadName = "国际物流服务合作协议-DM.docx";
+        String fileName = downloadName;
+        fileName = getCurrentFileName(defaultPath, fileName);
         String filePath = defaultPath + "/" + fileName;
         File file = new File(filePath);
         InputStream inputStream = null;
@@ -63,7 +64,7 @@ public class ProtocolController {
             response.setContentType("application/octet-stream;charset=utf-8");
             response.setContentLengthLong(file.length());
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("GBK"), StandardCharsets.ISO_8859_1) + ".docx");
+            response.setHeader("Content-Disposition", "attachment;filename=" + new String(downloadName.getBytes("GBK"), StandardCharsets.ISO_8859_1));
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
@@ -107,6 +108,22 @@ public class ProtocolController {
             throw new CommonException("999", "保存文件失败，" + e.getMessage());
         }
         return R.ok(filePath);
+    }
+
+    private String getCurrentFileName(String defaultPath, String fileName) {
+        int index = 0;
+        boolean isEnd = true;
+        do {
+            File f = new File(defaultPath + "/" + fileName);
+            if (f.exists()) {
+                index++;
+            } else {
+                isEnd = false;
+                index--;
+            }
+            fileName = "国际物流服务合作协议-DM (" + index + ").docx";
+        } while (isEnd);
+        return fileName;
     }
 
     private String getFileName(String defaultPath, String fileName) {
