@@ -51,8 +51,8 @@ public class HtpRequestLogServiceImpl extends ServiceImpl<HtpRequestLogMapper, H
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "request_url_group", htpRequestLog.getRequestUrlGroup());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_uri", htpRequestLog.getRequestUri());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_body", htpRequestLog.getRequestBody());
-        if (null != htpRequestLog.getRequestTime()) {
-            queryWrapper.eq("request_time", DateFormatUtils.format(htpRequestLog.getRequestTime(), "yyyy-MM-dd"));
+        if (null != htpRequestLog.getRequestTimeStart() && null != htpRequestLog.getRequestTimeEnd()) {
+            queryWrapper.between("request_time", DateFormatUtils.format(htpRequestLog.getRequestTimeStart(), "yyyy-MM-dd"), DateFormatUtils.format(htpRequestLog.getRequestTimeEnd(), "yyyy-MM-dd"));
         }
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
