@@ -121,7 +121,9 @@ public class ProtocolController {
                 isEnd = false;
                 index--;
             }
-            fileName = "国际物流服务合作协议-DM (" + index + ").docx";
+            if (index > 0) {
+                fileName = "国际物流服务合作协议-DM (" + index + ").docx";
+            }
         } while (isEnd);
         return fileName;
     }
