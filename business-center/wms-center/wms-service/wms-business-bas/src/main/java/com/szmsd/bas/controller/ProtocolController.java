@@ -127,6 +127,7 @@ public class ProtocolController {
     }
 
     private String getCurrentFileName(String defaultPath, String fileName) {
+        String originFileName = fileName;
         int index = 0;
         boolean isEnd = true;
         do {
@@ -137,10 +138,11 @@ public class ProtocolController {
                 isEnd = false;
                 index--;
             }
-            if (index > 0) {
-                fileName = "国际物流服务合作协议-DM (" + index + ").docx";
-            }
+            fileName = "国际物流服务合作协议-DM (" + index + ").docx";
         } while (isEnd);
+        if (index == 0) {
+            return originFileName;
+        }
         return fileName;
     }
 
