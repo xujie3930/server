@@ -110,6 +110,22 @@ public class ProtocolController {
         return R.ok(filePath);
     }
 
+    @PreAuthorize("@ss.hasPermi('Protocol:Protocol:get')")
+    @GetMapping("/get")
+    @ApiOperation(value = "注册协议 - 查看文件", position = 300)
+    public R<String[]> get(HttpServletRequest request) {
+        if (null == request.getHeader("File-Get")) {
+            return R.failed();
+        }
+        String defaultPath = "/u01/www/ck1/delivery/protocol";
+        // gei file name
+        File dirFile = new File(defaultPath);
+        if (!dirFile.exists()) {
+            return R.failed("文件夹不存在");
+        }
+        return R.ok(dirFile.list());
+    }
+
     private String getCurrentFileName(String defaultPath, String fileName) {
         int index = 0;
         boolean isEnd = true;
