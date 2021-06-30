@@ -458,6 +458,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     address.getStreet1(), address.getStreet2(), address.getStreet3(), address.getPostCode(), address.getPhoneNo(), address.getEmail()));
         }
         // 转运出库明细处理
+        Map<String, DelOutboundDetail> detailMap = new HashMap<>(16);
         List<ShipmentDetailInfoDto> details;
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
             details = new ArrayList<>();
@@ -490,6 +491,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         shipmentDetailInfoDtoMap.put(bindCode, new ShipmentDetailInfoDto(bindCode, detail.getQty(), detail.getNewLabelCode()));
                     }
                 }
+                // 记录sku的信息，在批量里面需要使用
+                detailMap.put(sku, detail);
             }
             details = new ArrayList<>(shipmentDetailInfoDtoMap.values());
         }
@@ -507,11 +510,31 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 if (CollectionUtils.isNotEmpty(details1)) {
                     List<ShipmentDetailInfoDto> shipmentDetailInfoDtos = new ArrayList<>();
                     for (DelOutboundPackingDetailVO delOutboundPackingDetailVO : details1) {
+                        // sku的信息
                         ShipmentDetailInfoDto shipmentDetailInfoDto = new ShipmentDetailInfoDto();
                         shipmentDetailInfoDto.setSku(delOutboundPackingDetailVO.getSku());
                         shipmentDetailInfoDto.setQty(delOutboundPackingDetailVO.getQty());
-                        shipmentDetailInfoDto.setNewLabelCode(delOutboundPackingDetailVO.getNewLabelCode());
+                        // 保存的时候装箱信息里面的newLabelCode没有保存值，需要从SKU明细里面获取
+                        // shipmentDetailInfoDto.setNewLabelCode(delOutboundPackingDetailVO.getNewLabelCode());
+                        // sku包材的信息
+                        DelOutboundDetail delOutboundDetail = detailMap.get(delOutboundPackingDetailVO.getSku());
+                        ShipmentDetailInfoDto shipmentDetailInfoDtoBindCode = null;
+                        if (null != delOutboundDetail) {
+                            // 设置newLabelCode
+                            shipmentDetailInfoDto.setNewLabelCode(delOutboundDetail.getNewLabelCode());
+                            String bindCode = delOutboundDetail.getBindCode();
+                            if (StringUtils.isNotEmpty(bindCode)) {
+                                shipmentDetailInfoDtoBindCode = new ShipmentDetailInfoDto();
+                                shipmentDetailInfoDtoBindCode.setSku(bindCode);
+                                shipmentDetailInfoDtoBindCode.setQty(delOutboundPackingDetailVO.getQty());
+                            }
+                        }
+                        // 添加sku信息
                         shipmentDetailInfoDtos.add(shipmentDetailInfoDto);
+                        // 添加sku包材信息
+                        if (null != shipmentDetailInfoDtoBindCode) {
+                            shipmentDetailInfoDtos.add(shipmentDetailInfoDto);
+                        }
                     }
                     packingRequirementInfoDto.setDetails(shipmentDetailInfoDtos);
                 }
