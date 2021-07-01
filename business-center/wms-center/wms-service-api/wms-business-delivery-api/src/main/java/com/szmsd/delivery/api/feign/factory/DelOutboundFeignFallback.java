@@ -1,6 +1,7 @@
 package com.szmsd.delivery.api.feign.factory;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -76,7 +77,7 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
 
             @Override
             public TableDataInfo<DelOutboundListVO> page(DelOutboundListQueryDto queryDto) {
-                return null;
+                throw new BaseException("查询出库单异常:", throwable.getMessage());
             }
         };
     }
