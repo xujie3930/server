@@ -251,10 +251,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             List<DelOutboundListVO> rows = page.getRows();
             if (CollectionUtils.isNotEmpty(rows)) {
                 DelOutboundListVO delOutboundListVO = rows.get(0);
-                boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.REVIEWED.getCode());
-                AssertUtil.isTrue(!equals, "该原出库单号未提审/不存在!");
+                boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.COMPLETED.getCode());
+                AssertUtil.isTrue(!equals, "该原出库单号未完成/不存在!");
             } else {
-                AssertUtil.isTrue(false, "该原出库单号不存在!");
+                throw new BaseException("该原出库单号不存在!");
             }
         } else {
             throw new BaseException("获取原出库单信息失败,请重试!");
