@@ -113,6 +113,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     // 回滚操作
                     applicationContainer.setEndState(BringVerifyEnum.BEGIN);
                     applicationContainer.rollback();
+                    // 更新状态
+                    DelOutbound updateDelOutbound = new DelOutbound();
+                    updateDelOutbound.setId(delOutbound.getId());
+                    updateDelOutbound.setBringVerifyState(BringVerifyEnum.BEGIN.name());
+                    this.delOutboundService.updateById(updateDelOutbound);
                     // 抛出异常
                     throw e;
                 }
