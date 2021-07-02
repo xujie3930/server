@@ -59,6 +59,14 @@ public final class ApplicationRuleConfig {
         bringVerifyNewSkuSet.add(BringVerifyEnum.FREEZE_OPERATION.name());
         bringVerifyNewSkuSet.add(BringVerifyEnum.END.name());
         bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.NEW_SKU.getCode(), bringVerifyNewSkuSet);
+        // 提审配置 - 【拆分SKU】
+        Set<String> bringVerifySplitSkuSet = new HashSet<>();
+        bringVerifySplitSkuSet.add(BringVerifyEnum.BEGIN.name());
+        bringVerifySplitSkuSet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
+        bringVerifySplitSkuSet.add(BringVerifyEnum.FREEZE_INVENTORY.name());
+        bringVerifySplitSkuSet.add(BringVerifyEnum.FREEZE_OPERATION.name());
+        bringVerifySplitSkuSet.add(BringVerifyEnum.END.name());
+        bringVerifyRuleMap.put(DelOutboundOrderTypeEnum.SPLIT_SKU.getCode(), bringVerifySplitSkuSet);
         // 提审配置 - 【批量出库】
         // 执行所有步骤
         // =======================================================================================
@@ -87,6 +95,12 @@ public final class ApplicationRuleConfig {
         shipmentNewSkuSet.add(ShipmentEnum.SHIPMENT_SHIPPING.name());
         shipmentNewSkuSet.add(ShipmentEnum.END.name());
         shipmentRuleMap.put(DelOutboundOrderTypeEnum.NEW_SKU.getCode(), shipmentNewSkuSet);
+        // 出库配置 - 【拆分SKU】
+        Set<String> shipmentSplitSkuSet = new HashSet<>();
+        shipmentSplitSkuSet.add(ShipmentEnum.BEGIN.name());
+        shipmentSplitSkuSet.add(ShipmentEnum.SHIPMENT_SHIPPING.name());
+        shipmentSplitSkuSet.add(ShipmentEnum.END.name());
+        shipmentRuleMap.put(DelOutboundOrderTypeEnum.SPLIT_SKU.getCode(), shipmentSplitSkuSet);
         // 出库配置 - 【批量出库】
         // 执行所有步骤
     }

@@ -133,4 +133,7 @@ public class DelOutboundDto implements Serializable {
 
     @ApiModelProperty(value = "装箱信息")
     private List<DelOutboundPackingDto> packings;
+
+    @ApiModelProperty(value = "组合信息")
+    private List<DelOutboundCombinationDto> combinations;
 }

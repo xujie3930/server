@@ -54,6 +54,7 @@ import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
+import javax.print.attribute.standard.SheetCollate;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -505,6 +506,20 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         return basSellerEmailDtos;
     }
 
+    @Override
+    public String getRealState(String sellerCode) {
+        if (StringUtils.isEmpty(sellerCode)) {
+            return "";
+        }
+        LambdaQueryWrapper<BasSeller> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.select(BasSeller::getRealState);
+        queryWrapper.eq(BasSeller::getSellerCode, sellerCode);
+        BasSeller basSeller = super.getOne(queryWrapper);
+        if (null == basSeller) {
+            return "";
+        }
+        return basSeller.getRealState();
+    }
 
     private String sellerCode(){
 

@@ -39,4 +39,7 @@ public interface BasSellerFeignService {
      */
     @PostMapping("/bas/seller/queryAllSellerCodeAndEmail")
     R<List<BasSellerEmailDto>> queryAllSellerCodeAndEmail();
+
+    @PostMapping("/bas/seller/getRealState")
+    R<String> getRealState(@RequestBody String sellerCode);
 }

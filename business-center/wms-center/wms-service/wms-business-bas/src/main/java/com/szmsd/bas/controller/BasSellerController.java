@@ -174,4 +174,10 @@ public class BasSellerController extends BaseController{
         return R.ok(this.basSellerService.queryAllSellerCodeAndEmail());
     }
 
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:getRealState')")
+    @PostMapping("/getRealState")
+    @ApiOperation(value = "查询实名状态")
+    public R<String> getRealState(@RequestBody String sellerCode) {
+        return R.ok(this.basSellerService.getRealState(sellerCode));
+    }
 }

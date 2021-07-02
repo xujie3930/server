@@ -109,6 +109,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private IDelOutboundPackingService delOutboundPackingService;
     @Resource
     private BasRegionFeignService basRegionFeignService;
+    @Autowired
+    private IDelOutboundCombinationService delOutboundCombinationService;
 
     /**
      * 查询出库单模块
@@ -326,6 +328,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
                 this.remoteAttachmentService.saveAndUpdate(batchLabel);
             }
+            if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+                // 组合信息
+                this.delOutboundCombinationService.save(orderNo, dto.getCombinations());
+            }
             return insert;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -533,6 +540,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 箱标文件
                 AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
                 this.remoteAttachmentService.saveAndUpdate(batchLabel);
+            }
+            if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+                // 组合信息
+                this.delOutboundCombinationService.update(orderNo, dto.getCombinations());
             }
             // 更新
             int i = baseMapper.updateById(inputDelOutbound);
