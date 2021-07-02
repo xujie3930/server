@@ -116,5 +116,12 @@ public interface IBasSellerService extends IService<BasSeller> {
     List<String> queryByServiceCondition(ServiceConditionDto conditionDto);
 
     List<BasSellerEmailDto> queryAllSellerCodeAndEmail();
+
+    /**
+     * 查询实名状态
+     * @param sellerCode sellerCode
+     * @return String
+     */
+    String getRealState(String sellerCode);
 }
 
