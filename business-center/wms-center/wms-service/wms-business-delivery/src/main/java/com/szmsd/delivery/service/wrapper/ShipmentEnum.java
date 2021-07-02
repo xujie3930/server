@@ -146,9 +146,16 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
-            // 冻结费用
+            // PRC计费
+            updateDelOutbound.setLength(delOutbound.getLength());
+            updateDelOutbound.setWidth(delOutbound.getWidth());
+            updateDelOutbound.setHeight(delOutbound.getHeight());
+            // 规格，长*宽*高
+            delOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
+            updateDelOutbound.setAmount(delOutbound.getAmount());
+            updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             delOutboundService.shipmentFail(updateDelOutbound);
@@ -493,6 +500,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     // 更新：计费重，金额
                     ShipmentChargeInfo data = chargeWrapper.getData();
                     PricingPackageInfo packageInfo = data.getPackageInfo();
+                    // 包裹信息
+                    Packing packing = packageInfo.getPacking();
+                    delOutbound.setLength(Utils.valueOf(packing.getLength()));
+                    delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
+                    delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
+                    // 费用信息
                     Weight calcWeight = packageInfo.getCalcWeight();
                     delOutbound.setCalcWeight(calcWeight.getValue());
                     delOutbound.setCalcWeightUnit(calcWeight.getUnit());
@@ -620,7 +633,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setOrderNo(delOutbound.getOrderNo());
-            // 冻结费用
+            // PRC计费
+            updateDelOutbound.setLength(delOutbound.getLength());
+            updateDelOutbound.setWidth(delOutbound.getWidth());
+            updateDelOutbound.setHeight(delOutbound.getHeight());
+            // 规格，长*宽*高
+            delOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());
