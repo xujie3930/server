@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.feign.BasFeignService;
+import com.szmsd.bas.api.feign.BaseProductFeignService;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -77,6 +80,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     @Resource
     private BasFeignService basFeignService;
+
+    @Resource
+    private BaseProductFeignService baseProductFeignService;
 
     @Resource
     private IBasFeignClientService iBasFeignClientService;
@@ -247,7 +253,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
         delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
         TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);
-        if (page!=null && page.getCode() == 200) {
+        if (page != null && page.getCode() == 200) {
             List<DelOutboundListVO> rows = page.getRows();
             if (CollectionUtils.isNotEmpty(rows)) {
                 DelOutboundListVO delOutboundListVO = rows.get(0);
@@ -499,12 +505,45 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
         List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
         returnExpressGoodService.addOrUpdateGoodInfoBatch(details, expressUpdateDTO.getId());
-
+        //上架处理校验是否属于该用户的sku
+        checkSku(expressUpdateDTO);
         //处理结果推送WMS
         pushSkuDetailsToWMS(expressUpdateDTO, details);
 
         return update;
     }
+
+    /**
+     * 校验该sku是否属于该用户
+     *
+     * @param expressUpdateDTO
+     */
+    private void checkSku(ReturnExpressAddDTO expressUpdateDTO) {
+        List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
+        if (CollectionUtils.isEmpty(details)) {
+            log.info("无商品数据，不校验商品sku");
+        }
+        List<String> skuIdList = details.stream().map(ReturnExpressGoodAddDTO::getPutawaySku).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        log.info("需要上架的：{}", skuIdList);
+        if (CollectionUtils.isEmpty(skuIdList)) return;
+        BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
+        String sellCode = getSellCode();
+        baseProductConditionQueryDto.setSellerCode(sellCode);
+        baseProductConditionQueryDto.setSkus(skuIdList);
+        log.info("查询sku信息 {}", JSONObject.toJSONString(baseProductConditionQueryDto));
+        R<List<BaseProduct>> listR = baseProductFeignService.queryProductList(baseProductConditionQueryDto);
+        AssertUtil.isTrue(HttpStatus.SUCCESS == listR.getCode(), "校验sku异常：" + listR.getMsg());
+        List<BaseProduct> data = listR.getData();
+        List<String> returnIdList = data.stream().map(BaseProduct::getCode).collect(Collectors.toList());
+        log.info("查询到的sku信息：{}", returnIdList);
+        skuIdList.removeAll(returnIdList);
+        if (CollectionUtils.isNotEmpty(skuIdList)) {
+            log.info("未查询到的数据：{}", skuIdList);
+            throw new BaseException("未查询到该SKU: " + String.join(" ", skuIdList) + "数据");
+        }
+
+    }
+
 
     /**
      * 更新前校验
