@@ -1,6 +1,10 @@
 package com.szmsd.delivery.service.wrapper;
 
 import cn.hutool.core.codec.Base64;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -15,6 +19,7 @@ import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
+import com.szmsd.delivery.util.PdfUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
@@ -22,6 +27,7 @@ import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.ResponseVO;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -383,7 +389,46 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
-            String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+            String pathname = null;
+            // 如果是批量出库，将批量出库上传的文件和标签文件合并在一起传过去
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
+                    && delOutbound.getIsLabelBox()) {
+                // 判断文件是否已经创建
+                String mergeFilePath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
+                File mergeFile = new File(mergeFilePath);
+                if (!mergeFile.exists()) {
+                    // 合并文件
+                    // 查询上传文件
+                    // 查询上传文件信息
+                    RemoteAttachmentService remoteAttachmentService = SpringUtils.getBean(RemoteAttachmentService.class);
+                    BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                    basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
+                    basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                    R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                    if (null != listR && null != listR.getData()) {
+                        List<BasAttachment> attachmentList = listR.getData();
+                        if (CollectionUtils.isNotEmpty(attachmentList)) {
+                            BasAttachment attachment = attachmentList.get(0);
+                            // 箱标文件 - 上传的
+                            String boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
+                            // 标签文件 - 从承运商物流那边获取的
+                            String labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+                            // 合并文件
+                            try {
+                                if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath)) {
+                                    pathname = mergeFilePath;
+                                }
+                            } catch (IOException e) {
+                                logger.error(e.getMessage(), e);
+                                throw new CommonException("999", "合并箱标文件，标签文件失败");
+                            }
+                        }
+                    }
+                }
+            }
+            if (null == pathname) {
+                pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+            }
             File labelFile = new File(pathname);
             if (!labelFile.exists()) {
                 throw new CommonException("999", "标签文件不存在");
