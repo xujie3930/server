@@ -426,17 +426,19 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             // 把details里面的sku 更新到对应的库存管理的数量里面
             List<String> collect = goodVOList.stream().map(ReturnExpressGoodVO::getPutawaySku).collect(Collectors.toList());
             String sku = String.join(",", collect);
-            TableDataInfo<InventorySkuVO> page = inventoryFeignService.page(warehouseCode, sku, sellerCode, collect.size());
-            AssertUtil.isTrue(page.getCode() == 200, "获取库存信息失败!");
-            List<InventorySkuVO> rows = page.getRows();
+            //2021-07-06取消 查询，没有的sku会在之前的校验，sku没有库存信息会 无法更新
+//            TableDataInfo<InventorySkuVO> page = inventoryFeignService.page(warehouseCode, sku, sellerCode, collect.size());
+//            log.info("warehouseCode:{},sku:{},sellerCode:{},查询到的商品sku信息: {}", warehouseCode, sku, sellerCode, JSONObject.toJSONString(page.getRows()));
+//            AssertUtil.isTrue(page.getCode() == 200, "获取库存信息失败!");
+//            List<InventorySkuVO> rows = page.getRows();
             Map<String, Integer> needAddSkuNum = goodVOList.stream().collect(Collectors.toMap(ReturnExpressGoodVO::getPutawaySku, ReturnExpressGoodVO::getPutawayQty));
             //根据sku 更新库存
-            rows.forEach(x -> {
+            collect.forEach(x -> {
                 InventoryAdjustmentDTO inventoryAdjustmentDTO = new InventoryAdjustmentDTO();
                 BeanUtils.copyProperties(x, inventoryAdjustmentDTO);
                 //一直为增加
                 inventoryAdjustmentDTO.setAdjustment("5");
-                Integer skuAddNum = needAddSkuNum.get(x.getSku());
+                Integer skuAddNum = needAddSkuNum.get(x);
                 inventoryAdjustmentDTO.setQuantity(skuAddNum);
                 log.info("拆包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
                 inventoryFeignService.adjustment(inventoryAdjustmentDTO);
@@ -445,19 +447,20 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         if (returnExpressDetail.getProcessType().equals(configStatus.getWholePackageOnShelves())) {
             log.info("整包上架--上架的商品需要更新库存管理的sku库存数量 + 1 ");
             String sku = returnExpressDetail.getSku();
-            TableDataInfo<InventorySkuVO> page = inventoryFeignService.page(warehouseCode, sku, sellerCode, 1);
-            AssertUtil.isTrue(page.getCode() == 200, "获取库存信息失败!");
-            List<InventorySkuVO> rows = page.getRows();
-            //整包上架直接+1
-            rows.forEach(x -> {
-                InventoryAdjustmentDTO inventoryAdjustmentDTO = new InventoryAdjustmentDTO();
-                BeanUtils.copyProperties(x, inventoryAdjustmentDTO);
-                //一直为增加
-                inventoryAdjustmentDTO.setAdjustment("5");
-                inventoryAdjustmentDTO.setQuantity(1);
-                log.info("整包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
-                inventoryFeignService.adjustment(inventoryAdjustmentDTO);
-            });
+//            TableDataInfo<InventorySkuVO> page = inventoryFeignService.page(warehouseCode, sku, sellerCode, 1);
+//            AssertUtil.isTrue(page.getCode() == 200, "获取库存信息失败!");
+//            List<InventorySkuVO> rows = page.getRows();
+//            //整包上架直接+1
+//            rows.forEach(x -> {
+            InventoryAdjustmentDTO inventoryAdjustmentDTO = new InventoryAdjustmentDTO();
+//                BeanUtils.copyProperties(x, inventoryAdjustmentDTO);
+            //一直为增加
+            inventoryAdjustmentDTO.setAdjustment("5");
+            inventoryAdjustmentDTO.setQuantity(1);
+            inventoryAdjustmentDTO.setSku(sku);
+            log.info("整包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
+            inventoryFeignService.adjustment(inventoryAdjustmentDTO);
+//            });
         }
     }
 

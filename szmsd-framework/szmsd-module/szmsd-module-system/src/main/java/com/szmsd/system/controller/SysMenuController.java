@@ -202,8 +202,9 @@ public class SysMenuController extends BaseController {
             }
             if (filter) {
                 Set<String> set = new HashSet<>(8);
-                set.add("storage");
-                set.add("bill");
+                set.add("storage"); // 仓储
+                set.add("bill"); // 账单
+                set.add("finance"); // 财务
                 for (RouterVo routerVo : list) {
                     List<RouterVo> children = routerVo.getChildren();
                     if (CollectionUtils.isNotEmpty(children)) {
