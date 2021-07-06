@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
 import com.szmsd.delivery.dto.DelOutboundExportListDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
@@ -58,4 +59,6 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
      * @return List<DelOutboundExportListDto>
      */
     List<DelOutboundExportListDto> exportList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
+
+    int updateTrackingNo(DelOutboundBatchUpdateTrackingNoDto dto);
 }
