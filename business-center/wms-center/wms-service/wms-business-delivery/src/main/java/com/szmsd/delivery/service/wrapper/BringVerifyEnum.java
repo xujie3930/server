@@ -559,9 +559,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
             }
             Collection<InventoryOperateDto> inventoryOperateDtos = inventoryOperateDtoMap.values();
-            operateListDto.setOperateList(new ArrayList<>(inventoryOperateDtos));
+            ArrayList<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtos);
+            operateListDto.setOperateList(operateList);
             try {
-                DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, inventoryOperateDtos});
+                DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, operateList});
                 InventoryFeignClientService inventoryFeignClientService = SpringUtils.getBean(InventoryFeignClientService.class);
                 inventoryFeignClientService.freeze(operateListDto);
             } catch (CommonException e) {
