@@ -212,4 +212,10 @@ public class UpdatePricedProductCommand {
     @ApiModelProperty(value = "一票多件包裹數量限制")
     private Integer multiPackageLength;
 
+    @ApiModelProperty(value = "发货规则")
+    private String shipmentRule;
+
+    @ApiModelProperty(value = "装箱规则")
+    private String packingRule;
+
 }
