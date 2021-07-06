@@ -321,5 +321,13 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return boolean
      */
     boolean toPrint(DelOutboundToPrintDto dto);
+
+    /**
+     * 批量更新挂号
+     *
+     * @param list list
+     * @return int
+     */
+    int batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list);
 }
 

@@ -2,6 +2,7 @@ package com.szmsd.delivery.controller;
 
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
@@ -481,5 +482,29 @@ public class DelOutboundController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundToPrintDto")
     public R<Boolean> toPrint(@RequestBody DelOutboundToPrintDto dto) {
         return R.ok(delOutboundService.toPrint(dto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchUpdateTrackingNo')")
+    @PostMapping("/batchUpdateTrackingNo")
+    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号", position = 10300)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
+    })
+    public R<Integer> batchUpdateTrackingNo(HttpServletRequest request) {
+        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
+        MultipartFile file = multipartHttpServletRequest.getFile("file");
+        AssertUtil.notNull(file, "上传文件不存在");
+        try {
+            DelOutboundBatchUpdateTrackingNoAnalysisEventListener analysisEventListener = new DelOutboundBatchUpdateTrackingNoAnalysisEventListener();
+            ExcelReaderBuilder excelReaderBuilder = EasyExcelFactory.read(file.getInputStream(), DelOutboundBatchUpdateTrackingNoDto.class, analysisEventListener);
+            ExcelReaderSheetBuilder excelReaderSheetBuilder = excelReaderBuilder.sheet(0);
+            excelReaderSheetBuilder.build().setHeadRowNumber(1);
+            excelReaderSheetBuilder.doRead();
+            List<DelOutboundBatchUpdateTrackingNoDto> list = analysisEventListener.getList();
+            return R.ok(this.delOutboundService.batchUpdateTrackingNo(list));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return R.failed(e.getMessage());
+        }
     }
 }
