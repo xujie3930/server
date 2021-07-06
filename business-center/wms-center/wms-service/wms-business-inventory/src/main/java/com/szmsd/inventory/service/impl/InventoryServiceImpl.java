@@ -1,5 +1,6 @@
 package com.szmsd.inventory.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -9,6 +10,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import com.szmsd.common.core.utils.DateUtils;
@@ -25,9 +27,11 @@ import com.szmsd.inventory.domain.vo.InventoryVO;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
+import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -321,8 +325,33 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             lock.lock();
 
             Inventory before = this.getOne(new QueryWrapper<Inventory>().lambda().eq(Inventory::getSku, sku).eq(Inventory::getWarehouseCode, warehouseCode));
-            AssertUtil.notNull(before, warehouseCode + "仓没有[" + sku + "]库存记录");
-
+            //AssertUtil.notNull(before, warehouseCode + "仓没有[" + sku + "]库存记录");
+            if (null == before && increase) {
+                String loginSellerCode = Optional.ofNullable(remoteComponent.getLoginUserInfo()).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("获取用户信息失败!"));
+                Integer addQut = inventoryAdjustmentDTO.getQuantity();
+                Inventory inventory = new Inventory();
+                inventory.setSku(inventoryAdjustmentDTO.getSku())
+                        .setWarehouseCode(inventoryAdjustmentDTO.getWarehouseCode())
+                        .setTotalInventory(addQut)
+                        .setAvailableInventory(addQut)
+                        .setCusCode(loginSellerCode)
+                        .setTotalInbound(addQut);
+                baseMapper.insert(inventory);
+                log.info(warehouseCode + "仓没有[" + sku + "]库存记录 新增sku 信息 {}", JSONObject.toJSONString(inventory));
+                before = new Inventory();
+                Integer beforeQut = 0;
+                inventory.setSku(inventoryAdjustmentDTO.getSku())
+                        .setWarehouseCode(inventoryAdjustmentDTO.getWarehouseCode())
+                        .setTotalInventory(beforeQut)
+                        .setAvailableInventory(beforeQut)
+                        .setCusCode(loginSellerCode)
+                        .setTotalInbound(beforeQut);
+                BeanUtils.copyProperties(inventory,before);
+                // 记录库存日志
+                iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, inventory, quantity);
+                return;
+            }
+            //没有就新增
             int afterTotalInventory = before.getTotalInventory() + quantity;
             int afterAvailableInventory = before.getAvailableInventory() + quantity;
             AssertUtil.isTrue(afterTotalInventory > 0 && afterAvailableInventory > 0, warehouseCode + "仓[" + sku + "]可用库存调减数量不足[" + before.getAvailableInventory() + "]");

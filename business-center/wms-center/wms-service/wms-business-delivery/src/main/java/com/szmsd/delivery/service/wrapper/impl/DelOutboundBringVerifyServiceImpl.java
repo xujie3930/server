@@ -576,7 +576,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         shipmentDetailInfoDtos.add(shipmentDetailInfoDto);
                         // 添加sku包材信息
                         if (null != shipmentDetailInfoDtoBindCode) {
-                            shipmentDetailInfoDtos.add(shipmentDetailInfoDto);
+                            shipmentDetailInfoDtos.add(shipmentDetailInfoDtoBindCode);
                         }
                     }
                     packingRequirementInfoDto.setDetails(shipmentDetailInfoDtos);
