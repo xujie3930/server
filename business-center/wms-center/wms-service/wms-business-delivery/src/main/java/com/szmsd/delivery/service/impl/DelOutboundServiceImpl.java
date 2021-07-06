@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
@@ -593,6 +594,24 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getIsPrint, true);
         updateWrapper.eq(DelOutbound::getId, dto.getId());
         return super.update(updateWrapper);
+    }
+
+    @Transactional
+    @Override
+    public int batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list) {
+        String sqlStatement = this.sqlStatement(SqlMethod.UPDATE);
+        int size = list.size();
+        executeBatch(sqlSession -> {
+            int i = 0;
+            for (DelOutboundBatchUpdateTrackingNoDto dto : list) {
+                sqlSession.update("updateTrackingNo", dto);
+                if ((i % 100 == 0) || i == size) {
+                    sqlSession.flushStatements();
+                }
+                i++;
+            }
+        });
+        return size;
     }
 
     /**
