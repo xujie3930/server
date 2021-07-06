@@ -78,6 +78,18 @@ public final class DelOutboundServiceImplUtil {
     }
 
     /**
+     * 获取到合并之后的文件路径
+     *
+     * @param delOutbound delOutbound
+     * @return String
+     */
+    public static String getBatchMergeFilePath(DelOutbound delOutbound) {
+        String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
+        String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
+        return basedir + "/shipment/merge/" + labelBizPath;
+    }
+
+    /**
      * 不需要操作库存
      *
      * @param orderType 出库单类型
