@@ -177,6 +177,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 delOutboundVO.setContainerList(this.delOutboundPackingService.listByOrderNo(orderNo, DelOutboundPackingTypeConstant.TYPE_2));
             }
         }
+        // 组合，拆分SKU
+        if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
+                || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+            delOutboundVO.setCombinations(this.delOutboundCombinationService.listByOrderNo(orderNo));
+        }
         return delOutboundVO;
     }
 
