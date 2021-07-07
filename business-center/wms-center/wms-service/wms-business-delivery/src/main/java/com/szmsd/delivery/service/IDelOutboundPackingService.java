@@ -105,5 +105,14 @@ public interface IDelOutboundPackingService extends IService<DelOutboundPacking>
      * @param containerList containerList
      */
     void save(String orderNo, List<ContainerInfoDto> containerList);
+
+    /**
+     * 查询箱子的信息
+     *
+     * @param orderNo orderNo
+     * @param type    type
+     * @return DelOutboundPacking
+     */
+    List<DelOutboundPacking> packageListByOrderNo(String orderNo, int type);
 }
 
