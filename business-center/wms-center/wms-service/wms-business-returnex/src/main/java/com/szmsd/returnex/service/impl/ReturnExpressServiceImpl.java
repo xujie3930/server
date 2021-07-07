@@ -435,8 +435,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             //根据sku 更新库存
             collect.forEach(x -> {
                 InventoryAdjustmentDTO inventoryAdjustmentDTO = new InventoryAdjustmentDTO();
-                BeanUtils.copyProperties(x, inventoryAdjustmentDTO);
                 //一直为增加
+                inventoryAdjustmentDTO.setSku(x);
                 inventoryAdjustmentDTO.setAdjustment("5");
                 Integer skuAddNum = needAddSkuNum.get(x);
                 inventoryAdjustmentDTO.setQuantity(skuAddNum);
