@@ -12,6 +12,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
@@ -261,9 +262,23 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
-                packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
-                        new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                        , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
+                // 批量出口传WMS返回的装箱明细过去计算
+                if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+                    // 查询装箱明细
+                    List<DelOutboundPacking> packingList = this.delOutboundPackingService.packageListByOrderNo(delOutbound.getOrderNo(), DelOutboundPackingTypeConstant.TYPE_2);
+                    if (CollectionUtils.isEmpty(packingList)) {
+                        throw new CommonException("999", "没有查询到WMS返回的装箱信息");
+                    }
+                    for (DelOutboundPacking packing : packingList) {
+                        packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(packing.getWeight()), "g"),
+                                new Packing(Utils.valueOf(packing.getLength()), Utils.valueOf(packing.getWidth()), Utils.valueOf(packing.getHeight()), "cm")
+                                , Math.toIntExact(1), packing.getPackingNo(), BigDecimal.ZERO, ""));
+                    }
+                } else {
+                    packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
+                            new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
+                            , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
+                }
             }
         }
         // 计算包裹费用
@@ -353,6 +368,19 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             packageItems.add(new PackageItem(delOutbound.getOrderNo(), delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), Utils.valueOfDouble(delOutbound.getWeight()),
                     new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                     1, "", String.valueOf(delOutbound.getId()), delOutbound.getOrderNo()));
+        } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+            List<String> skus = new ArrayList<>();
+            skus.add(delOutbound.getNewSku());
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            conditionQueryDto.setSkus(skus);
+            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            if (CollectionUtils.isEmpty(productList)) {
+                throw new CommonException("999", "查询SKU[" + delOutbound.getNewSku() + "]信息失败");
+            }
+            BaseProduct product = productList.get(0);
+            packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), Utils.valueOfDouble(product.getWeight()),
+                    new Size(product.getLength(), product.getWidth(), product.getHeight()),
+                    Utils.valueOfLong(delOutbound.getBoxNumber()), product.getHsCode(), String.valueOf(delOutbound.getId()), delOutbound.getNewSku()));
         } else {
             // 查询sku信息
             List<BaseProduct> productList = delOutboundWrapperContext.getProductList();

@@ -223,5 +223,15 @@ public class DelOutboundPackingServiceImpl extends ServiceImpl<DelOutboundPackin
             }
         }
     }
+
+    @Override
+    public List<DelOutboundPacking> packageListByOrderNo(String orderNo, int type) {
+        // 查询装箱信息
+        List<DelOutboundPacking> packingList = this.list(Wrappers.<DelOutboundPacking>lambdaQuery().eq(DelOutboundPacking::getOrderNo, orderNo).eq(DelOutboundPacking::getType, type));
+        if (CollectionUtils.isEmpty(packingList)) {
+            return Collections.emptyList();
+        }
+        return packingList;
+    }
 }
 
