@@ -498,6 +498,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
 
+                .set(ReturnExpressDetail::getSku,expressUpdateDTO.getSku())
                 .set(ReturnExpressDetail::getDealStatus, dealStatus)
                 .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
