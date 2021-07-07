@@ -1,6 +1,5 @@
 package com.szmsd.delivery.vo;
 
-import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
 import io.swagger.annotations.ApiModel;
@@ -129,4 +128,7 @@ public class DelOutboundVO implements Serializable {
 
     @ApiModelProperty(value = "装箱列表,wms返回的")
     private List<DelOutboundPackingVO> containerList;
+
+    @ApiModelProperty(value = "组合信息")
+    private List<DelOutboundCombinationVO> combinations;
 }
