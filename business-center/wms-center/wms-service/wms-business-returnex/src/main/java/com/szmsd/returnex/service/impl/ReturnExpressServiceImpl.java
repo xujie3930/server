@@ -439,6 +439,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 inventoryAdjustmentDTO.setSku(x);
                 inventoryAdjustmentDTO.setAdjustment("5");
                 Integer skuAddNum = needAddSkuNum.get(x);
+                inventoryAdjustmentDTO.setWarehouseCode(warehouseCode);
                 inventoryAdjustmentDTO.setSellerCode(sellerCode);
                 inventoryAdjustmentDTO.setQuantity(skuAddNum);
                 log.info("拆包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
@@ -458,6 +459,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             //一直为增加
             inventoryAdjustmentDTO.setAdjustment("5");
             inventoryAdjustmentDTO.setQuantity(1);
+            inventoryAdjustmentDTO.setWarehouseCode(warehouseCode);
             inventoryAdjustmentDTO.setSku(sku);
             inventoryAdjustmentDTO.setSellerCode(sellerCode);
             log.info("整包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
