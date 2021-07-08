@@ -22,4 +22,7 @@ public class InventoryAdjustmentDTO {
     @ApiModelProperty(value = "数量")
     private Integer quantity;
 
+    @ApiModelProperty(value = "卖家code")
+    private String sellerCode;
+
 }

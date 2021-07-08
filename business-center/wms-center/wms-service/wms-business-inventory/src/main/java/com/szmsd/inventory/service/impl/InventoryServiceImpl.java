@@ -327,31 +327,27 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             Inventory before = this.getOne(new QueryWrapper<Inventory>().lambda().eq(Inventory::getSku, sku).eq(Inventory::getWarehouseCode, warehouseCode));
             //AssertUtil.notNull(before, warehouseCode + "仓没有[" + sku + "]库存记录");
             if (null == before && increase) {
-                String loginSellerCode = Optional.ofNullable(remoteComponent.getLoginUserInfo()).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("获取用户信息失败!"));
+                //String loginSellerCode = Optional.ofNullable(remoteComponent.getLoginUserInfo()).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("获取用户信息失败!"));
+                String loginSellerCode = inventoryAdjustmentDTO.getSellerCode();
                 Integer addQut = inventoryAdjustmentDTO.getQuantity();
                 Inventory inventory = new Inventory();
                 inventory.setSku(inventoryAdjustmentDTO.getSku())
                         .setWarehouseCode(inventoryAdjustmentDTO.getWarehouseCode())
-                        .setTotalInventory(addQut)
                         .setAvailableInventory(addQut)
                         .setCusCode(loginSellerCode)
+
+                        .setTotalInventory(addQut)
                         .setTotalInbound(addQut);
                 baseMapper.insert(inventory);
+
                 log.info(warehouseCode + "仓没有[" + sku + "]库存记录 新增sku 信息 {}", JSONObject.toJSONString(inventory));
                 before = new Inventory();
-                Integer beforeQut = 0;
-                inventory.setSku(inventoryAdjustmentDTO.getSku())
-                        .setWarehouseCode(inventoryAdjustmentDTO.getWarehouseCode())
-                        .setTotalInventory(beforeQut)
-                        .setAvailableInventory(beforeQut)
-                        .setCusCode(loginSellerCode)
-                        .setTotalInbound(beforeQut);
                 BeanUtils.copyProperties(inventory,before);
+                before.setTotalInventory(0).setTotalInbound(0);
                 // 记录库存日志
                 iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, inventory, quantity);
                 return;
             }
-            //没有就新增
             int afterTotalInventory = before.getTotalInventory() + quantity;
             int afterAvailableInventory = before.getAvailableInventory() + quantity;
             AssertUtil.isTrue(afterTotalInventory > 0 && afterAvailableInventory > 0, warehouseCode + "仓[" + sku + "]可用库存调减数量不足[" + before.getAvailableInventory() + "]");
