@@ -327,7 +327,8 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             Inventory before = this.getOne(new QueryWrapper<Inventory>().lambda().eq(Inventory::getSku, sku).eq(Inventory::getWarehouseCode, warehouseCode));
             //AssertUtil.notNull(before, warehouseCode + "仓没有[" + sku + "]库存记录");
             if (null == before && increase) {
-                String loginSellerCode = Optional.ofNullable(remoteComponent.getLoginUserInfo()).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("获取用户信息失败!"));
+                //String loginSellerCode = Optional.ofNullable(remoteComponent.getLoginUserInfo()).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("获取用户信息失败!"));
+                String loginSellerCode = inventoryAdjustmentDTO.getSellerCode();
                 Integer addQut = inventoryAdjustmentDTO.getQuantity();
                 Inventory inventory = new Inventory();
                 inventory.setSku(inventoryAdjustmentDTO.getSku())
