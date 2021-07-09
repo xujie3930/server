@@ -149,7 +149,7 @@ public class PackageManagement extends BaseEntity implements BOConvert {
 
     @ApiModelProperty(value = "期望收货日期")
     @Excel(name = "期望收货日期")
-    private LocalDate expectedDeliveryTime;
+    private String expectedDeliveryTime;
 
     @ApiModelProperty(value = "实际揽收数量")
     @Excel(name = "实际揽收数量")
