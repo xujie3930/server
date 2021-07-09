@@ -84,7 +84,7 @@ public class PackageMangVO {
     private String linkPhone;
     @Excel(name = "期望收货日期")
     @ApiModelProperty(value = "期望收货日期")
-    private String expectedDeliveryTime;
+    private LocalDate expectedDeliveryTime;
     //@Excel(name = "收货时间")
     private LocalDate deliveryTime;
 
