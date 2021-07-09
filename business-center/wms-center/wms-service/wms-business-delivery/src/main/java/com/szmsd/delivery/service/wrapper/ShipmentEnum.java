@@ -394,7 +394,17 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
                     && delOutbound.getIsLabelBox()) {
                 // 判断文件是否已经创建
-                String mergeFilePath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
+                String mergeFileDirPath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
+                File mergeFileDir = new File(mergeFileDirPath);
+                if (!mergeFileDir.exists()) {
+                    try {
+                        FileUtils.forceMkdir(mergeFileDir);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
+                        throw new CommonException("999", "创建文件夹失败，" + e.getMessage());
+                    }
+                }
+                String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getShipmentOrderNumber();
                 File mergeFile = new File(mergeFilePath);
                 if (!mergeFile.exists()) {
                     // 合并文件
