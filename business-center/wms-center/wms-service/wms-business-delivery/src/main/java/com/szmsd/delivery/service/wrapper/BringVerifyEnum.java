@@ -245,6 +245,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     ChargeWrapper chargeWrapper = responseObject.getObject();
                     ShipmentChargeInfo data = chargeWrapper.getData();
                     PricingPackageInfo packageInfo = data.getPackageInfo();
+                    // 挂号服务
+                    delOutbound.setShipmentService(data.getLogisticsRouteId());
                     // 包裹信息
                     Packing packing = packageInfo.getPacking();
                     delOutbound.setLength(Utils.valueOf(packing.getLength()));
@@ -410,7 +412,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             PricedProductInfo pricedProductInfo = htpPricedProductClientService.info(productCode);
             if (null != pricedProductInfo) {
                 delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
-                delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
                 DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
             } else {
                 // 异常信息
@@ -423,7 +424,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             delOutbound.setTrackingAcquireType("");
-            delOutbound.setShipmentService("");
             super.rollback(context);
         }
 
