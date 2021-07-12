@@ -231,9 +231,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
      * @param orderType     orderType
      */
     private void deduction(String orderNo, String warehouseCode, String orderType) {
-        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+        // 转运出库，集运出库在核重之后会去冻结库存，现在需要进行扣减库存
+        /*if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
             return;
-        }
+        }*/
         // 查询明细
         List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
         InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();

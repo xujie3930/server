@@ -12,6 +12,7 @@ import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
@@ -27,6 +28,9 @@ import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.inventory.api.service.InventoryFeignClientService;
+import com.szmsd.inventory.domain.dto.InventoryOperateDto;
+import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,10 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 出库发货步骤
@@ -73,7 +74,10 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
     // #7 冻结费用
     FREEZE_BALANCE,
 
-    // #8 更新发货指令
+    // #8 冻结库存（转运出库，集运出库）
+    FREEZE_INVENTORY,
+
+    // #9 更新发货指令
     SHIPMENT_SHIPPING,
 
     /**
@@ -102,6 +106,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         map.put(THAW_BALANCE.name(), new ThawBalanceHandle());
         map.put(PRC_PRICING.name(), new PrcPricingHandle());
         map.put(FREEZE_BALANCE.name(), new FreezeBalanceHandle());
+        map.put(FREEZE_INVENTORY.name(), new FreezeBalanceHandle());
         map.put(SHIPMENT_SHIPPING.name(), new ShipmentShippingHandle());
         map.put(END.name(), new EndHandle());
         return map;
@@ -649,10 +654,74 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         }
     }
 
+    static class FreezeInventoryHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return SHIPMENT_SHIPPING;
+        }
+
+        @Override
+        public ApplicationState quoState() {
+            return FREEZE_INVENTORY;
+        }
+
+        @Override
+        public void handle(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            String orderType = delOutbound.getOrderType();
+            // 只有转运出库，集运出库业务才可以处理
+            if (!DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+                return;
+            }
+            List<DelOutboundDetail> details = delOutboundWrapperContext.getDetailList();
+            if (CollectionUtils.isEmpty(details)) {
+                return;
+            }
+            InventoryOperateListDto operateListDto = new InventoryOperateListDto();
+            operateListDto.setInvoiceNo(delOutbound.getOrderNo());
+            operateListDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
+            for (DelOutboundDetail detail : details) {
+                DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
+            }
+            Collection<InventoryOperateDto> inventoryOperateDtos = inventoryOperateDtoMap.values();
+            ArrayList<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtos);
+            operateListDto.setOperateList(operateList);
+            try {
+                DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, operateList});
+                InventoryFeignClientService inventoryFeignClientService = SpringUtils.getBean(InventoryFeignClientService.class);
+                inventoryFeignClientService.freeze(operateListDto);
+            } catch (CommonException e) {
+                logger.error(e.getMessage(), e);
+                throw e;
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new CommonException("999", "冻结库存操作失败");
+            }
+        }
+
+        @Override
+        public void rollback(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.RK_BRV_FREEZE_INVENTORY.listener(delOutbound);
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            delOutboundService.unFreeze(delOutbound.getOrderType(), delOutbound.getOrderNo(), delOutbound.getWarehouseCode());
+            super.rollback(context);
+        }
+
+        @Override
+        public ApplicationState nextState() {
+            return SHIPMENT_SHIPPING;
+        }
+    }
+
     static class ShipmentShippingHandle extends CommonApplicationHandle {
         @Override
         public ApplicationState preState() {
-            return FREEZE_BALANCE;
+            return FREEZE_INVENTORY;
         }
 
         @Override
