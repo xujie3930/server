@@ -424,7 +424,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             delOutbound.setTrackingAcquireType("");
-            delOutbound.setShipmentService("");
             super.rollback(context);
         }
 
