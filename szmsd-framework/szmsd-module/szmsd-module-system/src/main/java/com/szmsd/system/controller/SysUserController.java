@@ -465,6 +465,21 @@ public class SysUserController extends BaseController {
         return toOk(userService.resetPwd(user));
     }
 
+    @Log(title = "用户管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/resetPwdBySeller")
+    @ApiOperation(httpMethod = "PUT", value = "重置密码")
+    public R<Integer> resetPwdBySeller(@RequestBody SysUserDto userDto) {
+        if (StringUtils.isEmpty(userDto.getSellerCode())
+            || StringUtils.isEmpty(userDto.getPassword())) {
+            return R.failed("非法操作");
+        }
+        SysUser user = new SysUser();
+        BeanUtils.copyBeanProp(user, userDto);
+        user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
+        user.setUpdateByName(SecurityUtils.getUsername());
+        return toOk(userService.resetPwdBySeller(user));
+    }
+
     /**
      * 状态修改
      */
