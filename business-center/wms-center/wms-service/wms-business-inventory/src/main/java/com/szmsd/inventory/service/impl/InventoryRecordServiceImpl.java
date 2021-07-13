@@ -55,6 +55,11 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
     }
 
     @Override
+    public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, Integer quantity, String receiptNo) {
+        this.saveLogs(type, beforeInventory, afterInventory, receiptNo, null, null, quantity, "");
+    }
+
+    @Override
     public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity) {
         this.saveLogs(type, beforeInventory, afterInventory, receiptNo, operator, operateOn, quantity, "");
     }
