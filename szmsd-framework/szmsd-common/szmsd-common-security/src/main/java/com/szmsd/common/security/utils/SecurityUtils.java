@@ -25,7 +25,11 @@ public class SecurityUtils
      */
     public static String getUsername()
     {
-        return getLoginUser().getUsername();
+        LoginUser loginUser = getLoginUser();
+        if (null != loginUser) {
+            return loginUser.getUsername();
+        }
+        return "";
     }
 
     /**

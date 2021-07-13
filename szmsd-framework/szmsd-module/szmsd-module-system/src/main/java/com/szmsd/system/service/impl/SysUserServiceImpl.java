@@ -414,6 +414,11 @@ public class SysUserServiceImpl implements ISysUserService {
         return userMapper.updateUser(user);
     }
 
+    @Override
+    public int resetPwdBySeller(SysUser user) {
+        return userMapper.updateUserBySeller(user);
+    }
+
     /**
      * 重置用户密码
      *

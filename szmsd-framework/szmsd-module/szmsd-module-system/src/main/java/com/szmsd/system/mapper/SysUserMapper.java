@@ -56,6 +56,14 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     public int updateUser(SysUser user);
 
     /**
+     * 修改用户信息，根据客户代码
+     *
+     * @param user 用户信息
+     * @return 结果
+     */
+    public int updateUserBySeller(SysUser user);
+
+    /**
      * 修改用户头像
      *
      * @param userName 用户名
