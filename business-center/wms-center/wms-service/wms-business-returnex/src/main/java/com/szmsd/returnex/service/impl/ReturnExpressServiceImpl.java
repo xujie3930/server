@@ -442,6 +442,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 inventoryAdjustmentDTO.setWarehouseCode(warehouseCode);
                 inventoryAdjustmentDTO.setSellerCode(sellerCode);
                 inventoryAdjustmentDTO.setQuantity(skuAddNum);
+                inventoryAdjustmentDTO.setFormReturn(true);
+                inventoryAdjustmentDTO.setReceiptNo(returnProcessingReqDTO.getReturnNo());
                 log.info("拆包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
                 inventoryFeignService.adjustment(inventoryAdjustmentDTO);
             });
@@ -462,6 +464,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             inventoryAdjustmentDTO.setWarehouseCode(warehouseCode);
             inventoryAdjustmentDTO.setSku(sku);
             inventoryAdjustmentDTO.setSellerCode(sellerCode);
+            inventoryAdjustmentDTO.setFormReturn(true);
+            inventoryAdjustmentDTO.setReceiptNo(returnProcessingReqDTO.getReturnNo());
             log.info("整包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
             inventoryFeignService.adjustment(inventoryAdjustmentDTO);
 //            });
