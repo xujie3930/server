@@ -319,7 +319,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         boolean reduce = LocalLanguageEnum.INVENTORY_RECORD_TYPE_6 == localLanguageEnum;
         AssertUtil.isTrue(increase || reduce, "调整类型有误");
         quantity = increase ? quantity : -quantity;
-
+        if (null != inventoryAdjustmentDTO.getFormReturn() && inventoryAdjustmentDTO.getFormReturn()) localLanguageEnum = LocalLanguageEnum.INVENTORY_RECORD_TYPE_7;
         Lock lock = new ReentrantLock(true);
         try {
             lock.lock();
@@ -345,7 +345,8 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                 BeanUtils.copyProperties(inventory,before);
                 before.setTotalInventory(0).setTotalInbound(0);
                 // 记录库存日志
-                iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, inventory, quantity);
+                //iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, inventory, quantity);
+                iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, inventory, quantity, inventoryAdjustmentDTO.getReceiptNo());
                 return;
             }
             int afterTotalInventory = before.getTotalInventory() + quantity;
@@ -357,7 +358,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             this.updateById(after);
 
             // 记录库存日志
-            iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, after, quantity);
+            iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, after, quantity, inventoryAdjustmentDTO.getReceiptNo());
         } finally {
             lock.unlock();
         }
