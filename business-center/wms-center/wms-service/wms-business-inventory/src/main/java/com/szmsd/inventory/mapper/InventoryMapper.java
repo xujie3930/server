@@ -3,6 +3,7 @@ package com.szmsd.inventory.mapper;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
@@ -14,7 +15,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 public interface InventoryMapper extends BaseMapper<Inventory> {
-
+    @DataScope("t.cus_code")
     List<InventorySkuVO> selectListVO(InventorySkuQueryDTO inventorySkuQueryDTO);
 
     /**
