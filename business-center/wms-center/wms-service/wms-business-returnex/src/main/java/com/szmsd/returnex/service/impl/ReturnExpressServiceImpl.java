@@ -249,21 +249,23 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @param returnExpressAddDTO
      */
     private void handleExpectedCreate(ReturnExpressAddDTO returnExpressAddDTO) {
-        //判断如果是待提审状态的订单则不能提交
-        DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
-        delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
-        TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);
-        if (page != null && page.getCode() == 200) {
-            List<DelOutboundListVO> rows = page.getRows();
-            if (CollectionUtils.isNotEmpty(rows)) {
-                DelOutboundListVO delOutboundListVO = rows.get(0);
-                boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.COMPLETED.getCode());
-                AssertUtil.isTrue(equals, "该原出库单号未完成/不存在!");
+        //判断如果是待提审状态的订单则不能提交 外部渠道退件，不用校验
+        if (!"070003".equals(returnExpressAddDTO.getReturnType())){
+            DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
+            delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
+            TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);
+            if (page != null && page.getCode() == 200) {
+                List<DelOutboundListVO> rows = page.getRows();
+                if (CollectionUtils.isNotEmpty(rows)) {
+                    DelOutboundListVO delOutboundListVO = rows.get(0);
+                    boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.COMPLETED.getCode());
+                    AssertUtil.isTrue(equals, "该原出库单号未完成/不存在!");
+                } else {
+                    throw new BaseException("该原出库单号不存在!");
+                }
             } else {
-                throw new BaseException("该原出库单号不存在!");
+                throw new BaseException("获取原出库单信息失败,请重试!");
             }
-        } else {
-            throw new BaseException("获取原出库单信息失败,请重试!");
         }
         // 创建退报单 推给VMS仓库
         CreateExpectedReqDTO createExpectedReqDTO = returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class);
