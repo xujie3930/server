@@ -9,7 +9,7 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.putinstorage.annotation.InboundReceiptLog;
 import com.szmsd.putinstorage.domain.InboundReceiptRecord;
-import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
+import com.szmsd.putinstorage.enums.RecordEnum;
 import com.szmsd.putinstorage.service.InboundReceiptRecordAsyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,12 +61,12 @@ public class InboundReceiptRecordAspect {
         Method targetMethod = methodSignature.getMethod();
 
         InboundReceiptLog recordAnnotation = targetMethod.getDeclaredAnnotation(InboundReceiptLog.class);
-        InboundReceiptRecordEnum recordEnum = recordAnnotation.record();
+        RecordEnum recordEnum = recordAnnotation.record();
         Object arg = point.getArgs()[0];
 
         InboundReceiptRecord inboundReceiptRecord = new InboundReceiptRecord();
         inboundReceiptRecord.setType(recordEnum.getType());
-        inboundReceiptRecord.setRemark(getStr(recordEnum.get(null)));
+        inboundReceiptRecord.setRemark(getStr(recordEnum.getFunc(null)));
 
         if (arg instanceof String) {
             inboundReceiptRecord.setWarehouseNo(arg.toString());
@@ -90,7 +90,7 @@ public class InboundReceiptRecordAspect {
                 params.add(sourceMap.get(reflexFill) + "");
             }
         }
-        inboundReceiptRecord.setRemark(recordEnum.get(params));
+        inboundReceiptRecord.setRemark(recordEnum.getFunc(params));
 
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (StringUtils.isNotEmpty(recordEnum.getCreateBy())) {

@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.feign.BasFeignService;
+import com.szmsd.bas.api.feign.BaseProductFeignService;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -77,6 +80,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     @Resource
     private BasFeignService basFeignService;
+
+    @Resource
+    private BaseProductFeignService baseProductFeignService;
 
     @Resource
     private IBasFeignClientService iBasFeignClientService;
@@ -243,21 +249,23 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @param returnExpressAddDTO
      */
     private void handleExpectedCreate(ReturnExpressAddDTO returnExpressAddDTO) {
-        //判断如果是待提审状态的订单则不能提交
-        DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
-        delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
-        TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);
-        if (page!=null && page.getCode() == 200) {
-            List<DelOutboundListVO> rows = page.getRows();
-            if (CollectionUtils.isNotEmpty(rows)) {
-                DelOutboundListVO delOutboundListVO = rows.get(0);
-                boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.REVIEWED.getCode());
-                AssertUtil.isTrue(!equals, "该原出库单号未提审/不存在!");
+        //判断如果是待提审状态的订单则不能提交 外部渠道退件，不用校验
+        if (!"070003".equals(returnExpressAddDTO.getReturnType())){
+            DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
+            delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
+            TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);
+            if (page != null && page.getCode() == 200) {
+                List<DelOutboundListVO> rows = page.getRows();
+                if (CollectionUtils.isNotEmpty(rows)) {
+                    DelOutboundListVO delOutboundListVO = rows.get(0);
+                    boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.COMPLETED.getCode());
+                    AssertUtil.isTrue(equals, "该原出库单号未完成/不存在!");
+                } else {
+                    throw new BaseException("该原出库单号不存在!");
+                }
             } else {
-                AssertUtil.isTrue(false, "该原出库单号不存在!");
+                throw new BaseException("获取原出库单信息失败,请重试!");
             }
-        } else {
-            throw new BaseException("获取原出库单信息失败,请重试!");
         }
         // 创建退报单 推给VMS仓库
         CreateExpectedReqDTO createExpectedReqDTO = returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class);
@@ -420,18 +428,24 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             // 把details里面的sku 更新到对应的库存管理的数量里面
             List<String> collect = goodVOList.stream().map(ReturnExpressGoodVO::getPutawaySku).collect(Collectors.toList());
             String sku = String.join(",", collect);
-            TableDataInfo<InventorySkuVO> page = inventoryFeignService.page(warehouseCode, sku, sellerCode, collect.size());
-            AssertUtil.isTrue(page.getCode() == 200, "获取库存信息失败!");
-            List<InventorySkuVO> rows = page.getRows();
+            //2021-07-06取消 查询，没有的sku会在之前的校验，sku没有库存信息会 无法更新
+//            TableDataInfo<InventorySkuVO> page = inventoryFeignService.page(warehouseCode, sku, sellerCode, collect.size());
+//            log.info("warehouseCode:{},sku:{},sellerCode:{},查询到的商品sku信息: {}", warehouseCode, sku, sellerCode, JSONObject.toJSONString(page.getRows()));
+//            AssertUtil.isTrue(page.getCode() == 200, "获取库存信息失败!");
+//            List<InventorySkuVO> rows = page.getRows();
             Map<String, Integer> needAddSkuNum = goodVOList.stream().collect(Collectors.toMap(ReturnExpressGoodVO::getPutawaySku, ReturnExpressGoodVO::getPutawayQty));
             //根据sku 更新库存
-            rows.forEach(x -> {
+            collect.forEach(x -> {
                 InventoryAdjustmentDTO inventoryAdjustmentDTO = new InventoryAdjustmentDTO();
-                BeanUtils.copyProperties(x, inventoryAdjustmentDTO);
                 //一直为增加
+                inventoryAdjustmentDTO.setSku(x);
                 inventoryAdjustmentDTO.setAdjustment("5");
-                Integer skuAddNum = needAddSkuNum.get(x.getSku());
+                Integer skuAddNum = needAddSkuNum.get(x);
+                inventoryAdjustmentDTO.setWarehouseCode(warehouseCode);
+                inventoryAdjustmentDTO.setSellerCode(sellerCode);
                 inventoryAdjustmentDTO.setQuantity(skuAddNum);
+                inventoryAdjustmentDTO.setFormReturn(true);
+                inventoryAdjustmentDTO.setReceiptNo(returnProcessingReqDTO.getReturnNo());
                 log.info("拆包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
                 inventoryFeignService.adjustment(inventoryAdjustmentDTO);
             });
@@ -439,19 +453,24 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         if (returnExpressDetail.getProcessType().equals(configStatus.getWholePackageOnShelves())) {
             log.info("整包上架--上架的商品需要更新库存管理的sku库存数量 + 1 ");
             String sku = returnExpressDetail.getSku();
-            TableDataInfo<InventorySkuVO> page = inventoryFeignService.page(warehouseCode, sku, sellerCode, 1);
-            AssertUtil.isTrue(page.getCode() == 200, "获取库存信息失败!");
-            List<InventorySkuVO> rows = page.getRows();
-            //整包上架直接+1
-            rows.forEach(x -> {
-                InventoryAdjustmentDTO inventoryAdjustmentDTO = new InventoryAdjustmentDTO();
-                BeanUtils.copyProperties(x, inventoryAdjustmentDTO);
-                //一直为增加
-                inventoryAdjustmentDTO.setAdjustment("5");
-                inventoryAdjustmentDTO.setQuantity(1);
-                log.info("整包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
-                inventoryFeignService.adjustment(inventoryAdjustmentDTO);
-            });
+//            TableDataInfo<InventorySkuVO> page = inventoryFeignService.page(warehouseCode, sku, sellerCode, 1);
+//            AssertUtil.isTrue(page.getCode() == 200, "获取库存信息失败!");
+//            List<InventorySkuVO> rows = page.getRows();
+//            //整包上架直接+1
+//            rows.forEach(x -> {
+            InventoryAdjustmentDTO inventoryAdjustmentDTO = new InventoryAdjustmentDTO();
+//                BeanUtils.copyProperties(x, inventoryAdjustmentDTO);
+            //一直为增加
+            inventoryAdjustmentDTO.setAdjustment("5");
+            inventoryAdjustmentDTO.setQuantity(1);
+            inventoryAdjustmentDTO.setWarehouseCode(warehouseCode);
+            inventoryAdjustmentDTO.setSku(sku);
+            inventoryAdjustmentDTO.setSellerCode(sellerCode);
+            inventoryAdjustmentDTO.setFormReturn(true);
+            inventoryAdjustmentDTO.setReceiptNo(returnProcessingReqDTO.getReturnNo());
+            log.info("整包上架更新库存数据{}", JSONObject.toJSONString(inventoryAdjustmentDTO));
+            inventoryFeignService.adjustment(inventoryAdjustmentDTO);
+//            });
         }
     }
 
@@ -489,6 +508,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
 
+                .set(ReturnExpressDetail::getSku,expressUpdateDTO.getSku())
                 .set(ReturnExpressDetail::getDealStatus, dealStatus)
                 .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
@@ -499,12 +519,45 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
         List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
         returnExpressGoodService.addOrUpdateGoodInfoBatch(details, expressUpdateDTO.getId());
-
+        //上架处理校验是否属于该用户的sku
+        checkSku(expressUpdateDTO);
         //处理结果推送WMS
         pushSkuDetailsToWMS(expressUpdateDTO, details);
 
         return update;
     }
+
+    /**
+     * 校验该sku是否属于该用户
+     *
+     * @param expressUpdateDTO
+     */
+    private void checkSku(ReturnExpressAddDTO expressUpdateDTO) {
+        List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
+        if (CollectionUtils.isEmpty(details)) {
+            log.info("无商品数据，不校验商品sku");
+        }
+        List<String> skuIdList = details.stream().map(ReturnExpressGoodAddDTO::getPutawaySku).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        log.info("需要上架的：{}", skuIdList);
+        if (CollectionUtils.isEmpty(skuIdList)) return;
+        BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
+        String sellCode = getSellCode();
+        baseProductConditionQueryDto.setSellerCode(sellCode);
+        baseProductConditionQueryDto.setSkus(skuIdList);
+        log.info("查询sku信息 {}", JSONObject.toJSONString(baseProductConditionQueryDto));
+        R<List<BaseProduct>> listR = baseProductFeignService.queryProductList(baseProductConditionQueryDto);
+        AssertUtil.isTrue(HttpStatus.SUCCESS == listR.getCode(), "校验sku异常：" + listR.getMsg());
+        List<BaseProduct> data = listR.getData();
+        List<String> returnIdList = data.stream().map(BaseProduct::getCode).collect(Collectors.toList());
+        log.info("查询到的sku信息：{}", returnIdList);
+        skuIdList.removeAll(returnIdList);
+        if (CollectionUtils.isNotEmpty(skuIdList)) {
+            log.info("未查询到的数据：{}", skuIdList);
+            throw new BaseException("未查询到该SKU: " + String.join(" ", skuIdList) + "数据");
+        }
+
+    }
+
 
     /**
      * 更新前校验

@@ -352,15 +352,18 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      * @param inboundReceiptInfoVO inboundReceiptInfoVO
      */
     private void inbound(InboundReceiptInfoVO inboundReceiptInfoVO) {
-        List<InboundReceiptDetailVO> inboundReceiptDetails = inboundReceiptInfoVO.getInboundReceiptDetails();
-        if(inboundReceiptDetails != null && inboundReceiptDetails.size() > 0) {
-            InboundInventoryInspectionDTO dto = new InboundInventoryInspectionDTO();
-            dto.setCusCode(inboundReceiptInfoVO.getCusCode());
-            dto.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
-            dto.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
-            List<String> collect = inboundReceiptInfoVO.getInboundReceiptDetails().stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.toList());
-            dto.setSkus(collect);
-            inventoryInspectionFeignService.inbound(dto);
+        // 集运入库不验货
+        if(!StringUtils.equals("Collection",inboundReceiptInfoVO.getOrderType())) {
+            List<InboundReceiptDetailVO> inboundReceiptDetails = inboundReceiptInfoVO.getInboundReceiptDetails();
+            if(inboundReceiptDetails != null && inboundReceiptDetails.size() > 0) {
+                InboundInventoryInspectionDTO dto = new InboundInventoryInspectionDTO();
+                dto.setCusCode(inboundReceiptInfoVO.getCusCode());
+                dto.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
+                dto.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
+                List<String> collect = inboundReceiptInfoVO.getInboundReceiptDetails().stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.toList());
+                dto.setSkus(collect);
+                inventoryInspectionFeignService.inbound(dto);
+            }
         }
     }
 

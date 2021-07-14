@@ -176,7 +176,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setLength(delOutbound.getLength());
             updateDelOutbound.setWidth(delOutbound.getWidth());
             updateDelOutbound.setHeight(delOutbound.getHeight());
-            updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
+            // 规格，长*宽*高
+            delOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());
@@ -244,6 +245,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     ChargeWrapper chargeWrapper = responseObject.getObject();
                     ShipmentChargeInfo data = chargeWrapper.getData();
                     PricingPackageInfo packageInfo = data.getPackageInfo();
+                    // 挂号服务
+                    delOutbound.setShipmentService(data.getLogisticsRouteId());
                     // 包裹信息
                     Packing packing = packageInfo.getPacking();
                     delOutbound.setLength(Utils.valueOf(packing.getLength()));
@@ -409,7 +412,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             PricedProductInfo pricedProductInfo = htpPricedProductClientService.info(productCode);
             if (null != pricedProductInfo) {
                 delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
-                delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
                 DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
             } else {
                 // 异常信息
@@ -422,7 +424,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             delOutbound.setTrackingAcquireType("");
-            delOutbound.setShipmentService("");
             super.rollback(context);
         }
 
@@ -558,9 +559,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
             }
             Collection<InventoryOperateDto> inventoryOperateDtos = inventoryOperateDtoMap.values();
-            operateListDto.setOperateList(new ArrayList<>(inventoryOperateDtos));
+            ArrayList<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtos);
+            operateListDto.setOperateList(operateList);
             try {
-                DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, inventoryOperateDtos});
+                DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, operateList});
                 InventoryFeignClientService inventoryFeignClientService = SpringUtils.getBean(InventoryFeignClientService.class);
                 inventoryFeignClientService.freeze(operateListDto);
             } catch (CommonException e) {
@@ -726,7 +728,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setLength(delOutbound.getLength());
             updateDelOutbound.setWidth(delOutbound.getWidth());
             updateDelOutbound.setHeight(delOutbound.getHeight());
-            updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
+            // 规格，长*宽*高
+            delOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());

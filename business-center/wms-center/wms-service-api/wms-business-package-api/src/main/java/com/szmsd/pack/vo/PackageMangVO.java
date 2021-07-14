@@ -39,7 +39,7 @@ public class PackageMangVO {
     @ApiModelProperty(value = "逻辑删除标识；2-已删除，0-未删除", hidden = true)
     private Integer delFlag = 0;
 
-    @Excel(name = "单号")
+    @Excel(name = "单号", width = 20)
     @ApiModelProperty(value = "订单号")
     private String orderNo;
 
@@ -71,7 +71,7 @@ public class PackageMangVO {
         }
     }
 
-    @Excel(name = "地址")
+    @Excel(name = "地址", width = 32)
     @ApiModelProperty(value = "详细地址", required = true)
     private String deliveryAddress;
 
@@ -82,11 +82,10 @@ public class PackageMangVO {
     @ApiModelProperty(value = "联系电话")
     @Excel(name = "联系电话")
     private String linkPhone;
-
+    @Excel(name = "期望收货日期")
     @ApiModelProperty(value = "期望收货日期")
     private LocalDate expectedDeliveryTime;
-
-    @Excel(name = "收货时间")
+    //@Excel(name = "收货时间")
     private LocalDate deliveryTime;
 
     @ApiModelProperty(value = "揽件数量")

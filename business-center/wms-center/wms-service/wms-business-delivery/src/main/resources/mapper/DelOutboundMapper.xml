@@ -137,4 +137,8 @@
         ${ew.customSqlSegment}
     </select>
 
+    <update id="updateTrackingNo">
+        update del_outbound set tracking_no = #{trackingNo} where order_no = #{orderNo}
+    </update>
+
 </mapper>

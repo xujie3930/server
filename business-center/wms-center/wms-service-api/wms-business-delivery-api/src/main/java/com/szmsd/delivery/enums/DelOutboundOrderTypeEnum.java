@@ -13,7 +13,8 @@ public enum DelOutboundOrderTypeEnum {
     SELF_PICK("SelfPick", "自提出库单"),
     PACKAGE_TRANSFER("PackageTransfer", "转运出库单"),
     COLLECTION("Collection", "集运出库单"),
-    NEW_SKU("NewSku", "新SKU上架出库"),
+    NEW_SKU("NewSku", "组合SKU上架出库单"),
+    SPLIT_SKU("SplitSku", "拆分SKU上架出库单"),
     BATCH("Batch", "批量出库单"),
     SALES("Sales", "普通销售订单"),
 

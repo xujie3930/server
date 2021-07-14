@@ -25,6 +25,9 @@ public class CalcShipmentFeeCommand implements Serializable {
     // 发货类型---普货，电池，粉末等
     private String shipmentType;
 
+    // 增值税号
+    private String ioss;
+
     // 包裹信息
     private List<PackageInfo> packageInfos;
 

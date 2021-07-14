@@ -1,16 +1,19 @@
 package com.szmsd.system.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.system.domain.dto.SysMenuDto;
 import com.szmsd.system.domain.dto.SysMenuRoleDto;
+import com.szmsd.system.domain.vo.RouterVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +40,8 @@ import javax.annotation.Resource;
 public class SysMenuController extends BaseController {
     @Resource
     private ISysMenuService menuService;
+    @Autowired
+    private BasSellerFeignService basSellerFeignService;
 
 
 //    @Resource
@@ -179,6 +184,41 @@ public class SysMenuController extends BaseController {
         Long userId = loginUser.getUserId();
 //        Long userId = 140L;
         List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId, type);
-        return R.ok(menuService.buildMenus(menus));
+        List<RouterVo> list = menuService.buildMenus(menus);
+        if (CollectionUtils.isEmpty(list)) {
+            return R.ok();
+        }
+        // 查询实名认证信息，没有实名认证或者实名不通过的客户，不能查看仓储菜单和财务菜单
+        // 实名状态 1未实名 2审核中 3实名通过
+        String sellerCode = loginUser.getSellerCode();
+        boolean filter = false;
+        // 又卖家编号的时候才处理
+        if (StringUtils.isNotEmpty(sellerCode)) {
+            // 查询实名状态
+            R<String> r = this.basSellerFeignService.getRealState(sellerCode);
+            // 如果不是实名通过，就需要过滤
+            if (null != r && !"3".equals(r.getData())) {
+                filter = true;
+            }
+            if (filter) {
+                Set<String> set = new HashSet<>(8);
+                set.add("storage"); // 仓储
+                set.add("bill"); // 账单
+                set.add("finance"); // 财务
+                for (RouterVo routerVo : list) {
+                    List<RouterVo> children = routerVo.getChildren();
+                    if (CollectionUtils.isNotEmpty(children)) {
+                        for (int i = 0; i < children.size(); i++) {
+                            RouterVo child = children.get(i);
+                            if (set.contains(child.getPath())) {
+                                children.remove(i);
+                                i--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return R.ok(list);
     }
 }

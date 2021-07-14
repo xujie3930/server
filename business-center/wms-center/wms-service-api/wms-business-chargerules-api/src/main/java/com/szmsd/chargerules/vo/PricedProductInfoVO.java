@@ -158,4 +158,10 @@ public class PricedProductInfoVO {
     @ApiModelProperty(value = "白名单")
     private List<String> whiteList;
 
+    @ApiModelProperty(value = "发货规则")
+    private String shipmentRule;
+
+    @ApiModelProperty(value = "装箱规则")
+    private String packingRule;
+
 }

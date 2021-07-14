@@ -1,5 +1,6 @@
 package com.szmsd.inventory.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -9,6 +10,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import com.szmsd.common.core.utils.DateUtils;
@@ -25,9 +27,11 @@ import com.szmsd.inventory.domain.vo.InventoryVO;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
+import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -315,14 +319,36 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         boolean reduce = LocalLanguageEnum.INVENTORY_RECORD_TYPE_6 == localLanguageEnum;
         AssertUtil.isTrue(increase || reduce, "调整类型有误");
         quantity = increase ? quantity : -quantity;
-
+        if (null != inventoryAdjustmentDTO.getFormReturn() && inventoryAdjustmentDTO.getFormReturn()) localLanguageEnum = LocalLanguageEnum.INVENTORY_RECORD_TYPE_7;
         Lock lock = new ReentrantLock(true);
         try {
             lock.lock();
 
             Inventory before = this.getOne(new QueryWrapper<Inventory>().lambda().eq(Inventory::getSku, sku).eq(Inventory::getWarehouseCode, warehouseCode));
-            AssertUtil.notNull(before, warehouseCode + "仓没有[" + sku + "]库存记录");
+            //AssertUtil.notNull(before, warehouseCode + "仓没有[" + sku + "]库存记录");
+            if (null == before && increase) {
+                //String loginSellerCode = Optional.ofNullable(remoteComponent.getLoginUserInfo()).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("获取用户信息失败!"));
+                String loginSellerCode = inventoryAdjustmentDTO.getSellerCode();
+                Integer addQut = inventoryAdjustmentDTO.getQuantity();
+                Inventory inventory = new Inventory();
+                inventory.setSku(inventoryAdjustmentDTO.getSku())
+                        .setWarehouseCode(inventoryAdjustmentDTO.getWarehouseCode())
+                        .setAvailableInventory(addQut)
+                        .setCusCode(loginSellerCode)
 
+                        .setTotalInventory(addQut)
+                        .setTotalInbound(addQut);
+                baseMapper.insert(inventory);
+
+                log.info(warehouseCode + "仓没有[" + sku + "]库存记录 新增sku 信息 {}", JSONObject.toJSONString(inventory));
+                before = new Inventory();
+                BeanUtils.copyProperties(inventory,before);
+                before.setTotalInventory(0).setTotalInbound(0);
+                // 记录库存日志
+                //iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, inventory, quantity);
+                iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, inventory, quantity, inventoryAdjustmentDTO.getReceiptNo());
+                return;
+            }
             int afterTotalInventory = before.getTotalInventory() + quantity;
             int afterAvailableInventory = before.getAvailableInventory() + quantity;
             AssertUtil.isTrue(afterTotalInventory > 0 && afterAvailableInventory > 0, warehouseCode + "仓[" + sku + "]可用库存调减数量不足[" + before.getAvailableInventory() + "]");
@@ -332,7 +358,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             this.updateById(after);
 
             // 记录库存日志
-            iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, after, quantity);
+            iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, after, quantity, inventoryAdjustmentDTO.getReceiptNo());
         } finally {
             lock.unlock();
         }

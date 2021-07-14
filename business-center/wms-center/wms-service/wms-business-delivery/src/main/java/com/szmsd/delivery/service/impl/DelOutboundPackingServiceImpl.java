@@ -195,9 +195,20 @@ public class DelOutboundPackingServiceImpl extends ServiceImpl<DelOutboundPackin
                 p.setOrderNo(orderNo);
                 p.setPackingNo(infoDto.getContainerCode());
                 p.setType(DelOutboundPackingTypeConstant.TYPE_2);
+                List<ContainerDetailDto> containerDetailList = infoDto.getContainerDetailList();
+                // 累加SKU数量
+                Long qty = 0L;
+                if (CollectionUtils.isNotEmpty(containerDetailList)) {
+                    for (ContainerDetailDto detailDto : containerDetailList) {
+                        if (null == detailDto || null == detailDto.getQty()) {
+                            continue;
+                        }
+                        qty += detailDto.getQty();
+                    }
+                }
+                p.setQty(qty);
                 // 保存装箱信息
                 this.save(p);
-                List<ContainerDetailDto> containerDetailList = infoDto.getContainerDetailList();
                 if (CollectionUtils.isNotEmpty(containerDetailList)) {
                     List<DelOutboundPackingDetail> detailList = BeanMapperUtil.mapList(containerDetailList, DelOutboundPackingDetail.class);
                     for (DelOutboundPackingDetail detail : detailList) {
@@ -211,6 +222,16 @@ public class DelOutboundPackingServiceImpl extends ServiceImpl<DelOutboundPackin
                 this.delOutboundPackingDetailService.saveBatch(details);
             }
         }
+    }
+
+    @Override
+    public List<DelOutboundPacking> packageListByOrderNo(String orderNo, int type) {
+        // 查询装箱信息
+        List<DelOutboundPacking> packingList = this.list(Wrappers.<DelOutboundPacking>lambdaQuery().eq(DelOutboundPacking::getOrderNo, orderNo).eq(DelOutboundPacking::getType, type));
+        if (CollectionUtils.isEmpty(packingList)) {
+            return Collections.emptyList();
+        }
+        return packingList;
     }
 }
 

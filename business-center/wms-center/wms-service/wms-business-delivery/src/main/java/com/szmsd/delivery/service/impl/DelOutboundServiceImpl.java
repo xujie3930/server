@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
@@ -109,6 +110,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private IDelOutboundPackingService delOutboundPackingService;
     @Resource
     private BasRegionFeignService basRegionFeignService;
+    @Autowired
+    private IDelOutboundCombinationService delOutboundCombinationService;
 
     /**
      * 查询出库单模块
@@ -173,6 +176,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (DelOutboundConstant.CONTAINER_STATE_1 == containerState) {
                 delOutboundVO.setContainerList(this.delOutboundPackingService.listByOrderNo(orderNo, DelOutboundPackingTypeConstant.TYPE_2));
             }
+        }
+        // 组合，拆分SKU
+        if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
+                || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+            delOutboundVO.setCombinations(this.delOutboundCombinationService.listByOrderNo(orderNo));
         }
         return delOutboundVO;
     }
@@ -325,6 +333,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 箱标文件
                 AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
                 this.remoteAttachmentService.saveAndUpdate(batchLabel);
+            }
+            if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+                // 组合信息
+                this.delOutboundCombinationService.save(orderNo, dto.getCombinations());
             }
             return insert;
         } catch (Exception e) {
@@ -534,6 +547,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
                 this.remoteAttachmentService.saveAndUpdate(batchLabel);
             }
+            if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+                // 组合信息
+                this.delOutboundCombinationService.update(orderNo, dto.getCombinations());
+            }
             // 更新
             int i = baseMapper.updateById(inputDelOutbound);
             DelOutboundOperationLogEnum.UPDATE.listener(delOutbound);
@@ -581,6 +599,24 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getIsPrint, true);
         updateWrapper.eq(DelOutbound::getId, dto.getId());
         return super.update(updateWrapper);
+    }
+
+    @Transactional
+    @Override
+    public int batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list) {
+        String sqlStatement = this.sqlStatement(SqlMethod.UPDATE);
+        int size = list.size();
+        executeBatch(sqlSession -> {
+            int i = 0;
+            for (DelOutboundBatchUpdateTrackingNoDto dto : list) {
+                sqlSession.update("updateTrackingNo", dto);
+                if ((i % 100 == 0) || i == size) {
+                    sqlSession.flushStatements();
+                }
+                i++;
+            }
+        });
+        return size;
     }
 
     /**
