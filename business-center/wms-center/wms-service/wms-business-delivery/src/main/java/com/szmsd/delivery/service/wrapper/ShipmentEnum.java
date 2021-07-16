@@ -437,7 +437,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                                 logger.error(e.getMessage(), e);
                                 throw new CommonException("999", "合并箱标文件，标签文件失败");
                             }
+                        } else {
+                            throw new CommonException("999", "箱标文件未上传");
                         }
+                    } else {
+                        throw new CommonException("999", "箱标文件未上传");
                     }
                 }
             }
