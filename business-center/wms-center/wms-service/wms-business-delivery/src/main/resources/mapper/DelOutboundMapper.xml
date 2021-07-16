@@ -43,7 +43,8 @@
             o.create_by_name,
             o.create_time,
             a.consignee,
-            o.is_print
+            o.is_print,
+            o.is_label_box
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}

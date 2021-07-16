@@ -100,4 +100,7 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "是否打印标签")
     private Boolean isPrint;
+
+    @ApiModelProperty(value = "是否贴箱标")
+    private Boolean isLabelBox;
 }
