@@ -403,7 +403,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:uploadBoxLabel')")
     @PostMapping("/uploadBoxLabel")
     @ApiOperation(value = "出库管理 - 上传箱标", position = 1400)
-    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundUpdateBoxLabelDto")
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundUploadBoxLabelDto")
     public R<Integer> uploadBoxLabel(@RequestBody @Validated DelOutboundUploadBoxLabelDto dto) {
         return R.ok(this.delOutboundService.uploadBoxLabel(dto));
     }
