@@ -1128,6 +1128,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
     }
 
+    @Override
+    public int uploadBoxLabel(DelOutboundUploadBoxLabelDto dto) {
+        // 箱标文件
+        AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(dto.getOrderNo()).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
+        this.remoteAttachmentService.saveAndUpdate(batchLabel);
+        return 1;
+    }
+
     @Deprecated
     @Override
     public List<DelOutboundDetailVO> importDetail(String warehouseCode, String sellerCode, List<DelOutboundDetailImportDto> dtoList) {

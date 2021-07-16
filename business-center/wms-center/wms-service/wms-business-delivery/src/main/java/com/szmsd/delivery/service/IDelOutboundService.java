@@ -269,6 +269,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     void label(HttpServletResponse response, DelOutboundLabelDto dto);
 
     /**
+     * 上传箱标
+     *
+     * @param dto dto
+     * @return int
+     */
+    int uploadBoxLabel(DelOutboundUploadBoxLabelDto dto);
+
+    /**
      * sku导入
      *
      * @param warehouseCode warehouseCode
