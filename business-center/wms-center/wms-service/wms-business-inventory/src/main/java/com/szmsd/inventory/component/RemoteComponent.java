@@ -7,14 +7,18 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasSellerEmailDto;
 import com.szmsd.bas.dto.BaseProductBatchQueryDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
+import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -137,5 +141,21 @@ public class RemoteComponent {
     public List<BasSellerEmailDto> queryCusAll() {
         R<List<BasSellerEmailDto>> listR = basSellerFeignService.queryAllSellerCodeAndEmail();
         return listR == null ? null : listR.getData();
+    }
+    public InboundReceiptInfoVO getReceiptInfo(String warehouseNo){
+        R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
+        AssertUtil.isTrue(info.getCode()== HttpStatus.SUCCESS,"查询详情异常");
+        return info.getData();
+    }
+    /**
+     * 获取入库信息详情
+     * @param warehouseNo
+     */
+    public List<InboundReceiptVO> getReceiptInfoList(String purshOrderNo){
+        InboundReceiptQueryDTO inboundReceiptQueryDTO = new InboundReceiptQueryDTO();
+        inboundReceiptQueryDTO.setOrderNo(purshOrderNo);
+        R<List<InboundReceiptVO>> info = inboundReceiptFeignService.list(inboundReceiptQueryDTO);
+        AssertUtil.isTrue(info.getCode()== HttpStatus.SUCCESS,"查询详情异常");
+        return info.getData();
     }
 }
