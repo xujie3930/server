@@ -70,7 +70,13 @@ public class InboundReceiptController extends BaseController {
         List<InboundReceiptVO> list = iInboundReceiptService.selectList(queryDTO);
         return getDataTable(list);
     }
-
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
+    @GetMapping("/receipt/list")
+    @ApiOperation(value = "查询", notes = "入库管理")
+    public R<List<InboundReceiptVO>> list(@RequestBody InboundReceiptQueryDTO queryDTO) {
+        List<InboundReceiptVO> list = iInboundReceiptService.selectList(queryDTO);
+        return R.ok(list);
+    }
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @PostMapping("/receipt/saveOrUpdate")
     @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
