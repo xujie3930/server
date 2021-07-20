@@ -181,6 +181,24 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
                 || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
             delOutboundVO.setCombinations(this.delOutboundCombinationService.listByOrderNo(orderNo));
+            // 查询SKU可用数量
+            if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+                InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
+                inventoryAvailableQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                inventoryAvailableQueryDto.setCusCode(delOutbound.getSellerCode());
+                List<String> skus = new ArrayList<>();
+                skus.add(delOutbound.getNewSku());
+                inventoryAvailableQueryDto.setSkus(skus);
+                // 可用库存为0的也需要查询出来
+                inventoryAvailableQueryDto.setQueryType(2);
+                List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+                if (CollectionUtils.isNotEmpty(availableList)) {
+                    InventoryAvailableListVO availableListVO = availableList.get(0);
+                    if (null != availableListVO) {
+                        delOutboundVO.setAvailableInventory(availableListVO.getAvailableInventory());
+                    }
+                }
+            }
         }
         return delOutboundVO;
     }
