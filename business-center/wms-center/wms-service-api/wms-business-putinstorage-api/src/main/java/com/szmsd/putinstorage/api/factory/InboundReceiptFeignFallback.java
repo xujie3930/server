@@ -8,6 +8,7 @@ import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.domain.vo.InboundCountVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +41,11 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
 
             @Override
             public R<List<InboundCountVO>> statistics(InboundReceiptQueryDTO queryDTO) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<InboundReceiptVO>> list(InboundReceiptQueryDTO queryDTO) {
                 return R.convertResultJson(throwable);
             }
         };
