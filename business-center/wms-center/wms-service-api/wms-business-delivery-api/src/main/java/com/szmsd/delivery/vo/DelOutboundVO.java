@@ -117,6 +117,9 @@ public class DelOutboundVO implements Serializable {
     @ApiModelProperty(value = "增值税号")
     private String ioss;
 
+    @ApiModelProperty(value = "可用数量，拆分SKU使用到，前端验证")
+    private Integer availableInventory;
+
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressVO address;
 
