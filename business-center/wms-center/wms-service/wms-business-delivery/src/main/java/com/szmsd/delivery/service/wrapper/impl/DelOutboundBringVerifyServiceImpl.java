@@ -537,6 +537,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
             }
             details = new ArrayList<>(shipmentDetailInfoDtoMap.values());
+            // 组合SKU特殊处理
+            if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+                PackingRequirementInfoDto packingRequirementInfoDto = new PackingRequirementInfoDto();
+                packingRequirementInfoDto.setQty(delOutbound.getBoxNumber());
+                packingRequirementInfoDto.setDetails(details);
+                createShipmentRequestDto.setPackingRequirement(packingRequirementInfoDto);
+            }
         } else {
             // 查询sku详细信息
             List<BaseProduct> productList = delOutboundWrapperContext.getProductList();

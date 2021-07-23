@@ -554,12 +554,22 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             InventoryOperateListDto operateListDto = new InventoryOperateListDto();
             operateListDto.setInvoiceNo(delOutbound.getOrderNo());
             operateListDto.setWarehouseCode(delOutbound.getWarehouseCode());
-            Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
-            for (DelOutboundDetail detail : details) {
-                DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
+            ArrayList<InventoryOperateDto> operateList;
+            // 拆分SKU特殊处理，拆分是主SKU出库，明细入库，这里逻辑调整一下
+            if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+                InventoryOperateDto inventoryOperateDto = new InventoryOperateDto();
+                inventoryOperateDto.setSku(delOutbound.getNewSku());
+                inventoryOperateDto.setNum(Math.toIntExact(delOutbound.getBoxNumber()));
+                operateList = new ArrayList<>(1);
+                operateList.add(inventoryOperateDto);
+            } else {
+                Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
+                for (DelOutboundDetail detail : details) {
+                    DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
+                }
+                Collection<InventoryOperateDto> inventoryOperateDtos = inventoryOperateDtoMap.values();
+                operateList = new ArrayList<>(inventoryOperateDtos);
             }
-            Collection<InventoryOperateDto> inventoryOperateDtos = inventoryOperateDtoMap.values();
-            ArrayList<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtos);
             operateListDto.setOperateList(operateList);
             try {
                 DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, operateList});
