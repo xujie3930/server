@@ -282,18 +282,18 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         totalDeclareQty += declareQty;
                     }
                 }
-                // 封装请求参数
+                // 封装请求参数 送货方式：自送货到仓，入库方式：新产品入库，类别：SKU
                 CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
                 createInboundReceiptDTO
                         .setDeliveryNo("")
-                        .setWarehouseMethodCode("")
+                        .setWarehouseMethodCode("055006")
                         .setOrderNo("")
                         .setCusCode(delOutbound.getSellerCode())
                         .setVat("")
                         .setWarehouseCode(delOutbound.getWarehouseCode())
                         .setOrderType(InboundReceiptEnum.OrderType.NEW_SKU.getValue())
-                        .setWarehouseCategoryCode("")
-                        .setDeliveryWayCode("")
+                        .setWarehouseCategoryCode("056001")
+                        .setDeliveryWayCode("053002")
                         .setTotalDeclareQty(totalDeclareQty)
                         .setTotalPutQty(0)
                         .setRemark(delOutbound.getRemark());
