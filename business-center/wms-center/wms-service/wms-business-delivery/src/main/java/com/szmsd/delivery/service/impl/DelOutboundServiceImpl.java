@@ -603,10 +603,28 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         inventoryOperateListDto.setWarehouseCode(warehouseCode);
         List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
         inventoryOperateListDto.setOperateList(operateList);
-        // 取消冻结
-        Integer deduction = this.inventoryFeignClientService.unFreeze(inventoryOperateListDto);
-        if (null == deduction || deduction < 1) {
-            throw new CommonException("999", "取消冻结库存失败");
+        this.unFreeze(inventoryOperateListDto);
+    }
+
+    @Transactional
+    @Override
+    public void unFreeze(DelOutbound delOutbound) {
+        String orderType = delOutbound.getOrderType();
+        String orderNo = delOutbound.getOrderNo();
+        String warehouseCode = delOutbound.getWarehouseCode();
+        if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(orderType)) {
+            InventoryOperateDto inventoryOperateDto = new InventoryOperateDto();
+            inventoryOperateDto.setSku(delOutbound.getNewSku());
+            inventoryOperateDto.setNum(Math.toIntExact(delOutbound.getBoxNumber()));
+            List<InventoryOperateDto> operateList = new ArrayList<>(1);
+            operateList.add(inventoryOperateDto);
+            InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
+            inventoryOperateListDto.setInvoiceNo(orderNo);
+            inventoryOperateListDto.setWarehouseCode(warehouseCode);
+            inventoryOperateListDto.setOperateList(operateList);
+            this.unFreeze(inventoryOperateListDto);
+        } else {
+            this.unFreeze(orderType, orderNo, warehouseCode);
         }
     }
 
@@ -688,7 +706,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 判断要不要取消冻结库存
                 if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY, BringVerifyEnum.get(bringVerifyState))) {
                     // 取消冻结库存
-                    this.unFreeze(delOutbound1.getOrderType(), orderNo, delOutbound1.getWarehouseCode());
+                    this.unFreeze(delOutbound1);
                 }
                 // 判断要不要取消冻结操作费用
                 if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
@@ -1030,7 +1048,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     // 判断要不要取消冻结库存
                     if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY, BringVerifyEnum.get(bringVerifyState))) {
                         // 取消冻结库存
-                        this.unFreeze(delOutbound.getOrderType(), orderNo, delOutbound.getWarehouseCode());
+                        this.unFreeze(delOutbound);
                     }
                     // 判断要不要取消冻结操作费用
                     if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
@@ -1225,6 +1243,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
         }
         return this.baseMapper.exportList(queryWrapper);
+    }
+
+    /**
+     * 取消冻结库存
+     *
+     * @param inventoryOperateListDto inventoryOperateListDto
+     */
+    private void unFreeze(InventoryOperateListDto inventoryOperateListDto) {
+        // 取消冻结
+        Integer deduction = this.inventoryFeignClientService.unFreeze(inventoryOperateListDto);
+        if (null == deduction || deduction < 1) {
+            throw new CommonException("999", "取消冻结库存失败");
+        }
     }
 
     /**
