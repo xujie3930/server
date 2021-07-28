@@ -374,7 +374,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         String cancelledState = delOutbound.getCancelledState();
         try {
             if (StringUtils.isEmpty(cancelledState)) {
-                this.delOutboundService.unFreeze(delOutbound.getOrderType(), orderNo, delOutbound.getWarehouseCode());
+                this.delOutboundService.unFreeze(delOutbound);
                 cancelledState = "UN_FEE";
             }
             // 销毁，自提，新SKU不扣物流费用
