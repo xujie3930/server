@@ -69,10 +69,10 @@
     <!-- 系统模块日志级别控制  -->
 	<logger name="com.szmsd" level="info" />
 	<!-- Spring日志级别控制  -->
-	<logger name="org.springframework" level="debug" />
+	<logger name="org.springframework" level="error" />
 
 	<!--系统操作日志-->
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="console" />
         <appender-ref ref="file_info" />
         <appender-ref ref="file_error" />
