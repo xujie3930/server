@@ -11,6 +11,7 @@ public enum DelOutboundOrderEnum {
     PACKAGE_TRANSFER("PackageTransfer", "转运出库单"),
     COLLECTION("Collection", "集运出库单"),
     NEW_SKU("NewSku", "新SKU上架出库"),
+    SPLIT_SKU("SplitSku", "拆分SKU上架出库单"),
     BATCH("Batch", "批量出库单"),
     SALES("Sales", "普通销售订单"),
     COLLECTION_MANY_SKU("Collection-manySku", "集运出库单-多SKU"),
