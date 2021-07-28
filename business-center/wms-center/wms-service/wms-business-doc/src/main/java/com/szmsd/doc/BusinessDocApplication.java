@@ -11,7 +11,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @EnableSwaggerBootstrapUI
-@EnableFeignClients
+@EnableFeignClients(basePackages = {"com.szmsd"})
 @EnableHystrix
 @EnableDiscoveryClient
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
