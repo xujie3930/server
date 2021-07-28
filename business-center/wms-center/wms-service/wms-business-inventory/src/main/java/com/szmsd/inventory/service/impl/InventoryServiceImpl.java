@@ -323,7 +323,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         }, (updateConsumer) -> {
             updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() + num);
             updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
-        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_3);
+        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_8);
     }
 
     @Transactional

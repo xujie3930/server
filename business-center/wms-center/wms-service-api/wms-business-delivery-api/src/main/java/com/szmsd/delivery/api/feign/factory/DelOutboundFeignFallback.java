@@ -79,6 +79,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public TableDataInfo<DelOutboundListVO> page(DelOutboundListQueryDto queryDto) {
                 throw new BaseException("查询出库单异常:", throwable.getMessage());
             }
+
+            @Override
+            public R<Integer> canceled(DelOutboundCanceledDto dto) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

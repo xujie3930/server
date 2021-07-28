@@ -3,10 +3,7 @@ package com.szmsd.delivery.api.service.impl;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
-import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
-import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
-import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
-import com.szmsd.delivery.dto.ShipmentRequestDto;
+import com.szmsd.delivery.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,5 +35,10 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     @Override
     public int furtherHandler(DelOutboundFurtherHandlerDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.furtherHandler(dto));
+    }
+
+    @Override
+    public int canceled(DelOutboundCanceledDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.canceled(dto));
     }
 }

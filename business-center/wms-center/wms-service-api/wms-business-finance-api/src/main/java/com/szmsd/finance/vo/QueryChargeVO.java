@@ -3,6 +3,7 @@ package com.szmsd.finance.vo;
 import com.szmsd.bas.plugin.BasSubCommonPlugin;
 import com.szmsd.bas.plugin.BasSubValueCommonParameter;
 import com.szmsd.common.plugin.annotation.AutoFieldValue;
+import com.szmsd.finance.enums.BillEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -65,5 +66,15 @@ public class QueryChargeVO implements Serializable {
 
     @ApiModelProperty(value = "备注")
     private String remark;
+
+    @ApiModelProperty(value = "支付类型")
+    private String payMethod;
+
+    @ApiModelProperty(value = "支付类型名称")
+    private String payMethodName;
+
+    public String getPayMethodName() {
+        return this.payMethod != null ? BillEnum.PayMethod.valueOf(this.payMethod).getPaymentName() : null;
+    }
 
 }

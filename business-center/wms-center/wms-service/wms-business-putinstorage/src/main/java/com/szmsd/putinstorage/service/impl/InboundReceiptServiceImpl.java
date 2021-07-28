@@ -8,6 +8,8 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
 import com.szmsd.putinstorage.component.CheckTag;
@@ -310,14 +312,17 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      */
     @Override
     public void review(InboundReceiptReviewDTO inboundReceiptReviewDTO) {
-        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+       /* SysUser loginUserInfo = remoteComponent.getLoginUserInfo();*/
         InboundReceipt inboundReceipt = new InboundReceipt();
         InboundReceiptEnum.InboundReceiptEnumMethods anEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.InboundReceiptStatus.class, inboundReceiptReviewDTO.getStatus());
         anEnum = anEnum == null ? InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE : anEnum;
         inboundReceipt.setStatus(anEnum.getValue());
         inboundReceipt.setReviewRemark(inboundReceiptReviewDTO.getReviewRemark());
-        inboundReceipt.setReviewBy(loginUserInfo.getUserId() + "");
-        inboundReceipt.setReviewBy(loginUserInfo.getUserName());
+        Optional<LoginUser> loginUser = Optional.ofNullable(SecurityUtils.getLoginUser());
+        String userId = loginUser.map(LoginUser::getUserId).map(String::valueOf).orElse("");
+        String userName = loginUser.map(LoginUser::getUsername).orElse("");
+        inboundReceipt.setReviewBy(userId);
+        inboundReceipt.setReviewBy(userName);
         inboundReceipt.setReviewTime(new Date());
         List<String> warehouseNos = inboundReceiptReviewDTO.getWarehouseNos();
         log.info("入库单审核: {},{},{}", anEnum.getValue2(), warehouseNos, inboundReceipt);

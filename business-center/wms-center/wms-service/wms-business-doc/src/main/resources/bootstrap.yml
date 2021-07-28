@@ -1,0 +1,21 @@
+# Tomcat
+server:
+  port: 17001
+
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: wms-business-doc
+  profiles:
+    # 环境配置
+    active: test
+
+com:
+  szmsd:
+    doc:
+      oauth:
+        users:
+          - name: test
+            password: 123456
+            auth: read

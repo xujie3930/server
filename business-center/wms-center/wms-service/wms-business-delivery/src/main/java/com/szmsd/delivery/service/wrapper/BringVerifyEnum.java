@@ -590,7 +590,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.RK_BRV_FREEZE_INVENTORY.listener(delOutbound);
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
-            delOutboundService.unFreeze(delOutbound.getOrderType(), delOutbound.getOrderNo(), delOutbound.getWarehouseCode());
+            delOutboundService.unFreeze(delOutbound);
             super.rollback(context);
         }
 
