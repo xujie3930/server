@@ -14,7 +14,10 @@ import com.szmsd.finance.vo.QueryChargeVO;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -114,8 +117,11 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/furtherHandler")
     R<Integer> furtherHandler(@RequestBody @Validated DelOutboundFurtherHandlerDto dto);
 
-
     @PostMapping("/api/outbound/page")
-    @ApiOperation(value = "出库管理 - 分页", position = 100)
+    @ApiOperation(value = "出库管理 - 分页")
     TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto queryDto);
+
+    @PostMapping("/api/outbound/canceled")
+    @ApiOperation(value = "出库管理 - 取消")
+    R<Integer> canceled(@RequestBody DelOutboundCanceledDto dto);
 }
