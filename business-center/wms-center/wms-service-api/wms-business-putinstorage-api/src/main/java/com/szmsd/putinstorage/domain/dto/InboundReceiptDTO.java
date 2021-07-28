@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.domain.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -71,4 +72,8 @@ public class InboundReceiptDTO {
     @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
     private String status;
 
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }
