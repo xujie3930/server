@@ -619,6 +619,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         inventoryOperateListDto.setWarehouseCode(warehouseCode);
         List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
         inventoryOperateListDto.setOperateList(operateList);
+        if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType)) {
+            inventoryOperateListDto.setFreeType(1);
+        }
         this.unFreeze(inventoryOperateListDto);
     }
 
