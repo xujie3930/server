@@ -764,7 +764,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 赋值
         updateWrapper.set(DelOutbound::getOperationType, dto.getOperationType());
         updateWrapper.set(DelOutbound::getOperationTime, dto.getOperationTime());
-        updateWrapper.set(DelOutbound::getRemark, dto.getRemark());
+        // 备注不替换
+        // updateWrapper.set(DelOutbound::getRemark, dto.getRemark());
         String state = null;
         // 仓库开始处理
         if (DelOutboundOperationTypeEnum.PROCESSING.getCode().equals(dto.getOperationType())) {
