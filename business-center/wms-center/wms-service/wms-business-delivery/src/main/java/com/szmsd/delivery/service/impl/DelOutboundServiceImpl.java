@@ -150,6 +150,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 inventoryAvailableQueryDto.setSource("084002");
             }
             List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+            // 去查询SKU的信息，集运出库需要查看产品详情，需要单独去查询
+            Map<String, BaseProduct> baseProductMap = null;
+            if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())) {
+                BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+                conditionQueryDto.setSkus(skus);
+                List<BaseProduct> baseProductList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                if (CollectionUtils.isNotEmpty(baseProductList)) {
+                    baseProductMap = baseProductList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (a, b) -> a));
+                }
+            }
             Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(availableList)) {
                 for (InventoryAvailableListVO vo : availableList) {
@@ -160,6 +170,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 InventoryAvailableListVO available = availableMap.get(vo.getSku());
                 if (null != available) {
                     BeanMapperUtil.map(available, vo);
+                }
+                if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType()) && null != baseProductMap) {
+                    BaseProduct baseProduct = baseProductMap.get(vo.getSku());
+                    if (null != baseProduct) {
+                        vo.setProductDescription(baseProduct.getProductDescription());
+                    }
                 }
             }
             delOutboundVO.setDetails(detailDtos);
