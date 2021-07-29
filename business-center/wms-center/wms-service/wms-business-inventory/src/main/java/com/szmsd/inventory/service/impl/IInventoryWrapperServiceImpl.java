@@ -48,9 +48,9 @@ public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
         // 失败：回滚冻结过的SKU
         return this.doWorker(operateListDto,
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "freeze"),
-                        () -> this.inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum())),
+                        () -> this.inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())),
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "unFreeze"),
-                        () -> inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum())));
+                        () -> inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())));
     }
 
     /**
@@ -67,9 +67,9 @@ public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
         // 失败：回滚取消冻结过的SKU
         return this.doWorker(operateListDto,
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "unFreeze"),
-                        () -> this.inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum())),
+                        () -> this.inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())),
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "freeze"),
-                        () -> inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum())));
+                        () -> inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())));
     }
 
     @Override

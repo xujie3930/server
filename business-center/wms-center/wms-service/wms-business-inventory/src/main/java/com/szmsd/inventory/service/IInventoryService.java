@@ -57,9 +57,10 @@ public interface IInventoryService extends IService<Inventory> {
      * @param warehouseCode warehouseCode
      * @param sku           sku
      * @param num           num
+     * @param freeType      freeType
      * @return int
      */
-    int freeze(String invoiceNo, String warehouseCode, String sku, Integer num);
+    int freeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType);
 
     /**
      * 释放冻结库存
@@ -68,9 +69,10 @@ public interface IInventoryService extends IService<Inventory> {
      * @param warehouseCode warehouseCode
      * @param sku           sku
      * @param num           num
+     * @param freeType      freeType
      * @return int
      */
-    int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num);
+    int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType);
 
     /**
      * 扣减库存
@@ -98,6 +100,7 @@ public interface IInventoryService extends IService<Inventory> {
 
     /**
      * 获取仓库SKU
+     *
      * @return list
      */
     List<Inventory> getWarehouseSku();

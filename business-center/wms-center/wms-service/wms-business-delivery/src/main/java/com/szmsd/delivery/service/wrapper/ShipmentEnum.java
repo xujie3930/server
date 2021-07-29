@@ -693,6 +693,10 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             Collection<InventoryOperateDto> inventoryOperateDtos = inventoryOperateDtoMap.values();
             ArrayList<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtos);
             operateListDto.setOperateList(operateList);
+            // 集运出库特殊处理
+            if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType)) {
+                operateListDto.setFreeType(1);
+            }
             try {
                 DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, operateList});
                 InventoryFeignClientService inventoryFeignClientService = SpringUtils.getBean(InventoryFeignClientService.class);

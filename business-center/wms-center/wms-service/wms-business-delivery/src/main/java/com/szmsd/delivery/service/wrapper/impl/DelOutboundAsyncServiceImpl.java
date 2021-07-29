@@ -173,7 +173,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     custPayDTO.setOrderType("Freight");
                     R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
                     if (null == r || Constants.SUCCESS != r.getCode()) {
-                        throw new CommonException("999", "扣减费用失败");
+                        String message;
+                        if (null != r) {
+                            message = "扣减费用失败，" + r.getMsg();
+                        } else {
+                            message = "扣减费用失败";
+                        }
+                        throw new CommonException("999", message);
                     }
                 }
                 completedState = "OP_FEE_DE";
