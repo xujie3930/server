@@ -90,7 +90,7 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
 
     @Override
     public List<InventoryRecordVO> selectList(InventoryRecordQueryDTO inventoryRecordQueryDTO) {
-        return baseMapper.selectList(inventoryRecordQueryDTO);
+        return baseMapper.selectQueryList(inventoryRecordQueryDTO);
     }
 
     /**

@@ -84,7 +84,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             int afterAvailableInventory = beforeInventory.getAvailableInventory() + qty;
             int afterTotalInbound = beforeInventory.getTotalInbound() + qty;
             afterInventory.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
-            afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", inboundInventoryDTO.getOperateOn()));
+            afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss", inboundInventoryDTO.getOperateOn()));
             this.saveOrUpdate(afterInventory);
 
             // 记录库存日志

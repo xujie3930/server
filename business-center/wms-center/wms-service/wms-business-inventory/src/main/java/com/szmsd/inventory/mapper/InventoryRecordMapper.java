@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface InventoryRecordMapper extends BaseMapper<InventoryRecord> {
 
-    List<InventoryRecordVO> selectList(InventoryRecordQueryDTO inventoryRecordQueryDTO);
+    List<InventoryRecordVO> selectQueryList(InventoryRecordQueryDTO inventoryRecordQueryDTO);
 }
