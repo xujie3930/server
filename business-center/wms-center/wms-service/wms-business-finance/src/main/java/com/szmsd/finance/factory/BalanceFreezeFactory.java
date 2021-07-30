@@ -2,6 +2,7 @@ package com.szmsd.finance.factory;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.BalanceDTO;
@@ -9,7 +10,6 @@ import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
-import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.util.SnowflakeId;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +35,6 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     private RedissonClient redissonClient;
 
     @Resource
-    private IAccountBalanceService accountBalanceService;
-
-    @Resource
     private AccountBalanceChangeMapper accountBalanceChangeMapper;
 
     @Resource
@@ -46,20 +43,22 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     @Transactional
     @Override
     public boolean updateBalance(CustPayDTO dto) {
-        String key = "cky-test-fss-freeze-balance-all:" + dto.getCusId();
+        String key = "cky-fss-freeze-balance-all:" + dto.getCusId();
         RLock lock = redissonClient.getLock(key);
         try {
-            BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
-            if (!checkBalance(balance, dto)) {
-                return false;
+            if(lock.tryLock(time, unit)) {
+                BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
+                if (!checkBalance(balance, dto)) {
+                    return false;
+                }
+                setBalance(dto.getCusCode(), dto.getCurrencyCode(), balance);
+                recordOpLog(dto, balance.getCurrentBalance());
             }
-            setBalance(dto.getCusCode(), dto.getCurrencyCode(), balance);
-            recordOpLog(dto, balance.getCurrentBalance());
             return true;
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
-            log.info("获取余额异常，加锁失败");
-            log.info("异常信息:" + e.getMessage());
+            log.error("获取余额异常，加锁失败");
+            log.error("异常信息:" + e.getMessage());
         } finally {
             if (lock.isLocked()) {
                 lock.unlock();
@@ -90,12 +89,15 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         if (BillEnum.PayMethod.BALANCE_FREEZE == dto.getPayMethod()) {
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
             if (accountBalanceChanges.size() > 0) {
-                log.error("该单已有冻结额，单号： {}", dto.getNo());
-                return false;
+                throw new CommonException("999", "该单已存在冻结额，单号：" + dto.getNo());
             }
             balance.setCurrentBalance(balance.getCurrentBalance().subtract(changeAmount));
             balance.setFreezeBalance(balance.getFreezeBalance().add(changeAmount));
-            return BigDecimal.ZERO.compareTo(balance.getCurrentBalance()) <= 0;
+            boolean result = BigDecimal.ZERO.compareTo(balance.getCurrentBalance()) <= 0;
+            if(!result) {
+                throw new CommonException("999", "可用余额不足以冻结，费用：" + changeAmount);
+            }
+            return true;
         }
         if (BillEnum.PayMethod.BALANCE_THAW == dto.getPayMethod()) {
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
@@ -106,14 +108,13 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 balance.setFreezeBalance(balance.getFreezeBalance().subtract(amountChange));
                 dto.setAmount(amountChange);
                 boolean b = BigDecimal.ZERO.compareTo(balance.getFreezeBalance()) <= 0;
-                if(b) {
+                if (b) {
                     setHasFreeze(dto);
                     return true;
                 }
-                log.error("解冻金额不足 单号: {} 金额：{}",dto.getNo(),amountChange);
+                throw new CommonException("999", "解冻金额不足 单号: " + dto.getNo() + " 金额：" + amountChange);
             }
-            log.error("没有找到该单的冻结额。 单号： {}", dto.getNo());
-            return false;
+            throw new CommonException("999", "没有找到该单的冻结额。 单号: " + dto.getNo());
         }
         return false;
     }
@@ -122,8 +123,8 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         LambdaQueryWrapper<AccountBalanceChange> query = Wrappers.lambdaQuery();
         query.eq(AccountBalanceChange::getCurrencyCode, dto.getCurrencyCode());
         query.eq(AccountBalanceChange::getNo, dto.getNo());
-        if(StringUtils.isNotBlank(dto.getOrderType())){
-            query.eq(AccountBalanceChange::getOrderType,dto.getOrderType());
+        if (StringUtils.isNotBlank(dto.getOrderType())) {
+            query.eq(AccountBalanceChange::getOrderType, dto.getOrderType());
         }
         query.eq(AccountBalanceChange::getPayMethod, BillEnum.PayMethod.BALANCE_FREEZE);
         query.eq(AccountBalanceChange::getHasFreeze, true);
