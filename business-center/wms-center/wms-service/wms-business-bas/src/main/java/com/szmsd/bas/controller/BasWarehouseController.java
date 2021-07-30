@@ -37,6 +37,15 @@ public class BasWarehouseController extends BaseController {
         return getDataTable(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('bas:warehouse:page')")
+    @PostMapping("/open/page")
+    @ApiOperation(value = "查询", notes = "仓库列表 - 分页查询")
+    public TableDataInfo<BasWarehouseVO> pagePost(@RequestBody BasWarehouseQueryDTO queryDTO) {
+        startPage(queryDTO);
+        List<BasWarehouseVO> list = basWarehouseService.selectList(queryDTO);
+        return getDataTable(list);
+    }
+
     @PreAuthorize("@ss.hasPermi('bas:warehouse:create')")
     @PostMapping("/saveOrUpdate")
     @ApiOperation(value = "# 创建/更新仓库", notes = "创建/更新仓库")
