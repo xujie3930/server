@@ -41,7 +41,6 @@ public class BasWarehouseClientServiceImpl implements BasWarehouseClientService 
 
     @Override
     public TableDataInfo<BasWarehouseVO> queryByWarehouseCodes(BasWarehouseQueryDTO queryDTO) {
-        TableDataInfo<BasWarehouseVO> basWarehouseVOTableDataInfo = this.basWarehouseFeignService.pagePost(queryDTO);
-        return basWarehouseVOTableDataInfo;
+        return this.basWarehouseFeignService.pagePost(queryDTO);
     }
 }
