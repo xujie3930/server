@@ -41,6 +41,7 @@ public class BusinessDocApplication {
      *   a.整合接口时，采用feign调用。基于不改动原接口的准则。如果中间逻辑有变，在此服务中做整合修改。
      *   b.调用时，在各个业务模块的api包中写feign（有的还没有写feign接口）调用
      *   c.接口验证，字段验证采用validator。详细看validator.md，validator.txt
+     *   d.validator测试类在TestValidator，junit测试可以看出验证是否正常。
      *
      * 4.其它
      *   a.本模块没有api模块
