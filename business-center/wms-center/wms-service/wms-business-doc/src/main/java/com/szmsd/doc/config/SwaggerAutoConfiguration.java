@@ -26,7 +26,8 @@ public class SwaggerAutoConfiguration {
                 .description("请求令牌")
                 .modelRef(new ModelRef("string"))
                 .parameterType("header")
-                .required(false)
+                .required(true)
+                .scalarExample("Bearer 62b60ccc-ee49-4cd5-980f-656d4622d68c")
                 .build());
         return new Docket(DocumentationType.SWAGGER_2)
                 .pathMapping("/")
