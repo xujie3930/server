@@ -1,5 +1,6 @@
 package com.szmsd.bas.dto;
 
+import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -8,7 +9,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "BasWarehouseQueryDTO", description = "仓库列表查询字段")
-public class BasWarehouseQueryDTO {
+public class BasWarehouseQueryDTO extends QueryDto {
 
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
