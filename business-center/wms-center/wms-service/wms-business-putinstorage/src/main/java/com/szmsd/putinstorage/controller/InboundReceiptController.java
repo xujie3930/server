@@ -88,6 +88,22 @@ public class InboundReceiptController extends BaseController {
             CheckTag.remove();
         }
     }
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
+    @PostMapping("/receipt/saveOrUpdate/batch")
+    @ApiOperation(value = "创建/修改-批量", notes = "批量 入库管理 - 新增/创建")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.CREATE)
+    public R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@RequestBody List<CreateInboundReceiptDTO> createInboundReceiptDTOList) {
+        try {
+            List<InboundReceiptInfoVO> resultList = new ArrayList<>();
+            createInboundReceiptDTOList.forEach(createInboundReceiptDTO->{
+                InboundReceiptInfoVO inboundReceiptInfoVO = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
+                resultList.add(inboundReceiptInfoVO);
+            });
+            return R.ok(resultList);
+        } finally {
+            CheckTag.remove();
+        }
+    }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @DeleteMapping("/receipt/cancel/{warehouseNo}")

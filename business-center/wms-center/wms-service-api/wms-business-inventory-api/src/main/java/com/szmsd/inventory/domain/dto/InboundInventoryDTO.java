@@ -1,5 +1,6 @@
 package com.szmsd.inventory.domain.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -25,4 +26,8 @@ public class InboundInventoryDTO {
     /** 上架数量 **/
     private Integer qty;
 
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }
