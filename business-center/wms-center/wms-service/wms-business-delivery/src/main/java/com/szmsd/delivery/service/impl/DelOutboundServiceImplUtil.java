@@ -99,8 +99,10 @@ public final class DelOutboundServiceImplUtil {
         // 转运出库
         // 集运出库
         // 不需要冻结库存
-        return DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(orderType)
-                || DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType);
+        /*return DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(orderType)
+                || DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType);*/
+        // 转运出库需要冻结库存
+        return DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(orderType);
     }
 
     /**
