@@ -29,4 +29,7 @@ public class InventoryOperateListDto implements Serializable {
 
     @ApiModelProperty(value = "冻结可以为负数，默认null，值为1是冻结可以为负数")
     private Integer freeType;
+
+    @ApiModelProperty(value = "客户编码")
+    private String cusCode;
 }

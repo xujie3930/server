@@ -58,9 +58,10 @@ public interface IInventoryService extends IService<Inventory> {
      * @param sku           sku
      * @param num           num
      * @param freeType      freeType
+     * @param cusCode       cusCode
      * @return int
      */
-    int freeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType);
+    int freeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType, String cusCode);
 
     /**
      * 释放冻结库存

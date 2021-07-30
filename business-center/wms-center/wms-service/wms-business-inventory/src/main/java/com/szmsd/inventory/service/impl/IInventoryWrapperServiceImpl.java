@@ -48,7 +48,7 @@ public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
         // 失败：回滚冻结过的SKU
         return this.doWorker(operateListDto,
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "freeze"),
-                        () -> this.inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())),
+                        () -> this.inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType(), operateListDto.getCusCode())),
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "unFreeze"),
                         () -> inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())));
     }
@@ -69,7 +69,7 @@ public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "unFreeze"),
                         () -> this.inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())),
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "freeze"),
-                        () -> inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())));
+                        () -> inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType(), operateListDto.getCusCode())));
     }
 
     @Override
