@@ -10,7 +10,6 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import com.szmsd.common.core.utils.DateUtils;
@@ -18,7 +17,10 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.InventoryRecord;
-import com.szmsd.inventory.domain.dto.*;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
+import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
+import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.*;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
@@ -26,7 +28,6 @@ import com.szmsd.inventory.service.IInventoryService;
 import com.szmsd.inventory.service.IPurchaseService;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
-import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -97,7 +98,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
                 //根据采购单号查询所有的入库单 统计之前该入库单 关联这个sku的冻结的数量
                 List<InventoryRecord> inventoryRecordVOS = iInventoryRecordService.getBaseMapper()
-                        .selectList(Wrappers.<InventoryRecord>lambdaQuery().eq(InventoryRecord::getSku,sku).in(InventoryRecord::getReceiptNo,warehouseNoList));
+                        .selectList(Wrappers.<InventoryRecord>lambdaQuery().eq(InventoryRecord::getSku, sku).in(InventoryRecord::getReceiptNo, warehouseNoList));
 
                 //之前冻结的数量
                 int beforeFreeze = inventoryRecordVOS.stream().map(InventoryRecord::getOperator).mapToInt(Integer::parseInt).reduce(Integer::sum).orElse(0);
@@ -304,10 +305,13 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     @Transactional
     @Override
-    public int freeze(String invoiceNo, String warehouseCode, String sku, Integer num) {
+    public int freeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType) {
         return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
-            // >=
-            queryWrapperConsumer.ge(Inventory::getAvailableInventory, num);
+            // 库存可以为负数
+            if (null == freeType) {
+                // >=
+                queryWrapperConsumer.ge(Inventory::getAvailableInventory, num);
+            }
         }, (updateConsumer) -> {
             updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() - num);
             updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() + num);
@@ -316,10 +320,12 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     @Transactional
     @Override
-    public int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num) {
+    public int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType) {
         return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
-            // >=
-            queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
+            if (null == freeType) {
+                // >=
+                queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
+            }
         }, (updateConsumer) -> {
             updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() + num);
             updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);

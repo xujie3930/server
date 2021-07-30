@@ -130,7 +130,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             // 空值默认处理
             if (StringUtils.isEmpty(completedState)) {
                 // 执行扣减库存
-                this.deduction(orderNo, delOutbound.getWarehouseCode(), delOutbound.getOrderType());
+                this.deduction(delOutbound);
                 completedState = "FEE_DE";
             }
             // 销毁，自提，新SKU不扣物流费用
@@ -173,7 +173,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     custPayDTO.setOrderType("Freight");
                     R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
                     if (null == r || Constants.SUCCESS != r.getCode()) {
-                        throw new CommonException("999", "扣减费用失败");
+                        String message;
+                        if (null != r) {
+                            message = "扣减费用失败，" + r.getMsg();
+                        } else {
+                            message = "扣减费用失败";
+                        }
+                        throw new CommonException("999", message);
                     }
                 }
                 completedState = "OP_FEE_DE";
@@ -342,10 +348,44 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         inventoryOperateListDto.setWarehouseCode(warehouseCode);
         List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
         inventoryOperateListDto.setOperateList(operateList);
+        this.deduction(inventoryOperateListDto);
+    }
+
+    /**
+     * 扣减库存
+     *
+     * @param inventoryOperateListDto inventoryOperateListDto
+     */
+    private void deduction(InventoryOperateListDto inventoryOperateListDto) {
         // 扣减库存
         Integer deduction = this.inventoryFeignClientService.deduction(inventoryOperateListDto);
         if (null == deduction || deduction < 1) {
             throw new CommonException("999", "扣减库存失败");
+        }
+    }
+
+    /**
+     * 扣减库存
+     *
+     * @param delOutbound delOutbound
+     */
+    private void deduction(DelOutbound delOutbound) {
+        String orderNo = delOutbound.getOrderNo();
+        String warehouseCode = delOutbound.getWarehouseCode();
+        String orderType = delOutbound.getOrderType();
+        if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(orderType)) {
+            InventoryOperateDto inventoryOperateDto = new InventoryOperateDto();
+            inventoryOperateDto.setSku(delOutbound.getNewSku());
+            inventoryOperateDto.setNum(Math.toIntExact(delOutbound.getBoxNumber()));
+            List<InventoryOperateDto> operateList = new ArrayList<>(1);
+            operateList.add(inventoryOperateDto);
+            InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
+            inventoryOperateListDto.setInvoiceNo(orderNo);
+            inventoryOperateListDto.setWarehouseCode(warehouseCode);
+            inventoryOperateListDto.setOperateList(operateList);
+            this.deduction(inventoryOperateListDto);
+        } else {
+            this.deduction(orderNo, warehouseCode, orderType);
         }
     }
 
