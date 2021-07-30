@@ -602,9 +602,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param orderType     orderType
      * @param orderNo       orderNo
      * @param warehouseCode warehouseCode
+     * @param cusCode       cusCode
      */
     @Override
-    public void unFreeze(String orderType, String orderNo, String warehouseCode) {
+    public void unFreeze(String orderType, String orderNo, String warehouseCode, String cusCode) {
         if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
             return;
         }
@@ -621,6 +622,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         inventoryOperateListDto.setOperateList(operateList);
         if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType)) {
             inventoryOperateListDto.setFreeType(1);
+            inventoryOperateListDto.setCusCode(cusCode);
         }
         this.unFreeze(inventoryOperateListDto);
     }
@@ -643,7 +645,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             inventoryOperateListDto.setOperateList(operateList);
             this.unFreeze(inventoryOperateListDto);
         } else {
-            this.unFreeze(orderType, orderNo, warehouseCode);
+            this.unFreeze(orderType, orderNo, warehouseCode, delOutbound.getSellerCode());
         }
     }
 

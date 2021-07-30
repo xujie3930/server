@@ -4,7 +4,10 @@ import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.dto.AddWarehouseRequest;
+import com.szmsd.bas.dto.BasWarehouseQueryDTO;
+import com.szmsd.bas.vo.BasWarehouseVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -34,5 +37,10 @@ public class BasWarehouseClientServiceImpl implements BasWarehouseClientService 
     @Override
     public List<BasWarehouse> queryByWarehouseCodes(List<String> warehouseCodes) {
         return R.getDataAndException(this.basWarehouseFeignService.queryByWarehouseCodes(warehouseCodes));
+    }
+
+    @Override
+    public TableDataInfo<BasWarehouseVO> queryByWarehouseCodes(BasWarehouseQueryDTO queryDTO) {
+        return this.basWarehouseFeignService.pagePost(queryDTO);
     }
 }
