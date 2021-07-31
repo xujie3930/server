@@ -1,13 +1,10 @@
 package com.szmsd.system.controller;
 
 
-import com.szmsd.bas.api.feign.BasSellerFeignService;
-import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -20,7 +17,6 @@ import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.model.UserInfo;
 import com.szmsd.system.domain.dto.SysUserEditPsw;
-import com.szmsd.system.domain.dto.SysUserSellerDto;
 import com.szmsd.system.service.ISysPermissionService;
 import com.szmsd.system.service.ISysPostService;
 import com.szmsd.system.service.ISysRoleService;
@@ -29,7 +25,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -335,9 +330,9 @@ public class SysUserController extends BaseController {
         BeanUtils.copyBeanProp(user, userDto);
         if (UserConstants.NOT_UNIQUE.equals(userService.checkUserNameUniqueCus(user.getUserName()))) {
             return R.failed("新增用户'" + user.getUserName() + "'失败，登录账号已存在");
-        } /*else if (UserConstants.NOT_UNIQUE.equals(userService.checkPhoneUnique(user))) {
+        } else if (UserConstants.NOT_UNIQUE.equals(userService.checkPhoneUnique(user))) {
             return R.failed("新增用户'" + user.getUserName() + "'失败，手机号码已存在");
-        } */else if (UserConstants.NOT_UNIQUE.equals(userService.checkEmailUniqueCus(user))) {
+        } else if (UserConstants.NOT_UNIQUE.equals(userService.checkEmailUniqueCus(user))) {
             return R.failed("新增用户'" + user.getUserName() + "'失败，邮箱账号已存在");
         }
 
@@ -468,6 +463,21 @@ public class SysUserController extends BaseController {
         user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
         user.setUpdateByName(SecurityUtils.getUsername());
         return toOk(userService.resetPwd(user));
+    }
+
+    @Log(title = "用户管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/resetPwdBySeller")
+    @ApiOperation(httpMethod = "PUT", value = "重置密码")
+    public R<Integer> resetPwdBySeller(@RequestBody SysUserDto userDto) {
+        if (StringUtils.isEmpty(userDto.getSellerCode())
+            || StringUtils.isEmpty(userDto.getPassword())) {
+            return R.failed("非法操作");
+        }
+        SysUser user = new SysUser();
+        BeanUtils.copyBeanProp(user, userDto);
+        user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
+        user.setUpdateByName(SecurityUtils.getUsername());
+        return toOk(userService.resetPwdBySeller(user));
     }
 
     /**

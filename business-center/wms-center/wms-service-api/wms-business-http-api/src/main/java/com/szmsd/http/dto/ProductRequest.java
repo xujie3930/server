@@ -67,4 +67,8 @@ public class ProductRequest {
     @ApiModelProperty(value = "产品图片")
     @Excel(name = "产品图片")
     private String productImage;
+
+    @ApiModelProperty(value = "产品图片")
+    @Excel(name = "产品描述")
+    private String productDesc;
 }

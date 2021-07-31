@@ -9,20 +9,20 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.service.IDelOutboundAddressService;
-import com.szmsd.delivery.service.IDelOutboundDetailService;
-import com.szmsd.delivery.service.IDelOutboundPackingService;
-import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
+import com.szmsd.delivery.vo.DelOutboundCombinationVO;
 import com.szmsd.delivery.vo.DelOutboundPackingDetailVO;
 import com.szmsd.delivery.vo.DelOutboundPackingVO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
@@ -70,6 +70,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IHtpCarrierClientService htpCarrierClientService;
     @Autowired
     private IDelOutboundPackingService delOutboundPackingService;
+    @Autowired
+    private IDelOutboundCombinationService delOutboundCombinationService;
 
     @Override
     public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
@@ -113,6 +115,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     // 回滚操作
                     applicationContainer.setEndState(BringVerifyEnum.BEGIN);
                     applicationContainer.rollback();
+                    // 更新状态
+                    DelOutbound updateDelOutbound = new DelOutbound();
+                    updateDelOutbound.setId(delOutbound.getId());
+                    updateDelOutbound.setBringVerifyState(BringVerifyEnum.BEGIN.name());
+                    this.delOutboundService.updateById(updateDelOutbound);
                     // 抛出异常
                     throw e;
                 }
@@ -143,9 +150,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
         // 查询sku信息
         List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
-        if (CollectionUtils.isEmpty(detailList)) {
-            throw new CommonException("999", "出库明细不存在");
-        }
         // 查询仓库信息
         BasWarehouse warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
         if (null == warehouse) {
@@ -161,19 +165,21 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
         }
         // 查询sku信息
-        BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
-        List<String> skus = new ArrayList<>();
-        for (DelOutboundDetail detail : detailList) {
-            skus.add(detail.getSku());
-        }
-        // conditionQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
-        conditionQueryDto.setSkus(skus);
         List<BaseProduct> productList = null;
-        // 转运出库的不查询sku明细信息
-        if (!DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
-            productList = this.baseProductClientService.queryProductList(conditionQueryDto);
-            if (CollectionUtils.isEmpty(productList)) {
-                throw new CommonException("999", "查询SKU信息失败");
+        if (CollectionUtils.isNotEmpty(detailList)) {
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            List<String> skus = new ArrayList<>();
+            for (DelOutboundDetail detail : detailList) {
+                skus.add(detail.getSku());
+            }
+            // conditionQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            conditionQueryDto.setSkus(skus);
+            // 转运出库的不查询sku明细信息
+            if (!DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+                productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                if (CollectionUtils.isEmpty(productList)) {
+                    throw new CommonException("999", "查询SKU信息失败");
+                }
             }
         }
         // 查询sku包材信息
@@ -257,9 +263,23 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
-                packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
-                        new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                        , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
+                // 批量出口传WMS返回的装箱明细过去计算
+                if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+                    // 查询装箱明细
+                    List<DelOutboundPacking> packingList = this.delOutboundPackingService.packageListByOrderNo(delOutbound.getOrderNo(), DelOutboundPackingTypeConstant.TYPE_2);
+                    if (CollectionUtils.isEmpty(packingList)) {
+                        throw new CommonException("999", "没有查询到WMS返回的装箱信息");
+                    }
+                    for (DelOutboundPacking packing : packingList) {
+                        packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(packing.getWeight()), "g"),
+                                new Packing(Utils.valueOf(packing.getLength()), Utils.valueOf(packing.getWidth()), Utils.valueOf(packing.getHeight()), "cm")
+                                , Math.toIntExact(1), packing.getPackingNo(), BigDecimal.ZERO, ""));
+                    }
+                } else {
+                    packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
+                            new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
+                            , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
+                }
             }
         }
         // 计算包裹费用
@@ -349,6 +369,19 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             packageItems.add(new PackageItem(delOutbound.getOrderNo(), delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), Utils.valueOfDouble(delOutbound.getWeight()),
                     new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                     1, "", String.valueOf(delOutbound.getId()), delOutbound.getOrderNo()));
+        } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+            List<String> skus = new ArrayList<>();
+            skus.add(delOutbound.getNewSku());
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            conditionQueryDto.setSkus(skus);
+            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            if (CollectionUtils.isEmpty(productList)) {
+                throw new CommonException("999", "查询SKU[" + delOutbound.getNewSku() + "]信息失败");
+            }
+            BaseProduct product = productList.get(0);
+            packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), Utils.valueOfDouble(product.getWeight()),
+                    new Size(product.getLength(), product.getWidth(), product.getHeight()),
+                    Utils.valueOfLong(delOutbound.getBoxNumber()), product.getHsCode(), String.valueOf(delOutbound.getId()), delOutbound.getNewSku()));
         } else {
             // 查询sku信息
             List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
@@ -458,6 +491,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     address.getStreet1(), address.getStreet2(), address.getStreet3(), address.getPostCode(), address.getPhoneNo(), address.getEmail()));
         }
         // 转运出库明细处理
+        Map<String, DelOutboundDetail> detailMap = new HashMap<>(16);
         List<ShipmentDetailInfoDto> details;
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
             details = new ArrayList<>();
@@ -465,6 +499,52 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             /*for (DelOutboundDetail detail : detailList) {
                 details.add(new ShipmentDetailInfoDto(detail.getProductName(), detail.getQty(), detail.getNewLabelCode()));
             }*/
+        } else if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
+                || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+            // 查询组合信息
+            List<DelOutboundCombinationVO> combinationVOList = this.delOutboundCombinationService.listByOrderNo(delOutbound.getOrderNo());
+            // 查询sku信息
+            List<String> skus = new ArrayList<>();
+            for (DelOutboundCombinationVO combinationVO : combinationVOList) {
+                skus.add(combinationVO.getSku());
+            }
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            conditionQueryDto.setSkus(skus);
+            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            if (CollectionUtils.isEmpty(productList)) {
+                throw new CommonException("999", "查询SKU信息失败");
+            }
+            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            // 处理包材或sku明细重复的问题
+            Map<String, ShipmentDetailInfoDto> shipmentDetailInfoDtoMap = new HashMap<>();
+            for (DelOutboundCombinationVO combinationVO : combinationVOList) {
+                String sku = combinationVO.getSku();
+                if (shipmentDetailInfoDtoMap.containsKey(sku)) {
+                    shipmentDetailInfoDtoMap.get(sku).addQty(combinationVO.getQty());
+                } else {
+                    shipmentDetailInfoDtoMap.put(sku, new ShipmentDetailInfoDto(sku, combinationVO.getQty(), ""));
+                }
+                // 获取sku详细信息
+                BaseProduct baseProduct = productMap.get(combinationVO.getSku());
+                String bindCode = baseProduct.getBindCode();
+                // 判断sku是否存在包材
+                if (StringUtils.isNotEmpty(bindCode)) {
+                    // 存在包材，增加包材信息
+                    if (shipmentDetailInfoDtoMap.containsKey(bindCode)) {
+                        shipmentDetailInfoDtoMap.get(bindCode).addQty(combinationVO.getQty());
+                    } else {
+                        shipmentDetailInfoDtoMap.put(bindCode, new ShipmentDetailInfoDto(bindCode, combinationVO.getQty(), ""));
+                    }
+                }
+            }
+            details = new ArrayList<>(shipmentDetailInfoDtoMap.values());
+            // 组合SKU特殊处理
+            if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+                PackingRequirementInfoDto packingRequirementInfoDto = new PackingRequirementInfoDto();
+                packingRequirementInfoDto.setQty(delOutbound.getBoxNumber());
+                packingRequirementInfoDto.setDetails(details);
+                createShipmentRequestDto.setPackingRequirement(packingRequirementInfoDto);
+            }
         } else {
             // 查询sku详细信息
             List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
@@ -490,10 +570,26 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         shipmentDetailInfoDtoMap.put(bindCode, new ShipmentDetailInfoDto(bindCode, detail.getQty(), detail.getNewLabelCode()));
                     }
                 }
+                // 记录sku的信息，在批量里面需要使用
+                detailMap.put(sku, detail);
             }
             details = new ArrayList<>(shipmentDetailInfoDtoMap.values());
         }
-        createShipmentRequestDto.setDetails(details);
+        // 组合SKU特殊处理
+        if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+            // 特殊处理这两个字段的值
+            // details
+            // packingRequirement.details
+            List<ShipmentDetailInfoDto> detailInfoDtoList = new ArrayList<>();
+            for (ShipmentDetailInfoDto detailInfoDto : details) {
+                ShipmentDetailInfoDto infoDto = BeanMapperUtil.map(detailInfoDto, ShipmentDetailInfoDto.class);
+                infoDto.setQty(infoDto.getQty() * delOutbound.getBoxNumber());
+                detailInfoDtoList.add(infoDto);
+            }
+            createShipmentRequestDto.setDetails(detailInfoDtoList);
+        } else {
+            createShipmentRequestDto.setDetails(details);
+        }
         createShipmentRequestDto.setIsPackingByRequired(delOutbound.getIsPackingByRequired());
         createShipmentRequestDto.setIsFirst(delOutbound.getIsFirst());
         createShipmentRequestDto.setNewSKU(delOutbound.getNewSku());
@@ -507,11 +603,31 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 if (CollectionUtils.isNotEmpty(details1)) {
                     List<ShipmentDetailInfoDto> shipmentDetailInfoDtos = new ArrayList<>();
                     for (DelOutboundPackingDetailVO delOutboundPackingDetailVO : details1) {
+                        // sku的信息
                         ShipmentDetailInfoDto shipmentDetailInfoDto = new ShipmentDetailInfoDto();
                         shipmentDetailInfoDto.setSku(delOutboundPackingDetailVO.getSku());
                         shipmentDetailInfoDto.setQty(delOutboundPackingDetailVO.getQty());
-                        shipmentDetailInfoDto.setNewLabelCode(delOutboundPackingDetailVO.getNewLabelCode());
+                        // 保存的时候装箱信息里面的newLabelCode没有保存值，需要从SKU明细里面获取
+                        // shipmentDetailInfoDto.setNewLabelCode(delOutboundPackingDetailVO.getNewLabelCode());
+                        // sku包材的信息
+                        DelOutboundDetail delOutboundDetail = detailMap.get(delOutboundPackingDetailVO.getSku());
+                        ShipmentDetailInfoDto shipmentDetailInfoDtoBindCode = null;
+                        if (null != delOutboundDetail) {
+                            // 设置newLabelCode
+                            shipmentDetailInfoDto.setNewLabelCode(delOutboundDetail.getNewLabelCode());
+                            String bindCode = delOutboundDetail.getBindCode();
+                            if (StringUtils.isNotEmpty(bindCode)) {
+                                shipmentDetailInfoDtoBindCode = new ShipmentDetailInfoDto();
+                                shipmentDetailInfoDtoBindCode.setSku(bindCode);
+                                shipmentDetailInfoDtoBindCode.setQty(delOutboundPackingDetailVO.getQty());
+                            }
+                        }
+                        // 添加sku信息
                         shipmentDetailInfoDtos.add(shipmentDetailInfoDto);
+                        // 添加sku包材信息
+                        if (null != shipmentDetailInfoDtoBindCode) {
+                            shipmentDetailInfoDtos.add(shipmentDetailInfoDtoBindCode);
+                        }
                     }
                     packingRequirementInfoDto.setDetails(shipmentDetailInfoDtos);
                 }

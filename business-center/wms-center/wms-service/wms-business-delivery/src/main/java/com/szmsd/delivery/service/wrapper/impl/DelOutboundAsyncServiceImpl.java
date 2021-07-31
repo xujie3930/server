@@ -1,8 +1,11 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
 import com.szmsd.bas.api.service.BasePackingClientService;
+import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasePackingConditionQueryDto;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
@@ -14,11 +17,13 @@ import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.service.IDelOutboundCombinationService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
+import com.szmsd.delivery.vo.DelOutboundCombinationVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -29,6 +34,10 @@ import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
+import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
+import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
+import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangyuyuan
@@ -64,6 +74,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private OperationFeignService operationFeignService;
     @Autowired
     private BasePackingClientService basePackingClientService;
+    @Autowired
+    private InboundReceiptFeignService inboundReceiptFeignService;
+    @Autowired
+    private IDelOutboundCombinationService delOutboundCombinationService;
+    @Autowired
+    private BaseProductClientService baseProductClientService;
 
     @Transactional
     @Override
@@ -114,7 +130,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             // 空值默认处理
             if (StringUtils.isEmpty(completedState)) {
                 // 执行扣减库存
-                this.deduction(orderNo, delOutbound.getWarehouseCode(), delOutbound.getOrderType());
+                this.deduction(delOutbound);
                 completedState = "FEE_DE";
             }
             // 销毁，自提，新SKU不扣物流费用
@@ -157,7 +173,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     custPayDTO.setOrderType("Freight");
                     R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
                     if (null == r || Constants.SUCCESS != r.getCode()) {
-                        throw new CommonException("999", "扣减费用失败");
+                        String message;
+                        if (null != r) {
+                            message = "扣减费用失败，" + r.getMsg();
+                        } else {
+                            message = "扣减费用失败";
+                        }
+                        throw new CommonException("999", message);
                     }
                 }
                 completedState = "OP_FEE_DE";
@@ -211,6 +233,79 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 }
                 completedState = "END";
             }
+            // 如果是组合SKU，拆分SKU，需要创建入库单
+            if ("END".equals(completedState) && (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType()))) {
+                // 查询明细
+                int totalDeclareQty = 0;
+                //设置SKU列表数据
+                ArrayList<InboundReceiptDetailDTO> inboundReceiptDetailAddList = new ArrayList<>();
+                if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+                    // 查询sku信息
+                    BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+                    ArrayList<String> skus = new ArrayList<>();
+                    skus.add(delOutbound.getNewSku());
+                    conditionQueryDto.setSkus(skus);
+                    List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                    String skuName = "";
+                    if (CollectionUtils.isNotEmpty(productList)) {
+                        skuName = getSkuName(productList.get(0));
+                    }
+                    totalDeclareQty = Math.toIntExact(delOutbound.getBoxNumber());
+                    InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
+                    inboundReceiptDetailDTO
+                            .setDeclareQty(totalDeclareQty)
+                            .setSku(delOutbound.getNewSku())
+                            .setDeliveryNo(delOutbound.getOrderNo())
+                            .setSkuName(skuName);
+                    inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
+                }
+                if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+                    // 查询
+                    List<DelOutboundCombinationVO> voList = this.delOutboundCombinationService.listByOrderNo(delOutbound.getOrderNo());
+                    ArrayList<String> skus = new ArrayList<>();
+                    for (DelOutboundCombinationVO vo : voList) {
+                        skus.add(vo.getSku());
+                    }
+                    BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+                    conditionQueryDto.setSkus(skus);
+                    List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                    Map<String, BaseProduct> productMap;
+                    if (CollectionUtils.isNotEmpty(productList)) {
+                        productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v, v2) -> v));
+                    } else {
+                        productMap = new HashMap<>();
+                    }
+                    for (DelOutboundCombinationVO vo : voList) {
+                        InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
+                        int declareQty = Math.toIntExact(vo.getQty());
+                        inboundReceiptDetailDTO
+                                .setDeclareQty(declareQty)
+                                .setSku(vo.getSku())
+                                .setDeliveryNo(delOutbound.getOrderNo())
+                                .setSkuName(getSkuName(productMap.get(vo.getSku())));
+                        inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
+                        totalDeclareQty += declareQty;
+                    }
+                }
+                // 封装请求参数 送货方式：自送货到仓，入库方式：新产品入库，类别：SKU
+                CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+                createInboundReceiptDTO
+                        .setDeliveryNo("")
+                        .setWarehouseMethodCode("055006")
+                        .setOrderNo("")
+                        .setCusCode(delOutbound.getSellerCode())
+                        .setVat("")
+                        .setWarehouseCode(delOutbound.getWarehouseCode())
+                        .setOrderType(InboundReceiptEnum.OrderType.NEW_SKU.getValue())
+                        .setWarehouseCategoryCode("056001")
+                        .setDeliveryWayCode("053002")
+                        .setTotalDeclareQty(totalDeclareQty)
+                        .setTotalPutQty(0)
+                        .setRemark(delOutbound.getRemark());
+                createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
+                this.inboundReceiptFeignService.saveOrUpdate(createInboundReceiptDTO);
+            }
         } catch (Exception e) {
             this.logger.error(e.getMessage(), e);
             // 记录异常
@@ -223,6 +318,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         }
     }
 
+    private String getSkuName(BaseProduct baseProduct) {
+        if (null != baseProduct) {
+            return baseProduct.getProductName();
+        }
+        return "";
+    }
+
     /**
      * 扣减库存
      *
@@ -231,9 +333,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
      * @param orderType     orderType
      */
     private void deduction(String orderNo, String warehouseCode, String orderType) {
-        if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+        // 转运出库，集运出库在核重之后会去冻结库存，现在需要进行扣减库存
+        /*if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
             return;
-        }
+        }*/
         // 查询明细
         List<DelOutboundDetail> details = this.delOutboundDetailService.listByOrderNo(orderNo);
         InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
@@ -245,10 +348,44 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         inventoryOperateListDto.setWarehouseCode(warehouseCode);
         List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
         inventoryOperateListDto.setOperateList(operateList);
+        this.deduction(inventoryOperateListDto);
+    }
+
+    /**
+     * 扣减库存
+     *
+     * @param inventoryOperateListDto inventoryOperateListDto
+     */
+    private void deduction(InventoryOperateListDto inventoryOperateListDto) {
         // 扣减库存
         Integer deduction = this.inventoryFeignClientService.deduction(inventoryOperateListDto);
         if (null == deduction || deduction < 1) {
             throw new CommonException("999", "扣减库存失败");
+        }
+    }
+
+    /**
+     * 扣减库存
+     *
+     * @param delOutbound delOutbound
+     */
+    private void deduction(DelOutbound delOutbound) {
+        String orderNo = delOutbound.getOrderNo();
+        String warehouseCode = delOutbound.getWarehouseCode();
+        String orderType = delOutbound.getOrderType();
+        if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(orderType)) {
+            InventoryOperateDto inventoryOperateDto = new InventoryOperateDto();
+            inventoryOperateDto.setSku(delOutbound.getNewSku());
+            inventoryOperateDto.setNum(Math.toIntExact(delOutbound.getBoxNumber()));
+            List<InventoryOperateDto> operateList = new ArrayList<>(1);
+            operateList.add(inventoryOperateDto);
+            InventoryOperateListDto inventoryOperateListDto = new InventoryOperateListDto();
+            inventoryOperateListDto.setInvoiceNo(orderNo);
+            inventoryOperateListDto.setWarehouseCode(warehouseCode);
+            inventoryOperateListDto.setOperateList(operateList);
+            this.deduction(inventoryOperateListDto);
+        } else {
+            this.deduction(orderNo, warehouseCode, orderType);
         }
     }
 
@@ -277,7 +414,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         String cancelledState = delOutbound.getCancelledState();
         try {
             if (StringUtils.isEmpty(cancelledState)) {
-                this.delOutboundService.unFreeze(delOutbound.getOrderType(), orderNo, delOutbound.getWarehouseCode());
+                this.delOutboundService.unFreeze(delOutbound);
                 cancelledState = "UN_FEE";
             }
             // 销毁，自提，新SKU不扣物流费用

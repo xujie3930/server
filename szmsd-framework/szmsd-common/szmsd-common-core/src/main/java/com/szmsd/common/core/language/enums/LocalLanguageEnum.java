@@ -33,9 +33,11 @@ public enum LocalLanguageEnum {
     INVENTORY_RECORD_TYPE_1(INVENTORY_RECORD_TYPE, "1", "入库", "Inbound inventory"),
     INVENTORY_RECORD_TYPE_2(INVENTORY_RECORD_TYPE, "2", "出库", "Outbound inventory"),
     INVENTORY_RECORD_TYPE_3(INVENTORY_RECORD_TYPE, "3", "冻结", "Freeze inventory"),
+    INVENTORY_RECORD_TYPE_8(INVENTORY_RECORD_TYPE, "8", "解冻", "unFreeze inventory"),
     INVENTORY_RECORD_TYPE_4(INVENTORY_RECORD_TYPE, "4", "盘点", "Check inventory"),
     INVENTORY_RECORD_TYPE_5(INVENTORY_RECORD_TYPE, "5", "调增", "Increase"),
     INVENTORY_RECORD_TYPE_6(INVENTORY_RECORD_TYPE, "6", "调减", "Reduce"),
+    INVENTORY_RECORD_TYPE_7(INVENTORY_RECORD_TYPE, "7", "退件上架", "Return express and shelve"),
 
     /** 入库单：自动审核 **/
     INBOUND_RECEIPT_REVIEW_0(INBOUND_RECEIPT_REVIEW, "0", "自动审核", "Auto review"),

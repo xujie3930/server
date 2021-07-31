@@ -9,6 +9,7 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
 import com.szmsd.exception.domain.ExceptionInfo;
@@ -89,6 +90,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         }
 
     @Override
+    @DataScope("seller_code")
     public List<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto){
         QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "exception_type", dto.getExceptionType());

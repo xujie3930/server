@@ -38,6 +38,11 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
             public R<List<BasSellerEmailDto>> queryAllSellerCodeAndEmail() {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<String> getRealState(String sellerCode) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

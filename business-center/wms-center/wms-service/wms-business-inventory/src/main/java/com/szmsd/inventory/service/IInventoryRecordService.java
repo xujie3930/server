@@ -18,6 +18,8 @@ public interface IInventoryRecordService extends IService<InventoryRecord> {
 
     void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, Integer quantity);
 
+    void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory,Integer quantity, String receiptNo);
+
     List<InventoryRecordVO> selectList(InventoryRecordQueryDTO inventoryRecordQueryDTO);
 
     List<InventorySkuVolumeVO> selectSkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO);

@@ -2,6 +2,7 @@ package com.szmsd.delivery.controller;
 
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
@@ -399,6 +400,14 @@ public class DelOutboundController extends BaseController {
         this.delOutboundService.label(response, dto);
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:uploadBoxLabel')")
+    @PostMapping("/uploadBoxLabel")
+    @ApiOperation(value = "出库管理 - 上传箱标", position = 1400)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundUploadBoxLabelDto")
+    public R<Integer> uploadBoxLabel(@RequestBody @Validated DelOutboundUploadBoxLabelDto dto) {
+        return R.ok(this.delOutboundService.uploadBoxLabel(dto));
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/getDelOutboundDetailsList")
     @ApiOperation(value = "出库管理 - 按条件查询出库单及详情", position = 10000)
@@ -481,5 +490,29 @@ public class DelOutboundController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundToPrintDto")
     public R<Boolean> toPrint(@RequestBody DelOutboundToPrintDto dto) {
         return R.ok(delOutboundService.toPrint(dto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchUpdateTrackingNo')")
+    @PostMapping("/batchUpdateTrackingNo")
+    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号", position = 10300)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
+    })
+    public R<Integer> batchUpdateTrackingNo(HttpServletRequest request) {
+        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
+        MultipartFile file = multipartHttpServletRequest.getFile("file");
+        AssertUtil.notNull(file, "上传文件不存在");
+        try {
+            DelOutboundBatchUpdateTrackingNoAnalysisEventListener analysisEventListener = new DelOutboundBatchUpdateTrackingNoAnalysisEventListener();
+            ExcelReaderBuilder excelReaderBuilder = EasyExcelFactory.read(file.getInputStream(), DelOutboundBatchUpdateTrackingNoDto.class, analysisEventListener);
+            ExcelReaderSheetBuilder excelReaderSheetBuilder = excelReaderBuilder.sheet(0);
+            excelReaderSheetBuilder.build().setHeadRowNumber(1);
+            excelReaderSheetBuilder.doRead();
+            List<DelOutboundBatchUpdateTrackingNoDto> list = analysisEventListener.getList();
+            return R.ok(this.delOutboundService.batchUpdateTrackingNo(list));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return R.failed(e.getMessage());
+        }
     }
 }

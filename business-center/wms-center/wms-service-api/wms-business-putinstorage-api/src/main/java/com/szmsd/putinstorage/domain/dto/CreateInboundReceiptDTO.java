@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.domain.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -20,4 +21,8 @@ public class CreateInboundReceiptDTO extends InboundReceiptDTO {
     @ApiModelProperty(value = "要删除的入库明细id")
     private List<String> receiptDetailIds;
 
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }

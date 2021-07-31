@@ -31,6 +31,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.ProductRequest;
@@ -105,6 +106,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
+    @DataScope("seller_code")
     public List<BaseProduct> selectBaseProductPage(BaseProductQueryDto queryDto) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotEmpty(queryDto.getCodes())) {
@@ -225,6 +227,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             b.setSource(BaseMainEnum.NORMAL_IN.getCode());
             b.setWarehouseAcceptance(false);
             ProductRequest productRequest = BeanMapperUtil.map(b, ProductRequest.class);
+            productRequest.setProductDesc(b.getProductDescription());
             R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
             if (!r.getData().getSuccess()) {
                 throw new BaseException("传wms失败:" + r.getData().getMessage());
@@ -355,7 +358,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProduct.setVolume(baseProduct.getInitVolume());
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
-
+        productRequest.setProductDesc(baseProductDto.getProductDescription());
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         //验证wms
         toWms(r);
@@ -410,6 +413,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             o.setHeight(o.getInitHeight());
             o.setVolume(o.getInitVolume());
             ProductRequest productRequest = BeanMapperUtil.map(o, ProductRequest.class);
+            productRequest.setProductDesc(o.getProductDescription());
             R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
             //验证wms
             toWms(r);
@@ -439,6 +443,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         }
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
+        productRequest.setProductDesc(baseProductDto.getProductDescription());
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         //验证wms
         toWms(r);

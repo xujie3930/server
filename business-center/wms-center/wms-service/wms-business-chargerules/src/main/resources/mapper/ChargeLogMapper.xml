@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.chargerules.mapper.ChargeLogMapper">
 
     <select id="selectChargeLogList" resultType="com.szmsd.finance.vo.QueryChargeVO" parameterType="com.szmsd.finance.dto.QueryChargeDto">
-        SELECT id,custom_code,create_time,order_no,qty,amount,remark FROM cha_log
+        SELECT id,custom_code,create_time,order_no,qty,amount,remark,pay_method FROM cha_log
         <where>
             success = true
             <if test="no != null and no != ''">

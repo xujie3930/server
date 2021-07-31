@@ -1,6 +1,10 @@
 package com.szmsd.delivery.service.wrapper;
 
 import cn.hutool.core.codec.Base64;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -8,6 +12,7 @@ import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
@@ -15,6 +20,7 @@ import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
+import com.szmsd.delivery.util.PdfUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
@@ -22,16 +28,17 @@ import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.inventory.api.service.InventoryFeignClientService;
+import com.szmsd.inventory.domain.dto.InventoryOperateDto;
+import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 出库发货步骤
@@ -67,7 +74,10 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
     // #7 冻结费用
     FREEZE_BALANCE,
 
-    // #8 更新发货指令
+    // #8 冻结库存（转运出库，集运出库）
+    FREEZE_INVENTORY,
+
+    // #9 更新发货指令
     SHIPMENT_SHIPPING,
 
     /**
@@ -96,6 +106,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         map.put(THAW_BALANCE.name(), new ThawBalanceHandle());
         map.put(PRC_PRICING.name(), new PrcPricingHandle());
         map.put(FREEZE_BALANCE.name(), new FreezeBalanceHandle());
+        map.put(FREEZE_INVENTORY.name(), new FreezeBalanceHandle());
         map.put(SHIPMENT_SHIPPING.name(), new ShipmentShippingHandle());
         map.put(END.name(), new EndHandle());
         return map;
@@ -146,9 +157,16 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
-            // 冻结费用
+            // PRC计费
+            updateDelOutbound.setLength(delOutbound.getLength());
+            updateDelOutbound.setWidth(delOutbound.getWidth());
+            updateDelOutbound.setHeight(delOutbound.getHeight());
+            // 规格，长*宽*高
+            updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
+            updateDelOutbound.setAmount(delOutbound.getAmount());
+            updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             delOutboundService.shipmentFail(updateDelOutbound);
@@ -376,7 +394,60 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
-            String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+            String pathname = null;
+            // 如果是批量出库，将批量出库上传的文件和标签文件合并在一起传过去
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
+                    && delOutbound.getIsLabelBox()) {
+                // 判断文件是否已经创建
+                String mergeFileDirPath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
+                File mergeFileDir = new File(mergeFileDirPath);
+                if (!mergeFileDir.exists()) {
+                    try {
+                        FileUtils.forceMkdir(mergeFileDir);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
+                        throw new CommonException("999", "创建文件夹失败，" + e.getMessage());
+                    }
+                }
+                String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getShipmentOrderNumber();
+                File mergeFile = new File(mergeFilePath);
+                if (!mergeFile.exists()) {
+                    // 合并文件
+                    // 查询上传文件
+                    // 查询上传文件信息
+                    RemoteAttachmentService remoteAttachmentService = SpringUtils.getBean(RemoteAttachmentService.class);
+                    BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                    basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
+                    basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                    R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                    if (null != listR && null != listR.getData()) {
+                        List<BasAttachment> attachmentList = listR.getData();
+                        if (CollectionUtils.isNotEmpty(attachmentList)) {
+                            BasAttachment attachment = attachmentList.get(0);
+                            // 箱标文件 - 上传的
+                            String boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
+                            // 标签文件 - 从承运商物流那边获取的
+                            String labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+                            // 合并文件
+                            try {
+                                if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath)) {
+                                    pathname = mergeFilePath;
+                                }
+                            } catch (IOException e) {
+                                logger.error(e.getMessage(), e);
+                                throw new CommonException("999", "合并箱标文件，标签文件失败");
+                            }
+                        } else {
+                            throw new CommonException("999", "箱标文件未上传");
+                        }
+                    } else {
+                        throw new CommonException("999", "箱标文件未上传");
+                    }
+                }
+            }
+            if (null == pathname) {
+                pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+            }
             File labelFile = new File(pathname);
             if (!labelFile.exists()) {
                 throw new CommonException("999", "标签文件不存在");
@@ -493,6 +564,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     // 更新：计费重，金额
                     ShipmentChargeInfo data = chargeWrapper.getData();
                     PricingPackageInfo packageInfo = data.getPackageInfo();
+                    // 包裹信息
+                    Packing packing = packageInfo.getPacking();
+                    delOutbound.setLength(Utils.valueOf(packing.getLength()));
+                    delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
+                    delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
+                    // 费用信息
                     Weight calcWeight = packageInfo.getCalcWeight();
                     delOutbound.setCalcWeight(calcWeight.getValue());
                     delOutbound.setCalcWeightUnit(calcWeight.getUnit());
@@ -581,10 +658,79 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         }
     }
 
+    static class FreezeInventoryHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return SHIPMENT_SHIPPING;
+        }
+
+        @Override
+        public ApplicationState quoState() {
+            return FREEZE_INVENTORY;
+        }
+
+        @Override
+        public void handle(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            String orderType = delOutbound.getOrderType();
+            // 只有转运出库，集运出库业务才可以处理
+            if (!DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+                return;
+            }
+            List<DelOutboundDetail> details = delOutboundWrapperContext.getDetailList();
+            if (CollectionUtils.isEmpty(details)) {
+                return;
+            }
+            InventoryOperateListDto operateListDto = new InventoryOperateListDto();
+            operateListDto.setInvoiceNo(delOutbound.getOrderNo());
+            operateListDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            Map<String, InventoryOperateDto> inventoryOperateDtoMap = new HashMap<>();
+            for (DelOutboundDetail detail : details) {
+                DelOutboundServiceImplUtil.handlerInventoryOperate(detail, inventoryOperateDtoMap);
+            }
+            Collection<InventoryOperateDto> inventoryOperateDtos = inventoryOperateDtoMap.values();
+            ArrayList<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtos);
+            operateListDto.setOperateList(operateList);
+            // 集运出库特殊处理
+            if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType)) {
+                operateListDto.setFreeType(1);
+                operateListDto.setCusCode(delOutbound.getSellerCode());
+            }
+            try {
+                DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, operateList});
+                InventoryFeignClientService inventoryFeignClientService = SpringUtils.getBean(InventoryFeignClientService.class);
+                inventoryFeignClientService.freeze(operateListDto);
+            } catch (CommonException e) {
+                logger.error(e.getMessage(), e);
+                throw e;
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new CommonException("999", "冻结库存操作失败");
+            }
+        }
+
+        @Override
+        public void rollback(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.RK_BRV_FREEZE_INVENTORY.listener(delOutbound);
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            delOutboundService.unFreeze(delOutbound);
+            super.rollback(context);
+        }
+
+        @Override
+        public ApplicationState nextState() {
+            return SHIPMENT_SHIPPING;
+        }
+    }
+
     static class ShipmentShippingHandle extends CommonApplicationHandle {
         @Override
         public ApplicationState preState() {
-            return FREEZE_BALANCE;
+            return FREEZE_INVENTORY;
         }
 
         @Override
@@ -620,7 +766,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setOrderNo(delOutbound.getOrderNo());
-            // 冻结费用
+            // PRC计费
+            updateDelOutbound.setLength(delOutbound.getLength());
+            updateDelOutbound.setWidth(delOutbound.getWidth());
+            updateDelOutbound.setHeight(delOutbound.getHeight());
+            // 规格，长*宽*高
+            updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());

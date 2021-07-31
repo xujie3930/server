@@ -70,7 +70,13 @@ public class InboundReceiptController extends BaseController {
         List<InboundReceiptVO> list = iInboundReceiptService.selectList(queryDTO);
         return getDataTable(list);
     }
-
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
+    @GetMapping("/receipt/list")
+    @ApiOperation(value = "查询", notes = "入库管理")
+    public R<List<InboundReceiptVO>> list(@RequestBody InboundReceiptQueryDTO queryDTO) {
+        List<InboundReceiptVO> list = iInboundReceiptService.selectList(queryDTO);
+        return R.ok(list);
+    }
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @PostMapping("/receipt/saveOrUpdate")
     @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
@@ -78,6 +84,22 @@ public class InboundReceiptController extends BaseController {
     public R<InboundReceiptInfoVO> saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
         try {
             return R.ok(iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO));
+        } finally {
+            CheckTag.remove();
+        }
+    }
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
+    @PostMapping("/receipt/saveOrUpdate/batch")
+    @ApiOperation(value = "创建/修改-批量", notes = "批量 入库管理 - 新增/创建")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.CREATE)
+    public R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@RequestBody List<CreateInboundReceiptDTO> createInboundReceiptDTOList) {
+        try {
+            List<InboundReceiptInfoVO> resultList = new ArrayList<>();
+            createInboundReceiptDTOList.forEach(createInboundReceiptDTO->{
+                InboundReceiptInfoVO inboundReceiptInfoVO = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
+                resultList.add(inboundReceiptInfoVO);
+            });
+            return R.ok(resultList);
         } finally {
             CheckTag.remove();
         }

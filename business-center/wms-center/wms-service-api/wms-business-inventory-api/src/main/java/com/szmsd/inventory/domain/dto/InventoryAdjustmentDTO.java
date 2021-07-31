@@ -22,4 +22,15 @@ public class InventoryAdjustmentDTO {
     @ApiModelProperty(value = "数量")
     private Integer quantity;
 
+    @ApiModelProperty(value = "卖家code")
+    private String sellerCode;
+    /**
+     * 退件 调整类型为退件
+     */
+    @ApiModelProperty(value = "退件来源",hidden = true)
+    private Boolean formReturn = false;
+
+    @ApiModelProperty(value = "退件来源-单号",hidden = true)
+    private String receiptNo;
+
 }

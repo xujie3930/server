@@ -269,6 +269,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     void label(HttpServletResponse response, DelOutboundLabelDto dto);
 
     /**
+     * 上传箱标
+     *
+     * @param dto dto
+     * @return int
+     */
+    int uploadBoxLabel(DelOutboundUploadBoxLabelDto dto);
+
+    /**
      * sku导入
      *
      * @param warehouseCode warehouseCode
@@ -311,8 +319,16 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param orderType     orderType
      * @param orderNo       orderNo
      * @param warehouseCode warehouseCode
+     * @param cusCode       cusCode
      */
-    void unFreeze(String orderType, String orderNo, String warehouseCode);
+    void unFreeze(String orderType, String orderNo, String warehouseCode, String cusCode);
+
+    /**
+     * 取消冻结库存
+     *
+     * @param delOutbound delOutbound
+     */
+    void unFreeze(DelOutbound delOutbound);
 
     /**
      * 打印
@@ -321,5 +337,13 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return boolean
      */
     boolean toPrint(DelOutboundToPrintDto dto);
+
+    /**
+     * 批量更新挂号
+     *
+     * @param list list
+     * @return int
+     */
+    int batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list);
 }
 

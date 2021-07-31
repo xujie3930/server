@@ -4,7 +4,11 @@ import com.szmsd.bas.api.BusinessBasInterface;
 import com.szmsd.bas.api.factory.BasWarehouseFeignFallback;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.dto.AddWarehouseRequest;
+import com.szmsd.bas.dto.BasWarehouseQueryDTO;
+import com.szmsd.bas.vo.BasWarehouseVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,4 +46,13 @@ public interface BasWarehouseFeignService {
      */
     @RequestMapping("/bas/warehouse/queryByWarehouseCodes")
     R<List<BasWarehouse>> queryByWarehouseCodes(@RequestParam("warehouseCodes") List<String> warehouseCodes);
+
+    /**
+     * 查询 仓库列表
+     * @param queryDTO
+     * @return
+     */
+    @PostMapping("/bas/warehouse/open/page")
+    @ApiOperation(value = "查询", notes = "仓库列表 - 分页查询")
+    TableDataInfo<BasWarehouseVO> pagePost(@RequestBody BasWarehouseQueryDTO queryDTO);
 }

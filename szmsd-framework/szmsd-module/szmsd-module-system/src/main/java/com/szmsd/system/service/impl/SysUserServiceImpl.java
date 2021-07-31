@@ -120,6 +120,13 @@ public class SysUserServiceImpl implements ISysUserService {
                         sysUser.setPermissions(listR.getData());
                     }
                 }
+                // 处理无任何权限时，能查到数据的问题
+                List<String> permissions = sysUser.getPermissions();
+                if (CollectionUtils.isEmpty(permissions)) {
+                    permissions = new ArrayList<>();
+                    permissions.add("0");
+                    sysUser.setPermissions(permissions);
+                }
             }
             sysUser.setAllDataScope(allDataScope);
         }
@@ -405,6 +412,11 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public int resetPwd(SysUser user) {
         return userMapper.updateUser(user);
+    }
+
+    @Override
+    public int resetPwdBySeller(SysUser user) {
+        return userMapper.updateUserBySeller(user);
     }
 
     /**
