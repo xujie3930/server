@@ -39,4 +39,12 @@ public interface DelOutboundClientService {
      * @return int
      */
     int furtherHandler(DelOutboundFurtherHandlerDto dto);
+
+    /**
+     * 取消出库单
+     *
+     * @param dto dto
+     * @return int
+     */
+    int canceled(DelOutboundCanceledDto dto);
 }

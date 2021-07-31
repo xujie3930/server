@@ -1,13 +1,14 @@
 package com.szmsd.bas.dto;
 
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class BaseProductQueryDto {
+public class BaseProductQueryDto extends QueryDto {
 
     private List<Long> ids;
 

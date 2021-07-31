@@ -19,7 +19,6 @@ public class ResponseVO implements Serializable {
 
     @ApiModelProperty(value = "返回消息")
     private String message;
-
     public ResponseVO(boolean success, String message) {
         this.success = success;
         this.message = message;

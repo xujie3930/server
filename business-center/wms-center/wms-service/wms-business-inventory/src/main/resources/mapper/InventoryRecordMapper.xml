@@ -43,9 +43,9 @@
         t.after_total_outbound,
         t.operator,
         t.operate_on,
-        t.remark logs
+        t.remark `logs`
     </sql>
-    <select id="selectList" parameterType="com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO" resultMap="InventoryRecordVO">
+    <select id="selectQueryList" parameterType="com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO" resultMap="InventoryRecordVO">
         SELECT <include refid="Column_List_VO"/>
         FROM inventory_record t
         <where>

@@ -693,6 +693,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             Collection<InventoryOperateDto> inventoryOperateDtos = inventoryOperateDtoMap.values();
             ArrayList<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtos);
             operateListDto.setOperateList(operateList);
+            // 集运出库特殊处理
+            if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType)) {
+                operateListDto.setFreeType(1);
+                operateListDto.setCusCode(delOutbound.getSellerCode());
+            }
             try {
                 DelOutboundOperationLogEnum.BRV_FREEZE_INVENTORY.listener(new Object[]{delOutbound, operateList});
                 InventoryFeignClientService inventoryFeignClientService = SpringUtils.getBean(InventoryFeignClientService.class);
@@ -712,7 +717,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.RK_BRV_FREEZE_INVENTORY.listener(delOutbound);
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
-            delOutboundService.unFreeze(delOutbound.getOrderType(), delOutbound.getOrderNo(), delOutbound.getWarehouseCode());
+            delOutboundService.unFreeze(delOutbound);
             super.rollback(context);
         }
 

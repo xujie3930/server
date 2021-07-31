@@ -10,7 +10,6 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import com.szmsd.common.core.utils.DateUtils;
@@ -18,7 +17,10 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.InventoryRecord;
-import com.szmsd.inventory.domain.dto.*;
+import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
+import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
+import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.*;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
@@ -26,7 +28,6 @@ import com.szmsd.inventory.service.IInventoryService;
 import com.szmsd.inventory.service.IPurchaseService;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
-import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -40,6 +41,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,7 +99,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
                 //根据采购单号查询所有的入库单 统计之前该入库单 关联这个sku的冻结的数量
                 List<InventoryRecord> inventoryRecordVOS = iInventoryRecordService.getBaseMapper()
-                        .selectList(Wrappers.<InventoryRecord>lambdaQuery().eq(InventoryRecord::getSku,sku).in(InventoryRecord::getReceiptNo,warehouseNoList));
+                        .selectList(Wrappers.<InventoryRecord>lambdaQuery().eq(InventoryRecord::getSku, sku).in(InventoryRecord::getReceiptNo, warehouseNoList));
 
                 //之前冻结的数量
                 int beforeFreeze = inventoryRecordVOS.stream().map(InventoryRecord::getOperator).mapToInt(Integer::parseInt).reduce(Integer::sum).orElse(0);
@@ -126,7 +128,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                         freezeInventory += qty;
                     }
                     afterInventory.setFreezeInventory(freezeInventory).setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
-                    afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", inboundInventoryDTO.getOperateOn()));
+                    afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss", inboundInventoryDTO.getOperateOn()));
                     this.saveOrUpdate(afterInventory);
                 } else {
                     //入库数 = 可用++
@@ -140,7 +142,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                 int afterAvailableInventory = beforeInventory.getAvailableInventory() + qty;
                 int afterTotalInbound = beforeInventory.getTotalInbound() + qty;
                 afterInventory.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
-                afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", inboundInventoryDTO.getOperateOn()));
+                afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss", inboundInventoryDTO.getOperateOn()));
                 this.saveOrUpdate(afterInventory);
             }
 
@@ -304,10 +306,29 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     @Transactional
     @Override
-    public int freeze(String invoiceNo, String warehouseCode, String sku, Integer num) {
+    public int freeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType, String cusCode) {
         return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
-            // >=
-            queryWrapperConsumer.ge(Inventory::getAvailableInventory, num);
+            // 库存可以为负数
+            if (null == freeType) {
+                // >=
+                queryWrapperConsumer.ge(Inventory::getAvailableInventory, num);
+            }
+        }, (dbInventory) -> {
+            // 库存可以为负数，但是库存是空的，新增一条库存记录
+            if (null != freeType && null == dbInventory) {
+                Inventory inventory = new Inventory();
+                inventory.setCusCode(cusCode)
+                        .setSku(sku)
+                        .setWarehouseCode(warehouseCode)
+                        .setTotalInventory(0)
+                        .setAvailableInventory(0)
+                        .setFreezeInventory(0)
+                        .setTotalInbound(0)
+                        .setTotalOutbound(0);
+                baseMapper.insert(inventory);
+                return inventory;
+            }
+            return dbInventory;
         }, (updateConsumer) -> {
             updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() - num);
             updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() + num);
@@ -316,38 +337,43 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     @Transactional
     @Override
-    public int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num) {
+    public int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType) {
         return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
-            // >=
-            queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
-        }, (updateConsumer) -> {
-            updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() + num);
-            updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
-        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_3);
+                    if (null == freeType) {
+                        // >=
+                        queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
+                    }
+                }, null,
+                (updateConsumer) -> {
+                    updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() + num);
+                    updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
+                }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_8);
     }
 
     @Transactional
     @Override
     public int deduction(String invoiceNo, String warehouseCode, String sku, Integer num) {
         return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
-            // >=
-            queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
-        }, (updateConsumer) -> {
-            updateConsumer.setTotalInventory(updateConsumer.getTotalInventory() - num);
-            updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
-            updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() + num);
-        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);
+                    // >=
+                    queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
+                }, null,
+                (updateConsumer) -> {
+                    updateConsumer.setTotalInventory(updateConsumer.getTotalInventory() - num);
+                    updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
+                    updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() + num);
+                }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);
     }
 
     @Transactional
     @Override
     public int unDeduction(String invoiceNo, String warehouseCode, String sku, Integer num) {
         return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
-        }, (updateConsumer) -> {
-            updateConsumer.setTotalInventory(updateConsumer.getTotalInventory() + num);
-            updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() + num);
-            updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() - num);
-        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);
+                }, null,
+                (updateConsumer) -> {
+                    updateConsumer.setTotalInventory(updateConsumer.getTotalInventory() + num);
+                    updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() + num);
+                    updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() - num);
+                }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);
     }
 
     /**
@@ -420,6 +446,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
     private int doWorker(String invoiceNo, String warehouseCode, String sku, Integer num,
                          Consumer<LambdaQueryWrapper<Inventory>> queryWrapperConsumer,
+                         Function<Inventory, Inventory> beforeHandler,
                          Consumer<Inventory> updateConsumer,
                          LocalLanguageEnum type) {
         if (StringUtils.isEmpty(warehouseCode)
@@ -433,29 +460,32 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         queryWrapper.eq(Inventory::getSku, sku);
         queryWrapperConsumer.accept(queryWrapper);
         List<Inventory> list = this.list(queryWrapper);
-        if (CollectionUtils.isEmpty(list)) {
+        Inventory dbInventory = null;
+        if (CollectionUtils.isNotEmpty(list)) {
+            dbInventory = list.get(0);
+        }
+        if (null != beforeHandler) {
+            dbInventory = beforeHandler.apply(dbInventory);
+        }
+        if (null == dbInventory) {
             throw new CommonException("999", "[" + sku + "]库存不足");
         }
-        Inventory inventory = list.get(0);
-        if (null == inventory) {
-            throw new CommonException("999", "[" + sku + "]库存不存在");
-        }
         Inventory updateInventory = new Inventory();
-        updateInventory.setWarehouseCode(inventory.getWarehouseCode());
-        updateInventory.setSku(inventory.getSku());
-        updateInventory.setTotalInventory(inventory.getTotalInventory());
-        updateInventory.setAvailableInventory(inventory.getAvailableInventory());
-        updateInventory.setFreezeInventory(inventory.getFreezeInventory());
-        updateInventory.setTotalInbound(inventory.getTotalInbound());
-        updateInventory.setTotalOutbound(inventory.getTotalOutbound());
-        updateInventory.setId(inventory.getId());
+        updateInventory.setWarehouseCode(dbInventory.getWarehouseCode());
+        updateInventory.setSku(dbInventory.getSku());
+        updateInventory.setTotalInventory(dbInventory.getTotalInventory());
+        updateInventory.setAvailableInventory(dbInventory.getAvailableInventory());
+        updateInventory.setFreezeInventory(dbInventory.getFreezeInventory());
+        updateInventory.setTotalInbound(dbInventory.getTotalInbound());
+        updateInventory.setTotalOutbound(dbInventory.getTotalOutbound());
+        updateInventory.setId(dbInventory.getId());
         updateConsumer.accept(updateInventory);
         int update = baseMapper.updateById(updateInventory);
         if (update < 1) {
             throw new CommonException("999", "[" + sku + "]库存操作失败");
         }
         // 添加日志
-        iInventoryRecordService.saveLogs(type.getKey(), inventory, updateInventory, invoiceNo, null, null, num, "");
+        iInventoryRecordService.saveLogs(type.getKey(), dbInventory, updateInventory, invoiceNo, null, null, num, "");
         return update;
     }
 

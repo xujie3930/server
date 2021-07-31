@@ -30,6 +30,7 @@ public interface InboundReceiptFeignService {
     R completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest);
 
     @GetMapping("/inbound/receipt/info/{warehouseNo}")
+    @ApiOperation(value = "详情", notes = "入库管理 - 详情（包含明细）")
     R<InboundReceiptInfoVO> info(@PathVariable("warehouseNo") String warehouseNo);
 
     @PostMapping("/inbound/receipt/saveOrUpdate")
@@ -41,4 +42,8 @@ public interface InboundReceiptFeignService {
     @GetMapping("/inbound/receipt/list")
     @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
     R<List<InboundReceiptVO>> list(@RequestBody InboundReceiptQueryDTO queryDTO);
+
+    @PostMapping("/receipt/saveOrUpdate/batch")
+    @ApiOperation(value = "创建/修改-批量", notes = "批量 入库管理 - 新增/创建")
+    R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@RequestBody List<CreateInboundReceiptDTO> createInboundReceiptDTOList);
 }

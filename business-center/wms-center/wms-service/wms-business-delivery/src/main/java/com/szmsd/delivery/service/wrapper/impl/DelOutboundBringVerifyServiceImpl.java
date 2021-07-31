@@ -9,6 +9,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
@@ -537,6 +538,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
             }
             details = new ArrayList<>(shipmentDetailInfoDtoMap.values());
+            // 组合SKU特殊处理
+            if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+                PackingRequirementInfoDto packingRequirementInfoDto = new PackingRequirementInfoDto();
+                packingRequirementInfoDto.setQty(delOutbound.getBoxNumber());
+                packingRequirementInfoDto.setDetails(details);
+                createShipmentRequestDto.setPackingRequirement(packingRequirementInfoDto);
+            }
         } else {
             // 查询sku详细信息
             List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
@@ -567,7 +575,21 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
             details = new ArrayList<>(shipmentDetailInfoDtoMap.values());
         }
-        createShipmentRequestDto.setDetails(details);
+        // 组合SKU特殊处理
+        if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+            // 特殊处理这两个字段的值
+            // details
+            // packingRequirement.details
+            List<ShipmentDetailInfoDto> detailInfoDtoList = new ArrayList<>();
+            for (ShipmentDetailInfoDto detailInfoDto : details) {
+                ShipmentDetailInfoDto infoDto = BeanMapperUtil.map(detailInfoDto, ShipmentDetailInfoDto.class);
+                infoDto.setQty(infoDto.getQty() * delOutbound.getBoxNumber());
+                detailInfoDtoList.add(infoDto);
+            }
+            createShipmentRequestDto.setDetails(detailInfoDtoList);
+        } else {
+            createShipmentRequestDto.setDetails(details);
+        }
         createShipmentRequestDto.setIsPackingByRequired(delOutbound.getIsPackingByRequired());
         createShipmentRequestDto.setIsFirst(delOutbound.getIsFirst());
         createShipmentRequestDto.setNewSKU(delOutbound.getNewSku());
