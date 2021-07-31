@@ -25,9 +25,14 @@
         </dependency>
 
         <!-- szmsd Common Swagger -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.szmsd</groupId>
             <artifactId>szmsd-common-swagger</artifactId>
+        </dependency>-->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>swagger-bootstrap-ui</artifactId>
+            <version>${swagger-bootstrap-ui.version}</version>
         </dependency>
 
         <dependency>

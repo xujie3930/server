@@ -11,6 +11,8 @@ import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
+import com.szmsd.http.vo.PricedProduct;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
@@ -124,4 +126,8 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/canceled")
     @ApiOperation(value = "出库管理 - 取消")
     R<Integer> canceled(@RequestBody DelOutboundCanceledDto dto);
+
+    @PostMapping("/inService")
+    @ApiOperation(value = "出库管理 - 其它服务 - 物流服务")
+    R<List<PricedProduct>> inService(@RequestBody @Validated DelOutboundOtherInServiceDto dto);
 }
