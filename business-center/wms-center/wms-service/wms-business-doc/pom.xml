@@ -97,6 +97,11 @@
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-delivery-api</artifactId>
         </dependency>
+        <!--仓库API-->
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-bas-api</artifactId>
+        </dependency>
 
     </dependencies>
 

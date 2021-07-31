@@ -68,6 +68,17 @@ public class BaseProductController extends BaseController {
         return getDataTable(list);
     }
 
+    /**
+     * 查询模块列表
+     */
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:queryList')")
+    @PostMapping("/queryList")
+    @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
+    public TableDataInfo queryList(@RequestBody BaseProductQueryDto queryDto) {
+        startPage();
+        List<BaseProduct> list = baseProductService.selectBaseProductPage(queryDto);
+        return getDataTable(list);
+    }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/listByCode")

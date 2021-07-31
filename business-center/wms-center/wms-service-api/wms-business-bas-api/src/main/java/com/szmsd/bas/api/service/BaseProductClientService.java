@@ -2,12 +2,30 @@ package com.szmsd.bas.api.service;
 
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.dto.BaseProductDto;
+import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.dto.MeasuringProductRequest;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
 public interface BaseProductClientService {
+
+    /**
+     * 查询模块列表
+     */
+    TableDataInfo list(BaseProductQueryDto queryDto);
+
+    /**
+     * 新增产品模块
+     */
+    void add(BaseProductDto baseProductDto);
+
     /**
      * 检查sku编码是否有效
      *

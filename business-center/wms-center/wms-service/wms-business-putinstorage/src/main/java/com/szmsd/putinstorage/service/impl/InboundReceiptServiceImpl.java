@@ -216,7 +216,6 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      */
     @Override
     public InboundReceiptInfoVO queryInfo(String warehouseNo) {
-        log.info("查询入库单详情：warehouseNo={}", warehouseNo);
         InboundReceiptInfoVO inboundReceiptInfoVO = queryInfo(warehouseNo, true);
         return inboundReceiptInfoVO;
     }
@@ -228,7 +227,6 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      * @return
      */
     public InboundReceiptInfoVO queryInfo(String warehouseNo, boolean isContainFile) {
-        log.info("查询入库单详情：warehouseNo={}", warehouseNo);
         InboundReceiptInfoVO inboundReceiptInfoVO = baseMapper.selectInfo(null, warehouseNo);
         if (inboundReceiptInfoVO == null) {
             return null;
@@ -236,7 +234,6 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         // 查明细
         List<InboundReceiptDetailVO> inboundReceiptDetailVOS = iInboundReceiptDetailService.selectList(new InboundReceiptDetailQueryDTO().setWarehouseNo(warehouseNo), isContainFile);
         inboundReceiptInfoVO.setInboundReceiptDetails(inboundReceiptDetailVOS);
-        log.info("查询入库单详情：查询完成{}", inboundReceiptDetailVOS);
         return inboundReceiptInfoVO;
     }
 

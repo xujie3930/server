@@ -5,8 +5,13 @@ import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.constant.ShipmentType;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.dto.BaseProductDto;
+import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.bas.dto.MeasuringProductRequest;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +22,21 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
 
     @Autowired
     private BaseProductFeignService baseProductFeignService;
+
+    @Override
+    public TableDataInfo list(BaseProductQueryDto queryDto) {
+        TableDataInfo r = baseProductFeignService.list(queryDto);
+        if(Constants.SUCCESS != r.getCode()){
+            // 抛出接口返回的异常信息
+            throw new CommonException("" + r.getCode(), r.getMsg());
+        }
+        return r;
+    }
+
+    @Override
+    public void add(BaseProductDto baseProductDto) {
+        R.getDataAndException(this.baseProductFeignService.add(baseProductDto));
+    }
 
     @Override
     public Boolean checkSkuValidToDelivery(String code) {

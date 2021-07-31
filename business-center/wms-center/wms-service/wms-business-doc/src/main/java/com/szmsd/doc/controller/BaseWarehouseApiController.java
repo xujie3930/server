@@ -1,8 +1,11 @@
-package com.szmsd.open.controller;
+package com.szmsd.doc.controller;
 
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.dto.BasWarehouseQueryDTO;
-import com.szmsd.open.vo.ResponseVO;
+import com.szmsd.bas.vo.BasWarehouseVO;
+import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.doc.api.delivery.RestfulResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
@@ -29,8 +32,8 @@ public class BaseWarehouseApiController extends BaseController {
      */
     @PostMapping("/open/page")
     @ApiOperation(value = "查询", notes = "仓库列表 - 分页查询")
-    public ResponseVO pagePost(@Validated @RequestBody BasWarehouseQueryDTO queryDTO) {
-        return ResponseVO.ok();
+    public RestfulResponse<TableDataInfo<BasWarehouseVO>> pagePost(@Validated @RequestBody BasWarehouseQueryDTO queryDTO) {
+        return RestfulResponse.ok(basWarehouseClientService.queryByWarehouseCodes(queryDTO));
     }
 
 }

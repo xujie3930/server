@@ -2,11 +2,9 @@ package com.szmsd.bas.api.factory;
 
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.domain.BaseProduct;
-import com.szmsd.bas.dto.BaseProductBatchQueryDto;
-import com.szmsd.bas.dto.BaseProductConditionQueryDto;
-import com.szmsd.bas.dto.BaseProductMeasureDto;
-import com.szmsd.bas.dto.MeasuringProductRequest;
+import com.szmsd.bas.dto.*;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,6 +19,16 @@ public class BaseProductFeignFallback implements FallbackFactory<BaseProductFeig
     @Override
     public BaseProductFeignService create(Throwable throwable) {
         return new BaseProductFeignService() {
+            @Override
+            public TableDataInfo list(BaseProductQueryDto queryDto) {
+                return null;
+            }
+
+            @Override
+            public R add(BaseProductDto baseProductDto) {
+                return R.convertResultJson(throwable);
+            }
+
             @Override
             public R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct) {
                 return R.convertResultJson(throwable);
