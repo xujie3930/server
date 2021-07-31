@@ -53,7 +53,8 @@ public class SkuApiController {
     @GetMapping("getBarCode")
     @ApiOperation(value = "SKU标签生成",notes = "生成sku标签条形码，返回的为条形码图片的Base64")
     public R getBarCode(@ApiParam("sku的code") @RequestParam String skuCode){
-        return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode));
+        Boolean valid = baseProductClientService.checkSkuValidToDelivery(skuCode);
+        return valid ? R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode)) : R.failed("sku不存在");
     }
 
 }
