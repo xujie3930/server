@@ -3,12 +3,13 @@ package com.szmsd.bas.api.feign;
 import com.szmsd.bas.api.BusinessBasInterface;
 import com.szmsd.bas.api.factory.BaseProductFeignFallback;
 import com.szmsd.bas.domain.BaseProduct;
-import com.szmsd.bas.dto.BaseProductBatchQueryDto;
-import com.szmsd.bas.dto.BaseProductConditionQueryDto;
-import com.szmsd.bas.dto.BaseProductMeasureDto;
-import com.szmsd.bas.dto.MeasuringProductRequest;
+import com.szmsd.bas.dto.*;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.java.Log;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -16,6 +17,18 @@ import java.util.List;
 
 @FeignClient(contextId = "FeignClient.BaseProductFeignService", name = BusinessBasInterface.SERVICE_NAME, fallbackFactory = BaseProductFeignFallback.class)
 public interface BaseProductFeignService {
+
+    /**
+     * 查询模块列表
+     */
+    @PostMapping("/base/product/queryList")
+    TableDataInfo list(@RequestBody BaseProductQueryDto queryDto);
+
+    /**
+     * 新增产品模块
+     */
+    @PostMapping("/base/product/add")
+    R add(@RequestBody BaseProductDto baseProductDto);
 
     @PostMapping(value = "/base/product/checkSkuValidToDelivery")
     R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct);
