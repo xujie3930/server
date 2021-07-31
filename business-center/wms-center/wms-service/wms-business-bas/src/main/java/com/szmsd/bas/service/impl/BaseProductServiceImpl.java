@@ -227,6 +227,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             b.setSource(BaseMainEnum.NORMAL_IN.getCode());
             b.setWarehouseAcceptance(false);
             ProductRequest productRequest = BeanMapperUtil.map(b, ProductRequest.class);
+            productRequest.setProductDesc(b.getProductDescription());
             R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
             if (!r.getData().getSuccess()) {
                 throw new BaseException("传wms失败:" + r.getData().getMessage());
@@ -357,7 +358,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProduct.setVolume(baseProduct.getInitVolume());
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
-
+        productRequest.setProductDesc(baseProductDto.getProductDescription());
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         //验证wms
         toWms(r);
@@ -412,6 +413,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             o.setHeight(o.getInitHeight());
             o.setVolume(o.getInitVolume());
             ProductRequest productRequest = BeanMapperUtil.map(o, ProductRequest.class);
+            productRequest.setProductDesc(o.getProductDescription());
             R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
             //验证wms
             toWms(r);
@@ -441,6 +443,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         }
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
+        productRequest.setProductDesc(baseProductDto.getProductDescription());
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         //验证wms
         toWms(r);
