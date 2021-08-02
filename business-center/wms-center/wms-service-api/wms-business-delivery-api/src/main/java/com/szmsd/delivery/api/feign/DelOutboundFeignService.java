@@ -127,7 +127,7 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - 取消")
     R<Integer> canceled(@RequestBody DelOutboundCanceledDto dto);
 
-    @PostMapping("/inService")
+    @PostMapping("/api/outbound/other/inService")
     @ApiOperation(value = "出库管理 - 其它服务 - 物流服务")
     R<List<PricedProduct>> inService(@RequestBody @Validated DelOutboundOtherInServiceDto dto);
 }
