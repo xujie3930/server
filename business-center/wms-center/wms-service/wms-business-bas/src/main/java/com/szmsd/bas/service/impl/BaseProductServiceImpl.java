@@ -209,7 +209,6 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         List<BaseProduct> baseProductList = BeanMapperUtil.mapList(list, BaseProduct.class);
 
         for (BaseProduct b : baseProductList) {
-            //b.setSource("01");
             b.setCategory(ProductConstant.SKU_NAME);
             b.setCategoryCode(ProductConstant.SKU);
             b.setSellerCode(seller.getSellerCode());
@@ -584,8 +583,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         for (BaseProductImportDto b : list) {
             StringBuilder s = new StringBuilder("");
             if (StringUtils.isEmpty(b.getCode())) {
-
-                s.append("SKU未填写，");
+                String skuCode = "S" + sellerCode + baseSerialNumberService.generateNumber(ProductConstant.SKU_NAME);
+                b.setCode(skuCode);
             } else {
                 if (!Pattern.matches(regex, b.getCode())) {
                     s.append("SKU不允许出现除了数字字母之外的其它字符，");
