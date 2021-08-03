@@ -1,6 +1,9 @@
 package com.szmsd.delivery.api.service;
 
 import com.szmsd.delivery.dto.*;
+import com.szmsd.http.vo.PricedProduct;
+
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -47,4 +50,12 @@ public interface DelOutboundClientService {
      * @return int
      */
     int canceled(DelOutboundCanceledDto dto);
+
+    /**
+     * 物流服务
+     *
+     * @param dto dto
+     * @return PricedProduct
+     */
+    List<PricedProduct> inService(DelOutboundOtherInServiceDto dto);
 }

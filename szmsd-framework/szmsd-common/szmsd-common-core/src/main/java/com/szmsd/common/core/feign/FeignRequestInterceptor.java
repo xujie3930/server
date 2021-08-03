@@ -5,6 +5,7 @@ import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestAttributes;
@@ -20,6 +21,9 @@ public class FeignRequestInterceptor implements RequestInterceptor {
 
     @Value("${spring.application.name}")
     String springApplicationName;
+
+    @Autowired
+    private FeignRequestInterceptorFilter feignRequestInterceptorFilter;
 
     @Override
     public void apply(RequestTemplate template) {
@@ -37,6 +41,9 @@ public class FeignRequestInterceptor implements RequestInterceptor {
             while (headerNames.hasMoreElements()) {
                 String name = headerNames.nextElement();
                 Enumeration<String> values = request.getHeaders(name);
+                if (this.feignRequestInterceptorFilter.filter(name, values)) {
+                    continue;
+                }
                 while (values.hasMoreElements()) {
                     String value = values.nextElement();
                     // 停止传播

@@ -6,5 +6,6 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.common.core.converter.ConverterConfig,\
   com.szmsd.common.core.filter.ContextFilterConfig,\
   com.szmsd.common.core.feign.FeignExceptionErrorDecoder,\
+  com.szmsd.common.core.feign.FeignRequestInterceptorFilterConfiguration,\
   com.szmsd.common.core.feign.FeignRequestInterceptor,\
   com.szmsd.common.core.config.TokenConfiguration
