@@ -1,16 +1,20 @@
 package com.szmsd.doc.api.delivery;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.dto.DelOutboundCanceledDto;
+import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
 import com.szmsd.doc.api.delivery.request.DelOutboundCanceledRequest;
 import com.szmsd.doc.api.delivery.request.PricedProductRequest;
 import com.szmsd.doc.api.delivery.response.PricedProductResponse;
+import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiSort;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +43,15 @@ public class DeliveryController {
     @ApiOperation(value = "#1 出库管理 - 物流服务列表", position = 100)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "PricedProductRequest", required = true)
     public R<List<PricedProductResponse>> pricedProduct(@RequestBody @Validated PricedProductRequest request) {
-        return R.ok();
+        if (CollectionUtils.isEmpty(request.getSkus()) && CollectionUtils.isEmpty(request.getProductAttributes())) {
+            throw new CommonException("500", "SKU，产品属性信息不能全部为空");
+        }
+        DelOutboundOtherInServiceDto dto = BeanMapperUtil.map(request, DelOutboundOtherInServiceDto.class);
+        List<PricedProduct> productList = this.delOutboundClientService.inService(dto);
+        if (CollectionUtils.isEmpty(productList)) {
+            return R.ok();
+        }
+        return R.ok(BeanMapperUtil.mapList(productList, PricedProductResponse.class));
     }
 
     @PreAuthorize("hasAuthority('read')")

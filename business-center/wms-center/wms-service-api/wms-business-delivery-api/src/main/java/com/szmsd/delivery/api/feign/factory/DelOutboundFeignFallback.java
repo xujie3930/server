@@ -11,6 +11,7 @@ import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
+import com.szmsd.http.vo.PricedProduct;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
@@ -82,6 +83,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
 
             @Override
             public R<Integer> canceled(DelOutboundCanceledDto dto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<PricedProduct>> inService(DelOutboundOtherInServiceDto dto) {
                 return R.convertResultJson(throwable);
             }
         };
