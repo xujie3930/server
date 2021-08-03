@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiSort;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,9 @@ import java.util.Enumeration;
 @RequestMapping("/api/test")
 public class TestController {
 
+    @Value("${server.port}")
+    private int port;
+
     @GetMapping(value = "/token", produces = "application/json;charset=utf-8")
     public Object token() throws IOException {
         NameValuePair[] nameValuePairs = new NameValuePair[]{
@@ -37,7 +41,7 @@ public class TestController {
                 new BasicNameValuePair("password", "123456")
         };
         String hostAddress = getLocalHostLANAddress().getHostAddress();
-        return Request.Post("http://" + hostAddress + ":17001/oauth/token").bodyForm(nameValuePairs).execute().returnContent().asString(StandardCharsets.UTF_8);
+        return Request.Post("http://" + hostAddress + ":" + port + "/oauth/token").bodyForm(nameValuePairs).execute().returnContent().asString(StandardCharsets.UTF_8);
     }
 
     @GetMapping("/echo")
