@@ -1,6 +1,7 @@
 package com.szmsd.delivery.api.service;
 
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.http.vo.PricedProduct;
 
 import java.util.List;
@@ -58,4 +59,12 @@ public interface DelOutboundClientService {
      * @return PricedProduct
      */
     List<PricedProduct> inService(DelOutboundOtherInServiceDto dto);
+
+    /**
+     * 出库单新增 - DOC支持
+     *
+     * @param dto dto
+     * @return DelOutboundAddResponse
+     */
+    List<DelOutboundAddResponse> add(List<DelOutboundDto> dto);
 }

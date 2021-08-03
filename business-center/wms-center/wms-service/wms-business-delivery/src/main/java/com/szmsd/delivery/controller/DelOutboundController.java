@@ -79,6 +79,7 @@ public class DelOutboundController extends BaseController {
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
     @Autowired
     private BasSubClientService basSubClientService;
+    @SuppressWarnings({"all"})
     @Autowired
     private BasRegionFeignService basRegionFeignService;
     @Autowired
@@ -160,7 +161,7 @@ public class DelOutboundController extends BaseController {
     @PostMapping("/shipment")
     @ApiOperation(value = "出库管理 - 创建", position = 300)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
-    public R<Integer> add(@RequestBody @Validated({ValidationSaveGroup.class}) DelOutboundDto dto) {
+    public R<DelOutboundAddResponse> add(@RequestBody @Validated({ValidationSaveGroup.class}) DelOutboundDto dto) {
         return R.ok(delOutboundService.insertDelOutbound(dto));
     }
 

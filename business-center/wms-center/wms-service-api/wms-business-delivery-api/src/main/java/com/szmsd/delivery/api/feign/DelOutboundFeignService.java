@@ -6,13 +6,13 @@ import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.vo.PricedProduct;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
@@ -129,5 +129,9 @@ public interface DelOutboundFeignService {
 
     @PostMapping("/api/outbound/other/inService")
     @ApiOperation(value = "出库管理 - 其它服务 - 物流服务")
-    R<List<PricedProduct>> inService(@RequestBody @Validated DelOutboundOtherInServiceDto dto);
+    R<List<PricedProduct>> inService(@RequestBody DelOutboundOtherInServiceDto dto);
+
+    @PostMapping("/api/outbound/doc/shipment")
+    @ApiOperation(value = "出库管理 - DOC支持 - 创建")
+    R<List<DelOutboundAddResponse>> add(@RequestBody List<DelOutboundDto> dto);
 }
