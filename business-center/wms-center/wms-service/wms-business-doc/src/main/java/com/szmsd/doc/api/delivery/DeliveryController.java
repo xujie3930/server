@@ -5,9 +5,14 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.dto.DelOutboundCanceledDto;
+import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
+import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.doc.api.delivery.request.DelOutboundCanceledRequest;
+import com.szmsd.doc.api.delivery.request.DelOutboundPackageTransferRequest;
 import com.szmsd.doc.api.delivery.request.PricedProductRequest;
+import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
+import com.szmsd.doc.api.delivery.response.DelOutboundPackageTransferResponse;
 import com.szmsd.doc.api.delivery.response.PricedProductResponse;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
@@ -18,10 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -55,10 +57,49 @@ public class DeliveryController {
     }
 
     @PreAuthorize("hasAuthority('read')")
+    @PostMapping("/package-transfer")
+    @ApiOperation(value = "#2 出库管理 - 单据创建（转运出库）", position = 200)
+    @ApiImplicitParam(name = "request", value = "请求参数", allowMultiple = true, dataType = "DelOutboundPackageTransferRequest", required = true)
+    public R<List<DelOutboundPackageTransferResponse>> packageTransfer(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) List<DelOutboundPackageTransferRequest> request) {
+        if (CollectionUtils.isEmpty(request)) {
+            throw new CommonException("999", "请求对象不能为空");
+        }
+        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(request, DelOutboundDto.class);
+        List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
+        return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
+    }
+
+    @PreAuthorize("hasAuthority('read')")
+    @GetMapping("/package-transfer/label")
+    @ApiOperation(value = "#3 出库管理 - 获取标签（转运出库）", position = 201)
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "List", required = true)
+    public R<List<DelOutboundPackageTransferResponse>> packageTransferLabel(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) List<DelOutboundPackageTransferRequest> request) {
+        if (CollectionUtils.isEmpty(request)) {
+            throw new CommonException("999", "请求对象不能为空");
+        }
+        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(request, DelOutboundDto.class);
+        List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
+        return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
+    }
+
+    @PreAuthorize("hasAuthority('read')")
+    @DeleteMapping("/package-transfer")
+    @ApiOperation(value = "#4 出库管理 - 取消单据（转运出库）", position = 202)
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackageTransferRequest", required = true)
+    public R<List<DelOutboundPackageTransferResponse>> packageTransferCancel(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) List<DelOutboundPackageTransferRequest> request) {
+        if (CollectionUtils.isEmpty(request)) {
+            throw new CommonException("999", "请求对象不能为空");
+        }
+        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(request, DelOutboundDto.class);
+        List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
+        return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
+    }
+
+    @PreAuthorize("hasAuthority('read')")
     @PostMapping("/canceled")
     @ApiOperation(value = "出库管理 - 取消", position = 700)
-    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCanceledRequest")
-    public R<Integer> canceled(@RequestBody @Validated DelOutboundCanceledRequest request) {
+    @ApiImplicitParam(name = "request", value = "请求参数", required = true, dataType = "DelOutboundCanceledRequest")
+    public R<Integer> canceled(@RequestBody @Validated List<DelOutboundCanceledRequest> request) {
         DelOutboundCanceledDto dto = BeanMapperUtil.map(request, DelOutboundCanceledDto.class);
         return R.ok(this.delOutboundClientService.canceled(dto));
     }

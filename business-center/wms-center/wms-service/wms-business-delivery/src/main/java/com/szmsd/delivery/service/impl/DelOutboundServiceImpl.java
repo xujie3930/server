@@ -96,6 +96,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private InventoryFeignClientService inventoryFeignClientService;
     @Autowired
     private IHtpOutboundClientService htpOutboundClientService;
+    @SuppressWarnings({"all"})
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
     @Autowired
@@ -104,6 +105,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private IDelOutboundChargeService delOutboundChargeService;
     @Autowired
     private IDelOutboundAsyncService delOutboundAsyncService;
+    @SuppressWarnings({"all"})
     @Autowired
     private OperationFeignService operationFeignService;
     @Autowired
@@ -321,7 +323,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      */
     @Transactional
     @Override
-    public int insertDelOutbound(DelOutboundDto dto) {
+    public DelOutboundAddResponse insertDelOutbound(DelOutboundDto dto) {
         if (!DelOutboundOrderTypeEnum.has(dto.getOrderType())) {
             throw new CommonException("999", "订单类型不存在");
         }
@@ -330,7 +332,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return this.createDelOutbound(dto);
     }
 
-    private int createDelOutbound(DelOutboundDto dto) {
+    private DelOutboundAddResponse createDelOutbound(DelOutboundDto dto) {
+        DelOutboundAddResponse response = new DelOutboundAddResponse();
         String orderNo;
         // 创建出库单
         try {
@@ -373,7 +376,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 组合信息
                 this.delOutboundCombinationService.save(orderNo, dto.getCombinations());
             }
-            return insert;
+            response.setId(delOutbound.getId());
+            response.setOrderNo(orderNo);
+            return response;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // 异常传播
@@ -396,10 +401,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
-    public int insertDelOutbounds(List<DelOutboundDto> dtoList) {
-        int result = 0;
+    public List<DelOutboundAddResponse> insertDelOutbounds(List<DelOutboundDto> dtoList) {
+        List<DelOutboundAddResponse> result = new ArrayList<>();
         for (DelOutboundDto dto : dtoList) {
-            result += this.createDelOutbound(dto);
+            result.add(this.createDelOutbound(dto));
         }
         return result;
     }
