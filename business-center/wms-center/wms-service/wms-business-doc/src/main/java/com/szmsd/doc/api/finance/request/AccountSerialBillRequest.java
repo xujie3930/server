@@ -1,4 +1,4 @@
-package com.szmsd.finance.dto;
+package com.szmsd.doc.api.finance.request;
 
 import com.szmsd.finance.enums.BillEnum;
 import io.swagger.annotations.ApiModelProperty;
@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -13,13 +14,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountSerialBillDTO {
-
-    @ApiModelProperty(value = "当前起始页索引")
-    private int pageNum;
-
-    @ApiModelProperty(value = "每页显示记录数")
-    private int pageSize;
+public class AccountSerialBillRequest {
 
     @ApiModelProperty(value = "单号")
     private String no;
@@ -27,13 +22,14 @@ public class AccountSerialBillDTO {
     @ApiModelProperty(value = "跟踪号")
     private String trackingNo;
 
+    @NotNull
     @ApiModelProperty(value = "客户编码")
     private String cusCode;
 
     @ApiModelProperty(value = "客户名称")
     private String cusName;
 
-    @ApiModelProperty(value = "币种id")
+    @ApiModelProperty(value = "币种编号")
     private String currencyCode;
 
     @ApiModelProperty(value = "币种名")
@@ -81,27 +77,4 @@ public class AccountSerialBillDTO {
     @ApiModelProperty(value = "备注")
     private String remark;
 
-    @ApiModelProperty(value = "选择导出的id")
-    private String ids;
-
-    public AccountSerialBillDTO(CustPayDTO dto, AccountSerialBillDTO details) {
-        this.no = dto.getNo();
-        this.trackingNo = details.getTrackingNo();
-        this.cusCode = dto.getCusCode();
-        this.cusName = dto.getCusName();
-        this.currencyCode = details.getCurrencyCode();
-        this.currencyName = details.getCurrencyName();
-        this.amount = details.getAmount();
-        this.warehouseCode = details.getWarehouseCode();
-        this.warehouseName = details.getWarehouseName();
-        this.payMethod = dto.getPayMethod();
-        this.businessCategory = details.getBusinessCategory();
-        this.productCode = details.getProductCode();
-        this.productCategory = details.getProductCategory();
-        this.chargeCategory = details.getChargeCategory();
-        this.chargeType = details.getChargeType();
-        this.orderTime = details.getOrderTime();
-        this.paymentTime = details.getPaymentTime();
-        this.remark = details.getRemark();
-    }
 }
