@@ -9,6 +9,7 @@ import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.doc.api.delivery.request.DelOutboundCanceledRequest;
+import com.szmsd.doc.api.delivery.request.DelOutboundPackageTransferListRequest;
 import com.szmsd.doc.api.delivery.request.DelOutboundPackageTransferRequest;
 import com.szmsd.doc.api.delivery.request.PricedProductRequest;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
@@ -59,12 +60,13 @@ public class DeliveryController {
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/package-transfer")
     @ApiOperation(value = "#2 出库管理 - 单据创建（转运出库）", position = 200)
-    @ApiImplicitParam(name = "request", value = "请求参数", allowMultiple = true, dataType = "DelOutboundPackageTransferRequest", required = true)
-    public R<List<DelOutboundPackageTransferResponse>> packageTransfer(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) List<DelOutboundPackageTransferRequest> request) {
-        if (CollectionUtils.isEmpty(request)) {
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackageTransferListRequest", required = true)
+    public R<List<DelOutboundPackageTransferResponse>> packageTransfer(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) DelOutboundPackageTransferListRequest request) {
+        List<DelOutboundPackageTransferRequest> requestList = request.getRequestList();
+        if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("999", "请求对象不能为空");
         }
-        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(request, DelOutboundDto.class);
+        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
     }
