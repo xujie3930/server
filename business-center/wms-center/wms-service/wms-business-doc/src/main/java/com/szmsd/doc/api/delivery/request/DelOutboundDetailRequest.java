@@ -1,6 +1,7 @@
 package com.szmsd.doc.api.delivery.request;
 
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
+import com.szmsd.doc.validator.annotation.PreNotNull;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value = "DelOutboundDetailRequest", description = "DelOutboundDetailRequest对象")
+@PreNotNull(field = "productAttribute", model = PreNotNull.Model.VALUE, fieldValue = "Battery", linkageFields = {"electrifiedMode", "batteryPackaging"}, message = "带电信息，电池包装不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
 public class DelOutboundDetailRequest implements Serializable {
 
     @Size(max = 50, message = "SKU不能超过50个字符")

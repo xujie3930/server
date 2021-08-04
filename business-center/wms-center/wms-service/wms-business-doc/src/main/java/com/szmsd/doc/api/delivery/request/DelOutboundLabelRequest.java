@@ -13,8 +13,8 @@ import java.util.List;
  * @date 2021-07-28 16:07
  */
 @Data
-@ApiModel(value = "DelOutboundCanceledRequest", description = "DelOutboundCanceledRequest对象")
-public class DelOutboundCanceledRequest implements Serializable {
+@ApiModel(value = "DelOutboundLabelRequest", description = "DelOutboundLabelRequest对象")
+public class DelOutboundLabelRequest implements Serializable {
 
     @NotNull(message = "订单号不能为空")
     @ApiModelProperty(value = "订单号", required = true, dataType = "String", position = 1, example = "[\"XF0001\"]")

@@ -61,14 +61,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Base64Utils;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1024,12 +1023,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public int canceled(DelOutboundCanceledDto dto) {
         List<Long> ids = dto.getIds();
-        // 参数ids为空，直接返回
-        if (CollectionUtils.isEmpty(ids)) {
+        List<String> orderNos1 = dto.getOrderNos();
+        if (CollectionUtils.isEmpty(ids) || CollectionUtils.isEmpty(orderNos1)) {
             return 0;
         }
-        // 根据ids查询单据为空，直接返回
-        List<DelOutbound> outboundList = this.listByIds(ids);
+        List<DelOutbound> outboundList;
+        if (CollectionUtils.isNotEmpty(ids)) {
+            // 根据ids查询单据
+            outboundList = this.listByIds(ids);
+        } else {
+            // 根据订单号查询单据
+            LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.in(DelOutbound::getOrderNo, orderNos1);
+            outboundList = this.list(queryWrapper);
+        }
         if (CollectionUtils.isEmpty(outboundList)) {
             return 0;
         }
@@ -1189,6 +1196,69 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             IoUtil.close(outputStream);
             IoUtil.close(inputStream);
         }
+    }
+
+    @Override
+    public List<DelOutboundLabelResponse> labelBase64(DelOutboundLabelDto dto) {
+        List<String> orderNos = dto.getOrderNos();
+        if (CollectionUtils.isEmpty(orderNos)) {
+            return null;
+        }
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.in(DelOutbound::getOrderNo, orderNos);
+        List<DelOutbound> outboundList = this.list(queryWrapper);
+        if (CollectionUtils.isEmpty(outboundList)) {
+            return null;
+        }
+        Map<String, DelOutbound> outboundMap = outboundList.stream().collect(Collectors.toMap(DelOutbound::getOrderNo, v -> v, (a, b) -> a));
+        List<DelOutboundLabelResponse> responseList = new ArrayList<>();
+        for (String orderNo : orderNos) {
+            DelOutboundLabelResponse response = new DelOutboundLabelResponse();
+            response.setOrderNo(orderNo);
+            DelOutbound outbound = outboundMap.get(orderNo);
+            if (null == outbound) {
+                response.setStatus(false);
+                response.setMessage("单据不存在");
+                responseList.add(response);
+                continue;
+            }
+            String shipmentOrderNumber = outbound.getShipmentOrderNumber();
+            if (StringUtils.isEmpty(shipmentOrderNumber)) {
+                response.setStatus(false);
+                response.setMessage("未获取承运商标签");
+                responseList.add(response);
+                continue;
+            }
+            String pathname = DelOutboundServiceImplUtil.getLabelFilePath(outbound) + "/" + shipmentOrderNumber;
+            File labelFile = new File(pathname);
+            if (!labelFile.exists()) {
+                response.setStatus(false);
+                response.setMessage("标签文件不存在");
+                responseList.add(response);
+                continue;
+            }
+            FileInputStream fileInputStream = null;
+            try {
+                fileInputStream = new FileInputStream(labelFile);
+                byte[] byteArray = IOUtils.toByteArray(fileInputStream);
+                String base64Str = new String(Base64Utils.encode(byteArray), StandardCharsets.UTF_8);
+                response.setBase64(base64Str);
+                response.setFileName(shipmentOrderNumber + ".pdf");
+                response.setStatus(true);
+            } catch (FileNotFoundException e) {
+                logger.error(e.getMessage());
+                response.setStatus(false);
+                response.setMessage("未找到标签文件");
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+                response.setStatus(false);
+                response.setMessage("读取标签文件失败");
+            } finally {
+                IOUtils.closeQuietly(fileInputStream);
+            }
+            responseList.add(response);
+        }
+        return responseList;
     }
 
     @Override

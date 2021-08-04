@@ -6,10 +6,7 @@ import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
-import com.szmsd.delivery.vo.DelOutboundAddResponse;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
-import com.szmsd.delivery.vo.DelOutboundDetailVO;
-import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.vo.PricedProduct;
@@ -134,4 +131,8 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/doc/shipment")
     @ApiOperation(value = "出库管理 - DOC支持 - 创建")
     R<List<DelOutboundAddResponse>> add(@RequestBody List<DelOutboundDto> dto);
+
+    @PostMapping("/api/outbound/labelBase64")
+    @ApiOperation(value = "出库管理 - 获取标签（根据订单号批量查询，DOC支持）")
+    R<List<DelOutboundLabelResponse>> labelBase64(@RequestBody DelOutboundLabelDto dto);
 }

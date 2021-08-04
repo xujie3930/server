@@ -2,6 +2,7 @@ package com.szmsd.delivery.api.service;
 
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
+import com.szmsd.delivery.vo.DelOutboundLabelResponse;
 import com.szmsd.http.vo.PricedProduct;
 
 import java.util.List;
@@ -67,4 +68,12 @@ public interface DelOutboundClientService {
      * @return DelOutboundAddResponse
      */
     List<DelOutboundAddResponse> add(List<DelOutboundDto> dto);
+
+    /**
+     * 获取标签
+     *
+     * @param dto dto
+     * @return DelOutboundLabelResponse
+     */
+    List<DelOutboundLabelResponse> labelBase64(DelOutboundLabelDto dto);
 }

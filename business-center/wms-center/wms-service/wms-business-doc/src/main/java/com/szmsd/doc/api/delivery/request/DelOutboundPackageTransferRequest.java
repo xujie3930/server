@@ -1,6 +1,7 @@
 package com.szmsd.doc.api.delivery.request;
 
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
+import com.szmsd.doc.validator.annotation.PreNotNull;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -18,6 +19,7 @@ import java.util.List;
  */
 @Data
 @ApiModel(value = "DelOutboundPackageTransferRequest", description = "DelOutboundPackageTransferRequest对象")
+@PreNotNull(field = "packageConfirm", fieldValue = "076002", model = PreNotNull.Model.VALUE, linkageFields = {"packageWeightDeviation"}, message = "重量误差范围不能为空")
 public class DelOutboundPackageTransferRequest implements Serializable {
 
     @NotNull(message = "重量不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
