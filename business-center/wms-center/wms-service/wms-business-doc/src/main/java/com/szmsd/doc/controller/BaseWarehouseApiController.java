@@ -2,19 +2,32 @@ package com.szmsd.doc.controller;
 
 import cn.hutool.core.codec.Base64Encoder;
 import cn.hutool.core.util.URLUtil;
+import com.alibaba.fastjson.JSONObject;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.dto.BasWarehouseQueryDTO;
 import com.szmsd.bas.vo.BasWarehouseVO;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.doc.api.delivery.response.InboundReceiptDetailResp;
+import com.szmsd.doc.api.delivery.response.InboundReceiptInfoResp;
+import com.szmsd.doc.utils.GoogleBarCodeUtils;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
+import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +38,8 @@ import javax.validation.constraints.NotEmpty;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +52,8 @@ public class BaseWarehouseApiController extends BaseController {
     private BasWarehouseClientService basWarehouseClientService;
     @Resource
     private InboundReceiptFeignService inboundReceiptFeignService;
+    @Resource
+    private RemoteAttachmentService attachmentFeignService;
 
     /**
      * 查询 仓库列表
@@ -53,18 +70,42 @@ public class BaseWarehouseApiController extends BaseController {
 
     //    @PreAuthorize("hasAuthority('read')")
     @GetMapping("/inbound/receipt/info/{warehouseNo}")
-    @ApiImplicitParam(name = "入库单号", value = "warehouseNo", example = "RKCNYWO7210730000009", required = true)
+    @ApiImplicitParam(name = "warehouseNo", value = "入库单号", example = "RKCNYWO7210730000009", required = true)
     @ApiOperation(value = "详情", notes = "入库管理 - 详情（包含明细）")
-    R<InboundReceiptInfoVO> receiptInfoQuery(@Valid @NotBlank @PathVariable("warehouseNo") String warehouseNo) {
+    R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
-        Optional.of(info).map(R::getData).flatMap(x -> Optional.of(x).map(InboundReceiptInfoVO::getInboundReceiptDetails)).filter(CollectionUtils::isNotEmpty)
+        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取详情异常");
+        InboundReceiptInfoResp inboundReceiptInfoResp = new InboundReceiptInfoResp();
+        BeanUtils.copyProperties(info.getData(), inboundReceiptInfoResp);
+        Optional.of(inboundReceiptInfoResp).flatMap(x -> Optional.of(x).map(InboundReceiptInfoResp::getInboundReceiptDetails)).filter(CollectionUtils::isNotEmpty)
                 .ifPresent(inboundReceiptDetailList ->
                         inboundReceiptDetailList.forEach(z -> Optional.ofNullable(z.getEditionImage())
                                 .ifPresent(attachmentFileDTO -> attachmentFileDTO.setAttachmentUrl(getBase64Pic(attachmentFileDTO.getAttachmentUrl())))));
-        return info;
+
+        //获取单证信息转换成Base64
+        BasAttachmentQueryDTO queryDto = new BasAttachmentQueryDTO();
+        queryDto.setAttachmentType("单证信息文件").setBusinessNo(warehouseNo);
+        R<List<BasAttachment>> list = attachmentFeignService.list(queryDto);
+        List<BasAttachment> date = getDate(list);
+        List<AttachmentFileDTO> attachmentFileList = new ArrayList<>();
+        date.forEach(x -> {
+            AttachmentFileDTO inboundReceiptDetailResp = new AttachmentFileDTO();
+            String base64Pic = getBase64Pic(x.getAttachmentUrl());
+
+            BeanUtils.copyProperties(x, inboundReceiptDetailResp);
+            inboundReceiptDetailResp.setAttachmentUrl(base64Pic);
+            attachmentFileList.add(inboundReceiptDetailResp);
+        });
+        inboundReceiptInfoResp.setDocumentInformation(attachmentFileList);
+        return R.ok(inboundReceiptInfoResp);
     }
 
-    public static String getBase64Pic(String picUrl) {
+    private static <T> T getDate(R<T> info) {
+        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取失败!");
+        return info.getData();
+    }
+
+    private static String getBase64Pic(String picUrl) {
         try (InputStream inputStream = URLUtil.url(picUrl).openConnection().getInputStream();
              ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             int available = inputStream.available();
@@ -87,4 +128,18 @@ public class BaseWarehouseApiController extends BaseController {
         return inboundReceiptFeignService.saveOrUpdateBatch(createInboundReceiptDTOList);
     }
 
+    @DeleteMapping("/receipt/cancel/{warehouseNo}")
+    @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
+    @ApiOperation(value = "取消入库单", notes = "入库管理 - 取消")
+    public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
+        inboundReceiptFeignService.cancel(warehouseNo);
+        return R.ok();
+    }
+
+    @GetMapping("/inbound/getInboundLabel/byOrderNo/{warehouseNo}")
+    @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
+    @ApiOperation(value = "获取入库标签-通过单号", notes = "入库管理 - 获取入库标签")
+    public R getInboundLabelByOrderNo(@PathVariable("warehouseNo") String warehouseNo) {
+        return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
+    }
 }
