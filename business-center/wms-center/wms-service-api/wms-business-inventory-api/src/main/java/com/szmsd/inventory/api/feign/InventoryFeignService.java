@@ -10,6 +10,7 @@ import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.domain.vo.InventoryVO;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,9 +29,11 @@ public interface InventoryFeignService {
     R<List<InventorySkuVolumeVO>> querySkuVolume(@RequestBody InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO);
 
     @PostMapping("/inventory/queryAvailableList2")
+    @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 不分页")
     R<List<InventoryAvailableListVO>> queryAvailableList(@RequestBody InventoryAvailableQueryDto queryDto);
 
     @PostMapping("/inventory/queryOnlyAvailable")
+    @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 单条")
     R<InventoryAvailableListVO> queryOnlyAvailable(@RequestBody InventoryAvailableQueryDto queryDto);
 
     @PostMapping("/inventory/querySku")
@@ -65,4 +68,5 @@ public interface InventoryFeignService {
 
     @GetMapping("/inventory/getWarehouseSku")
     R<List<Inventory>> getWarehouseSku();
+
 }

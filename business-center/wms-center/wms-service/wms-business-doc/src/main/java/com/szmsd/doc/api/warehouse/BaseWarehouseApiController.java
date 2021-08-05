@@ -1,8 +1,7 @@
-package com.szmsd.doc.controller;
+package com.szmsd.doc.api.warehouse;
 
 import cn.hutool.core.codec.Base64Encoder;
 import cn.hutool.core.util.URLUtil;
-import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
@@ -13,21 +12,26 @@ import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.web.controller.BaseController;
-import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.doc.api.delivery.response.InboundReceiptDetailResp;
-import com.szmsd.doc.api.delivery.response.InboundReceiptInfoResp;
+import com.szmsd.doc.api.warehouse.req.InventoryAvailableQueryReq;
+import com.szmsd.doc.api.warehouse.resp.InboundReceiptInfoResp;
+import com.szmsd.doc.api.warehouse.resp.InventoryAvailableListResp;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
+import com.szmsd.inventory.api.service.InventoryFeignClientService;
+import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
+import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
-import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import jdk.jfr.internal.tool.Main;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,10 +42,12 @@ import javax.validation.constraints.NotEmpty;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Api(tags = {"仓库信息"})
 @RestController
@@ -54,6 +60,8 @@ public class BaseWarehouseApiController extends BaseController {
     private InboundReceiptFeignService inboundReceiptFeignService;
     @Resource
     private RemoteAttachmentService attachmentFeignService;
+    @Resource
+    private InventoryFeignClientService inventoryFeignService;
 
     /**
      * 查询 仓库列表
@@ -142,4 +150,27 @@ public class BaseWarehouseApiController extends BaseController {
     public R getInboundLabelByOrderNo(@PathVariable("warehouseNo") String warehouseNo) {
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
     }
+
+    //    @PreAuthorize("hasAuthority('read')")
+    @PostMapping("/inbound/queryAvailableList")
+    @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 不分页")
+    public R<List<InventoryAvailableListResp>> queryAvailableList(@RequestBody InventoryAvailableQueryReq queryDTO) {
+        List<InventoryAvailableListVO> inventoryAvailableListVOS = inventoryFeignService.queryAvailableList(queryDTO.convertThis());
+
+        List<InventoryAvailableListResp> returnList =inventoryAvailableListVOS
+                .stream().filter(Objects::nonNull).map(InventoryAvailableListResp::convertThis).collect(Collectors.toList());
+
+        return R.ok(returnList);
+    }
+
+    //    @PreAuthorize("hasAuthority('read')")
+    @PostMapping("/inbound/queryOnlyAvailable")
+    @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 单条")
+    public R<InventoryAvailableListResp> queryOnlyAvailable(@RequestBody InventoryAvailableQueryReq queryDto) {
+
+        InventoryAvailableListVO inventoryAvailableListVO = inventoryFeignService.queryOnlyAvailable(queryDto.convertThis());
+
+        return R.ok(InventoryAvailableListResp.convertThis(inventoryAvailableListVO));
+    }
+
 }
