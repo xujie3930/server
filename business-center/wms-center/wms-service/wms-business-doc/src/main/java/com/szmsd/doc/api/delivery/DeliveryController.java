@@ -3,13 +3,13 @@ package com.szmsd.doc.api.delivery;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
-import com.szmsd.delivery.dto.DelOutboundCanceledDto;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.dto.DelOutboundLabelDto;
-import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
+import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.doc.api.delivery.request.*;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.api.delivery.response.DelOutboundPackageTransferResponse;
@@ -40,6 +40,8 @@ public class DeliveryController {
 
     @Autowired
     private DelOutboundClientService delOutboundClientService;
+    @Autowired
+    private DelOutboundFeignService delOutboundFeignService;
 
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/priced-product")
@@ -99,7 +101,13 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    // @ApiOperation(value = "#5 出库管理 - 查询订单列表", position = 300)
+    @PreAuthorize("hasAuthority('read')")
+    @PostMapping("/page")
+    @ApiOperation(value = "#5 出库管理 - 查询订单列表", position = 300)
+    @ApiImplicitParam(name = "dto", value = "请求参数", dataType = "DelOutboundListQueryDto", required = true)
+    public TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto dto) {
+        return this.delOutboundFeignService.page(dto);
+    }
 
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/shipment")
