@@ -8,6 +8,10 @@ package com.szmsd.doc.api.delivery.request.group;
  */
 public interface DelOutboundGroup {
 
+    interface ALL {
+
+    }
+
     /**
      * 转运出库
      */

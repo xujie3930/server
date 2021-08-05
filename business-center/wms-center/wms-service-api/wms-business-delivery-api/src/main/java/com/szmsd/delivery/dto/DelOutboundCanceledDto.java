@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,7 +15,9 @@ import java.util.List;
 @ApiModel(value = "DelOutboundCanceledDto", description = "DelOutboundCanceledDto对象")
 public class DelOutboundCanceledDto implements Serializable {
 
-    @NotNull(message = "IDS不能为空")
     @ApiModelProperty(value = "IDS")
     private List<Long> ids;
+
+    @ApiModelProperty(value = "订单编号")
+    private List<String> orderNos;
 }

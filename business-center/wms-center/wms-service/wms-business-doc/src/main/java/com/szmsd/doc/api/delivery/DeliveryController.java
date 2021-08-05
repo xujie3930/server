@@ -3,16 +3,17 @@ package com.szmsd.doc.api.delivery;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
-import com.szmsd.delivery.dto.DelOutboundCanceledDto;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
-import com.szmsd.doc.api.delivery.request.DelOutboundCanceledRequest;
-import com.szmsd.doc.api.delivery.request.DelOutboundPackageTransferRequest;
-import com.szmsd.doc.api.delivery.request.PricedProductRequest;
+import com.szmsd.delivery.vo.DelOutboundLabelResponse;
+import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.doc.api.delivery.request.*;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.api.delivery.response.DelOutboundPackageTransferResponse;
+import com.szmsd.doc.api.delivery.response.DelOutboundShipmentResponse;
 import com.szmsd.doc.api.delivery.response.PricedProductResponse;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
@@ -39,6 +40,8 @@ public class DeliveryController {
 
     @Autowired
     private DelOutboundClientService delOutboundClientService;
+    @Autowired
+    private DelOutboundFeignService delOutboundFeignService;
 
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/priced-product")
@@ -59,12 +62,13 @@ public class DeliveryController {
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/package-transfer")
     @ApiOperation(value = "#2 出库管理 - 单据创建（转运出库）", position = 200)
-    @ApiImplicitParam(name = "request", value = "请求参数", allowMultiple = true, dataType = "DelOutboundPackageTransferRequest", required = true)
-    public R<List<DelOutboundPackageTransferResponse>> packageTransfer(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) List<DelOutboundPackageTransferRequest> request) {
-        if (CollectionUtils.isEmpty(request)) {
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackageTransferListRequest", required = true)
+    public R<List<DelOutboundPackageTransferResponse>> packageTransfer(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) DelOutboundPackageTransferListRequest request) {
+        List<DelOutboundPackageTransferRequest> requestList = request.getRequestList();
+        if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("999", "请求对象不能为空");
         }
-        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(request, DelOutboundDto.class);
+        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
     }
@@ -72,35 +76,72 @@ public class DeliveryController {
     @PreAuthorize("hasAuthority('read')")
     @GetMapping("/package-transfer/label")
     @ApiOperation(value = "#3 出库管理 - 获取标签（转运出库）", position = 201)
-    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "List", required = true)
-    public R<List<DelOutboundPackageTransferResponse>> packageTransferLabel(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) List<DelOutboundPackageTransferRequest> request) {
-        if (CollectionUtils.isEmpty(request)) {
-            throw new CommonException("999", "请求对象不能为空");
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundLabelRequest", required = true)
+    public R<List<DelOutboundLabelResponse>> packageTransferLabel(@RequestBody @Validated DelOutboundLabelRequest request) {
+        List<String> orderNos = request.getOrderNos();
+        if (CollectionUtils.isEmpty(orderNos)) {
+            throw new CommonException("999", "订单号不能为空");
         }
-        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(request, DelOutboundDto.class);
-        List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
-        return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
+        DelOutboundLabelDto labelDto = new DelOutboundLabelDto();
+        labelDto.setOrderNos(orderNos);
+        return R.ok(this.delOutboundClientService.labelBase64(labelDto));
     }
 
     @PreAuthorize("hasAuthority('read')")
-    @DeleteMapping("/package-transfer")
+    @DeleteMapping("/cancel/package-transfer")
     @ApiOperation(value = "#4 出库管理 - 取消单据（转运出库）", position = 202)
-    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackageTransferRequest", required = true)
-    public R<List<DelOutboundPackageTransferResponse>> packageTransferCancel(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) List<DelOutboundPackageTransferRequest> request) {
-        if (CollectionUtils.isEmpty(request)) {
-            throw new CommonException("999", "请求对象不能为空");
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCanceledRequest", required = true)
+    public R<Integer> cancelPackageTransfer(@RequestBody @Validated DelOutboundCanceledRequest request) {
+        List<String> orderNos = request.getOrderNos();
+        if (CollectionUtils.isEmpty(orderNos)) {
+            throw new CommonException("999", "订单号不能为空");
         }
-        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(request, DelOutboundDto.class);
-        List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
-        return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
+        DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
+        canceledDto.setOrderNos(orderNos);
+        return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
     @PreAuthorize("hasAuthority('read')")
-    @PostMapping("/canceled")
-    @ApiOperation(value = "出库管理 - 取消", position = 700)
-    @ApiImplicitParam(name = "request", value = "请求参数", required = true, dataType = "DelOutboundCanceledRequest")
-    public R<Integer> canceled(@RequestBody @Validated List<DelOutboundCanceledRequest> request) {
-        DelOutboundCanceledDto dto = BeanMapperUtil.map(request, DelOutboundCanceledDto.class);
-        return R.ok(this.delOutboundClientService.canceled(dto));
+    @PostMapping("/page")
+    @ApiOperation(value = "#5 出库管理 - 查询订单列表", position = 300)
+    @ApiImplicitParam(name = "dto", value = "请求参数", dataType = "DelOutboundListQueryDto", required = true)
+    public TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto dto) {
+        return this.delOutboundFeignService.page(dto);
     }
+
+    @PreAuthorize("hasAuthority('read')")
+    @PostMapping("/shipment")
+    @ApiOperation(value = "#6 出库管理 - 订单创建（一件代发）", position = 400)
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundShipmentListRequest", required = true)
+    public R<List<DelOutboundShipmentResponse>> shipment(@RequestBody @Validated DelOutboundShipmentListRequest request) {
+        List<DelOutboundShipmentRequest> requestList = request.getRequestList();
+        if (CollectionUtils.isEmpty(requestList)) {
+            throw new CommonException("999", "请求对象不能为空");
+        }
+        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
+        List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
+        return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundShipmentResponse.class));
+    }
+
+    @PreAuthorize("hasAuthority('read')")
+    @DeleteMapping("/cancel/shipment")
+    @ApiOperation(value = "#7 出库管理 - 取消单据（一件代发）", position = 401)
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCanceledRequest", required = true)
+    public R<Integer> cancelShipment(@RequestBody @Validated DelOutboundCanceledRequest request) {
+        List<String> orderNos = request.getOrderNos();
+        if (CollectionUtils.isEmpty(orderNos)) {
+            throw new CommonException("999", "订单号不能为空");
+        }
+        DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
+        canceledDto.setOrderNos(orderNos);
+        return R.ok(this.delOutboundClientService.canceled(canceledDto));
+    }
+
+    // @ApiOperation(value = "#8 出库管理 - 订单创建（集运出库）", position = 500)
+
+    // @ApiOperation(value = "#9 出库管理 - 取消单据（集运出库）", position = 501)
+
+    // @ApiOperation(value = "#10 出库管理 - 更新信息（集运出库）", position = 502)
+
+    // @ApiOperation(value = "#11 出库管理 - 更新信息（集运出库）", position = 502)
 }

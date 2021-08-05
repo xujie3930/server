@@ -10,13 +10,11 @@ import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.domain.vo.InboundCountVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -46,4 +44,8 @@ public interface InboundReceiptFeignService {
     @PostMapping("/receipt/saveOrUpdate/batch")
     @ApiOperation(value = "创建/修改-批量", notes = "批量 入库管理 - 新增/创建")
     R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@RequestBody List<CreateInboundReceiptDTO> createInboundReceiptDTOList);
+
+    @DeleteMapping("/inbound/receipt/cancel/{warehouseNo}")
+    @ApiOperation(value = "取消", notes = "入库管理 - 取消")
+    R cancel(@PathVariable("warehouseNo") String warehouseNo);
 }

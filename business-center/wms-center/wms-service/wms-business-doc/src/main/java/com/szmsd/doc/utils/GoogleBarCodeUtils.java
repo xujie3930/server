@@ -121,7 +121,7 @@ public class GoogleBarCodeUtils {
             //转换成base64串
             String png_base64 = encoder.encodeBuffer(bytes).trim();
             if(StringUtils.isNotEmpty(png_base64)) {
-                return BASE64_PREFIX.concat(png_base64);
+                return BASE64_PREFIX.concat(png_base64).replace("\\r","").replace("\r\n","").replace("\r","");
             }
         } catch (IOException e) {
             e.printStackTrace();
