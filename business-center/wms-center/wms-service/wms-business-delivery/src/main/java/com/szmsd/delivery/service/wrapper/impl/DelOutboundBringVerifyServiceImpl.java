@@ -499,8 +499,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             /*for (DelOutboundDetail detail : detailList) {
                 details.add(new ShipmentDetailInfoDto(detail.getProductName(), detail.getQty(), detail.getNewLabelCode()));
             }*/
-        } else if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
-                || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+        } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+            details = new ArrayList<>();
+            ShipmentDetailInfoDto shipmentDetailInfoDto = new ShipmentDetailInfoDto();
+            shipmentDetailInfoDto.setSku(delOutbound.getNewSku());
+            shipmentDetailInfoDto.setQty(delOutbound.getBoxNumber());
+            details.add(shipmentDetailInfoDto);
+        } else if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
             // 查询组合信息
             List<DelOutboundCombinationVO> combinationVOList = this.delOutboundCombinationService.listByOrderNo(delOutbound.getOrderNo());
             // 查询sku信息
