@@ -43,6 +43,16 @@
             o.create_by_name,
             o.create_time,
             a.consignee,
+            a.phone_no,
+            a.email,
+            a.street1,
+            a.street2,
+            a.street3,
+            a.city,
+            a.state_or_province,
+            a.country_code,
+            a.country,
+            a.post_code,
             o.is_print,
             o.is_label_box
         FROM del_outbound o
