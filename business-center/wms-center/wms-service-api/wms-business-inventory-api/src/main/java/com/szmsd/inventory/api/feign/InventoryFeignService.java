@@ -6,16 +6,12 @@ import com.szmsd.inventory.api.BusinessInventoryInterface;
 import com.szmsd.inventory.api.factory.InventoryFeignFallback;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.*;
-import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
-import com.szmsd.inventory.domain.vo.InventorySkuVO;
-import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
-import com.szmsd.inventory.domain.vo.InventoryVO;
+import com.szmsd.inventory.domain.vo.*;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -68,5 +64,13 @@ public interface InventoryFeignService {
 
     @GetMapping("/inventory/getWarehouseSku")
     R<List<Inventory>> getWarehouseSku();
+
+    @GetMapping("/inventory/queryInventoryAge/weeks/bySku/{warehouseCode}/{sku}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "warehouseCode", value = "仓库code", example = "NJ"),
+            @ApiImplicitParam(name = "sku", value = "sku", example = "CN20210601006"),
+    })
+    @ApiOperation(value = "查询sku的库龄", notes = "查询sku的库龄-周")
+    R<List<SkuInventoryAgeVo>> queryInventoryAgeBySku(@PathVariable("warehouseCode") String warehouseCode, @PathVariable("sku") String sku);
 
 }

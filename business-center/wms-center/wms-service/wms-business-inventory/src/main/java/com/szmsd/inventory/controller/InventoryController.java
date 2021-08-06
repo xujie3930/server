@@ -13,6 +13,7 @@ import com.szmsd.inventory.service.IInventoryService;
 import com.szmsd.inventory.service.IInventoryWrapperService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -177,5 +178,17 @@ public class InventoryController extends BaseController {
     public R<List<Inventory>> getWarehouseSku() {
         return R.ok(inventoryService.getWarehouseSku());
     }
+
+    @PreAuthorize("@ss.hasPermi('inventory:getWarehouseSku')")
+    @GetMapping("/queryInventoryAge/weeks/bySku/{warehouseCode}/{sku}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "warehouseCode", value = "仓库code", example = "NJ"),
+            @ApiImplicitParam(name = "sku", value = "sku", example = "CN20210601006"),
+    })
+    @ApiOperation(value = "查询sku的库龄", notes = "查询sku的库龄-周")
+    public R<List<SkuInventoryAgeVo>> queryInventoryAgeBySku(@PathVariable("warehouseCode") String warehouseCode,@PathVariable("sku") String sku) {
+        return R.ok(inventoryService.queryInventoryAgeBySku(warehouseCode,sku));
+    }
+
 
 }
