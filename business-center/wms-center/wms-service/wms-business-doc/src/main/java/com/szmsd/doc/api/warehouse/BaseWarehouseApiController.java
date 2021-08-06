@@ -186,6 +186,6 @@ public class BaseWarehouseApiController extends BaseController {
     @ApiOperation(value = "查询sku的库龄", notes = "查询sku的库龄-周")
     public R<List<SkuInventoryAgeResp>> queryInventoryAgeBySku(@PathVariable("warehouseCode") String warehouseCode, @PathVariable("sku") String sku) {
         List<SkuInventoryAgeVo> skuInventoryAgeVos = inventoryFeignService.queryInventoryAgeBySku(warehouseCode, sku);
-        return R.ok(SkuInventoryAgeResp.convert(skuInventoryAgeVos));
+        return R.ok(SkuInventoryAgeResp.convert(skuInventoryAgeVos,warehouseCode,sku));
     }
 }
