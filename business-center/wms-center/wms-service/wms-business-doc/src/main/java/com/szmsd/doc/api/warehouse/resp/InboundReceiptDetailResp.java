@@ -1,4 +1,4 @@
-package com.szmsd.doc.api.delivery.response;
+package com.szmsd.doc.api.warehouse.resp;
 
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;

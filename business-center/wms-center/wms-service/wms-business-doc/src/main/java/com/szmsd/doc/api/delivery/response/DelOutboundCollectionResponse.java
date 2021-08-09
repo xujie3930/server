@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@ApiModel(value = "DelOutboundShipmentResponse", description = "DelOutboundShipmentResponse对象")
-public class DelOutboundShipmentResponse extends DelOutboundResponse {
+@ApiModel(value = "DelOutboundCollectionResponse", description = "DelOutboundCollectionResponse对象")
+public class DelOutboundCollectionResponse extends DelOutboundResponse {
 
 }

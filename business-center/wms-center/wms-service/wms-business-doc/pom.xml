@@ -123,6 +123,10 @@
             <artifactId>javase</artifactId>
             <version>3.4.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-inventory-api</artifactId>
+        </dependency>
 
     </dependencies>
 

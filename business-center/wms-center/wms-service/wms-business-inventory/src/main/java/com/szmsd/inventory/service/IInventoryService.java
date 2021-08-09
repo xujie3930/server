@@ -9,6 +9,7 @@ import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.domain.vo.InventoryVO;
+import com.szmsd.inventory.domain.vo.SkuInventoryAgeVo;
 
 import java.util.List;
 
@@ -106,5 +107,12 @@ public interface IInventoryService extends IService<Inventory> {
      */
     List<Inventory> getWarehouseSku();
 
+    /**
+     * 查询sku的库龄
+     *
+     * @param sku
+     * @return
+     */
+    List<SkuInventoryAgeVo> queryInventoryAgeBySku(String warehouseCode, String sku);
 }
 
