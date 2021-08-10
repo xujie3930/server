@@ -4,6 +4,8 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.vo.DelOutboundAddResponse;
+import com.szmsd.delivery.vo.DelOutboundLabelResponse;
 import com.szmsd.http.vo.PricedProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,5 +50,15 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     @Override
     public List<PricedProduct> inService(DelOutboundOtherInServiceDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.inService(dto));
+    }
+
+    @Override
+    public List<DelOutboundAddResponse> add(List<DelOutboundDto> dto) {
+        return R.getDataAndException(this.delOutboundFeignService.add(dto));
+    }
+
+    @Override
+    public List<DelOutboundLabelResponse> labelBase64(DelOutboundLabelDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.labelBase64(dto));
     }
 }

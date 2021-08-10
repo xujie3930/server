@@ -9,6 +9,7 @@ import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.domain.vo.InventoryVO;
+import com.szmsd.inventory.domain.vo.SkuInventoryAgeVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -77,5 +78,10 @@ public class InventoryFeignClientServiceImpl implements InventoryFeignClientServ
     @Override
     public Integer unDeductionAndDeduction(InventoryOperateListDto operateListDto) {
         return R.getDataAndException(this.inventoryFeignService.unDeductionAndDeduction(operateListDto));
+    }
+
+    @Override
+    public List<SkuInventoryAgeVo> queryInventoryAgeBySku(String warehouseCode, String sku) {
+        return R.getDataAndException(this.inventoryFeignService.queryInventoryAgeBySku(warehouseCode,sku));
     }
 }

@@ -79,6 +79,7 @@ public class DelOutboundController extends BaseController {
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
     @Autowired
     private BasSubClientService basSubClientService;
+    @SuppressWarnings({"all"})
     @Autowired
     private BasRegionFeignService basRegionFeignService;
     @Autowired
@@ -160,7 +161,7 @@ public class DelOutboundController extends BaseController {
     @PostMapping("/shipment")
     @ApiOperation(value = "出库管理 - 创建", position = 300)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
-    public R<Integer> add(@RequestBody @Validated({ValidationSaveGroup.class}) DelOutboundDto dto) {
+    public R<DelOutboundAddResponse> add(@RequestBody @Validated({ValidationSaveGroup.class}) DelOutboundDto dto) {
         return R.ok(delOutboundService.insertDelOutbound(dto));
     }
 
@@ -398,6 +399,14 @@ public class DelOutboundController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundLabelDto")
     public void label(HttpServletResponse response, @RequestBody @Validated DelOutboundLabelDto dto) {
         this.delOutboundService.label(response, dto);
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:labelBase64')")
+    @PostMapping("/labelBase64")
+    @ApiOperation(value = "出库管理 - 获取标签（根据订单号批量查询，DOC支持）", position = 1301)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundLabelDto")
+    public R<List<DelOutboundLabelResponse>> labelBase64(@RequestBody @Validated DelOutboundLabelDto dto) {
+        return R.ok(this.delOutboundService.labelBase64(dto));
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:uploadBoxLabel')")

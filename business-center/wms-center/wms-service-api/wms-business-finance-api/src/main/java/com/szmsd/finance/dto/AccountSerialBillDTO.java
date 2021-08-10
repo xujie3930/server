@@ -15,6 +15,12 @@ import java.util.Date;
 @AllArgsConstructor
 public class AccountSerialBillDTO {
 
+    @ApiModelProperty(value = "当前起始页索引")
+    private int pageNum;
+
+    @ApiModelProperty(value = "每页显示记录数")
+    private int pageSize;
+
     @ApiModelProperty(value = "单号")
     private String no;
 
