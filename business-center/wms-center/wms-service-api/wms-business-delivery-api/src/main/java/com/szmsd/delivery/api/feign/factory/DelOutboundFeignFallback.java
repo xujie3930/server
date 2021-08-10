@@ -6,9 +6,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
-import com.szmsd.delivery.vo.DelOutboundDetailVO;
-import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.vo.PricedProduct;
@@ -88,6 +86,16 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
 
             @Override
             public R<List<PricedProduct>> inService(DelOutboundOtherInServiceDto dto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<DelOutboundAddResponse>> add(List<DelOutboundDto> dto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<DelOutboundLabelResponse>> labelBase64(DelOutboundLabelDto dto) {
                 return R.convertResultJson(throwable);
             }
         };

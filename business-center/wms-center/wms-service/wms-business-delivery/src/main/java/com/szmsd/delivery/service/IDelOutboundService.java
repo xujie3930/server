@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
-import com.szmsd.delivery.vo.DelOutboundDetailVO;
-import com.szmsd.delivery.vo.DelOutboundListVO;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 
@@ -63,15 +60,15 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param dto 出库单模块
      * @return 结果
      */
-    int insertDelOutbound(DelOutboundDto dto);
+    DelOutboundAddResponse insertDelOutbound(DelOutboundDto dto);
 
     /**
      * 批量新增出库单
      *
      * @param dtoList dtoList
-     * @return int
+     * @return 结果
      */
-    int insertDelOutbounds(List<DelOutboundDto> dtoList);
+    List<DelOutboundAddResponse> insertDelOutbounds(List<DelOutboundDto> dtoList);
 
     /**
      * 修改出库单模块
@@ -267,6 +264,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param dto      dto
      */
     void label(HttpServletResponse response, DelOutboundLabelDto dto);
+
+    /**
+     * 获取标签
+     *
+     * @param dto dto
+     * @return DelOutboundLabelResponse
+     */
+    List<DelOutboundLabelResponse> labelBase64(DelOutboundLabelDto dto);
 
     /**
      * 上传箱标

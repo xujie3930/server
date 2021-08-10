@@ -1,12 +1,11 @@
 package com.szmsd.delivery.dto;
 
-import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -16,7 +15,9 @@ import java.io.Serializable;
 @ApiModel(value = "DelOutboundLabelDto", description = "DelOutboundLabelDto对象")
 public class DelOutboundLabelDto implements Serializable {
 
-    @NotNull(message = "ID不能为空", groups = ValidationUpdateGroup.class)
     @ApiModelProperty(value = "ID")
     private Long id;
+
+    @ApiModelProperty(value = "订单号")
+    private List<String> orderNos;
 }

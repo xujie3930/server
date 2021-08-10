@@ -17,13 +17,11 @@ import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
-import com.szmsd.delivery.service.IDelOutboundCombinationService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
-import com.szmsd.delivery.vo.DelOutboundCombinationVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -66,18 +64,19 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private IDelOutboundDetailService delOutboundDetailService;
     @Autowired
     private InventoryFeignClientService inventoryFeignClientService;
+    @SuppressWarnings({"all"})
     @Autowired
     private RechargesFeignService rechargesFeignService;
     @Autowired
     private IDelOutboundChargeService delOutboundChargeService;
+    @SuppressWarnings({"all"})
     @Autowired
     private OperationFeignService operationFeignService;
     @Autowired
     private BasePackingClientService basePackingClientService;
+    @SuppressWarnings({"all"})
     @Autowired
     private InboundReceiptFeignService inboundReceiptFeignService;
-    @Autowired
-    private IDelOutboundCombinationService delOutboundCombinationService;
     @Autowired
     private BaseProductClientService baseProductClientService;
 
@@ -262,10 +261,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 }
                 if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
                     // 查询
-                    List<DelOutboundCombinationVO> voList = this.delOutboundCombinationService.listByOrderNo(delOutbound.getOrderNo());
-                    ArrayList<String> skus = new ArrayList<>();
-                    for (DelOutboundCombinationVO vo : voList) {
-                        skus.add(vo.getSku());
+                    List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(delOutbound.getOrderNo());
+                    List<String> skus = new ArrayList<>();
+                    for (DelOutboundDetail detail : detailList) {
+                        skus.add(detail.getSku());
                     }
                     BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
                     conditionQueryDto.setSkus(skus);
@@ -276,14 +275,14 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     } else {
                         productMap = new HashMap<>();
                     }
-                    for (DelOutboundCombinationVO vo : voList) {
+                    for (DelOutboundDetail detail : detailList) {
                         InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
-                        int declareQty = Math.toIntExact(vo.getQty());
+                        int declareQty = Math.toIntExact(detail.getQty());
                         inboundReceiptDetailDTO
                                 .setDeclareQty(declareQty)
-                                .setSku(vo.getSku())
+                                .setSku(detail.getSku())
                                 .setDeliveryNo(delOutbound.getOrderNo())
-                                .setSkuName(getSkuName(productMap.get(vo.getSku())));
+                                .setSkuName(getSkuName(productMap.get(detail.getSku())));
                         inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
                         totalDeclareQty += declareQty;
                     }

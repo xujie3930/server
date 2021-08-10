@@ -14,13 +14,11 @@ import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.InventoryRecord;
-import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
-import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
-import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
-import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
+import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.*;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
@@ -38,12 +36,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.szmsd.common.core.language.enums.LocalLanguageEnum.*;
 
 @Slf4j
 @Service
@@ -147,7 +148,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             }
 
             // 记录库存日志
-            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty);
+            iInventoryRecordService.saveLogs(INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty);
         } finally {
             lock.unlock();
         }
@@ -394,12 +395,12 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         String adjustment = inventoryAdjustmentDTO.getAdjustment();
 
         LocalLanguageEnum localLanguageEnum = LocalLanguageEnum.getLocalLanguageEnum(LocalLanguageTypeEnum.INVENTORY_RECORD_TYPE, adjustment);
-        boolean increase = LocalLanguageEnum.INVENTORY_RECORD_TYPE_5 == localLanguageEnum;
+        boolean increase = INVENTORY_RECORD_TYPE_5 == localLanguageEnum;
         boolean reduce = LocalLanguageEnum.INVENTORY_RECORD_TYPE_6 == localLanguageEnum;
         AssertUtil.isTrue(increase || reduce, "调整类型有误");
         quantity = increase ? quantity : -quantity;
         if (null != inventoryAdjustmentDTO.getFormReturn() && inventoryAdjustmentDTO.getFormReturn())
-            localLanguageEnum = LocalLanguageEnum.INVENTORY_RECORD_TYPE_7;
+            localLanguageEnum = INVENTORY_RECORD_TYPE_7;
         Lock lock = new ReentrantLock(true);
         try {
             lock.lock();
@@ -495,5 +496,80 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         query.gt(Inventory::getAvailableInventory, 0);
         return this.list(query);
     }
+
+    /**
+     * 可用库存 -（按入库时间 先进先出）总数 剩余的都是
+     * 把入库记录 按 库龄 分组求和
+     *
+     * @param warehouseCode
+     * @param sku
+     * @return
+     */
+    @Override
+    public List<SkuInventoryAgeVo> queryInventoryAgeBySku(String warehouseCode, String sku) {
+        Inventory inventory = baseMapper.selectOne(Wrappers.<Inventory>lambdaQuery().eq(Inventory::getSku, sku).eq(Inventory::getWarehouseCode, warehouseCode));
+        if (null == inventory) return new ArrayList<>();
+        int availableInventory = Optional.ofNullable(inventory.getTotalInventory()).orElse(0);
+        //查询 库存记录信息
+        List<InventoryRecord> inventoryRecords = iInventoryRecordService.getBaseMapper().selectList(Wrappers.<InventoryRecord>lambdaQuery()
+                .eq(InventoryRecord::getWarehouseCode, warehouseCode)
+                .eq(InventoryRecord::getSku, sku)
+                .orderByAsc(BaseEntity::getCreateTime));
+        SkuInventoryAgeVo skuInventoryAgeVo = new SkuInventoryAgeVo();
+        skuInventoryAgeVo.setSku(sku);
+        if (CollectionUtils.isEmpty(inventoryRecords)) return new ArrayList<>();
+        //构造一个入库队列 + 出库队列
+
+
+        //构造初始化 历史记录 入库  1 5 7 是 加库存
+        Queue<SkuInventoryAgeVo> input = inventoryRecords.stream().filter(y ->
+                INVENTORY_RECORD_TYPE_1.getKey().equals(y.getType())
+                        || INVENTORY_RECORD_TYPE_5.getKey().equals(y.getType())
+                        || INVENTORY_RECORD_TYPE_7.getKey().equals(y.getType())).map(x -> {
+            SkuInventoryAgeVo skuInventoryAge = new SkuInventoryAgeVo();
+            //设置数量，库龄 类型
+            skuInventoryAge.setSku(x.getSku()).setWarehouseCode(x.getWarehouseCode())
+                    .setNum(x.getQuantity()).setType(x.getType())
+
+                    .setCreateTime(x.getCreateTime());
+            return skuInventoryAge;
+        }).filter(x -> x.getNum() != null && x.getNum() > 0).collect(Collectors.toCollection(LinkedBlockingDeque::new));
+        Integer totalInput = input.stream().map(SkuInventoryAgeVo::getNum).reduce(Integer::sum).orElse(0);
+        /*Queue<SkuInventoryAgeVo> output = inventoryRecords.stream().filter(y -> "2".equals(y.getType())).map(x -> {
+            SkuInventoryAgeVo skuInventoryAge = new SkuInventoryAgeVo();
+            //设置数量，库龄 类型
+            skuInventoryAge.setSku(x.getSku()).setWarehouseCode(x.getWarehouseCode())
+                    .setNum(x.getQuantity()).setType(x.getType())
+
+                    .setCreateTime(x.getCreateTime());
+            return skuInventoryAge;
+        }).filter(x -> x.getNum() != null && x.getNum() > 0).collect(Collectors.toCollection(LinkedBlockingDeque::new));
+        output.forEach(x -> processingQuantity(input, x.getNum()));*/
+        processingQuantity(input, totalInput - availableInventory);
+        return new ArrayList<>(input);
+    }
+
+    /**
+     * 处理数量
+     *
+     * @param queue
+     * @param
+     */
+    public static void processingQuantity(Queue<SkuInventoryAgeVo> queue, int minusNum) {
+        SkuInventoryAgeVo element = queue.peek();
+        if (null == element) {
+            log.error("处理数量异常,总入库数 小于 当前库存");
+            return;
+        }
+        Integer nowNum = element.getNum();
+        if (minusNum >= nowNum) {
+            queue.poll();
+            minusNum = minusNum - nowNum;
+            processingQuantity(queue, minusNum);
+        } else {
+            element.setNum(nowNum - minusNum);
+        }
+    }
+
 
 }

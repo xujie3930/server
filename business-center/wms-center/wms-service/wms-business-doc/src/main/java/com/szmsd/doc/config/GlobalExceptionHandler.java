@@ -13,6 +13,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -77,35 +78,64 @@ public class GlobalExceptionHandler {
         } else if (exception instanceof MethodArgumentNotValidException) {
             MethodArgumentNotValidException manv = (MethodArgumentNotValidException) exception;
             StringBuilder builder = new StringBuilder();
-            List<FieldError> fieldErrors = manv.getBindingResult().getFieldErrors();
-            for (FieldError fieldError : fieldErrors) {
+            BindingResult bindingResult = manv.getBindingResult();
+            List<ObjectError> allErrors = bindingResult.getAllErrors();
+            for (ObjectError objectError : allErrors) {
                 builder.append("[");
-                Object[] arguments = fieldError.getArguments();
-                if (null == arguments) {
-                    builder.append(fieldError.getField());
-                } else {
-                    for (Object argument : arguments) {
-                        if (argument instanceof DefaultMessageSourceResolvable) {
-                            DefaultMessageSourceResolvable defaultMessageSourceResolvable = (DefaultMessageSourceResolvable) argument;
-                            String[] codes = defaultMessageSourceResolvable.getCodes();
-                            if (null != codes) {
-                                for (String s : codes) {
-                                    builder.append(s);
-                                    builder.append(",");
+                Object[] arguments = objectError.getArguments();
+                if (objectError instanceof FieldError) {
+                    if (null == arguments) {
+                        FieldError fieldError = (FieldError) objectError;
+                        builder.append(fieldError.getField());
+                    } else {
+                        for (Object argument : arguments) {
+                            if (argument instanceof DefaultMessageSourceResolvable) {
+                                DefaultMessageSourceResolvable defaultMessageSourceResolvable = (DefaultMessageSourceResolvable) argument;
+                                String[] codes = defaultMessageSourceResolvable.getCodes();
+                                if (null != codes) {
+                                    for (String s : codes) {
+                                        builder.append(s);
+                                        builder.append(",");
+                                    }
+                                    builder.deleteCharAt(builder.length() - 1);
+                                } else {
+                                    builder.append(defaultMessageSourceResolvable.getDefaultMessage());
                                 }
-                                builder.deleteCharAt(builder.length() - 1);
                             } else {
-                                builder.append(defaultMessageSourceResolvable.getDefaultMessage());
+                                if (argument instanceof String[]) {
+                                    String[] codes = (String[]) argument;
+                                    for (String s : codes) {
+                                        builder.append(s);
+                                        builder.append(",");
+                                    }
+                                    builder.deleteCharAt(builder.length() - 1);
+                                } else {
+                                    builder.append(argument);
+                                }
                             }
-                        } else {
-                            builder.append(argument);
+                            builder.append(",");
                         }
-                        builder.append(",");
+                        builder.deleteCharAt(builder.length() - 1);
                     }
-                    builder.deleteCharAt(builder.length() - 1);
+                } else {
+                    String[] codes = null;
+                    if (null != arguments) {
+                        for (Object argument : arguments) {
+                            if (argument instanceof String[]) {
+                                codes = (String[]) argument;
+                            }
+                        }
+                    }
+                    if (null != codes) {
+                        for (String s : codes) {
+                            builder.append(s);
+                            builder.append(",");
+                        }
+                        builder.deleteCharAt(builder.length() - 1);
+                    }
                 }
                 builder.append("]");
-                builder.append(fieldError.getDefaultMessage());
+                builder.append(objectError.getDefaultMessage());
                 builder.append(",");
             }
             if (builder.lastIndexOf(",") == builder.length() - 1) {

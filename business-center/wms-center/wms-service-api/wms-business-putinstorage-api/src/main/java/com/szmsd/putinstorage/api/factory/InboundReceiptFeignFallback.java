@@ -53,6 +53,11 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
             public R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(List<CreateInboundReceiptDTO> createInboundReceiptDTOList) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R cancel(String warehouseNo) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

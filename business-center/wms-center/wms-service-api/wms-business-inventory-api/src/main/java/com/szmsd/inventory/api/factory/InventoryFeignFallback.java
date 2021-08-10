@@ -5,10 +5,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.*;
-import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
-import com.szmsd.inventory.domain.vo.InventorySkuVO;
-import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
-import com.szmsd.inventory.domain.vo.InventoryVO;
+import com.szmsd.inventory.domain.vo.*;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
@@ -91,6 +88,11 @@ public class InventoryFeignFallback implements FallbackFactory<InventoryFeignSer
 
             @Override
             public R<List<Inventory>> getWarehouseSku() {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<SkuInventoryAgeVo>> queryInventoryAgeBySku(String warehouseCode, String sku) {
                 return R.convertResultJson(throwable);
             }
         };
