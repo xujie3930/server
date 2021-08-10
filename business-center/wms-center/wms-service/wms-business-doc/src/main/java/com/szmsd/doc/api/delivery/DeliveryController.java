@@ -44,7 +44,7 @@ public class DeliveryController {
 
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/priced-product")
-    @ApiOperation(value = "#1 出库管理 - 物流服务列表", position = 100)
+    @ApiOperation(value = "#1 出库管理 - 物流服务列表", position = 100, notes = "接口描述")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "PricedProductRequest", required = true)
     public R<List<PricedProductResponse>> pricedProduct(@RequestBody @Validated PricedProductRequest request) {
         if (CollectionUtils.isEmpty(request.getSkus()) && CollectionUtils.isEmpty(request.getProductAttributes())) {
@@ -77,7 +77,7 @@ public class DeliveryController {
 
     @PreAuthorize("hasAuthority('read')")
     @GetMapping("/package-transfer/label")
-    @ApiOperation(value = "#3 出库管理 - 获取标签（转运出库）", position = 201)
+    @ApiOperation(value = "#3 出库管理 - 获取标签（转运出库）", position = 201, notes = "")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundLabelRequest", required = true)
     public R<List<DelOutboundLabelResponse>> packageTransferLabel(@RequestBody @Validated DelOutboundLabelRequest request) {
         List<String> orderNos = request.getOrderNos();
