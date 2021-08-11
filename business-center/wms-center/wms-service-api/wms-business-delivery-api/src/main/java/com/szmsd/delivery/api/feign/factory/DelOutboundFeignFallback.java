@@ -98,6 +98,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<List<DelOutboundLabelResponse>> labelBase64(DelOutboundLabelDto dto) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<Integer> uploadBoxLabel(DelOutboundUploadBoxLabelDto dto) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }
