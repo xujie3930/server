@@ -118,17 +118,17 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                 int afterAvailableInventory = beforeInventory.getAvailableInventory();
                 if (canFreeze > 0) {
                     //之前的冻结库存
-                    int freezeInventory = Optional.ofNullable(afterInventory.getFreezeInventory()).orElse(0) + qty;
+//                    int freezeInventory = Optional.ofNullable(afterInventory.getFreezeInventory()).orElse(0) + qty;
                     //入库数 = 冻结++
                     if (qty >= canFreeze) {
                         //入库数>可冻结数 则 多余的 = 可用库存
                         afterAvailableInventory += (qty - canFreeze);
-                        freezeInventory += canFreeze;
+                        // freezeInventory += canFreeze;
                     } else {
                         //入库数<可冻结数 之前的冻结库存 + 入库数
-                        freezeInventory += qty;
+                        // freezeInventory += qty;
                     }
-                    afterInventory.setFreezeInventory(freezeInventory).setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
+                    afterInventory/*.setFreezeInventory(freezeInventory)*/.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
                     afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss", inboundInventoryDTO.getOperateOn()));
                     this.saveOrUpdate(afterInventory);
                 } else {
