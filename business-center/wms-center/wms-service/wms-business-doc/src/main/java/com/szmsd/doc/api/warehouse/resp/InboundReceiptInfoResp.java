@@ -3,8 +3,6 @@ package com.szmsd.doc.api.warehouse.resp;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
-import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
-import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -110,6 +108,6 @@ public class InboundReceiptInfoResp {
     private String goodsSourceName;
 
     @ApiModelProperty(value = "单证信息",notes = "对外接口")
-    private List<AttachmentFileDTO> documentInformation;
+    private List<AttachmentFileResp> documentInformation;
 
 }
