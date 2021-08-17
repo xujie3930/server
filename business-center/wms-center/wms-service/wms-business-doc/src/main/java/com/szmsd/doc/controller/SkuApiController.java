@@ -1,13 +1,11 @@
 package com.szmsd.doc.controller;
 
-import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.doc.api.delivery.RestfulResponse;
 import com.szmsd.doc.bean.request.BaseProductQueryRequest;
 import com.szmsd.doc.bean.request.ProductRequest;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;

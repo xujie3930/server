@@ -2,17 +2,21 @@ package com.szmsd.bas.api.feign;
 
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.factory.RemoteAttachmentServiceFallbackFactory;
 import com.szmsd.common.core.constant.ServiceNameConstants;
 import com.szmsd.common.core.domain.R;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 /**
- *  附件控制 BasAttachmentController
+ * 附件控制 BasAttachmentController
  *
  * @author szmsd
  */
@@ -50,10 +54,17 @@ public interface RemoteAttachmentService {
 
     /**
      * 删除附件
+     *
      * @param attachmentDTO
      * @return
      */
     @DeleteMapping("/bas-attachment/deleteByBusinessNo")
     R deleteByBusinessNo(@RequestBody AttachmentDTO attachmentDTO);
+
+    @PostMapping(value = "/bas-attachment/uploadAttachment", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    R<List<BasAttachmentDataDTO>> uploadAttachment(@RequestPart("attachmentUrl") MultipartFile[] myFiles,
+                                                   @RequestParam("attachmentTypeEnum") AttachmentTypeEnum attachmentTypeEnum,
+                                                   @RequestParam("businessNo") String businessNo,
+                                                   @RequestParam("businessItemNo") String businessItemNo);
 
 }

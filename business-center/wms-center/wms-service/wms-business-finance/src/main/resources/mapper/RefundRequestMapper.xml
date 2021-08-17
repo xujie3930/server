@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.finance.mapper.RefundRequestMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.finance.domain.FssRefundRequest">
+        <id column="id" property="id"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="audit_time" property="auditTime"/>
+        <result column="reviewer_id" property="reviewerId"/>
+        <result column="reviewer_code" property="reviewerCode"/>
+        <result column="reviewer_name" property="reviewerName"/>
+        <result column="cus_id" property="cusId"/>
+        <result column="cus_code" property="cusCode"/>
+        <result column="cus_name" property="cusName"/>
+        <result column="treatment_properties" property="treatmentProperties"/>
+        <result column="treatment_properties_code" property="treatmentPropertiesCode"/>
+        <result column="responsibility_area" property="responsibilityArea"/>
+        <result column="responsibility_area_code" property="responsibilityAreaCode"/>
+        <result column="warehouse_name" property="warehouseName"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="compensation_payment_flag" property="compensationPaymentFlag"/>
+        <result column="no_compensation_flag" property="noCompensationFlag"/>
+        <result column="compensation_payment_arrived_flag" property="compensationPaymentArrivedFlag"/>
+        <result column="product_type_name" property="productTypeName"/>
+        <result column="product_type_code" property="productTypeCode"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="order_type" property="orderType"/>
+        <result column="currency_code" property="currencyCode"/>
+        <result column="currency_name" property="currencyName"/>
+        <result column="amount" property="amount"/>
+        <result column="compensation_payment_currency" property="compensationPaymentCurrency"/>
+        <result column="compensation_payment_currency_code" property="compensationPaymentCurrencyCode"/>
+        <result column="compensation_payment_amount" property="compensationPaymentAmount"/>
+        <result column="num" property="num"/>
+        <result column="attributes" property="attributes"/>
+        <result column="attributes_code" property="attributesCode"/>
+        <result column="attachment" property="attachment"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by_name,create_time,update_by_name,update_time,remark,
+        id, audit_status, audit_time, reviewer_id, reviewer_code, reviewer_name, cus_id, cus_code, cus_name,
+        treatment_properties, treatment_properties_code, responsibility_area, responsibility_area_code,
+        warehouse_name, warehouse_code, compensation_payment_flag, no_compensation_flag,
+        compensation_payment_arrived_flag, product_type_name, product_type_code, order_no, order_type,
+        currency_code, currency_name, amount, compensation_payment_currency, compensation_payment_currency_code,
+        compensation_payment_amount, num, attributes, attributes_code, attachment, create_by, update_by
+    </sql>
+
+    <select id="selectRequestList" resultType="com.szmsd.finance.vo.RefundRequestListVO">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM fss_refund_request
+    </select>
+</mapper>

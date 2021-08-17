@@ -83,7 +83,7 @@ public class BaseWarehouseApiController extends BaseController {
     //    @PreAuthorize("hasAuthority('read')")
     @GetMapping("/inbound/receipt/info/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", example = "RKCNYWO7210730000009", required = true)
-    @ApiOperation(value = "详情", notes = "入库管理 - 详情（包含明细）")
+    @ApiOperation(value = "入库单 - 详情", notes = "根据入库单号查询详情 - 详情（包含明细）")
     R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
         AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取详情异常");
@@ -135,14 +135,14 @@ public class BaseWarehouseApiController extends BaseController {
 
     //    @PreAuthorize("hasAuthority('create')")
     @PostMapping("/inbound/receipt/saveOrUpdate/batch")
-    @ApiOperation(value = "创建/修改-批量", notes = "批量 入库管理 - 新增/创建")
+    @ApiOperation(value = "新增/修改-批量入库单", notes = "批量新增/修改入库单信息")
     R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@Valid @NotEmpty @RequestBody List<CreateInboundReceiptDTO> createInboundReceiptDTOList) {
         return inboundReceiptFeignService.saveOrUpdateBatch(createInboundReceiptDTOList);
     }
 
     @DeleteMapping("/receipt/cancel/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
-    @ApiOperation(value = "取消入库单", notes = "入库管理 - 取消")
+    @ApiOperation(value = "取消入库单", notes = "入库管理 - 取消指定的入库单")
     public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
         inboundReceiptFeignService.cancel(warehouseNo);
         return R.ok();
@@ -150,14 +150,14 @@ public class BaseWarehouseApiController extends BaseController {
 
     @GetMapping("/inbound/getInboundLabel/byOrderNo/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
-    @ApiOperation(value = "获取入库标签-通过单号", notes = "入库管理 - 获取入库标签")
-    public R getInboundLabelByOrderNo(@PathVariable("warehouseNo") String warehouseNo) {
+    @ApiOperation(value = "获取入库标签-通过单号", notes = "入库管理 - 通过单号获取入库标签 返回 base64")
+    public R<String> getInboundLabelByOrderNo(@PathVariable("warehouseNo") String warehouseNo) {
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
     }
 
     //    @PreAuthorize("hasAuthority('read')")
     @PostMapping("/inbound/queryAvailableList")
-    @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 不分页")
+    @ApiOperation(value = "查询可用库存-根据仓库编码，SKU - 不分页")
     public R<List<InventoryAvailableListResp>> queryAvailableList(@RequestBody InventoryAvailableQueryReq queryDTO) {
         List<InventoryAvailableListVO> inventoryAvailableListVOS = inventoryFeignService.queryAvailableList(queryDTO.convertThis());
 
@@ -183,7 +183,7 @@ public class BaseWarehouseApiController extends BaseController {
             @ApiImplicitParam(name = "warehouseCode", value = "仓库code", example = "NJ"),
             @ApiImplicitParam(name = "sku", value = "sku", example = "CN20210601006"),
     })
-    @ApiOperation(value = "查询sku的库龄", notes = "查询sku的库龄-周")
+    @ApiOperation(value = "库龄-查询sku的库龄", notes = "查询sku的库龄-周")
     public R<List<SkuInventoryAgeResp>> queryInventoryAgeBySku(@PathVariable("warehouseCode") String warehouseCode, @PathVariable("sku") String sku) {
         List<SkuInventoryAgeVo> skuInventoryAgeVos = inventoryFeignService.queryInventoryAgeBySku(warehouseCode, sku);
         return R.ok(SkuInventoryAgeResp.convert(skuInventoryAgeVos,warehouseCode,sku));
