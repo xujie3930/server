@@ -89,8 +89,8 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
             //07-16 集运出库转采购入库后，第一次采购入库完成后，同步处理出库的库存冻结
             String orderNo = inboundInventoryDTO.getOrderNo();
-
-            //根据入库单查询是否有采购单号
+            // 08-17 取消之前的提交
+           /* //根据入库单查询是否有采购单号
             InboundReceiptInfoVO receiptInfo = remoteComponent.getReceiptInfo(orderNo);
             String purchaseOrder = receiptInfo.getOrderNo();
             if (StringUtils.isNotBlank(purchaseOrder)) {
@@ -118,17 +118,17 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                 int afterAvailableInventory = beforeInventory.getAvailableInventory();
                 if (canFreeze > 0) {
                     //之前的冻结库存
-//                    int freezeInventory = Optional.ofNullable(afterInventory.getFreezeInventory()).orElse(0) + qty;
+                    int freezeInventory = Optional.ofNullable(afterInventory.getFreezeInventory()).orElse(0) + qty;
                     //入库数 = 冻结++
                     if (qty >= canFreeze) {
                         //入库数>可冻结数 则 多余的 = 可用库存
                         afterAvailableInventory += (qty - canFreeze);
-                        // freezeInventory += canFreeze;
+                         freezeInventory += canFreeze;
                     } else {
                         //入库数<可冻结数 之前的冻结库存 + 入库数
-                        // freezeInventory += qty;
+                         freezeInventory += qty;
                     }
-                    afterInventory/*.setFreezeInventory(freezeInventory)*/.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
+                    afterInventory.setFreezeInventory(freezeInventory).setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
                     afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss", inboundInventoryDTO.getOperateOn()));
                     this.saveOrUpdate(afterInventory);
                 } else {
@@ -137,7 +137,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                     afterInventory.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
                     this.saveOrUpdate(afterInventory);
                 }
-            } else {
+            } else */{
                 // after inventory
                 int afterTotalInventory = beforeInventory.getTotalInventory() + qty;
                 int afterAvailableInventory = beforeInventory.getAvailableInventory() + qty;
