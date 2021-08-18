@@ -1,5 +1,6 @@
 package com.szmsd.bas.domain.dto;
 
+import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

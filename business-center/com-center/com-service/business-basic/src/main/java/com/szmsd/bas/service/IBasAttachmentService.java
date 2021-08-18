@@ -2,10 +2,10 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.domain.dto.BasAttachmentDTO;
-import com.szmsd.bas.domain.dto.BasAttachmentDataDTO;
 
 import java.util.List;
 

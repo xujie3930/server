@@ -1,5 +1,9 @@
 package com.szmsd.doc.api.delivery;
 
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -15,16 +19,16 @@ import com.szmsd.doc.api.delivery.request.*;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.api.delivery.response.*;
 import com.szmsd.http.vo.PricedProduct;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiSort;
+import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -41,6 +45,8 @@ public class DeliveryController {
     private DelOutboundClientService delOutboundClientService;
     @Autowired
     private DelOutboundFeignService delOutboundFeignService;
+    @Autowired
+    private RemoteAttachmentService remoteAttachmentService;
 
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/priced-product")
@@ -175,11 +181,47 @@ public class DeliveryController {
 
     // @ApiOperation(value = "#10 出库管理 - 更新信息（集运出库）", position = 502)
 
-    // @ApiOperation(value = "#11 出库管理 - 订单创建（批量出库）", position = 600)
+    @PreAuthorize("hasAuthority('read')")
+    @PostMapping("/batch")
+    @ApiOperation(value = "#11 出库管理 - 订单创建（批量出库）", position = 600)
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundBatchListRequest", required = true)
+    public R<List<DelOutboundBatchResponse>> batch(@RequestBody @Validated DelOutboundBatchListRequest request) {
+        List<DelOutboundBatchRequest> requestList = request.getRequestList();
+        if (CollectionUtils.isEmpty(requestList)) {
+            throw new CommonException("999", "请求对象不能为空");
+        }
+        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
+        for (DelOutboundDto dto : dtoList) {
+            dto.setOrderType(DelOutboundOrderTypeEnum.BATCH.getCode());
+        }
+        List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
+        return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundBatchResponse.class));
+    }
 
     // @ApiOperation(value = "#12 出库管理 - 装箱结果（批量出库）", position = 601)
 
-    // @ApiOperation(value = "#13 出库管理 - 标签上传（批量出库）", position = 602)
+    @PreAuthorize("hasAuthority('read')")
+    @PostMapping("/label/batch")
+    @ApiOperation(value = "#13 出库管理 - 标签上传（批量出库）", position = 602)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "form", dataType = "String", name = "orderNo", value = "单据号", required = true),
+            @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "文件", required = true, allowMultiple = true)
+    })
+    public R<Integer> labelBatch(@RequestParam("orderNo") String orderNo, HttpServletRequest request) {
+        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
+        MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
+
+        MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
+        R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL, "", "");
+        List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
+
+        List<AttachmentDataDTO> dataDTOList = BeanMapperUtil.mapList(attachmentDataDTOList, AttachmentDataDTO.class);
+
+        DelOutboundUploadBoxLabelDto delOutboundUploadBoxLabelDto = new DelOutboundUploadBoxLabelDto();
+        delOutboundUploadBoxLabelDto.setOrderNo(orderNo);
+        delOutboundUploadBoxLabelDto.setBatchLabels(dataDTOList);
+        return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
+    }
 
     @PreAuthorize("hasAuthority('read')")
     @DeleteMapping("/cancel/batch")

@@ -35,6 +35,10 @@
             <groupId>com.szmsd</groupId>
             <artifactId>business-basic-plugin</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-putinstorage-api</artifactId>
+        </dependency>
 
     </dependencies>
 
