@@ -61,4 +61,9 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     public List<DelOutboundLabelResponse> labelBase64(DelOutboundLabelDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.labelBase64(dto));
     }
+
+    @Override
+    public int uploadBoxLabel(DelOutboundUploadBoxLabelDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.uploadBoxLabel(dto));
+    }
 }

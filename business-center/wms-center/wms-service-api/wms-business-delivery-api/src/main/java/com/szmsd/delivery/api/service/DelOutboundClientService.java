@@ -76,4 +76,12 @@ public interface DelOutboundClientService {
      * @return DelOutboundLabelResponse
      */
     List<DelOutboundLabelResponse> labelBase64(DelOutboundLabelDto dto);
+
+    /**
+     * 上传箱标
+     *
+     * @param dto dto
+     * @return int
+     */
+    int uploadBoxLabel(DelOutboundUploadBoxLabelDto dto);
 }

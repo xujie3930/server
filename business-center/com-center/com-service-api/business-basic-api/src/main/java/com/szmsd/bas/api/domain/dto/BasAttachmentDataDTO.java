@@ -1,4 +1,4 @@
-package com.szmsd.bas.domain.dto;
+package com.szmsd.bas.api.domain.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

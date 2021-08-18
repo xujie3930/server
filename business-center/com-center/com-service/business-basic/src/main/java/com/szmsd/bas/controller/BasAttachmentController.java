@@ -1,10 +1,10 @@
 package com.szmsd.bas.controller;
 
 import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.domain.dto.BasAttachmentDTO;
-import com.szmsd.bas.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.domain.dto.FileDTO;
 import com.szmsd.bas.service.IBasAttachmentService;
 import com.szmsd.bas.util.FileUtil;
@@ -43,14 +43,13 @@ import java.util.List;
 public class BasAttachmentController extends BaseController {
 
     private final Environment env;
+    @Resource
+    private IBasAttachmentService basAttachmentService;
 
     @Autowired
     public BasAttachmentController(Environment env) {
         this.env = env;
     }
-
-    @Resource
-    private IBasAttachmentService basAttachmentService;
 
     @PreAuthorize("@ss.hasPermi('bas:attachment:list')")
     @GetMapping("/list")

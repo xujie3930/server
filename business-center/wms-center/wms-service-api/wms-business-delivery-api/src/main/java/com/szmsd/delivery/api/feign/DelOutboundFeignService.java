@@ -135,4 +135,8 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/labelBase64")
     @ApiOperation(value = "出库管理 - 获取标签（根据订单号批量查询，DOC支持）")
     R<List<DelOutboundLabelResponse>> labelBase64(@RequestBody DelOutboundLabelDto dto);
+
+    @PostMapping("/api/outbound/uploadBoxLabel")
+    @ApiOperation(value = "出库管理 - 上传箱标")
+    R<Integer> uploadBoxLabel(@RequestBody DelOutboundUploadBoxLabelDto dto);
 }
