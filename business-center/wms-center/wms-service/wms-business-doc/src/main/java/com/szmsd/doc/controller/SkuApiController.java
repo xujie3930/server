@@ -38,7 +38,7 @@ public class SkuApiController {
         return R.ok(baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class)));
     }
 
-    @PreAuthorize("hasAuthority('write')")
+    @PreAuthorize("hasAuthority('read')")
     @PostMapping("save")
     @ApiOperation(value = "新增", notes = "SKU新增")
     public R save(@RequestBody @Validated ProductRequest productRequest){
