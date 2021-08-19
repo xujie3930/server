@@ -24,7 +24,7 @@ import java.util.Date;
 public class SkuInventoryAgeVo {
     @ApiModelProperty(value = "时间维度")
     private ChronoUnit timeDimension = ChronoUnit.WEEKS;
-    @ApiModelProperty(value = "时间维度描述", example = "1", hidden = true)
+    @ApiModelProperty(value = "时间维度描述-day", example = "1", hidden = true)
     private String timeDimensionDesc;
     @ApiModelProperty(value = "时间维度描述-展示", example = "1 WEEK", hidden = true)
     private String timeDimensionDescShow;
@@ -49,7 +49,7 @@ public class SkuInventoryAgeVo {
         this.createTimeStr = parse1 + "";
         this.storageAge = calculateStorageAge(parse1, this.timeDimension);
         this.timeDimensionDesc = getDayOfWeek(parse1);
-        this.timeDimensionDescShow = this.timeDimensionDesc + " " + this.timeDimension;
+        this.timeDimensionDescShow = this.storageAge +" "+ this.timeDimension;
     }
 
     private static long calculateStorageAge(LocalDate date, ChronoUnit chronoUnit) {
