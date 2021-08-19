@@ -5,7 +5,7 @@ import com.szmsd.bas.dto.BasWarehouseQueryDTO;
 import com.szmsd.bas.vo.BasWarehouseVO;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.doc.api.warehouse.resp.BasWarehouseQueryReq;
+import com.szmsd.doc.api.warehouse.req.BasWarehouseQueryReq;
 import com.szmsd.doc.api.warehouse.resp.BasWarehouseResp;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
