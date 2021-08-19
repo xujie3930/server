@@ -21,17 +21,17 @@ import java.util.List;
 public class InventoryAvailableQueryReq extends QueryDto implements Serializable {
     @NotBlank
     @Size(max = 30)
-    @ApiModelProperty(value = "目的仓库编码", required = true, example = "GZ")
+    @ApiModelProperty(value = "目的仓库编码 [30]", required = true, example = "GZ")
     private String warehouseCode;
     @NotBlank
     @Size(max = 30)
-    @ApiModelProperty(value = "客户编码", example = "CN72", required = true)
+    @ApiModelProperty(value = "客户编码 [30]", example = "CN72", required = true)
     private String cusCode;
     @Size(max = 30)
-    @ApiModelProperty(value = "sku - 模糊查询")
+    @ApiModelProperty(value = "sku - 模糊查询 [30]")
     private String sku;
     @Size(max = 30)
-    @ApiModelProperty(value = "sku - 精准查询", example = "SCN72000010")
+    @ApiModelProperty(value = "sku - 精准查询 [30]", example = "SCN72000010")
     private String eqSku;
 
     @ApiModelProperty(value = "skus - 批量查询")
@@ -40,10 +40,10 @@ public class InventoryAvailableQueryReq extends QueryDto implements Serializable
     @ApiModelProperty(value = "查询类型，1可用库存为0时不查询。2可用库存为0时查询。默认1")
     private Integer queryType = 1;
     @Size(max = 30)
-    @ApiModelProperty(value = "只查询SKU，传值SKU")
+    @ApiModelProperty(value = "只查询SKU，传值SKU [30]")
     private String querySku;
     @Size(max = 30)
-    @ApiModelProperty(value = "SKU来源，不传默认084002")
+    @ApiModelProperty(value = "SKU来源，不传默认084002 [30]")
     private String source;
 
     public InventoryAvailableQueryDto convertThis() {
