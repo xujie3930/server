@@ -19,7 +19,7 @@ public interface BaseProductClientService {
     /**
      * 查询模块列表
      */
-    TableDataInfo list(BaseProductQueryDto queryDto);
+    TableDataInfo<BaseProduct> list(BaseProductQueryDto queryDto);
 
     /**
      * 新增产品模块

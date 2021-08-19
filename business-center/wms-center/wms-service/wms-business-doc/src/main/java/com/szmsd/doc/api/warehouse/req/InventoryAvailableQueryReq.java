@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 
@@ -19,15 +20,17 @@ import java.util.List;
 @Data
 public class InventoryAvailableQueryReq extends QueryDto implements Serializable {
     @NotBlank
-    @ApiModelProperty(value = "目的仓库编码", required = true,example = "GZ")
+    @Size(max = 30)
+    @ApiModelProperty(value = "目的仓库编码", required = true, example = "GZ")
     private String warehouseCode;
-
-    @ApiModelProperty(value = "客户编码", example = "CN72")
+    @NotBlank
+    @Size(max = 30)
+    @ApiModelProperty(value = "客户编码", example = "CN72", required = true)
     private String cusCode;
-
+    @Size(max = 30)
     @ApiModelProperty(value = "sku - 模糊查询")
     private String sku;
-
+    @Size(max = 30)
     @ApiModelProperty(value = "sku - 精准查询", example = "SCN72000010")
     private String eqSku;
 
@@ -36,10 +39,10 @@ public class InventoryAvailableQueryReq extends QueryDto implements Serializable
 
     @ApiModelProperty(value = "查询类型，1可用库存为0时不查询。2可用库存为0时查询。默认1")
     private Integer queryType = 1;
-
+    @Size(max = 30)
     @ApiModelProperty(value = "只查询SKU，传值SKU")
     private String querySku;
-
+    @Size(max = 30)
     @ApiModelProperty(value = "SKU来源，不传默认084002")
     private String source;
 
