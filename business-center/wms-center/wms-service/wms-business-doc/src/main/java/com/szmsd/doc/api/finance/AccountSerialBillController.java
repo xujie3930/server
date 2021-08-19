@@ -25,7 +25,7 @@ public class AccountSerialBillController {
 
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/list")
-    @ApiOperation(value = "流水账单 - 列表")
+    @ApiOperation(value = "流水账单 - 列表",notes = "展示用户费用的清单流水，包括充值记录、出入库费用实扣记录等。")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "AccountSerialBillRequest")
     public TableDataInfo<AccountSerialBill> listPage(@RequestParam(name = "pageNum",required = false,defaultValue = "1") Integer pageNum,
                                                      @RequestParam(name = "pageSize",required = false,defaultValue = "10") Integer pageSize,

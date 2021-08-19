@@ -62,7 +62,7 @@ public class BaseProductController extends BaseController {
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/list")
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
-    public TableDataInfo list(BaseProductQueryDto queryDto) {
+    public TableDataInfo<BaseProduct> list(BaseProductQueryDto queryDto) {
         startPage();
         List<BaseProduct> list = baseProductService.selectBaseProductPage(queryDto);
         return getDataTable(list);
