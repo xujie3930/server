@@ -34,8 +34,8 @@ public class SkuApiController {
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("list")
     @ApiOperation(value = "查询列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
-    public R<TableDataInfo> list(@RequestBody BaseProductQueryRequest baseProductQueryRequest){
-        return R.ok(baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class)));
+    public TableDataInfo list(@RequestBody BaseProductQueryRequest baseProductQueryRequest){
+        return baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
     }
 
     @PreAuthorize("hasAuthority('read')")
