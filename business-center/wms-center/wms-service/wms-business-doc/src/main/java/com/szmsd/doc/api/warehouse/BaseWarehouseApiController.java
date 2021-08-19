@@ -3,8 +3,10 @@ package com.szmsd.doc.api.warehouse;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.dto.BasWarehouseQueryDTO;
 import com.szmsd.bas.vo.BasWarehouseVO;
+import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.doc.api.warehouse.resp.BasWarehouseResp;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(tags = {"仓库信息"})
 @RestController
@@ -33,8 +38,13 @@ public class BaseWarehouseApiController extends BaseController {
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/warehouse/page")
     @ApiOperation(value = "仓库列表-分页查询", notes = "仓库列表 - 分页查询")
-    public TableDataInfo<BasWarehouseVO> pagePost(@Validated @RequestBody BasWarehouseQueryDTO queryDTO) {
-        return basWarehouseClientService.queryByWarehouseCodes(queryDTO);
+    public TableDataInfo<BasWarehouseResp> pagePost(@Validated @RequestBody BasWarehouseQueryDTO queryDTO) {
+        TableDataInfo<BasWarehouseVO> basWarehousePage = basWarehouseClientService.queryByWarehouseCodes(queryDTO);
+        List<BasWarehouseVO> rows = basWarehousePage.getRows();
+        List<BasWarehouseResp> collect = rows.stream().map(BasWarehouseResp::convertThis).collect(Collectors.toList());
+        long total = basWarehousePage.getTotal();
+        TableDataInfo<BasWarehouseResp> tableDataInfo = new TableDataInfo(collect, (int) total);
+        return tableDataInfo;
     }
 
 }
