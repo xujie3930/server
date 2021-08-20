@@ -5,6 +5,7 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
@@ -101,6 +102,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
 
             @Override
             public R<Integer> uploadBoxLabel(DelOutboundUploadBoxLabelDto dto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<DelOutboundPacking>> queryList(DelOutboundPacking request) {
                 return R.convertResultJson(throwable);
             }
         };

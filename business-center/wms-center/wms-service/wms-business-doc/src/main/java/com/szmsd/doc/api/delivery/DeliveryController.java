@@ -10,6 +10,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
+import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
@@ -29,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -198,7 +200,21 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundBatchResponse.class));
     }
 
-    // @ApiOperation(value = "#12 出库管理 - 装箱结果（批量出库）", position = 601)
+    @PreAuthorize("hasAuthority('read')")
+    @DeleteMapping("/packing/batch")
+    @ApiOperation(value = "#12 出库管理 - 装箱结果（批量出库）", position = 601)
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackingRequest", required = true)
+    public R<List<DelOutboundSelfPickResponse>> packingBatch(@RequestBody @Validated DelOutboundPackingRequest request) {
+        DelOutboundPacking delOutboundPacking = new DelOutboundPacking();
+        delOutboundPacking.setOrderNo(request.getOrderNo());
+        delOutboundPacking.setType(2);
+        List<DelOutboundPacking> packingList = this.delOutboundClientService.queryList(delOutboundPacking);
+        if (CollectionUtils.isEmpty(packingList)) {
+            return R.ok(Collections.emptyList());
+        }
+        List<DelOutboundSelfPickResponse> responseList = BeanMapperUtil.mapList(packingList, DelOutboundSelfPickResponse.class);
+        return R.ok(responseList);
+    }
 
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/label/batch")
@@ -220,6 +236,7 @@ public class DeliveryController {
         DelOutboundUploadBoxLabelDto delOutboundUploadBoxLabelDto = new DelOutboundUploadBoxLabelDto();
         delOutboundUploadBoxLabelDto.setOrderNo(orderNo);
         delOutboundUploadBoxLabelDto.setBatchLabels(dataDTOList);
+        delOutboundUploadBoxLabelDto.setAttachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL);
         return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
     }
 
@@ -237,9 +254,46 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    // @ApiOperation(value = "#15 出库管理 - 订单创建（自提出库）", position = 700)
+    @PreAuthorize("hasAuthority('read')")
+    @PostMapping("/selfPick")
+    @ApiOperation(value = "#15 出库管理 - 订单创建（自提出库）", position = 700)
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundSelfPickListRequest", required = true)
+    public R<List<DelOutboundSelfPickResponse>> selfPick(@RequestBody @Validated DelOutboundSelfPickListRequest request) {
+        List<DelOutboundSelfPickRequest> requestList = request.getRequestList();
+        if (CollectionUtils.isEmpty(requestList)) {
+            throw new CommonException("999", "请求对象不能为空");
+        }
+        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
+        for (DelOutboundDto dto : dtoList) {
+            dto.setOrderType(DelOutboundOrderTypeEnum.SELF_PICK.getCode());
+        }
+        List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
+        return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundSelfPickResponse.class));
+    }
 
-    // @ApiOperation(value = "#16 出库管理 - 标签上传（自提出库）", position = 701)
+    @PreAuthorize("hasAuthority('read')")
+    @PostMapping("/label/selfPick")
+    @ApiOperation(value = "#16 出库管理 - 标签上传（自提出库）", position = 701)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "form", dataType = "String", name = "orderNo", value = "单据号", required = true),
+            @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "文件", required = true, allowMultiple = true)
+    })
+    public R<Integer> labelSelfPick(@RequestParam("orderNo") String orderNo, HttpServletRequest request) {
+        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
+        MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
+
+        MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
+        R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT, "", "");
+        List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
+
+        List<AttachmentDataDTO> dataDTOList = BeanMapperUtil.mapList(attachmentDataDTOList, AttachmentDataDTO.class);
+
+        DelOutboundUploadBoxLabelDto delOutboundUploadBoxLabelDto = new DelOutboundUploadBoxLabelDto();
+        delOutboundUploadBoxLabelDto.setOrderNo(orderNo);
+        delOutboundUploadBoxLabelDto.setBatchLabels(dataDTOList);
+        delOutboundUploadBoxLabelDto.setAttachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT);
+        return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
+    }
 
     @PreAuthorize("hasAuthority('read')")
     @DeleteMapping("/cancel/selfPick")

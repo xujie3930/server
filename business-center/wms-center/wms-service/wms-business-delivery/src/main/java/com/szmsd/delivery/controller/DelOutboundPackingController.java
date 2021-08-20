@@ -49,6 +49,13 @@ public class DelOutboundPackingController extends BaseController {
         return getDataTable(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutboundPacking:DelOutboundPacking:queryList')")
+    @PostMapping("/queryList")
+    @ApiOperation(value = "查询装箱信息模块列表", notes = "查询装箱信息模块列表")
+    public R<List<DelOutboundPacking>> queryList(@RequestBody DelOutboundPacking delOutboundPacking) {
+        return R.ok(delOutboundPackingService.selectDelOutboundPackingList(delOutboundPacking));
+    }
+
     /**
      * 导出装箱信息模块列表
      */

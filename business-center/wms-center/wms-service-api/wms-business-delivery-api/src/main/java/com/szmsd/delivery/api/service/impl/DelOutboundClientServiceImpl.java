@@ -3,6 +3,7 @@ package com.szmsd.delivery.api.service.impl;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
+import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
@@ -65,5 +66,10 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     @Override
     public int uploadBoxLabel(DelOutboundUploadBoxLabelDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.uploadBoxLabel(dto));
+    }
+
+    @Override
+    public List<DelOutboundPacking> queryList(DelOutboundPacking request) {
+        return R.getDataAndException(this.delOutboundFeignService.queryList(request));
     }
 }
