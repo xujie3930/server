@@ -1,4 +1,4 @@
-package com.szmsd.doc.controller;
+package com.szmsd.doc.api.sku;
 
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.dto.BaseProductDto;
@@ -6,8 +6,8 @@ import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.doc.bean.request.BaseProductQueryRequest;
-import com.szmsd.doc.bean.request.ProductRequest;
+import com.szmsd.doc.api.sku.request.BaseProductQueryRequest;
+import com.szmsd.doc.api.sku.request.ProductRequest;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
