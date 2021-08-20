@@ -1,5 +1,6 @@
 package com.szmsd.doc.api.finance.request;
 
+import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.finance.enums.BillEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -16,10 +17,12 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountSerialBillRequest {
+public class AccountSerialBillRequest extends QueryDto {
+
     @Size(max = 30)
     @ApiModelProperty(value = "单号 [30]")
     private String no;
+
     @Size(max = 30)
     @ApiModelProperty(value = "跟踪号 [30]")
     private String trackingNo;
@@ -47,8 +50,15 @@ public class AccountSerialBillRequest {
     @ApiModelProperty(value = "仓库名称 [200]")
     private String warehouseName;
 
-    @ApiModelProperty(value = "交易类型")
-    private BillEnum.PayMethod payMethod;
+    @ApiModelProperty(value = "交易类型 ONLINE_INCOME(在线充值),OFFLINE_INCOME(线下充值)" +
+            ",EXCHANGE_INCOME(汇率转换充值),EXCHANGE_PAYMENT(汇率转换扣款)" +
+            ",WITHDRAW_PAYMENT(提现),SPECIAL_OPERATE(特殊操作)" +
+            ",BUSINESS_OPERATE(业务操作),WAREHOUSE_RENT(仓租)" +
+            ",BALANCE_FREEZE(余额冻结)" +
+            ",BALANCE_THAW(余额解冻)" +
+            ",BALANCE_DEDUCTIONS(费用扣除)" +
+            ",BALANCE_EXCHANGE(余额转换)")
+    private BillEnum.PayMethod payMethod = BillEnum.PayMethod.ONLINE_INCOME;
     @Size(max = 200)
     @ApiModelProperty(value = "业务类别（性质）[200]")
     private String businessCategory;
