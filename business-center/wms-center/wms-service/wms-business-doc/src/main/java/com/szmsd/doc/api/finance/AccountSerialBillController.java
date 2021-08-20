@@ -27,12 +27,8 @@ public class AccountSerialBillController {
     @PostMapping("/list")
     @ApiOperation(value = "流水账单 - 列表",notes = "展示用户费用的清单流水，包括充值记录、出入库费用实扣记录等。")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "AccountSerialBillRequest")
-    public TableDataInfo<AccountSerialBill> listPage(@RequestParam(name = "pageNum",required = false,defaultValue = "1") Integer pageNum,
-                                                     @RequestParam(name = "pageSize",required = false,defaultValue = "10") Integer pageSize,
-                                                     @Validated @RequestBody AccountSerialBillRequest request) {
+    public TableDataInfo<AccountSerialBill> listPage(@Validated @RequestBody AccountSerialBillRequest request) {
         AccountSerialBillDTO map = BeanMapperUtil.map(request, AccountSerialBillDTO.class);
-        map.setPageNum(pageNum);
-        map.setPageSize(pageSize);
         return this.accountSerialBillFeignService.listPage(map).getData();
     }
 
