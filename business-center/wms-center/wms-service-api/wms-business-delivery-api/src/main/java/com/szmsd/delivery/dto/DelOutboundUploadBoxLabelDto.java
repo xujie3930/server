@@ -1,6 +1,7 @@
 package com.szmsd.delivery.dto;
 
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -23,5 +24,8 @@ public class DelOutboundUploadBoxLabelDto implements Serializable {
 
     @ApiModelProperty(value = "箱标文件")
     private List<AttachmentDataDTO> batchLabels;
+
+    @ApiModelProperty(value = "附件类型")
+    private AttachmentTypeEnum attachmentTypeEnum;
 
 }

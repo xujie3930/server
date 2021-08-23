@@ -22,7 +22,7 @@ public interface BaseProductFeignService {
      * 查询模块列表
      */
     @PostMapping("/base/product/queryList")
-    TableDataInfo list(@RequestBody BaseProductQueryDto queryDto);
+    TableDataInfo<BaseProduct> list(@RequestBody BaseProductQueryDto queryDto);
 
     /**
      * 新增产品模块

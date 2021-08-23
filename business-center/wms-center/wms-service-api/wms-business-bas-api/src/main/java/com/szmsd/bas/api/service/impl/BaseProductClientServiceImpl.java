@@ -24,8 +24,8 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
     private BaseProductFeignService baseProductFeignService;
 
     @Override
-    public TableDataInfo list(BaseProductQueryDto queryDto) {
-        TableDataInfo r = baseProductFeignService.list(queryDto);
+    public TableDataInfo<BaseProduct> list(BaseProductQueryDto queryDto) {
+        TableDataInfo<BaseProduct> r = baseProductFeignService.list(queryDto);
         if(Constants.SUCCESS != r.getCode()){
             // 抛出接口返回的异常信息
             throw new CommonException("" + r.getCode(), r.getMsg());

@@ -137,7 +137,8 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                     afterInventory.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
                     this.saveOrUpdate(afterInventory);
                 }
-            } else */{
+            } else */
+            {
                 // after inventory
                 int afterTotalInventory = beforeInventory.getTotalInventory() + qty;
                 int afterAvailableInventory = beforeInventory.getAvailableInventory() + qty;
@@ -509,23 +510,21 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     public List<SkuInventoryAgeVo> queryInventoryAgeBySku(String warehouseCode, String sku) {
         Inventory inventory = baseMapper.selectOne(Wrappers.<Inventory>lambdaQuery().eq(Inventory::getSku, sku).eq(Inventory::getWarehouseCode, warehouseCode));
         if (null == inventory) return new ArrayList<>();
-        int availableInventory = Optional.ofNullable(inventory.getTotalInventory()).orElse(0);
+        int availableInventory = Optional.ofNullable(inventory.getAvailableInventory()).orElse(0);
+        log.info("可用库存 {}", availableInventory);
+        if (availableInventory <= 0) return new ArrayList<>();
         //查询 库存记录信息
         List<InventoryRecord> inventoryRecords = iInventoryRecordService.getBaseMapper().selectList(Wrappers.<InventoryRecord>lambdaQuery()
                 .eq(InventoryRecord::getWarehouseCode, warehouseCode)
                 .eq(InventoryRecord::getSku, sku)
-                .orderByAsc(BaseEntity::getCreateTime));
+                .in(InventoryRecord::getType, INVENTORY_RECORD_TYPE_1.getKey(), INVENTORY_RECORD_TYPE_5.getKey(), INVENTORY_RECORD_TYPE_7.getKey())
+                .orderByDesc(BaseEntity::getCreateTime));
         SkuInventoryAgeVo skuInventoryAgeVo = new SkuInventoryAgeVo();
         skuInventoryAgeVo.setSku(sku);
         if (CollectionUtils.isEmpty(inventoryRecords)) return new ArrayList<>();
         //构造一个入库队列 + 出库队列
-
-
         //构造初始化 历史记录 入库  1 5 7 是 加库存
-        Queue<SkuInventoryAgeVo> input = inventoryRecords.stream().filter(y ->
-                INVENTORY_RECORD_TYPE_1.getKey().equals(y.getType())
-                        || INVENTORY_RECORD_TYPE_5.getKey().equals(y.getType())
-                        || INVENTORY_RECORD_TYPE_7.getKey().equals(y.getType())).map(x -> {
+        Queue<SkuInventoryAgeVo> input = inventoryRecords.stream().map(x -> {
             SkuInventoryAgeVo skuInventoryAge = new SkuInventoryAgeVo();
             //设置数量，库龄 类型
             skuInventoryAge.setSku(x.getSku()).setWarehouseCode(x.getWarehouseCode())
@@ -534,19 +533,15 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                     .setCreateTime(x.getCreateTime());
             return skuInventoryAge;
         }).filter(x -> x.getNum() != null && x.getNum() > 0).collect(Collectors.toCollection(LinkedBlockingDeque::new));
-        Integer totalInput = input.stream().map(SkuInventoryAgeVo::getNum).reduce(Integer::sum).orElse(0);
-        /*Queue<SkuInventoryAgeVo> output = inventoryRecords.stream().filter(y -> "2".equals(y.getType())).map(x -> {
-            SkuInventoryAgeVo skuInventoryAge = new SkuInventoryAgeVo();
-            //设置数量，库龄 类型
-            skuInventoryAge.setSku(x.getSku()).setWarehouseCode(x.getWarehouseCode())
-                    .setNum(x.getQuantity()).setType(x.getType())
 
-                    .setCreateTime(x.getCreateTime());
-            return skuInventoryAge;
-        }).filter(x -> x.getNum() != null && x.getNum() > 0).collect(Collectors.toCollection(LinkedBlockingDeque::new));
-        output.forEach(x -> processingQuantity(input, x.getNum()));*/
-        processingQuantity(input, totalInput - availableInventory);
-        return new ArrayList<>(input);
+        List<SkuInventoryAgeVo> skuInventoryAgeVos = new ArrayList<>(input.size());
+        processingQuantity(input, availableInventory, skuInventoryAgeVos);
+        Collection<SkuInventoryAgeVo> values = skuInventoryAgeVos.stream().collect(Collectors.toMap(SkuInventoryAgeVo::getStorageAge, x -> x, (x1, x2) -> {
+            x1.setNum(x1.getNum() + x2.getNum());
+            return x1;
+        })).values();
+
+        return new ArrayList<>(values);
     }
 
     /**
@@ -555,19 +550,20 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
      * @param queue
      * @param
      */
-    public static void processingQuantity(Queue<SkuInventoryAgeVo> queue, int minusNum) {
-        SkuInventoryAgeVo element = queue.peek();
+    public static void processingQuantity(Queue<SkuInventoryAgeVo> queue, int totalNum, List<SkuInventoryAgeVo> resultList) {
+        SkuInventoryAgeVo element = queue.poll();
         if (null == element) {
             log.error("处理数量异常,总入库数 小于 当前库存");
             return;
         }
         Integer nowNum = element.getNum();
-        if (minusNum >= nowNum) {
-            queue.poll();
-            minusNum = minusNum - nowNum;
-            processingQuantity(queue, minusNum);
+        if (nowNum < totalNum) {
+            resultList.add(element);
+            totalNum -= nowNum;
+            processingQuantity(queue, totalNum, resultList);
         } else {
-            element.setNum(nowNum - minusNum);
+            element.setNum(nowNum);
+            resultList.add(element);
         }
     }
 

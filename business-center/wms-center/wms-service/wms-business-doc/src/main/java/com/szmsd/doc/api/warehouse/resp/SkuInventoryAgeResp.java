@@ -28,11 +28,11 @@ import java.util.stream.Collectors;
 @ApiModel(description = "sku库龄")
 public class SkuInventoryAgeResp {
 
-    @ApiModelProperty(value = "sku", example = "a")
+    @ApiModelProperty(value = "sku", example = "SCNYWO7000214")
     private String sku;
-    @ApiModelProperty(value = "仓库code", example = "a")
+    @ApiModelProperty(value = "仓库code", example = "NJ")
     private String warehouseCode;
-    @ApiModelProperty(value = "sku库龄详情", example = "a")
+    @ApiModelProperty(value = "sku库龄详情")
     private List<SkuInventoryAgeDetailsResp> details;
 
     public static List<SkuInventoryAgeResp> convert(List<SkuInventoryAgeVo> skuInventoryAgeList, String warehouseCode, String sku) {
