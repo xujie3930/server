@@ -127,9 +127,9 @@ public class HttpClientHelper {
         //默认请求配置
         RequestConfig requestConfig = RequestConfig.custom()
                 //设置连接超时时间
-                .setConnectTimeout(2 * 10000)
+                .setConnectTimeout(600 * 1000)
                 //设置等待数据超时时间
-                .setSocketTimeout(5 * 10000)
+                .setSocketTimeout(600 * 1000)
                 //设置从连接池获取连接的等待超时时间
                 .setConnectionRequestTimeout(20000)
                 .build();
