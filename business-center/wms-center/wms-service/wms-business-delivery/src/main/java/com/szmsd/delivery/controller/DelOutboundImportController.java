@@ -14,10 +14,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
-import com.szmsd.delivery.dto.DelOutboundCollectionDetailImportDto;
-import com.szmsd.delivery.dto.DelOutboundDetailImportDto2;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.dto.DelOutboundImportDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.imported.*;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -117,12 +114,12 @@ public class DelOutboundImportController extends BaseController {
         }
     }
 
-    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundImportTemplate')")
-    @GetMapping("/delOutboundImportTemplate")
-    @ApiOperation(value = "出库管理 - 列表 - 出库单导入模板", position = 1000)
-    public void delOutboundImportTemplate(HttpServletResponse response) {
-        String filePath = "/template/DM.xls";
-        String fileName = "DM出库（正常，自提，销毁）模板";
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:collectionImportTemplate')")
+    @GetMapping("/collectionImportTemplate")
+    @ApiOperation(value = "出库管理 - 导入 - 集运出库导入模板", position = 300)
+    public void collectionImportTemplate(HttpServletResponse response) {
+        String filePath = "/template/DM_collection.xls";
+        String fileName = "集运出库模板";
         this.downloadTemplate(response, filePath, fileName);
     }
 
@@ -168,14 +165,14 @@ public class DelOutboundImportController extends BaseController {
         }
     }
 
-    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundImport')")
-    @PostMapping("/delOutboundImport")
-    @ApiOperation(value = "出库管理 - 列表 - 出库单导入", position = 1100)
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:collectionImport')")
+    @PostMapping("/collectionImport")
+    @ApiOperation(value = "出库管理 - 导入 - 集运出库导入", position = 400)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "String", name = "sellerCode", value = "客户编码", required = true),
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
-    public R<ImportResult> delOutboundImport(@RequestParam("sellerCode") String sellerCode, HttpServletRequest request) {
+    public R<ImportResult> collectionImport(@RequestParam("sellerCode") String sellerCode, HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile file = multipartHttpServletRequest.getFile("file");
         AssertUtil.notNull(file, "上传文件不存在");
@@ -184,11 +181,11 @@ public class DelOutboundImportController extends BaseController {
             // copy文件流
             byte[] byteArray = IOUtils.toByteArray(file.getInputStream());
             // 初始化读取第一个sheet页的数据
-            DefaultAnalysisEventListener<DelOutboundImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
+            DefaultAnalysisEventListener<DelOutboundCollectionImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundCollectionImportDto.class, 0, 1);
             if (defaultAnalysisEventListener.isError()) {
                 return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
             }
-            List<DelOutboundImportDto> dataList = defaultAnalysisEventListener.getList();
+            List<DelOutboundCollectionImportDto> dataList = defaultAnalysisEventListener.getList();
             if (CollectionUtils.isEmpty(dataList)) {
                 return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
             }
@@ -201,19 +198,15 @@ public class DelOutboundImportController extends BaseController {
             if (CollectionUtils.isEmpty(detailList)) {
                 return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据明细不能为空")));
             }
-            // 查询出库类型数据
-            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,058");
-            List<BasSubWrapperVO> orderTypeList = listMap.get("063");
-            List<BasSubWrapperVO> deliveryMethodList = listMap.get("058");
             // 查询国家数据
             R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
             List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
             // 初始化导入上下文
-            DelOutboundImportContext importContext = new DelOutboundImportContext(dataList, orderTypeList, countryList, deliveryMethodList);
+            DelOutboundCollectionImportContext importContext = new DelOutboundCollectionImportContext(dataList, countryList);
             // 初始化外联导入上下文
             DelOutboundOuterContext outerContext = new DelOutboundOuterContext();
             // 初始化导入验证容器
-            ImportResult importResult = new ImportValidationContainer<>(importContext, ImportValidation.build(new DelOutboundImportValidation(outerContext, importContext))).valid();
+            ImportResult importResult = new ImportValidationContainer<>(importContext, ImportValidation.build(new DelOutboundCollectionImportValidation(outerContext, importContext))).valid();
             // 验证导入验证结果
             if (!importResult.isStatus()) {
                 return R.ok(importResult);
@@ -223,13 +216,94 @@ public class DelOutboundImportController extends BaseController {
             // 初始化SKU数据验证器
             DelOutboundDetailImportValidationData importValidationData = new DelOutboundDetailImportValidationData(sellerCode, inventoryFeignClientService);
             // 初始化SKU导入验证容器
-            ImportResult importResult1 = new ImportValidationContainer<>(importContext1, ImportValidation.build(new DelOutboundDetailImportValidation(outerContext, importContext1, importValidationData))).valid();
+            ImportResult importResult1 = new ImportValidationContainer<>(importContext1, ImportValidation.build(new DelOutboundCollectionDetailImportValidation(outerContext, importContext1))).valid();
             // 验证SKU导入验证结果
             if (!importResult1.isStatus()) {
                 return R.ok(importResult1);
             }
             // 获取导入的数据
-            List<DelOutboundDto> dtoList = new DelOutboundImportContainer(dataList, orderTypeList, countryList, deliveryMethodList, detailList, importValidationData, sellerCode).get();
+            List<DelOutboundDto> dtoList = new DelOutboundCollectionImportContainer(dataList, countryList, detailList, importValidationData, sellerCode).get();
+            // 批量新增
+            this.delOutboundService.insertDelOutbounds(dtoList);
+            // 返回成功的结果
+            return R.ok(ImportResult.buildSuccess());
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            // 返回失败的结果
+            return R.ok(ImportResult.buildFail(ImportMessage.build(e.getMessage())));
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:packageTransferImportTemplate')")
+    @GetMapping("/packageTransferImportTemplate")
+    @ApiOperation(value = "出库管理 - 导入 - 转运出库导入模板", position = 500)
+    public void packageTransferImportTemplate(HttpServletResponse response) {
+        String filePath = "/template/DM_packageTransfer.xls";
+        String fileName = "转运出库模板";
+        this.downloadTemplate(response, filePath, fileName);
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:packageTransferImport')")
+    @PostMapping("/packageTransferImport")
+    @ApiOperation(value = "出库管理 - 导入 - 转运出库导入", position = 600)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "form", dataType = "String", name = "sellerCode", value = "客户编码", required = true),
+            @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
+    })
+    public R<ImportResult> packageTransferImport(@RequestParam("sellerCode") String sellerCode, HttpServletRequest request) {
+        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
+        MultipartFile file = multipartHttpServletRequest.getFile("file");
+        AssertUtil.notNull(file, "上传文件不存在");
+        AssertUtil.isTrue(StringUtils.isNotEmpty(sellerCode), "客户编码不能为空");
+        try {
+            // copy文件流
+            byte[] byteArray = IOUtils.toByteArray(file.getInputStream());
+            // 初始化读取第一个sheet页的数据
+            DefaultAnalysisEventListener<DelOutboundPackageTransferImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundPackageTransferImportDto.class, 0, 1);
+            if (defaultAnalysisEventListener.isError()) {
+                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
+            }
+            List<DelOutboundPackageTransferImportDto> dataList = defaultAnalysisEventListener.getList();
+            if (CollectionUtils.isEmpty(dataList)) {
+                return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
+            }
+            // 初始化读取第二个sheet页的数据
+            DefaultAnalysisEventListener<DelOutboundPackageTransferDetailImportDto> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundPackageTransferDetailImportDto.class, 1, 1);
+            if (defaultAnalysisEventListener1.isError()) {
+                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
+            }
+            List<DelOutboundPackageTransferDetailImportDto> detailList = defaultAnalysisEventListener1.getList();
+            if (CollectionUtils.isEmpty(detailList)) {
+                return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据明细不能为空")));
+            }
+            // 查询国家数据
+            R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
+            List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
+            // 初始化导入上下文
+            DelOutboundPackageTransferImportContext importContext = new DelOutboundPackageTransferImportContext(dataList, countryList);
+            // 初始化外联导入上下文
+            DelOutboundOuterContext outerContext = new DelOutboundOuterContext();
+            // 初始化导入验证容器
+            ImportResult importResult = new ImportValidationContainer<>(importContext, ImportValidation.build(new DelOutboundPackageTransferImportValidation(outerContext, importContext))).valid();
+            // 验证导入验证结果
+            if (!importResult.isStatus()) {
+                return R.ok(importResult);
+            }
+            // 产品属性，带电信息，电池包装
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("059,060,061");
+            List<BasSubWrapperVO> productAttributeList = listMap.get("059");
+            List<BasSubWrapperVO> electrifiedModeList = listMap.get("060");
+            List<BasSubWrapperVO> batteryPackagingList = listMap.get("061");
+            // 初始化SKU导入上下文
+            DelOutboundPackageTransferDetailImportContext importContext1 = new DelOutboundPackageTransferDetailImportContext(detailList, productAttributeList, electrifiedModeList, batteryPackagingList);
+            // 初始化SKU导入验证容器
+            ImportResult importResult1 = new ImportValidationContainer<>(importContext1, ImportValidation.build(new DelOutboundPackageTransferDetailImportValidation(outerContext, importContext1))).valid();
+            // 验证SKU导入验证结果
+            if (!importResult1.isStatus()) {
+                return R.ok(importResult1);
+            }
+            // 获取导入的数据
+            List<DelOutboundDto> dtoList = new DelOutboundPackageTransferImportContainer(dataList, countryList, detailList, sellerCode).get();
             // 批量新增
             this.delOutboundService.insertDelOutbounds(dtoList);
             // 返回成功的结果
