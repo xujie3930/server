@@ -1,4 +1,4 @@
-package com.szmsd.doc.controller;
+package com.szmsd.doc.api.sku;
 
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.dto.BaseProductDto;
@@ -6,8 +6,8 @@ import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.doc.bean.request.BaseProductQueryRequest;
-import com.szmsd.doc.bean.request.ProductRequest;
+import com.szmsd.doc.api.sku.request.BaseProductQueryRequest;
+import com.szmsd.doc.api.sku.request.ProductRequest;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,14 +33,14 @@ public class SkuApiController {
 
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("list")
-    @ApiOperation(value = "查询列表", notes = "SKU列表 - 分页查询")
-    public R<TableDataInfo> list(@RequestBody BaseProductQueryRequest baseProductQueryRequest){
-        return R.ok(baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class)));
+    @ApiOperation(value = "查询列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
+    public TableDataInfo list(@RequestBody BaseProductQueryRequest baseProductQueryRequest){
+        return baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
     }
 
-    @PreAuthorize("hasAuthority('write')")
+    @PreAuthorize("hasAuthority('read')")
     @PostMapping("save")
-    @ApiOperation(value = "新增", notes = "SKU新增")
+    @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
     public R save(@RequestBody @Validated ProductRequest productRequest){
         BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
         baseProductClientService.add(product);
@@ -49,7 +49,7 @@ public class SkuApiController {
 
     @PreAuthorize("hasAuthority('read')")
     @GetMapping("getBarCode")
-    @ApiOperation(value = "SKU标签生成",notes = "生成sku标签条形码，返回的为条形码图片的Base64")
+    @ApiOperation(value = "SKU标签生成",notes = "生成sku编号，生成标签条形码，返回的为条形码图片的Base64")
     public R getBarCode(@ApiParam("sku的code") @RequestParam String skuCode){
         Boolean valid = baseProductClientService.checkSkuValidToDelivery(skuCode);
         return valid ? R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode)) : R.failed("sku不存在");

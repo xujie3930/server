@@ -1264,9 +1264,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public int uploadBoxLabel(DelOutboundUploadBoxLabelDto dto) {
         // 删除之前的文件
-        this.remoteAttachmentService.deleteByBusinessNo(AttachmentDTO.builder().businessNo(dto.getOrderNo()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build());
+        String orderNo = dto.getOrderNo();
+        AttachmentTypeEnum attachmentTypeEnum = dto.getAttachmentTypeEnum();
+        this.remoteAttachmentService.deleteByBusinessNo(AttachmentDTO.builder().businessNo(orderNo).attachmentTypeEnum(attachmentTypeEnum).build());
         // 箱标文件
-        AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(dto.getOrderNo()).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
+        AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(attachmentTypeEnum).build();
         this.remoteAttachmentService.saveAndUpdate(batchLabel);
         return 1;
     }

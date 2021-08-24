@@ -5,6 +5,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
@@ -139,4 +140,8 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/uploadBoxLabel")
     @ApiOperation(value = "出库管理 - 上传箱标")
     R<Integer> uploadBoxLabel(@RequestBody DelOutboundUploadBoxLabelDto dto);
+
+    @PostMapping("/del-outbound-packing/queryList")
+    @ApiOperation(value = "出库管理 - 装箱信息")
+    R<List<DelOutboundPacking>> queryList(@RequestBody DelOutboundPacking request);
 }

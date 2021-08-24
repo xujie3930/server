@@ -1,4 +1,4 @@
-package com.szmsd.doc.bean.request;
+package com.szmsd.doc.api.sku.request;
 
 import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModelProperty;

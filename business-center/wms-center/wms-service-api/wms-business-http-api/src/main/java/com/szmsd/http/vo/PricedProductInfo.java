@@ -235,4 +235,9 @@ public class PricedProductInfo {
     @ApiModelProperty(value = "AvaibleSheets")
     private String avaibleSheets;
 
+    @ApiModelProperty(value = "发货规则")
+    private String shipmentRule;
+
+    @ApiModelProperty(value = "装箱规则")
+    private String packingRule;
 }

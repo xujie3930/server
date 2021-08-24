@@ -41,7 +41,7 @@ public interface InboundReceiptFeignService {
     @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
     R<List<InboundReceiptVO>> list(@RequestBody InboundReceiptQueryDTO queryDTO);
 
-    @PostMapping("/receipt/saveOrUpdate/batch")
+    @PostMapping("/inbound/receipt/saveOrUpdate/batch")
     @ApiOperation(value = "创建/修改-批量", notes = "批量 入库管理 - 新增/创建")
     R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@RequestBody List<CreateInboundReceiptDTO> createInboundReceiptDTOList);
 

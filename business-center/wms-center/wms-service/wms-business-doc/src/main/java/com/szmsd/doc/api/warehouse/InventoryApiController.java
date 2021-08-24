@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -30,8 +31,8 @@ public class InventoryApiController extends BaseController {
 
     @PreAuthorize("hasAuthority('read')")
     @PostMapping("/inbound/queryAvailableList")
-    @ApiOperation(value = "查询可用库存-根据仓库编码，SKU - 不分页")
-    public R<List<InventoryAvailableListResp>> queryAvailableList(@RequestBody InventoryAvailableQueryReq queryDTO) {
+    @ApiOperation(value = "查询可用库存-根据仓库编码，SKU - 不分页", notes = "根据客户代码、所在仓库、sku查询SKU库存")
+    public R<List<InventoryAvailableListResp>> queryAvailableList(@Validated @RequestBody InventoryAvailableQueryReq queryDTO) {
         List<InventoryAvailableListVO> inventoryAvailableListVOS = inventoryFeignService.queryAvailableList(queryDTO.convertThis());
 
         List<InventoryAvailableListResp> returnList = inventoryAvailableListVOS
@@ -43,10 +44,10 @@ public class InventoryApiController extends BaseController {
     @PreAuthorize("hasAuthority('read')")
     @GetMapping("/queryInventoryAge/weeks/bySku/{warehouseCode}/{sku}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "warehouseCode", value = "仓库code", example = "NJ"),
-            @ApiImplicitParam(name = "sku", value = "sku", example = "CN20210601006"),
+            @ApiImplicitParam(name = "warehouseCode", required = true, value = "仓库code", example = "NJ"),
+            @ApiImplicitParam(name = "sku", required = true, value = "sku", example = "CN20210601006"),
     })
-    @ApiOperation(value = "库龄-查询sku的库龄", notes = "查询sku的库龄-周")
+    @ApiOperation(value = "库龄-查询sku的库龄", notes = "按周返回SKU的库龄")
     public R<List<SkuInventoryAgeResp>> queryInventoryAgeBySku(@PathVariable("warehouseCode") String warehouseCode, @PathVariable("sku") String sku) {
         List<SkuInventoryAgeVo> skuInventoryAgeVos = inventoryFeignService.queryInventoryAgeBySku(warehouseCode, sku);
         return R.ok(SkuInventoryAgeResp.convert(skuInventoryAgeVos, warehouseCode, sku));

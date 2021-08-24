@@ -1,5 +1,6 @@
 package com.szmsd.delivery.api.service;
 
+import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
@@ -84,4 +85,12 @@ public interface DelOutboundClientService {
      * @return int
      */
     int uploadBoxLabel(DelOutboundUploadBoxLabelDto dto);
+
+    /**
+     * 装箱信息
+     *
+     * @param request request
+     * @return DelOutboundPacking
+     */
+    List<DelOutboundPacking> queryList(DelOutboundPacking request);
 }

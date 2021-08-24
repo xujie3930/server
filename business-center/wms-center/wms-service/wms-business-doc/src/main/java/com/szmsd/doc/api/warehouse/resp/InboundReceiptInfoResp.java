@@ -80,31 +80,24 @@ public class InboundReceiptInfoResp {
     // --------------------多语言字段--------------------
 
     @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS)
     private String statusName;
 
     @ApiModelProperty(value = "客户名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_CUSTOMER)
     private String cusName;
 
     @ApiModelProperty(value = "目的仓库名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     private String warehouseName;
 
     @ApiModelProperty(value = "入库方式名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     private String warehouseMethodName;
 
     @ApiModelProperty(value = "类别名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     private String warehouseCategoryName;
 
     @ApiModelProperty(value = "送货方式名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     private String deliveryWayName;
 
     @ApiModelProperty(value = "产品货源地名称 - 当前系统语言")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     private String goodsSourceName;
 
     @ApiModelProperty(value = "单证信息",notes = "对外接口")
