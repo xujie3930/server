@@ -22,6 +22,14 @@ import java.util.List;
 @PreNotNull(field = "packageConfirm", fieldValue = "076002", model = PreNotNull.Model.VALUE, linkageFields = {"packageWeightDeviation"}, message = "重量误差范围不能为空")
 public class DelOutboundPackageTransferRequest implements Serializable {
 
+    @NotNull(message = "客户编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
+    private String sellerCode;
+
+    @NotNull(message = "仓库编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
+    private String warehouseCode;
+
     @NotNull(message = "重量不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @Max(value = Integer.MAX_VALUE, message = "重量不能大于2147483647", groups = {DelOutboundGroup.PackageTransfer.class})
     @Min(value = 0, message = "重量不能小于0", groups = {DelOutboundGroup.PackageTransfer.class})
