@@ -1,9 +1,12 @@
 package com.szmsd.finance.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.chargerules.api.feign.ChargeFeignService;
+import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
@@ -194,6 +197,28 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         return flag ? R.ok() : R.failed("余额不足");
     }
 
+    @Resource
+    private ChargeFeignService chargeFeignService;
+
+    private void addOptLog(CustPayDTO dto) {
+        BillEnum.PayMethod payType = dto.getPayMethod();
+        boolean b = !(payType == BillEnum.PayMethod.BALANCE_FREEZE || payType == BillEnum.PayMethod.BALANCE_THAW);
+        if (b) return;
+        ChargeLog chargeLog = new ChargeLog();
+        BeanUtils.copyProperties(dto,chargeLog);
+        chargeLog
+                .setCustomCode(dto.getCusCode()).setPayMethod(payType.name())
+                .setOrderNo(dto.getNo()).setOperationPayMethod("业务操作").setSuccess(true)
+        ;
+        if (payType == BillEnum.PayMethod.BALANCE_FREEZE) {
+            chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE.name());
+        } else if (payType == BillEnum.PayMethod.BALANCE_THAW) {
+            chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
+        }
+        chargeFeignService.add(chargeLog);
+        log.info("{} -  扣减操作费 {}", payType, JSONObject.toJSONString(chargeLog));
+    }
+
     @Transactional
     @Override
     public R freezeBalance(CusFreezeBalanceDTO cfbDTO) {
@@ -207,7 +232,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayType(BillEnum.PayType.FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
+
         boolean flag = abstractPayFactory.updateBalance(dto);
+        if (flag)
+            //冻结 解冻 需要把费用扣减加到 操作费用表
+            this.addOptLog(dto);
         return flag ? R.ok() : R.failed("可用余额不足以冻结");
     }
 
@@ -225,6 +254,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
+        if (flag)
+            //冻结 解冻 需要把费用扣减加到 操作费用表
+            this.addOptLog(dto);
         return flag ? R.ok() : R.failed("冻结金额不足以解冻");
     }
 
