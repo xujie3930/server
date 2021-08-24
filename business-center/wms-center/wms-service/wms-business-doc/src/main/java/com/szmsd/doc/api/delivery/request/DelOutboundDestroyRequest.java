@@ -1,10 +1,12 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
@@ -12,6 +14,14 @@ import java.util.List;
 @Data
 @ApiModel(value = "DelOutboundDestroyRequest", description = "DelOutboundDestroyRequest对象")
 public class DelOutboundDestroyRequest implements Serializable {
+
+    @NotNull(message = "客户编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
+    private String sellerCode;
+
+    @NotNull(message = "仓库编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
+    private String warehouseCode;
 
     @ApiModelProperty(value = "是否优先发货", dataType = "Boolean", position = 1, example = "false")
     private Boolean isFirst;
