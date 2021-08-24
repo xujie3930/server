@@ -1,14 +1,12 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +14,14 @@ import java.util.List;
 @Data
 @ApiModel(value = "DelOutboundBatchRequest", description = "DelOutboundBatchRequest对象")
 public class DelOutboundBatchRequest implements Serializable {
+
+    @NotNull(message = "客户编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
+    private String sellerCode;
+
+    @NotNull(message = "仓库编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
+    private String warehouseCode;
 
     @ApiModelProperty(value = "出货渠道", dataType = "String", position = 1, example = "")
     private String shipmentChannel;
