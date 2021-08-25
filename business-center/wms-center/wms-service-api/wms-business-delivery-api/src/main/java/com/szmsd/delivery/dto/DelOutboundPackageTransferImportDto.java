@@ -60,7 +60,7 @@ public class DelOutboundPackageTransferImportDto implements Serializable {
     private Double height;
 
     @ApiModelProperty(value = "包裹重量尺寸确认")
-    private String packageConfirm;
+    private String packageConfirmName;
 
     @ApiModelProperty(value = "包裹重量误差")
     private Integer packageWeightDeviation;

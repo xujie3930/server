@@ -1,6 +1,5 @@
 package com.szmsd.delivery.imported;
 
-import com.szmsd.delivery.dto.DelOutboundCollectionImportDto;
 import com.szmsd.delivery.dto.DelOutboundPackageTransferImportDto;
 
 /**
@@ -60,6 +59,13 @@ public class DelOutboundPackageTransferImportValidation implements ImportValidat
         }
         String countryCode = this.getCountryCode(country);
         this.importContext.isEmpty(countryCode, rowIndex, 10, country, "国家不存在");
+        // 重量信息确认
+        String packageConfirmName = object.getPackageConfirmName();
+        if (this.importContext.isEmpty(packageConfirmName, rowIndex, 16, null, "重量信息确认不能为空")) {
+            return;
+        }
+        String packageConfirm = this.importContext.packageConfirmCache.get(packageConfirmName);
+        this.importContext.isEmpty(packageConfirm, rowIndex, 16, packageConfirmName, "重量信息确认不存在");
     }
 
     public String getCountryCode(String country) {

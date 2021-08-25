@@ -1,6 +1,7 @@
 package com.szmsd.delivery.imported;
 
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
@@ -24,9 +25,10 @@ public class DelOutboundPackageTransferImportContainer extends DelOutboundPackag
 
     public DelOutboundPackageTransferImportContainer(List<DelOutboundPackageTransferImportDto> dataList,
                                                      List<BasRegionSelectListVO> countryList,
+                                                     List<BasSubWrapperVO> packageConfirmList,
                                                      List<DelOutboundPackageTransferDetailImportDto> detailList,
                                                      String sellerCode) {
-        super(dataList, countryList);
+        super(dataList, countryList, packageConfirmList);
         this.detailList = detailList;
         this.detailMapList = this.detailToMapList();
         this.sellerCode = sellerCode;
@@ -46,7 +48,7 @@ public class DelOutboundPackageTransferImportContainer extends DelOutboundPackag
             outboundDto.setLength(dto.getLength());
             outboundDto.setWidth(dto.getWidth());
             outboundDto.setHeight(dto.getHeight());
-            outboundDto.setPackageConfirm(dto.getPackageConfirm());
+            outboundDto.setPackageConfirm(super.packageConfirmCache.get(dto.getPackageConfirmName()));
             outboundDto.setPackageWeightDeviation(dto.getPackageWeightDeviation());
             outboundDto.setAddress(this.buildAddress(dto));
             outboundDto.setDetails(this.buildDetails(dto));
