@@ -276,11 +276,17 @@ public class DelOutboundImportController extends BaseController {
             if (CollectionUtils.isEmpty(detailList)) {
                 return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据明细不能为空")));
             }
+            // 产品属性，带电信息，电池包装
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("059,060,061,076");
+            List<BasSubWrapperVO> productAttributeList = listMap.get("059");
+            List<BasSubWrapperVO> electrifiedModeList = listMap.get("060");
+            List<BasSubWrapperVO> batteryPackagingList = listMap.get("061");
+            List<BasSubWrapperVO> packageConfirmList = listMap.get("076");
             // 查询国家数据
             R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
             List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
             // 初始化导入上下文
-            DelOutboundPackageTransferImportContext importContext = new DelOutboundPackageTransferImportContext(dataList, countryList);
+            DelOutboundPackageTransferImportContext importContext = new DelOutboundPackageTransferImportContext(dataList, countryList, packageConfirmList);
             // 初始化外联导入上下文
             DelOutboundOuterContext outerContext = new DelOutboundOuterContext();
             // 初始化导入验证容器
@@ -289,11 +295,6 @@ public class DelOutboundImportController extends BaseController {
             if (!importResult.isStatus()) {
                 return R.ok(importResult);
             }
-            // 产品属性，带电信息，电池包装
-            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("059,060,061");
-            List<BasSubWrapperVO> productAttributeList = listMap.get("059");
-            List<BasSubWrapperVO> electrifiedModeList = listMap.get("060");
-            List<BasSubWrapperVO> batteryPackagingList = listMap.get("061");
             // 初始化SKU导入上下文
             DelOutboundPackageTransferDetailImportContext importContext1 = new DelOutboundPackageTransferDetailImportContext(detailList, productAttributeList, electrifiedModeList, batteryPackagingList);
             // 初始化SKU导入验证容器
@@ -303,7 +304,7 @@ public class DelOutboundImportController extends BaseController {
                 return R.ok(importResult1);
             }
             // 获取导入的数据
-            List<DelOutboundDto> dtoList = new DelOutboundPackageTransferImportContainer(dataList, countryList, detailList, sellerCode).get();
+            List<DelOutboundDto> dtoList = new DelOutboundPackageTransferImportContainer(dataList, countryList, packageConfirmList, detailList, sellerCode).get();
             // 批量新增
             this.delOutboundService.insertDelOutbounds(dtoList);
             // 返回成功的结果
