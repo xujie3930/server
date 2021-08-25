@@ -29,7 +29,7 @@ public class DelOutboundPackageTransferImportContext extends ImportContext<DelOu
         }
         if (CollectionUtils.isNotEmpty(packageConfirmList)) {
             for (BasSubWrapperVO vo : packageConfirmList) {
-                this.packageConfirmCache.put(vo.getSubName(), vo.getSubValue());
+                this.packageConfirmCache.put(vo.getSubName(), vo.getSubCode());
             }
         }
     }
