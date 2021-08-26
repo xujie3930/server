@@ -75,7 +75,7 @@ public class BaseProductController extends BaseController {
     @PostMapping("/queryList")
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
     public TableDataInfo queryList(@RequestBody BaseProductQueryDto queryDto) {
-        startPage();
+        startPage(queryDto);
         List<BaseProduct> list = baseProductService.selectBaseProductPage(queryDto);
         return getDataTable(list);
     }
