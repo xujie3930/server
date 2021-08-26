@@ -207,7 +207,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      * @param dto
      */
     private void addOptLog(CustPayDTO dto) {
-        log.info("addOptLog {} ", JSONObject.toJSONString(dto));
+        /*log.info("addOptLog {} ", JSONObject.toJSONString(dto));
         BillEnum.PayMethod payType = dto.getPayMethod();
         boolean b = !(payType == BillEnum.PayMethod.BALANCE_FREEZE || payType == BillEnum.PayMethod.BALANCE_THAW);
         if (b) return;
@@ -223,7 +223,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
         }
         chargeFeignService.add(chargeLog);
-        log.info("{} -  扣减操作费 {}", payType, JSONObject.toJSONString(chargeLog));
+        log.info("{} -  扣减操作费 {}", payType, JSONObject.toJSONString(chargeLog));*/
     }
 
     @Transactional
