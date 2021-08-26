@@ -1,5 +1,6 @@
 package com.szmsd.finance.factory.abstractFactory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
@@ -96,6 +97,7 @@ public abstract class AbstractPayFactory {
     }
 
     public void setSerialBillLog(CustPayDTO dto) {
+        log.info("setSerialBillLog - {}", JSONObject.toJSONString(dto));
         if (CollectionUtils.isEmpty(dto.getSerialBillInfoList())) {
             log.info("setSerialBillLog() list is empty :{} ", dto);
             AccountSerialBillDTO accountSerialBillDTO = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);

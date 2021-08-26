@@ -185,6 +185,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Transactional
     @Override
     public R feeDeductions(CustPayDTO dto) {
+        log.info("feeDeductions -{}", JSONObject.toJSONString(dto));
         if(BigDecimal.ZERO.compareTo(dto.getAmount()) == 0) return R.ok();
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
@@ -193,6 +194,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
         dto.setPayType(BillEnum.PayType.PAYMENT);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
+        log.info("feeDeductions#updateBalance -{}", JSONObject.toJSONString(dto));
         boolean flag = abstractPayFactory.updateBalance(dto);
         return flag ? R.ok() : R.failed("余额不足");
     }
@@ -240,8 +242,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
         boolean flag = abstractPayFactory.updateBalance(dto);
         if (flag)
-            //冻结 解冻 需要把费用扣减加到 操作费用表
+        //冻结 解冻 需要把费用扣减加到 操作费用表
+        {
+            log.info("thawBalance - {}", JSONObject.toJSONString(cfbDTO));
             this.addOptLog(dto);
+        }
         return flag ? R.ok() : R.failed("可用余额不足以冻结");
     }
 
@@ -260,8 +265,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
         if (flag)
-            //冻结 解冻 需要把费用扣减加到 操作费用表
+        //冻结 解冻 需要把费用扣减加到 操作费用表
+        {
+            log.info("thawBalance - {}", JSONObject.toJSONString(cfbDTO));
             this.addOptLog(dto);
+        }
         return flag ? R.ok() : R.failed("冻结金额不足以解冻");
     }
 
