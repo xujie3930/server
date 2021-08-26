@@ -200,6 +200,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Resource
     private ChargeFeignService chargeFeignService;
 
+    /**
+     *  冻结 解冻 需要把费用扣减加到 操作费用表
+     * @param dto
+     */
     private void addOptLog(CustPayDTO dto) {
         BillEnum.PayMethod payType = dto.getPayMethod();
         boolean b = !(payType == BillEnum.PayMethod.BALANCE_FREEZE || payType == BillEnum.PayMethod.BALANCE_THAW);
