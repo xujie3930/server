@@ -25,6 +25,13 @@ public class ChargeLogController extends BaseController {
     @Resource
     private IChargeLogService chargeLogService;
 
+    @PostMapping("/add")
+    @ApiOperation(value = "新增扣费")
+    public R add(@RequestBody ChargeLog chargeLog) {
+        chargeLogService.save(chargeLog);
+        return R.ok();
+    }
+
     @GetMapping("/list")
     @ApiOperation(value = "扣费日志 - 分页查询")
     public TableDataInfo<ChargeLog> list(ChargeLogDto chargeLogDto) {
