@@ -1,10 +1,12 @@
 package com.szmsd.doc.api.sku.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
@@ -28,34 +30,38 @@ public class BaseProductRequest {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "产品名称")
+    @ApiModelProperty(value = "产品名称", required = true)
     @Size(max = 255)
     @NotBlank(message = "产品名称不能为空")
     private String productName;
 
-    @ApiModelProperty(value = "产品编码")
+    @ApiModelProperty(value = "产品编码", required = true)
     @Size(max = 50)
     @NotBlank(message = "产品编码不能为空")
     private String code;
 
-    @ApiModelProperty(value = "初始重量g")
+    @ApiModelProperty(value = "初始重量g", required = true)
     @Digits(integer = 8,fraction = 2)
+    @NotBlank(message = "初始重量不能为空")
     private Double initWeight;
 
-    @ApiModelProperty(value = "初始长 cm")
+    @ApiModelProperty(value = "初始长 cm", required = true)
     @Digits(integer = 8,fraction = 2)
+    @NotBlank(message = "初始长度不能为空")
     private Double initLength;
 
-    @ApiModelProperty(value = "初始宽 cm")
+    @ApiModelProperty(value = "初始宽 cm", required = true)
     @Digits(integer = 8,fraction = 2)
+    @NotBlank(message = "初始宽度不能为空")
     private Double initWidth;
 
-    @ApiModelProperty(value = "初始高 cm")
+    @ApiModelProperty(value = "初始高 cm", required = true)
     @Digits(integer = 8,fraction = 2)
+    @NotBlank(message = "初始高度不能为空")
     private Double initHeight;
 
-    @ApiModelProperty(value = "是否激活")
-    private Boolean isActive;
+    @ApiModelProperty(value = "是否激活 默认true")
+    private Boolean isActive = true;
 
     @ApiModelProperty(value = "产品图片")
     @Size(max = 255)
@@ -65,8 +71,9 @@ public class BaseProductRequest {
     @Size(max = 40)
     private String suffix;
 
-    @ApiModelProperty(value = "初始体积 cm3")
+    @ApiModelProperty(value = "初始体积 cm3", required = true)
     @Digits(integer = 14,fraction = 2)
+    @NotBlank(message = "初始体积不能为空")
     private BigDecimal initVolume;
 
     @ApiModelProperty(value = "客户（卖家）编码")
@@ -74,22 +81,26 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String sellerCode;
 
-    @ApiModelProperty(value = "中文申报品名")
+    @ApiModelProperty(value = "中文申报品名", required = true)
     @Excel(name = "中文申报品名")
     @Size(max = 200)
+    @NotBlank(message = "中文申报品名不能为空")
     private String productNameChinese;
 
-    @ApiModelProperty(value = "申报价值")
+    @ApiModelProperty(value = "申报价值", required = true)
     @Excel(name = "申报价值")
+    @NotBlank(message = "申报价值不能为空")
     @Digits(integer = 8,fraction = 2)
     private Double declaredValue;
 
-    @ApiModelProperty(value = "产品属性编号")
+    @ApiModelProperty(value = "产品属性编号", required = true)
     @Size(max = 50)
+    @NotBlank(message = "产品属性编号不能为空")
     private String productAttribute;
 
-    @ApiModelProperty(value = "产品属性名")
+    @ApiModelProperty(value = "产品属性名", required = true)
     @Excel(name = "产品属性名")
+    @NotBlank(message = "产品属性名不能为空")
     @Size(max = 100)
     private String productAttributeName;
 
@@ -132,14 +143,15 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String suggestPackingMaterialCode;
 
-    @ApiModelProperty(value = "价格区间")
-    @Excel(name = "价格区间")
-    @Size(max = 255)
-    private String priceRange;
+//    @ApiModelProperty(value = "价格区间")
+//    @Excel(name = "价格区间")
+//    @Size(max = 255)
+//    private String priceRange;
 
-    @ApiModelProperty(value = "产品说明")
+    @ApiModelProperty(value = "产品说明", required = true)
     @Excel(name = "产品说明")
     @Size(max = 1000)
+    @NotBlank(message = "产品说明不能为空")
     private String productDescription;
 
     @ApiModelProperty(value = "产品介绍地址")
@@ -154,48 +166,57 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String categoryCode;
 
-    @ApiModelProperty(value = "是否仓库验收")
-    private Boolean warehouseAcceptance;
+//    @ApiModelProperty(value = "是否仓库验收")
+//    private Boolean warehouseAcceptance;
 
-    @ApiModelProperty(value = "属性1")
-    @Size(max = 200)
-    private String attribute1;
+//    @ApiModelProperty(value = "属性1")
+//    @Size(max = 200)
+//    @JsonIgnore
+//    private String attribute1;
+//
+//    @ApiModelProperty(value = "属性2")
+//    @Size(max = 200)
+//    @JsonIgnore
+//    private String attribute2;
+//
+//    @ApiModelProperty(value = "属性3")
+//    @Size(max = 200)
+//    @JsonIgnore
+//    private String attribute3;
+//
+//    @ApiModelProperty(value = "属性4")
+//    @Size(max = 200)
+//    @JsonIgnore
+//    private String attribute4;
+//
+//    @ApiModelProperty(value = "属性5")
+//    @Size(max = 200)
+//    private String attribute5;
 
-    @ApiModelProperty(value = "属性2")
-    @Size(max = 200)
-    private String attribute2;
-
-    @ApiModelProperty(value = "属性3")
-    @Size(max = 200)
-    private String attribute3;
-
-    @ApiModelProperty(value = "属性4")
-    @Size(max = 200)
-    private String attribute4;
-
-    @ApiModelProperty(value = "属性5")
-    @Size(max = 200)
-    private String attribute5;
-
-    @ApiModelProperty(value = "仓库测量重量g")
-    @Digits(integer = 8,fraction = 2)
-    private Double weight;
-
-    @ApiModelProperty(value = "仓库测量长 cm")
-    @Digits(integer = 8,fraction = 2)
-    private Double length;
-
-    @ApiModelProperty(value = "仓库测量宽 cm")
-    @Digits(integer = 8,fraction = 2)
-    private Double width;
-
-    @ApiModelProperty(value = "仓库测量高 cm")
-    @Digits(integer = 8,fraction = 2)
-    private Double height;
-
-    @ApiModelProperty(value = "仓库测量体积 cm3")
-    @Digits(integer = 14,fraction = 2)
-    private BigDecimal volume;
+//    @ApiModelProperty(value = "仓库测量重量g")
+//    @NotBlank(message = "仓库测量重量不能为空")
+//    @Digits(integer = 8,fraction = 2)
+//    private Double weight;
+//
+//    @ApiModelProperty(value = "仓库测量长 cm")
+//    @NotBlank(message = "仓库测量长度不能为空")
+//    @Digits(integer = 8,fraction = 2)
+//    private Double length;
+//
+//    @ApiModelProperty(value = "仓库测量宽 cm")
+//    @NotBlank(message = "仓库测量宽度不能为空")
+//    @Digits(integer = 8,fraction = 2)
+//    private Double width;
+//
+//    @ApiModelProperty(value = "仓库测量高 cm")
+//    @NotBlank(message = "仓库测量高度不能为空")
+//    @Digits(integer = 8,fraction = 2)
+//    private Double height;
+//
+//    @ApiModelProperty(value = "仓库测量体积 cm3")
+//    @Digits(integer = 14,fraction = 2)
+//    @NotBlank(message = "仓库测量体积不能为空")
+//    private BigDecimal volume;
 
     @ApiModelProperty(value = "操作员")
     @Excel(name = "操作员")
