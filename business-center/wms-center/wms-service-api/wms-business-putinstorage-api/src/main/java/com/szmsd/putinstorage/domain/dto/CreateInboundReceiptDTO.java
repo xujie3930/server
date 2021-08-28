@@ -6,7 +6,9 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Data
@@ -14,7 +16,7 @@ import java.util.List;
 @Accessors(chain = true)
 @ApiModel(value = "CreateInboundReceiptDTO", description = "创建入库单")
 public class CreateInboundReceiptDTO extends InboundReceiptDTO {
-
+    @Valid
     @ApiModelProperty(value = "入库明细")
     private List<InboundReceiptDetailDTO> inboundReceiptDetails;
 
