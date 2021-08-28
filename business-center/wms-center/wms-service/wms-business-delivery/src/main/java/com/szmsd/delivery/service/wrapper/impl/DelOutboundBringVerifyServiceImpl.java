@@ -247,9 +247,15 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     if (null == product) {
                         throw new CommonException("999", "查询SKU[" + sku + "]信息失败");
                     }
+                    BigDecimal declaredValue;
+                    if (null != product.getDeclaredValue()) {
+                        declaredValue = BigDecimal.valueOf(product.getDeclaredValue());
+                    } else {
+                        declaredValue = BigDecimal.ZERO;
+                    }
                     packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
                             new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
-                            Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO, product.getProductAttribute()));
+                            Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, product.getProductAttribute()));
                     // 判断有没有包材
                     String bindCode = detail.getBindCode();
                     if (StringUtils.isNotEmpty(bindCode)) {
@@ -257,9 +263,14 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         if (null == baseProduct) {
                             throw new CommonException("999", "查询SKU[" + sku + "]的包材[" + bindCode + "]信息失败");
                         }
+                        if (null != baseProduct.getDeclaredValue()) {
+                            declaredValue = BigDecimal.valueOf(baseProduct.getDeclaredValue());
+                        } else {
+                            declaredValue = BigDecimal.ZERO;
+                        }
                         packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(baseProduct.getWeight()), "g"),
                                 new Packing(Utils.valueOf(baseProduct.getLength()), Utils.valueOf(baseProduct.getWidth()), Utils.valueOf(baseProduct.getHeight()), "cm"),
-                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
+                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, ""));
                     }
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
