@@ -1,5 +1,6 @@
 package com.szmsd.finance.factory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
@@ -35,6 +36,7 @@ public class IncomePayFactory extends AbstractPayFactory {
 
     @Transactional
     public boolean updateBalance(CustPayDTO dto) {
+        log.info("updateBalance {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
@@ -76,6 +78,7 @@ public class IncomePayFactory extends AbstractPayFactory {
     }
 
     public void setSerialBillLog(CustPayDTO dto) {
+        log.info("setSerialBillLog {}", JSONObject.toJSONString(dto));
         AccountSerialBillDTO serialBill = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
         serialBill.setNo(dto.getNo());
         serialBill.setChargeCategory(dto.getPayMethod().getPaymentName());
