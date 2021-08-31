@@ -15,6 +15,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @ApiModel(description = "退款申请查询条件")
 public class RefundRequestQueryDTO {
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

@@ -10,7 +10,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import java.util.List;
-
+@Validated
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)

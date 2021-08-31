@@ -5,10 +5,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
-
+@Validated
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "InboundReceiptDTO", description = "入库参数")
@@ -17,13 +19,13 @@ public class InboundReceiptDTO {
     @ApiModelProperty(value = "主键ID")
     private Long id;
     @Size(max = 30)
-    @ApiModelProperty(value = "入库单号", hidden = true)
+    @ApiModelProperty(value = "入库单号 (0-30]", hidden = true)
     private String warehouseNo;
     @Size(max = 30)
-    @ApiModelProperty(value = "采购单")
+    @ApiModelProperty(value = "采购单 (0-30]")
     private String orderNo;
     @Size(max = 30)
-    @ApiModelProperty(value = "客户编码")
+    @ApiModelProperty(value = "客户编码 (0-30]")
     private String cusCode;
     @Size(max = 30)
     @ApiModelProperty(value = "普通入库（OMS用）：Normal" +
@@ -31,29 +33,29 @@ public class InboundReceiptDTO {
             "包裹转运入库（OMS用）：PackageTransfer" +
             "新SKU入库（OMS用）：NewSku" +
             "上架入库（Yewu用）：Putaway" +
-            "点数入库（Yewu用）：Counting")
+            "点数入库（Yewu用）：Counting  (0-30]")
     private String orderType;
     @NotBlank
     @Size(max = 30)
-    @ApiModelProperty(value = "目的仓库编码",required = true)
+    @ApiModelProperty(value = "目的仓库编码 (0-30]",required = true)
     private String warehouseCode;
     @NotBlank
     @Size(max = 30)
-    @ApiModelProperty(value = "入库方式编码",required = true)
+    @ApiModelProperty(value = "入库方式编码 (0-30]",required = true)
     private String warehouseMethodCode;
     @NotBlank
     @Size(max = 30)
-    @ApiModelProperty(value = "类别编码",required = true)
+    @ApiModelProperty(value = "类别编码 (0-30]",required = true)
     private String warehouseCategoryCode;
     @Size(max = 30)
     @ApiModelProperty(value = "VAT")
     private String vat;
     @NotBlank
     @Size(max = 30)
-    @ApiModelProperty(value = "送货方式编码",required = true)
+    @ApiModelProperty(value = "送货方式编码 (0-30]",required = true)
     private String deliveryWayCode;
     @Size(max = 30)
-    @ApiModelProperty(value = "送货单号")
+    @ApiModelProperty(value = "送货单号 (0-30]")
     private String deliveryNo;
     @NotNull
     @Min(0)
@@ -63,13 +65,13 @@ public class InboundReceiptDTO {
     @ApiModelProperty(value = "合计上架数量")
     private Integer totalPutQty;
     @Size(max = 30)
-    @ApiModelProperty(value = "产品货源地编码")
+    @ApiModelProperty(value = "产品货源地编码 (0-30]")
     private String goodsSourceCode;
-    @Size(max = 30)
-    @ApiModelProperty(value = "挂号")
+    @Size(max = 200)
+    @ApiModelProperty(value = "挂号 (0-200]")
     private String trackingNumber;
     @Size(max = 500)
-    @ApiModelProperty(value = "备注")
+    @ApiModelProperty(value = "备注 (0-500]")
     private String remark;
 
     @ApiModelProperty(value = "单证信息文件")
