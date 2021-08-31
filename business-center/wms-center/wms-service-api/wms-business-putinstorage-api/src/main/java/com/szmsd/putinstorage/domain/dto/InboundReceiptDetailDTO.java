@@ -16,13 +16,13 @@ public class InboundReceiptDetailDTO {
 
     @ApiModelProperty(value = "入库单号", hidden = true)
     private String warehouseNo;
-    @NotBlank
+    @NotBlank(message = "sku不能为空")
     @ApiModelProperty(value = "sku",required = true)
     private String sku;
-    @NotBlank
+    @NotBlank(message = "申报品名不能为空")
     @ApiModelProperty(value = "申报品名",required = true)
     private String skuName;
-    @NotNull
+    @NotNull(message = "申报数量不能为空")
     @ApiModelProperty(value = "申报数量",required = true)
     private Integer declareQty;
 
