@@ -33,11 +33,11 @@ public class SubController {
 
     @ApiOperation("根据主类别code 查询子类别List")
     @GetMapping("getSubList")
-    public R getSubList(@RequestParam("mainCode") String mainCode){
-        if (StringUtils.isEmpty(mainCode)) {
-            return R.failed("主类别编码不能为空");
+    public R getSubList(@RequestParam(required = false, value = "mainCode") String mainCode, @RequestParam(required = false, value = "mainName") String mainName){
+        if (StringUtils.isEmpty(mainCode) && StringUtils.isEmpty(mainName)) {
+            return R.failed("参数不能为空");
         }
-        List<BasSub> subList = subClientService.listApi(mainCode, "");
+        List<BasSub> subList = subClientService.listByMain(mainCode, mainName);
         if(subList != null) {
             return R.ok(BeanMapperUtil.mapList(subList, SubResponse.class));
         }
