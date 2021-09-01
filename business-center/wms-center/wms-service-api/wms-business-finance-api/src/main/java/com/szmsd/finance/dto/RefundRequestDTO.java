@@ -1,8 +1,6 @@
 package com.szmsd.finance.dto;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
@@ -11,9 +9,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.commons.collections4.CollectionUtils;
 
-import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -58,42 +54,13 @@ public class RefundRequestDTO {
     @Excel(name = "责任地区编码")
     private String responsibilityAreaCode;
 
-    @ApiModelProperty(value = "所属仓库")
-    @Excel(name = "所属仓库")
-    private String warehouseName;
+    @ApiModelProperty(value = "标准赔付")
+    @Excel(name = "标准赔付")
+    private String standardPayout;
 
-    @ApiModelProperty(value = "所属仓库编码")
-    @Excel(name = "所属仓库编码")
-    private String warehouseCode;
-
-    @ApiModelProperty(value = "产品类型")
-    @Excel(name = "产品类型")
-    private String productTypeName;
-
-    @ApiModelProperty(value = "产品类型编码")
-    @Excel(name = "产品类型编码")
-    private String productTypeCode;
-
-    @NotBlank(message = "单号不能为空")
-    @ApiModelProperty(value = "单号")
-    @Excel(name = "单号")
-    private String orderNo;
-
-    @ApiModelProperty(value = "单号类型")
-    @Excel(name = "单号类型")
-    private String orderType;
-
-    @ApiModelProperty(value = "币种编码")
-    @Excel(name = "币种编码")
-    private String currencyCode;
-
-    @ApiModelProperty(value = "币种名称")
-    @Excel(name = "币种名称")
-    private String currencyName;
-
-    @ApiModelProperty(value = "金额")
-    @Excel(name = "金额")
-    private BigDecimal amount;
+    @ApiModelProperty(value = "额外赔付")
+    @Excel(name = "额外赔付")
+    private String additionalPayout;
 
     @ApiModelProperty(value = "赔付币别")
     @Excel(name = "赔付币别")
@@ -103,13 +70,85 @@ public class RefundRequestDTO {
     @Excel(name = "赔付币别编码")
     private String compensationPaymentCurrencyCode;
 
+    @ApiModelProperty(value = "供应商是否完成赔付（0：未完成，1：已完成）")
+    @Excel(name = "供应商是否完成赔付（0：未完成，1：已完成）")
+    private Boolean compensationPaymentFlag;
+
     @ApiModelProperty(value = "赔付金额")
     @Excel(name = "赔付金额")
-    private BigDecimal compensationPaymentAmount;
+    private String payoutAmount;
+
+    @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
+    @Excel(name = "供应商确认不赔付（0：否，1：是）")
+    private Boolean noCompensationFlag;
+
+    @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
+    @Excel(name = "供应商确认赔付未到账（0：否，1：是）")
+    private Boolean compensationPaymentArrivedFlag;
+
+    @ApiModelProperty(value = "所属仓库")
+    @Excel(name = "所属仓库")
+    private String warehouseName;
+
+    @ApiModelProperty(value = "所属仓库编码")
+    @Excel(name = "所属仓库编码")
+    private String warehouseCode;
+
+    @ApiModelProperty(value = "业务类型")
+    @Excel(name = "业务类型")
+    private String businessTypeName;
+
+    @ApiModelProperty(value = "业务类型编码")
+    @Excel(name = "业务类型编码")
+    private String businessTypeCode;
+
+    @ApiModelProperty(value = "业务明细")
+    @Excel(name = "业务明细")
+    private String businessDetails;
+
+    @ApiModelProperty(value = "费用类型")
+    @Excel(name = "费用类型")
+    private String feeTypeName;
+
+    @ApiModelProperty(value = "费用类型编码")
+    @Excel(name = "费用类型编码")
+    private String feeTypeCode;
+
+    @ApiModelProperty(value = "费用类别")
+    @Excel(name = "费用类别")
+    private String feeCategoryName;
+
+    @ApiModelProperty(value = "费用类别编码")
+    @Excel(name = "费用类别编码")
+    private String feeCategoryCode;
 
     @ApiModelProperty(value = "数量")
     @Excel(name = "数量")
-    private Integer num;
+    private String num;
+
+    @ApiModelProperty(value = "处理号（工单id)")
+    @Excel(name = "处理号（工单id)")
+    private String orderNo;
+
+    @ApiModelProperty(value = "处理编号")
+    @Excel(name = "处理编号")
+    private String processNo;
+
+    @ApiModelProperty(value = "处理号类型")
+    @Excel(name = "处理号类型")
+    private String orderType;
+
+    @ApiModelProperty(value = "金额")
+    @Excel(name = "金额")
+    private BigDecimal amount;
+
+    @ApiModelProperty(value = "币种编码")
+    @Excel(name = "币种编码")
+    private String currencyCode;
+
+    @ApiModelProperty(value = "币种名称")
+    @Excel(name = "币种名称")
+    private String currencyName;
 
     @ApiModelProperty(value = "属性-数组")
     @Excel(name = "属性-数组")
