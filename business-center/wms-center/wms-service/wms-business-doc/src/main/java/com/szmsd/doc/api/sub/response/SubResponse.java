@@ -11,6 +11,9 @@ public class SubResponse {
     @ApiModelProperty("主类别code")
     private String mainCode;
 
+    @ApiModelProperty("主类别名称")
+    private String mainName;
+
     @ApiModelProperty("子类别code")
     private String subCode;
 

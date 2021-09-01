@@ -35,4 +35,9 @@ public class BasSubClientServiceImpl implements BasSubClientService {
     public List<BasSub> listApi(String mainCode, String subValue) {
         return this.basSubFeignService.listApi(mainCode, subValue);
     }
+
+    @Override
+    public List<BasSub> listByMain(String mainCode, String mainName) {
+        return R.getDataAndException(this.basSubFeignService.listByMain(mainCode, mainName));
+    }
 }

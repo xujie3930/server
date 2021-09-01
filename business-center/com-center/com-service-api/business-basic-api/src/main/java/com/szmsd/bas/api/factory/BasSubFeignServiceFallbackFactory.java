@@ -26,6 +26,10 @@ public class BasSubFeignServiceFallbackFactory implements FallbackFactory<BasSub
                 return null;
             }
 
+            @Override
+            public R<List<BasSub>> listByMain(String mainCode, String mainName) {
+                return null;
+            }
 
             @Override
             public R<Map<String, List<BasSubWrapperVO>>> getSub(String code) {

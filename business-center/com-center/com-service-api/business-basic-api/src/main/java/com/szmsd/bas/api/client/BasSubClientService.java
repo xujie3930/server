@@ -35,4 +35,6 @@ public interface BasSubClientService {
      * @return
      */
     List<BasSub> listApi(String mainCode, String subValue);
+
+    List<BasSub> listByMain(String mainCode, String mainName);
 }
