@@ -1,6 +1,7 @@
 package com.szmsd.bas.api.client.impl;
 
 import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
@@ -23,5 +24,15 @@ public class BasSubClientServiceImpl implements BasSubClientService {
     @Override
     public Map<String, List<BasSubWrapperVO>> getSub(String code) {
         return R.getDataAndException(this.basSubFeignService.getSub(code));
+    }
+
+    @Override
+    public Map<String, String> getSubList(String code) {
+        return R.getDataAndException(this.basSubFeignService.getSubList(code));
+    }
+
+    @Override
+    public List<BasSub> listApi(String mainCode, String subValue) {
+        return this.basSubFeignService.listApi(mainCode, subValue);
     }
 }
