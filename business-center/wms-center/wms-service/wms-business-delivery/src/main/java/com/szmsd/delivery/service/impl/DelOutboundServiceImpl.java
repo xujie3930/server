@@ -339,7 +339,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
             // 生成出库单号
             // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
-            delOutbound.setOrderNo(orderNo = ("CK" + delOutbound.getCustomCode() + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
+            String sellerCode;
+            if (StringUtils.isNotEmpty(delOutbound.getCustomCode())) {
+                sellerCode = delOutbound.getCustomCode();
+            } else {
+                sellerCode = delOutbound.getSellerCode();
+            }
+            if (StringUtils.isEmpty(sellerCode)) {
+                throw new CommonException("999", "操作失败，客户代码不能为空");
+            }
+            delOutbound.setOrderNo(orderNo = ("CK" + sellerCode + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
             // 默认状态
             delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
             // 默认异常状态
@@ -1024,8 +1033,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public int canceled(DelOutboundCanceledDto dto) {
         List<Long> ids = dto.getIds();
         List<String> orderNos1 = dto.getOrderNos();
-        if (CollectionUtils.isEmpty(ids) || CollectionUtils.isEmpty(orderNos1)) {
-            return 0;
+        if (CollectionUtils.isEmpty(ids) && CollectionUtils.isEmpty(orderNos1)) {
+            throw new CommonException("999", "操作异常，请求参数不合法");
         }
         List<DelOutbound> outboundList;
         if (CollectionUtils.isNotEmpty(ids)) {
@@ -1038,7 +1047,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             outboundList = this.list(queryWrapper);
         }
         if (CollectionUtils.isEmpty(outboundList)) {
-            return 0;
+            throw new CommonException("999", "操作失败，订单不存在");
         }
         List<String> orderNos = new ArrayList<>();
         String warehouseCode = outboundList.get(0).getWarehouseCode();
@@ -1051,10 +1060,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             String orderNo = outbound.getOrderNo();
             delOutboundMap.put(orderNo, outbound);
             // 处理已完成，已取消的
-            if (DelOutboundStateEnum.COMPLETED.getCode().equals(outbound.getState())
-                    || DelOutboundStateEnum.CANCELLED.getCode().equals(outbound.getState())) {
+            if (DelOutboundStateEnum.COMPLETED.getCode().equals(outbound.getState())) {
                 // 已完成，已取消的单据不做处理
-                continue;
+                // continue;
+                throw new CommonException("999", "操作失败，已完成的订单不能取消");
+            }
+            if (DelOutboundStateEnum.CANCELLED.getCode().equals(outbound.getState())) {
+                throw new CommonException("999", "操作失败，已取消的订单不能取消");
             }
             // 处理未提审，提审失败的
             if (DelOutboundStateEnum.REVIEWED.getCode().equals(outbound.getState())

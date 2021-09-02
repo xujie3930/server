@@ -6,6 +6,7 @@ import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
@@ -175,6 +176,11 @@ public class DeliveryController {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
             throw new CommonException("999", "订单号不能为空");
+        }
+        for (String orderNo : orderNos) {
+            if (StringUtils.isEmpty(orderNo)) {
+                throw new CommonException("999", "订单号值不能为空");
+            }
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
