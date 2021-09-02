@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -42,22 +43,22 @@ public class BaseProductRequest {
 
     @ApiModelProperty(value = "初始重量g", required = true)
     @Digits(integer = 8,fraction = 2)
-    @NotBlank(message = "初始重量不能为空")
+    @NotNull(message = "初始重量不能为空")
     private Double initWeight;
 
     @ApiModelProperty(value = "初始长 cm", required = true)
     @Digits(integer = 8,fraction = 2)
-    @NotBlank(message = "初始长度不能为空")
+    @NotNull(message = "初始长度不能为空")
     private Double initLength;
 
     @ApiModelProperty(value = "初始宽 cm", required = true)
     @Digits(integer = 8,fraction = 2)
-    @NotBlank(message = "初始宽度不能为空")
+    @NotNull(message = "初始宽度不能为空")
     private Double initWidth;
 
     @ApiModelProperty(value = "初始高 cm", required = true)
     @Digits(integer = 8,fraction = 2)
-    @NotBlank(message = "初始高度不能为空")
+    @NotNull(message = "初始高度不能为空")
     private Double initHeight;
 
     @ApiModelProperty(value = "是否激活 默认true")
@@ -73,7 +74,7 @@ public class BaseProductRequest {
 
     @ApiModelProperty(value = "初始体积 cm3", required = true)
     @Digits(integer = 14,fraction = 2)
-    @NotBlank(message = "初始体积不能为空")
+    @NotNull(message = "初始体积不能为空")
     private BigDecimal initVolume;
 
     @ApiModelProperty(value = "客户（卖家）编码")
@@ -89,7 +90,7 @@ public class BaseProductRequest {
 
     @ApiModelProperty(value = "申报价值", required = true)
     @Excel(name = "申报价值")
-    @NotBlank(message = "申报价值不能为空")
+    @NotNull(message = "申报价值不能为空")
     @Digits(integer = 8,fraction = 2)
     private Double declaredValue;
 
