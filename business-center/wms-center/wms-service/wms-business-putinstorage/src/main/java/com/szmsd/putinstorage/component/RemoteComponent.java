@@ -294,6 +294,7 @@ public class RemoteComponent {
      */
     public void delOutboundCharge(InboundReceiptInfoVO inboundReceiptInfoVO) {
         DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+        delOutboundOperationVO.setOrderNo(inboundReceiptInfoVO.getWarehouseNo());
         delOutboundOperationVO.setOrderType(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode());
         delOutboundOperationVO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
         delOutboundOperationVO.setWeight(null);
@@ -310,6 +311,6 @@ public class RemoteComponent {
         delOutboundOperationVO.setDetails(details);
         log.info("调用冻结余额 {}", JSONObject.toJSONString(delOutboundOperationVO));
         R r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
-        AssertUtil.isTrue(r != null && r.getCode() == HttpStatus.SUCCESS && null != r.getData(), "冻结余额不足");
+        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS && null != r.getData(), r.getMsg());
     }
 }
