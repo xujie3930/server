@@ -297,6 +297,7 @@ public class RemoteComponent {
         delOutboundOperationVO.setOrderNo(inboundReceiptInfoVO.getWarehouseNo());
         delOutboundOperationVO.setOrderType(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode());
         delOutboundOperationVO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
+        delOutboundOperationVO.setCustomCode(inboundReceiptInfoVO.getCusCode());
         delOutboundOperationVO.setWeight(null);
 
         List<InboundReceiptDetailVO> inboundReceiptDetailList = Optional.ofNullable(inboundReceiptInfoVO.getInboundReceiptDetails()).orElse(new ArrayList<>());
