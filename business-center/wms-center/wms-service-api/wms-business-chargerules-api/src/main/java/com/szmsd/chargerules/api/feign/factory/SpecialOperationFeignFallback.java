@@ -5,14 +5,16 @@ import com.szmsd.chargerules.dto.BasSpecialOperationRequestDTO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import feign.hystrix.FallbackFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class SpecialOperationFeignFallback implements FallbackFactory<SpecialOperationFeignService> {
 
     @Override
     public SpecialOperationFeignService create(Throwable throwable) {
-
+        log.error("SpecialOperationFeignService fail {}", throwable.getMessage());
         return new SpecialOperationFeignService() {
 
             @Override

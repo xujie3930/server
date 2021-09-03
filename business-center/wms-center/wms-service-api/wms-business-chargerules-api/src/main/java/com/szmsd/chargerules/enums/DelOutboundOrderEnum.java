@@ -17,6 +17,8 @@ public enum DelOutboundOrderEnum {
     COLLECTION_MANY_SKU("Collection-manySku", "集运出库单-多SKU"),
     BATCH_PACKING("Batch-packing", "批量出库单-装箱费"),
     BATCH_LABEL("Batch-label", "批量出库单-贴标费"),
+    FREEZE_IN_STORAGE("FreezeInStorage", "入库冻结"),
+
 
     ;
 

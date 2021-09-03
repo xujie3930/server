@@ -19,7 +19,9 @@ public class DelOutboundOperationVO implements Serializable {
 
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
-
+    /**
+     * {@link com.szmsd.chargerules.enums.DelOutboundOrderEnum}
+     */
     @ApiModelProperty(value = "出库订单类型")
     private String orderType;
 
