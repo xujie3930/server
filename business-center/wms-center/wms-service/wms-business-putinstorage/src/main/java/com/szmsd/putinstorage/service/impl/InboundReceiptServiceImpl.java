@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -67,6 +68,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 入库单查询
+     *
      * @param queryDTO
      * @return
      */
@@ -90,6 +92,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 入库单号查询
+     *
      * @param warehouseNo
      * @return
      */
@@ -116,8 +119,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             }
         }
     }
+
     /**
      * 创建入库单
+     *
      * @param createInboundReceiptDTO
      */
     @Override
@@ -161,6 +166,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 保存入库单信息
+     *
      * @param inboundReceiptDTO
      * @return
      */
@@ -186,6 +192,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 取消
+     *
      * @param warehouseNo
      */
     @Override
@@ -198,8 +205,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         /** 审核通过、处理中、已完成3个状态需要调第三方接口 **/
         String status = inboundReceiptVO.getStatus();
         if (InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(status)
-            || InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue().equals(status)
-            || InboundReceiptEnum.InboundReceiptStatus.COMPLETED.getValue().equals(status)) {
+                || InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue().equals(status)
+                || InboundReceiptEnum.InboundReceiptStatus.COMPLETED.getValue().equals(status)) {
             // 第三方接口推送
             remoteRequest.cancelInboundReceipt(inboundReceiptVO.getWarehouseNo(), inboundReceiptVO.getWarehouseName());
         }
@@ -211,6 +218,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 入库单详情
+     *
      * @param warehouseNo
      * @return
      */
@@ -222,6 +230,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 入库单详情
+     *
      * @param warehouseNo
      * @param isContainFile 是否包含明细附件
      * @return
@@ -239,12 +248,13 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * #B1 接收入库上架 修改上架数量
+     *
      * @param receivingRequest
      */
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public void receiving(ReceivingRequest receivingRequest) {
-        log.info("#B1 接收入库上架：{}",  receivingRequest);
+        log.info("#B1 接收入库上架：{}", receivingRequest);
 
         Integer qty = receivingRequest.getQty();
         AssertUtil.isTrue(qty != null && qty > 0, "上架数量不能为" + qty);
@@ -274,11 +284,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * #B3 接收完成入库
+     *
      * @param receivingCompletedRequest
      */
     @Override
     public void completed(ReceivingCompletedRequest receivingCompletedRequest) {
-        log.info("#B3 接收完成入库：{}",  receivingCompletedRequest);
+        log.info("#B3 接收完成入库：{}", receivingCompletedRequest);
         updateStatus(receivingCompletedRequest.getOrderNo(), InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
         log.info("#B3 接收完成入库：操作完成");
 
@@ -286,6 +297,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 修改状态
+     *
      * @param warehouseNo
      * @param status
      */
@@ -305,11 +317,13 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 入库单审核
+     *
      * @param inboundReceiptReviewDTO
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void review(InboundReceiptReviewDTO inboundReceiptReviewDTO) {
-       /* SysUser loginUserInfo = remoteComponent.getLoginUserInfo();*/
+        /* SysUser loginUserInfo = remoteComponent.getLoginUserInfo();*/
         InboundReceipt inboundReceipt = new InboundReceipt();
         InboundReceiptEnum.InboundReceiptEnumMethods anEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.InboundReceiptStatus.class, inboundReceiptReviewDTO.getStatus());
         anEnum = anEnum == null ? InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE : anEnum;
@@ -323,6 +337,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         inboundReceipt.setReviewTime(new Date());
         List<String> warehouseNos = inboundReceiptReviewDTO.getWarehouseNos();
         log.info("入库单审核: {},{},{}", anEnum.getValue2(), warehouseNos, inboundReceipt);
+
         StringBuffer sb = new StringBuffer();
         warehouseNos.forEach(warehouseNo -> {
             inboundReceipt.setWarehouseNo(warehouseNo);
@@ -332,6 +347,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 return;
             }
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
+
+            // 入库按照数量（按申报数量）进行扣费 扣费失败则出库失败，不能出库
+            log.info("审核通过则扣费{}", JSONObject.toJSONString(inboundReceiptReviewDTO));
+            remoteComponent.delOutboundCharge(inboundReceiptInfoVO);
+
+
             try {
                 if (CheckTag.get()) {
                     log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
@@ -351,13 +372,14 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 入库单审核 根据客户配置的验货状态生成验货单
+     *
      * @param inboundReceiptInfoVO inboundReceiptInfoVO
      */
     private void inbound(InboundReceiptInfoVO inboundReceiptInfoVO) {
         // 集运入库不验货
-        if(!StringUtils.equals("Collection",inboundReceiptInfoVO.getOrderType())) {
+        if (!StringUtils.equals("Collection", inboundReceiptInfoVO.getOrderType())) {
             List<InboundReceiptDetailVO> inboundReceiptDetails = inboundReceiptInfoVO.getInboundReceiptDetails();
-            if(inboundReceiptDetails != null && inboundReceiptDetails.size() > 0) {
+            if (inboundReceiptDetails != null && inboundReceiptDetails.size() > 0) {
                 InboundInventoryInspectionDTO dto = new InboundInventoryInspectionDTO();
                 dto.setCusCode(inboundReceiptInfoVO.getCusCode());
                 dto.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
@@ -371,6 +393,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 删除入库单 物理删除
+     *
      * @param warehouseNo
      */
     @Override
@@ -394,6 +417,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 入库单导出数据查询
+     *
      * @param queryDTO
      */
     @Override
@@ -410,6 +434,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 导出sku
+     *
      * @param excel
      * @param details
      */
@@ -478,6 +503,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 统计入库单
+     *
      * @param queryDTO
      * @return
      */
@@ -488,6 +514,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 提审
+     *
      * @param warehouseNos
      */
     @Override
@@ -500,6 +527,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 异步删除附件
+     *
      * @param warehouseNo
      */
     private void asyncDeleteAttachment(String warehouseNo) {
@@ -513,6 +541,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     /**
      * 异步保存附件
      * 空对象不会调用远程接口，空数组会删除所对应的附件
+     *
      * @param warehouseNo
      * @param inboundReceiptDTO
      */
