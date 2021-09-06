@@ -31,14 +31,14 @@ public class SkuApiController {
     @Autowired
     private BaseProductClientService baseProductClientService;
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("list")
     @ApiOperation(value = "查询列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
     public TableDataInfo list(@RequestBody BaseProductQueryRequest baseProductQueryRequest){
         return baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("save")
     @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
     public R save(@RequestBody @Validated ProductRequest productRequest){
@@ -47,7 +47,7 @@ public class SkuApiController {
         return R.ok();
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @GetMapping("getBarCode")
     @ApiOperation(value = "SKU标签生成",notes = "生成sku编号，生成标签条形码，返回的为条形码图片的Base64")
     public R getBarCode(@ApiParam("sku的code") @RequestParam String skuCode){

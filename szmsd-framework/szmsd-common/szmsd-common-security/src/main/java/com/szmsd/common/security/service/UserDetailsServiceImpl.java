@@ -1,13 +1,15 @@
 package com.szmsd.common.security.service;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.szmsd.common.core.constant.SecurityConstants;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.enums.UserStatus;
 import com.szmsd.common.core.utils.ServletUtils;
-import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
+import com.szmsd.system.api.feign.RemoteUserService;
+import com.szmsd.system.api.model.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,19 +17,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.stereotype.Service;
-import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.enums.UserStatus;
-import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.security.domain.LoginUser;
-import com.szmsd.system.api.feign.RemoteUserService;
-import com.szmsd.system.api.domain.SysUser;
-import com.szmsd.system.api.model.UserInfo;
 
 import javax.annotation.Resource;
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 用户信息处理
@@ -45,7 +41,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) {
         log.info("用户{}加载loadUserByUsername方法", username);
         String clientId = ServletUtils.getParameter(SecurityConstants.DETAILS_CLIENT_ID, SecurityConstants.DETAILS_CLIENT_WEB);//获取令牌id
-        String userType = ServletUtils.getParameter(SecurityConstants.DETAILS_USER_TYPE, SecurityConstants.DETAILS_USER_TYPE_SYS);//获取用户类型 00-内部用户，01-vip用户
+        String defaultUserType = null;
+        HttpSession session = ServletUtils.getSession();
+        if (null != session) {
+            defaultUserType = (String) session.getAttribute(SecurityConstants.DETAILS_USER_TYPE);
+        }
+        if (null == defaultUserType) {
+            defaultUserType = SecurityConstants.DETAILS_USER_TYPE_SYS;
+        }
+        String userType = ServletUtils.getParameter(SecurityConstants.DETAILS_USER_TYPE, defaultUserType);//获取用户类型 00-内部用户，01-vip用户
         SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
       if (SecurityConstants.DETAILS_USER_TYPE_CLIENT.equals(userType) &&
                 SecurityConstants.DETAILS_CLIENT_CLIENT.equals(clientId)) {//如果是客户端用户

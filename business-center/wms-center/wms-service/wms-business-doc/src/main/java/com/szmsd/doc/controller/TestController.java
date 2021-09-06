@@ -1,21 +1,23 @@
 package com.szmsd.doc.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiSort;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.message.BasicNameValuePair;
+import com.szmsd.common.core.domain.R;
+import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 /**
@@ -31,21 +33,50 @@ public class TestController {
     @Value("${server.port}")
     private int port;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
+
+    @ApiOperation(value = "获取Token信息", position = 100, notes = "1.本接口只适用于测试环境<br/>" +
+            "2.先请求 [GET]http://127.0.0.1:9200/oauth/authorize?client_id=doc&response_type=code&scope=server&redirect_uri=http://www.baidu.com 登录成功之后，复制code, redirect_uri 信息<br/>" +
+            "3.将 code, redirect_uri 传到这个接口来请求<br/>" +
+            "4.将返回的 access_token 作为token请求资源接口。<br/>" +
+            "<br/>" +
+            "第三方系统联调<br/>" +
+            "请求顺序<br/>" +
+            "1.第三方本地判断有没有 access_token 信息，没有走第2步，有走第4步（或直接请求资源接口）。<br/>" +
+            "2.第三方本地判断有没有 refresh_token 信息，没有走第3步，有走第5步（或直接走第3步）。<br/>" +
+            "3.第三方系统打开浏览器访问 [GET]http://接口系统地址/oauth/authorize?client_id=doc&response_type=code&scope=server&redirect_uri=回调地址 ，登录成功之后记录 code 信息。<br/>" +
+            "第三方系统获取到 code 信息之后请求 [POST]http://接口系统地址/oauth/token 获取 token 信息。<br/>" +
+            "请求参数信息：client_id: doc<br/>" +
+            "client_secret: 123456<br/>" +
+            "grant_type: authorization_code<br/>" +
+            "code: code信息<br/>" +
+            "redirect_uri: 回调地址<br/>" +
+            "4.根据 access_token 验证是否有效，[POST]http://接口系统地址/oauth/check_token 请求参数：token: access_token的值，请求成功表示可以正常访问接口系统。访问失败走第2步。<br/>" +
+            "5.根据 refresh_token 刷新token信息，[POST]http://接口系统地址/oauth/token 请求参数：client_id: doc<br/>" +
+            "client_secret: 123456<br/>" +
+            "grant_type: refresh_token<br/>" +
+            "refresh_token: refresh_token的值<br/>" +
+            "请求成功之后会返回新的 access_token 信息，请求失败走第3步。")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "code", value = "编码", dataType = "String", required = true),
+            @ApiImplicitParam(name = "redirect_uri", value = "回调地址", dataType = "String", required = true)
+    })
     @GetMapping(value = "/token", produces = "application/json;charset=utf-8")
-    public Object token() throws IOException {
-        NameValuePair[] nameValuePairs = new NameValuePair[]{
-                new BasicNameValuePair("client_id", "client"),
-                new BasicNameValuePair("client_secret", "123456"),
-                new BasicNameValuePair("grant_type", "password"),
-                new BasicNameValuePair("username", "test"),
-                new BasicNameValuePair("password", "123456")
-        };
-        String hostAddress = getLocalHostLANAddress().getHostAddress();
-        return Request.Post("http://" + hostAddress + ":" + port + "/oauth/token").bodyForm(nameValuePairs).execute().returnContent().asString(StandardCharsets.UTF_8);
+    public R<Object> token(@RequestParam("code") String code, @RequestParam("redirect_uri") String redirect_uri) throws IOException {
+        MultiValueMap<String, Object> requestParam = new LinkedMultiValueMap<>();
+        requestParam.set("client_id", "doc");
+        requestParam.set("client_secret", "123456");
+        requestParam.set("grant_type", "authorization_code");
+        requestParam.set("code", code);
+        requestParam.set("redirect_uri", redirect_uri);
+        OAuth2AccessToken oAuth2AccessToken = restTemplate.postForObject("http://szmsd-auth/oauth/token", requestParam, OAuth2AccessToken.class);
+        return R.ok(oAuth2AccessToken);
     }
 
     @GetMapping("/echo")
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     public String echo() {
         return "echo ... ";
     }

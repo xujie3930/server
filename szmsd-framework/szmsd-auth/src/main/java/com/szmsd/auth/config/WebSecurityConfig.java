@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,6 +21,7 @@ import javax.annotation.Resource;
  */
 @Order(99)
 @Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter
 {
     @Resource
@@ -47,13 +49,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
     @Override
     protected void configure(HttpSecurity http) throws Exception
     {
-        http
-        .authorizeRequests()
-        .antMatchers(
-            "/actuator/**",
-            "/oauth/*",
-            "/token/**").permitAll()
-        .anyRequest().authenticated()
-        .and().csrf().disable();
+        http.csrf()
+                .disable()
+                .authorizeRequests()
+                .antMatchers("/actuator/**", "/oauth/*", "/token/**", "/login")
+                .permitAll()
+
+                .anyRequest()
+                .permitAll()
+
+                .and().formLogin()
+
+                .and().logout();
     }
 }

@@ -9,7 +9,7 @@ import java.util.Enumeration;
  * @author zhangyuyuan
  * @date 2021-08-02 9:55
  */
-@Component
+// @Component
 public class DocFeignRequestInterceptorFilter implements FeignRequestInterceptorFilter {
 
     @Override

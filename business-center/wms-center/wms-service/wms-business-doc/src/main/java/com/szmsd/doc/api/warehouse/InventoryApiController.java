@@ -31,7 +31,7 @@ public class InventoryApiController extends BaseController {
     @Resource
     private InventoryFeignClientService inventoryFeignService;
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/inbound/queryAvailableList")
     @ApiOperation(value = "查询可用库存-根据仓库编码，SKU - 不分页", notes = "根据客户代码、所在仓库、sku查询SKU库存")
     public R<List<InventoryAvailableListResp>> queryAvailableList(@Valid @RequestBody InventoryAvailableQueryReq queryDTO) {
@@ -43,7 +43,7 @@ public class InventoryApiController extends BaseController {
         return R.ok(returnList);
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @GetMapping("/queryInventoryAge/weeks/bySku/{warehouseCode}/{sku}")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "warehouseCode", required = true, value = "仓库code", example = "NJ"),

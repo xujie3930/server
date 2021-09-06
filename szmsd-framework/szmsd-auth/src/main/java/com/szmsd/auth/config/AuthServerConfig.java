@@ -1,12 +1,11 @@
 package com.szmsd.auth.config;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import javax.annotation.Resource;
-import javax.sql.DataSource;
-
+import com.szmsd.common.core.constant.CacheConstants;
 import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.constant.SecurityConstants;
+import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.handler.CustomWebResponseExceptionTranslator;
+import com.szmsd.common.security.service.RedisClientDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -24,10 +23,11 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
-import com.szmsd.common.core.constant.CacheConstants;
-import com.szmsd.common.core.constant.SecurityConstants;
-import com.szmsd.common.security.domain.LoginUser;
-import com.szmsd.common.security.service.RedisClientDetailsService;
+
+import javax.annotation.Resource;
+import javax.sql.DataSource;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * OAuth2 认证服务配置
@@ -71,7 +71,8 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter
                 // 指定认证管理器
                 .authenticationManager(authenticationManager)
                 // 是否重复使用 refresh_token
-                .reuseRefreshTokens(false)
+                .reuseRefreshTokens(true)
+                .addInterceptor(new DocHandlerInterceptor())
                 // 自定义异常处理
                 .exceptionTranslator(new CustomWebResponseExceptionTranslator());
     }
@@ -82,7 +83,10 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter
     @Override
     public void configure(AuthorizationServerSecurityConfigurer oauthServer)
     {
-        oauthServer.allowFormAuthenticationForClients().checkTokenAccess("permitAll()");
+        oauthServer.allowFormAuthenticationForClients()
+                .tokenKeyAccess("permitAll()")
+                .checkTokenAccess("permitAll()")
+                .allowFormAuthenticationForClients();
     }
 
     /**
