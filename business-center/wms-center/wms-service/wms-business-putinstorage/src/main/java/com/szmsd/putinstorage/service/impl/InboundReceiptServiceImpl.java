@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -18,14 +19,15 @@ import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.InboundReceiptDetail;
+import com.szmsd.putinstorage.domain.InboundTracking;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.mapper.InboundReceiptMapper;
 import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
+import com.szmsd.putinstorage.service.IInboundTrackingService;
 import com.szmsd.putinstorage.util.ExcelUtil;
-import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -33,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +68,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Resource
     private InventoryInspectionFeignService inventoryInspectionFeignService;
 
+    @Resource
+    private IInboundTrackingService iInboundTrackingService;
 
     /**
      * 入库单查询
@@ -557,5 +562,11 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         });
     }
 
+    @Override
+    public void tracking(ReceivingTrackingRequest receivingCompletedRequest) {
+        InboundTracking inboundTracking = new InboundTracking();
+        BeanUtils.copyProperties(receivingCompletedRequest, inboundTracking);
+        iInboundTrackingService.save(inboundTracking);
+    }
 }
 

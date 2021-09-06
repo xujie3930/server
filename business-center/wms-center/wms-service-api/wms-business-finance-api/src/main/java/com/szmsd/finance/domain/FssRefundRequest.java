@@ -37,12 +37,12 @@ public class FssRefundRequest extends BaseEntity {
     @Excel(name = "id")
     private Integer id;
 
-    @ApiModelProperty(value = "审核状态[0：待审核,1：拒绝,2：审核通过]")
-    @Excel(name = "审核状态[0：待审核,1：拒绝,2：审核通过]")
+    @ApiModelProperty(value = "审核状态：初始、提审、异常、完成")
+    @Excel(name = "审核状态", readConverterExp = "0=初始,1=提审,2=异常,3=完成")
     private Integer auditStatus;
 
     @ApiModelProperty(value = "审核时间")
-    @Excel(name = "审核时间")
+    @Excel(name = "审核时间",dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date auditTime;
 
     @ApiModelProperty(value = "审核人id")
@@ -74,7 +74,6 @@ public class FssRefundRequest extends BaseEntity {
     private String treatmentProperties;
 
     @ApiModelProperty(value = "处理性质编码")
-    @Excel(name = "处理性质编码")
     private String treatmentPropertiesCode;
 
     @ApiModelProperty(value = "责任地区")
@@ -82,16 +81,15 @@ public class FssRefundRequest extends BaseEntity {
     private String responsibilityArea;
 
     @ApiModelProperty(value = "责任地区编码")
-    @Excel(name = "责任地区编码")
     private String responsibilityAreaCode;
 
     @ApiModelProperty(value = "标准赔付")
     @Excel(name = "标准赔付")
-    private String standardPayout;
+    private BigDecimal standardPayout;
 
     @ApiModelProperty(value = "额外赔付")
     @Excel(name = "额外赔付")
-    private String additionalPayout;
+    private BigDecimal additionalPayout;
 
     @ApiModelProperty(value = "赔付币别")
     @Excel(name = "赔付币别")
