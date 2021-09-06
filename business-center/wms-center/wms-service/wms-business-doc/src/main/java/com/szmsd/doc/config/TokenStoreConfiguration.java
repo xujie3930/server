@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.provider.token.store.redis.RedisToken
  * @author zhangyuyuan
  * @date 2021-07-28 09:25
  */
-@Configuration
+// @Configuration
 public class TokenStoreConfiguration {
 
     @Autowired

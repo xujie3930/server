@@ -20,8 +20,8 @@ public class BusinessDocApplication {
     /**
      * <blockquote><pre>
      *
-     * 1.项目认证
-     *   a.使用oauth2.0的授权码模式认证
+     * 1.项目认证（密码）
+     *   a.使用oauth2.0的密码模式认证
      *   b.用户配置在yml中
      *   c.测试，密码认证（TestController中有例子）
      *      请求地址：http://127.0.0.1:17001/oauth/token
@@ -33,6 +33,33 @@ public class BusinessDocApplication {
      *   d.访问测试接口
      *      请求地址：http://127.0.0.1:17001/echo
      *      请求头：Authorization:Bearer 62b60ccc-ee49-4cd5-980f-656d4622d68c
+     * 1.1项目认证（授权码）
+     *   a.授权码模式认证
+     *   b.oms作为认证服务器
+     *   c.doc作为资源服务器
+     *   d.请求资源导doc，如果doc验证无权限则跳转导oms服务器
+     *   e.http://127.0.0.1:9200/oauth/authorize?client_id=doc&response_type=code&scope=server&redirect_uri=http://www.baidu.com
+     *   f.http://127.0.0.1:9200/oauth/authorize?client_id=doc&response_type=code&scope=server&redirect_uri=http://www.sogou.com
+     *   g.现在配置的baidu sogou是测试地址，正式需要配置新的地址
+     *   h.在认证系统认证成功之后，会根据回调地址传会code，第三方系统根据code到认证系统请求登录动作
+     *     授权码认证地址：http://127.0.0.1:9200/oauth/token
+     *     请求参数：client_id:doc
+     *              client_secret:123456
+     *              grant_type:authorization_code
+     *              code:回调地址返回的code
+     *              redirect_uri:回调地址
+     *   i.在h步骤中，认证成功之后会返回token相关信息，请求资源接口时，在header中携带参数
+     *          Authorization:Bearer 认证系统返回的 access_token
+     *   j.验证token
+     *      验证地址：http://127.0.0.1:9200/oauth/check_token
+     *      请求参数：token:认证系统返回的 access_token
+     *   k.刷新token
+     *      刷新地址：http://127.0.0.1:9200/oauth/token
+     *      请求参数：client_id:doc
+     *               client_secret:123456
+     *               grant_type:refresh_token
+     *               refresh_token:认证系统返回的 refresh_token
+     *      刷新成功之后会返回新的 access_token 再次请求资源接口时，需要携带新的 access_token ，refresh_token 不变
      *
      * 2.日志
      *   a.日志采用logback输出，不存DB。每一个请求都会有一个请求ID，会在日志中体现。
