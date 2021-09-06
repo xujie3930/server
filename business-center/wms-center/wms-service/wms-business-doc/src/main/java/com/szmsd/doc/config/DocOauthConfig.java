@@ -10,9 +10,9 @@ import java.util.List;
  * @author zhangyuyuan
  * @date 2021-07-28 9:51
  */
-@Data
-@Configuration
-@ConfigurationProperties(prefix = DocOauthConfig.CONFIG_PREFIX)
+// @Data
+// @Configuration
+// @ConfigurationProperties(prefix = DocOauthConfig.CONFIG_PREFIX)
 public class DocOauthConfig {
 
     static final String CONFIG_PREFIX = "com.szmsd.doc.oauth";

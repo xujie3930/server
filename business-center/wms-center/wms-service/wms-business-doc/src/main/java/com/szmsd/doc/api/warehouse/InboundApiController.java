@@ -48,7 +48,7 @@ public class InboundApiController extends BaseController {
     @Resource
     private RemoteAttachmentService attachmentFeignService;
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @GetMapping("/info/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", example = "RKCNYWO7210730000009", type = "String", required = true)
     @ApiOperation(value = "入库单 - 详情", notes = "查看入库单详情")
@@ -101,7 +101,7 @@ public class InboundApiController extends BaseController {
         return picUrl;
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/saveOrUpdate/batch")
     @ApiOperation(value = "新增/修改-批量入库单", notes = "新建入库单，入库单提交后，视入库仓库是否需要人工审核，" +
             "如果需要管理人员人工审核，则需进入OMS客户端-仓储服务-入库管理，再次提交入库申请。如仓库设置为自动审核，" +
@@ -110,7 +110,7 @@ public class InboundApiController extends BaseController {
         return inboundReceiptFeignService.saveOrUpdateBatch(createInboundReceiptDTOList);
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "取消入库单", notes = "取消仓库还未处理的入库单")
@@ -125,7 +125,7 @@ public class InboundApiController extends BaseController {
         return cancel;
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @GetMapping("/getInboundLabel/byOrderNo/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "获取入库标签-通过单号", notes = "根据入库单号，生成标签条形码，返回的为条形码图片的Base64")

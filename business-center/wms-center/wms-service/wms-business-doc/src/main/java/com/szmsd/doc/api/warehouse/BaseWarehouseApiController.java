@@ -37,7 +37,7 @@ public class BaseWarehouseApiController extends BaseController {
      * @param queryDTO
      * @return
      */
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/warehouse/page")
     @ApiOperation(value = "仓库列表-分页查询", notes = "用于在创建入库单、出库单时选择仓库，支持分页")
     public TableDataInfo<BasWarehouseResp> pagePost(@Valid @RequestBody BasWarehouseQueryReq queryDTO) {

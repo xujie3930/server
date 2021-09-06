@@ -23,7 +23,7 @@ public class AccountSerialBillController {
     @Resource
     private AccountSerialBillFeignService accountSerialBillFeignService;
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/list")
     @ApiOperation(value = "流水账单 - 列表",notes = "展示用户费用的清单流水，包括充值记录、出入库费用实扣记录等。")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "AccountSerialBillRequest")
