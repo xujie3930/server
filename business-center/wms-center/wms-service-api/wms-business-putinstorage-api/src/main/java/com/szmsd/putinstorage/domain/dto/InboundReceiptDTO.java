@@ -1,6 +1,7 @@
 package com.szmsd.putinstorage.domain.dto;
 
 import com.alibaba.fastjson.JSONObject;
+import com.szmsd.common.core.utils.StringToolkit;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -57,9 +58,18 @@ public class InboundReceiptDTO {
     @Size(max = 30, message = "送货方式编码仅支持0-30字符")
     @ApiModelProperty(value = "送货方式编码 (0-30]", required = true)
     private String deliveryWayCode;
-    @Size(max = 30, message = "送货单号仅支持0-30字符")
-    @ApiModelProperty(value = "送货单号 (0-30]")
+//    @Size(max = 200, message = "送货单号仅支持0-30字符")
+    @ApiModelProperty(value = "送货单号 可支持多个")
     private String deliveryNo;
+
+    public InboundReceiptDTO setDeliveryNo(String deliveryNo) {
+        this.deliveryNo = deliveryNo;
+        this.deliveryNoList = StringToolkit.getCodeByArray(deliveryNo);
+        return this;
+    }
+
+    @ApiModelProperty(value = "送货单号-多个",hidden = true)
+    private List<String> deliveryNoList;
     @NotNull(message = "合计申报数量不能为空")
     @Min(value = 0, message = "合计申报数量不能小于0")
     @ApiModelProperty(value = "合计申报数量", required = true)

@@ -5,6 +5,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.CancelReceiptRequest;
 import com.szmsd.http.dto.CreatePackageReceiptRequest;
 import com.szmsd.http.dto.CreateReceiptRequest;
+import com.szmsd.http.dto.CreateTrackRequest;
 import com.szmsd.http.service.IInboundService;
 import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
@@ -43,5 +44,12 @@ public class InboundController extends BaseController {
     public R<ResponseVO> createPackage(@RequestBody CreatePackageReceiptRequest createPackageReceiptRequest) {
         ResponseVO cancel = iInboundService.createPackage(createPackageReceiptRequest);
         return R.ok(cancel);
+    }
+
+    @PostMapping("/tracking")
+    @ApiOperation(value = "B4 创建入库单物流信息列表")
+    public R<ResponseVO> createTracking(@RequestBody CreateTrackRequest createTrackRequest) {
+        ResponseVO createTracking = iInboundService.createTracking(createTrackRequest);
+        return R.ok(createTracking);
     }
 }

@@ -3,10 +3,7 @@ package com.szmsd.putinstorage.api.feign;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.putinstorage.api.BusinessPutinstorageInterface;
 import com.szmsd.putinstorage.api.factory.InboundReceiptFeignFallback;
-import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
-import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
-import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
+import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundCountVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -48,4 +45,8 @@ public interface InboundReceiptFeignService {
     @DeleteMapping("/inbound/receipt/cancel/{warehouseNo}")
     @ApiOperation(value = "取消", notes = "入库管理 - 取消")
     R cancel(@PathVariable("warehouseNo") String warehouseNo);
+
+    @PostMapping("//inbound/receiving/tracking")
+    @ApiOperation(value = "#B5 物流到货接收确认", notes = "#B5 物流到货接收确认")
+    R tracking(ReceivingTrackingRequest receivingCompletedRequest);
 }

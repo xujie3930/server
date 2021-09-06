@@ -6,6 +6,7 @@ import com.szmsd.http.api.feign.fallback.HtpInboundFeignFallback;
 import com.szmsd.http.dto.CancelReceiptRequest;
 import com.szmsd.http.dto.CreatePackageReceiptRequest;
 import com.szmsd.http.dto.CreateReceiptRequest;
+import com.szmsd.http.dto.CreateTrackRequest;
 import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
 import io.swagger.annotations.ApiOperation;
@@ -26,5 +27,9 @@ public interface HtpInboundFeignService {
     @PostMapping("/api/inbound/http/package")
     @ApiOperation(value = "B3 创建转运入库单")
     R<ResponseVO> createPackage(@RequestBody CreatePackageReceiptRequest createPackageReceiptRequest);
+
+    @PostMapping("/api/inbound/http/tracking")
+    @ApiOperation(value = "B4 创建入库单物流信息列表")
+    R<ResponseVO> createTracking(@RequestBody CreateTrackRequest createTrackRequest);
 
 }
