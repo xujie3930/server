@@ -30,9 +30,13 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
+import com.szmsd.http.api.feign.HtpInboundFeignService;
+import com.szmsd.http.dto.CreateTrackRequest;
+import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
+import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
@@ -92,6 +96,9 @@ public class RemoteComponent {
 
     @Resource
     private OperationFeignService operationFeignService;
+
+    @Resource
+    private HtpInboundFeignService htpInboundFeignService;
 
     /**
      * 获取登录人信息
@@ -313,5 +320,19 @@ public class RemoteComponent {
         log.info("调用冻结余额 {}", JSONObject.toJSONString(delOutboundOperationVO));
         R r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
         AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg());
+    }
+
+    /**
+     * 创建入库单物流信息列表
+     */
+    public void createTracking(CreateInboundReceiptDTO createInboundReceiptDTO) {
+        CreateTrackRequest createTrackRequest = new CreateTrackRequest();
+        createTrackRequest.setWarehouseCode(createInboundReceiptDTO.getWarehouseCode())
+                .setRefOrderNo(createInboundReceiptDTO.getOrderNo())
+                .setTrackingNumberList(createInboundReceiptDTO.getDeliveryNoList());
+        log.info("创建入库单物流信息列表 {}", createTrackRequest);
+        R<ResponseVO> tracking = htpInboundFeignService.createTracking(createTrackRequest);
+        AssertUtil.isTrue(tracking.getCode() == HttpStatus.SUCCESS, tracking.getMsg());
+
     }
 }

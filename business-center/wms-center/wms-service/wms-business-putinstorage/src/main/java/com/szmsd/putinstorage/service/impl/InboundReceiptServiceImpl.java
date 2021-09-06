@@ -160,6 +160,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
             this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
         }
+        // 创建入库单物流信息列表
+        remoteComponent.createTracking(createInboundReceiptDTO);
         log.info("创建入库单：操作完成");
         return this.queryInfo(warehouseNo, false);
     }

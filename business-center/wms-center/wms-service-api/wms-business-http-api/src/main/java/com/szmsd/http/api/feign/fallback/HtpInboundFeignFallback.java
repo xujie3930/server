@@ -6,6 +6,7 @@ import com.szmsd.http.api.feign.HtpInboundFeignService;
 import com.szmsd.http.dto.CancelReceiptRequest;
 import com.szmsd.http.dto.CreatePackageReceiptRequest;
 import com.szmsd.http.dto.CreateReceiptRequest;
+import com.szmsd.http.dto.CreateTrackRequest;
 import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
 import feign.hystrix.FallbackFactory;
@@ -31,6 +32,11 @@ public class HtpInboundFeignFallback implements FallbackFactory<HtpInboundFeignS
 
             @Override
             public R<ResponseVO> createPackage(CreatePackageReceiptRequest createPackageReceiptRequest) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<ResponseVO> createTracking(CreateTrackRequest createTrackRequest) {
                 return R.convertResultJson(throwable);
             }
         };
