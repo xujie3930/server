@@ -10,7 +10,6 @@ import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +29,6 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
     @Autowired
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
 
-    @Transactional
     @Override
     public List<DelOutboundAddResponse> add(List<DelOutboundDto> list) {
 
