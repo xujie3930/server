@@ -270,6 +270,18 @@ public class DelOutboundController extends BaseController {
      * @param fileName 文件名称
      */
     private void downloadTemplate(HttpServletResponse response, String filePath, String fileName) {
+        this.downloadTemplate(response, filePath, fileName, "xls");
+    }
+
+    /**
+     * 下载模板
+     *
+     * @param response response
+     * @param filePath 文件存放路径，${server.tomcat.basedir}配置的目录和resources目录下
+     * @param fileName 文件名称
+     * @param ext      扩展名
+     */
+    private void downloadTemplate(HttpServletResponse response, String filePath, String fileName, String ext) {
         // 先去模板目录中获取模板
         // 模板目录中没有模板再从项目中获取模板
         String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery");
@@ -289,7 +301,7 @@ public class DelOutboundController extends BaseController {
             //response为HttpServletResponse对象
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), "ISO8859-1") + ".xls");
+            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), "ISO8859-1") + "." + ext);
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
@@ -501,9 +513,18 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.toPrint(dto));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchUpdateTrackingNoTemplate')")
+    @GetMapping("/batchUpdateTrackingNoTemplate")
+    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号模板", position = 10300)
+    public void batchUpdateTrackingNoTemplate(HttpServletResponse response) {
+        String filePath = "/template/DM_UpdateTracking.xlsx";
+        String fileName = "更新挂号";
+        this.downloadTemplate(response, filePath, fileName, "xlsx");
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchUpdateTrackingNo')")
     @PostMapping("/batchUpdateTrackingNo")
-    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号", position = 10300)
+    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号", position = 10301)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
