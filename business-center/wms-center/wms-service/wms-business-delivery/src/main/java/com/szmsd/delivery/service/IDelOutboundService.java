@@ -10,6 +10,7 @@ import com.szmsd.finance.vo.QueryChargeVO;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -347,8 +348,8 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * 批量更新挂号
      *
      * @param list list
-     * @return int
+     * @return List
      */
-    int batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list);
+    List<Map<String, Object>> batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list);
 }
 

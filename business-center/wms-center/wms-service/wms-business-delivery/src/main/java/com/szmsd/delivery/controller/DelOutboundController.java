@@ -528,7 +528,7 @@ public class DelOutboundController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
-    public R<Integer> batchUpdateTrackingNo(HttpServletRequest request) {
+    public R<List<Map<String, Object>>> batchUpdateTrackingNo(HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile file = multipartHttpServletRequest.getFile("file");
         AssertUtil.notNull(file, "上传文件不存在");
