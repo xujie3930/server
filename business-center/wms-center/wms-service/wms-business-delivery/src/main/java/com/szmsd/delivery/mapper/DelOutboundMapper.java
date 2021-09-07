@@ -9,6 +9,7 @@ import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
 import com.szmsd.delivery.dto.DelOutboundExportListDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
+import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
@@ -61,4 +62,6 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     List<DelOutboundExportListDto> exportList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
 
     int updateTrackingNo(DelOutboundBatchUpdateTrackingNoDto dto);
+
+    List<DelOutboundListExceptionMessageVO> exceptionMessageList(@Param("orderNos") List<String> orderNos);
 }

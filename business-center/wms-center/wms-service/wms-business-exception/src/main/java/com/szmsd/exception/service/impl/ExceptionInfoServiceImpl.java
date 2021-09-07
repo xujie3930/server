@@ -1,10 +1,13 @@
 package com.szmsd.exception.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -12,6 +15,7 @@ import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
+import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
 import com.szmsd.exception.domain.ExceptionInfo;
 import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.ExceptionInfoQueryDto;
@@ -23,17 +27,13 @@ import com.szmsd.exception.enums.ProcessTypeEnum;
 import com.szmsd.exception.enums.StateSubEnum;
 import com.szmsd.exception.mapper.ExceptionInfoMapper;
 import com.szmsd.exception.service.IExceptionInfoService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.http.api.feign.HtpExceptionFeignService;
 import com.szmsd.http.dto.ExceptionProcessRequest;
 import com.szmsd.http.vo.ResponseVO;
 import lombok.extern.slf4j.Slf4j;
-import lombok.extern.slf4j.XSlf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
@@ -41,7 +41,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 /**
 * <p>
@@ -103,7 +105,19 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             where.in("order_no",dto.getOrderNos());
         }
         where.orderByDesc("create_time");
-        return baseMapper.selectList(where);
+        List<ExceptionInfo> exceptionInfoList = baseMapper.selectList(where);
+        if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
+            // 查询异常描述信息
+            List<String> orderNos = exceptionInfoList.stream().map(ExceptionInfo::getOrderNo).collect(Collectors.toList());
+            List<DelOutboundListExceptionMessageVO> exceptionMessageList = this.delOutboundClientService.exceptionMessageList(orderNos);
+            if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
+                Map<String, String> exceptionMessageMap = exceptionMessageList.stream().collect(Collectors.toMap(DelOutboundListExceptionMessageVO::getOrderNo, DelOutboundListExceptionMessageVO::getExceptionMessage));
+                for (ExceptionInfo exceptionInfo : exceptionInfoList) {
+                    exceptionInfo.setExceptionMessage(exceptionMessageMap.get(exceptionInfo.getOrderNo()));
+                }
+            }
+        }
+        return exceptionInfoList;
     }
 
         /**

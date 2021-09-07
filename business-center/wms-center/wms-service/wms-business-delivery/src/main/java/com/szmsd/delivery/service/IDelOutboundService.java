@@ -351,5 +351,21 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return List
      */
     List<Map<String, Object>> batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list);
+
+    /**
+     * 重新获取挂号
+     *
+     * @param dto dto
+     * @return int
+     */
+    int againTrackingNo(DelOutboundAgainTrackingNoDto dto);
+
+    /**
+     * 获取异常描述
+     *
+     * @param orderNos orderNos
+     * @return DelOutboundListExceptionMessageVO
+     */
+    List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos);
 }
 

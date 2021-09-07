@@ -1430,5 +1430,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         logger.info("回写出库单{}-采购单号{},修改条数{}", JSONObject.toJSONString(orderNoList), purchaseNo, update);
         return update;
     }
+
+    @Transactional
+    @Override
+    public int againTrackingNo(DelOutboundAgainTrackingNoDto dto) {
+        return 0;
+    }
+
+    @Override
+    public List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos) {
+        if (CollectionUtils.isEmpty(orderNos)) {
+            return Collections.emptyList();
+        }
+        return super.baseMapper.exceptionMessageList(orderNos);
+    }
 }
 
