@@ -9,9 +9,21 @@ public class DocCodeAuthConfiguration {
 
     public static final String PREFIX = "com.szmsd.auth.doc";
 
+    private String url;
+
     private String locationUrl;
 
     private String authenticationUrl;
+
+    private String targetUrl;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
     public String getLocationUrl() {
         return locationUrl;
@@ -27,5 +39,13 @@ public class DocCodeAuthConfiguration {
 
     public void setAuthenticationUrl(String authenticationUrl) {
         this.authenticationUrl = authenticationUrl;
+    }
+
+    public String getTargetUrl() {
+        return targetUrl;
+    }
+
+    public void setTargetUrl(String targetUrl) {
+        this.targetUrl = targetUrl;
     }
 }
