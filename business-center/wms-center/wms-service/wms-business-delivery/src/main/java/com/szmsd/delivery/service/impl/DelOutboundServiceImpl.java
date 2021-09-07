@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
@@ -673,8 +672,30 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Transactional
     @Override
-    public int batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list) {
-        String sqlStatement = this.sqlStatement(SqlMethod.UPDATE);
+    public List<Map<String, Object>> batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list) {
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            DelOutboundBatchUpdateTrackingNoDto updateTrackingNoDto = list.get(i);
+            if (StringUtils.isEmpty(updateTrackingNoDto.getOrderNo())) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("msg", "第 " + (i + 1) + " 行，出库单号不能为空。");
+                resultList.add(result);
+                continue;
+            }
+            if (StringUtils.isEmpty(updateTrackingNoDto.getTrackingNo())) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("msg", "第 " + (i + 1) + " 行，挂号不能为空。");
+                resultList.add(result);
+                continue;
+            }
+            int u = super.baseMapper.updateTrackingNo(updateTrackingNoDto);
+            if (u < 1) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("msg", "第 " + (i + 1) + " 行，出库单号不存在。");
+                resultList.add(result);
+            }
+        }
+        /*
         int size = list.size();
         executeBatch(sqlSession -> {
             int i = 0;
@@ -685,8 +706,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
                 i++;
             }
-        });
-        return size;
+        });*/
+        return resultList;
     }
 
     /**
@@ -1408,6 +1429,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         );
         logger.info("回写出库单{}-采购单号{},修改条数{}", JSONObject.toJSONString(orderNoList), purchaseNo, update);
         return update;
+    }
+
+    @Transactional
+    @Override
+    public int againTrackingNo(DelOutboundAgainTrackingNoDto dto) {
+        return 0;
+    }
+
+    @Override
+    public List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos) {
+        if (CollectionUtils.isEmpty(orderNos)) {
+            return Collections.emptyList();
+        }
+        return super.baseMapper.exceptionMessageList(orderNos);
     }
 }
 

@@ -144,4 +144,8 @@ public interface DelOutboundFeignService {
     @PostMapping("/del-outbound-packing/queryList")
     @ApiOperation(value = "出库管理 - 装箱信息")
     R<List<DelOutboundPacking>> queryList(@RequestBody DelOutboundPacking request);
+
+    @PostMapping("/api/outbound/exceptionMessageList")
+    @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述")
+    R<List<DelOutboundListExceptionMessageVO>> exceptionMessageList(@RequestBody List<String> orderNos);
 }

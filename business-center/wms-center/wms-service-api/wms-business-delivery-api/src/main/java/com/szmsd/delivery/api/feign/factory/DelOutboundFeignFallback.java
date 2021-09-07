@@ -109,6 +109,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<List<DelOutboundPacking>> queryList(DelOutboundPacking request) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<List<DelOutboundListExceptionMessageVO>> exceptionMessageList(List<String> orderNos) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

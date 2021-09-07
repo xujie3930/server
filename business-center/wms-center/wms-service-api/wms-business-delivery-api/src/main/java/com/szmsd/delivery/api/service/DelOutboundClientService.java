@@ -4,6 +4,7 @@ import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
+import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
 import com.szmsd.http.vo.PricedProduct;
 
 import java.util.List;
@@ -93,4 +94,12 @@ public interface DelOutboundClientService {
      * @return DelOutboundPacking
      */
     List<DelOutboundPacking> queryList(DelOutboundPacking request);
+
+    /**
+     * 获取异常描述
+     *
+     * @param orderNos orderNos
+     * @return DelOutboundListExceptionMessageVO
+     */
+    List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos);
 }
