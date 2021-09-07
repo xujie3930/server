@@ -5,8 +5,10 @@ import com.szmsd.open.vo.ResponseVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
+import com.szmsd.putinstorage.domain.dto.ReceivingTrackingRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,4 +39,10 @@ public class InboundReceiptController extends BaseController {
         return ResponseVO.ok();
     }
 
+    @PostMapping("/receiving/tracking")
+    @ApiOperation(value = "#B5 物流到货接收确认", notes = "#B5 物流到货接收确认")
+    public ResponseVO tracking(@Validated @RequestBody ReceivingTrackingRequest receivingCompletedRequest) {
+        R.getDataAndException(inboundReceiptFeignService.tracking(receivingCompletedRequest));
+        return ResponseVO.ok();
+    }
 }

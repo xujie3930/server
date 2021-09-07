@@ -1,6 +1,7 @@
 package com.szmsd.putinstorage.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
@@ -50,5 +51,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     List<InboundCountVO> statistics(InboundReceiptQueryDTO queryDTO);
 
     void arraigned(List<String> warehouseNos);
+
+    void tracking(ReceivingTrackingRequest receivingCompletedRequest);
 }
 

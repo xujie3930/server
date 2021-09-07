@@ -2,10 +2,7 @@ package com.szmsd.putinstorage.api.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
-import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
-import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
-import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
+import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundCountVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -56,6 +53,11 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
 
             @Override
             public R cancel(String warehouseNo) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R tracking(ReceivingTrackingRequest receivingCompletedRequest) {
                 return R.convertResultJson(throwable);
             }
         };

@@ -4,7 +4,9 @@ import com.szmsd.finance.domain.FssRefundRequest;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.finance.dto.ConfirmOperationDTO;
 import com.szmsd.finance.dto.RefundRequestDTO;
+import com.szmsd.finance.dto.RefundRequestListDTO;
 import com.szmsd.finance.dto.RefundRequestQueryDTO;
+import com.szmsd.finance.enums.RefundStatusEnum;
 import com.szmsd.finance.enums.ReviewStatusEnum;
 import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.finance.vo.RefundRequestVO;
@@ -32,7 +34,7 @@ public interface IRefundRequestService extends IService<FssRefundRequest> {
 
     RefundRequestVO selectDetailInfoById(String id);
 
-    int insertRefundRequest(RefundRequestDTO addDTO);
+    int insertRefundRequest(RefundRequestListDTO addDTO);
 
     int insertBatchRefundRequest(List<RefundRequestDTO> addList);
 
@@ -42,7 +44,7 @@ public interface IRefundRequestService extends IService<FssRefundRequest> {
 
     int importByTemplate(MultipartFile file);
 
-    int approve(ReviewStatusEnum status, List<String> ids);
+    int approve(RefundStatusEnum status, List<String> ids);
 
     int confirmOperation(ConfirmOperationDTO confirmOperationDTO);
 }
