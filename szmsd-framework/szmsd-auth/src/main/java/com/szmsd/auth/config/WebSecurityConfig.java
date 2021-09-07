@@ -28,9 +28,12 @@ import javax.annotation.Resource;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private UserDetailsService userDetailsService;
+    private final DocCodeAuthConfiguration docCodeAuthConfiguration;
+
     @SuppressWarnings({"all"})
-    @Autowired
-    private DocCodeAuthConfiguration docCodeAuthConfiguration;
+    public WebSecurityConfig(DocCodeAuthConfiguration docCodeAuthConfiguration) {
+        this.docCodeAuthConfiguration = docCodeAuthConfiguration;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -52,6 +55,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public UsernamePasswordAuthenticationFilter usernamePasswordAuthenticationFilter(AuthenticationManager authenticationManager) {
         UsernamePasswordAuthenticationFilter usernamePasswordAuthenticationFilter = new UsernamePasswordAuthenticationFilter();
         usernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManager);
+        DocSavedRequestAwareAuthenticationSuccessHandler successHandler = new DocSavedRequestAwareAuthenticationSuccessHandler(this.docCodeAuthConfiguration);
+        usernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(successHandler);
         return usernamePasswordAuthenticationFilter;
     }
 
@@ -84,7 +89,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .and().formLogin()
                 .loginPage(this.docCodeAuthConfiguration.getLocationUrl())
-                .successHandler(successHandler)
                 // .loginPage("http://127.0.0.1:8080/auth/login")
 
                 .and().logout();

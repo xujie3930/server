@@ -50,6 +50,10 @@ public class DocSavedRequestAwareAuthenticationSuccessHandler extends SimpleUrlA
         String targetUrl = this.docCodeAuthConfiguration.getTargetUrl();
         if (null == targetUrl) {
             targetUrl = savedRequest.getRedirectUrl();
+        } else {
+            String redirectUrl = savedRequest.getRedirectUrl();
+            String queryParams = redirectUrl.substring(redirectUrl.indexOf("?"));
+            targetUrl = targetUrl + queryParams;
         }
         logger.debug("Redirecting to DefaultSavedRequest Url: " + targetUrl);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
