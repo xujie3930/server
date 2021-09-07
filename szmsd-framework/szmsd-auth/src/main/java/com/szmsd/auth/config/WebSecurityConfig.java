@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private UserDetailsService userDetailsService;
+    @SuppressWarnings({"all"})
     @Autowired
     private DocCodeAuthConfiguration docCodeAuthConfiguration;
 
@@ -68,6 +69,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        DocSavedRequestAwareAuthenticationSuccessHandler successHandler = new DocSavedRequestAwareAuthenticationSuccessHandler(this.docCodeAuthConfiguration);
         http.csrf()
                 .disable()
                 .authorizeRequests()
@@ -82,6 +84,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .and().formLogin()
                 .loginPage(this.docCodeAuthConfiguration.getLocationUrl())
+                .successHandler(successHandler)
                 // .loginPage("http://127.0.0.1:8080/auth/login")
 
                 .and().logout();
