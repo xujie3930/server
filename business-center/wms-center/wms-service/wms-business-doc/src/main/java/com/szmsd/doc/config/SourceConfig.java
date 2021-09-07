@@ -31,8 +31,7 @@ public class SourceConfig extends ResourceServerConfigurerAdapter {
         // 配置组件的clientid和密码,这个也是在auth中配置好的
         tokenServices.setClientId("doc");
         tokenServices.setClientSecret("123456");
-        resources.resourceId("doc")
-                .tokenServices(tokenServices)
+        resources.tokenServices(tokenServices)
                 .stateless(true);
     }
 
