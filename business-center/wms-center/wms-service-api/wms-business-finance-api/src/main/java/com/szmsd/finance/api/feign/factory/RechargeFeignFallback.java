@@ -3,10 +3,8 @@ package com.szmsd.finance.api.feign.factory;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.domain.AccountBalance;
-import com.szmsd.finance.dto.AccountBalanceDTO;
-import com.szmsd.finance.dto.CusFreezeBalanceDTO;
-import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
+import com.szmsd.finance.dto.*;
+import com.szmsd.finance.vo.UserCreditInfoVO;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,6 +20,7 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
 
     @Override
     public RechargesFeignService create(Throwable throwable) {
+        log.info("RechargeFeignFallback {}", throwable.getMessage());
         return new RechargesFeignService(){
 
             @Override
@@ -57,6 +56,18 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
             @Override
             public R<List<AccountBalance>> accountList(AccountBalanceDTO dto) {
                 return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R updateUserCredit(UserCreditDTO userCreditDTO) {
+                log.info("修改用户授信额度失败，服务调用降级");
+                return R.failed();
+            }
+
+            @Override
+            public R<UserCreditInfoVO> queryUserCredit(String cusCode) {
+                log.info("查询用户授信额度失败，服务调用降级");
+                return R.failed();
             }
 
         };

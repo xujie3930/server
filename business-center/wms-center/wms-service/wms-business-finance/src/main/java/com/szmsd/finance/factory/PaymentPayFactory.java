@@ -48,22 +48,28 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 List<AccountBalanceChange> balanceChange = getBalanceChange(dto);
                 if (balanceChange.size() == 0) {
                     log.info("no freeze, customCode: {}, getCurrencyCode: {}, no: {}", dto.getCusCode(), dto.getCurrencyCode(), dto.getNo());
-                    //余额不足
+                    /*//余额不足
                     if (oldBalance.getCurrentBalance().compareTo(changeAmount) < 0) {
                         return false;
                     }
-                    this.calculateBalance(oldBalance, changeAmount);
+                    this.calculateBalance(oldBalance, changeAmount);*/
+                    if (!oldBalance.checkAmountAndCreditAndSet(changeAmount,true,BalanceDTO::pay)){
+                        return false;
+                    }
                 }
                 if (balanceChange.size() == 1) {
                     AccountBalanceChange accountBalanceChange = balanceChange.get(0);
                     BigDecimal freeze = accountBalanceChange.getAmountChange();
-                    if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
+                    // if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
+                    if (!oldBalance.checkAmountAndCreditAndSet(changeAmount,true, (x, y) -> this.calculateBalance(x, y, freeze, dto))) {
+                        return false;
+                    }
                 }
                 if (balanceChange.size() > 1) {
                     log.info("该单存在多个冻结额，操作失败。单号： {} 币种： {}", dto.getNo(), dto.getCurrencyCode());
                     return false;
                 }
-                setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance);
+                setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance,true);
                 recordOpLog(dto, oldBalance.getCurrentBalance());
                 setSerialBillLog(dto);
             }

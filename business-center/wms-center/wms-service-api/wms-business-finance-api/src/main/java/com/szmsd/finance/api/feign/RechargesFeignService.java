@@ -3,13 +3,12 @@ package com.szmsd.finance.api.feign;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.factory.RechargeFeignFallback;
 import com.szmsd.finance.domain.AccountBalance;
-import com.szmsd.finance.dto.AccountBalanceDTO;
-import com.szmsd.finance.dto.CusFreezeBalanceDTO;
-import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.dto.RechargesCallbackRequestDTO;
+import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BusinessFssInterface;
+import com.szmsd.finance.vo.UserCreditInfoVO;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,4 +42,12 @@ public interface RechargesFeignService {
     @ApiOperation(value = "查询账户余额信息")
     @PostMapping("/accountBalance/list")
     R<List<AccountBalance>> accountList(@RequestBody AccountBalanceDTO dto);
+
+    @ApiOperation(value = "修改用户信用额信息")
+    @PostMapping("/accountBalance/updateUserCredit")
+    R updateUserCredit(@Validated @RequestBody UserCreditDTO userCreditDTO);
+
+    @ApiOperation(value = "查询用户信用额信息")
+    @GetMapping("/accountBalance/queryUserCredit/{cusCode}")
+    R<UserCreditInfoVO> queryUserCredit(@PathVariable("cusCode") String cusCode);
 }
