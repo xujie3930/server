@@ -1,9 +1,6 @@
 package com.szmsd.exception.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.szmsd.exception.dto.ExceptionInfoDto;
-import com.szmsd.exception.dto.ExceptionInfoQueryDto;
-import com.szmsd.exception.dto.NewExceptionRequest;
-import com.szmsd.exception.dto.ProcessExceptionRequest;
+import com.szmsd.exception.dto.*;
 import com.szmsd.exception.enums.StateSubEnum;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
@@ -141,4 +138,11 @@ public class ExceptionInfoController extends BaseController{
     return toOk(exceptionInfoService.deleteExceptionInfoByIds(ids));
     }
 
+    @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:againTrackingNo')")
+    @Log(title = "模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/againTrackingNo")
+    @ApiOperation(value = "重新获取挂号",notes = "重新获取挂号")
+    public R againTrackingNo(@RequestBody ExceptionDelOutboundAgainTrackingNoDto dto) {
+        return R.ok(this.exceptionInfoService.againTrackingNo(dto));
+    }
 }
