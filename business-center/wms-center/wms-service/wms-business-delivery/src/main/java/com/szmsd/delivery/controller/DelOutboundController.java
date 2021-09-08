@@ -108,6 +108,14 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.selectDelOutboundById(id));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:getInfoByOrderNo')")
+    @GetMapping(value = "getInfoByOrderNo/{orderNo}")
+    @ApiOperation(value = "出库管理 - 详情", position = 201)
+    @AutoValue
+    public R<DelOutboundVO> getInfoByOrderNo(@PathVariable("orderNo") String orderNo) {
+        return R.ok(delOutboundService.selectDelOutboundByOrderNo(orderNo));
+    }
+
     /**
      * 出库-创建采购单 查询
      *

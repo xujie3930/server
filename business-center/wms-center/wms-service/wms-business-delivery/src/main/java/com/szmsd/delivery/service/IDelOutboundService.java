@@ -30,6 +30,8 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      */
     DelOutboundVO selectDelOutboundById(String id);
 
+    DelOutboundVO selectDelOutboundByOrderNo(String orderNo);
+
 
     /**
      * 出库-创建采购单

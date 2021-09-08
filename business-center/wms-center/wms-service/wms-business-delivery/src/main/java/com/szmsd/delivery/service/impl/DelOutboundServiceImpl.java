@@ -122,6 +122,18 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public DelOutboundVO selectDelOutboundById(String id) {
         DelOutbound delOutbound = baseMapper.selectById(id);
+        return this.selectDelOutboundVO(delOutbound);
+    }
+
+    @Override
+    public DelOutboundVO selectDelOutboundByOrderNo(String orderNo) {
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
+        DelOutbound delOutbound = super.getOne(queryWrapper);
+        return this.selectDelOutboundVO(delOutbound);
+    }
+
+    private DelOutboundVO selectDelOutboundVO(DelOutbound delOutbound) {
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("999", "单据不存在");
         }
