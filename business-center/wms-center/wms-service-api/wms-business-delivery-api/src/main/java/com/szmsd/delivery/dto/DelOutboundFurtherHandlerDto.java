@@ -19,4 +19,7 @@ public class DelOutboundFurtherHandlerDto implements Serializable {
     @NotEmpty(message = "订单号不能为空")
     @ApiModelProperty(value = "订单号")
     private String orderNo;
+
+    @ApiModelProperty(value = "失败了是否推送发货指令，默认false不推送")
+    private boolean shipmentShipping;
 }

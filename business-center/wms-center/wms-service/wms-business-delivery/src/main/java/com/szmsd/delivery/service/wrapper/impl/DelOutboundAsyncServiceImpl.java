@@ -83,6 +83,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     @Transactional
     @Override
     public int shipmentPacking(Long id) {
+        return this.shipmentPacking(id, true);
+    }
+
+    @Transactional
+    @Override
+    public int shipmentPacking(Long id, boolean shipmentShipping) {
         // 获取新的出库单信息
         DelOutbound delOutbound = this.delOutboundService.getById(id);
         if (Objects.isNull(delOutbound)) {
@@ -93,7 +99,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 || DelOutboundStateEnum.PROCESSING.getCode().equals(delOutbound.getState()))) {
             return 0;
         }
-        ApplicationContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
+        DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
+        if (context != null) {
+            context.setShipmentShipping(shipmentShipping);
+        }
         ShipmentEnum currentState;
         String shipmentState = delOutbound.getShipmentState();
         if (StringUtils.isEmpty(shipmentState)) {

@@ -15,6 +15,15 @@ public interface IDelOutboundAsyncService {
     int shipmentPacking(Long id);
 
     /**
+     * #D2 接收出库包裹使用包材
+     *
+     * @param id               id
+     * @param shipmentShipping 失败了是否推送发货指令，默认false不推送
+     * @return int
+     */
+    int shipmentPacking(Long id, boolean shipmentShipping);
+
+    /**
      * 出库单完成
      *
      * @param orderNo orderNo
