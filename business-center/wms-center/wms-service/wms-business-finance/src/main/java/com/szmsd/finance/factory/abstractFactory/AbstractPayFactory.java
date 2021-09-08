@@ -45,6 +45,9 @@ public abstract class AbstractPayFactory {
     ISysDictDataService sysDictDataService;
 
     @Resource
+    private IAccountBalanceService iAccountBalanceService;
+
+    @Resource
     private IAccountSerialBillService accountSerialBillService;
 
     public abstract boolean updateBalance(CustPayDTO dto);
@@ -75,12 +78,31 @@ public abstract class AbstractPayFactory {
         accountBalanceService.setCurrentBalance(cusCode, currencyCode, result);
     }
 
+    /**
+     * 查询该用户对应币别的余额
+     * @param cusCode 客户编码
+     * @param currencyCode 币别
+     * @return 查询结果
+     */
     protected BalanceDTO getBalance(String cusCode, String currencyCode) {
         return accountBalanceService.getBalance(cusCode, currencyCode);
     }
+    protected void updateCreditStatus(CustPayDTO dto){
+        iAccountBalanceService.updateCreditStatus(dto);
+    }
 
+    /**
+     * 需要扣减信用额
+     * @param cusCode
+     * @param currencyCode
+     * @param result
+     * @param need
+     */
+    protected void setBalance(String cusCode, String currencyCode, BalanceDTO result,boolean needUpdateCredit) {
+        accountBalanceService.setBalance(cusCode, currencyCode, result,true);
+    }
     protected void setBalance(String cusCode, String currencyCode, BalanceDTO result) {
-        accountBalanceService.setBalance(cusCode, currencyCode, result);
+        accountBalanceService.setBalance(cusCode, currencyCode, result ,false);
     }
 
     public abstract BalanceDTO calculateBalance(BalanceDTO oldBalance, BigDecimal changeAmount);

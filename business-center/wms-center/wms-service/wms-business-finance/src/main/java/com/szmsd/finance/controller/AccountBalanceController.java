@@ -6,10 +6,12 @@ import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.service.IAccountBalanceService;
+import com.szmsd.finance.vo.UserCreditInfoVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -117,5 +119,20 @@ public class AccountBalanceController extends FssBaseController {
     public R thawBalance(@RequestBody CusFreezeBalanceDTO dto){
         return accountBalanceService.thawBalance(dto);
     }
+
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:thawBalance')")
+    @ApiOperation(value = "修改用户信用额信息")
+    @PostMapping("/updateUserCredit")
+    public R updateUserCredit(@Validated @RequestBody UserCreditDTO userCreditDTO){
+        accountBalanceService.updateUserCredit(userCreditDTO);
+        return R.ok();
+    }
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:thawBalance')")
+    @ApiOperation(value = "查询用户信用额信息")
+    @GetMapping("/queryUserCredit/{cusCode}")
+    public R<UserCreditInfoVO> queryUserCredit(@PathVariable("cusCode") String cusCode){
+        return R.ok(accountBalanceService.queryUserCredit(cusCode));
+    }
+
 
 }

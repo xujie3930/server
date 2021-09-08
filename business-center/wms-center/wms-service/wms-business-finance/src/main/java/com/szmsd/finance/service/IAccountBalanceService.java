@@ -5,6 +5,7 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.*;
+import com.szmsd.finance.vo.UserCreditInfoVO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -43,9 +44,15 @@ public interface IAccountBalanceService {
 
     BalanceDTO getBalance(String cusCode, String currencyCode);
 
-    void setBalance(String cusCode, String currencyCode, BalanceDTO result);
+    void setBalance(String cusCode, String currencyCode, BalanceDTO result,boolean needUpdateCredit);
 
     boolean withDrawBalanceCheck(String cusCode, String currencyCode, BigDecimal amount);
 
     int updateAccountBalanceChange(AccountBalanceChangeDTO dto);
+
+    void updateCreditStatus(CustPayDTO dto);
+
+    void updateUserCredit(UserCreditDTO userCreditDTO);
+
+    UserCreditInfoVO queryUserCredit(String cusCode);
 }

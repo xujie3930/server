@@ -9,7 +9,13 @@ import java.io.Serializable;
  * @author liulei
  */
 public class BillEnum implements Serializable {
-
+    /**
+     * 收入("01"),
+     * 付款("02"),
+     * 兑换("03"),
+     * 冻结("04"),
+     * 解冻结("05"),
+     */
     public enum PayType implements IEnum<String> {
         INCOME("01"),
         PAYMENT("02"),
