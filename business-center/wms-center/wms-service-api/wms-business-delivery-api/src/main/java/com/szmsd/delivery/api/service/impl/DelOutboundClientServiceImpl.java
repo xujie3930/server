@@ -77,6 +77,11 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     }
 
     @Override
+    public int againTrackingNo(DelOutboundAgainTrackingNoDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.againTrackingNo(dto));
+    }
+
+    @Override
     public List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos) {
         if (CollectionUtils.isEmpty(orderNos)) {
             return Collections.emptyList();

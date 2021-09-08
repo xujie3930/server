@@ -531,8 +531,8 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
             DelOutbound delOutbound = (DelOutbound) objects[0];
             Object[] arguments = new Object[]{delOutbound.getOrderNo(),
                     DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
-                    objects[1],
-                    delOutbound.getShipmentService()};
+                    delOutbound.getShipmentService(),
+                    objects[1]};
             return format.format(arguments);
         }
 

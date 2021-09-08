@@ -552,9 +552,7 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 异常列表 - 重新获取挂号", position = 10400)
     @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundAgainTrackingNoDto")
     public R<Integer> againTrackingNo(@RequestBody @Validated DelOutboundAgainTrackingNoDto dto) {
-
-
-        return R.ok();
+        return R.ok(this.delOutboundService.againTrackingNo(dto));
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:exceptionMessageList')")

@@ -96,6 +96,14 @@ public interface DelOutboundClientService {
     List<DelOutboundPacking> queryList(DelOutboundPacking request);
 
     /**
+     * 重新获取挂号
+     *
+     * @param dto dto
+     * @return int
+     */
+    int againTrackingNo(DelOutboundAgainTrackingNoDto dto);
+
+    /**
      * 获取异常描述
      *
      * @param orderNos orderNos
