@@ -25,8 +25,12 @@ public class DelOutboundVO implements Serializable {
     @ApiModelProperty(value = "出库单号")
     private String orderNo;
 
+    @AutoFieldValue(supports = "BasWarehouse", cp = DefaultCommonParameter.class, nameField = "warehouseName")
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
+
+    @ApiModelProperty(value = "仓库名称")
+    private String warehouseName;
 
     @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "063", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "出库订单类型")

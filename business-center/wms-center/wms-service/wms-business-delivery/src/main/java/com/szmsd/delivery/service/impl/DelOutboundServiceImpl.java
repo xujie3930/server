@@ -36,6 +36,7 @@ import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
+import com.szmsd.delivery.service.wrapper.IDelOutboundExceptionService;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
@@ -112,6 +113,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private BasRegionFeignService basRegionFeignService;
     @Autowired
     private IDelOutboundCombinationService delOutboundCombinationService;
+    @Autowired
+    private IDelOutboundExceptionService delOutboundExceptionService;
 
     /**
      * 查询出库单模块
@@ -1443,7 +1446,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return update;
     }
 
-    @Transactional
     @Override
     public int againTrackingNo(DelOutboundAgainTrackingNoDto dto) {
         // 1.更新地址信息，物流规则
@@ -1456,25 +1458,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (null == delOutbound) {
             throw new CommonException("999", "单据不存在");
         }
-        String orderNo = delOutbound.getOrderNo();
-        this.deleteAddress(orderNo);
-        DelOutboundAddress delOutboundAddress = BeanMapperUtil.map(dto.getAddress(), DelOutboundAddress.class);
-        if (Objects.nonNull(delOutboundAddress)) {
-            delOutboundAddress.setOrderNo(orderNo);
-            this.delOutboundAddressService.save(delOutboundAddress);
-        }
-        LambdaUpdateWrapper<DelOutbound> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.set(DelOutbound::getShipmentRule, dto.getShipmentRule());
-        lambdaUpdateWrapper.eq(DelOutbound::getId, id);
-        int update = super.baseMapper.update(null, lambdaUpdateWrapper);
-        Object[] params = new Object[]{delOutbound, dto.getShipmentRule()};
-        DelOutboundOperationLogEnum.AGAIN_TRACKING_NO.listener(params);
-        if (update > 0) {
+        boolean update = delOutboundExceptionService.againTrackingNo(delOutbound, dto);
+        if (update) {
             DelOutboundFurtherHandlerDto furtherHandlerDto = new DelOutboundFurtherHandlerDto();
-            furtherHandlerDto.setOrderNo(orderNo);
+            furtherHandlerDto.setOrderNo(delOutbound.getOrderNo());
             this.furtherHandler(furtherHandlerDto);
         }
-        return update;
+        return update ? 1 : 0;
     }
 
     @Override
