@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
@@ -37,6 +36,7 @@ import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
+import com.szmsd.delivery.service.wrapper.IDelOutboundExceptionService;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
@@ -113,6 +113,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private BasRegionFeignService basRegionFeignService;
     @Autowired
     private IDelOutboundCombinationService delOutboundCombinationService;
+    @Autowired
+    private IDelOutboundExceptionService delOutboundExceptionService;
 
     /**
      * 查询出库单模块
@@ -123,6 +125,18 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public DelOutboundVO selectDelOutboundById(String id) {
         DelOutbound delOutbound = baseMapper.selectById(id);
+        return this.selectDelOutboundVO(delOutbound);
+    }
+
+    @Override
+    public DelOutboundVO selectDelOutboundByOrderNo(String orderNo) {
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
+        DelOutbound delOutbound = super.getOne(queryWrapper);
+        return this.selectDelOutboundVO(delOutbound);
+    }
+
+    private DelOutboundVO selectDelOutboundVO(DelOutbound delOutbound) {
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("999", "单据不存在");
         }
@@ -673,8 +687,30 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Transactional
     @Override
-    public int batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list) {
-        String sqlStatement = this.sqlStatement(SqlMethod.UPDATE);
+    public List<Map<String, Object>> batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list) {
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            DelOutboundBatchUpdateTrackingNoDto updateTrackingNoDto = list.get(i);
+            if (StringUtils.isEmpty(updateTrackingNoDto.getOrderNo())) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("msg", "第 " + (i + 1) + " 行，出库单号不能为空。");
+                resultList.add(result);
+                continue;
+            }
+            if (StringUtils.isEmpty(updateTrackingNoDto.getTrackingNo())) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("msg", "第 " + (i + 1) + " 行，挂号不能为空。");
+                resultList.add(result);
+                continue;
+            }
+            int u = super.baseMapper.updateTrackingNo(updateTrackingNoDto);
+            if (u < 1) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("msg", "第 " + (i + 1) + " 行，出库单号不存在。");
+                resultList.add(result);
+            }
+        }
+        /*
         int size = list.size();
         executeBatch(sqlSession -> {
             int i = 0;
@@ -685,8 +721,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
                 i++;
             }
-        });
-        return size;
+        });*/
+        return resultList;
     }
 
     /**
@@ -1162,16 +1198,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         DelOutboundOperationLogEnum.FURTHER_HANDLER.listener(delOutbound);
         int result;
-        if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getOrderType())) {
+        if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getState())) {
             // 仓库发货，调用完成的接口
             this.delOutboundAsyncService.completed(delOutbound.getOrderNo());
             result = 1;
-        } else if (DelOutboundStateEnum.WHSE_CANCELLED.getCode().equals(delOutbound.getOrderType())) {
+        } else if (DelOutboundStateEnum.WHSE_CANCELLED.getCode().equals(delOutbound.getState())) {
             // 仓库取消，调用取消的接口
             this.delOutboundAsyncService.cancelled(delOutbound.getOrderNo());
             result = 1;
         } else {
-            result = this.delOutboundAsyncService.shipmentPacking(delOutbound.getId());
+            result = this.delOutboundAsyncService.shipmentPacking(delOutbound.getId(), dto.isShipmentShipping());
         }
         return result;
     }
@@ -1408,6 +1444,35 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         );
         logger.info("回写出库单{}-采购单号{},修改条数{}", JSONObject.toJSONString(orderNoList), purchaseNo, update);
         return update;
+    }
+
+    @Override
+    public int againTrackingNo(DelOutboundAgainTrackingNoDto dto) {
+        // 1.更新地址信息，物流规则
+        // 核重之后的操作
+        // 2.调用出库发货流程
+        // 3.增加操作日志
+        // 4.异常状态变更[call]
+        Long id = dto.getId();
+        DelOutbound delOutbound = this.getById(id);
+        if (null == delOutbound) {
+            throw new CommonException("999", "单据不存在");
+        }
+        boolean update = delOutboundExceptionService.againTrackingNo(delOutbound, dto);
+        if (update) {
+            DelOutboundFurtherHandlerDto furtherHandlerDto = new DelOutboundFurtherHandlerDto();
+            furtherHandlerDto.setOrderNo(delOutbound.getOrderNo());
+            this.furtherHandler(furtherHandlerDto);
+        }
+        return update ? 1 : 0;
+    }
+
+    @Override
+    public List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos) {
+        if (CollectionUtils.isEmpty(orderNos)) {
+            return Collections.emptyList();
+        }
+        return super.baseMapper.exceptionMessageList(orderNos);
     }
 }
 

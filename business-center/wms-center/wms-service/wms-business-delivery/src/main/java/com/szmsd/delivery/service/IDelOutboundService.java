@@ -10,6 +10,7 @@ import com.szmsd.finance.vo.QueryChargeVO;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -28,6 +29,8 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return 出库单模块
      */
     DelOutboundVO selectDelOutboundById(String id);
+
+    DelOutboundVO selectDelOutboundByOrderNo(String orderNo);
 
 
     /**
@@ -347,8 +350,24 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * 批量更新挂号
      *
      * @param list list
+     * @return List
+     */
+    List<Map<String, Object>> batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list);
+
+    /**
+     * 重新获取挂号
+     *
+     * @param dto dto
      * @return int
      */
-    int batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list);
+    int againTrackingNo(DelOutboundAgainTrackingNoDto dto);
+
+    /**
+     * 获取异常描述
+     *
+     * @param orderNos orderNos
+     * @return DelOutboundListExceptionMessageVO
+     */
+    List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos);
 }
 

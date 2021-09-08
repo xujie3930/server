@@ -108,6 +108,14 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.selectDelOutboundById(id));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:getInfoByOrderNo')")
+    @GetMapping(value = "getInfoByOrderNo/{orderNo}")
+    @ApiOperation(value = "出库管理 - 详情", position = 201)
+    @AutoValue
+    public R<DelOutboundVO> getInfoByOrderNo(@PathVariable("orderNo") String orderNo) {
+        return R.ok(delOutboundService.selectDelOutboundByOrderNo(orderNo));
+    }
+
     /**
      * 出库-创建采购单 查询
      *
@@ -270,6 +278,18 @@ public class DelOutboundController extends BaseController {
      * @param fileName 文件名称
      */
     private void downloadTemplate(HttpServletResponse response, String filePath, String fileName) {
+        this.downloadTemplate(response, filePath, fileName, "xls");
+    }
+
+    /**
+     * 下载模板
+     *
+     * @param response response
+     * @param filePath 文件存放路径，${server.tomcat.basedir}配置的目录和resources目录下
+     * @param fileName 文件名称
+     * @param ext      扩展名
+     */
+    private void downloadTemplate(HttpServletResponse response, String filePath, String fileName, String ext) {
         // 先去模板目录中获取模板
         // 模板目录中没有模板再从项目中获取模板
         String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery");
@@ -289,7 +309,7 @@ public class DelOutboundController extends BaseController {
             //response为HttpServletResponse对象
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), "ISO8859-1") + ".xls");
+            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), "ISO8859-1") + "." + ext);
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
@@ -501,13 +521,22 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.toPrint(dto));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchUpdateTrackingNoTemplate')")
+    @GetMapping("/batchUpdateTrackingNoTemplate")
+    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号模板", position = 10300)
+    public void batchUpdateTrackingNoTemplate(HttpServletResponse response) {
+        String filePath = "/template/DM_UpdateTracking.xlsx";
+        String fileName = "更新挂号";
+        this.downloadTemplate(response, filePath, fileName, "xlsx");
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchUpdateTrackingNo')")
     @PostMapping("/batchUpdateTrackingNo")
-    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号", position = 10300)
+    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号", position = 10301)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
-    public R<Integer> batchUpdateTrackingNo(HttpServletRequest request) {
+    public R<List<Map<String, Object>>> batchUpdateTrackingNo(HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile file = multipartHttpServletRequest.getFile("file");
         AssertUtil.notNull(file, "上传文件不存在");
@@ -523,5 +552,22 @@ public class DelOutboundController extends BaseController {
             logger.error(e.getMessage(), e);
             return R.failed(e.getMessage());
         }
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:againTrackingNo')")
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/againTrackingNo")
+    @ApiOperation(value = "出库管理 - 异常列表 - 重新获取挂号", position = 10400)
+    @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundAgainTrackingNoDto")
+    public R<Integer> againTrackingNo(@RequestBody @Validated DelOutboundAgainTrackingNoDto dto) {
+        return R.ok(this.delOutboundService.againTrackingNo(dto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:exceptionMessageList')")
+    @PostMapping("/exceptionMessageList")
+    @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述", position = 10401)
+    @ApiImplicitParam(name = "orderNos", value = "单号", dataType = "String")
+    public R<List<DelOutboundListExceptionMessageVO>> exceptionMessageList(@RequestBody List<String> orderNos) {
+        return R.ok(this.delOutboundService.exceptionMessageList(orderNos));
     }
 }

@@ -1,12 +1,8 @@
 package com.szmsd.exception.service;
 
-import com.szmsd.common.core.domain.R;
-import com.szmsd.exception.domain.ExceptionInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.szmsd.exception.dto.ExceptionInfoDto;
-import com.szmsd.exception.dto.ExceptionInfoQueryDto;
-import com.szmsd.exception.dto.NewExceptionRequest;
-import com.szmsd.exception.dto.ProcessExceptionRequest;
+import com.szmsd.exception.domain.ExceptionInfo;
+import com.szmsd.exception.dto.*;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -83,5 +79,11 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
         */
         int deleteExceptionInfoById(String id);
 
+        /**
+         * 重新获取挂号
+         * @param dto dto
+         * @return int
+         */
+        int againTrackingNo(ExceptionDelOutboundAgainTrackingNoDto dto);
 }
 
