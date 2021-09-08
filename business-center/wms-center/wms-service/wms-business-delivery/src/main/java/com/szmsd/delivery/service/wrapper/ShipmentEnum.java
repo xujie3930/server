@@ -182,17 +182,19 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 exType = "OutboundGetTrackingFailed";
             }
             // 更新消息到WMS
-            ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
-            shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
-            shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
-            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
-            shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
-            shipmentUpdateRequestDto.setIsEx(true);
-            shipmentUpdateRequestDto.setExType(exType);
-            shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "操作失败"));
-            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
-            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
-            htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+            if (delOutboundWrapperContext.isShipmentShipping()) {
+                ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+                shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+                shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+                shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+                shipmentUpdateRequestDto.setIsEx(true);
+                shipmentUpdateRequestDto.setExType(exType);
+                shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "操作失败"));
+                shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+                IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+                htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+            }
         }
     }
 

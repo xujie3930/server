@@ -7,8 +7,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author zhangyuyuan
@@ -19,14 +19,19 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 public class SourceConfig extends ResourceServerConfigurerAdapter {
 
     @Autowired
-    protected TokenStore tokenStore;
+    private RestTemplate restTemplate;
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-        DefaultTokenServices tokenServices = new DefaultTokenServices();
-        tokenServices.setTokenStore(tokenStore);
-        resources.resourceId("resource")
-                .tokenServices(tokenServices)
+
+        RemoteTokenServices tokenServices = new RemoteTokenServices();
+        // 配置去哪里验证token
+        tokenServices.setRestTemplate(restTemplate);
+        tokenServices.setCheckTokenEndpointUrl("http://szmsd-auth/oauth/check_token");
+        // 配置组件的clientid和密码,这个也是在auth中配置好的
+        tokenServices.setClientId("doc");
+        tokenServices.setClientSecret("123456");
+        resources.tokenServices(tokenServices)
                 .stateless(true);
     }
 
@@ -34,7 +39,7 @@ public class SourceConfig extends ResourceServerConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/**").access("#oauth2.hasScope('scope')")
+                .antMatchers("/**").access("#oauth2.hasScope('server')")
 
                 .and()
 

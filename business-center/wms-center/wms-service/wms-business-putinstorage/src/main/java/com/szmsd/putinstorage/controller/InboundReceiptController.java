@@ -25,11 +25,13 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -38,7 +40,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-/**iInboundReceiptService
+/**
+ * iInboundReceiptService
  * <p>
  * rec_wareh - 入库 前端控制器
  * </p>
@@ -70,6 +73,7 @@ public class InboundReceiptController extends BaseController {
         List<InboundReceiptVO> list = iInboundReceiptService.selectList(queryDTO);
         return getDataTable(list);
     }
+
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
     @GetMapping("/receipt/list")
     @ApiOperation(value = "查询", notes = "入库管理")
@@ -77,6 +81,7 @@ public class InboundReceiptController extends BaseController {
         List<InboundReceiptVO> list = iInboundReceiptService.selectList(queryDTO);
         return R.ok(list);
     }
+
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @PostMapping("/receipt/saveOrUpdate")
     @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
@@ -88,6 +93,7 @@ public class InboundReceiptController extends BaseController {
             CheckTag.remove();
         }
     }
+
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @PostMapping("/receipt/saveOrUpdate/batch")
     @ApiOperation(value = "创建/修改-批量", notes = "批量 入库管理 - 新增/创建")
@@ -95,7 +101,7 @@ public class InboundReceiptController extends BaseController {
     public R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@RequestBody List<CreateInboundReceiptDTO> createInboundReceiptDTOList) {
         try {
             List<InboundReceiptInfoVO> resultList = new ArrayList<>();
-            createInboundReceiptDTOList.forEach(createInboundReceiptDTO->{
+            createInboundReceiptDTOList.forEach(createInboundReceiptDTO -> {
                 InboundReceiptInfoVO inboundReceiptInfoVO = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
                 resultList.add(inboundReceiptInfoVO);
             });
@@ -143,7 +149,7 @@ public class InboundReceiptController extends BaseController {
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
             String fileName = URLEncoder.encode("SKU_入库单_" + details.get(0).getWarehouseNo(), "UTF-8");
-            response.setHeader("Content-Disposition" , "attachment;filename=" + fileName + ".xls");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xls");
             excel.write(out);
             //此处记得关闭输出Servlet流
             IoUtil.close(out);
@@ -256,6 +262,13 @@ public class InboundReceiptController extends BaseController {
     public TableDataInfo<InboundReceiptRecord> queryRecord(InboundReceiptRecordQueryDTO queryDTO) {
         startPage();
         return getDataTable(iInboundReceiptRecordService.selectList(queryDTO));
+    }
+
+    @PostMapping("/receiving/tracking")
+    @ApiOperation(value = "#B5 物流到货接收确认", notes = "#B5 物流到货接收确认")
+    R tracking(@Validated @RequestBody ReceivingTrackingRequest receivingCompletedRequest) {
+        iInboundReceiptService.tracking(receivingCompletedRequest);
+        return R.ok();
     }
 
 }

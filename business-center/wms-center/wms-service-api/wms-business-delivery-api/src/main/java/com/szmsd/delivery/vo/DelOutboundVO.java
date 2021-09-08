@@ -1,5 +1,7 @@
 package com.szmsd.delivery.vo;
 
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
 import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
 import io.swagger.annotations.ApiModel;
@@ -23,11 +25,19 @@ public class DelOutboundVO implements Serializable {
     @ApiModelProperty(value = "出库单号")
     private String orderNo;
 
+    @AutoFieldValue(supports = "BasWarehouse", cp = DefaultCommonParameter.class, nameField = "warehouseName")
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
 
+    @ApiModelProperty(value = "仓库名称")
+    private String warehouseName;
+
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "063", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "出库订单类型")
     private String orderType;
+
+    @ApiModelProperty(value = "出库订单类型名称")
+    private String orderTypeName;
 
     @ApiModelProperty(value = "卖家代码")
     private String sellerCode;

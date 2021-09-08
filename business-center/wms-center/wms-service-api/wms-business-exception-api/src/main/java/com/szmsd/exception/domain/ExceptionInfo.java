@@ -1,6 +1,7 @@
 package com.szmsd.exception.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import java.util.Date;
@@ -123,4 +124,7 @@ public class ExceptionInfo extends BaseEntity {
     @Excel(name = "客户编码")
     private String sellerCode;
 
+    @ApiModelProperty(value = "异常描述")
+    @TableField(exist = false)
+    private String exceptionMessage;
 }

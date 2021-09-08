@@ -65,6 +65,13 @@ public class BasSubController extends BaseController {
         return basSubService.selectBasSubList(new BasSub(mainCode, subValue));
     }
 
+    @PreAuthorize("@ss.hasPermi('bas:bassub:listByMain')")
+    @ApiOperation(value = "根据主类别查询子类别列表api", notes = "查询子类别列表api")
+    @GetMapping("/listByMain")
+    public R<List<BasSub>> listByMain(@RequestParam("mainCode") String mainCode, @RequestParam("mainName") String mainName){
+        return R.ok(basSubService.selectBasSubList(new BasSub().setMainCode(mainCode).setMainName(mainName)));
+    }
+
 
     @ApiOperation(value = "根据code查询子类别（下拉框）")
     @RequestMapping("/getSubList")

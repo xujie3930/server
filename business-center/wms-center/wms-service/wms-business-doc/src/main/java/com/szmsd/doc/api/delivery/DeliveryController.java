@@ -6,6 +6,7 @@ import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
@@ -50,7 +51,7 @@ public class DeliveryController {
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/priced-product")
     @ApiOperation(value = "#1 出库管理 - 物流服务列表", position = 100, notes = "接口描述")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "PricedProductRequest", required = true)
@@ -66,7 +67,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(productList, PricedProductResponse.class));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/package-transfer")
     @ApiOperation(value = "#2 出库管理 - 单据创建（转运出库）", position = 200)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackageTransferListRequest", required = true)
@@ -83,7 +84,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @GetMapping("/package-transfer/label")
     @ApiOperation(value = "#3 出库管理 - 获取标签（转运出库）", position = 201, notes = "")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundLabelRequest", required = true)
@@ -97,7 +98,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.labelBase64(labelDto));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/package-transfer")
     @ApiOperation(value = "#4 出库管理 - 取消单据（转运出库）", position = 202)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCanceledRequest", required = true)
@@ -111,7 +112,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/page")
     @ApiOperation(value = "#5 出库管理 - 查询订单列表", position = 300)
     @ApiImplicitParam(name = "dto", value = "请求参数", dataType = "DelOutboundListQueryDto", required = true)
@@ -119,7 +120,7 @@ public class DeliveryController {
         return this.delOutboundFeignService.page(dto);
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/shipment")
     @ApiOperation(value = "#6 出库管理 - 订单创建（一件代发）", position = 400)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundShipmentListRequest", required = true)
@@ -136,7 +137,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundShipmentResponse.class));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/shipment")
     @ApiOperation(value = "#7 出库管理 - 取消单据（一件代发）", position = 401)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCanceledRequest", required = true)
@@ -150,7 +151,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/collection")
     @ApiOperation(value = "#8 出库管理 - 订单创建（集运出库）", position = 500)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCollectionListRequest", required = true)
@@ -167,7 +168,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundCollectionResponse.class));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/collection")
     @ApiOperation(value = "#9 出库管理 - 取消单据（集运出库）", position = 501)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCanceledRequest", required = true)
@@ -176,6 +177,11 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(orderNos)) {
             throw new CommonException("999", "订单号不能为空");
         }
+        for (String orderNo : orderNos) {
+            if (StringUtils.isEmpty(orderNo)) {
+                throw new CommonException("999", "订单号值不能为空");
+            }
+        }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
@@ -183,7 +189,7 @@ public class DeliveryController {
 
     // @ApiOperation(value = "#10 出库管理 - 更新信息（集运出库）", position = 502)
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/batch")
     @ApiOperation(value = "#11 出库管理 - 订单创建（批量出库）", position = 600)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundBatchListRequest", required = true)
@@ -200,7 +206,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundBatchResponse.class));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/packing/batch")
     @ApiOperation(value = "#12 出库管理 - 装箱结果（批量出库）", position = 601)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackingRequest", required = true)
@@ -216,7 +222,7 @@ public class DeliveryController {
         return R.ok(responseList);
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/label/batch")
     @ApiOperation(value = "#13 出库管理 - 标签上传（批量出库）", position = 602)
     @ApiImplicitParams({
@@ -240,7 +246,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/batch")
     @ApiOperation(value = "#14 出库管理 - 取消单据（批量出库）", position = 603)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCanceledRequest", required = true)
@@ -254,7 +260,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/selfPick")
     @ApiOperation(value = "#15 出库管理 - 订单创建（自提出库）", position = 700)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundSelfPickListRequest", required = true)
@@ -271,7 +277,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundSelfPickResponse.class));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/label/selfPick")
     @ApiOperation(value = "#16 出库管理 - 标签上传（自提出库）", position = 701)
     @ApiImplicitParams({
@@ -295,7 +301,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/selfPick")
     @ApiOperation(value = "#17 出库管理 - 取消单据（自提出库）", position = 702)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCanceledRequest", required = true)
@@ -309,7 +315,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/destroy")
     @ApiOperation(value = "#18 出库管理 - 订单创建（销毁出库）", position = 800)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundDestroyListRequest", required = true)
@@ -326,7 +332,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundDestroyResponse.class));
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/destroy")
     @ApiOperation(value = "#19 出库管理 - 取消单据（销毁出库）", position = 801)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCanceledRequest", required = true)

@@ -512,7 +512,31 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
     },
 
-    ;
+    AGAIN_TRACKING_NO {
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},物流服务由{2}改为{3}");
+
+        @Override
+        public String getType() {
+            return "重新获取挂号";
+        }
+
+        @Override
+        boolean personalize() {
+            return true;
+        }
+
+        @Override
+        String personalizeFormat(Object object) {
+            Object[] objects = (Object[]) object;
+            DelOutbound delOutbound = (DelOutbound) objects[0];
+            Object[] arguments = new Object[]{delOutbound.getOrderNo(),
+                    DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
+                    delOutbound.getShipmentService(),
+                    objects[1]};
+            return format.format(arguments);
+        }
+
+    };
 
     /**
      * 个性化

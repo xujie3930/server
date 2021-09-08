@@ -1,38 +1,36 @@
 package com.szmsd.finance.controller;
 
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
+import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.log.annotation.Log;
+import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.finance.dto.ConfirmOperationDTO;
 import com.szmsd.finance.dto.RefundRequestDTO;
+import com.szmsd.finance.dto.RefundRequestListDTO;
 import com.szmsd.finance.dto.RefundRequestQueryDTO;
+import com.szmsd.finance.enums.RefundStatusEnum;
 import com.szmsd.finance.enums.ReviewStatusEnum;
+import com.szmsd.finance.service.IRefundRequestService;
 import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.finance.vo.RefundRequestVO;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
-import com.szmsd.common.core.domain.R;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.szmsd.finance.service.IRefundRequestService;
-import com.szmsd.common.log.annotation.Log;
-import com.szmsd.common.core.web.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-
-import com.szmsd.common.core.utils.poi.ExcelUtil;
-import com.szmsd.common.log.enums.BusinessType;
-import io.swagger.annotations.Api;
-
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
-
-import org.springframework.web.bind.annotation.RestController;
-import io.swagger.annotations.ApiOperation;
-import com.szmsd.common.core.web.controller.BaseController;
-import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -124,7 +122,7 @@ public class FssRefundRequestController extends BaseController {
     @Log(title = "退费记录表模块", businessType = BusinessType.INSERT)
     @PostMapping("add")
     @ApiOperation(value = "新增", notes = "新增退费记录表模块")
-    public R add(@Validated @RequestBody RefundRequestDTO addDTO) {
+    public R add(@Validated @RequestBody RefundRequestListDTO addDTO) {
         return toOk(fssRefundRequestService.insertRefundRequest(addDTO));
     }
 
@@ -157,11 +155,11 @@ public class FssRefundRequestController extends BaseController {
     @Log(title = "退费记录表模块", businessType = BusinessType.UPDATE)
     @GetMapping("approve/{status}/{idList}")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "status", value = "AUDIT_REJECT: 审核拒绝.AUDIT_PASS:审核通过", allowableValues = "AUDIT_REJECT,AUDIT_PASS"),
+            @ApiImplicitParam(name = "status"),
             @ApiImplicitParam(name = "idList", value = "审核勾选列表", example = "1")
     })
     @ApiOperation(value = "审批", notes = "审核退费记录")
-    public R approve(@PathVariable("status") ReviewStatusEnum status, @PathVariable("idList") List<String> ids) {
+    public R approve(@PathVariable("status") RefundStatusEnum status, @PathVariable("idList") List<String> ids) {
         return toOk(fssRefundRequestService.approve(status, ids));
     }
 

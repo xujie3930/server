@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Validated
 @Api(tags = {"入库信息"})
 @RestController
 @RequestMapping("/api/inboundReceipt")
@@ -47,11 +48,11 @@ public class InboundApiController extends BaseController {
     @Resource
     private RemoteAttachmentService attachmentFeignService;
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @GetMapping("/info/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", example = "RKCNYWO7210730000009", type = "String", required = true)
     @ApiOperation(value = "入库单 - 详情", notes = "查看入库单详情")
-    R<InboundReceiptInfoResp> receiptInfoQuery(@Validated @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
+    R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
         AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取详情异常");
         InboundReceiptInfoResp inboundReceiptInfoResp = new InboundReceiptInfoResp();
@@ -100,29 +101,35 @@ public class InboundApiController extends BaseController {
         return picUrl;
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/saveOrUpdate/batch")
     @ApiOperation(value = "新增/修改-批量入库单", notes = "新建入库单，入库单提交后，视入库仓库是否需要人工审核，" +
             "如果需要管理人员人工审核，则需进入OMS客户端-仓储服务-入库管理，再次提交入库申请。如仓库设置为自动审核，" +
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
-    R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@Validated @NotEmpty @RequestBody List<CreateInboundReceiptDTO> createInboundReceiptDTOList) {
+    R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@NotEmpty @RequestBody @Valid List<CreateInboundReceiptDTO> createInboundReceiptDTOList) {
         return inboundReceiptFeignService.saveOrUpdateBatch(createInboundReceiptDTOList);
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "取消入库单", notes = "取消仓库还未处理的入库单")
-    public R<String> cancel(@PathVariable("warehouseNo") String warehouseNo) {
-        inboundReceiptFeignService.cancel(warehouseNo);
-        return R.ok("success");
+    public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
+        R cancel = null;
+        try {
+            cancel = inboundReceiptFeignService.cancel(warehouseNo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.failed(e.getMessage());
+        }
+        return cancel;
     }
 
-    @PreAuthorize("hasAuthority('read')")
+    @PreAuthorize("hasAuthority('client')")
     @GetMapping("/getInboundLabel/byOrderNo/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "获取入库标签-通过单号", notes = "根据入库单号，生成标签条形码，返回的为条形码图片的Base64")
-    public R<String> getInboundLabelByOrderNo(@PathVariable("warehouseNo") String warehouseNo) {
+    public R<String> getInboundLabelByOrderNo(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
     }
 

@@ -1,6 +1,8 @@
 package com.szmsd.bas.api.client;
 
+import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -18,4 +20,21 @@ public interface BasSubClientService {
      * @return Map<String, List < BasSubWrapperVO>>
      */
     Map<String, List<BasSubWrapperVO>> getSub(String code);
+
+    /**
+     * 根据主类别编码查询
+     * @param code
+     * @return
+     */
+    Map<String, String> getSubList(String code);
+
+    /**
+     * 查询子类别列表api
+     * @param mainCode
+     * @param subValue
+     * @return
+     */
+    List<BasSub> listApi(String mainCode, String subValue);
+
+    List<BasSub> listByMain(String mainCode, String mainName);
 }

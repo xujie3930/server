@@ -29,6 +29,10 @@ public interface BasSubFeignService {
     @GetMapping("/bas-sub/listApi")
     List<BasSub> listApi(@RequestParam("mainCode") String mainCode, @RequestParam("subValue") String subValue);
 
+    @ApiOperation(value = "根据主类别查询子类别列表api", notes = "查询子类别列表api")
+    @GetMapping("/bas-sub/listByMain")
+    R<List<BasSub>> listByMain(@RequestParam("mainCode") String mainCode, @RequestParam("mainName") String mainName);
+
     @ApiOperation(value = "根据code查询子类别（下拉框）")
     @RequestMapping("/bas-sub/getSub")
     R<Map<String, List<BasSubWrapperVO>>> getSub(@RequestParam("code") String code);

@@ -21,22 +21,30 @@
         <result column="treatment_properties_code" property="treatmentPropertiesCode"/>
         <result column="responsibility_area" property="responsibilityArea"/>
         <result column="responsibility_area_code" property="responsibilityAreaCode"/>
-        <result column="warehouse_name" property="warehouseName"/>
-        <result column="warehouse_code" property="warehouseCode"/>
-        <result column="compensation_payment_flag" property="compensationPaymentFlag"/>
-        <result column="no_compensation_flag" property="noCompensationFlag"/>
-        <result column="compensation_payment_arrived_flag" property="compensationPaymentArrivedFlag"/>
-        <result column="product_type_name" property="productTypeName"/>
-        <result column="product_type_code" property="productTypeCode"/>
-        <result column="order_no" property="orderNo"/>
-        <result column="order_type" property="orderType"/>
-        <result column="currency_code" property="currencyCode"/>
-        <result column="currency_name" property="currencyName"/>
-        <result column="amount" property="amount"/>
+        <result column="standard_payout" property="standardPayout"/>
+        <result column="additional_payout" property="additionalPayout"/>
         <result column="compensation_payment_currency" property="compensationPaymentCurrency"/>
         <result column="compensation_payment_currency_code" property="compensationPaymentCurrencyCode"/>
-        <result column="compensation_payment_amount" property="compensationPaymentAmount"/>
+        <result column="compensation_payment_flag" property="compensationPaymentFlag"/>
+        <result column="payout_amount" property="payoutAmount"/>
+        <result column="no_compensation_flag" property="noCompensationFlag"/>
+        <result column="compensation_payment_arrived_flag" property="compensationPaymentArrivedFlag"/>
+        <result column="warehouse_name" property="warehouseName"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="business_type_name" property="businessTypeName"/>
+        <result column="business_type_code" property="businessTypeCode"/>
+        <result column="business_details" property="businessDetails"/>
+        <result column="fee_type_name" property="feeTypeName"/>
+        <result column="fee_type_code" property="feeTypeCode"/>
+        <result column="fee_category_name" property="feeCategoryName"/>
+        <result column="fee_category_code" property="feeCategoryCode"/>
         <result column="num" property="num"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="process_no" property="processNo"/>
+        <result column="order_type" property="orderType"/>
+        <result column="amount" property="amount"/>
+        <result column="currency_code" property="currencyCode"/>
+        <result column="currency_name" property="currencyName"/>
         <result column="attributes" property="attributes"/>
         <result column="attributes_code" property="attributesCode"/>
         <result column="attachment" property="attachment"/>
@@ -46,15 +54,13 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        create_by_name,create_time,update_by_name,update_time,remark,
-        id, audit_status, audit_time, reviewer_id, reviewer_code, reviewer_name, cus_id, cus_code, cus_name,
-        treatment_properties, treatment_properties_code, responsibility_area, responsibility_area_code,
-        warehouse_name, warehouse_code, compensation_payment_flag, no_compensation_flag,
-        compensation_payment_arrived_flag, product_type_name, product_type_code, order_no, order_type,
-        currency_code, currency_name, amount, compensation_payment_currency, compensation_payment_currency_code,
-        compensation_payment_amount, num, attributes, attributes_code, attachment, create_by, update_by
+        create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, audit_status, audit_time, reviewer_id, reviewer_code, reviewer_name, cus_id, cus_code, cus_name, treatment_properties, treatment_properties_code, responsibility_area, responsibility_area_code, standard_payout, additional_payout, compensation_payment_currency, compensation_payment_currency_code, compensation_payment_flag, payout_amount, no_compensation_flag, compensation_payment_arrived_flag, warehouse_name, warehouse_code, business_type_name, business_type_code, business_details, fee_type_name, fee_type_code, fee_category_name, fee_category_code, num, order_no, process_no, order_type, amount, currency_code, currency_name, attributes, attributes_code, attachment, create_by, update_by
     </sql>
-
     <select id="selectRequestList" resultType="com.szmsd.finance.vo.RefundRequestListVO">
         SELECT
         <include refid="Base_Column_List"/>

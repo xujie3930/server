@@ -1,10 +1,12 @@
 package com.szmsd.auth;
 
 import com.szmsd.common.security.annotation.EnableCustomConfig;
+import com.szmsd.common.security.annotation.EnableRyFeignClients;
+import com.szmsd.common.security.config.ResourceServerConfig;
 import com.szmsd.common.swagger.annotation.EnableCustomSwagger2;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.client.SpringCloudApplication;
-import com.szmsd.common.security.annotation.EnableRyFeignClients;
 
 /**
  * 认证授权中心
@@ -15,6 +17,7 @@ import com.szmsd.common.security.annotation.EnableRyFeignClients;
 @EnableCustomSwagger2
 @EnableRyFeignClients
 @SpringCloudApplication
+@EnableAutoConfiguration(exclude = {ResourceServerConfig.class})
 public class SzmsdAuthApplication
 {
     public static void main(String[] args)

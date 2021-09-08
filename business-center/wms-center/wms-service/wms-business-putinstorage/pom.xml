@@ -112,6 +112,10 @@
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-inventory-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-chargerules-api</artifactId>
+        </dependency>
 
     </dependencies>
 
