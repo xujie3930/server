@@ -513,19 +513,14 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public void updateUserCredit(UserCreditDTO userCreditDTO) {
         log.info("更新用户授信额度信息 {}", userCreditDTO);
         AccountBalance accountBalanceBefore = accountBalanceMapper.selectOne(Wrappers.<AccountBalance>lambdaQuery()
-                .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode()))
-                .setCurrencyCode(userCreditDTO.getCurrencyCode());
-        AssertUtil.notNull(accountBalanceBefore, "该用户没有此币别账户");
-        Integer integer = accountBalanceMapper.selectCount(Wrappers.<AccountBalance>lambdaQuery()
                 .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode())
-                .ne(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode())
-                .isNotNull(AccountBalance::getCreditType)
-        );
-        AssertUtil.isTrue(integer==0,"该账户已激活其他币别信用额,暂不支持修改");
-        log.info("更新用户授信额度信息 - before {}", JSONObject.toJSONString(accountBalanceBefore));
+        .eq(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode()));
+        AssertUtil.notNull(accountBalanceBefore, "该用户没有此币别账户");
+
         LambdaUpdateWrapper<AccountBalance> updateWrapper = Wrappers.<AccountBalance>lambdaUpdate()
                 .eq(AccountBalance::getCurrencyCode, userCreditDTO.getCurrencyCode())
                 .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode())
+                .set(AccountBalance::getCreditStatus,CreditConstant.CreditStatusEnum.ACTIVE.getValue())
                 .last("LIMIT 1");
         if (null == userCreditDTO.getCreditType()) {
             int update = accountBalanceMapper.update(new AccountBalance(), updateWrapper
@@ -534,16 +529,31 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             );
             log.info("禁用用户授信额度{}- {}条", userCreditDTO, update);
         } else {
+            AssertUtil.notNull(userCreditDTO.getCreditLine(),"金额不能为空");
             Integer creditType = userCreditDTO.getCreditType();
             CreditConstant.CreditTypeEnum thisByTypeCode = CreditConstant.CreditTypeEnum.getThisByTypeCode(creditType);
             switch (thisByTypeCode) {
                 case QUOTA:
+                    Integer integer = accountBalanceMapper.selectCount(Wrappers.<AccountBalance>lambdaQuery()
+                            .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode())
+                            .ne(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode())
+                            .eq(AccountBalance::getCreditType,CreditConstant.CreditTypeEnum.QUOTA.getValue())
+                    );
+                    AssertUtil.isTrue(integer==0,"该账户已激活其他币别信用额,暂不支持修改");
+                    log.info("更新用户授信额度信息 - before {}", JSONObject.toJSONString(accountBalanceBefore));
                     int update = accountBalanceMapper.update(new AccountBalance(), updateWrapper
                             .set(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.QUOTA.getValue())
+                            .set(AccountBalance::getCreditLine,userCreditDTO.getCreditLine())
                     );
                     log.info("设置授信额度{}- {}条", userCreditDTO, update);
                     return;
                 case TIME_LIMIT:
+                    Integer integer2 = accountBalanceMapper.selectCount(Wrappers.<AccountBalance>lambdaQuery()
+                            .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode())
+                            .ne(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode())
+                            .eq(AccountBalance::getCreditType,CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
+                    );
+                    AssertUtil.isTrue(integer2==0,"该账户已激活其他币别信用期限,暂不支持修改");
                     AssertUtil.notNull(userCreditDTO.getCreditTimeInterval(), "授信期限不能为空");
                     AssertUtil.isTrue(userCreditDTO.getCreditTimeInterval() >= 3, "授信期限不能小于3天");
                     boolean newCreate = accountBalanceBefore.getCreditBeginTime() == null;

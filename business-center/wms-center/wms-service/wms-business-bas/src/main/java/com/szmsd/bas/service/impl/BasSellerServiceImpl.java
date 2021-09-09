@@ -395,7 +395,9 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
 
             UserCreditDTO userCreditDTO = new UserCreditDTO();
             BeanUtils.copyProperties(basSellerInfoDto, userCreditDTO);
-            rechargesFeignService.updateUserCredit(userCreditDTO);
+            userCreditDTO.setCusCode(basSellerInfoDto.getSellerCode());
+            R r1 = rechargesFeignService.updateUserCredit(userCreditDTO);
+            AssertUtil.isTrue(r1.getCode()==HttpStatus.SUCCESS,r1.getMsg());
 
             return baseMapper.updateById(basSeller);
         }

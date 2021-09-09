@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.Getter;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -29,7 +31,7 @@ public class UserCreditDTO {
     @ApiModelProperty(value = "授信类型(0：额度，1：期限)")
     @Excel(name = "授信类型(0：额度，1：期限)")
     private Integer creditType;
-
+    @DecimalMin(value = "0", message = "授信额度不能小于0")
     @ApiModelProperty(value = "授信额度")
     @Excel(name = "授信额度")
     private BigDecimal creditLine;

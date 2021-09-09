@@ -43,18 +43,20 @@ public class BalanceDTO {
      * @param amount 余额
      * @return 处理结果
      */
-    public Boolean checkAmountAndCreditAndSet(BigDecimal amount, boolean updateCredit, BiFunction<BalanceDTO, BigDecimal, Boolean> function) {
+    public Boolean checkAndSetAmountAndCreditAnd(BigDecimal amount, boolean updateCredit, BiFunction<BalanceDTO, BigDecimal, Boolean> function) {
         CreditInfoBO creditInfoBO = this.creditInfoBO;
         Integer creditStatus = creditInfoBO.getCreditStatus();
-        if (CreditConstant.CreditStatusEnum.ACTIVE.getValue().equals(creditStatus) && updateCredit) {
+        if (CreditConstant.CreditStatusEnum.ACTIVE.getValue().equals(creditStatus)) {
             if (this.currentBalance.compareTo(amount) >= 0) {
                 if (null != function) return function.apply(this, amount);
             } else {
+                boolean b = false;
                 //余额不足扣减，使用授信额度
-                if (null != function) function.apply(this, this.currentBalance);
+                if (null != function) function.apply(this, amount);
                 //把余额全部冻结 剩余需要扣除的钱
                 BigDecimal needDeducted = amount.subtract(this.currentBalance);
-                this.creditInfoBO.changeCreditAmount(needDeducted);
+                b = this.creditInfoBO.changeCreditAmount(needDeducted, updateCredit);
+                return b;
             }
         } else {
             //正常逻辑走
@@ -96,12 +98,9 @@ public class BalanceDTO {
      * @return 是否扣减成功
      */
     public boolean freeze(BigDecimal amount) {
-        if (this.currentBalance.compareTo(amount) >= 0) {
-            this.currentBalance = this.currentBalance.subtract(amount);
-            this.freezeBalance = this.freezeBalance.add(amount);
-            return true;
-        }
-        return false;
+        this.currentBalance = this.currentBalance.subtract(amount);
+        this.freezeBalance = this.freezeBalance.add(amount);
+        return true;
     }
 
     /**
