@@ -44,7 +44,7 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
                     return false;
                 }
                 BalanceDTO result = calculateBalance(oldBalance, changeAmount);*/
-                if (dto.getPayType() == BillEnum.PayType.PAYMENT_NO_FREEZE &&!oldBalance.checkAmountAndCreditAndSet(changeAmount,true,BalanceDTO::pay)){
+                if (dto.getPayType() == BillEnum.PayType.PAYMENT_NO_FREEZE &&!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount,true,BalanceDTO::pay)){
                     return false;
                 }
 

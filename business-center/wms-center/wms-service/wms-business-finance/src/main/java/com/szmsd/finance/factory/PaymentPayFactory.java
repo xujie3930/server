@@ -53,7 +53,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
                         return false;
                     }
                     this.calculateBalance(oldBalance, changeAmount);*/
-                    if (!oldBalance.checkAmountAndCreditAndSet(changeAmount,true,BalanceDTO::pay)){
+                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount,true,BalanceDTO::pay)){
                         return false;
                     }
                 }
@@ -61,7 +61,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     AccountBalanceChange accountBalanceChange = balanceChange.get(0);
                     BigDecimal freeze = accountBalanceChange.getAmountChange();
                     // if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
-                    if (!oldBalance.checkAmountAndCreditAndSet(changeAmount,true, (x, y) -> this.calculateBalance(x, y, freeze, dto))) {
+                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount,true, (x, y) -> this.calculateBalance(x, y, freeze, dto))) {
                         return false;
                     }
                 }

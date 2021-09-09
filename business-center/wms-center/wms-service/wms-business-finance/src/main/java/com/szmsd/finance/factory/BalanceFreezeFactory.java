@@ -98,7 +98,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 throw new CommonException("999", "可用余额不足以冻结，费用：" + changeAmount);
             }
             return true;*/
-            if (!balance.checkAmountAndCreditAndSet(changeAmount,false, BalanceDTO::freeze)) {
+            if (!balance.checkAndSetAmountAndCreditAnd(changeAmount,false, BalanceDTO::freeze)) {
                 throw new CommonException("999", "可用余额不足以冻结，费用：" + changeAmount);
             }
         }
@@ -119,7 +119,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             }
             throw new CommonException("999", "没有找到该单的冻结额。 单号: " + dto.getNo());
         }
-        return false;
+        return true;
     }
 
     private List<AccountBalanceChange> getRecordList(CustPayDTO dto) {
