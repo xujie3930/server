@@ -40,12 +40,16 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
                 //余额不足
-                if (dto.getPayType() == BillEnum.PayType.PAYMENT_NO_FREEZE && oldBalance.getCurrentBalance().compareTo(changeAmount) < 0) {
+                /*if (dto.getPayType() == BillEnum.PayType.PAYMENT_NO_FREEZE && oldBalance.getCurrentBalance().compareTo(changeAmount) < 0) {
                     return false;
                 }
-                BalanceDTO result = calculateBalance(oldBalance, changeAmount);
-                setBalance(dto.getCusCode(), dto.getCurrencyCode(), result);
-                recordOpLog(dto, result.getCurrentBalance());
+                BalanceDTO result = calculateBalance(oldBalance, changeAmount);*/
+                if (dto.getPayType() == BillEnum.PayType.PAYMENT_NO_FREEZE &&!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount,true,BalanceDTO::pay)){
+                    return false;
+                }
+
+                setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance);
+                recordOpLog(dto, oldBalance.getCurrentBalance());
                 setSerialBillLog(dto);
             }
             return true;

@@ -91,13 +91,16 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             if (accountBalanceChanges.size() > 0) {
                 throw new CommonException("999", "该单已存在冻结额，单号：" + dto.getNo());
             }
-            balance.setCurrentBalance(balance.getCurrentBalance().subtract(changeAmount));
+            /*balance.setCurrentBalance(balance.getCurrentBalance().subtract(changeAmount));
             balance.setFreezeBalance(balance.getFreezeBalance().add(changeAmount));
             boolean result = BigDecimal.ZERO.compareTo(balance.getCurrentBalance()) <= 0;
             if(!result) {
                 throw new CommonException("999", "可用余额不足以冻结，费用：" + changeAmount);
             }
-            return true;
+            return true;*/
+            if (!balance.checkAndSetAmountAndCreditAnd(changeAmount,false, BalanceDTO::freeze)) {
+                throw new CommonException("999", "可用余额不足以冻结，费用：" + changeAmount);
+            }
         }
         if (BillEnum.PayMethod.BALANCE_THAW == dto.getPayMethod()) {
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
@@ -116,7 +119,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             }
             throw new CommonException("999", "没有找到该单的冻结额。 单号: " + dto.getNo());
         }
-        return false;
+        return true;
     }
 
     private List<AccountBalanceChange> getRecordList(CustPayDTO dto) {

@@ -27,6 +27,7 @@ import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -35,6 +36,9 @@ import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.UserCreditDTO;
+import com.szmsd.finance.vo.UserCreditInfoVO;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SellerRequest;
 import com.szmsd.http.vo.ResponseVO;
@@ -46,6 +50,7 @@ import com.szmsd.system.api.feign.RemoteUserService;
 import com.szmsd.system.api.model.UserInfo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -92,6 +97,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
 
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
+    @Resource
+    private RechargesFeignService rechargesFeignService;
 
         /**
         * 查询模块
@@ -318,6 +325,12 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 basSellerInfoVO.setDocumentsFiles(documentsFiles);
             }
             basSellerInfoVO.setBasSellerCertificateList(basSellerCertificateVOS);
+
+            R<UserCreditInfoVO> userCreditInfoVOR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
+            if (userCreditInfoVOR.getCode()==HttpStatus.SUCCESS){
+                UserCreditInfoVO data = userCreditInfoVOR.getData();
+                BeanUtils.copyProperties(data,basSellerInfoVO);
+            }
             return basSellerInfoVO;
         }
 
@@ -379,6 +392,13 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(basSellerInfoDto.getId().toString()).businessItemNo(null).fileList(basSellerInfoDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SELLER_IMAGE).build();
                 this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
             }
+
+            UserCreditDTO userCreditDTO = new UserCreditDTO();
+            BeanUtils.copyProperties(basSellerInfoDto, userCreditDTO);
+            userCreditDTO.setCusCode(basSellerInfoDto.getSellerCode());
+            R r1 = rechargesFeignService.updateUserCredit(userCreditDTO);
+            AssertUtil.isTrue(r1.getCode()==HttpStatus.SUCCESS,r1.getMsg());
+
             return baseMapper.updateById(basSeller);
         }
 

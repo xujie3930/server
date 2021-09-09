@@ -123,8 +123,15 @@ public class SysUserServiceImpl implements ISysUserService {
                 // 处理无任何权限时，能查到数据的问题
                 List<String> permissions = sysUser.getPermissions();
                 if (CollectionUtils.isEmpty(permissions)) {
+                    // 只能查询自己的数据
+                    String permission;
+                    if (StringUtils.isNotEmpty(sysUser.getSellerCode())) {
+                        permission = sysUser.getSellerCode();
+                    } else {
+                        permission = "0";
+                    }
                     permissions = new ArrayList<>();
-                    permissions.add("0");
+                    permissions.add(permission);
                     sysUser.setPermissions(permissions);
                 }
             }
