@@ -101,7 +101,7 @@ public class FssRefundRequest extends BaseEntity {
 
     @ApiModelProperty(value = "供应商是否完成赔付（0：未完成，1：已完成）")
     @Excel(name = "供应商是否完成赔付（0：未完成，1：已完成）")
-    private Boolean compensationPaymentFlag;
+    private String compensationPaymentFlag;
 
     @ApiModelProperty(value = "赔付金额")
     @Excel(name = "赔付金额")
@@ -109,11 +109,11 @@ public class FssRefundRequest extends BaseEntity {
 
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
     @Excel(name = "供应商确认不赔付（0：否，1：是）")
-    private Boolean noCompensationFlag;
+    private String noCompensationFlag;
 
     @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
     @Excel(name = "供应商确认赔付未到账（0：否，1：是）")
-    private Boolean compensationPaymentArrivedFlag;
+    private String compensationPaymentArrivedFlag;
 
     @ApiModelProperty(value = "所属仓库")
     @Excel(name = "所属仓库")
@@ -134,6 +134,9 @@ public class FssRefundRequest extends BaseEntity {
     @ApiModelProperty(value = "业务明细")
     @Excel(name = "业务明细")
     private String businessDetails;
+    @ApiModelProperty(value = "业务明细编码")
+    @Excel(name = "业务明细编码")
+    private String businessDetailsCode;
 
     @ApiModelProperty(value = "费用类型")
     @Excel(name = "费用类型")
