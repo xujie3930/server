@@ -78,7 +78,7 @@ public class FssRefundRequestController extends BaseController {
     {
         list = new ArrayList<>(1);
         RefundRequestDTO refundRequestDTO = new RefundRequestDTO();
-        refundRequestDTO.setAmount(new BigDecimal("12.1"));
+        refundRequestDTO.setAmount(new BigDecimal("12.1")).setCompensationPaymentFlag("是");
         list.add(refundRequestDTO);
     }
 

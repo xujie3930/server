@@ -34,6 +34,7 @@
         <result column="business_type_name" property="businessTypeName"/>
         <result column="business_type_code" property="businessTypeCode"/>
         <result column="business_details" property="businessDetails"/>
+        <result column="business_details_code" property="businessDetailsCode"/>
         <result column="fee_type_name" property="feeTypeName"/>
         <result column="fee_type_code" property="feeTypeCode"/>
         <result column="fee_category_name" property="feeCategoryName"/>
@@ -59,7 +60,7 @@
                 update_by_name,
                 update_time,
                 remark,
-            id, audit_status, audit_time, reviewer_id, reviewer_code, reviewer_name, cus_id, cus_code, cus_name, treatment_properties, treatment_properties_code, responsibility_area, responsibility_area_code, standard_payout, additional_payout, compensation_payment_currency, compensation_payment_currency_code, compensation_payment_flag, payout_amount, no_compensation_flag, compensation_payment_arrived_flag, warehouse_name, warehouse_code, business_type_name, business_type_code, business_details, fee_type_name, fee_type_code, fee_category_name, fee_category_code, num, order_no, process_no, order_type, amount, currency_code, currency_name, attributes, attributes_code, attachment, create_by, update_by
+            id, audit_status, audit_time, reviewer_id, reviewer_code, reviewer_name, cus_id, cus_code, cus_name, treatment_properties, treatment_properties_code, responsibility_area, responsibility_area_code, standard_payout, additional_payout, compensation_payment_currency, compensation_payment_currency_code, compensation_payment_flag, payout_amount, no_compensation_flag, compensation_payment_arrived_flag, warehouse_name, warehouse_code, business_type_name, business_type_code, business_details,business_details_code, fee_type_name, fee_type_code, fee_category_name, fee_category_code, num, order_no, process_no, order_type, amount, currency_code, currency_name, attributes, attributes_code, attachment, create_by, update_by
     </sql>
     <select id="selectRequestList" resultType="com.szmsd.finance.vo.RefundRequestListVO">
         SELECT

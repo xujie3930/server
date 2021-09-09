@@ -1,11 +1,13 @@
 package com.szmsd.finance.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.finance.compont.ConfigData;
+import com.szmsd.finance.compont.IRemoteApi;
 import com.szmsd.finance.config.ExportValid;
 import com.szmsd.finance.config.FileVerifyUtil;
 import com.szmsd.finance.domain.FssRefundRequest;
@@ -14,23 +16,22 @@ import com.szmsd.finance.dto.RefundRequestDTO;
 import com.szmsd.finance.dto.RefundRequestListDTO;
 import com.szmsd.finance.dto.RefundRequestQueryDTO;
 import com.szmsd.finance.enums.RefundStatusEnum;
-import com.szmsd.finance.enums.ReviewStatusEnum;
 import com.szmsd.finance.mapper.RefundRequestMapper;
 import com.szmsd.finance.service.IRefundRequestService;
 import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.finance.vo.RefundRequestVO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.Ref;
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, FssRefundRequest> implements IRefundRequestService {
+    @Resource
+    private IRemoteApi remoteApi;
 
     @Override
     public List<RefundRequestListVO> selectRequestList(RefundRequestQueryDTO queryDTO) {
@@ -95,12 +98,15 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int importByTemplate(MultipartFile file) {
         List<RefundRequestDTO> basPackingAddList = FileVerifyUtil.importExcel(file, RefundRequestDTO.class);
         handleInsertData(basPackingAddList, true);
-        this.insertBatchRefundRequest(basPackingAddList);
-        return 1;
+        return this.insertBatchRefundRequest(basPackingAddList);
     }
+
+    @Resource
+    private ConfigData configData;
 
     public void handleInsertData(List<RefundRequestDTO> basPackingAddList, Boolean isExport) {
         AssertUtil.isTrue(CollectionUtils.isNotEmpty(basPackingAddList), "数据异常,请重新新增!");
@@ -108,6 +114,32 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             //检验规则
             AtomicInteger importNo = new AtomicInteger(1);
             basPackingAddList.forEach(basSellAccountPeriodAddDTO -> FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo, ExportValid.class));
+            basPackingAddList.forEach(x -> {
+                // 处理性质	责任地区	所属仓库 业务类型	业务明细	费用类型	费用明细 属性
+                ConfigData.MainSubCode mainSubCode = configData.getMainSubCode();
+                
+                x.setTreatmentPropertiesCode(remoteApi.getSubCode(mainSubCode.getTreatmentProperties(), x.getTreatmentProperties()));
+                
+                x.setResponsibilityAreaCode(remoteApi.getSubCode(mainSubCode.getResponsibilityArea(), x.getResponsibilityArea()));
+
+                BasSub businessTypeObj = remoteApi.getSubCodeObj(mainSubCode.getBusinessType(), x.getBusinessTypeName());
+                x.setBusinessTypeCode(businessTypeObj.getSubCode());
+                String subValue = businessTypeObj.getSubValue();
+                x.setBusinessDetailsCode(remoteApi.getSubCode(subValue, x.getBusinessDetails()));
+
+                BasSub feeTypeSubCodeObj = remoteApi.getSubCodeObj(mainSubCode.getTypesOfFee(), x.getFeeTypeName());
+                x.setFeeTypeCode(feeTypeSubCodeObj.getSubCode());
+                String feeTypeSubValue = feeTypeSubCodeObj.getSubValue();
+                x.setFeeCategoryCode(remoteApi.getSubCode(feeTypeSubValue, x.getFeeCategoryName()));
+
+                x.setAttributesCode(remoteApi.getSubCode(mainSubCode.getProperty(), x.getAttributes()));
+                // 供应商是否完成赔付
+                String compensationPaymentFlag = Optional.ofNullable(x.getCompensationPaymentFlag()).map(z -> {
+                    if ("是".equals(z)) return "1";
+                    return "0";
+                }).orElse("0");
+                x.setCompensationPaymentFlag(compensationPaymentFlag);
+            });
         }
     }
 
@@ -140,6 +172,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
      * @param status 审核状态
      * @param idList 审核id集合
      */
+    @Transactional(rollbackFor = Exception.class)
     public void afterApprove(RefundStatusEnum status, List<String> idList) {
         if (RefundStatusEnum.COMPLETE != status) return;
         log.info("审核通过-进行相应的越扣减 {}", idList);
