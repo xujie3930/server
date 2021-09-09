@@ -299,7 +299,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         calcShipmentFeeCommand.setAddressValifition(true);
         // 产品代码就是选择的物流承运商
         calcShipmentFeeCommand.setProductCode(delOutbound.getShipmentRule());
-        calcShipmentFeeCommand.setClientCode(delOutbound.getCustomCode());
+        if (StringUtils.isNotEmpty(delOutbound.getCustomCode())) {
+            calcShipmentFeeCommand.setClientCode(delOutbound.getCustomCode());
+        } else {
+            calcShipmentFeeCommand.setClientCode(delOutbound.getSellerCode());
+        }
         calcShipmentFeeCommand.setShipmentType(delOutbound.getShipmentType());
         calcShipmentFeeCommand.setIoss(delOutbound.getIoss());
         calcShipmentFeeCommand.setPackageInfos(packageInfos);
