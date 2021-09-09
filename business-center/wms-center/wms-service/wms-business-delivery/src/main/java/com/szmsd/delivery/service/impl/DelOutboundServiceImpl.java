@@ -1073,17 +1073,23 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("999", "操作异常，请求参数不合法");
         }
         List<DelOutbound> outboundList;
+        int cancelSize;
         if (CollectionUtils.isNotEmpty(ids)) {
             // 根据ids查询单据
             outboundList = this.listByIds(ids);
+            cancelSize = ids.size();
         } else {
             // 根据订单号查询单据
             LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.in(DelOutbound::getOrderNo, orderNos1);
             outboundList = this.list(queryWrapper);
+            cancelSize = orderNos1.size();
         }
         if (CollectionUtils.isEmpty(outboundList)) {
             throw new CommonException("999", "操作失败，订单不存在");
+        }
+        if (cancelSize != outboundList.size()) {
+            throw new CommonException("999", "操作失败，部分订单不存在");
         }
         List<String> orderNos = new ArrayList<>();
         String warehouseCode = outboundList.get(0).getWarehouseCode();
