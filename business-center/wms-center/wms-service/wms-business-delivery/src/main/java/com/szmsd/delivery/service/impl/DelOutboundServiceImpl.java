@@ -1125,6 +1125,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 修改状态未已取消
             LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
             updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
+            // 把异常信息也清空
+            updateWrapper.set(DelOutbound::getExceptionState, DelOutboundExceptionStateEnum.NORMAL.getCode());
+            updateWrapper.set(DelOutbound::getExceptionMessage, "");
             updateWrapper.in(DelOutbound::getOrderNo, reviewedList);
             this.update(updateWrapper);
             // 取消冻结的数据
