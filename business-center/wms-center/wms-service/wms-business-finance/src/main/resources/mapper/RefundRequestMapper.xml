@@ -65,5 +65,52 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM fss_refund_request
+        <where>
+            <if test="createTimeStart != null and createTimeEnd != null">
+                AND create_time BETWEEN #{createTimeStart} AND #{createTimeEnd}
+            </if>
+            <if test="processNoList != null and processNoList.size() > 0">
+                AND process_no IN
+                <foreach collection="processNoList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="orderNoList != null and orderNoList.size() > 0">
+                AND order_no IN
+                <foreach collection="orderNoList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="cusCode != null and cusCode != ''">
+                AND cus_code = #{cusCode}
+            </if>
+            <if test="createByName != null and createByName != ''">
+                AND create_by_name = #{createByName}
+            </if>
+            <if test="attributes != null and attributes != ''">
+                AND attributes like concat('%',#{attributes},'%')
+            </if>
+            <if test="auditTimeStart != null and auditTimeEnd != null">
+                AND audit_time BETWEEN #{auditTimeStart} AND #{auditTimeEnd}
+            </if>
+            <if test="businessTypeName != null and businessTypeName != ''">
+                AND business_type_name = #{businessTypeName}
+            </if>
+            <if test="businessTypeCode != null and businessTypeCode != ''">
+                AND business_type_code = #{businessTypeCode}
+            </if>
+            <if test="responsibilityArea != null and responsibilityArea != ''">
+                AND responsibility_area = #{responsibilityArea}
+            </if>
+            <if test="responsibilityAreaCode != null and responsibilityAreaCode != ''">
+                AND responsibility_area_code = #{responsibilityAreaCode}
+            </if>
+            <if test="treatmentProperties != null and treatmentProperties != ''">
+                AND treatment_properties = #{treatmentProperties}
+            </if>
+            <if test="treatmentPropertiesCode != null and treatmentPropertiesCode != ''">
+                AND treatment_properties_code = #{treatmentPropertiesCode}
+            </if>
+        </where>
     </select>
 </mapper>

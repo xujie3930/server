@@ -6,10 +6,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
-import com.szmsd.finance.dto.ConfirmOperationDTO;
-import com.szmsd.finance.dto.RefundRequestDTO;
-import com.szmsd.finance.dto.RefundRequestListDTO;
-import com.szmsd.finance.dto.RefundRequestQueryDTO;
+import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.RefundStatusEnum;
 import com.szmsd.finance.enums.ReviewStatusEnum;
 import com.szmsd.finance.service.IRefundRequestService;
@@ -88,7 +85,7 @@ public class FssRefundRequestController extends BaseController {
     @PreAuthorize("@ss.hasPermi('FssRefundRequest:FssRefundRequest:export')")
     @Log(title = "退费记录表模块", businessType = BusinessType.EXPORT)
     @GetMapping("/exportTemplate")
-    @ApiOperation(value = "导出模板", notes = "导出模板")
+    @ApiOperation(value = "导出-导入模板", notes = "导出模板")
     public void exportTemplate(HttpServletResponse response) {
         ExcelUtil<RefundRequestDTO> util = new ExcelUtil<>(RefundRequestDTO.class);
         util.exportExcel(response, list, "退费申请模板-" + LocalDate.now());

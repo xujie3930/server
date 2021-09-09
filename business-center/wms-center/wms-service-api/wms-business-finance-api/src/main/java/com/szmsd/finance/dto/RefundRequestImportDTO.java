@@ -21,7 +21,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @ApiModel(description = "退款申请新增修改对象")
-public class RefundRequestDTO {
+public class RefundRequestImportDTO {
 
     @ApiModelProperty(value = "id")
     private Integer id;
@@ -43,6 +43,7 @@ public class RefundRequestDTO {
     private String treatmentProperties;
 
     @ApiModelProperty(value = "处理性质编码")
+    @Excel(name = "处理性质编码")
     private String treatmentPropertiesCode;
 
     @ApiModelProperty(value = "责任地区")
@@ -50,21 +51,27 @@ public class RefundRequestDTO {
     private String responsibilityArea;
 
     @ApiModelProperty(value = "责任地区编码")
+    @Excel(name = "责任地区编码")
     private String responsibilityAreaCode;
 
     @ApiModelProperty(value = "标准赔付")
+    @Excel(name = "标准赔付")
     private String standardPayout;
 
     @ApiModelProperty(value = "额外赔付")
+    @Excel(name = "额外赔付")
     private String additionalPayout;
 
     @ApiModelProperty(value = "赔付币别")
+    @Excel(name = "赔付币别")
     private String compensationPaymentCurrency;
 
     @ApiModelProperty(value = "赔付币别编码")
+    @Excel(name = "赔付币别编码")
     private String compensationPaymentCurrencyCode;
 
     @ApiModelProperty(value = "供应商是否完成赔付（0：未完成，1：已完成）")
+    @Excel(name = "供应商是否完成赔付（0：未完成，1：已完成）")
     private Boolean compensationPaymentFlag;
 
     @ApiModelProperty(value = "赔付金额")
@@ -72,9 +79,11 @@ public class RefundRequestDTO {
     private String payoutAmount;
 
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
+    @Excel(name = "供应商确认不赔付（0：否，1：是）")
     private Boolean noCompensationFlag;
 
     @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
+    @Excel(name = "供应商确认赔付未到账（0：否，1：是）")
     private Boolean compensationPaymentArrivedFlag;
 
     @ApiModelProperty(value = "所属仓库")
@@ -82,6 +91,7 @@ public class RefundRequestDTO {
     private String warehouseName;
 
     @ApiModelProperty(value = "所属仓库编码")
+    @Excel(name = "所属仓库编码")
     private String warehouseCode;
 
     @ApiModelProperty(value = "业务类型")
@@ -89,6 +99,7 @@ public class RefundRequestDTO {
     private String businessTypeName;
 
     @ApiModelProperty(value = "业务类型编码")
+    @Excel(name = "业务类型编码")
     private String businessTypeCode;
 
     @ApiModelProperty(value = "业务明细")
@@ -100,6 +111,7 @@ public class RefundRequestDTO {
     private String feeTypeName;
 
     @ApiModelProperty(value = "费用类型编码")
+    @Excel(name = "费用类型编码")
     private String feeTypeCode;
 
     @ApiModelProperty(value = "费用类别")
@@ -107,6 +119,7 @@ public class RefundRequestDTO {
     private String feeCategoryName;
 
     @ApiModelProperty(value = "费用类别编码")
+    @Excel(name = "费用类别编码")
     private String feeCategoryCode;
 
     @ApiModelProperty(value = "数量")
