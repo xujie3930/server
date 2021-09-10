@@ -109,6 +109,7 @@ public class DeliveryController {
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
+        canceledDto.setOrderType(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -148,6 +149,7 @@ public class DeliveryController {
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
+        canceledDto.setOrderType(DelOutboundOrderTypeEnum.NORMAL);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -184,6 +186,7 @@ public class DeliveryController {
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
+        canceledDto.setOrderType(DelOutboundOrderTypeEnum.COLLECTION);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -257,6 +260,7 @@ public class DeliveryController {
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
+        canceledDto.setOrderType(DelOutboundOrderTypeEnum.BATCH);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -312,6 +316,7 @@ public class DeliveryController {
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
+        canceledDto.setOrderType(DelOutboundOrderTypeEnum.SELF_PICK);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -343,6 +348,7 @@ public class DeliveryController {
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
+        canceledDto.setOrderType(DelOutboundOrderTypeEnum.DESTROY);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 }
