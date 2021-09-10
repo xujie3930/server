@@ -358,6 +358,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 sellerCode = delOutbound.getCustomCode();
             } else {
                 sellerCode = delOutbound.getSellerCode();
+                // 兼容
+                delOutbound.setCustomCode(sellerCode);
             }
             if (StringUtils.isEmpty(sellerCode)) {
                 throw new CommonException("999", "操作失败，客户代码不能为空");
