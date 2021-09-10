@@ -35,6 +35,8 @@ import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.datascope.annotation.DataScope;
+import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.UserCreditDTO;
@@ -127,6 +129,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
         QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"o.user_name",basSeller.getUserName());
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            if (!loginUser.isAllDataScope()) {
+                String username = loginUser.getUsername();
+                where.and(x -> x.eq("o.service_manager_name", username).or().eq("o.service_staff_name",username));
+            }
         int count = baseMapper.countBasSeller(where,basSeller.getReviewState());
        /* where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());*/
         List<BasSellerSysDto> basSellerSysDtos = baseMapper.selectBasSeller(where,basSeller.getReviewState(),(basSeller.getPageNum()-1)*basSeller.getPageSize(),basSeller.getPageSize());
