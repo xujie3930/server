@@ -1082,6 +1082,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 根据订单号查询单据
             LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.in(DelOutbound::getOrderNo, orderNos1);
+            if (null != dto.getOrderType()) {
+                queryWrapper.eq(DelOutbound::getOrderType, dto.getOrderType().getCode());
+            }
             outboundList = this.list(queryWrapper);
             cancelSize = orderNos1.size();
         }
