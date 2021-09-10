@@ -1,15 +1,13 @@
 package com.szmsd.finance.vo;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -30,7 +28,7 @@ public class RefundRequestVO {
 
     @ApiModelProperty(value = "id")
     private Integer id;
-
+@FieldJsonI18n
     @ApiModelProperty(value = "处理编号")
     @Excel(name = "处理编号")
     private String processNo;
@@ -81,6 +79,10 @@ public class RefundRequestVO {
     @ApiModelProperty(value = "业务明细")
     @Excel(name = "业务明细")
     private String businessDetails;
+
+    @ApiModelProperty(value = "业务明细编码")
+    @Excel(name = "业务明细编码")
+    private String businessDetailsCode;
 
     @ApiModelProperty(value = "费用类型")
     @Excel(name = "费用类型")

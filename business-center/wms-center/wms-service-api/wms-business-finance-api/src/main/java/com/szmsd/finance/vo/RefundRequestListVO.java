@@ -81,6 +81,8 @@ public class RefundRequestListVO {
     @ApiModelProperty(value = "业务明细")
     @Excel(name = "业务明细")
     private String businessDetails;
+    @ApiModelProperty(value = "业务明细编码")
+    private String businessDetailsCode;
 
     @ApiModelProperty(value = "费用类型")
     @Excel(name = "费用类型")
@@ -140,9 +142,7 @@ public class RefundRequestListVO {
     @ApiModelProperty(value = "客户名称")
     private String cusName;
 
-
     @ApiModelProperty(value = "标准赔付")
-    @Excel(name = "标准赔付")
     private String standardPayout;
 
     @ApiModelProperty(value = "额外赔付")
