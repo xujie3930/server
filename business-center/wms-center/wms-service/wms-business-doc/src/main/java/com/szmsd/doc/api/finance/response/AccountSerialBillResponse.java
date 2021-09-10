@@ -82,12 +82,12 @@ public class AccountSerialBillResponse extends FssBaseEntity {
     private String chargeType;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ApiModelProperty(value = "下单时间")
+    @ApiModelProperty(value = "下单时间 yyyy-MM-dd HH:mm:ss")
     @Excel(name = "下单时间")
     private Date orderTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ApiModelProperty(value = "结算时间")
+    @ApiModelProperty(value = "结算时间 yyyy-MM-dd HH:mm:ss")
     @Excel(name = "结算时间")
     private Date paymentTime;
 
