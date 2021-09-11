@@ -348,7 +348,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private void docValid(DelOutboundDto dto) {
         if (DelOutboundConstant.SOURCE_TYPE_DOC.equals(dto.getSourceType())) {
             List<DelOutboundDetailDto> details = dto.getDetails();
-            if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(dto.getOrderType())) {
+            if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(dto.getOrderType())
+                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(dto.getOrderType())
+                    || DelOutboundOrderTypeEnum.BATCH.getCode().equals(dto.getOrderType())
+                    || DelOutboundOrderTypeEnum.DESTROY.getCode().equals(dto.getOrderType())) {
                 if (CollectionUtils.isEmpty(details)) {
                     throw new CommonException("999", "明细信息不能为空");
                 }
