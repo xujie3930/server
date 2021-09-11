@@ -62,7 +62,7 @@ public class SkuApiController {
         return baseProductResp;
     }
 
-//    @PreAuthorize("hasAuthority('client')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("save")
     @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
     public R save(@RequestBody @Validated ProductRequest productRequest) {
@@ -72,7 +72,7 @@ public class SkuApiController {
         return R.ok();
     }
 
-//    @PreAuthorize("hasAuthority('client')")
+    @PreAuthorize("hasAuthority('client')")
     @GetMapping("getBarCode/{sellerCode}/{skuCode}")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sellerCode", value = "用户code", required = true),
