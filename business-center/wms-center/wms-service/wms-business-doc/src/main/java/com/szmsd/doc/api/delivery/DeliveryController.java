@@ -13,6 +13,7 @@ import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
@@ -79,6 +80,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
@@ -125,7 +127,7 @@ public class DeliveryController {
     @PostMapping("/shipment")
     @ApiOperation(value = "#6 出库管理 - 订单创建（一件代发）", position = 400)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundShipmentListRequest", required = true)
-    public R<List<DelOutboundShipmentResponse>> shipment(@RequestBody @Validated DelOutboundShipmentListRequest request) {
+    public R<List<DelOutboundShipmentResponse>> shipment(@RequestBody @Validated(DelOutboundGroup.Normal.class) DelOutboundShipmentListRequest request) {
         List<DelOutboundShipmentRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("999", "请求对象不能为空");
@@ -133,6 +135,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.NORMAL.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundShipmentResponse.class));
@@ -157,7 +160,7 @@ public class DeliveryController {
     @PostMapping("/collection")
     @ApiOperation(value = "#8 出库管理 - 订单创建（集运出库）", position = 500)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCollectionListRequest", required = true)
-    public R<List<DelOutboundCollectionResponse>> collection(@RequestBody @Validated DelOutboundCollectionListRequest request) {
+    public R<List<DelOutboundCollectionResponse>> collection(@RequestBody @Validated(DelOutboundGroup.Collection.class) DelOutboundCollectionListRequest request) {
         List<DelOutboundCollectionRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("999", "请求对象不能为空");
@@ -165,6 +168,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.COLLECTION.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundCollectionResponse.class));
@@ -196,7 +200,7 @@ public class DeliveryController {
     @PostMapping("/batch")
     @ApiOperation(value = "#11 出库管理 - 订单创建（批量出库）", position = 600)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundBatchListRequest", required = true)
-    public R<List<DelOutboundBatchResponse>> batch(@RequestBody @Validated DelOutboundBatchListRequest request) {
+    public R<List<DelOutboundBatchResponse>> batch(@RequestBody @Validated(DelOutboundGroup.Batch.class) DelOutboundBatchListRequest request) {
         List<DelOutboundBatchRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("999", "请求对象不能为空");
@@ -204,6 +208,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.BATCH.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundBatchResponse.class));
@@ -268,7 +273,7 @@ public class DeliveryController {
     @PostMapping("/selfPick")
     @ApiOperation(value = "#15 出库管理 - 订单创建（自提出库）", position = 700)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundSelfPickListRequest", required = true)
-    public R<List<DelOutboundSelfPickResponse>> selfPick(@RequestBody @Validated DelOutboundSelfPickListRequest request) {
+    public R<List<DelOutboundSelfPickResponse>> selfPick(@RequestBody @Validated(DelOutboundGroup.SelfPick.class) DelOutboundSelfPickListRequest request) {
         List<DelOutboundSelfPickRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("999", "请求对象不能为空");
@@ -276,6 +281,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.SELF_PICK.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundSelfPickResponse.class));
@@ -324,7 +330,7 @@ public class DeliveryController {
     @PostMapping("/destroy")
     @ApiOperation(value = "#18 出库管理 - 订单创建（销毁出库）", position = 800)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundDestroyListRequest", required = true)
-    public R<List<DelOutboundDestroyResponse>> destroy(@RequestBody @Validated DelOutboundDestroyListRequest request) {
+    public R<List<DelOutboundDestroyResponse>> destroy(@RequestBody @Validated(DelOutboundGroup.Destroy.class) DelOutboundDestroyListRequest request) {
         List<DelOutboundDestroyRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("999", "请求对象不能为空");
@@ -332,6 +338,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.DESTROY.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundDestroyResponse.class));
