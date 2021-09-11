@@ -19,7 +19,6 @@ import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -39,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Validated
 @Api(tags = {"入库信息"})
@@ -126,7 +123,7 @@ public class InboundApiController extends BaseController {
         return R.ok(result);
     }
 
-    @PreAuthorize("hasAuthority('client')")
+//    @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "取消入库单", notes = "取消仓库还未处理的入库单")
@@ -141,7 +138,7 @@ public class InboundApiController extends BaseController {
         return cancel;
     }
 
-    @PreAuthorize("hasAuthority('client')")
+//    @PreAuthorize("hasAuthority('client')")
     @GetMapping("/getInboundLabel/byOrderNo/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "获取入库标签-通过单号", notes = "根据入库单号，生成标签条形码，返回的为条形码图片的Base64")

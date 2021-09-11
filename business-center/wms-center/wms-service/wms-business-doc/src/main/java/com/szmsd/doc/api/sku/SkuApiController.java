@@ -24,6 +24,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author francis
@@ -48,10 +50,17 @@ public class SkuApiController {
         TableDataInfo<BaseProduct> list = baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
         TableDataInfo<BaseProductResp> baseProductResp = new TableDataInfo<>();
         BeanUtils.copyProperties(list,baseProductResp);
+        List<BaseProduct> rows = list.getRows();
+        List<BaseProductResp> collect = rows.stream().map(x -> {
+            BaseProductResp baseProductResp1 = new BaseProductResp();
+            BeanUtils.copyProperties(x, baseProductResp1);
+            return baseProductResp1;
+        }).collect(Collectors.toList());
+        baseProductResp.setRows(collect);
         return baseProductResp;
     }
 
-//    @PreAuthorize("hasAuthority('client')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("save")
     @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
     public R save(@RequestBody @Validated ProductRequest productRequest){
