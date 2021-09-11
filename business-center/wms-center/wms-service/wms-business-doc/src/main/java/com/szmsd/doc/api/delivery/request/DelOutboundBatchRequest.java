@@ -1,21 +1,21 @@
 package com.szmsd.doc.api.delivery.request;
 
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
+import com.szmsd.doc.validator.annotation.PreNotNull;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 @Data
 @ApiModel(value = "DelOutboundBatchRequest", description = "DelOutboundBatchRequest对象")
+@PreNotNull(field = "deliveryMethod", model = PreNotNull.Model.VALUE, fieldValue = "058002", linkageFields = {"deliveryTime"}, message = "提货时间不能为空", groups = {DelOutboundGroup.Batch.class})
+@PreNotNull(field = "deliveryMethod", model = PreNotNull.Model.VALUE, fieldValue = "058002", linkageFields = {"deliveryAgent"}, message = "提货商/快递商不能为空", groups = {DelOutboundGroup.Batch.class})
 public class DelOutboundBatchRequest implements Serializable {
 
     @NotBlank(message = "客户编码不能为空", groups = {DelOutboundGroup.Batch.class})
@@ -50,7 +50,8 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "增值税号", dataType = "String", position = 7, example = "F00X")
     private String ioss;
 
-    @ApiModelProperty(value = "提货方式", dataType = "String", position = 8, example = "")
+    @NotBlank(message = "提货方式不能为空", groups = {DelOutboundGroup.Batch.class})
+    @ApiModelProperty(value = "提货方式,快递自提:058001,车辆自提:058002", dataType = "String", position = 8, example = "")
     private String deliveryMethod;
 
     @ApiModelProperty(value = "提货时间", dataType = "Date", position = 9, example = "")
@@ -82,6 +83,7 @@ public class DelOutboundBatchRequest implements Serializable {
     private DelOutboundAddressRequest address;
 
     @Valid
+    @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "明细信息", dataType = "DelOutboundDetailRequest", position = 16)
     private List<DelOutboundDetailRequest> details;
 

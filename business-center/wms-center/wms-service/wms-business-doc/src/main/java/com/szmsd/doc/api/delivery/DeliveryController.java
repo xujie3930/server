@@ -209,6 +209,28 @@ public class DeliveryController {
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.BATCH.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
+            // 验证
+            if ("058001".equals(dto.getDeliveryMethod())) {
+                DelOutboundAddressDto address = dto.getAddress();
+                if (null == address) {
+                    throw new CommonException("999", "地址信息不能为空");
+                }
+                if (StringUtils.isEmpty(address.getConsignee())) {
+                    throw new CommonException("999", "收货人不能为空");
+                }
+                if (StringUtils.isEmpty(address.getStreet1())) {
+                    throw new CommonException("999", "街道1不能为空");
+                }
+                if (StringUtils.isEmpty(address.getCountryCode())) {
+                    throw new CommonException("999", "国家不能为空");
+                }
+                if (StringUtils.isEmpty(address.getCountry())) {
+                    throw new CommonException("999", "国家名称不能为空");
+                }
+                if (StringUtils.isEmpty(address.getPostCode())) {
+                    throw new CommonException("999", "邮编不能为空");
+                }
+            }
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundBatchResponse.class));

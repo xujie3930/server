@@ -15,15 +15,15 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value = "DelOutboundDetailRequest", description = "DelOutboundDetailRequest对象")
-@PreNotNull(field = "productAttribute", model = PreNotNull.Model.VALUE, fieldValue = "Battery", linkageFields = {"electrifiedMode", "batteryPackaging"}, message = "带电信息，电池包装不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+@PreNotNull(field = "productAttribute", model = PreNotNull.Model.VALUE, fieldValue = "Battery", linkageFields = {"electrifiedMode", "batteryPackaging"}, message = "带电信息，电池包装不能为空", groups = {DelOutboundGroup.Default.class})
 public class DelOutboundDetailRequest implements Serializable {
 
-    @NotBlank(message = "SKU不能为空", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class, DelOutboundGroup.Collection.class, DelOutboundGroup.Destroy.class, DelOutboundGroup.SelfPick.class})
+    @NotBlank(message = "SKU不能为空", groups = {DelOutboundGroup.Default.class})
     @Size(max = 50, message = "SKU不能超过50个字符", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "SKU", dataType = "String")
     private String sku;
 
-    @NotNull(message = "数量不能为空", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class, DelOutboundGroup.Collection.class, DelOutboundGroup.Destroy.class, DelOutboundGroup.SelfPick.class})
+    @NotNull(message = "数量不能为空", groups = {DelOutboundGroup.Default.class})
     @Max(value = Integer.MAX_VALUE, message = "数量不能大于2147483647", groups = {DelOutboundGroup.Default.class})
     @Min(value = 1, message = "数量不能小于1", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "数量", required = true, dataType = "Long", example = "1")
