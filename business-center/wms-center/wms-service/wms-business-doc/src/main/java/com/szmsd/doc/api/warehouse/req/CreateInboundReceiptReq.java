@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 @Validated
@@ -20,7 +21,8 @@ import java.util.List;
 @ApiModel(value = "CreateInboundReceiptDTO", description = "创建入库单")
 public class CreateInboundReceiptReq extends InboundReceiptReq {
     @Valid
-    @ApiModelProperty(value = "入库明细")
+    @NotEmpty(message = "入库明细不能为空")
+    @ApiModelProperty(value = "入库明细",required = true)
     private List<InboundReceiptDetailDTO> inboundReceiptDetails;
 
 //    @ApiModelProperty(value = "要删除的入库明细id")

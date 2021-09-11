@@ -6,17 +6,16 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.doc.api.sku.request.BaseProductQueryRequest;
 import com.szmsd.doc.api.sku.request.ProductRequest;
 import com.szmsd.doc.api.sku.resp.BaseProductResp;
+import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiSort;
+import io.swagger.annotations.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,13 +42,16 @@ public class SkuApiController {
     private DocSubConfigData docSubConfigData;
     @Resource
     private BasePackingFeignService basePackingFeignService;
+    @Resource
+    private IRemoterApi remoterApi;
+
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("list")
     @ApiOperation(value = "查询列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
-    public TableDataInfo<BaseProductResp> list(@RequestBody BaseProductQueryRequest baseProductQueryRequest){
+    public TableDataInfo<BaseProductResp> list(@Validated @RequestBody BaseProductQueryRequest baseProductQueryRequest) {
         TableDataInfo<BaseProduct> list = baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
         TableDataInfo<BaseProductResp> baseProductResp = new TableDataInfo<>();
-        BeanUtils.copyProperties(list,baseProductResp);
+        BeanUtils.copyProperties(list, baseProductResp);
         List<BaseProduct> rows = list.getRows();
         List<BaseProductResp> collect = rows.stream().map(x -> {
             BaseProductResp baseProductResp1 = new BaseProductResp();
@@ -60,21 +62,27 @@ public class SkuApiController {
         return baseProductResp;
     }
 
-    @PreAuthorize("hasAuthority('client')")
+//    @PreAuthorize("hasAuthority('client')")
     @PostMapping("save")
     @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
-    public R save(@RequestBody @Validated ProductRequest productRequest){
+    public R save(@RequestBody @Validated ProductRequest productRequest) {
         productRequest.validData(docSubConfigData).calculateTheVolume().checkPack(basePackingFeignService);
         BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
         baseProductClientService.add(product);
         return R.ok();
     }
 
-    @PreAuthorize("hasAuthority('client')")
-    @GetMapping("getBarCode")
-    @ApiOperation(value = "SKU标签生成",notes = "生成sku编号，生成标签条形码，返回的为条形码图片的Base64")
-    public R getBarCode(@ApiParam("sku的code") @RequestParam String skuCode){
+//    @PreAuthorize("hasAuthority('client')")
+    @GetMapping("getBarCode/{sellerCode}/{skuCode}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sellerCode", value = "用户code", required = true),
+            @ApiImplicitParam(name = "skuCode", value = "sku", required = true),
+    })
+    @ApiOperation(value = "SKU标签生成", notes = "生成sku编号，生成标签条形码，返回的为条形码图片的Base64")
+    public R getBarCode(@PathVariable("sellerCode") String sellerCode, @PathVariable("skuCode") String skuCode) {
         Boolean valid = baseProductClientService.checkSkuValidToDelivery(skuCode);
+        boolean b = remoterApi.checkSkuBelong(sellerCode, null, skuCode);
+        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否属于用户%s", skuCode, sellerCode));
         return valid ? R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode)) : R.failed("sku不存在");
     }
 
