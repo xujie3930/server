@@ -1,5 +1,6 @@
 package com.szmsd.finance.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasSub;
@@ -15,6 +16,7 @@ import com.szmsd.finance.dto.ConfirmOperationDTO;
 import com.szmsd.finance.dto.RefundRequestDTO;
 import com.szmsd.finance.dto.RefundRequestListDTO;
 import com.szmsd.finance.dto.RefundRequestQueryDTO;
+import com.szmsd.finance.enums.RefundProcessEnum;
 import com.szmsd.finance.enums.RefundStatusEnum;
 import com.szmsd.finance.mapper.RefundRequestMapper;
 import com.szmsd.finance.service.IRefundRequestService;
@@ -117,9 +119,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             basPackingAddList.forEach(x -> {
                 // 处理性质	责任地区	所属仓库 业务类型	业务明细	费用类型	费用明细 属性
                 ConfigData.MainSubCode mainSubCode = configData.getMainSubCode();
-                
+
                 x.setTreatmentPropertiesCode(remoteApi.getSubCode(mainSubCode.getTreatmentProperties(), x.getTreatmentProperties()));
-                
+
                 x.setResponsibilityAreaCode(remoteApi.getSubCode(mainSubCode.getResponsibilityArea(), x.getResponsibilityArea()));
 
                 BasSub businessTypeObj = remoteApi.getSubCodeObj(mainSubCode.getBusinessType(), x.getBusinessTypeName());
@@ -177,14 +179,27 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         if (RefundStatusEnum.COMPLETE != status) return;
         log.info("审核通过-进行相应的越扣减 {}", idList);
         List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, idList));
-        Map<String, List<FssRefundRequest>> add = fssRefundRequests.stream().collect(Collectors.groupingBy(x -> {
-            if (x.getTreatmentPropertiesCode().equals("add")) {
-                return "add";
-            } else {
-                return "minus";
-            }
+        Map<RefundProcessEnum, List<FssRefundRequest>> collect = fssRefundRequests.stream().collect(Collectors.groupingBy(x -> {
+            ConfigData.MainSubCode mainSubCode = configData.getMainSubCode();
+            BasSub subCodeObj = remoteApi.getSubCodeObj(mainSubCode.getTreatmentProperties(), x.getTreatmentProperties());
+            String subValue = subCodeObj.getSubValue();
+            return RefundProcessEnum.getProcessStrategy(subValue);
         }));
+        log.info("审核处理{}", JSONObject.toJSONString(collect));
         // TODO 订单记录流水、【余额对应调增/调减】、【产生业务账记录】
+        collect.forEach((processEnum,list)->{
+            switch (processEnum) {
+                case ADD:
+                    //TODO
+                    return;
+                case SUBTRACT:
+                    //TODO
+                    return;
+                default:
+                    //TODO
+                    return;
+            }
+        });
     }
 
     @Override

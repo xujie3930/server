@@ -60,6 +60,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IHtpPricedProductClientService htpPricedProductClientService;
     @Autowired
     private BasWarehouseClientService basWarehouseClientService;
+    @SuppressWarnings({"all"})
     @Autowired
     private BasRegionFeignService basRegionFeignService;
     @Autowired
@@ -380,8 +381,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 包裹信息
         List<Package> packages = new ArrayList<>();
         List<PackageItem> packageItems = new ArrayList<>();
+        int weightInGram = 0;
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
-            packageItems.add(new PackageItem(delOutbound.getOrderNo(), delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), Utils.valueOfDouble(delOutbound.getWeight()),
+            packageItems.add(new PackageItem(delOutbound.getOrderNo(), delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), weightInGram = Utils.valueOfDouble(delOutbound.getWeight()),
                     new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                     1, "", String.valueOf(delOutbound.getId()), delOutbound.getOrderNo()));
         } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
@@ -394,7 +396,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 throw new CommonException("999", "查询SKU[" + delOutbound.getNewSku() + "]信息失败");
             }
             BaseProduct product = productList.get(0);
-            packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), Utils.valueOfDouble(product.getWeight()),
+            packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), weightInGram = Utils.valueOfDouble(product.getWeight()),
                     new Size(product.getLength(), product.getWidth(), product.getHeight()),
                     Utils.valueOfLong(delOutbound.getBoxNumber()), product.getHsCode(), String.valueOf(delOutbound.getId()), delOutbound.getNewSku()));
         } else {
@@ -407,14 +409,22 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 if (null == product) {
                     throw new CommonException("999", "查询SKU[" + sku + "]信息失败");
                 }
-                packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), Utils.valueOfDouble(product.getWeight()),
+                int productWeight = Utils.valueOfDouble(product.getWeight());
+                weightInGram += productWeight;
+                packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), productWeight,
                         new Size(product.getLength(), product.getWidth(), product.getHeight()),
                         Utils.valueOfLong(detail.getQty()), product.getHsCode(), String.valueOf(detail.getId()), sku));
             }
         }
+        if (null != delOutbound.getWeight() && delOutbound.getWeight() > 0) {
+            weightInGram = Utils.valueOfDouble(delOutbound.getWeight());
+        }
+        if (weightInGram <= 0) {
+            throw new CommonException("999", "包裹重量为0或者小于0，不能创建承运商物流订单");
+        }
         packages.add(new Package(delOutbound.getOrderNo(), String.valueOf(delOutbound.getId()),
                 new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
-                Utils.valueOfDouble(delOutbound.getWeight()), packageItems));
+                weightInGram, packageItems));
         createShipmentOrderCommand.setPackages(packages);
         createShipmentOrderCommand.setCarrier(new Carrier(delOutbound.getShipmentService()));
         ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);

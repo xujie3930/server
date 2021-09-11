@@ -1,6 +1,8 @@
 package com.szmsd.doc.api.sku;
 
+import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.api.service.BaseProductClientService;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.common.core.domain.R;
@@ -8,15 +10,20 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.doc.api.sku.request.BaseProductQueryRequest;
 import com.szmsd.doc.api.sku.request.ProductRequest;
+import com.szmsd.doc.api.sku.resp.BaseProductResp;
+import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiSort;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 /**
  * @author francis
@@ -30,18 +37,25 @@ public class SkuApiController {
 
     @Autowired
     private BaseProductClientService baseProductClientService;
-
+    @Resource
+    private DocSubConfigData docSubConfigData;
+    @Resource
+    private BasePackingFeignService basePackingFeignService;
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("list")
     @ApiOperation(value = "查询列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
-    public TableDataInfo list(@RequestBody BaseProductQueryRequest baseProductQueryRequest){
-        return baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
+    public TableDataInfo<BaseProductResp> list(@RequestBody BaseProductQueryRequest baseProductQueryRequest){
+        TableDataInfo<BaseProduct> list = baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
+        TableDataInfo<BaseProductResp> baseProductResp = new TableDataInfo<>();
+        BeanUtils.copyProperties(list,baseProductResp);
+        return baseProductResp;
     }
 
-    @PreAuthorize("hasAuthority('client')")
+//    @PreAuthorize("hasAuthority('client')")
     @PostMapping("save")
     @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
     public R save(@RequestBody @Validated ProductRequest productRequest){
+        productRequest.validData(docSubConfigData).calculateTheVolume().checkPack(basePackingFeignService);
         BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
         baseProductClientService.add(product);
         return R.ok();

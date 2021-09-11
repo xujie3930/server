@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
@@ -15,11 +16,11 @@ import java.util.List;
 @ApiModel(value = "DelOutboundDestroyRequest", description = "DelOutboundDestroyRequest对象")
 public class DelOutboundDestroyRequest implements Serializable {
 
-    @NotNull(message = "客户编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @NotBlank(message = "客户编码不能为空", groups = {DelOutboundGroup.Destroy.class})
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
     private String sellerCode;
 
-    @NotNull(message = "仓库编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @NotBlank(message = "仓库编码不能为空", groups = {DelOutboundGroup.Destroy.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
     private String warehouseCode;
 
@@ -35,6 +36,7 @@ public class DelOutboundDestroyRequest implements Serializable {
     private String remark;
 
     @Valid
+    @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "明细信息", dataType = "DelOutboundDetailRequest", position = 4)
     private List<DelOutboundDetailRequest> details;
 

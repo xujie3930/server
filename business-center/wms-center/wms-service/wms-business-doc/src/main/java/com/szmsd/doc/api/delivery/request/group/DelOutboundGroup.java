@@ -8,14 +8,35 @@ package com.szmsd.doc.api.delivery.request.group;
  */
 public interface DelOutboundGroup {
 
-    interface ALL {
+    interface Default {
 
     }
 
     /**
      * 转运出库
      */
-    interface PackageTransfer {
+    interface PackageTransfer extends Default {
 
     }
+
+    interface Normal extends Default {
+
+    }
+
+    interface Destroy extends Default {
+
+    }
+
+    interface SelfPick extends Default {
+
+    }
+
+    interface Collection extends Default {
+
+    }
+
+    interface Batch extends Default {
+
+    }
+
 }
