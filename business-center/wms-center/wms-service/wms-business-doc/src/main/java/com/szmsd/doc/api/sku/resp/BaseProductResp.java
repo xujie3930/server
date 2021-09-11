@@ -36,14 +36,14 @@ public class BaseProductResp  {
     @ApiModelProperty(value = "id")
     private Long id;
 
-    @ApiModelProperty(value = "创建人")
-    private String createBy;
-
-    @ApiModelProperty(value = "修改人")
-    private String updateBy;
-
-    @ApiModelProperty(value = "删除标识：0未删除 1已删除")
-    private String delFlag;
+//    @ApiModelProperty(value = "创建人")
+//    private String createBy;
+//
+//    @ApiModelProperty(value = "修改人")
+//    private String updateBy;
+//
+//    @ApiModelProperty(value = "删除标识：0未删除 1已删除")
+//    private String delFlag;
 
     @ApiModelProperty(value = "产品名称")
     @Excel(name = "产品名称")
@@ -172,69 +172,69 @@ public class BaseProductResp  {
     @Size(max = 100)
     private String categoryCode;
 
-    @ApiModelProperty(value = "是否仓库验收")
-    private Boolean warehouseAcceptance;
+//    @ApiModelProperty(value = "是否仓库验收")
+//    private Boolean warehouseAcceptance;
 
-    @ApiModelProperty(value = "属性1")
-    @Size(max = 200)
-    private String attribute1;
+//    @ApiModelProperty(value = "属性1")
+//    @Size(max = 200)
+//    private String attribute1;
+//
+//    @ApiModelProperty(value = "属性2")
+//    @Size(max = 200)
+//    private String attribute2;
+//
+//    @ApiModelProperty(value = "属性3")
+//    @Size(max = 200)
+//    private String attribute3;
+//
+//    @ApiModelProperty(value = "属性4")
+//    @Size(max = 200)
+//    private String attribute4;
+//
+//    @ApiModelProperty(value = "属性5")
+//    @Size(max = 200)
+//    private String attribute5;
 
-    @ApiModelProperty(value = "属性2")
-    @Size(max = 200)
-    private String attribute2;
+//    @ApiModelProperty(value = "仓库测量重量g")
+//    @Digits(integer = 8,fraction = 2)
+//    private Double weight;
+//
+//    @ApiModelProperty(value = "仓库测量长 cm")
+//    @Digits(integer = 8,fraction = 2)
+//    private Double length;
+//
+//    @ApiModelProperty(value = "仓库测量宽 cm")
+//    @Digits(integer = 8,fraction = 2)
+//    private Double width;
+//
+//    @ApiModelProperty(value = "仓库测量高 cm")
+//    @Digits(integer = 8,fraction = 2)
+//    private Double height;
+//
+//    @ApiModelProperty(value = "仓库测量体积 cm3")
+//    @Digits(integer = 14,fraction = 2)
+//    private BigDecimal volume;
 
-    @ApiModelProperty(value = "属性3")
-    @Size(max = 200)
-    private String attribute3;
-
-    @ApiModelProperty(value = "属性4")
-    @Size(max = 200)
-    private String attribute4;
-
-    @ApiModelProperty(value = "属性5")
-    @Size(max = 200)
-    private String attribute5;
-
-    @ApiModelProperty(value = "仓库测量重量g")
-    @Digits(integer = 8,fraction = 2)
-    private Double weight;
-
-    @ApiModelProperty(value = "仓库测量长 cm")
-    @Digits(integer = 8,fraction = 2)
-    private Double length;
-
-    @ApiModelProperty(value = "仓库测量宽 cm")
-    @Digits(integer = 8,fraction = 2)
-    private Double width;
-
-    @ApiModelProperty(value = "仓库测量高 cm")
-    @Digits(integer = 8,fraction = 2)
-    private Double height;
-
-    @ApiModelProperty(value = "仓库测量体积 cm3")
-    @Digits(integer = 14,fraction = 2)
-    private BigDecimal volume;
-
-    @ApiModelProperty(value = "操作员")
-    @Excel(name = "操作员")
-    @Size(max = 100)
-    private String operator;
-
-    @ApiModelProperty(value = "操作时间")
-    private Date operateOn;
+//    @ApiModelProperty(value = "操作员")
+//    @Excel(name = "操作员")
+//    @Size(max = 100)
+//    private String operator;
+//
+//    @ApiModelProperty(value = "操作时间")
+//    private Date operateOn;
 
     @ApiModelProperty(value = "仓库编码")
     @Size(max = 50)
     private String warehouseCode;
 
 
-    @ApiModelProperty(value = "关联单号")
-    @Size(max = 100)
-    private String orderNo;
-
-    @ApiModelProperty(value = "来源")
-    @Size(max = 50)
-    private String source;
+//    @ApiModelProperty(value = "关联单号")
+//    @Size(max = 100)
+//    private String orderNo;
+//
+//    @ApiModelProperty(value = "来源")
+//    @Size(max = 50)
+//    private String source;
 
     @ApiModelProperty(value = "海关编码")
     @Size(max = 200)

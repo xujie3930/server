@@ -3,6 +3,7 @@ package com.szmsd.bas.api.factory;
 import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingConditionQueryDto;
+import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.CreatePackingRequest;
 import com.szmsd.common.core.domain.R;
@@ -33,6 +34,11 @@ public class BasePackingFeignFallback implements FallbackFactory<BasePackingFeig
 
             @Override
             public R createPackings(CreatePackingRequest createPackingRequest){
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<BasePackingDto>> listParent() {
                 return R.convertResultJson(throwable);
             }
         };

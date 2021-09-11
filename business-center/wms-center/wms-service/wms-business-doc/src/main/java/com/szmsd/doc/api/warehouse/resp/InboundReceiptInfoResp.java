@@ -75,7 +75,7 @@ public class InboundReceiptInfoResp {
     private String remark;
 
     @ApiModelProperty(value = "入库明细")
-    private List<InboundReceiptDetailVO> inboundReceiptDetails;
+    private List<InboundReceiptDetailResp> inboundReceiptDetails;
 
     // --------------------多语言字段--------------------
 
