@@ -160,7 +160,7 @@ public class DeliveryController {
     @PostMapping("/collection")
     @ApiOperation(value = "#8 出库管理 - 订单创建（集运出库）", position = 500)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundCollectionListRequest", required = true)
-    public R<List<DelOutboundCollectionResponse>> collection(@RequestBody @Validated DelOutboundCollectionListRequest request) {
+    public R<List<DelOutboundCollectionResponse>> collection(@RequestBody @Validated(DelOutboundGroup.Collection.class) DelOutboundCollectionListRequest request) {
         List<DelOutboundCollectionRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("999", "请求对象不能为空");

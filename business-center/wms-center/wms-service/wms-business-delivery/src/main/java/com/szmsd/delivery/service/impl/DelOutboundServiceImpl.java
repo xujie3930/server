@@ -393,7 +393,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         }
                     }
                 }
-            } else if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(dto.getOrderType())) {
+            } else if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(dto.getOrderType())
+                    || DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(dto.getOrderType())) {
                 if (CollectionUtils.isEmpty(details)) {
                     throw new CommonException("999", "明细信息不能为空");
                 }
