@@ -22,31 +22,31 @@ import java.util.List;
 @ApiModel(value = "DelOutboundShipmentRequest", description = "DelOutboundShipmentRequest对象")
 public class DelOutboundShipmentRequest implements Serializable {
 
-    @NotNull(message = "客户编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @NotNull(message = "客户编码不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
     private String sellerCode;
 
-    @NotNull(message = "仓库编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @NotNull(message = "仓库编码不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
     private String warehouseCode;
 
     @ApiModelProperty(value = "是否优先发货", dataType = "Boolean", position = 1, example = "false")
     private Boolean isFirst;
 
-    @Size(max = 50, message = "增值税号不能超过50个字符")
+    @Size(max = 50, message = "增值税号不能超过50个字符", groups = {DelOutboundGroup.Normal.class})
     @ApiModelProperty(value = "增值税号", dataType = "String", position = 2, example = "F00X")
     private String ioss;
 
-    @NotBlank(message = "物流服务不能为空")
-    @Size(max = 50, message = "物流服务不能超过50个字符")
+    @NotBlank(message = "物流服务不能为空", groups = {DelOutboundGroup.Normal.class})
+    @Size(max = 50, message = "物流服务不能超过50个字符", groups = {DelOutboundGroup.Normal.class})
     @ApiModelProperty(value = "物流服务", dataType = "String", position = 3, example = "FX")
     private String shipmentRule;
 
-    @Size(max = 50, message = "参考号不能超过50个字符")
+    @Size(max = 50, message = "参考号不能超过50个字符", groups = {DelOutboundGroup.Normal.class})
     @ApiModelProperty(value = "参考号", dataType = "String", position = 4, example = "")
     private String refNo;
 
-    @Size(max = 500, message = "备注不能超过500个字符")
+    @Size(max = 500, message = "备注不能超过500个字符", groups = {DelOutboundGroup.Normal.class})
     @ApiModelProperty(value = "备注", dataType = "String", position = 5, example = "")
     private String remark;
 

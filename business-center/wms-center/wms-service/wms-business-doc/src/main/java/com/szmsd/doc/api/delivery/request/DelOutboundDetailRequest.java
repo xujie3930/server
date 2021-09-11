@@ -22,9 +22,9 @@ public class DelOutboundDetailRequest implements Serializable {
     @ApiModelProperty(value = "SKU", dataType = "String")
     private String sku;
 
-    @NotNull(message = "数量不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
-    @Max(value = Integer.MAX_VALUE, message = "数量不能大于2147483647", groups = {DelOutboundGroup.PackageTransfer.class})
-    @Min(value = 1, message = "数量不能小于1", groups = {DelOutboundGroup.PackageTransfer.class})
+    @NotNull(message = "数量不能为空", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class})
+    @Max(value = Integer.MAX_VALUE, message = "数量不能大于2147483647", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class})
+    @Min(value = 1, message = "数量不能小于1", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class})
     @ApiModelProperty(value = "数量", required = true, dataType = "Long", example = "1")
     private Long qty;
 
