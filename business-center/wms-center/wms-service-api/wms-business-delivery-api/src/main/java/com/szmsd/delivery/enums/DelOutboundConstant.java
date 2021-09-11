@@ -25,4 +25,9 @@ public class DelOutboundConstant {
      * 导入
      */
     public static final String SOURCE_TYPE_IMP = "IMP";
+
+    /**
+     * DOC接口
+     */
+    public static final String SOURCE_TYPE_DOC = "DOC";
 }

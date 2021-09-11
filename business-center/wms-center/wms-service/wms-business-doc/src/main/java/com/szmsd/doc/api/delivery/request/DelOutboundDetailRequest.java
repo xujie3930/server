@@ -18,7 +18,7 @@ import java.io.Serializable;
 @PreNotNull(field = "productAttribute", model = PreNotNull.Model.VALUE, fieldValue = "Battery", linkageFields = {"electrifiedMode", "batteryPackaging"}, message = "带电信息，电池包装不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
 public class DelOutboundDetailRequest implements Serializable {
 
-    @Size(max = 50, message = "SKU不能超过50个字符")
+    @Size(max = 50, message = "SKU不能超过50个字符", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class})
     @ApiModelProperty(value = "SKU", dataType = "String")
     private String sku;
 
@@ -28,7 +28,7 @@ public class DelOutboundDetailRequest implements Serializable {
     @ApiModelProperty(value = "数量", required = true, dataType = "Long", example = "1")
     private Long qty;
 
-    @Size(max = 50, message = "新标签不能超过50个字符")
+    @Size(max = 50, message = "新标签不能超过50个字符", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class})
     @ApiModelProperty(value = "新标签", dataType = "String", example = "")
     private String newLabelCode;
 

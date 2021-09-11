@@ -13,6 +13,7 @@ import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
@@ -79,6 +80,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
@@ -133,6 +135,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.NORMAL.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundShipmentResponse.class));
@@ -165,6 +168,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.COLLECTION.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundCollectionResponse.class));
@@ -204,6 +208,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.BATCH.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundBatchResponse.class));
@@ -276,6 +281,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.SELF_PICK.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundSelfPickResponse.class));
@@ -332,6 +338,7 @@ public class DeliveryController {
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.DESTROY.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundDestroyResponse.class));

@@ -345,11 +345,99 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return this.createDelOutbound(dto);
     }
 
+    private void docValid(DelOutboundDto dto) {
+        if (DelOutboundConstant.SOURCE_TYPE_DOC.equals(dto.getSourceType())) {
+            List<DelOutboundDetailDto> details = dto.getDetails();
+            if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(dto.getOrderType())) {
+                if (CollectionUtils.isEmpty(details)) {
+                    throw new CommonException("999", "明细信息不能为空");
+                }
+                // 查询sku
+                List<String> skus = details.stream().map(DelOutboundDetailDto::getSku).distinct().collect(Collectors.toList());
+                InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
+                inventoryAvailableQueryDto.setWarehouseCode(dto.getWarehouseCode());
+                inventoryAvailableQueryDto.setCusCode(dto.getSellerCode());
+                inventoryAvailableQueryDto.setSkus(skus);
+                // 库存是0的也查询出来，自行做数量验证。同时也能验证SKU是不是自己的
+                inventoryAvailableQueryDto.setQueryType(2);
+                List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+                Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
+                Map<String, Integer> availableInventoryMap = new HashMap<>();
+                if (CollectionUtils.isNotEmpty(availableList)) {
+                    for (InventoryAvailableListVO vo : availableList) {
+                        availableMap.put(vo.getSku(), vo);
+                    }
+                }
+                for (DelOutboundDetailDto detail : details) {
+                    String sku = detail.getSku();
+                    InventoryAvailableListVO vo = availableMap.get(sku);
+                    if (null == vo) {
+                        throw new CommonException("999", "SKU[" + sku + "]不属于当前客户");
+                    }
+                    int aiq = availableInventoryMap.getOrDefault(sku, 0);
+                    Integer inventory = vo.getAvailableInventory();
+                    Integer outQty = Math.toIntExact(detail.getQty() + aiq);
+                    if (outQty > inventory) {
+                        throw new CommonException("999", "SKU[" + sku + "]库存数量不足，出库数量：" + outQty + "，库存数量：" + inventory);
+                    }
+                    availableInventoryMap.put(sku, outQty);
+                    // 验证包材数量
+                    String bindCode = detail.getBindCode();
+                    if (StringUtils.isNotEmpty(bindCode)) {
+                        vo = availableMap.get(bindCode);
+                        if (null == vo) {
+                            throw new CommonException("999", "SKU[" + sku + "]的包材[" + bindCode + "]不存在");
+                        }
+                        if (outQty > vo.getAvailableInventory()) {
+                            throw new CommonException("999", "SKU[" + sku + "]的包材[" + bindCode + "]库存数量不足，出库数量：" + outQty + "，库存数量：" + vo.getAvailableInventory());
+                        }
+                    }
+                }
+            } else if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(dto.getOrderType())) {
+                if (CollectionUtils.isEmpty(details)) {
+                    throw new CommonException("999", "明细信息不能为空");
+                }
+                // 查询sku
+                List<String> skus = details.stream().map(DelOutboundDetailDto::getSku).distinct().collect(Collectors.toList());
+                InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
+                inventoryAvailableQueryDto.setWarehouseCode(dto.getWarehouseCode());
+                inventoryAvailableQueryDto.setCusCode(dto.getSellerCode());
+                inventoryAvailableQueryDto.setSkus(skus);
+                // 库存是0的也查询出来，自行做数量验证。同时也能验证SKU是不是自己的
+                inventoryAvailableQueryDto.setQueryType(2);
+                List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+                Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
+                if (CollectionUtils.isNotEmpty(availableList)) {
+                    for (InventoryAvailableListVO vo : availableList) {
+                        availableMap.put(vo.getSku(), vo);
+                    }
+                }
+                for (DelOutboundDetailDto detail : details) {
+                    String sku = detail.getSku();
+                    InventoryAvailableListVO vo = availableMap.get(sku);
+                    if (null == vo) {
+                        throw new CommonException("999", "SKU[" + sku + "]不属于当前客户");
+                    }
+                    // 验证包材数量
+                    String bindCode = detail.getBindCode();
+                    if (StringUtils.isNotEmpty(bindCode)) {
+                        vo = availableMap.get(bindCode);
+                        if (null == vo) {
+                            throw new CommonException("999", "SKU[" + sku + "]的包材[" + bindCode + "]不存在");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private DelOutboundAddResponse createDelOutbound(DelOutboundDto dto) {
         DelOutboundAddResponse response = new DelOutboundAddResponse();
         String orderNo;
         // 创建出库单
         try {
+            // DOC的验证SKU
+            this.docValid(dto);
             DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
             // 生成出库单号
             // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
