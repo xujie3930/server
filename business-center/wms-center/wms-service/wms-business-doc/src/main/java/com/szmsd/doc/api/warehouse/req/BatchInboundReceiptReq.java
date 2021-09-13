@@ -1,7 +1,6 @@
 package com.szmsd.doc.api.warehouse.req;
 
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,15 +17,14 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(value = "CreateInboundReceiptDTO", description = "创建入库单")
-public class CreateInboundReceiptReq extends InboundReceiptReq {
-    @Valid
-    @NotEmpty(message = "入库明细不能为空")
-    @ApiModelProperty(value = "入库明细",required = true)
-    private List<InboundReceiptDetailDTO> inboundReceiptDetails;
+@ApiModel(description = "入库单对象")
+public class BatchInboundReceiptReq {
 
-//    @ApiModelProperty(value = "要删除的入库明细id")
-//    private List<String> receiptDetailIds;
+    @Valid
+    @NotEmpty(message = "入库单不能为空")
+    @ApiModelProperty(value = "入库单", required = true)
+    private List<CreateInboundReceiptReq> batchInboundReceiptList;
+
 
     @Override
     public String toString() {

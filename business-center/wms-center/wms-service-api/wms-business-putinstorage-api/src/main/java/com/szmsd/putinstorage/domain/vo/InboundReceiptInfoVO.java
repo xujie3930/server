@@ -105,5 +105,7 @@ public class InboundReceiptInfoVO {
     @ApiModelProperty(value = "产品货源地名称 - 当前系统语言")
     @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     private String goodsSourceName;
+    @ApiModelProperty(value = "数据来源")
+    private String sourceType;
 
 }

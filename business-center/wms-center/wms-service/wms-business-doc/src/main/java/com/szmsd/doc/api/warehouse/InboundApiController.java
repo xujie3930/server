@@ -8,18 +8,27 @@ import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.req.CreateInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.resp.AttachmentFileResp;
+import com.szmsd.doc.api.warehouse.resp.InboundReceiptDetailResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptInfoResp;
+import com.szmsd.doc.component.IRemoterApi;
+import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
+import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
+import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
+import com.szmsd.putinstorage.enums.InboundReceiptEnum;
+import com.szmsd.putinstorage.enums.SourceTypeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,9 +37,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,7 +46,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Validated
 @Api(tags = {"入库信息"})
@@ -51,6 +57,10 @@ public class InboundApiController extends BaseController {
     private InboundReceiptFeignService inboundReceiptFeignService;
     @Resource
     private RemoteAttachmentService attachmentFeignService;
+    @Resource
+    private IRemoterApi iRemoterApi;
+    @Resource
+    private DocSubConfigData docSubConfigData;
 
     @PreAuthorize("hasAuthority('client')")
     @GetMapping("/info/{warehouseNo}")
@@ -59,8 +69,15 @@ public class InboundApiController extends BaseController {
     R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
         AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取详情异常");
+        List<InboundReceiptDetailVO> inboundReceiptDetails = info.getData().getInboundReceiptDetails();
+        List<InboundReceiptDetailResp> detailRespList = Optional.ofNullable(inboundReceiptDetails).orElse(new ArrayList<>()).stream().map(x -> {
+            InboundReceiptDetailResp inboundReceiptDetailResp = new InboundReceiptDetailResp();
+            BeanUtils.copyProperties(x, inboundReceiptDetailResp);
+            return inboundReceiptDetailResp;
+        }).collect(Collectors.toList());
         InboundReceiptInfoResp inboundReceiptInfoResp = new InboundReceiptInfoResp();
         BeanUtils.copyProperties(info.getData(), inboundReceiptInfoResp);
+        inboundReceiptInfoResp.setInboundReceiptDetails(detailRespList);
         Optional.of(inboundReceiptInfoResp).flatMap(x -> Optional.of(x).map(InboundReceiptInfoResp::getInboundReceiptDetails)).filter(CollectionUtils::isNotEmpty)
                 .ifPresent(inboundReceiptDetailList ->
                         inboundReceiptDetailList.forEach(z -> Optional.ofNullable(z.getEditionImage())
@@ -105,18 +122,49 @@ public class InboundApiController extends BaseController {
         return picUrl;
     }
 
-//    @PreAuthorize("hasAuthority('client')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/saveOrUpdate/batch")
     @ApiOperation(value = "新增/修改-批量入库单", notes = "新建入库单，入库单提交后，视入库仓库是否需要人工审核，" +
             "如果需要管理人员人工审核，则需进入OMS客户端-仓储服务-入库管理，再次提交入库申请。如仓库设置为自动审核，" +
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
-    R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@NotEmpty @RequestBody @Valid List<CreateInboundReceiptReq> createInboundReceiptDTOList) {
-        List<CreateInboundReceiptDTO> collect = createInboundReceiptDTOList.stream().map(x -> {
-            CreateInboundReceiptDTO createInboundReceiptReq = new CreateInboundReceiptDTO();
-            BeanUtils.copyProperties(x, createInboundReceiptReq);
-            return createInboundReceiptReq;
+    R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
+        List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
+        List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
+            CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+            BeanUtils.copyProperties(x, createInboundReceiptDTO);
+            createInboundReceiptDTO.setSourceType(SourceTypeEnum.DOC.name());
+            return createInboundReceiptDTO;
         }).collect(Collectors.toList());
-        R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(collect);
+
+        addDTO.forEach(x -> {
+            String orderType = x.getOrderType();
+            //集运入库采购单号必填
+            if (orderType.equals(InboundReceiptEnum.OrderType.COLLECTION.getValue())) {
+                String orderNo = x.getOrderNo();
+                AssertUtil.isTrue(StringUtils.isNotBlank(orderNo), "集运入库采购单号必填");
+            }
+            // 送货方式=快递到仓，送货单号必填 053001
+            String deliveryWayCode = x.getDeliveryWayCode();
+            DocSubConfigData.SubCode subCode = docSubConfigData.getSubCode();
+            if (subCode.getDeliveryWayCode().equals(deliveryWayCode)) {
+                AssertUtil.isTrue(StringUtils.isNotBlank(x.getDeliveryNo()), "送货方式为快递到仓时,送货单号必填");
+            }
+        });
+        List<String> warehouseCodeList = addDTO.stream().map(InboundReceiptDTO::getWarehouseCode).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
+        warehouseCodeList.forEach(x -> {
+            boolean b = iRemoterApi.verifyWarehouse(x);
+            AssertUtil.isTrue(b, String.format("请检查%s仓库是否存在", x));
+        });
+
+        List<String> skuList = addDTO.stream().map(CreateInboundReceiptDTO::getInboundReceiptDetails)
+                .flatMap(x -> x.stream().map(InboundReceiptDetailDTO::getSku)).distinct().collect(Collectors.toList());
+        String cusCode = createInboundReceiptDTOList.get(0).getCusCode();
+
+        String warehouseCode = createInboundReceiptDTOList.get(0).getWarehouseCode();
+        boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
+        AssertUtil.isTrue(b, String.format("请检查SKU：%s是否属于客户%s", skuList, cusCode));
+
+        R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
         List<InboundReceiptInfoVO> dataAndException = R.getDataAndException(listR);
         List<InboundReceiptInfoResp> result = dataAndException.stream().map(x -> {
             InboundReceiptInfoResp inboundReceiptInfoResp = new InboundReceiptInfoResp();

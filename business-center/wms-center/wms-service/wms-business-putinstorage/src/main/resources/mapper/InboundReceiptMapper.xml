@@ -15,6 +15,7 @@
         <result column="warehouse_method_name" property="warehouseMethodName"/>
         <result column="total_declare_qty" property="totalDeclareQty"/>
         <result column="total_put_qty" property="totalPutQty"/>
+        <result column="source_type" property="sourceType"/>
         <result column="cus_code" property="cusCode"/>
     </resultMap>
 
@@ -36,6 +37,7 @@
         <result column="tracking_number" property="trackingNumber"/>
         <result column="status" property="status"/>
         <result column="remark" property="remark"/>
+        <result column="source_type" property="sourceType"/>
 
         <!-- 多语言字段 -->
         <result column="cus_name" property="cusName"/>

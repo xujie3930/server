@@ -40,6 +40,10 @@ public class DocSubConfigData {
          * 基础信息-产品属性 059 带电 059004
          */
         private String charged = "059004";
+        /**
+         * 运输方式： 快递到仓
+         */
+        private String deliveryWayCode = "053001";
 
     }
     @PostConstruct
