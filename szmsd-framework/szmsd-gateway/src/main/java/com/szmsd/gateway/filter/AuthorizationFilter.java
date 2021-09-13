@@ -29,26 +29,28 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
-        // 1. 获取Authorization
-        String authorization = request.getHeaders().getFirst("Authorization");
-        String ip = request.getHeaders().getFirst("Gateway-X-Access-IP");
-        String path = request.getURI().getPath();
-        boolean jump = false;
-        if (CollectionUtils.isNotEmpty(ignoreConfig.getUrls())) {
-            jump = ignoreConfig.getUrls().contains(path);
-        }
-        if (!jump && CollectionUtils.isNotEmpty(ignoreConfig.getMatchUrls())) {
-            for (String url : ignoreConfig.getMatchUrls()) {
-                if (pathMatcher.match(url, path)) {
-                    jump = true;
-                    break;
+        if (ignoreConfig.isEnabled()) {
+            // 1. 获取Authorization
+            String authorization = request.getHeaders().getFirst("Authorization");
+            String ip = request.getHeaders().getFirst("Gateway-X-Access-IP");
+            String path = request.getURI().getPath();
+            boolean jump = false;
+            if (CollectionUtils.isNotEmpty(ignoreConfig.getUrls())) {
+                jump = ignoreConfig.getUrls().contains(path);
+            }
+            if (!jump && CollectionUtils.isNotEmpty(ignoreConfig.getMatchUrls())) {
+                for (String url : ignoreConfig.getMatchUrls()) {
+                    if (pathMatcher.match(url, path)) {
+                        jump = true;
+                        break;
+                    }
                 }
             }
-        }
-        logger.info("当前请求的url:{}, method:{}, token:{}, ip:{}, jump:{}", path, request.getMethodValue(), authorization, ip, jump);
-        if (!jump && StringUtils.isEmpty(authorization)) {
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return response.setComplete();
+            logger.info("当前请求的url:{}, method:{}, token:{}, ip:{}, jump:{}", path, request.getMethodValue(), authorization, ip, jump);
+            if (!jump && StringUtils.isEmpty(authorization)) {
+                response.setStatusCode(HttpStatus.UNAUTHORIZED);
+                return response.setComplete();
+            }
         }
         return chain.filter(exchange);
     }
