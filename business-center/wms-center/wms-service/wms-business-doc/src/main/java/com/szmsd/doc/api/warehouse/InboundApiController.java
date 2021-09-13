@@ -13,6 +13,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.req.CreateInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.resp.AttachmentFileResp;
+import com.szmsd.doc.api.warehouse.resp.InboundReceiptDetailResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptInfoResp;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
@@ -21,6 +22,7 @@ import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.enums.SourceTypeEnum;
@@ -67,8 +69,15 @@ public class InboundApiController extends BaseController {
     R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
         AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取详情异常");
+        List<InboundReceiptDetailVO> inboundReceiptDetails = info.getData().getInboundReceiptDetails();
+        List<InboundReceiptDetailResp> detailRespList = Optional.ofNullable(inboundReceiptDetails).orElse(new ArrayList<>()).stream().map(x -> {
+            InboundReceiptDetailResp inboundReceiptDetailResp = new InboundReceiptDetailResp();
+            BeanUtils.copyProperties(x, inboundReceiptDetailResp);
+            return inboundReceiptDetailResp;
+        }).collect(Collectors.toList());
         InboundReceiptInfoResp inboundReceiptInfoResp = new InboundReceiptInfoResp();
         BeanUtils.copyProperties(info.getData(), inboundReceiptInfoResp);
+        inboundReceiptInfoResp.setInboundReceiptDetails(detailRespList);
         Optional.of(inboundReceiptInfoResp).flatMap(x -> Optional.of(x).map(InboundReceiptInfoResp::getInboundReceiptDetails)).filter(CollectionUtils::isNotEmpty)
                 .ifPresent(inboundReceiptDetailList ->
                         inboundReceiptDetailList.forEach(z -> Optional.ofNullable(z.getEditionImage())

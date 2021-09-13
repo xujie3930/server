@@ -47,7 +47,7 @@ public class RemoterApiImpl implements IRemoterApi {
         BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
         baseProductConditionQueryDto.setSkus(sku);
         baseProductConditionQueryDto.setSellerCode(sellerCode);
-        baseProductConditionQueryDto.setWarehouseCode(warehouse);
+//        baseProductConditionQueryDto.setWarehouseCode(warehouse);
         List<BaseProduct> baseProducts = baseProductClientService.queryProductList(baseProductConditionQueryDto);
         if (CollectionUtils.isNotEmpty(baseProducts)) return true;
         return false;
