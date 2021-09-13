@@ -22,11 +22,11 @@ import java.util.List;
 @ApiModel(value = "DelOutboundShipmentRequest", description = "DelOutboundShipmentRequest对象")
 public class DelOutboundShipmentRequest implements Serializable {
 
-    @NotNull(message = "客户编码不能为空", groups = {DelOutboundGroup.Default.class})
+    @NotBlank(message = "客户编码不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
     private String sellerCode;
 
-    @NotNull(message = "仓库编码不能为空", groups = {DelOutboundGroup.Default.class})
+    @NotBlank(message = "仓库编码不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
     private String warehouseCode;
 
