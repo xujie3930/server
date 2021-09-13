@@ -23,7 +23,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.net.URLEncoder;
 
 /**
  * @author zhangyuyuan
@@ -64,7 +64,8 @@ public class ProtocolController {
             response.setContentType("application/octet-stream;charset=utf-8");
             response.setContentLengthLong(file.length());
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(downloadName.getBytes("GBK"), StandardCharsets.ISO_8859_1));
+            String efn = URLEncoder.encode(downloadName, "utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + efn);
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
