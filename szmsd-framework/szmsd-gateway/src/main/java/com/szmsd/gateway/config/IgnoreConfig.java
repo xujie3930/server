@@ -11,8 +11,18 @@ public class IgnoreConfig {
 
     static final String CONFIG_PREFIX = "com.szmsd.ignore";
 
+    // default enabled
+    private boolean enabled = true;
     private Set<String> urls;
     private Set<String> matchUrls;
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public Set<String> getUrls() {
         return urls;
