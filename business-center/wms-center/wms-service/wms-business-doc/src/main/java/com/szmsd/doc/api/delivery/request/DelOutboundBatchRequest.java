@@ -1,5 +1,6 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.validator.annotation.PreNotNull;
 import io.swagger.annotations.ApiModel;
@@ -26,6 +27,7 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
     private String warehouseCode;
 
+    @SwaggerDictionary(dicCode = "079", dicKey = "subValue")
     @ApiModelProperty(value = "出货渠道", dataType = "String", position = 1, example = "")
     private String shipmentChannel;
 
@@ -50,8 +52,9 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "增值税号", dataType = "String", position = 7, example = "F00X")
     private String ioss;
 
+    @SwaggerDictionary(dicCode = "058", dicKey = "subValue")
     @NotBlank(message = "提货方式不能为空", groups = {DelOutboundGroup.Batch.class})
-    @ApiModelProperty(value = "提货方式,快递自提:058001,车辆自提:058002", dataType = "String", position = 8, example = "")
+    @ApiModelProperty(value = "提货方式", dataType = "String", position = 8, example = "")
     private String deliveryMethod;
 
     @ApiModelProperty(value = "提货时间", dataType = "Date", position = 9, example = "")
