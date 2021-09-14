@@ -177,7 +177,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setWidth(delOutbound.getWidth());
             updateDelOutbound.setHeight(delOutbound.getHeight());
             // 规格，长*宽*高
-            delOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
+            updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());
@@ -744,7 +744,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setWidth(delOutbound.getWidth());
             updateDelOutbound.setHeight(delOutbound.getHeight());
             // 规格，长*宽*高
-            delOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
+            updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());
