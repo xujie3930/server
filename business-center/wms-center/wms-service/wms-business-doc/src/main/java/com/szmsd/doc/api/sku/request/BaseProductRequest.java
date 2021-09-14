@@ -36,23 +36,23 @@ public class BaseProductRequest {
 //    @Size(max = 50)
 //    @NotBlank(message = "产品编码不能为空")
 //    private String code;
-    @Min(value = 0L, message = "初始重量异常")
-    @ApiModelProperty(value = "初始重量g", required = true)
+    @DecimalMin(value = "0.01", message = "初始重量异常")
+    @ApiModelProperty(value = "初始重量g",example = "1",required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始重量不能为空")
     private Double initWeight;
-    @Min(value = 0L, message = "初始长度异常")
-    @ApiModelProperty(value = "初始长 cm", required = true)
+    @DecimalMin(value = "0.01", message = "初始长度异常")
+    @ApiModelProperty(value = "初始长 cm",example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始长度不能为空")
     private Double initLength;
-    @Min(value = 0L, message = "初始宽度异常")
-    @ApiModelProperty(value = "初始宽 cm", required = true)
+    @DecimalMin(value = "0.01", message = "初始宽度异常")
+    @ApiModelProperty(value = "初始宽 cm",example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始宽度不能为空")
     private Double initWidth;
-    @Min(value = 0L, message = "初始高度异常")
-    @ApiModelProperty(value = "初始高 cm", required = true)
+    @DecimalMin(value = "0.01", message = "初始高度异常")
+    @ApiModelProperty(value = "初始高 cm",example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始高度不能为空")
     private Double initHeight;
@@ -67,19 +67,19 @@ public class BaseProductRequest {
     @ApiModelProperty(value = "产品文件格式 jpg / png / jpeg")
     @Size(max = 40)
     private String suffix;
-    @Min(value = 0L, message = "初始体积异常")
-    @ApiModelProperty(value = "初始体积 cm3", required = true)
+    @DecimalMin(value = "0.01", message = "初始体积异常")
+    @ApiModelProperty(value = "初始体积 cm3",example = "1", required = true)
     @Digits(integer = 14, fraction = 2)
     @NotNull(message = "初始体积不能为空")
     private BigDecimal initVolume;
 
     @NotBlank(message = "客户（卖家）编码不能为空")
-    @ApiModelProperty(value = "客户（卖家）编码", required = true)
+    @ApiModelProperty(value = "客户（卖家）编码", example = "CNYWO7", required = true)
     @Excel(name = "客户（卖家）编码")
     @Size(max = 100)
     private String sellerCode;
 
-    @ApiModelProperty(value = "中文申报品名", required = true)
+    @ApiModelProperty(value = "中文申报品名",example = "中文申报品名",required = true)
     @Excel(name = "中文申报品名")
     @Size(max = 200)
     @NotBlank(message = "中文申报品名不能为空")
@@ -90,18 +90,18 @@ public class BaseProductRequest {
     @NotNull(message = "申报价值不能为空")
     @Digits(integer = 8, fraction = 2)
     private Double declaredValue;
-    @SwaggerDictionary(dicCode = "059")
+    @SwaggerDictionary(dicCode = "059",dicKey = "subValue")
     @ApiModelProperty(value = "产品属性编号", example = "GeneralCargo", required = true)
     @Size(max = 50)
     @NotBlank(message = "产品属性编号不能为空")
     private String productAttribute;
 
-    @ApiModelProperty(value = "产品属性名 [普货:GeneralCargo,带电:Battery,液体:Liquid,粉末:Powder,带磁:Magnet]", allowableValues = "[普货,电池,液体,粉末,带磁]", example = "普货", required = true, hidden = true)
+    @ApiModelProperty(value = "产品属性名 [普货:GeneralCargo,带电:Battery,液体:Liquid,粉末:Powder,带磁:MagneticBand]", allowableValues = "[普货,电池,液体,粉末,带磁]", example = "普货", required = true, hidden = true)
     @Excel(name = "产品属性名")
 //    @NotBlank(message = "产品属性名不能为空")
     @Size(max = 100)
     private String productAttributeName;
-    @SwaggerDictionary(dicCode = "060")
+    @SwaggerDictionary(dicCode = "060",dicKey = "subValue")
     @ApiModelProperty(value = "带电信息编号 主子类别(060 / ddxx -#{subValue})", example = "drycell")
     @Size(max = 50)
     private String electrifiedMode;
@@ -110,7 +110,7 @@ public class BaseProductRequest {
     @Excel(name = "带电信息名")
     @Size(max = 100)
     private String electrifiedModeName;
-    @SwaggerDictionary(dicCode = "061")
+    @SwaggerDictionary(dicCode = "061",dicKey = "subValue")
     @ApiModelProperty(value = "电池包装编号 主子类别(061 / dcbb -#{subValue})", example = "built_in")
     @Size(max = 50)
     private String batteryPackaging;
@@ -132,7 +132,7 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String bindCodeName;
 
-    @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋")
+    @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋",hidden = true)
     @Excel(name = "物流包装要求")
     @Size(max = 50)
     private String suggestPackingMaterial;

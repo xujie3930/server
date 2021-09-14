@@ -71,7 +71,9 @@ public class RemoterApiImpl implements IRemoterApi {
         if (subCodeWithInfo == null) {
             Map<String, List<BasSubWrapperVO>> sub = basSubClientService.getSub(mainCode);
             sub.forEach((x, y) -> {
-                Map<String, BasSubWrapperVO> collect = y.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubCode, subCode -> subCode, (x1, x2) -> x1));
+                Map<String, BasSubWrapperVO> collect = y.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubCode, subCodeInfo -> subCodeInfo, (x1, x2) -> x1));
+                Map<String, BasSubWrapperVO> collect2 = y.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue, subCodeInfo -> subCodeInfo, (x1, x2) -> x1));
+                collect.putAll(collect2);
                 timedCache.put(x, collect);
             });
             subCodeWithInfo = timedCache.get(mainCode);
