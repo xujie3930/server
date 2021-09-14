@@ -3,8 +3,10 @@ package com.szmsd.doc.api.sku.request;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.dto.BasePackingDto;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Data
@@ -73,9 +77,24 @@ public class ProductRequest extends BaseProductRequest {
         return this;
     }
 
-    public ProductRequest setTheCode(IRemoterApi iRemoterApi ,DocSubConfigData docSubConfigData) {
+    public ProductRequest setTheCode(IRemoterApi iRemoterApi, DocSubConfigData docSubConfigData) {
         DocSubConfigData.MainSubCode mainSubCode = docSubConfigData.getMainSubCode();
-//        iRemoterApi.getSubNameByCode()
+
+        String productAttributeConfig = mainSubCode.getProductAttribute();
+        Optional<BasSubWrapperVO> basSubWrapperOpt = Optional.ofNullable(iRemoterApi.getSubNameByCode(productAttributeConfig))
+                .flatMap(x -> Optional.ofNullable(x.get(super.getProductAttribute())));
+        String productAttributeName = basSubWrapperOpt.map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("产品属性不存在"));
+        String productAttribute = basSubWrapperOpt.map(BasSubWrapperVO::getSubValue).orElseThrow(() -> new RuntimeException("产品属性不存在"));
+        super.setProductAttribute(productAttribute);
+        super.setProductAttributeName(productAttributeName);
+
+        String electrifiedMode = super.getElectrifiedMode();
+        Optional.ofNullable(electrifiedMode).filter(StringUtils::isNotBlank).ifPresent(code -> {
+            String electrifiedModeName = Optional.ofNullable(iRemoterApi.getSubNameByCode(mainSubCode.getElectrifiedMode()))
+                    .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("电池包装不存在"));
+            super.setElectrifiedModeName(electrifiedModeName);
+        });
+
         return this;
     }
 }

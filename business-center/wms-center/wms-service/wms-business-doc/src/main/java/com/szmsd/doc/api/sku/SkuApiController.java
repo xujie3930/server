@@ -66,7 +66,7 @@ public class SkuApiController {
     @PostMapping("save")
     @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
     public R save(@RequestBody @Validated ProductRequest productRequest) {
-        productRequest.validData(docSubConfigData).calculateTheVolume().checkPack(basePackingFeignService);
+        productRequest.validData(docSubConfigData).calculateTheVolume().checkPack(basePackingFeignService).setTheCode(remoterApi,docSubConfigData);
         BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
         baseProductClientService.add(product);
         return R.ok();
