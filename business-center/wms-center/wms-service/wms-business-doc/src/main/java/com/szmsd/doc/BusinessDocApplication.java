@@ -76,6 +76,7 @@ public class BusinessDocApplication {
      *   c.本模块需要redis，oauth2.0认证的存储服务采用redis
      *   d.为了避免doc模块和其它业务模块实体类冲突，doc模块中请求的实体类以Request为后缀，响应的实体类以Response为后缀
      *   e.Swagger相关配置看（DeliveryController，注意请求实体，注解等信息）
+     *   f.SwaggerDictionary配置，支持数据字典，JSON，注解三种赋值方式
      *
      * </pre></blockquote>
      *

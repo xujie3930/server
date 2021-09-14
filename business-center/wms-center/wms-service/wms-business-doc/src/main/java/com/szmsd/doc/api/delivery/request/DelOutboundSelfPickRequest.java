@@ -1,5 +1,6 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,6 +29,7 @@ public class DelOutboundSelfPickRequest implements Serializable {
     @ApiModelProperty(value = "是否优先发货", dataType = "Boolean", position = 1, example = "false")
     private Boolean isFirst;
 
+    @SwaggerDictionary(dicCode = "058", dicKey = "subValue")
     @NotBlank(message = "提货方式不能为空", groups = {DelOutboundGroup.SelfPick.class})
     @ApiModelProperty(value = "提货方式", dataType = "String", position = 2, example = "")
     private String deliveryMethod;
