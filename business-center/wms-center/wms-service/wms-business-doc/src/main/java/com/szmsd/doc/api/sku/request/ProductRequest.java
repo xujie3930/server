@@ -5,7 +5,7 @@ import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -28,9 +28,9 @@ public class ProductRequest extends BaseProductRequest {
 
         // 1、如果产品属性是带电的，带电信息和电池包装必填；
         if (StringUtils.isNotBlank(super.getProductAttribute())) {
-            DocSubConfigData.SubCode subCode = docSubConfigData.getSubCode();
-            String charged = subCode.getCharged();
-            if (super.getProductAttribute().equals(charged)) {
+         /*   DocSubConfigData.SubCode subCode = docSubConfigData.getSubCode();
+            String charged = subCode.getCharged();*/
+            if ("Battery".equals(super.getProductAttribute())) {
                 AssertUtil.isTrue(StringUtils.isNotBlank(super.getElectrifiedMode()), "产品属性【带电】，带电信息不能为空");
                 AssertUtil.isTrue(StringUtils.isNotBlank(super.getElectrifiedModeName()), "产品属性【带电】，带电信息不能为空");
 
@@ -70,6 +70,12 @@ public class ProductRequest extends BaseProductRequest {
             dataAndException.stream().filter(x -> suggestPackingMaterial.equals(x.getPackingMaterialType())).findAny()
                     .orElseThrow(() -> new RuntimeException("请检查物流包装是否存在!"));
         }
+        return this;
+    }
+
+    public ProductRequest setTheCode(IRemoterApi iRemoterApi ,DocSubConfigData docSubConfigData) {
+        DocSubConfigData.MainSubCode mainSubCode = docSubConfigData.getMainSubCode();
+//        iRemoterApi.getSubNameByCode()
         return this;
     }
 }

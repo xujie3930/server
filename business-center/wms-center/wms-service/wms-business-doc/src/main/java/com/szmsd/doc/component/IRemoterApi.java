@@ -1,6 +1,9 @@
 package com.szmsd.doc.component;
 
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName: IRemoterApi
@@ -25,5 +28,8 @@ public interface IRemoterApi {
      * @return
      */
     boolean checkSkuBelong(String sellerCode, String warehouse, String sku);
+
     boolean checkSkuBelong(String sellerCode, String warehouse, List<String> sku);
+
+    Map<String, BasSubWrapperVO> getSubNameByCode(String subCode);
 }
