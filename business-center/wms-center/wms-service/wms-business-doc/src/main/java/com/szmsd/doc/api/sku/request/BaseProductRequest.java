@@ -1,19 +1,17 @@
 package com.szmsd.doc.api.sku.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.doc.api.SwaggerDictionary;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.util.Date;
 
 
 /**
@@ -94,32 +92,32 @@ public class BaseProductRequest {
     @NotNull(message = "申报价值不能为空")
     @Digits(integer = 8, fraction = 2)
     private Double declaredValue;
-
-    @ApiModelProperty(value = "产品属性编号 [普货:GeneralCargo,电池:Battery,液体:Liquid,粉末:Powder]", allowableValues = "[GeneralCargo,Battery,Liquid,Powder]", example = "GeneralCargo", required = true)
+    @SwaggerDictionary(dicCode = "059",dicKey = "subValue")
+    @ApiModelProperty(value = "产品属性编号 [普货:GeneralCargo,带电:Battery,液体:Liquid,粉末:Powder,带磁:Magnet]", allowableValues = "[GeneralCargo,Battery,Liquid,Powder]", example = "GeneralCargo", required = true)
     @Size(max = 50)
     @NotBlank(message = "产品属性编号不能为空")
     private String productAttribute;
 
-    @ApiModelProperty(value = "产品属性名 [普货:GeneralCargo,电池:Battery,液体:Liquid,粉末:Powder]", allowableValues = "[普货,电池,液体,粉末]", example = "普货", required = true)
+    @ApiModelProperty(value = "产品属性名 [普货:GeneralCargo,带电:Battery,液体:Liquid,粉末:Powder,带磁:Magnet]", allowableValues = "[普货,电池,液体,粉末,带磁]", example = "普货", required = true)
     @Excel(name = "产品属性名")
     @NotBlank(message = "产品属性名不能为空")
     @Size(max = 100)
     private String productAttributeName;
-
-    @ApiModelProperty(value = "带电信息编号 主子类别(060 / ddxx -#{subValue})", example = "Battery")
+    @SwaggerDictionary(dicCode = "060")
+    @ApiModelProperty(value = "带电信息编号 主子类别(060 / ddxx -#{subValue})", example = "drycell")
     @Size(max = 50)
     private String electrifiedMode;
-
-    @ApiModelProperty(value = "带电信息名 主子类别(060 / ddxx -#{subName})", example = "带电")
+    @SwaggerDictionary(dicCode = "060",dicKey = "subName")
+    @ApiModelProperty(value = "带电信息名 主子类别(060 / ddxx -#{subName})", example = "干电池")
     @Excel(name = "带电信息名")
     @Size(max = 100)
     private String electrifiedModeName;
-
+    @SwaggerDictionary(dicCode = "061")
     @ApiModelProperty(value = "电池包装编号 主子类别(061 / dcbb -#{subValue})", example = "built_in")
     @Size(max = 50)
     private String batteryPackaging;
-
-    @ApiModelProperty(value = "电池包装名 主子类别(061 / dcbb -#{subName})", example = "内置")
+    @SwaggerDictionary(dicCode = "061",dicKey = "subName")
+    @ApiModelProperty(value = "电池包装名 主子类别(061 / dcbb -#{subName})", example = "内置",hidden = true)
     @Excel(name = "电池包装名")
     @Size(max = 100)
     private String batteryPackagingName;
@@ -160,7 +158,7 @@ public class BaseProductRequest {
     @Size(max = 1000)
     private String productIntroductAddress;
 
-    @ApiModelProperty(value = "类别",hidden = true)
+    @ApiModelProperty(value = "类别",allowableValues = "sku",hidden = true)
     @Size(max = 20)
     private String category ="SKU";
 

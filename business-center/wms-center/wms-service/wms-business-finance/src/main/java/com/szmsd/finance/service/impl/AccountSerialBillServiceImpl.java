@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
@@ -28,6 +29,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     private ISysDictDataService sysDictDataService;
 
     @Override
+    @DataScope("cus_code")
     public List<AccountSerialBill> listPage(AccountSerialBillDTO dto) {
         LambdaQueryWrapper<AccountSerialBill> query = Wrappers.lambdaQuery();
         if (StringUtils.isNotBlank(dto.getNo())) {
