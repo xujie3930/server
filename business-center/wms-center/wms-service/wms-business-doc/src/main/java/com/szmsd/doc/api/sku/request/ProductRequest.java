@@ -29,7 +29,10 @@ public class ProductRequest extends BaseProductRequest {
     private List<AttachmentDataDTO> documentsFiles;
 
     public ProductRequest validData(DocSubConfigData docSubConfigData) {
-
+        if (null == super.getHavePackingMaterial() || !super.getHavePackingMaterial()) {
+            super.setBindCode(null);
+            super.setBindCodeName(null);
+        }
         // 1、如果产品属性是带电的，带电信息和电池包装必填；
         if (StringUtils.isNotBlank(super.getProductAttribute())) {
          /*   DocSubConfigData.SubCode subCode = docSubConfigData.getSubCode();
@@ -40,6 +43,11 @@ public class ProductRequest extends BaseProductRequest {
 
                 AssertUtil.isTrue(StringUtils.isNotBlank(super.getBatteryPackaging()), "产品属性【带电】，电池包装不能为空");
                 AssertUtil.isTrue(StringUtils.isNotBlank(super.getBatteryPackagingName()), "产品属性【带电】，电池包装不能为空");
+            } else {
+                super.setElectrifiedMode(null);
+                super.setElectrifiedModeName(null);
+                super.setBatteryPackaging(null);
+                super.setBatteryPackagingName(null);
             }
         }
         // 2、是否附带包材=是，附带包材必填；
@@ -67,12 +75,14 @@ public class ProductRequest extends BaseProductRequest {
 
     public ProductRequest checkPack(BasePackingFeignService basePackingFeignService) {
         // 3、选择物物流包装OMS要校验是否存在；
-        String suggestPackingMaterial = super.getSuggestPackingMaterial();
-        if (StringUtils.isNotBlank(suggestPackingMaterial)) {
+        String suggestPackingMaterialCode = super.getSuggestPackingMaterialCode();
+        if (StringUtils.isNotBlank(suggestPackingMaterialCode)) {
             R<List<BasePackingDto>> basePackingDtoR = basePackingFeignService.listParent();
             List<BasePackingDto> dataAndException = R.getDataAndException(basePackingDtoR);
-            dataAndException.stream().filter(x -> suggestPackingMaterial.equals(x.getPackingMaterialType())).findAny()
+            BasePackingDto basePackingDto = dataAndException.stream().filter(x -> suggestPackingMaterialCode.equals(x.getPackageMaterialCode())).findAny()
                     .orElseThrow(() -> new RuntimeException("请检查物流包装是否存在!"));
+            String packageMaterialName = basePackingDto.getPackageMaterialName();
+            super.setSuggestPackingMaterial(packageMaterialName);
         }
         return this;
     }
