@@ -1,5 +1,6 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.doc.validator.annotation.NotAnyNull;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -33,13 +34,18 @@ public class PricedProductRequest implements Serializable {
     @ApiModelProperty(value = "SKU，产品属性信息二选一", dataType = "String", position = 4, example = "[\"SN001\", \"SN002\"]")
     private List<String> skus;
 
-    @ApiModelProperty(value = "产品属性信息，SKU二选一" +
-            "<br/>普货：GeneralCargo" +
-            "<br/>电池：Battery" +
-            "<br/>液体：Liquid" +
-            "<br/>粉末：Powder" +
-            "<br/>磁铁：Magnet", dataType = "String", position = 4, example = "[\"GeneralCargo\", \"Powder\"]")
+    /**
+     * "<br/>普货：GeneralCargo" +
+     * "<br/>电池：Battery" +
+     * "<br/>液体：Liquid" +
+     * "<br/>粉末：Powder" +
+     * "<br/>磁铁：Magnet"
+     */
+    @SwaggerDictionary(dicCode = "059", dicKey = "subValue")
+    @ApiModelProperty(value = "产品属性信息，SKU二选一", dataType = "String", position = 4, example = "[\"GeneralCargo\", \"Powder\"]")
     private List<String> productAttributes;
 
+    @ApiModelProperty(value = "client")
     private String client;
+
 }

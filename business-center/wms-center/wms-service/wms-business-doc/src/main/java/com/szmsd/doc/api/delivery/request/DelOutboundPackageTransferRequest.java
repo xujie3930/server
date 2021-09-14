@@ -1,5 +1,6 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.validator.annotation.PreNotNull;
 import io.swagger.annotations.ApiModel;
@@ -54,9 +55,10 @@ public class DelOutboundPackageTransferRequest implements Serializable {
     @ApiModelProperty(value = "高 CM", required = true, dataType = "Double", position = 4, example = "10")
     private Double height;
 
+    @SwaggerDictionary(dicCode = "076")
     @NotBlank(message = "重量尺寸确认不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @Size(max = 30, message = "重量尺寸确认不能超过30个字符", groups = {DelOutboundGroup.PackageTransfer.class})
-    @ApiModelProperty(value = "重量尺寸确认，076001：仓库数据直接发货，076002：需要确认重量信息", required = true, dataType = "String", position = 5, example = "076001")
+    @ApiModelProperty(value = "重量尺寸确认", required = true, dataType = "String", position = 5, example = "076001")
     private String packageConfirm;
 
     @Max(value = Integer.MAX_VALUE, message = "重量误差范围不能大于2147483647", groups = {DelOutboundGroup.PackageTransfer.class})
