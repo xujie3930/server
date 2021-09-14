@@ -177,6 +177,8 @@ public class WmsApiConfig implements ApiConfig {
         private String cancel;
         // B3 创建转运单
         private String createPackage;
+        // B4 创建入库单物流信息列表
+        private String createTracking;
 
         public String getCreatePackage() {
             return createPackage;
@@ -200,6 +202,14 @@ public class WmsApiConfig implements ApiConfig {
 
         public void setCancel(String cancel) {
             this.cancel = cancel;
+        }
+
+        public String getCreateTracking() {
+            return createTracking;
+        }
+
+        public void setCreateTracking(String createTracking) {
+            this.createTracking = createTracking;
         }
     }
 
