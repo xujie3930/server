@@ -49,7 +49,7 @@ public class InboundReceiptDTO {
     private String warehouseMethodCode;
     @NotBlank(message = "类别编码不能为空")
     @Size(max = 30, message = "类别编码仅支持0-30字符")
-    @ApiModelProperty(value = "类别编码 (0-30]", required = true)
+    @ApiModelProperty(value = "类别编码 (0-30]",allowableValues = "SKU,包材",required = true)
     private String warehouseCategoryCode;
     @Size(max = 30, message = "VAT 仅支持 0-30 字符")
     @ApiModelProperty(value = "VAT")

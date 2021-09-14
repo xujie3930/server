@@ -30,7 +30,16 @@ public class DocSubConfigData {
         /**
          * 基础信息-产品属性 059
          */
-        private String property = "059";
+        private String productAttribute = "059";
+        /**
+         * 带电信息编号
+         */
+        private String electrifiedMode = "060";
+        /**
+         * 电池包装编号
+         */
+        private String batteryPackaging = "061";
+
 
     }
     @Data
