@@ -12,6 +12,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.req.CreateInboundReceiptReq;
+import com.szmsd.doc.api.warehouse.req.InboundReceiptDetailReq;
 import com.szmsd.doc.api.warehouse.resp.AttachmentFileResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptDetailResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptInfoResp;
@@ -29,6 +30,7 @@ import com.szmsd.putinstorage.enums.SourceTypeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -130,9 +132,19 @@ public class InboundApiController extends BaseController {
     R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
+            x.calculate();
             CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
             BeanUtils.copyProperties(x, createInboundReceiptDTO);
             createInboundReceiptDTO.setSourceType(SourceTypeEnum.DOC.name());
+            List<InboundReceiptDetailReq> inboundReceiptDetails = x.getInboundReceiptDetails();
+            if (CollectionUtils.isNotEmpty(inboundReceiptDetails)) {
+                List<InboundReceiptDetailDTO> collect = inboundReceiptDetails.stream().map(z -> {
+                    InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
+                    BeanUtils.copyProperties(z, inboundReceiptDetailDTO);
+                    return inboundReceiptDetailDTO;
+                }).collect(Collectors.toList());
+                createInboundReceiptDTO.setInboundReceiptDetails(collect);
+            }
             return createInboundReceiptDTO;
         }).collect(Collectors.toList());
 
