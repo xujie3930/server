@@ -16,6 +16,7 @@ import springfox.documentation.swagger.schema.ApiModelProperties;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 @Component
@@ -40,9 +41,21 @@ public class SwaggerDictionaryPropertyPlugin implements ModelPropertyBuilderPlug
         if (null != swaggerDictionary) {
             SwaggerDictionary.DataChannel dataChannel = new SwaggerDictionary.DataChannel.DefDataChannel(this.basSubClientService);
             AllowableListValues allowableListValues = SwaggerDictionary._AllowableListValues.VALUES.values(swaggerDictionary, dataChannel);
-            // final ResolvedType resolvedType = context.getResolver().resolve(String.class);
-            // context.getBuilder().allowableValues(allowableListValues).type(resolvedType);
-            context.getBuilder().allowableValues(allowableListValues);
+            Class<?> rawPrimaryType = context.getBeanPropertyDefinition().get().getRawPrimaryType();
+            final ResolvedType resolvedType;
+            if (List.class.equals(rawPrimaryType)) {
+                resolvedType = context.getResolver().resolve(rawPrimaryType);
+                String description = context.getBuilder().build().getDescription();
+                StringJoiner sj = new StringJoiner(",");
+                for (String value : allowableListValues.getValues()) {
+                    sj.add(value);
+                }
+                description = description + ";可用值:" + sj.toString();
+                context.getBuilder().description(description);
+            } else {
+                resolvedType = context.getResolver().resolve(String.class);
+            }
+            context.getBuilder().allowableValues(allowableListValues).type(resolvedType);
         } else {
             final Class<?> rawPrimaryType = beanPropertyDefinition.getRawPrimaryType();
             //过滤得到目标类型

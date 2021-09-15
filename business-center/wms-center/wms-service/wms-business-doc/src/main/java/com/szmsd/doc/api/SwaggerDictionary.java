@@ -124,7 +124,7 @@ public @interface SwaggerDictionary {
             for (DataFormat dataFormat : dataFormatList) {
                 list.add(dataFormat.toString());
             }
-            return new AllowableListValues(list, "String");
+            return new AllowableListValues(list, "array");
         }
     }
 
