@@ -48,6 +48,7 @@ public class BaseWarehouseApiController extends BaseController {
         List<BasWarehouseResp> collect = rows.stream().map(BasWarehouseResp::convertThis).collect(Collectors.toList());
         long total = basWarehousePage.getTotal();
         TableDataInfo<BasWarehouseResp> tableDataInfo = new TableDataInfo(collect, (int) total);
+        tableDataInfo.setCode(200);
         return tableDataInfo;
     }
 

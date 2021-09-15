@@ -5,6 +5,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.doc.api.warehouse.req.InventoryAvailableQueryReq;
 import com.szmsd.doc.api.warehouse.resp.InventoryAvailableListResp;
 import com.szmsd.doc.api.warehouse.resp.SkuInventoryAgeResp;
+import com.szmsd.doc.validator.CurrentUserInfo;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.SkuInventoryAgeVo;
@@ -35,6 +36,7 @@ public class InventoryApiController extends BaseController {
     @PostMapping("/inbound/queryAvailableList")
     @ApiOperation(value = "查询可用库存-根据仓库编码，SKU - 不分页", notes = "根据客户代码、所在仓库、sku查询SKU库存")
     public R<List<InventoryAvailableListResp>> queryAvailableList(@Valid @RequestBody InventoryAvailableQueryReq queryDTO) {
+        queryDTO.setCusCode(CurrentUserInfo.getSellerCode());
         List<InventoryAvailableListVO> inventoryAvailableListVOS = inventoryFeignService.queryAvailableList(queryDTO.convertThis());
 
         List<InventoryAvailableListResp> returnList = inventoryAvailableListVOS

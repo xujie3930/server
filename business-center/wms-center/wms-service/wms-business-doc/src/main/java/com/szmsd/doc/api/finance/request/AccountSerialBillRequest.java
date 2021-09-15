@@ -28,9 +28,9 @@ public class AccountSerialBillRequest extends QueryDto {
 //    @ApiModelProperty(value = "跟踪号 [30]")
 //    private String trackingNo;
 
-    @NotBlank(message = "客户编码不能为空")
+//    @NotBlank(message = "客户编码不能为空")
     @Size(max = 30, message = "客户编码最大支持30字符")
-    @ApiModelProperty(value = "客户编码 [30]", example = "CNYWO7", required = true)
+    @ApiModelProperty(value = "客户编码 [30]", hidden = true, example = "CNYWO7", required = true)
     private String cusCode;
     //    @Size(max = 200, message = "客户名称最大支持200字符")
 //    @ApiModelProperty(value = "客户名称 [200]")

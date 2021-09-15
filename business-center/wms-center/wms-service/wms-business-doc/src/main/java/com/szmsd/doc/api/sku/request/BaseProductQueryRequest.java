@@ -30,8 +30,8 @@ public class BaseProductQueryRequest extends QueryDto {
     @ApiModelProperty(value = "类别",allowableValues = "SKU,包材",example = "SKU")
     private String category;
 
-    @NotBlank(message = "客户（卖家）编码不能为空")
-    @ApiModelProperty(value = "客户（卖家）编码", required = true,example = "CNYWO7")
+//    @NotBlank(message = "客户（卖家）编码不能为空")
+    @ApiModelProperty(value = "客户（卖家）编码", required = true, hidden = true,example = "CNYWO7")
     private String sellerCode;
 
     @ApiModelProperty(value = "客户（卖家）编码", hidden = true)
