@@ -141,7 +141,7 @@ public class GlobalExceptionHandler {
             if (builder.lastIndexOf(",") == builder.length() - 1) {
                 builder.deleteCharAt(builder.length() - 1);
             }
-            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            code = HttpStatus.BAD_REQUEST.value();
             message = builder.toString();
         } else if (exception instanceof IllegalArgumentException) {
             code = HttpStatus.INTERNAL_SERVER_ERROR.value();
