@@ -166,7 +166,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
         }
         // 创建入库单物流信息列表
-        remoteComponent.createTracking(createInboundReceiptDTO);
+        //remoteComponent.createTracking(createInboundReceiptDTO);
         log.info("创建入库单：操作完成");
         return this.queryInfo(warehouseNo, false);
     }
@@ -356,8 +356,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
 
             // 入库按照数量（按申报数量）进行扣费 扣费失败则出库失败，不能出库
-            log.info("审核通过则扣费{}", JSONObject.toJSONString(inboundReceiptReviewDTO));
-            remoteComponent.delOutboundCharge(inboundReceiptInfoVO);
+//            log.info("审核通过则扣费{}", JSONObject.toJSONString(inboundReceiptReviewDTO));
+//            remoteComponent.delOutboundCharge(inboundReceiptInfoVO);
 
 
             try {
