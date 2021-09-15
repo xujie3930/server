@@ -90,4 +90,8 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "明细信息", dataType = "DelOutboundDetailRequest", position = 16)
     private List<DelOutboundDetailRequest> details;
 
+    @Valid
+    @ApiModelProperty(value = "装箱信息")
+    private List<DelOutboundBatchPackingRequest> packings;
+
 }
