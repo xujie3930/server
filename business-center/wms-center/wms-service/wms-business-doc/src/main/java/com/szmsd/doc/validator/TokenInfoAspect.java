@@ -40,7 +40,13 @@ public class TokenInfoAspect {
     public void before(JoinPoint joinPoint){
 //        joinPoint.getSignature()
         System.out.println("进入方法");
-        remoterApi.getUserInfo();
+        try {
+            //TODO 判断是否存在token
+            remoterApi.getUserInfo();
+        } catch (Exception e) {
+//            e.printStackTrace();
+        }
+
     }
     /**
      * 处理完请求后执行
