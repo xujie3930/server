@@ -3,23 +3,27 @@ package com.szmsd.doc.component;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.date.DateUnit;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.client.BasSubClientService;
-import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
-import com.szmsd.common.core.utils.StringToolkit;
-import com.szmsd.inventory.api.service.InventoryFeignClientService;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.doc.validator.CurrentUserInfo;
+import com.szmsd.system.api.domain.SysUser;
+import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +42,24 @@ public class RemoterApiImpl implements IRemoterApi {
     private BasWarehouseClientService basWarehouseClientService;
     @Resource
     private BasSubClientService basSubClientService;
+    @Resource
+    private RemoteUserService remoteUserService;
+
+    @Override
+    public void getUserInfo() {
+        R info = remoteUserService.getInfo(1);
+        Map data = (Map) info.getData();
+        // todo 此处修改ajax.put返回  R.ok(map)
+        Object userObj = data.get("user");
+        String jsonString = JSONObject.toJSONString(userObj);
+        SysUser user = JSONObject.parseObject(jsonString, SysUser.class);
+
+//        map.put("user", userService.selectUserById(userId));//SysUser
+//        SysUser
+//        map.put("roles", roles);
+//        map.put("permissions", permissions);
+        CurrentUserInfo.setSysUser(user);
+    }
 
     @Override
     public boolean verifyWarehouse(String warehouse) {

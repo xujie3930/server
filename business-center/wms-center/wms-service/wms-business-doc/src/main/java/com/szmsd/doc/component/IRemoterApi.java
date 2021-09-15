@@ -12,6 +12,8 @@ import java.util.Map;
  * @Date: 2021-09-11 14:22
  */
 public interface IRemoterApi {
+    void getUserInfo();
+
     /**
      * 校验仓库是否存在
      *
