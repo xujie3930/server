@@ -132,6 +132,7 @@ public class InboundApiController extends BaseController {
     R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
+            x.calculate();
             CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
             BeanUtils.copyProperties(x, createInboundReceiptDTO);
             createInboundReceiptDTO.setSourceType(SourceTypeEnum.DOC.name());
