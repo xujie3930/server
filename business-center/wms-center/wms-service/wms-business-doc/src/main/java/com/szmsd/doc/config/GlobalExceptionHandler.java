@@ -173,7 +173,7 @@ public class GlobalExceptionHandler {
             }
         }
         if (0 == code) {
-            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            code = HttpStatus.BAD_REQUEST.value();
         }
         if (StringUtils.isEmpty(message)) {
             message = exception.getMessage();
