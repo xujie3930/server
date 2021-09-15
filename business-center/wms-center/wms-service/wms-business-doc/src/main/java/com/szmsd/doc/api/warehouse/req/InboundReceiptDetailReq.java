@@ -1,5 +1,6 @@
-package com.szmsd.putinstorage.domain.dto;
+package com.szmsd.doc.api.warehouse.req;
 
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -9,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @Accessors(chain = true)
-public class InboundReceiptDetailDTO {
+public class InboundReceiptDetailReq {
 
     @ApiModelProperty(value = "主键ID")
     private Long id;

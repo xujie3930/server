@@ -63,9 +63,9 @@ public class ProductRequest extends BaseProductRequest {
     public ProductRequest calculateTheVolume() {
         // 4、体积，接口自动计算 体积如果为空，系统计算出来 新建SKU的时候， 体积给他用长*宽*高
         if (null == super.getInitVolume() || super.getInitVolume().compareTo(BigDecimal.ZERO) <= 0) {
-            Double initLength = Optional.ofNullable(super.getInitLength()).orElse(1.00);
-            Double initHeight = Optional.ofNullable(super.getInitHeight()).orElse(1.00);
-            Double initWeight = Optional.ofNullable(super.getInitWeight()).orElse(1.00);
+            Double initLength = Optional.ofNullable(super.getInitLength()).orElse(0.00);
+            Double initHeight = Optional.ofNullable(super.getInitHeight()).orElse(0.00);
+            Double initWeight = Optional.ofNullable(super.getInitWeight()).orElse(0.00);
             double volume = initLength * initHeight * initWeight;
             BigDecimal bigDecimal = BigDecimal.valueOf(volume).setScale(2, RoundingMode.HALF_UP);
             super.setInitVolume(bigDecimal);
@@ -81,7 +81,7 @@ public class ProductRequest extends BaseProductRequest {
             List<BasePackingDto> dataAndException = R.getDataAndException(basePackingDtoR);
             BasePackingDto basePackingDto = dataAndException.stream().filter(x -> suggestPackingMaterialCode.equals(x.getPackageMaterialCode())).findAny()
                     .orElseThrow(() -> new RuntimeException("请检查物流包装是否存在!"));
-            String packageMaterialName = basePackingDto.getPackageMaterialName();
+            String packageMaterialName = basePackingDto.getPackingMaterialType();
             super.setSuggestPackingMaterial(packageMaterialName);
         }
         return this;
