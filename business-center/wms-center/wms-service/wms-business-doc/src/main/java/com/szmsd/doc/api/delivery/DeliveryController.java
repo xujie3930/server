@@ -237,7 +237,7 @@ public class DeliveryController {
     }
 
     @PreAuthorize("hasAuthority('client')")
-    @DeleteMapping("/packing/batch")
+    @PostMapping("/packing/batch")
     @ApiOperation(value = "#12 出库管理 - 装箱结果（批量出库）", position = 601)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackingRequest", required = true)
     public R<List<DelOutboundSelfPickResponse>> packingBatch(@RequestBody @Validated DelOutboundPackingRequest request) {
