@@ -94,10 +94,12 @@ public class HtpRequestLog extends BaseEntity {
     @ApiModelProperty(value = "响应时间")
     @Excel(name = "响应时间")
     private Date responseTime;
+
     @TableField(exist = false)
     @ApiModelProperty(value = "请求时间-开始")
     @Excel(name = "请求时间")
     private Date requestTimeStart;
+
     @TableField(exist = false)
     @ApiModelProperty(value = "请求时间-结束")
     @Excel(name = "请求时间")
