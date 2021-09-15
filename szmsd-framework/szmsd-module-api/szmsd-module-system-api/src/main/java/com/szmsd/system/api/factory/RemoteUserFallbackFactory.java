@@ -82,6 +82,11 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             public R changeStatus(SysUserDto userDto) {
                 return null;
             }
+
+            @Override
+            public R getInfo(Integer type) {
+                return null;
+            }
         };
     }
 }

@@ -32,8 +32,9 @@ public class InboundReceiptReq {
     private String orderNo;
     @NotBlank(message = "客户编码不能为空")
     @Size(max = 30, message = "客户编码仅支持 0-30字符")
-    @ApiModelProperty(value = "客户编码 (0-30]",example = "CNYWO7",required = true)
+    @ApiModelProperty(value = "客户编码 (0-30]", hidden = true, example = "CNYWO7", required = true)
     private String cusCode;
+    @NotBlank(message = "入库方式不能为空")
     @Size(max = 30, message = "入库方式仅支持0-30字符")
     @ApiModelProperty(value = "普通入库：Normalr", allowableValues = "Normal,PackageTransfer,NewSku", hidden = true)
     private String orderType = "Normal";
@@ -84,10 +85,10 @@ public class InboundReceiptReq {
     @ApiModelProperty(value = "产品货源地编码  (0-30]", allowableValues = "0:本土,1:进口", example = "0")
     private String goodsSourceCode;
     @Size(max = 200, message = "挂号长度仅支持0-200字符")
-    @ApiModelProperty(value = "挂号 (0-200]",hidden = true)
+    @ApiModelProperty(value = "挂号 (0-200]", hidden = true)
     private String trackingNumber;
     @Size(max = 500, message = "备注长度仅支持0-500字符")
-    @ApiModelProperty(value = "备注 (0-500]",example = "备注")
+    @ApiModelProperty(value = "备注 (0-500]", example = "备注")
     private String remark;
 
     @ApiModelProperty(value = "单证信息文件")

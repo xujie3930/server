@@ -15,6 +15,7 @@ import com.szmsd.doc.api.sku.resp.BaseProductResp;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
+import com.szmsd.doc.validator.CurrentUserInfo;
 import io.swagger.annotations.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,8 @@ public class SkuApiController {
     @PostMapping("list")
     @ApiOperation(value = "查询列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
     public TableDataInfo<BaseProductResp> list(@Validated @RequestBody BaseProductQueryRequest baseProductQueryRequest) {
+        baseProductQueryRequest.setSellerCode(CurrentUserInfo.getSellerCode());
+        baseProductQueryRequest.setPageSize(999);
         TableDataInfo<BaseProduct> list = baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
         TableDataInfo<BaseProductResp> baseProductResp = new TableDataInfo<>();
         BeanUtils.copyProperties(list, baseProductResp);
@@ -66,7 +69,8 @@ public class SkuApiController {
     @PostMapping("save")
     @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
     public R save(@RequestBody @Validated ProductRequest productRequest) {
-        productRequest.validData(docSubConfigData).calculateTheVolume().checkPack(basePackingFeignService).setTheCode(remoterApi,docSubConfigData);
+        productRequest.setSellerCode(CurrentUserInfo.getSellerCode());
+        productRequest.validData(docSubConfigData).calculateTheVolume().checkPack(basePackingFeignService).setTheCode(remoterApi, docSubConfigData).uploadFile(remoterApi);
         BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
         baseProductClientService.add(product);
         return R.ok();

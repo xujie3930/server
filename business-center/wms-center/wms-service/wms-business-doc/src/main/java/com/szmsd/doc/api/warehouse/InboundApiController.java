@@ -19,6 +19,7 @@ import com.szmsd.doc.api.warehouse.resp.InboundReceiptInfoResp;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
+import com.szmsd.doc.validator.CurrentUserInfo;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
@@ -130,6 +131,8 @@ public class InboundApiController extends BaseController {
             "如果需要管理人员人工审核，则需进入OMS客户端-仓储服务-入库管理，再次提交入库申请。如仓库设置为自动审核，" +
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
     R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
+        String sellerCode = CurrentUserInfo.getSellerCode();
+        batchInboundReceiptReq.getBatchInboundReceiptList().stream().map(x->x.setCusCode(sellerCode));
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
             x.calculate();
