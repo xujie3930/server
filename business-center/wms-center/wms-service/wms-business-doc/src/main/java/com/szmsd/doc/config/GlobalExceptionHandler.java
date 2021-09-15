@@ -80,77 +80,79 @@ public class GlobalExceptionHandler {
             StringBuilder builder = new StringBuilder();
             BindingResult bindingResult = manv.getBindingResult();
             List<ObjectError> allErrors = bindingResult.getAllErrors();
-            for (ObjectError objectError : allErrors) {
-                builder.append("[");
-                Object[] arguments = objectError.getArguments();
-                if (objectError instanceof FieldError) {
-                    if (null == arguments) {
-                        FieldError fieldError = (FieldError) objectError;
-                        builder.append(fieldError.getField());
-                    } else {
-                        for (Object argument : arguments) {
-                            if (argument instanceof DefaultMessageSourceResolvable) {
-                                DefaultMessageSourceResolvable defaultMessageSourceResolvable = (DefaultMessageSourceResolvable) argument;
-                                String[] codes = defaultMessageSourceResolvable.getCodes();
-                                if (null != codes) {
-                                    for (String s : codes) {
-                                        builder.append(s);
-                                        builder.append(",");
-                                    }
-                                    builder.deleteCharAt(builder.length() - 1);
-                                } else {
-                                    builder.append(defaultMessageSourceResolvable.getDefaultMessage());
-                                }
-                            } else {
-                                if (argument instanceof String[]) {
-                                    String[] codes = (String[]) argument;
-                                    for (String s : codes) {
-                                        builder.append(s);
-                                        builder.append(",");
-                                    }
-                                    builder.deleteCharAt(builder.length() - 1);
-                                } else {
-                                    builder.append(argument);
-                                }
-                            }
-                            builder.append(",");
-                        }
-                        builder.deleteCharAt(builder.length() - 1);
-                    }
-                } else {
-                    String[] codes = null;
-                    if (null != arguments) {
-                        for (Object argument : arguments) {
-                            if (argument instanceof String[]) {
-                                codes = (String[]) argument;
-                            }
-                        }
-                    }
-                    if (null != codes) {
-                        for (String s : codes) {
-                            builder.append(s);
-                            builder.append(",");
-                        }
-                        builder.deleteCharAt(builder.length() - 1);
-                    }
-                }
-                builder.append("]");
-                builder.append(objectError.getDefaultMessage());
-                builder.append(",");
-            }
-            if (builder.lastIndexOf(",") == builder.length() - 1) {
-                builder.deleteCharAt(builder.length() - 1);
-            }
+//            for (ObjectError objectError : allErrors) {
+//                builder.append("[");
+//                Object[] arguments = objectError.getArguments();
+//                if (objectError instanceof FieldError) {
+//                    if (null == arguments) {
+//                        FieldError fieldError = (FieldError) objectError;
+//                        builder.append(fieldError.getField());
+//                    } else {
+//                        for (Object argument : arguments) {
+//                            if (argument instanceof DefaultMessageSourceResolvable) {
+//                                DefaultMessageSourceResolvable defaultMessageSourceResolvable = (DefaultMessageSourceResolvable) argument;
+//                                String[] codes = defaultMessageSourceResolvable.getCodes();
+//                                if (null != codes) {
+//                                    for (String s : codes) {
+//                                        builder.append(s);
+//                                        builder.append(",");
+//                                    }
+//                                    builder.deleteCharAt(builder.length() - 1);
+//                                } else {
+//                                    builder.append(defaultMessageSourceResolvable.getDefaultMessage());
+//                                }
+//                            } else {
+//                                if (argument instanceof String[]) {
+//                                    String[] codes = (String[]) argument;
+//                                    for (String s : codes) {
+//                                        builder.append(s);
+//                                        builder.append(",");
+//                                    }
+//                                    builder.deleteCharAt(builder.length() - 1);
+//                                } else {
+//                                    builder.append(argument);
+//                                }
+//                            }
+//                            builder.append(",");
+//                        }
+//                        builder.deleteCharAt(builder.length() - 1);
+//                    }
+//                } else {
+//                    String[] codes = null;
+//                    if (null != arguments) {
+//                        for (Object argument : arguments) {
+//                            if (argument instanceof String[]) {
+//                                codes = (String[]) argument;
+//                            }
+//                        }
+//                    }
+//                    if (null != codes) {
+//                        for (String s : codes) {
+//                            builder.append(s);
+//                            builder.append(",");
+//                        }
+//                        builder.deleteCharAt(builder.length() - 1);
+//                    }
+//                }
+//                builder.append("]");
+//                builder.append(objectError.getDefaultMessage());
+//                builder.append(",");
+//            }
+//            if (builder.lastIndexOf(",") == builder.length() - 1) {
+//                builder.deleteCharAt(builder.length() - 1);
+//            }
+//            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+//            message = builder.toString();
+            message = allErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage).reduce((a, b) -> a + "," + b).orElse("");
             code = HttpStatus.BAD_REQUEST.value();
-            message = builder.toString();
         } else if (exception instanceof IllegalArgumentException) {
-            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            code = HttpStatus.BAD_REQUEST.value();
             message = exception.getMessage();
             if (StringUtils.isEmpty(message)) {
                 message = "不合法的参数异常";
             }
         } else if (exception instanceof UnexpectedTypeException) {
-            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            code = HttpStatus.BAD_REQUEST.value();
             message = "不合法的参数异常";
         } else if (exception instanceof NoSuchMethodException) {
             code = HttpStatus.INTERNAL_SERVER_ERROR.value();
