@@ -4,6 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.open.domain.OpnRequestLog;
+import com.szmsd.open.interceptor.NoTransactionHandler;
 import com.szmsd.open.service.IOpnRequestLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,6 +39,7 @@ public class OpnRequestLogController extends BaseController {
     /**
      * 查询http请求日志模块列表
      */
+    @NoTransactionHandler
     @PreAuthorize("@ss.hasPermi('OpnRequestLog:OpnRequestLog:list')")
     @GetMapping("/list")
     @ApiOperation(value = "查询http请求日志模块列表", notes = "查询http请求日志模块列表")
@@ -50,6 +52,7 @@ public class OpnRequestLogController extends BaseController {
     /**
      * 获取http请求日志模块详细信息
      */
+    @NoTransactionHandler
     @PreAuthorize("@ss.hasPermi('OpnRequestLog:OpnRequestLog:query')")
     @GetMapping(value = "getInfo/{id}")
     @ApiOperation(value = "获取http请求日志模块详细信息", notes = "获取http请求日志模块详细信息")

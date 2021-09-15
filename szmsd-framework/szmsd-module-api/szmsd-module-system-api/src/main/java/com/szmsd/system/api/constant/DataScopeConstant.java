@@ -21,4 +21,9 @@ public final class DataScopeConstant {
      */
     public static final String DATA_SCOPE_SERVICE_STAFF = "3";
 
+    /**
+     * 只查询自己
+     */
+    public static final String DATA_SCOPE_SELF = "4";
+
 }
