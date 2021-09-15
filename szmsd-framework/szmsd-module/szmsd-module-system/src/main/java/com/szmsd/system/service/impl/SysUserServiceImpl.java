@@ -16,7 +16,6 @@ import com.szmsd.system.mapper.*;
 import com.szmsd.system.service.ISysConfigService;
 import com.szmsd.system.service.ISysUserService;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,21 +114,16 @@ public class SysUserServiceImpl implements ISysUserService {
                     conditionDto.setServiceStaff(String.valueOf(sysUser.getUserId()));
                 }
                 String sellerCode = sysUser.getSellerCode();
+                List<String> permissions = null;
                 if (hasServiceManager || hasServiceStaff) {
                     R<List<String>> listR = this.basSellerFeignService.queryByServiceCondition(conditionDto);
                     if (null != listR) {
                         // 授权信息
-                        List<String> data = listR.getData();
-                        if (StringUtils.isNotEmpty(sellerCode)) {
-                            if (!CollectionUtils.exists(data, sellerCode::equals)) {
-                                data.add(sellerCode);
-                            }
-                        }
-                        sysUser.setPermissions(data);
+                        permissions = listR.getData();
                     }
                 }
+                // 这里默认将自己的客户编码添加到权限中，对应数据权限 4 @see com.szmsd.system.api.constant.DataScopeConstant.DATA_SCOPE_SELF
                 // 处理无任何权限时，能查到数据的问题
-                List<String> permissions = sysUser.getPermissions();
                 if (CollectionUtils.isEmpty(permissions)) {
                     // 只能查询自己的数据
                     String permission;
@@ -140,8 +134,14 @@ public class SysUserServiceImpl implements ISysUserService {
                     }
                     permissions = new ArrayList<>();
                     permissions.add(permission);
-                    sysUser.setPermissions(permissions);
+                } else {
+                    if (StringUtils.isNotEmpty(sellerCode)) {
+                        if (!CollectionUtils.exists(permissions, sellerCode::equals)) {
+                            permissions.add(sellerCode);
+                        }
+                    }
                 }
+                sysUser.setPermissions(permissions);
             }
             sysUser.setAllDataScope(allDataScope);
         }
