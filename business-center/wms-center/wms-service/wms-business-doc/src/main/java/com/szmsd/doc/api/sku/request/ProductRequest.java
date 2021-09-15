@@ -81,7 +81,7 @@ public class ProductRequest extends BaseProductRequest {
             List<BasePackingDto> dataAndException = R.getDataAndException(basePackingDtoR);
             BasePackingDto basePackingDto = dataAndException.stream().filter(x -> suggestPackingMaterialCode.equals(x.getPackageMaterialCode())).findAny()
                     .orElseThrow(() -> new RuntimeException("请检查物流包装是否存在!"));
-            String packageMaterialName = basePackingDto.getPackageMaterialName();
+            String packageMaterialName = basePackingDto.getPackingMaterialType();
             super.setSuggestPackingMaterial(packageMaterialName);
         }
         return this;

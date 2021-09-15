@@ -70,12 +70,12 @@ public class InboundReceiptReq {
 
     @ApiModelProperty(value = "送货单号-多个", hidden = true)
     private List<String> deliveryNoList;
-    @NotNull(message = "合计申报数量不能为空")
+//    @NotNull(message = "合计申报数量不能为空")
     @Min(value = 0, message = "合计申报数量不能小于0")
-    @ApiModelProperty(value = "合计申报数量", required = true)
+    @ApiModelProperty(value = "合计申报数量", required = true,hidden = true)
     private Integer totalDeclareQty;
     @Min(value = 0, message = "合计上架数量不能小于0")
-    @ApiModelProperty(value = "合计上架数量")
+    @ApiModelProperty(value = "合计上架数量",hidden = true)
     private Integer totalPutQty;
     @Size(max = 30, message = "产品货源地编码仅支持0-30字符")
     @ApiModelProperty(value = "产品货源地编码  (0-30]", allowableValues = "0:本土,1:进口",example = "0")

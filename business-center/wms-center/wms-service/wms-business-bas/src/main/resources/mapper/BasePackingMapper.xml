@@ -33,7 +33,7 @@
             id, create_by, update_by, del_flag, name, code, seller_code, category, price, priority_level, category_name, describe
         </sql>
     <select id="selectBasePackingGroup" resultType="com.szmsd.bas.dto.BasePackingDto">
-    select CONCAT(min(price),"-",max(price)) as priceRange,packing_material_type from base_packing
+    select CONCAT(min(price),"-",max(price)) as priceRange,packing_material_type,package_material_code,package_material_name from base_packing
     where
     price is not null
     and currency is not null

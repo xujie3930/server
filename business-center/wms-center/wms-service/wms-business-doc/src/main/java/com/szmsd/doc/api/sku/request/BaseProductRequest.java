@@ -137,7 +137,7 @@ public class BaseProductRequest {
     @Size(max = 50)
     private String suggestPackingMaterial;
 
-    @ApiModelProperty(value = "物流包装要求编码 packing/listPacking -#{packageMaterialCode}", example = "SAASDA")
+    @ApiModelProperty(value = "物流包装要求编码 packing/listPacking -#{packageMaterialCode}", example = "B001")
     @Size(max = 100)
     private String suggestPackingMaterialCode;
 
