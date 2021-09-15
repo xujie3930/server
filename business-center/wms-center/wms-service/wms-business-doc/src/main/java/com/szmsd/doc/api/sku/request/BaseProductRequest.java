@@ -68,9 +68,9 @@ public class BaseProductRequest {
     @Size(max = 40)
     private String suffix;
     @DecimalMin(value = "0.01", message = "初始体积异常")
-    @ApiModelProperty(value = "初始体积 cm3",example = "1", required = true)
+    @ApiModelProperty(value = "初始体积 cm3",example = "1", required = true,hidden = true)
     @Digits(integer = 14, fraction = 2)
-    @NotNull(message = "初始体积不能为空")
+//    @NotNull(message = "初始体积不能为空")
     private BigDecimal initVolume;
 
     @NotBlank(message = "客户（卖家）编码不能为空")
