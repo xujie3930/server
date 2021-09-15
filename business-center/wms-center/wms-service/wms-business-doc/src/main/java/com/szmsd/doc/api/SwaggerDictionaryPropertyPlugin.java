@@ -40,8 +40,9 @@ public class SwaggerDictionaryPropertyPlugin implements ModelPropertyBuilderPlug
         if (null != swaggerDictionary) {
             SwaggerDictionary.DataChannel dataChannel = new SwaggerDictionary.DataChannel.DefDataChannel(this.basSubClientService);
             AllowableListValues allowableListValues = SwaggerDictionary._AllowableListValues.VALUES.values(swaggerDictionary, dataChannel);
-            final ResolvedType resolvedType = context.getResolver().resolve(String.class);
-            context.getBuilder().allowableValues(allowableListValues).type(resolvedType);
+            // final ResolvedType resolvedType = context.getResolver().resolve(String.class);
+            // context.getBuilder().allowableValues(allowableListValues).type(resolvedType);
+            context.getBuilder().allowableValues(allowableListValues);
         } else {
             final Class<?> rawPrimaryType = beanPropertyDefinition.getRawPrimaryType();
             //过滤得到目标类型
