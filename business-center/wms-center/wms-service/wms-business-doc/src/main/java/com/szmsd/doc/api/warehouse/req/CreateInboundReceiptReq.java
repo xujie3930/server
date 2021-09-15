@@ -23,7 +23,7 @@ public class CreateInboundReceiptReq extends InboundReceiptReq {
     @Valid
     @NotEmpty(message = "入库明细不能为空")
     @ApiModelProperty(value = "入库明细",required = true)
-    private List<InboundReceiptDetailDTO> inboundReceiptDetails;
+    private List<InboundReceiptDetailReq> inboundReceiptDetails;
 
 //    @ApiModelProperty(value = "要删除的入库明细id")
 //    private List<String> receiptDetailIds;

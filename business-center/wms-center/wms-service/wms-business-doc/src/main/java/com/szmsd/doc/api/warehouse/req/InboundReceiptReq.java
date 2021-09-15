@@ -28,23 +28,24 @@ public class InboundReceiptReq {
     @ApiModelProperty(value = "入库单号 (0-30]", hidden = true)
     private String warehouseNo;
     @Size(max = 30, message = "采购单仅支持0-30字符")
-    @ApiModelProperty(value = "采购单 (0-30]")
+    @ApiModelProperty(value = "采购单 (0-30]", hidden = true)
     private String orderNo;
     @NotBlank(message = "客户编码不能为空")
     @Size(max = 30, message = "客户编码仅支持 0-30字符")
     @ApiModelProperty(value = "客户编码 (0-30]", required = true)
     private String cusCode;
     @Size(max = 30, message = "入库方式仅支持0-30字符")
-    @ApiModelProperty(value = "[普通入库：Normal,新SKU入库：NewSku] (0-30],包裹转运入库：PackageTransfer", allowableValues = "Normal,PackageTransfer,NewSku")
-    private String orderType;
+    @ApiModelProperty(value = "普通入库：Normalr", allowableValues = "Normal,PackageTransfer,NewSku", hidden = true)
+    private String orderType = "Normal";
     @NotBlank(message = "目的仓库编码不能为空")
     @Size(max = 30, message = "目的仓库编码仅支持0-30字符")
     @ApiModelProperty(value = "目的仓库编码 /warehouse/page (0-30]", example = "NJ", required = true)
     private String warehouseCode;
-    @SwaggerDictionary(dicCode = "055")
+
+    //    @SwaggerDictionary(dicCode = "055")
     @NotBlank(message = "入库方式编码不能为空")
     @Size(max = 30, message = "入库方式编码仅支持0-30字符")
-    @ApiModelProperty(value = "入库方式编码 (0-30]", required = true)
+    @ApiModelProperty(value = "入库方式编码 (0-30]", allowableValues = "055001:SKU点数上架,055002:重新贴标上架,055003:裸货上架,055004:包材入库,055008:重新贴标上架", required = true)
     private String warehouseMethodCode;
     @NotBlank(message = "类别编码不能为空")
     @Size(max = 30, message = "类别编码仅支持0-30字符")
@@ -59,7 +60,7 @@ public class InboundReceiptReq {
     @ApiModelProperty(value = "送货方式编码 (0-30]", required = true)
     private String deliveryWayCode;
     //    @Size(max = 200, message = "送货单号仅支持0-30字符")
-    @ApiModelProperty(value = "送货单号 可支持多个")
+    @ApiModelProperty(value = "送货单号（快递单号） 可支持多个")
     private String deliveryNo;
 
     public InboundReceiptReq setDeliveryNo(String deliveryNo) {
@@ -70,15 +71,15 @@ public class InboundReceiptReq {
 
     @ApiModelProperty(value = "送货单号-多个", hidden = true)
     private List<String> deliveryNoList;
-//    @NotNull(message = "合计申报数量不能为空")
+    //    @NotNull(message = "合计申报数量不能为空")
     @Min(value = 0, message = "合计申报数量不能小于0")
-    @ApiModelProperty(value = "合计申报数量", required = true,hidden = true)
+    @ApiModelProperty(value = "合计申报数量", required = true, hidden = true)
     private Integer totalDeclareQty;
     @Min(value = 0, message = "合计上架数量不能小于0")
-    @ApiModelProperty(value = "合计上架数量",hidden = true)
+    @ApiModelProperty(value = "合计上架数量", hidden = true)
     private Integer totalPutQty;
     @Size(max = 30, message = "产品货源地编码仅支持0-30字符")
-    @ApiModelProperty(value = "产品货源地编码  (0-30]", allowableValues = "0:本土,1:进口",example = "0")
+    @ApiModelProperty(value = "产品货源地编码  (0-30]", allowableValues = "0:本土,1:进口", example = "0")
     private String goodsSourceCode;
     @Size(max = 200, message = "挂号长度仅支持0-200字符")
     @ApiModelProperty(value = "挂号 (0-200]")
