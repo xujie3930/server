@@ -5,6 +5,7 @@ import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.date.DateUnit;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
@@ -12,7 +13,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.doc.validator.CurrentUserInfo;
+import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,13 @@ public class RemoterApiImpl implements IRemoterApi {
     private BasSubClientService basSubClientService;
     @Resource
     private RemoteUserService remoteUserService;
+    @Resource
+    private RemoteAttachmentService remoteAttachmentService;
+
+    @Override
+    public RemoteAttachmentService getRemoteAttachmentService() {
+        return this.remoteAttachmentService;
+    }
 
     @Override
     public void getUserInfo() {
@@ -58,7 +66,7 @@ public class RemoterApiImpl implements IRemoterApi {
 //        SysUser
 //        map.put("roles", roles);
 //        map.put("permissions", permissions);
-        CurrentUserInfo.setSysUser(user);
+//        CurrentUserInfo.setSysUser(user);
     }
 
     @Override
@@ -71,6 +79,11 @@ public class RemoterApiImpl implements IRemoterApi {
     @Override
     public boolean checkSkuBelong(String sellerCode, String warehouse, String sku) {
         return this.checkSkuBelong(sellerCode, warehouse, Collections.singletonList(sku));
+    }
+
+    @Override
+    public boolean checkSkuBelong(String sku) {
+        return this.checkSkuBelong(AuthenticationUtil.getSellerCode(), null, Collections.singletonList(sku));
     }
 
     @Override

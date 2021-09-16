@@ -36,21 +36,25 @@ public class BaseProductRequest {
 //    @Size(max = 50)
 //    @NotBlank(message = "产品编码不能为空")
 //    private String code;
+    @DecimalMax(value = Integer.MAX_VALUE + "", message = "初始重量异常")
     @DecimalMin(value = "0.01", message = "初始重量异常")
     @ApiModelProperty(value = "初始重量g", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始重量不能为空")
     private Double initWeight;
+    @DecimalMax(value = Integer.MAX_VALUE + "", message = "初始长度异常")
     @DecimalMin(value = "0.01", message = "初始长度异常")
     @ApiModelProperty(value = "初始长 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始长度不能为空")
     private Double initLength;
+    @DecimalMax(value = Integer.MAX_VALUE + "", message = "初始宽度异常")
     @DecimalMin(value = "0.01", message = "初始宽度异常")
     @ApiModelProperty(value = "初始宽 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始宽度不能为空")
     private Double initWidth;
+    @DecimalMax(value = Integer.MAX_VALUE + "", message = "初始高度异常")
     @DecimalMin(value = "0.01", message = "初始高度异常")
     @ApiModelProperty(value = "初始高 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
@@ -85,7 +89,8 @@ public class BaseProductRequest {
     @Size(max = 200)
     @NotBlank(message = "中文申报品名不能为空")
     private String productNameChinese;
-
+    @DecimalMax(value = "100000000", message = "申报价值异常")
+    @DecimalMin(value = "0", message = "申报价值异常")
     @ApiModelProperty(value = "申报价值", required = true)
     @Excel(name = "申报价值")
     @NotNull(message = "申报价值不能为空")
@@ -121,8 +126,8 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String batteryPackagingName;
 
-    @ApiModelProperty(value = "是否附带包材", allowableValues = "true,false", example = "false")
-    private Boolean havePackingMaterial;
+    @ApiModelProperty(value = "是否附带包材 default=false", allowableValues = "true,false", example = "false")
+    private Boolean havePackingMaterial = false;
 
     @ApiModelProperty(value = "附带包材 产品编码 /product/listSku", example = "SCN72000081")
     @Size(max = 100)
@@ -229,7 +234,7 @@ public class BaseProductRequest {
     @Size(max = 50, message = "仓库编码不能大于50字符")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "关联单号")
+    @ApiModelProperty(value = "关联单号",hidden = true)
     @Size(max = 100)
     private String orderNo;
 

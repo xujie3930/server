@@ -1,8 +1,11 @@
 package com.szmsd.doc.utils;
 
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.doc.config.LoginUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Optional;
 
 public final class AuthenticationUtil {
 
@@ -19,5 +22,9 @@ public final class AuthenticationUtil {
             }
         }
         return null;
+    }
+
+    public static String getSellerCode(){
+        return Optional.ofNullable(getUser()).map(LoginUser::getSellerCode).orElseThrow(()->new CommonException("500","用户信息异常"));
     }
 }

@@ -9,13 +9,14 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.doc.api.sku.request.BarCodeReq;
 import com.szmsd.doc.api.sku.request.BaseProductQueryRequest;
 import com.szmsd.doc.api.sku.request.ProductRequest;
 import com.szmsd.doc.api.sku.resp.BaseProductResp;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
+import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
-import com.szmsd.doc.validator.CurrentUserInfo;
 import io.swagger.annotations.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ public class SkuApiController {
     @PostMapping("list")
     @ApiOperation(value = "查询列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
     public TableDataInfo<BaseProductResp> list(@Validated @RequestBody BaseProductQueryRequest baseProductQueryRequest) {
-        baseProductQueryRequest.setSellerCode(CurrentUserInfo.getSellerCode());
+        baseProductQueryRequest.setSellerCode(AuthenticationUtil.getSellerCode());
         baseProductQueryRequest.setPageSize(999);
         TableDataInfo<BaseProduct> list = baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
         TableDataInfo<BaseProductResp> baseProductResp = new TableDataInfo<>();
@@ -69,7 +70,7 @@ public class SkuApiController {
     @PostMapping("save")
     @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
     public R save(@RequestBody @Validated ProductRequest productRequest) {
-        productRequest.setSellerCode(CurrentUserInfo.getSellerCode());
+        productRequest.setSellerCode(AuthenticationUtil.getSellerCode());
         productRequest.validData(docSubConfigData).calculateTheVolume().checkPack(basePackingFeignService).setTheCode(remoterApi, docSubConfigData).uploadFile(remoterApi);
         BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
         baseProductClientService.add(product);
@@ -77,16 +78,13 @@ public class SkuApiController {
     }
 
     @PreAuthorize("hasAuthority('client')")
-    @GetMapping("getBarCode/{sellerCode}/{skuCode}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "sellerCode", value = "用户code", required = true),
-            @ApiImplicitParam(name = "skuCode", value = "sku", required = true),
-    })
+    @PostMapping("getBarCode")
     @ApiOperation(value = "SKU标签生成", notes = "生成sku编号，生成标签条形码，返回的为条形码图片的Base64")
-    public R getBarCode(@PathVariable("sellerCode") String sellerCode, @PathVariable("skuCode") String skuCode) {
+    public R getBarCode(@RequestBody @Validated BarCodeReq barCodeReq) {
+        String skuCode = barCodeReq.getSkuCode();
         Boolean valid = baseProductClientService.checkSkuValidToDelivery(skuCode);
-        boolean b = remoterApi.checkSkuBelong(sellerCode, null, skuCode);
-        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否属于用户%s", skuCode, sellerCode));
+        boolean b = remoterApi.checkSkuBelong( skuCode);
+        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否属于用户%s", skuCode, AuthenticationUtil.getSellerCode()));
         return valid ? R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode)) : R.failed("sku不存在");
     }
 
