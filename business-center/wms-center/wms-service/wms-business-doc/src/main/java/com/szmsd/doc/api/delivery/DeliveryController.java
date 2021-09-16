@@ -18,6 +18,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
 import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.doc.api.CountryCache;
 import com.szmsd.doc.api.delivery.request.*;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.api.delivery.response.*;
@@ -81,9 +82,26 @@ public class DeliveryController {
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
+            this.setAddressCountry(dto);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
+    }
+
+    private void setAddressCountry(DelOutboundDto dto) {
+        DelOutboundAddressDto address = dto.getAddress();
+        if (null == address) {
+            return;
+        }
+        String countryCode = address.getCountryCode();
+        if (StringUtils.isEmpty(countryCode)) {
+            return;
+        }
+        String country = CountryCache.getCountry(countryCode);
+        if (null == country) {
+            throw new CommonException("400", "国家编码[" + countryCode + "]不存在");
+        }
+        address.setCountry(country);
     }
 
     @PreAuthorize("hasAuthority('client')")
@@ -136,6 +154,7 @@ public class DeliveryController {
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.NORMAL.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
+            this.setAddressCountry(dto);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundShipmentResponse.class));
@@ -169,6 +188,7 @@ public class DeliveryController {
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.COLLECTION.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
+            this.setAddressCountry(dto);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundCollectionResponse.class));
@@ -239,6 +259,7 @@ public class DeliveryController {
                     }
                 }
             }
+            this.setAddressCountry(dto);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundBatchResponse.class));
@@ -312,6 +333,7 @@ public class DeliveryController {
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.SELF_PICK.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
+            this.setAddressCountry(dto);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundSelfPickResponse.class));
@@ -369,6 +391,7 @@ public class DeliveryController {
         for (DelOutboundDto dto : dtoList) {
             dto.setOrderType(DelOutboundOrderTypeEnum.DESTROY.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
+            this.setAddressCountry(dto);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundDestroyResponse.class));
