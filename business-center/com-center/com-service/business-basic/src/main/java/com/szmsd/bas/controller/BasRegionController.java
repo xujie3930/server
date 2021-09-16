@@ -129,11 +129,19 @@ public class BasRegionController extends BaseController {
         return R.ok(basRegionService.selectList(queryDto));
     }
 
-    @PreAuthorize("@ss.hasPermi('BasRegion:BasRegion:country')")
+    @PreAuthorize("@ss.hasPermi('BasRegion:BasRegion:queryByCountryCode')")
     @GetMapping("/queryByCountryCode")
     @ApiOperation(value = "基础资料 - 地区信息 - 国家", notes = "基础资料 - 地区信息 - 国家")
     public R<BasRegionSelectListVO> queryByCountryCode(@RequestParam("addressCode") String addressCode) {
         List<BasRegionSelectListVO> data = basRegionService.selectList(new BasRegionSelectListQueryDto().setType(1).setAddressCode(addressCode));
+        return CollectionUtils.isEmpty(data) ? R.ok() : R.ok(data.get(0));
+    }
+
+    @PreAuthorize("@ss.hasPermi('BasRegion:BasRegion:queryByCountryName')")
+    @GetMapping("/queryByCountryName")
+    @ApiOperation(value = "基础资料 - 地区信息 - 国家", notes = "基础资料 - 地区信息 - 国家")
+    public R<BasRegionSelectListVO> queryByCountryName(@RequestParam("addressName") String addressName) {
+        List<BasRegionSelectListVO> data = basRegionService.selectList(new BasRegionSelectListQueryDto().setType(1).setName(addressName));
         return CollectionUtils.isEmpty(data) ? R.ok() : R.ok(data.get(0));
     }
 
