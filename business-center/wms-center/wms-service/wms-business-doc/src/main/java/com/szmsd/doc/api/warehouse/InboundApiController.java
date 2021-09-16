@@ -10,7 +10,6 @@ import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
@@ -208,6 +207,12 @@ public class InboundApiController extends BaseController {
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "取消入库单", notes = "取消仓库还未处理的入库单")
     public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
+        R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
+        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取详情异常");
+        InboundReceiptInfoVO data = info.getData();
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        boolean equals = data.getCusCode().equals(sellerCode);
+        AssertUtil.isTrue(equals,"入库单不存在");
         R cancel = null;
         try {
             cancel = inboundReceiptFeignService.cancel(warehouseNo);
@@ -223,6 +228,12 @@ public class InboundApiController extends BaseController {
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "获取入库标签-通过单号", notes = "根据入库单号，生成标签条形码，返回的为条形码图片的Base64")
     public R<String> getInboundLabelByOrderNo(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
+        R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
+        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "入库单不存在");
+        InboundReceiptInfoVO data = info.getData();
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        boolean equals = data.getCusCode().equals(sellerCode);
+        AssertUtil.isTrue(equals,"入库单不存在");
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
     }
 

@@ -83,7 +83,7 @@ public class SkuApiController {
         String skuCode = barCodeReq.getSkuCode();
         Boolean valid = baseProductClientService.checkSkuValidToDelivery(skuCode);
         boolean b = remoterApi.checkSkuBelong(skuCode);
-        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否属于用户%s", skuCode, AuthenticationUtil.getSellerCode()));
+        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否存在", skuCode));
         return valid ? R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode)) : R.failed("sku不存在");
     }
 
