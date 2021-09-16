@@ -3,6 +3,8 @@ package com.szmsd.system.api.feign;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -95,4 +97,9 @@ public interface RemoteUserService {
      */
     @PutMapping("/user/changeStatus")
     R changeStatus(@RequestBody SysUserDto userDto);
+
+    @GetMapping("/user/getInfo")
+    @ApiOperation(httpMethod = "GET", value = "获取用户信息")
+    R getInfo(@ApiParam("权限类型：1-PC，2-APP,3-VIP") @RequestParam(defaultValue = "1",value = "type") Integer type);
+
 }

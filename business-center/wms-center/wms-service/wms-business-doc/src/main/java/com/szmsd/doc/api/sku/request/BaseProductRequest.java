@@ -60,21 +60,22 @@ public class BaseProductRequest {
     @ApiModelProperty(value = "是否激活 默认true", hidden = true)
     private Boolean isActive = true;
 
-    @ApiModelProperty(value = "产品图片")
+    @ApiModelProperty(value = "产品图片", hidden = true)
     @Size(max = 255)
     private String productImage;
 
-    @ApiModelProperty(value = "产品文件格式 jpg / png / jpeg")
+    @ApiModelProperty(value = "产品文件格式 jpg / png / jpeg", hidden = true)
     @Size(max = 40)
-    private String suffix;
+    private String suffix = "jpg";
+
     @DecimalMin(value = "0.01", message = "初始体积异常")
     @ApiModelProperty(value = "初始体积 cm3", example = "1", required = true, hidden = true)
     @Digits(integer = 14, fraction = 2)
 //    @NotNull(message = "初始体积不能为空")
     private BigDecimal initVolume;
 
-    @NotBlank(message = "客户（卖家）编码不能为空")
-    @ApiModelProperty(value = "客户（卖家）编码", example = "CNYWO7", required = true)
+    //    @NotBlank(message = "客户（卖家）编码不能为空")
+    @ApiModelProperty(value = "客户（卖家）编码", hidden = true, example = "CNYWO7", required = true)
     @Excel(name = "客户（卖家）编码")
     @Size(max = 100)
     private String sellerCode;

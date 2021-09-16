@@ -23,9 +23,9 @@ public class InventoryAvailableQueryReq extends QueryDto implements Serializable
     @Size(max = 30,message = "目的仓库编码仅支持0-30字符")
     @ApiModelProperty(value = "目的仓库编码 [30]", required = true, example = "GZ")
     private String warehouseCode;
-    @NotBlank(message = "客户编码不能为空")
+//    @NotBlank(message = "客户编码不能为空")
     @Size(max = 30,message = "客户编码仅支持0-30字符")
-    @ApiModelProperty(value = "客户编码 [30]", example = "CN72", required = true)
+    @ApiModelProperty(value = "客户编码 [30]", hidden = true,example = "CN72", required = true)
     private String cusCode;
     @Size(max = 30,message = "sku仅支持0-30字符")
     @ApiModelProperty(value = "sku - 模糊查询 [30]")

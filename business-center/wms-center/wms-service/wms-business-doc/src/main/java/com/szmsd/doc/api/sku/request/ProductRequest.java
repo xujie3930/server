@@ -1,5 +1,7 @@
 package com.szmsd.doc.api.sku.request;
 
+import cn.hutool.core.codec.Base64Encoder;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.dto.BasePackingDto;
@@ -12,20 +14,19 @@ import com.szmsd.doc.config.DocSubConfigData;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.Base64Utils;
 
+import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Data
 public class ProductRequest extends BaseProductRequest {
     @ApiModelProperty(value = "产品图片Base64", example = "xxx")
     private String productImageBase64;
 
-    @ApiModelProperty(value = "文件信息")
+    @ApiModelProperty(value = "文件信息",hidden = true)
     private List<AttachmentDataDTO> documentsFiles;
 
     public ProductRequest validData(DocSubConfigData docSubConfigData) {
@@ -107,4 +108,20 @@ public class ProductRequest extends BaseProductRequest {
 
         return this;
     }
+
+    public ProductRequest uploadFile(IRemoterApi remoterApi) {
+        String productImageBase64 = this.getProductImageBase64();
+        byte[] bytes = Base64Utils.decodeFromString(productImageBase64);
+        String imageUrl = "";
+//        super.setProductImage()
+//        documentsFiles
+        this.documentsFiles= new ArrayList<>();
+        AttachmentDataDTO attachmentDataDTO = new AttachmentDataDTO();
+        attachmentDataDTO.setId(null);
+        attachmentDataDTO.setAttachmentUrl(imageUrl);
+        this.documentsFiles.add(attachmentDataDTO);
+        return this;
+    }
+
+
 }
