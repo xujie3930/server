@@ -25,6 +25,7 @@ import java.util.Objects;
 @Accessors(chain = true)
 @ApiModel(value = "CreateInboundReceiptDTO", description = "创建入库单")
 public class CreateInboundReceiptReq extends InboundReceiptReq {
+
     @Valid
     @NotEmpty(message = "入库明细不能为空")
     @ApiModelProperty(value = "入库明细", required = true)

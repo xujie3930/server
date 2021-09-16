@@ -23,7 +23,7 @@ public class UserCreditInfoVO {
      */
     @ApiModelProperty(value = "授信类型(0：额度，1：期限)")
     @Excel(name = "授信类型(0：额度，1：期限)")
-    private Integer creditType;
+    private String creditType;
 
     @ApiModelProperty(value = "授信额度")
     @Excel(name = "授信额度")
