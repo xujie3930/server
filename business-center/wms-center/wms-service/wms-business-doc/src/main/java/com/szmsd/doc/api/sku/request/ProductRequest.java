@@ -1,34 +1,31 @@
 package com.szmsd.doc.api.sku.request;
 
-import cn.hutool.core.codec.Base64Encoder;
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
+import com.szmsd.doc.utils.AuthenticationUtil;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.Base64Utils;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 
-import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Data
 public class ProductRequest extends BaseProductRequest {
@@ -36,10 +33,10 @@ public class ProductRequest extends BaseProductRequest {
     @ApiModelProperty(value = "产品图片Base64", example = "xxx")
     private String productImageBase64;
 
-    @ApiModelProperty(value = "文件信息",hidden = true)
+    @ApiModelProperty(value = "文件信息", hidden = true)
     private List<AttachmentDataDTO> documentsFiles;
 
-    public ProductRequest validData(DocSubConfigData docSubConfigData) {
+    public ProductRequest validData(DocSubConfigData docSubConfigData, IRemoterApi remoterApi) {
         if (null == super.getHavePackingMaterial() || !super.getHavePackingMaterial()) {
             super.setBindCode(null);
             super.setBindCodeName(null);
@@ -65,6 +62,15 @@ public class ProductRequest extends BaseProductRequest {
         Optional.ofNullable(super.getHavePackingMaterial()).filter(x -> x).ifPresent(x -> {
             AssertUtil.isTrue(StringUtils.isNotBlank(super.getBindCode()), "附带包材选项,需要选择附带包材");
 //            AssertUtil.isTrue(StringUtils.isNotBlank(super.getBindCodeName()), "附带包材选项,需要选择附带包材");
+            String sellerCode = AuthenticationUtil.getSellerCode();
+            BaseProduct queryDTO = new BaseProduct();
+            queryDTO.setSellerCode(sellerCode);
+            queryDTO.setCategory("包材");
+            List<BaseProduct> baseProducts = remoterApi.listSku(queryDTO);
+            boolean b = baseProducts.stream().map(BaseProduct::getCode).anyMatch(code->code.equals(super.getBindCode()));
+            AssertUtil400.isTrue(b, "包材不存在!");
+            String bindName = baseProducts.stream().filter(bind -> bind.getCode().equals(super.getBindCode())).findAny().map(BaseProduct::getProductName).orElse("");
+            super.setBindCodeName(bindName);
         });
 
         // 5、页面内容以外的字段，均不要在新增接口体现。
@@ -116,7 +122,7 @@ public class ProductRequest extends BaseProductRequest {
             super.setElectrifiedModeName(electrifiedModeName);
         });
         String batteryPackaging = super.getBatteryPackaging();
-        Optional.ofNullable(batteryPackaging).filter(StringUtils::isNotBlank).ifPresent(code->{
+        Optional.ofNullable(batteryPackaging).filter(StringUtils::isNotBlank).ifPresent(code -> {
             String batteryPackagingeName = Optional.ofNullable(iRemoterApi.getSubNameByCode(mainSubCode.getBatteryPackaging()))
                     .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("电池包装不存在"));
             super.setBatteryPackagingName(batteryPackagingeName);
@@ -126,17 +132,20 @@ public class ProductRequest extends BaseProductRequest {
     }
 
     public ProductRequest uploadFile(IRemoterApi remoterApi) {
+
         String productImageBase64 = this.getProductImageBase64();
+        if (StringUtils.isBlank(productImageBase64)) return this;
         byte[] bytes = Base64Utils.decodeFromString(productImageBase64);
 
         RemoteAttachmentService remoteAttachmentService = remoterApi.getRemoteAttachmentService();
 
-        MockMultipartFile byteArrayMultipartFile = new MockMultipartFile(super.getProductName(),"","jpg",bytes);
+        MockMultipartFile byteArrayMultipartFile = new MockMultipartFile(super.getProductName(), "", "jpg", bytes);
         MockMultipartFile[] mockMultipartFiles = {byteArrayMultipartFile};
         R<List<BasAttachmentDataDTO>> listR = remoteAttachmentService.uploadAttachment(mockMultipartFiles, AttachmentTypeEnum.SKU_IMAGE, null, null);
         List<BasAttachmentDataDTO> dataAndException = R.getDataAndException(listR);
         //只有一张图片
-        Optional.ofNullable(dataAndException).filter(CollectionUtils::isNotEmpty).map(x->x.get(0)).map(BasAttachmentDataDTO::getAttachmentUrl).ifPresent(x->{super.setProductImage(x);
+        Optional.ofNullable(dataAndException).filter(CollectionUtils::isNotEmpty).map(x -> x.get(0)).map(BasAttachmentDataDTO::getAttachmentUrl).ifPresent(x -> {
+            super.setProductImage(x);
             AttachmentDataDTO attachmentDataDTO1 = new AttachmentDataDTO();
             attachmentDataDTO1.setAttachmentUrl(x);
             this.setDocumentsFiles(Collections.singletonList(attachmentDataDTO1));

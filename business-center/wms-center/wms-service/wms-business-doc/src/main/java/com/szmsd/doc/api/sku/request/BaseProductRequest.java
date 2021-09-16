@@ -133,7 +133,7 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String bindCode;
 
-    @ApiModelProperty(value = "附带包材 产品名 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", notes = "category: 包材 sellerCode: CNYWO7")
+    @ApiModelProperty(value = "附带包材 产品名 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", notes = "category: 包材 sellerCode: CNYWO7",hidden = true)
     @Excel(name = "绑定专属包材产品名")
     @Size(max = 100)
     private String bindCodeName;
@@ -147,7 +147,7 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String suggestPackingMaterialCode;
 
-    @ApiModelProperty(value = "价格区间(可修改) packing/listPacking -#{priceRange}", example = "10.00-10.00")
+    @ApiModelProperty(value = "包装材料价格区间(可修改) packing/listPacking -#{priceRange}", example = "10.00-10.00")
     @Excel(name = "价格区间")
     @Size(max = 255)
     private String priceRange;
