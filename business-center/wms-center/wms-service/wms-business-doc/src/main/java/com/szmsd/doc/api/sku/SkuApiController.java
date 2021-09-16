@@ -52,7 +52,6 @@ public class SkuApiController {
     @ApiOperation(value = "查询列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
     public TableDataInfo<BaseProductResp> list(@Validated @RequestBody BaseProductQueryRequest baseProductQueryRequest) {
         baseProductQueryRequest.setSellerCode(AuthenticationUtil.getSellerCode());
-        baseProductQueryRequest.setPageSize(999);
         TableDataInfo<BaseProduct> list = baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
         TableDataInfo<BaseProductResp> baseProductResp = new TableDataInfo<>();
         BeanUtils.copyProperties(list, baseProductResp);
@@ -83,8 +82,8 @@ public class SkuApiController {
     public R getBarCode(@RequestBody @Validated BarCodeReq barCodeReq) {
         String skuCode = barCodeReq.getSkuCode();
         Boolean valid = baseProductClientService.checkSkuValidToDelivery(skuCode);
-        boolean b = remoterApi.checkSkuBelong( skuCode);
-        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否属于用户%s", skuCode, AuthenticationUtil.getSellerCode()));
+        boolean b = remoterApi.checkSkuBelong(skuCode);
+        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否存在", skuCode));
         return valid ? R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode)) : R.failed("sku不存在");
     }
 

@@ -12,7 +12,6 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class InboundReceiptReq {
     @Size(max = 30, message = "采购单仅支持0-30字符")
     @ApiModelProperty(value = "采购单 (0-30]", hidden = true)
     private String orderNo;
-//    @NotBlank(message = "客户编码不能为空")
+    //    @NotBlank(message = "客户编码不能为空")
     @Size(max = 30, message = "客户编码仅支持 0-30字符")
     @ApiModelProperty(value = "客户编码 (0-30]", hidden = true, example = "CNYWO7", required = true)
     private String cusCode;
@@ -91,7 +90,11 @@ public class InboundReceiptReq {
     @ApiModelProperty(value = "备注 (0-500]", example = "备注")
     private String remark;
 
-    @ApiModelProperty(value = "单证信息文件")
+    @Size(max = 2, message = "单证信息文件-最多上传2张")
+    @ApiModelProperty(value = "单证信息文件-列表(base64) (0-2]")
+    private List<FileInfoBase64> documentsFileBase64List;
+
+    @ApiModelProperty(value = "单证信息文件", hidden = true)
     private List<AttachmentFileDTO> documentsFile;
 
 //    @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")

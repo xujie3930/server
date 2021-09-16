@@ -3,7 +3,9 @@ package com.szmsd.doc.api.warehouse;
 import cn.hutool.core.codec.Base64Encoder;
 import cn.hutool.core.util.URLUtil;
 import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
@@ -21,6 +23,7 @@ import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
@@ -131,10 +134,21 @@ public class InboundApiController extends BaseController {
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
     R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
         String sellerCode = AuthenticationUtil.getSellerCode();
-        batchInboundReceiptReq.getBatchInboundReceiptList().stream().forEach(x->x.setCusCode(sellerCode));
+        batchInboundReceiptReq.getBatchInboundReceiptList().forEach(x->x.setCusCode(sellerCode));
+
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
+            List<BasAttachmentDataDTO> basAttachmentDataDTOS = iRemoterApi.uploadFile(x.getDocumentsFileBase64List(), AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
+
+            List<AttachmentFileDTO> collect1 = basAttachmentDataDTOS.stream().map(file -> {
+                AttachmentFileDTO attachmentFileDTO = new AttachmentFileDTO();
+                BeanUtils.copyProperties(file, attachmentFileDTO);
+                return attachmentFileDTO;
+            }).collect(Collectors.toList());
+            x.setDocumentsFile(collect1);
+
             x.calculate();
+            x.checkOtherInfo();
             CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
             BeanUtils.copyProperties(x, createInboundReceiptDTO);
             createInboundReceiptDTO.setSourceType(SourceTypeEnum.DOC.name());
@@ -176,7 +190,7 @@ public class InboundApiController extends BaseController {
 
         String warehouseCode = createInboundReceiptDTOList.get(0).getWarehouseCode();
         boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
-        AssertUtil.isTrue(b, String.format("请检查SKU：%s是否属于客户%s", skuList, cusCode));
+        AssertUtil.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
 
         R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
         List<InboundReceiptInfoVO> dataAndException = R.getDataAndException(listR);
@@ -193,6 +207,12 @@ public class InboundApiController extends BaseController {
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "取消入库单", notes = "取消仓库还未处理的入库单")
     public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
+        R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
+        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取详情异常");
+        InboundReceiptInfoVO data = info.getData();
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        boolean equals = data.getCusCode().equals(sellerCode);
+        AssertUtil.isTrue(equals,"入库单不存在");
         R cancel = null;
         try {
             cancel = inboundReceiptFeignService.cancel(warehouseNo);
@@ -208,6 +228,12 @@ public class InboundApiController extends BaseController {
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", required = true)
     @ApiOperation(value = "获取入库标签-通过单号", notes = "根据入库单号，生成标签条形码，返回的为条形码图片的Base64")
     public R<String> getInboundLabelByOrderNo(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
+        R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
+        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "入库单不存在");
+        InboundReceiptInfoVO data = info.getData();
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        boolean equals = data.getCusCode().equals(sellerCode);
+        AssertUtil.isTrue(equals,"入库单不存在");
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
     }
 
