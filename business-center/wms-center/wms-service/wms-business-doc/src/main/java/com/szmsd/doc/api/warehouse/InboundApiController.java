@@ -18,8 +18,8 @@ import com.szmsd.doc.api.warehouse.resp.InboundReceiptDetailResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptInfoResp;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
+import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
-import com.szmsd.doc.validator.CurrentUserInfo;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
@@ -31,7 +31,6 @@ import com.szmsd.putinstorage.enums.SourceTypeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -131,7 +130,7 @@ public class InboundApiController extends BaseController {
             "如果需要管理人员人工审核，则需进入OMS客户端-仓储服务-入库管理，再次提交入库申请。如仓库设置为自动审核，" +
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
     R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
-        String sellerCode = CurrentUserInfo.getSellerCode();
+        String sellerCode = AuthenticationUtil.getSellerCode();
         batchInboundReceiptReq.getBatchInboundReceiptList().stream().map(x->x.setCusCode(sellerCode));
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
