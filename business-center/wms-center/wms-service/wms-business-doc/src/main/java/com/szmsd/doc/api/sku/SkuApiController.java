@@ -7,6 +7,7 @@ import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.doc.api.sku.request.BarCodeReq;
@@ -81,10 +82,11 @@ public class SkuApiController {
     @ApiOperation(value = "SKU标签生成", notes = "生成sku编号，生成标签条形码，返回的为条形码图片的Base64")
     public R getBarCode(@RequestBody @Validated BarCodeReq barCodeReq) {
         String skuCode = barCodeReq.getSkuCode();
-        Boolean valid = baseProductClientService.checkSkuValidToDelivery(skuCode);
+//        Boolean valid = baseProductClientService.checkSkuValidToDelivery(skuCode);
         boolean b = remoterApi.checkSkuBelong(skuCode);
-        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否存在", skuCode));
-        return valid ? R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode)) : R.failed("sku不存在");
+        if (!b) throw new CommonException("400",String.format("请检查SKU:%s是否存在", skuCode));
+//        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否存在", skuCode));
+        return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode));
     }
 
 }

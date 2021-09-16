@@ -36,7 +36,7 @@ public class ProductRequest extends BaseProductRequest {
     @ApiModelProperty(value = "产品图片Base64", example = "xxx")
     private String productImageBase64;
 
-    @ApiModelProperty(value = "文件信息",hidden = true)
+    @ApiModelProperty(value = "文件信息", hidden = true)
     private List<AttachmentDataDTO> documentsFiles;
 
     public ProductRequest validData(DocSubConfigData docSubConfigData) {
@@ -116,7 +116,7 @@ public class ProductRequest extends BaseProductRequest {
             super.setElectrifiedModeName(electrifiedModeName);
         });
         String batteryPackaging = super.getBatteryPackaging();
-        Optional.ofNullable(batteryPackaging).filter(StringUtils::isNotBlank).ifPresent(code->{
+        Optional.ofNullable(batteryPackaging).filter(StringUtils::isNotBlank).ifPresent(code -> {
             String batteryPackagingeName = Optional.ofNullable(iRemoterApi.getSubNameByCode(mainSubCode.getBatteryPackaging()))
                     .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("电池包装不存在"));
             super.setBatteryPackagingName(batteryPackagingeName);
@@ -126,17 +126,20 @@ public class ProductRequest extends BaseProductRequest {
     }
 
     public ProductRequest uploadFile(IRemoterApi remoterApi) {
+
         String productImageBase64 = this.getProductImageBase64();
+        if (StringUtils.isBlank(productImageBase64)) return this;
         byte[] bytes = Base64Utils.decodeFromString(productImageBase64);
 
         RemoteAttachmentService remoteAttachmentService = remoterApi.getRemoteAttachmentService();
 
-        MockMultipartFile byteArrayMultipartFile = new MockMultipartFile(super.getProductName(),"","jpg",bytes);
+        MockMultipartFile byteArrayMultipartFile = new MockMultipartFile(super.getProductName(), "", "jpg", bytes);
         MockMultipartFile[] mockMultipartFiles = {byteArrayMultipartFile};
         R<List<BasAttachmentDataDTO>> listR = remoteAttachmentService.uploadAttachment(mockMultipartFiles, AttachmentTypeEnum.SKU_IMAGE, null, null);
         List<BasAttachmentDataDTO> dataAndException = R.getDataAndException(listR);
         //只有一张图片
-        Optional.ofNullable(dataAndException).filter(CollectionUtils::isNotEmpty).map(x->x.get(0)).map(BasAttachmentDataDTO::getAttachmentUrl).ifPresent(x->{super.setProductImage(x);
+        Optional.ofNullable(dataAndException).filter(CollectionUtils::isNotEmpty).map(x -> x.get(0)).map(BasAttachmentDataDTO::getAttachmentUrl).ifPresent(x -> {
+            super.setProductImage(x);
             AttachmentDataDTO attachmentDataDTO1 = new AttachmentDataDTO();
             attachmentDataDTO1.setAttachmentUrl(x);
             this.setDocumentsFiles(Collections.singletonList(attachmentDataDTO1));

@@ -10,8 +10,10 @@ import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.req.CreateInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.req.InboundReceiptDetailReq;
@@ -73,8 +75,11 @@ public class InboundApiController extends BaseController {
     @ApiOperation(value = "入库单 - 详情", notes = "查看入库单详情")
     R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
-        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取详情异常");
+        if (info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode())) {
+            throw new CommonException("400", "入库单不存在");
+        }
         List<InboundReceiptDetailVO> inboundReceiptDetails = info.getData().getInboundReceiptDetails();
+
         List<InboundReceiptDetailResp> detailRespList = Optional.ofNullable(inboundReceiptDetails).orElse(new ArrayList<>()).stream().map(x -> {
             InboundReceiptDetailResp inboundReceiptDetailResp = new InboundReceiptDetailResp();
             BeanUtils.copyProperties(x, inboundReceiptDetailResp);
@@ -107,7 +112,7 @@ public class InboundApiController extends BaseController {
     }
 
     private static <T> T getDate(R<T> info) {
-        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取失败!");
+        AssertUtil400.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取失败!");
         return info.getData();
     }
 
@@ -134,7 +139,7 @@ public class InboundApiController extends BaseController {
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
     R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
         String sellerCode = AuthenticationUtil.getSellerCode();
-        batchInboundReceiptReq.getBatchInboundReceiptList().forEach(x->x.setCusCode(sellerCode));
+        batchInboundReceiptReq.getBatchInboundReceiptList().forEach(x -> x.setCusCode(sellerCode));
 
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
@@ -169,19 +174,19 @@ public class InboundApiController extends BaseController {
             //集运入库采购单号必填
             if (orderType.equals(InboundReceiptEnum.OrderType.COLLECTION.getValue())) {
                 String orderNo = x.getOrderNo();
-                AssertUtil.isTrue(StringUtils.isNotBlank(orderNo), "集运入库采购单号必填");
+                AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo), "集运入库采购单号必填");
             }
             // 送货方式=快递到仓，送货单号必填 053001
             String deliveryWayCode = x.getDeliveryWayCode();
             DocSubConfigData.SubCode subCode = docSubConfigData.getSubCode();
             if (subCode.getDeliveryWayCode().equals(deliveryWayCode)) {
-                AssertUtil.isTrue(StringUtils.isNotBlank(x.getDeliveryNo()), "送货方式为快递到仓时,送货单号必填");
+                AssertUtil400.isTrue(StringUtils.isNotBlank(x.getDeliveryNo()), "送货方式为快递到仓时,送货单号必填");
             }
         });
         List<String> warehouseCodeList = addDTO.stream().map(InboundReceiptDTO::getWarehouseCode).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
         warehouseCodeList.forEach(x -> {
             boolean b = iRemoterApi.verifyWarehouse(x);
-            AssertUtil.isTrue(b, String.format("请检查%s仓库是否存在", x));
+            AssertUtil400.isTrue(b, String.format("请检查%s仓库是否存在", x));
         });
 
         List<String> skuList = addDTO.stream().map(CreateInboundReceiptDTO::getInboundReceiptDetails)
@@ -190,7 +195,7 @@ public class InboundApiController extends BaseController {
 
         String warehouseCode = createInboundReceiptDTOList.get(0).getWarehouseCode();
         boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
-        AssertUtil.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
+        AssertUtil400.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
 
         R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
         List<InboundReceiptInfoVO> dataAndException = R.getDataAndException(listR);
@@ -208,11 +213,10 @@ public class InboundApiController extends BaseController {
     @ApiOperation(value = "取消入库单", notes = "取消仓库还未处理的入库单")
     public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
-        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "获取详情异常");
-        InboundReceiptInfoVO data = info.getData();
-        String sellerCode = AuthenticationUtil.getSellerCode();
-        boolean equals = data.getCusCode().equals(sellerCode);
-        AssertUtil.isTrue(equals,"入库单不存在");
+        if (info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode())) {
+            throw new CommonException("400", "入库单不存在");
+        }
+
         R cancel = null;
         try {
             cancel = inboundReceiptFeignService.cancel(warehouseNo);
@@ -229,11 +233,7 @@ public class InboundApiController extends BaseController {
     @ApiOperation(value = "获取入库标签-通过单号", notes = "根据入库单号，生成标签条形码，返回的为条形码图片的Base64")
     public R<String> getInboundLabelByOrderNo(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
-        AssertUtil.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null, "入库单不存在");
-        InboundReceiptInfoVO data = info.getData();
-        String sellerCode = AuthenticationUtil.getSellerCode();
-        boolean equals = data.getCusCode().equals(sellerCode);
-        AssertUtil.isTrue(equals,"入库单不存在");
+        AssertUtil400.isTrue(info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()),"入库单不存在");
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
     }
 
