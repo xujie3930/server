@@ -28,6 +28,11 @@ public class BasRegionFeignServiceFallbackFactory implements FallbackFactory<Bas
             public R<BasRegionSelectListVO> queryByCountryCode(String addressCode) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<BasRegionSelectListVO> queryByCountryName(String addressName) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

@@ -24,4 +24,7 @@ public interface BasRegionFeignService {
 
     @RequestMapping("/bas-region/queryByCountryCode")
     R<BasRegionSelectListVO> queryByCountryCode(@RequestParam("addressCode") String addressCode);
+
+    @RequestMapping("/bas-region/queryByCountryName")
+    R<BasRegionSelectListVO> queryByCountryName(@RequestParam("addressName") String addressName);
 }
