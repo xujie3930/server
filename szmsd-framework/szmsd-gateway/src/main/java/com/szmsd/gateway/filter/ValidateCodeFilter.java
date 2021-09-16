@@ -39,6 +39,10 @@ public class ValidateCodeFilter extends AbstractGatewayFilterFactory<Object> {
             if (!StringUtils.containsIgnoreCase(request.getURI().getPath(), AUTH_URL)) {
                 return chain.filter(exchange);
             }
+            // 授权码不验证
+            if (request.getQueryParams().containsKey("grant_type") && "authorization_code".equals(request.getQueryParams().getFirst("grant_type"))) {
+                return chain.filter(exchange);
+            }
             //如果是app请求，不处理
             if(request.getQueryParams().containsKey("client_id")&&request.getQueryParams().getFirst(SecurityConstants.DETAILS_CLIENT_ID).equals(SecurityConstants.DETAILS_CLIENT_ID_APP)&&
                     !request.getQueryParams().containsKey("code") && !request.getQueryParams().containsKey("uuid")){
