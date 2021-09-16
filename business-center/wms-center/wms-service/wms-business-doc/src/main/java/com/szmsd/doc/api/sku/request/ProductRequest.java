@@ -50,10 +50,10 @@ public class ProductRequest extends BaseProductRequest {
             String charged = subCode.getCharged();*/
             if ("Battery".equals(super.getProductAttribute())) {
                 AssertUtil.isTrue(StringUtils.isNotBlank(super.getElectrifiedMode()), "产品属性【带电】，带电信息不能为空");
-                AssertUtil.isTrue(StringUtils.isNotBlank(super.getElectrifiedModeName()), "产品属性【带电】，带电信息不能为空");
+//                AssertUtil.isTrue(StringUtils.isNotBlank(super.getElectrifiedModeName()), "产品属性【带电】，带电信息不能为空");
 
                 AssertUtil.isTrue(StringUtils.isNotBlank(super.getBatteryPackaging()), "产品属性【带电】，电池包装不能为空");
-                AssertUtil.isTrue(StringUtils.isNotBlank(super.getBatteryPackagingName()), "产品属性【带电】，电池包装不能为空");
+//                AssertUtil.isTrue(StringUtils.isNotBlank(super.getBatteryPackagingName()), "产品属性【带电】，电池包装不能为空");
             } else {
                 super.setElectrifiedMode(null);
                 super.setElectrifiedModeName(null);
@@ -64,7 +64,7 @@ public class ProductRequest extends BaseProductRequest {
         // 2、是否附带包材=是，附带包材必填；
         Optional.ofNullable(super.getHavePackingMaterial()).filter(x -> x).ifPresent(x -> {
             AssertUtil.isTrue(StringUtils.isNotBlank(super.getBindCode()), "附带包材选项,需要选择附带包材");
-            AssertUtil.isTrue(StringUtils.isNotBlank(super.getBindCodeName()), "附带包材选项,需要选择附带包材");
+//            AssertUtil.isTrue(StringUtils.isNotBlank(super.getBindCodeName()), "附带包材选项,需要选择附带包材");
         });
 
         // 5、页面内容以外的字段，均不要在新增接口体现。
@@ -112,8 +112,14 @@ public class ProductRequest extends BaseProductRequest {
         String electrifiedMode = super.getElectrifiedMode();
         Optional.ofNullable(electrifiedMode).filter(StringUtils::isNotBlank).ifPresent(code -> {
             String electrifiedModeName = Optional.ofNullable(iRemoterApi.getSubNameByCode(mainSubCode.getElectrifiedMode()))
-                    .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("电池包装不存在"));
+                    .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("带电信息不存在"));
             super.setElectrifiedModeName(electrifiedModeName);
+        });
+        String batteryPackaging = super.getBatteryPackaging();
+        Optional.ofNullable(batteryPackaging).filter(StringUtils::isNotBlank).ifPresent(code->{
+            String batteryPackagingeName = Optional.ofNullable(iRemoterApi.getSubNameByCode(mainSubCode.getBatteryPackaging()))
+                    .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("电池包装不存在"));
+            super.setBatteryPackagingName(batteryPackagingeName);
         });
 
         return this;
