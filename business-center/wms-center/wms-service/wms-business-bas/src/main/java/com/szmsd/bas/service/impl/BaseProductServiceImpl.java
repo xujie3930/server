@@ -437,10 +437,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         BaseProduct baseProduct = super.getById(baseProductDto.getId());
         ObjectUtil.fillNull(productRequest, baseProduct);
-        if (CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())) {
-            AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProduct.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
-            this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
-        }
+        AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProduct.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
+        this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
         productRequest.setProductDesc(baseProductDto.getProductDescription());
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
