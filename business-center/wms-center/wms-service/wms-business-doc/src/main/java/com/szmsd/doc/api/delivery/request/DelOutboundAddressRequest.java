@@ -55,10 +55,10 @@ public class DelOutboundAddressRequest {
     @ApiModelProperty(value = "国家代码", required = true, dataType = "String", example = "xxx")
     private String countryCode;
 
-    @NotBlank(message = "国家名称不能为空", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class, DelOutboundGroup.Collection.class})
-    @Size(max = 50, message = "国家名称长度不能超过50个字符", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "国家名称", required = true, dataType = "String", example = "xxx")
-    private String country;
+//    @NotBlank(message = "国家名称不能为空", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class, DelOutboundGroup.Collection.class})
+//    @Size(max = 50, message = "国家名称长度不能超过50个字符", groups = {DelOutboundGroup.Default.class})
+//    @ApiModelProperty(value = "国家名称", required = true, dataType = "String", example = "xxx")
+//    private String country;
 
     @NotBlank(message = "邮编不能为空", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class, DelOutboundGroup.Collection.class})
     @Size(max = 50, message = "邮编长度不能超过50个字符", groups = {DelOutboundGroup.Default.class})
