@@ -58,7 +58,7 @@ public class DeliveryController {
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "PricedProductRequest", required = true)
     public R<List<PricedProductResponse>> pricedProduct(@RequestBody @Validated PricedProductRequest request) {
         if (CollectionUtils.isEmpty(request.getSkus()) && CollectionUtils.isEmpty(request.getProductAttributes())) {
-            throw new CommonException("500", "SKU，产品属性信息不能全部为空");
+            throw new CommonException("400", "SKU，产品属性信息不能全部为空");
         }
         DelOutboundOtherInServiceDto dto = BeanMapperUtil.map(request, DelOutboundOtherInServiceDto.class);
         List<PricedProduct> productList = this.delOutboundClientService.inService(dto);
@@ -75,7 +75,7 @@ public class DeliveryController {
     public R<List<DelOutboundPackageTransferResponse>> packageTransfer(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) DelOutboundPackageTransferListRequest request) {
         List<DelOutboundPackageTransferRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("999", "请求对象不能为空");
+            throw new CommonException("400", "请求对象不能为空");
         }
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
@@ -93,7 +93,7 @@ public class DeliveryController {
     public R<List<DelOutboundLabelResponse>> packageTransferLabel(@RequestBody @Validated DelOutboundLabelRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("999", "订单号不能为空");
+            throw new CommonException("400", "订单号不能为空");
         }
         DelOutboundLabelDto labelDto = new DelOutboundLabelDto();
         labelDto.setOrderNos(orderNos);
@@ -107,7 +107,7 @@ public class DeliveryController {
     public R<Integer> cancelPackageTransfer(@RequestBody @Validated DelOutboundCanceledRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("999", "订单号不能为空");
+            throw new CommonException("400", "订单号不能为空");
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
@@ -130,7 +130,7 @@ public class DeliveryController {
     public R<List<DelOutboundShipmentResponse>> shipment(@RequestBody @Validated(DelOutboundGroup.Normal.class) DelOutboundShipmentListRequest request) {
         List<DelOutboundShipmentRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("999", "请求对象不能为空");
+            throw new CommonException("400", "请求对象不能为空");
         }
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
@@ -148,7 +148,7 @@ public class DeliveryController {
     public R<Integer> cancelShipment(@RequestBody @Validated DelOutboundCanceledRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("999", "订单号不能为空");
+            throw new CommonException("400", "订单号不能为空");
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
@@ -163,7 +163,7 @@ public class DeliveryController {
     public R<List<DelOutboundCollectionResponse>> collection(@RequestBody @Validated(DelOutboundGroup.Collection.class) DelOutboundCollectionListRequest request) {
         List<DelOutboundCollectionRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("999", "请求对象不能为空");
+            throw new CommonException("400", "请求对象不能为空");
         }
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
@@ -181,11 +181,11 @@ public class DeliveryController {
     public R<Integer> cancelCollection(@RequestBody @Validated DelOutboundCanceledRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("999", "订单号不能为空");
+            throw new CommonException("400", "订单号不能为空");
         }
         for (String orderNo : orderNos) {
             if (StringUtils.isEmpty(orderNo)) {
-                throw new CommonException("999", "订单号值不能为空");
+                throw new CommonException("400", "订单号值不能为空");
             }
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
@@ -203,7 +203,7 @@ public class DeliveryController {
     public R<List<DelOutboundBatchResponse>> batch(@RequestBody @Validated(DelOutboundGroup.Batch.class) DelOutboundBatchListRequest request) {
         List<DelOutboundBatchRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("999", "请求对象不能为空");
+            throw new CommonException("400", "请求对象不能为空");
         }
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
@@ -213,22 +213,30 @@ public class DeliveryController {
             if ("058001".equals(dto.getDeliveryMethod())) {
                 DelOutboundAddressDto address = dto.getAddress();
                 if (null == address) {
-                    throw new CommonException("999", "地址信息不能为空");
+                    throw new CommonException("400", "地址信息不能为空");
                 }
                 if (StringUtils.isEmpty(address.getConsignee())) {
-                    throw new CommonException("999", "收货人不能为空");
+                    throw new CommonException("400", "收货人不能为空");
                 }
                 if (StringUtils.isEmpty(address.getStreet1())) {
-                    throw new CommonException("999", "街道1不能为空");
+                    throw new CommonException("400", "街道1不能为空");
                 }
                 if (StringUtils.isEmpty(address.getCountryCode())) {
-                    throw new CommonException("999", "国家不能为空");
+                    throw new CommonException("400", "国家不能为空");
                 }
                 if (StringUtils.isEmpty(address.getCountry())) {
-                    throw new CommonException("999", "国家名称不能为空");
+                    throw new CommonException("400", "国家名称不能为空");
                 }
                 if (StringUtils.isEmpty(address.getPostCode())) {
-                    throw new CommonException("999", "邮编不能为空");
+                    throw new CommonException("400", "邮编不能为空");
+                }
+            }
+            // 验证
+            if (null != dto.getIsLabelBox() && dto.getIsLabelBox()) {
+                for (DelOutboundDetailDto detail : dto.getDetails()) {
+                    if (StringUtils.isEmpty(detail.getNewLabelCode())) {
+                        throw new CommonException("400", "新标签不能为空");
+                    }
                 }
             }
         }
@@ -283,7 +291,7 @@ public class DeliveryController {
     public R<Integer> cancelBatch(@RequestBody @Validated DelOutboundCanceledRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("999", "订单号不能为空");
+            throw new CommonException("400", "订单号不能为空");
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
@@ -298,7 +306,7 @@ public class DeliveryController {
     public R<List<DelOutboundSelfPickResponse>> selfPick(@RequestBody @Validated(DelOutboundGroup.SelfPick.class) DelOutboundSelfPickListRequest request) {
         List<DelOutboundSelfPickRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("999", "请求对象不能为空");
+            throw new CommonException("400", "请求对象不能为空");
         }
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
@@ -340,7 +348,7 @@ public class DeliveryController {
     public R<Integer> cancelSelfPick(@RequestBody @Validated DelOutboundCanceledRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("999", "订单号不能为空");
+            throw new CommonException("400", "订单号不能为空");
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
@@ -355,7 +363,7 @@ public class DeliveryController {
     public R<List<DelOutboundDestroyResponse>> destroy(@RequestBody @Validated(DelOutboundGroup.Destroy.class) DelOutboundDestroyListRequest request) {
         List<DelOutboundDestroyRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("999", "请求对象不能为空");
+            throw new CommonException("400", "请求对象不能为空");
         }
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
@@ -373,7 +381,7 @@ public class DeliveryController {
     public R<Integer> cancelDestroy(@RequestBody @Validated DelOutboundCanceledRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("999", "订单号不能为空");
+            throw new CommonException("400", "订单号不能为空");
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);

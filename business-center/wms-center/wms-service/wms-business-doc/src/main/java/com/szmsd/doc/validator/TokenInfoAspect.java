@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
  */
 @Slf4j
 @Aspect
-@Component
+// @Component
 public class TokenInfoAspect {
 
     private final IRemoterApi remoterApi;
