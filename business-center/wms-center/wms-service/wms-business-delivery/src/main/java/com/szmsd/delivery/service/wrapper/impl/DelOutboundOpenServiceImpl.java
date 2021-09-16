@@ -43,7 +43,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
             DelOutbound delOutbound = this.delOutboundService.getOne(queryWrapper);
             if (null == delOutbound) {
-                throw new CommonException("500", "单据不存在");
+                throw new CommonException("400", "单据不存在");
             }
             // 更新包裹信息
             int result;
@@ -106,7 +106,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
             DelOutbound delOutbound = this.delOutboundService.getOne(queryWrapper);
             if (null == delOutbound) {
-                throw new CommonException("500", "单据不存在");
+                throw new CommonException("400", "单据不存在");
             }
             DelOutboundOperationLogEnum.OPN_CONTAINERS.listener(delOutbound);
             // 更新包裹信息

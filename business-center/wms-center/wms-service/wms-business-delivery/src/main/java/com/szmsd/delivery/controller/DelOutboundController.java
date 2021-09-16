@@ -315,10 +315,10 @@ public class DelOutboundController extends BaseController {
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
-            throw new CommonException("999", "文件不存在，" + e.getMessage());
+            throw new CommonException("400", "文件不存在，" + e.getMessage());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            throw new CommonException("999", "文件流处理失败，" + e.getMessage());
+            throw new CommonException("500", "文件流处理失败，" + e.getMessage());
         } finally {
             IoUtil.flush(outputStream);
             IoUtil.close(outputStream);
