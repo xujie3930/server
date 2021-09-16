@@ -4,6 +4,7 @@ import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.date.DateUnit;
 import com.alibaba.fastjson.JSONObject;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
@@ -134,5 +135,20 @@ public class RemoterApiImpl implements IRemoterApi {
             subCodeWithInfo = timedCache.get(mainCode);
         }
         return subCodeWithInfo;
+    }
+
+    @Override
+    public boolean checkPackBelong(String bindCode) {
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        BaseProduct queryDTO = new BaseProduct();
+        queryDTO.setSellerCode(sellerCode);
+        queryDTO.setCategory("包材");
+        List<BaseProduct> baseProducts = baseProductClientService.listSku(queryDTO);
+        return baseProducts.stream().map(BaseProduct::getCode).anyMatch(x -> x.equals(bindCode));
+    }
+
+    @Override
+    public List<BaseProduct> listSku(BaseProduct baseProduct) {
+        return baseProductClientService.listSku(baseProduct);
     }
 }

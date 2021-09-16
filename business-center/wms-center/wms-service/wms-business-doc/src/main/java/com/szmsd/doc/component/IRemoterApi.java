@@ -3,6 +3,7 @@ package com.szmsd.doc.component;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.doc.api.warehouse.req.FileInfoBase64;
 
@@ -45,4 +46,10 @@ public interface IRemoterApi {
     boolean checkSkuBelong(String sellerCode, String warehouse, List<String> sku);
 
     Map<String, BasSubWrapperVO> getSubNameByCode(String subCode);
+    List<BaseProduct> listSku(BaseProduct baseProduct);
+    /**
+     * 校验包材
+     * @return
+     */
+    boolean checkPackBelong(String bindCode);
 }
