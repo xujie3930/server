@@ -30,7 +30,7 @@ public class InboundReceiptReq {
     @Size(max = 30, message = "采购单仅支持0-30字符")
     @ApiModelProperty(value = "采购单 (0-30]", hidden = true)
     private String orderNo;
-    @NotBlank(message = "客户编码不能为空")
+//    @NotBlank(message = "客户编码不能为空")
     @Size(max = 30, message = "客户编码仅支持 0-30字符")
     @ApiModelProperty(value = "客户编码 (0-30]", hidden = true, example = "CNYWO7", required = true)
     private String cusCode;

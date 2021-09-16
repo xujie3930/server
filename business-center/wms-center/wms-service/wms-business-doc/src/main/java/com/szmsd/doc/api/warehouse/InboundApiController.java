@@ -131,7 +131,7 @@ public class InboundApiController extends BaseController {
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
     R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
         String sellerCode = AuthenticationUtil.getSellerCode();
-        batchInboundReceiptReq.getBatchInboundReceiptList().stream().map(x->x.setCusCode(sellerCode));
+        batchInboundReceiptReq.getBatchInboundReceiptList().stream().forEach(x->x.setCusCode(sellerCode));
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
             x.calculate();
