@@ -1,34 +1,31 @@
 package com.szmsd.doc.api.sku.request;
 
-import cn.hutool.core.codec.Base64Encoder;
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
+import com.szmsd.doc.utils.AuthenticationUtil;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.Base64Utils;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 
-import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Data
 public class ProductRequest extends BaseProductRequest {
@@ -39,7 +36,7 @@ public class ProductRequest extends BaseProductRequest {
     @ApiModelProperty(value = "文件信息", hidden = true)
     private List<AttachmentDataDTO> documentsFiles;
 
-    public ProductRequest validData(DocSubConfigData docSubConfigData) {
+    public ProductRequest validData(DocSubConfigData docSubConfigData, IRemoterApi remoterApi) {
         if (null == super.getHavePackingMaterial() || !super.getHavePackingMaterial()) {
             super.setBindCode(null);
             super.setBindCodeName(null);
@@ -65,6 +62,15 @@ public class ProductRequest extends BaseProductRequest {
         Optional.ofNullable(super.getHavePackingMaterial()).filter(x -> x).ifPresent(x -> {
             AssertUtil.isTrue(StringUtils.isNotBlank(super.getBindCode()), "附带包材选项,需要选择附带包材");
 //            AssertUtil.isTrue(StringUtils.isNotBlank(super.getBindCodeName()), "附带包材选项,需要选择附带包材");
+            String sellerCode = AuthenticationUtil.getSellerCode();
+            BaseProduct queryDTO = new BaseProduct();
+            queryDTO.setSellerCode(sellerCode);
+            queryDTO.setCategory("包材");
+            List<BaseProduct> baseProducts = remoterApi.listSku(queryDTO);
+            boolean b = baseProducts.stream().map(BaseProduct::getCode).anyMatch(code->code.equals(super.getBindCode()));
+            AssertUtil400.isTrue(b, "包材不存在!");
+            String bindName = baseProducts.stream().filter(bind -> bind.getCode().equals(super.getBindCode())).findAny().map(BaseProduct::getProductName).orElse("");
+            super.setBindCodeName(bindName);
         });
 
         // 5、页面内容以外的字段，均不要在新增接口体现。

@@ -73,11 +73,9 @@ public class InboundApiController extends BaseController {
     @GetMapping("/info/{warehouseNo}")
     @ApiImplicitParam(name = "warehouseNo", value = "入库单号", example = "RKCNYWO7210730000009", type = "String", required = true)
     @ApiOperation(value = "入库单 - 详情", notes = "查看入库单详情")
-    R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
+    R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank(message = "入库单仅支持0-30字节") @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
-        if (info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode())) {
-            throw new CommonException("400", "入库单不存在");
-        }
+        AssertUtil400.isTrue(info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()),"入库单不存在");
         List<InboundReceiptDetailVO> inboundReceiptDetails = info.getData().getInboundReceiptDetails();
 
         List<InboundReceiptDetailResp> detailRespList = Optional.ofNullable(inboundReceiptDetails).orElse(new ArrayList<>()).stream().map(x -> {
@@ -204,7 +202,7 @@ public class InboundApiController extends BaseController {
             BeanUtils.copyProperties(x, inboundReceiptInfoResp);
             return inboundReceiptInfoResp;
         }).collect(Collectors.toList());
-        return R.ok(result);
+        return R.ok();
     }
 
     @PreAuthorize("hasAuthority('client')")

@@ -34,6 +34,8 @@ public interface BaseProductClientService {
      */
     Boolean checkSkuValidToDelivery(String code);
 
+    List<BaseProduct> listSku(BaseProduct baseProduct);
+
     /**
      * 测量SKU
      *
