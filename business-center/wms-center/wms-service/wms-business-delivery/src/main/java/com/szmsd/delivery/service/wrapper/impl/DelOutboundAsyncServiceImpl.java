@@ -92,7 +92,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 获取新的出库单信息
         DelOutbound delOutbound = this.delOutboundService.getById(id);
         if (Objects.isNull(delOutbound)) {
-            throw new CommonException("500", "单据不存在");
+            throw new CommonException("400", "单据不存在");
         }
         // 只处理状态为【WHSE_PROCESSING,PROCESSING】的记录
         if (!(DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(delOutbound.getState())
@@ -368,7 +368,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 扣减库存
         Integer deduction = this.inventoryFeignClientService.deduction(inventoryOperateListDto);
         if (null == deduction || deduction < 1) {
-            throw new CommonException("500", "扣减库存失败");
+            throw new CommonException("400", "扣减库存失败");
         }
     }
 
@@ -444,10 +444,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         cusFreezeBalanceDTO.setOrderType("Freight");
                         R<?> thawBalanceR = this.rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
                         if (null == thawBalanceR) {
-                            throw new CommonException("500", "取消冻结费用失败");
+                            throw new CommonException("400", "取消冻结费用失败");
                         }
                         if (Constants.SUCCESS != thawBalanceR.getCode()) {
-                            throw new CommonException("500", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
+                            throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
                         }
                     }
                 }
