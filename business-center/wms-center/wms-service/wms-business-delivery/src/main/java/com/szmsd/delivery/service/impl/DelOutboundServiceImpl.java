@@ -138,7 +138,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     private DelOutboundVO selectDelOutboundVO(DelOutbound delOutbound) {
         if (Objects.isNull(delOutbound)) {
-            throw new CommonException("500", "单据不存在");
+            throw new CommonException("400", "单据不存在");
         }
         DelOutboundVO delOutboundVO = BeanMapperUtil.map(delOutbound, DelOutboundVO.class);
         String orderNo = delOutbound.getOrderNo();
@@ -358,7 +358,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             productConditionQueryDto.setSellerCode(dto.getSellerCode());
             List<BaseProduct> productList = this.baseProductClientService.queryProductList(productConditionQueryDto);
             if (CollectionUtils.isEmpty(productList)) {
-                throw new CommonException("500", "查询SKU信息失败");
+                throw new CommonException("400", "查询SKU信息失败");
             }
             Set<String> productCodeSet = productList.stream().map(BaseProduct::getCode).collect(Collectors.toSet());
             if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(dto.getOrderType())
@@ -383,17 +383,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 for (DelOutboundDetailDto detail : details) {
                     String sku = detail.getSku();
                     if (!productCodeSet.contains(sku)) {
-                        throw new CommonException("500", "SKU[" + sku + "]不属于当前客户");
+                        throw new CommonException("400", "SKU[" + sku + "]不属于当前客户");
                     }
                     InventoryAvailableListVO vo = availableMap.get(sku);
                     if (null == vo) {
-                        throw new CommonException("500", "SKU[" + sku + "]没有库存信息");
+                        throw new CommonException("400", "SKU[" + sku + "]没有库存信息");
                     }
                     int aiq = availableInventoryMap.getOrDefault(sku, 0);
                     Integer inventory = vo.getAvailableInventory();
                     Integer outQty = Math.toIntExact(detail.getQty() + aiq);
                     if (outQty > inventory) {
-                        throw new CommonException("500", "SKU[" + sku + "]库存数量不足，出库数量：" + outQty + "，库存数量：" + inventory);
+                        throw new CommonException("400", "SKU[" + sku + "]库存数量不足，出库数量：" + outQty + "，库存数量：" + inventory);
                     }
                     availableInventoryMap.put(sku, outQty);
                     // 验证包材数量
@@ -401,10 +401,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     if (StringUtils.isNotEmpty(bindCode)) {
                         vo = availableMap.get(bindCode);
                         if (null == vo) {
-                            throw new CommonException("500", "SKU[" + sku + "]的包材[" + bindCode + "]不存在");
+                            throw new CommonException("400", "SKU[" + sku + "]的包材[" + bindCode + "]不存在");
                         }
                         if (outQty > vo.getAvailableInventory()) {
-                            throw new CommonException("500", "SKU[" + sku + "]的包材[" + bindCode + "]库存数量不足，出库数量：" + outQty + "，库存数量：" + vo.getAvailableInventory());
+                            throw new CommonException("400", "SKU[" + sku + "]的包材[" + bindCode + "]库存数量不足，出库数量：" + outQty + "，库存数量：" + vo.getAvailableInventory());
                         }
                     }
                 }
@@ -413,7 +413,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 for (DelOutboundDetailDto detail : details) {
                     String sku = detail.getSku();
                     if (!productCodeSet.contains(sku)) {
-                        throw new CommonException("500", "SKU[" + sku + "]不属于当前客户");
+                        throw new CommonException("400", "SKU[" + sku + "]不属于当前客户");
                     }
                 }
             }
@@ -453,7 +453,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 保存出库单
             int insert = baseMapper.insert(delOutbound);
             if (insert == 0) {
-                throw new CommonException("500", "保存出库单失败！");
+                throw new CommonException("400", "保存出库单失败！");
             }
             DelOutboundOperationLogEnum.CREATE.listener(delOutbound);
             // 保存地址
@@ -653,12 +653,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         DelOutbound inputDelOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
         DelOutbound delOutbound = this.getById(inputDelOutbound.getId());
         if (null == delOutbound) {
-            throw new CommonException("500", "单据不存在");
+            throw new CommonException("400", "单据不存在");
         }
         // 可以修改的状态：待提审，审核失败
         if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
                 || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
-            throw new CommonException("500", "单据不能修改");
+            throw new CommonException("400", "单据不能修改");
         }
         // 先取消冻结，再冻结
         // 取消冻结
@@ -824,7 +824,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return 0;
         }
         if (list.size() != ids.size()) {
-            throw new CommonException("500", "记录信息已被修改，请刷新后再试");
+            throw new CommonException("400", "记录信息已被修改，请刷新后再试");
         }
         DelOutbound delOutbound = list.get(0);
         Map<String, DelOutbound> delOutboundMap = new HashMap<>();
@@ -832,10 +832,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 只能删除待提审，提审失败的单据
             if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound1.getState())
                     || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound1.getState()))) {
-                throw new CommonException("500", "只能删除待提审，提审失败的单据");
+                throw new CommonException("400", "只能删除待提审，提审失败的单据");
             }
             if (!delOutbound.getWarehouseCode().equals(delOutbound1.getWarehouseCode())) {
-                throw new CommonException("500", "只能批量删除同一仓库下的出库单");
+                throw new CommonException("400", "只能批量删除同一仓库下的出库单");
             }
             delOutboundMap.put(delOutbound1.getOrderNo(), delOutbound1);
         }
@@ -871,7 +871,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.delOutboundDetailService.remove(detailLambdaQueryWrapper);
         int i = baseMapper.deleteBatchIds(ids);
         if (i != ids.size()) {
-            throw new CommonException("500", "操作记录异常，请刷新后再试");
+            throw new CommonException("400", "操作记录异常，请刷新后再试");
         }
         // 返回处理结果
         return i;
@@ -888,7 +888,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public int deleteDelOutboundById(String id) {
         DelOutbound delOutbound = this.getById(id);
         if (null == delOutbound) {
-            throw new CommonException("500", "单据不存在");
+            throw new CommonException("400", "单据不存在");
         }
         // 先删后增
         String orderNo = delOutbound.getOrderNo();
@@ -1004,7 +1004,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         query.eq(DelOutbound::getOrderNo, orderId);
         DelOutbound delOutbound = baseMapper.selectOne(query);
         if (Objects.isNull(delOutbound)) {
-            throw new CommonException("500", "单据不存在");
+            throw new CommonException("400", "单据不存在");
         }
         return delOutbound;
     }
@@ -1168,10 +1168,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             cancelSize = orderNos1.size();
         }
         if (CollectionUtils.isEmpty(outboundList)) {
-            throw new CommonException("500", "操作失败，订单不存在");
+            throw new CommonException("400", "操作失败，订单不存在");
         }
         if (cancelSize != outboundList.size()) {
-            throw new CommonException("500", "操作失败，部分订单不存在");
+            throw new CommonException("400", "操作失败，部分订单不存在");
         }
         List<String> orderNos = new ArrayList<>();
         String warehouseCode = outboundList.get(0).getWarehouseCode();
@@ -1179,7 +1179,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         Map<String, DelOutbound> delOutboundMap = new HashMap<>();
         for (DelOutbound outbound : outboundList) {
             if (!warehouseCode.equals(outbound.getWarehouseCode())) {
-                throw new CommonException("500", "只能同一个仓库下的出库单");
+                throw new CommonException("400", "只能同一个仓库下的出库单");
             }
             String orderNo = outbound.getOrderNo();
             delOutboundMap.put(orderNo, outbound);
@@ -1187,10 +1187,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (DelOutboundStateEnum.COMPLETED.getCode().equals(outbound.getState())) {
                 // 已完成，已取消的单据不做处理
                 // continue;
-                throw new CommonException("500", "操作失败，已完成的订单不能取消");
+                throw new CommonException("400", "操作失败，已完成的订单不能取消");
             }
             if (DelOutboundStateEnum.CANCELLED.getCode().equals(outbound.getState())) {
-                throw new CommonException("500", "操作失败，已取消的订单不能取消");
+                throw new CommonException("400", "操作失败，已取消的订单不能取消");
             }
             // 处理未提审，提审失败的
             if (DelOutboundStateEnum.REVIEWED.getCode().equals(outbound.getState())
@@ -1243,10 +1243,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         shipmentCancelRequestDto.setRemark("");
         ResponseVO responseVO = this.htpOutboundClientService.shipmentDelete(shipmentCancelRequestDto);
         if (null == responseVO || null == responseVO.getSuccess()) {
-            throw new CommonException("500", "取消出库单失败");
+            throw new CommonException("400", "取消出库单失败");
         }
         if (!responseVO.getSuccess()) {
-            throw new CommonException("500", Utils.defaultValue(responseVO.getMessage(), "取消出库单失败2"));
+            throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "取消出库单失败2"));
         }
         // 修改单据状态为【仓库取消中】
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
@@ -1285,7 +1285,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public int furtherHandler(DelOutboundFurtherHandlerDto dto) {
         DelOutbound delOutbound = this.getByOrderNo(dto.getOrderNo());
         if (null == delOutbound) {
-            throw new CommonException("500", "单据不存在");
+            throw new CommonException("400", "单据不存在");
         }
         DelOutboundOperationLogEnum.FURTHER_HANDLER.listener(delOutbound);
         int result;
@@ -1307,15 +1307,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public void label(HttpServletResponse response, DelOutboundLabelDto dto) {
         DelOutbound delOutbound = this.getById(dto.getId());
         if (null == delOutbound) {
-            throw new CommonException("500", "单据不存在");
+            throw new CommonException("400", "单据不存在");
         }
         if (StringUtils.isEmpty(delOutbound.getShipmentOrderNumber())) {
-            throw new CommonException("500", "未获取承运商标签");
+            throw new CommonException("400", "未获取承运商标签");
         }
         String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
         File labelFile = new File(pathname);
         if (!labelFile.exists()) {
-            throw new CommonException("500", "标签文件不存在");
+            throw new CommonException("400", "标签文件不存在");
         }
         ServletOutputStream outputStream = null;
         InputStream inputStream = null;
@@ -1547,7 +1547,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         Long id = dto.getId();
         DelOutbound delOutbound = this.getById(id);
         if (null == delOutbound) {
-            throw new CommonException("500", "单据不存在");
+            throw new CommonException("400", "单据不存在");
         }
         boolean update = delOutboundExceptionService.againTrackingNo(delOutbound, dto);
         if (update) {

@@ -111,7 +111,7 @@ public final class DelOutboundServiceImplUtil {
      * @param r r
      */
     public static void freezeOperationThrowErrorMessage(R<?> r) {
-        throwCommonException(r, "1900", "1901", "冻结操作费用失败");
+        throwCommonException(r, "400", "400", "冻结操作费用失败");
     }
 
     /**
@@ -120,7 +120,7 @@ public final class DelOutboundServiceImplUtil {
      * @param r r
      */
     public static void thawOperationThrowCommonException(R<?> r) {
-        throwCommonException(r, "1910", "1911", "取消冻结操作费用失败");
+        throwCommonException(r, "400", "400", "取消冻结操作费用失败");
     }
 
     /**
@@ -129,7 +129,7 @@ public final class DelOutboundServiceImplUtil {
      * @param r r
      */
     public static void chargeOperationThrowCommonException(R<?> r) {
-        throwCommonException(r, "1920", "1921", "扣减操作费用失败");
+        throwCommonException(r, "400", "400", "扣减操作费用失败");
     }
 
     /**
@@ -138,7 +138,7 @@ public final class DelOutboundServiceImplUtil {
      * @param r r
      */
     public static void packageThrowCommonException(R<?> r) {
-        throwCommonException(r, "1930", "1931", "扣减物料费用失败");
+        throwCommonException(r, "400", "400", "扣减物料费用失败");
     }
 
     /**

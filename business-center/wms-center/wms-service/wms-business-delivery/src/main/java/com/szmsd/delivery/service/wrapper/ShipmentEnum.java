@@ -120,7 +120,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOrderTypeEnum orderTypeEnum = DelOutboundOrderTypeEnum.get(delOutbound.getOrderType());
             if (null == orderTypeEnum) {
-                throw new CommonException("999", "不存在的类型[" + delOutbound.getOrderType() + "]");
+                throw new CommonException("400", "不存在的类型[" + delOutbound.getOrderType() + "]");
             }
             // 先判断规则
             boolean condition = ApplicationRuleConfig.shipmentCondition(orderTypeEnum, currentState.name());
@@ -346,7 +346,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                         try {
                             FileUtils.forceMkdir(file);
                         } catch (IOException e) {
-                            throw new CommonException("999", "创建文件夹[" + file.getPath() + "]失败，Error：" + e.getMessage());
+                            throw new CommonException("500", "创建文件夹[" + file.getPath() + "]失败，Error：" + e.getMessage());
                         }
                     }
                     byte[] inputStream;
@@ -355,15 +355,15 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                         try {
                             FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
                         } catch (IOException e) {
-                            throw new CommonException("999", "保存标签文件失败，Error：" + e.getMessage());
+                            throw new CommonException("500", "保存标签文件失败，Error：" + e.getMessage());
                         }
                     }
                 } else {
                     String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "获取标签文件流失败2");
-                    throw new CommonException("999", exceptionMessage);
+                    throw new CommonException("500", exceptionMessage);
                 }
             } else {
-                throw new CommonException("999", "获取标签文件流失败");
+                throw new CommonException("500", "获取标签文件流失败");
             }
         }
 
@@ -408,7 +408,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                         FileUtils.forceMkdir(mergeFileDir);
                     } catch (IOException e) {
                         logger.error(e.getMessage(), e);
-                        throw new CommonException("999", "创建文件夹失败，" + e.getMessage());
+                        throw new CommonException("500", "创建文件夹失败，" + e.getMessage());
                     }
                 }
                 String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getShipmentOrderNumber();
@@ -437,13 +437,13 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                                 }
                             } catch (IOException e) {
                                 logger.error(e.getMessage(), e);
-                                throw new CommonException("999", "合并箱标文件，标签文件失败");
+                                throw new CommonException("500", "合并箱标文件，标签文件失败");
                             }
                         } else {
-                            throw new CommonException("999", "箱标文件未上传");
+                            throw new CommonException("500", "箱标文件未上传");
                         }
                     } else {
-                        throw new CommonException("999", "箱标文件未上传");
+                        throw new CommonException("500", "箱标文件未上传");
                     }
                 }
             }
@@ -452,7 +452,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             }
             File labelFile = new File(pathname);
             if (!labelFile.exists()) {
-                throw new CommonException("999", "标签文件不存在");
+                throw new CommonException("500", "标签文件不存在");
             }
             try {
                 byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
@@ -465,13 +465,13 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
                 ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
                 if (null == responseVO || null == responseVO.getSuccess()) {
-                    throw new CommonException("999", "更新标签失败");
+                    throw new CommonException("400", "更新标签失败");
                 }
                 if (!responseVO.getSuccess()) {
-                    throw new CommonException("999", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
+                    throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
                 }
             } catch (IOException e) {
-                throw new CommonException("999", "读取标签文件失败");
+                throw new CommonException("500", "读取标签文件失败");
             }
         }
 
@@ -515,7 +515,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
             R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
             if (null == thawBalanceR) {
-                throw new CommonException("999", "取消冻结费用失败");
+                throw new CommonException("400", "取消冻结费用失败");
             }
             if (Constants.SUCCESS != thawBalanceR.getCode()) {
                 // 异常信息
@@ -523,7 +523,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 if (StringUtils.isEmpty(msg)) {
                     msg = "取消冻结费用失败";
                 }
-                throw new CommonException("999", msg);
+                throw new CommonException("400", msg);
             }
             // 清除费用信息
             IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
@@ -557,7 +557,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.PACKAGE);
             if (null == responseObject) {
                 // 返回值是空的
-                throw new CommonException("999", "计算包裹费用失败");
+                throw new CommonException("400", "计算包裹费用失败");
             } else {
                 // 判断返回值
                 if (responseObject.isSuccess()) {
@@ -605,7 +605,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 } else {
                     // 计算失败
                     String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "计算包裹费用失败2");
-                    throw new CommonException("999", exceptionMessage);
+                    throw new CommonException("400", exceptionMessage);
                 }
             }
         }
@@ -646,11 +646,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 if (Constants.SUCCESS != freezeBalanceR.getCode()) {
                     // 异常信息
                     String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "冻结费用信息失败2");
-                    throw new CommonException("999", msg);
+                    throw new CommonException("400", msg);
                 }
             } else {
                 // 异常信息
-                throw new CommonException("999", "冻结费用信息失败");
+                throw new CommonException("400", "冻结费用信息失败");
             }
         }
 
@@ -709,7 +709,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 throw e;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                throw new CommonException("999", "冻结库存操作失败");
+                throw new CommonException("400", "冻结库存操作失败");
             }
         }
 
@@ -756,10 +756,10 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
             ResponseVO responseVO = htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
             if (null == responseVO || null == responseVO.getSuccess()) {
-                throw new CommonException("999", "更新发货指令失败");
+                throw new CommonException("400", "更新发货指令失败");
             }
             if (!responseVO.getSuccess()) {
-                throw new CommonException("999", Utils.defaultValue(responseVO.getMessage(), "更新发货指令失败2"));
+                throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新发货指令失败2"));
             }
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();

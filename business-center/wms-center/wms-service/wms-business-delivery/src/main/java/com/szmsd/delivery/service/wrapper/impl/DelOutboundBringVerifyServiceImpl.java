@@ -83,19 +83,19 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 根据id查询出库信息
         List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
         if (CollectionUtils.isEmpty(delOutboundList)) {
-            throw new CommonException("500", "单据不存在");
+            throw new CommonException("400", "单据不存在");
         }
         List<DelOutboundBringVerifyVO> resultList = new ArrayList<>();
         for (DelOutbound delOutbound : delOutboundList) {
             try {
                 if (Objects.isNull(delOutbound)) {
-                    throw new CommonException("500", "单据不存在");
+                    throw new CommonException("400", "单据不存在");
                 }
                 // 可以提审的状态：待提审，审核失败
                 boolean isAuditFailed = DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState());
                 if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
                         || isAuditFailed)) {
-                    throw new CommonException("500", "单据状态不正确，不能提审");
+                    throw new CommonException("400", "单据状态不正确，不能提审");
                 }
                 ApplicationContext context = this.initContext(delOutbound);
                 BringVerifyEnum currentState;
@@ -146,7 +146,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (null == address) {
             // 普通出口需要收货地址
             if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())) {
-                throw new CommonException("500", "收货地址信息不存在");
+                throw new CommonException("400", "收货地址信息不存在");
             }
         }
         // 查询sku信息
@@ -154,7 +154,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 查询仓库信息
         BasWarehouse warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
         if (null == warehouse) {
-            throw new CommonException("500", "仓库信息不存在");
+            throw new CommonException("400", "仓库信息不存在");
         }
         // 查询国家信息，收货地址所在的国家
         BasRegionSelectListVO country = null;
@@ -162,7 +162,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(address.getCountryCode());
             country = R.getDataAndException(countryR);
             if (null == country) {
-                throw new CommonException("500", "国家信息不存在");
+                throw new CommonException("400", "国家信息不存在");
             }
         }
         // 查询sku信息
@@ -179,7 +179,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             if (!DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
                 productList = this.baseProductClientService.queryProductList(conditionQueryDto);
                 if (CollectionUtils.isEmpty(productList)) {
-                    throw new CommonException("500", "查询SKU信息失败");
+                    throw new CommonException("400", "查询SKU信息失败");
                 }
             }
         }
@@ -246,7 +246,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     String sku = detail.getSku();
                     BaseProduct product = productMap.get(sku);
                     if (null == product) {
-                        throw new CommonException("500", "查询SKU[" + sku + "]信息失败");
+                        throw new CommonException("400", "查询SKU[" + sku + "]信息失败");
                     }
                     BigDecimal declaredValue;
                     if (null != product.getDeclaredValue()) {
@@ -262,7 +262,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     if (StringUtils.isNotEmpty(bindCode)) {
                         BaseProduct baseProduct = bindCodeMap.get(bindCode);
                         if (null == baseProduct) {
-                            throw new CommonException("500", "查询SKU[" + sku + "]的包材[" + bindCode + "]信息失败");
+                            throw new CommonException("400", "查询SKU[" + sku + "]的包材[" + bindCode + "]信息失败");
                         }
                         if (null != baseProduct.getDeclaredValue()) {
                             declaredValue = BigDecimal.valueOf(baseProduct.getDeclaredValue());
@@ -280,7 +280,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     // 查询装箱明细
                     List<DelOutboundPacking> packingList = this.delOutboundPackingService.packageListByOrderNo(delOutbound.getOrderNo(), DelOutboundPackingTypeConstant.TYPE_2);
                     if (CollectionUtils.isEmpty(packingList)) {
-                        throw new CommonException("500", "没有查询到WMS返回的装箱信息");
+                        throw new CommonException("400", "没有查询到WMS返回的装箱信息");
                     }
                     for (DelOutboundPacking packing : packingList) {
                         packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(packing.getWeight()), "g"),
@@ -393,7 +393,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             conditionQueryDto.setSkus(skus);
             List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
             if (CollectionUtils.isEmpty(productList)) {
-                throw new CommonException("500", "查询SKU[" + delOutbound.getNewSku() + "]信息失败");
+                throw new CommonException("400", "查询SKU[" + delOutbound.getNewSku() + "]信息失败");
             }
             BaseProduct product = productList.get(0);
             packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), weightInGram = Utils.valueOfDouble(product.getWeight()),
@@ -407,7 +407,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 String sku = detail.getSku();
                 BaseProduct product = productMap.get(sku);
                 if (null == product) {
-                    throw new CommonException("500", "查询SKU[" + sku + "]信息失败");
+                    throw new CommonException("400", "查询SKU[" + sku + "]信息失败");
                 }
                 int productWeight = Utils.valueOfDouble(product.getWeight());
                 weightInGram += productWeight;
@@ -420,7 +420,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             weightInGram = Utils.valueOfDouble(delOutbound.getWeight());
         }
         if (weightInGram <= 0) {
-            throw new CommonException("500", "包裹重量为0或者小于0，不能创建承运商物流订单");
+            throw new CommonException("400", "包裹重量为0或者小于0，不能创建承运商物流订单");
         }
         packages.add(new Package(delOutbound.getOrderNo(), String.valueOf(delOutbound.getId()),
                 new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
@@ -429,14 +429,14 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentOrderCommand.setCarrier(new Carrier(delOutbound.getShipmentService()));
         ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
         if (null == responseObjectWrapper) {
-            throw new CommonException("500", "创建承运商物流订单失败，调用承运商系统无响应");
+            throw new CommonException("400", "创建承运商物流订单失败，调用承运商系统无响应");
         }
         if (responseObjectWrapper.isSuccess()) {
             // 保存挂号
             // 判断结果集是不是正确的
             ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
             if (null == shipmentOrderResult) {
-                throw new CommonException("500", "创建承运商物流订单失败，调用承运商系统返回数据为空");
+                throw new CommonException("400", "创建承运商物流订单失败，调用承运商系统返回数据为空");
             }
             if (null == shipmentOrderResult.getSuccess() || !shipmentOrderResult.getSuccess()) {
                 // 判断有没有错误信息
@@ -452,12 +452,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 } else {
                     builder.append("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空");
                 }
-                throw new CommonException("500", builder.toString());
+                throw new CommonException("400", builder.toString());
             }
             return shipmentOrderResult;
         } else {
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
-            throw new CommonException("500", exceptionMessage);
+            throw new CommonException("400", exceptionMessage);
         }
     }
 
@@ -471,13 +471,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         command.setCancelShipmentOrders(cancelShipmentOrders);
         ResponseObject<CancelShipmentOrderBatchResult, ErrorDataDto> responseObject = this.htpCarrierClientService.cancellation(command);
         if (null == responseObject || !responseObject.isSuccess()) {
-            throw new CommonException("500", "取消承运商物流订单失败");
+            throw new CommonException("400", "取消承运商物流订单失败");
         }
         CancelShipmentOrderBatchResult cancelShipmentOrderBatchResult = responseObject.getObject();
         List<CancelShipmentOrderResult> cancelOrders = cancelShipmentOrderBatchResult.getCancelOrders();
         for (CancelShipmentOrderResult cancelOrder : cancelOrders) {
             if (!cancelOrder.isSuccess()) {
-                throw new CommonException("500", "取消承运商物流订单失败2");
+                throw new CommonException("400", "取消承运商物流订单失败2");
             }
         }
     }
@@ -542,7 +542,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             conditionQueryDto.setSkus(skus);
             List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
             if (CollectionUtils.isEmpty(productList)) {
-                throw new CommonException("500", "查询SKU信息失败");
+                throw new CommonException("400", "查询SKU信息失败");
             }
             Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
             // 处理包材或sku明细重复的问题
@@ -671,13 +671,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     return createShipmentResponseVO.getOrderNo();
                 } else {
                     String message = Utils.defaultValue(createShipmentResponseVO.getMessage(), "创建出库单失败2");
-                    throw new CommonException("500", message);
+                    throw new CommonException("400", message);
                 }
             }
             String message = Utils.defaultValue(createShipmentResponseVO.getErrors(), "创建出库单失败3");
-            throw new CommonException("500", message);
+            throw new CommonException("400", message);
         } else {
-            throw new CommonException("500", "创建出库单失败");
+            throw new CommonException("400", "创建出库单失败");
         }
     }
 
