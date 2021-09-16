@@ -51,7 +51,7 @@ public class DelOutboundCollectionRequest implements Serializable {
 
     @Valid
     @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundDetailRequest", position = 7)
-    private List<DelOutboundDetailRequest> details;
+    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundSkuDetailRequest", position = 7)
+    private List<DelOutboundSkuDetailRequest> details;
 
 }
