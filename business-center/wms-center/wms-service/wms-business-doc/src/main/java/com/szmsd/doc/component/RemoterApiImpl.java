@@ -5,6 +5,9 @@ import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.date.DateUnit;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
@@ -13,18 +16,21 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.doc.api.warehouse.req.FileInfoBase64;
 import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
+import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Base64Utils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +57,20 @@ public class RemoterApiImpl implements IRemoterApi {
     @Override
     public RemoteAttachmentService getRemoteAttachmentService() {
         return this.remoteAttachmentService;
+    }
+
+    @Override
+    public List<BasAttachmentDataDTO> uploadFile(List<FileInfoBase64> base64List, AttachmentTypeEnum attachmentTypeEnum) {
+        if (CollectionUtils.isEmpty(base64List)) return new ArrayList<>();
+        MockMultipartFile[] mockMultipartFiles = new MockMultipartFile[base64List.size()];
+        for (int i = 0; i < base64List.size(); i++) {
+            FileInfoBase64 fileInfoBase64 = base64List.get(i);
+            byte[] bytes = Base64Utils.decodeFromString(fileInfoBase64.getFileBase64());
+            MockMultipartFile byteArrayMultipartFile = new MockMultipartFile(fileInfoBase64.getFileName() + "." + fileInfoBase64.getSuffix(), fileInfoBase64.getFileName() + "." + fileInfoBase64.getSuffix(), fileInfoBase64.getSuffix(), bytes);
+            mockMultipartFiles[i] = byteArrayMultipartFile;
+        }
+        R<List<BasAttachmentDataDTO>> listR = remoteAttachmentService.uploadAttachment(mockMultipartFiles, attachmentTypeEnum, null, null);
+        return R.getDataAndException(listR);
     }
 
     @Override

@@ -68,7 +68,7 @@ public class BaseProductRequest {
     @Size(max = 255)
     private String productImage;
 
-    @ApiModelProperty(value = "产品文件格式 jpg / png / jpeg", hidden = true)
+    @ApiModelProperty(value = "产品文件格式默认jpg jpg / png / jpeg")
     @Size(max = 40)
     private String suffix = "jpg";
 

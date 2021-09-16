@@ -3,11 +3,14 @@ package com.szmsd.doc.api.warehouse;
 import cn.hutool.core.codec.Base64Encoder;
 import cn.hutool.core.util.URLUtil;
 import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
@@ -21,6 +24,7 @@ import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
@@ -131,10 +135,21 @@ public class InboundApiController extends BaseController {
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
     R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
         String sellerCode = AuthenticationUtil.getSellerCode();
-        batchInboundReceiptReq.getBatchInboundReceiptList().stream().forEach(x->x.setCusCode(sellerCode));
+        batchInboundReceiptReq.getBatchInboundReceiptList().forEach(x->x.setCusCode(sellerCode));
+
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
+            List<BasAttachmentDataDTO> basAttachmentDataDTOS = iRemoterApi.uploadFile(x.getDocumentsFileBase64List(), AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
+
+            List<AttachmentFileDTO> collect1 = basAttachmentDataDTOS.stream().map(file -> {
+                AttachmentFileDTO attachmentFileDTO = new AttachmentFileDTO();
+                BeanUtils.copyProperties(file, attachmentFileDTO);
+                return attachmentFileDTO;
+            }).collect(Collectors.toList());
+            x.setDocumentsFile(collect1);
+
             x.calculate();
+            x.checkOtherInfo();
             CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
             BeanUtils.copyProperties(x, createInboundReceiptDTO);
             createInboundReceiptDTO.setSourceType(SourceTypeEnum.DOC.name());
@@ -167,7 +182,7 @@ public class InboundApiController extends BaseController {
         List<String> warehouseCodeList = addDTO.stream().map(InboundReceiptDTO::getWarehouseCode).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
         warehouseCodeList.forEach(x -> {
             boolean b = iRemoterApi.verifyWarehouse(x);
-            AssertUtil.isTrue(b, String.format("请检查%s仓库是否存在", x));
+            throw new CommonException("400",String.format("请检查%s仓库是否存在", x));
         });
 
         List<String> skuList = addDTO.stream().map(CreateInboundReceiptDTO::getInboundReceiptDetails)
@@ -176,7 +191,7 @@ public class InboundApiController extends BaseController {
 
         String warehouseCode = createInboundReceiptDTOList.get(0).getWarehouseCode();
         boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
-        AssertUtil.isTrue(b, String.format("请检查SKU：%s是否属于客户%s", skuList, cusCode));
+        AssertUtil.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
 
         R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
         List<InboundReceiptInfoVO> dataAndException = R.getDataAndException(listR);

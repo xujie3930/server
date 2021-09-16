@@ -1,7 +1,10 @@
 package com.szmsd.doc.component;
 
+import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+import com.szmsd.doc.api.warehouse.req.FileInfoBase64;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +17,8 @@ import java.util.Map;
  */
 public interface IRemoterApi {
     RemoteAttachmentService getRemoteAttachmentService();
+
+    List<BasAttachmentDataDTO> uploadFile(List<FileInfoBase64> base64List, AttachmentTypeEnum attachmentTypeEnum);
 
     void getUserInfo();
 
