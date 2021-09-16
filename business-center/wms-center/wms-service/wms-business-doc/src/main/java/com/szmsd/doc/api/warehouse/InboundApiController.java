@@ -182,7 +182,7 @@ public class InboundApiController extends BaseController {
         List<String> warehouseCodeList = addDTO.stream().map(InboundReceiptDTO::getWarehouseCode).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
         warehouseCodeList.forEach(x -> {
             boolean b = iRemoterApi.verifyWarehouse(x);
-            throw new CommonException("400",String.format("请检查%s仓库是否存在", x));
+            AssertUtil.isTrue(b, String.format("请检查%s仓库是否存在", x));
         });
 
         List<String> skuList = addDTO.stream().map(CreateInboundReceiptDTO::getInboundReceiptDetails)
