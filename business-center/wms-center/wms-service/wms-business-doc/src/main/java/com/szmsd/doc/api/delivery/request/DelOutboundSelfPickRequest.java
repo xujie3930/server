@@ -61,7 +61,7 @@ public class DelOutboundSelfPickRequest implements Serializable {
 
     @Valid
     @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundSkuDetailRequest", position = 9)
-    private List<DelOutboundSkuDetailRequest> details;
+    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundSkuDetailNoLabelRequest", position = 9)
+    private List<DelOutboundSkuDetailNoLabelRequest> details;
 
 }
