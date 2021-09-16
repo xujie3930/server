@@ -8,13 +8,19 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.gateway.service.ValidateCodeService;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 验证码过滤器
@@ -32,15 +38,18 @@ public class ValidateCodeFilter extends AbstractGatewayFilterFactory<Object> {
     public GatewayFilter apply(Object config) {
         return (exchange, chain) -> {
             R r = new R<>();
-
-              ServerHttpRequest request = exchange.getRequest();
-
+            ServerHttpRequest request = exchange.getRequest();
             // 非登录请求，不处理
             if (!StringUtils.containsIgnoreCase(request.getURI().getPath(), AUTH_URL)) {
                 return chain.filter(exchange);
             }
             // 授权码不验证
-            if (request.getQueryParams().containsKey("grant_type") && "authorization_code".equals(request.getQueryParams().getFirst("grant_type"))) {
+            HttpMethod httpMethod = request.getMethod();
+            if (HttpMethod.GET.equals(httpMethod)) {
+                if (request.getQueryParams().containsKey("grant_type") && "authorization_code".equals(request.getQueryParams().getFirst("grant_type"))) {
+                    return chain.filter(exchange);
+                }
+            } else if (HttpMethod.POST.equals(httpMethod)) {
                 return chain.filter(exchange);
             }
             //如果是app请求，不处理
