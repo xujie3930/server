@@ -22,6 +22,7 @@ import com.szmsd.doc.api.CountryCache;
 import com.szmsd.doc.api.delivery.request.*;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.api.delivery.response.*;
+import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -78,8 +79,10 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");
         }
+        String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
+            dto.setSellerCode(sellerCode);
             dto.setOrderType(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
             this.setAddressCountry(dto);
@@ -136,8 +139,9 @@ public class DeliveryController {
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/page")
     @ApiOperation(value = "#5 出库管理 - 查询订单列表", position = 300)
-    @ApiImplicitParam(name = "dto", value = "请求参数", dataType = "DelOutboundListQueryDto", required = true)
-    public TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto dto) {
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundListQueryRequest", required = true)
+    public TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryRequest request) {
+        DelOutboundListQueryDto dto = BeanMapperUtil.map(request, DelOutboundListQueryDto.class);
         return this.delOutboundFeignService.page(dto);
     }
 
@@ -150,8 +154,10 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");
         }
+        String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
+            dto.setSellerCode(sellerCode);
             dto.setOrderType(DelOutboundOrderTypeEnum.NORMAL.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
             this.setAddressCountry(dto);
@@ -184,8 +190,10 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");
         }
+        String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
+            dto.setSellerCode(sellerCode);
             dto.setOrderType(DelOutboundOrderTypeEnum.COLLECTION.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
             this.setAddressCountry(dto);
@@ -225,8 +233,10 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");
         }
+        String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
+            dto.setSellerCode(sellerCode);
             dto.setOrderType(DelOutboundOrderTypeEnum.BATCH.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
             // 验证
@@ -329,8 +339,10 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");
         }
+        String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
+            dto.setSellerCode(sellerCode);
             dto.setOrderType(DelOutboundOrderTypeEnum.SELF_PICK.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
             this.setAddressCountry(dto);
@@ -387,8 +399,10 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");
         }
+        String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
+            dto.setSellerCode(sellerCode);
             dto.setOrderType(DelOutboundOrderTypeEnum.DESTROY.getCode());
             dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
             this.setAddressCountry(dto);
