@@ -1,5 +1,7 @@
 package com.szmsd.doc.validator;
 
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.LRUCache;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +12,13 @@ import java.util.*;
 @Component(value = DictionaryPluginConstant.SUB_DICTIONARY_PLUGIN)
 public class SubDictionaryPlugin implements DictionaryPlugin {
 
+    private final LRUCache<String, List<BasSubWrapperVO>> lruCache;
     @Autowired
     private BasSubClientService basSubClientService;
+
+    public SubDictionaryPlugin() {
+        this.lruCache = CacheUtil.newLRUCache(32, (8 * 3600 * 1000));
+    }
 
     @Override
     public boolean valid(Object value, String param) {
@@ -30,13 +37,17 @@ public class SubDictionaryPlugin implements DictionaryPlugin {
         } else {
             subValue = false;
         }
-        Map<String, List<BasSubWrapperVO>> map = this.basSubClientService.getSub(param);
-        if (null == map) {
-            return false;
-        }
-        List<BasSubWrapperVO> voList = map.get(param);
+        List<BasSubWrapperVO> voList = this.lruCache.get(param);
         if (null == voList) {
-            return false;
+            Map<String, List<BasSubWrapperVO>> map = this.basSubClientService.getSub(param);
+            if (null == map) {
+                return false;
+            }
+            voList = map.get(param);
+            if (null == voList) {
+                return false;
+            }
+            this.lruCache.put(param, voList);
         }
         List<String> valueList = this.getValueList(value);
         Set<String> set = new HashSet<>(voList.size());
