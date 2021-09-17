@@ -132,7 +132,7 @@ public class InboundApiController extends BaseController {
 
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/saveOrUpdate/batch")
-    @ApiOperation(value = "新增/修改-批量入库单", notes = "新建入库单，入库单提交后，视入库仓库是否需要人工审核，" +
+    @ApiOperation(value = "新增-批量入库单", notes = "新建入库单，入库单提交后，视入库仓库是否需要人工审核，" +
             "如果需要管理人员人工审核，则需进入OMS客户端-仓储服务-入库管理，再次提交入库申请。如仓库设置为自动审核，" +
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
     R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {

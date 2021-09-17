@@ -14,11 +14,11 @@ import javax.validation.constraints.Size;
 public class BasWarehouseQueryReq extends QueryDto {
 
     @Size(max = 30, message = "仓库代码 仅支持 0-30 字符")
-    @ApiModelProperty(value = "仓库代码 [30]", example = "GZ")
+    @ApiModelProperty(value = "仓库代码 [30]", example = "GZ",hidden = true)
     private String warehouseCode;
 
     @Size(max = 200, message = "仓库中文名 仅支持 0-200 字符")
-    @ApiModelProperty(value = "仓库中文名 [200]", example = "广州")
+    @ApiModelProperty(value = "仓库中文名 [200]", example = "广州",hidden = true)
     private String warehouseNameCn;
 
     //    @Size(max = 30, message = "国家 仅支持 0-30 字符")
@@ -32,7 +32,7 @@ public class BasWarehouseQueryReq extends QueryDto {
 //    private String city;
 
     @Size(max = 10, message = "状态 仅支持 0-10 字符")
-    @ApiModelProperty(value = "状态：0无效，1有效 [10]", allowableValues = "0,1", example = "0")
-    private String status;
+    @ApiModelProperty(value = "状态：0无效，1有效 [10]", allowableValues = "0,1", example = "0",hidden = true)
+    private String status = "1";
 
 }
