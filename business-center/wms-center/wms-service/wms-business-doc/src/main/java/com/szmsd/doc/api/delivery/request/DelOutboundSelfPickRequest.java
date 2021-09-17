@@ -7,10 +7,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -55,13 +57,17 @@ public class DelOutboundSelfPickRequest implements Serializable {
     @ApiModelProperty(value = "增值税号", dataType = "String", position = 7, example = "F00X")
     private String ioss;
 
+    @Min(value = 0, message = "COD不能小于0", groups = {DelOutboundGroup.Default.class})
+    @ApiModelProperty(value = "COD", dataType = "Double", position = 8, example = "0.0")
+    private BigDecimal codAmount;
+
     @Size(max = 500, message = "备注不能超过500个字符", groups = {DelOutboundGroup.SelfPick.class})
-    @ApiModelProperty(value = "备注", dataType = "String", position = 8, example = "")
+    @ApiModelProperty(value = "备注", dataType = "String", position = 9, example = "")
     private String remark;
 
     @Valid
     @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundSkuDetailNoLabelRequest", position = 9)
+    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundSkuDetailNoLabelRequest", position = 10)
     private List<DelOutboundSkuDetailNoLabelRequest> details;
 
 }

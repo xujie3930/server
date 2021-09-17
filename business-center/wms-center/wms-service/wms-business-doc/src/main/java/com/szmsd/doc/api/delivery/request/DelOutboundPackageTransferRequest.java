@@ -10,6 +10,7 @@ import lombok.Data;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -70,26 +71,30 @@ public class DelOutboundPackageTransferRequest implements Serializable {
     @ApiModelProperty(value = "增值税号", dataType = "String", position = 7, example = "F00X")
     private String ioss;
 
+    @Min(value = 0, message = "COD不能小于0", groups = {DelOutboundGroup.Default.class})
+    @ApiModelProperty(value = "COD", dataType = "Double", position = 8, example = "0.0")
+    private BigDecimal codAmount;
+
     @NotBlank(message = "物流服务不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @Size(max = 50, message = "物流服务不能超过50个字符", groups = {DelOutboundGroup.PackageTransfer.class})
-    @ApiModelProperty(value = "物流服务", dataType = "String", position = 8, example = "FX")
+    @ApiModelProperty(value = "物流服务", dataType = "String", position = 9, example = "FX")
     private String shipmentRule;
 
     @Size(max = 50, message = "参考号不能超过50个字符", groups = {DelOutboundGroup.PackageTransfer.class})
-    @ApiModelProperty(value = "参考号", dataType = "String", position = 9, example = "")
+    @ApiModelProperty(value = "参考号", dataType = "String", position = 10, example = "")
     private String refNo;
 
     @Size(max = 500, message = "备注不能超过500个字符", groups = {DelOutboundGroup.PackageTransfer.class})
-    @ApiModelProperty(value = "备注", dataType = "String", position = 10, example = "")
+    @ApiModelProperty(value = "备注", dataType = "String", position = 11, example = "")
     private String remark;
 
     @Valid
     @NotNull(message = "地址信息不能为空", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "地址信息", dataType = "DelOutboundAddressRequest", position = 11)
+    @ApiModelProperty(value = "地址信息", dataType = "DelOutboundAddressRequest", position = 12)
     private DelOutboundAddressRequest address;
 
     @Valid
     @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundDetailRequest", position = 12)
+    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundDetailRequest", position = 13)
     private List<DelOutboundDetailRequest> details;
 }

@@ -378,6 +378,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             taxations.add(new Taxation("IOSS", ioss));
             createShipmentOrderCommand.setTaxations(taxations);
         }
+        createShipmentOrderCommand.setCodAmount(delOutbound.getCodAmount());
         // 包裹信息
         List<Package> packages = new ArrayList<>();
         List<PackageItem> packageItems = new ArrayList<>();
