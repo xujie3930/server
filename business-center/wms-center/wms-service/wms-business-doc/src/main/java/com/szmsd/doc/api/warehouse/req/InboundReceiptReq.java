@@ -21,8 +21,8 @@ import java.util.List;
 @ApiModel(value = "InboundReceiptDTO", description = "入库参数")
 public class InboundReceiptReq {
 
-    @ApiModelProperty(value = "主键ID")
-    private Long id;
+//    @ApiModelProperty(value = "主键ID")
+//    private Long id;
     @Size(max = 30, message = "入库单号仅支持0-30字符")
     @ApiModelProperty(value = "入库单号 (0-30]", hidden = true)
     private String warehouseNo;

@@ -24,7 +24,7 @@ public class PricedProductRequest implements Serializable {
     private String clientCode;
 
     @NotBlank(message = "仓库编码不能为空")
-    @ApiModelProperty(value = "仓库编码", required = true, dataType = "String", position = 2, example = "GZ")
+    @ApiModelProperty(value = "仓库编码，需要去#仓库信息接口中查询", required = true, dataType = "String", position = 2, example = "GZ")
     private String warehouseCode;
 
     @NotBlank(message = "国家编码不能为空")

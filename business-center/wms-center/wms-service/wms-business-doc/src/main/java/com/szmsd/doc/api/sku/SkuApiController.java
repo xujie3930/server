@@ -71,7 +71,7 @@ public class SkuApiController {
     @ApiOperation(value = "新增", notes = "创建SKU，创建成功，同步推送WMS")
     public R save(@RequestBody @Validated ProductRequest productRequest) {
         productRequest.setSellerCode(AuthenticationUtil.getSellerCode());
-        productRequest.validData(docSubConfigData,remoterApi).calculateTheVolume().checkPack(basePackingFeignService).setTheCode(remoterApi, docSubConfigData).uploadFile(remoterApi);
+        productRequest.uploadFile(remoterApi).validData(remoterApi).calculateTheVolume().checkPack(basePackingFeignService).setTheCode(remoterApi, docSubConfigData);
         BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
         baseProductClientService.add(product);
         return R.ok();
@@ -84,7 +84,7 @@ public class SkuApiController {
         String skuCode = barCodeReq.getSkuCode();
 //        Boolean valid = baseProductClientService.checkSkuValidToDelivery(skuCode);
         boolean b = remoterApi.checkSkuBelong(skuCode);
-        if (!b) throw new CommonException("400",String.format("请检查SKU:%s是否存在", skuCode));
+        if (!b) throw new CommonException("400", String.format("请检查SKU:%s是否存在", skuCode));
 //        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否存在", skuCode));
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode));
     }

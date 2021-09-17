@@ -23,8 +23,8 @@ public class InboundReceiptDetailReq {
     @NotBlank(message = "sku不能为空")
     @ApiModelProperty(value = "sku", example = "SCNYWO7000234", required = true)
     private String sku;
-    @NotBlank(message = "申报品名不能为空")
-    @ApiModelProperty(value = "申报品名", example = "English", required = true)
+    //    @NotBlank(message = "申报品名不能为空")
+    @ApiModelProperty(value = "申报品名", example = "English", required = true, hidden = true)
     private String skuName;
     @Min(value = 1, message = "申报数量不能小于1")
     @NotNull(message = "申报数量不能为空")

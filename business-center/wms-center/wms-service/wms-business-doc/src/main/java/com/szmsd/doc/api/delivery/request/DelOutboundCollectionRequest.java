@@ -16,9 +16,9 @@ import java.util.List;
 @ApiModel(value = "DelOutboundCollectionRequest", description = "DelOutboundCollectionRequest对象")
 public class DelOutboundCollectionRequest implements Serializable {
 
-    @NotBlank(message = "客户编码不能为空", groups = {DelOutboundGroup.Collection.class})
+    /*@NotBlank(message = "客户编码不能为空", groups = {DelOutboundGroup.Collection.class})
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
-    private String sellerCode;
+    private String sellerCode;*/
 
     @NotBlank(message = "仓库编码不能为空", groups = {DelOutboundGroup.Collection.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")

@@ -14,12 +14,12 @@ import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.AuthenticationUtil;
+import com.szmsd.doc.utils.Base64CheckUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.util.Base64Utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,7 +36,7 @@ public class ProductRequest extends BaseProductRequest {
     @ApiModelProperty(value = "文件信息", hidden = true)
     private List<AttachmentDataDTO> documentsFiles;
 
-    public ProductRequest validData(DocSubConfigData docSubConfigData, IRemoterApi remoterApi) {
+    public ProductRequest validData(IRemoterApi remoterApi) {
         if (null == super.getHavePackingMaterial() || !super.getHavePackingMaterial()) {
             super.setBindCode(null);
             super.setBindCodeName(null);
@@ -67,7 +67,7 @@ public class ProductRequest extends BaseProductRequest {
             queryDTO.setSellerCode(sellerCode);
             queryDTO.setCategory("包材");
             List<BaseProduct> baseProducts = remoterApi.listSku(queryDTO);
-            boolean b = baseProducts.stream().map(BaseProduct::getCode).anyMatch(code->code.equals(super.getBindCode()));
+            boolean b = baseProducts.stream().map(BaseProduct::getCode).anyMatch(code -> code.equals(super.getBindCode()));
             AssertUtil400.isTrue(b, "包材不存在!");
             String bindName = baseProducts.stream().filter(bind -> bind.getCode().equals(super.getBindCode())).findAny().map(BaseProduct::getProductName).orElse("");
             super.setBindCodeName(bindName);
@@ -82,7 +82,7 @@ public class ProductRequest extends BaseProductRequest {
         if (null == super.getInitVolume() || super.getInitVolume().compareTo(BigDecimal.ZERO) <= 0) {
             Double initLength = Optional.ofNullable(super.getInitLength()).orElse(0.00);
             Double initHeight = Optional.ofNullable(super.getInitHeight()).orElse(0.00);
-            Double initWeight = Optional.ofNullable(super.getInitWeight()).orElse(0.00);
+            Double initWeight = Optional.ofNullable(super.getInitWidth()).orElse(0.00);
             double volume = initLength * initHeight * initWeight;
             BigDecimal bigDecimal = BigDecimal.valueOf(volume).setScale(2, RoundingMode.HALF_UP);
             super.setInitVolume(bigDecimal);
@@ -135,8 +135,7 @@ public class ProductRequest extends BaseProductRequest {
 
         String productImageBase64 = this.getProductImageBase64();
         if (StringUtils.isBlank(productImageBase64)) return this;
-        byte[] bytes = Base64Utils.decodeFromString(productImageBase64);
-
+        byte[] bytes = Base64CheckUtils.checkAndConvert(productImageBase64);
         RemoteAttachmentService remoteAttachmentService = remoterApi.getRemoteAttachmentService();
 
         MockMultipartFile byteArrayMultipartFile = new MockMultipartFile(super.getProductName(), "", "jpg", bytes);

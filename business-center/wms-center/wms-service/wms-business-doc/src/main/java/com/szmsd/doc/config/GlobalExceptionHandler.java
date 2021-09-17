@@ -2,6 +2,7 @@ package com.szmsd.doc.config;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.exception.com.SystemException;
 import feign.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -278,5 +278,29 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public R<Map<String, Object>> handleHttpMediaTypeNotSupportedException(Exception cause) {
         return render(HttpStatus.UNSUPPORTED_MEDIA_TYPE, cause);
+    }
+
+    /**
+     * handleCommonException
+     *
+     * @param cause Exception
+     * @return ResponseDto
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(CommonException.class)
+    public R<Map<String, Object>> handleCommonException(Exception cause) {
+        return render(HttpStatus.BAD_REQUEST, cause);
+    }
+
+    /**
+     * handleSystemException
+     *
+     * @param cause Exception
+     * @return ResponseDto
+     */
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(SystemException.class)
+    public R<Map<String, Object>> handleSystemException(Exception cause) {
+        return render(HttpStatus.INTERNAL_SERVER_ERROR, cause);
     }
 }
