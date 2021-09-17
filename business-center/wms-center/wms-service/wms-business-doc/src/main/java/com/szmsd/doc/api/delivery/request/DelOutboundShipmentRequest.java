@@ -1,6 +1,8 @@
 package com.szmsd.doc.api.delivery.request;
 
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
+import com.szmsd.doc.validator.DictionaryPluginConstant;
+import com.szmsd.doc.validator.annotation.Dictionary;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -28,6 +30,7 @@ public class DelOutboundShipmentRequest implements Serializable {
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
     private String sellerCode;*/
 
+    @Dictionary(message = "仓库编码不存在", type = DictionaryPluginConstant.WAR_DICTIONARY_PLUGIN)
     @NotBlank(message = "仓库编码不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
     private String warehouseCode;
