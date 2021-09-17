@@ -9,6 +9,8 @@ import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.ApiException;
+import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.exception.com.SystemException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.*;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -191,7 +193,15 @@ public class BaseController {
     @ResponseBody
     public R handleException(Exception e) {
         log.error("系统异常拦截 Exception: {}", e);
-        return R.failed(HttpStatus.ERROR, ExceptionUtil.getRootErrorMseeage(e));
+        int httpStatus;
+        if (e instanceof CommonException) {
+            httpStatus = Integer.parseInt(((CommonException) e).getCode());
+        } else if (e instanceof SystemException) {
+            httpStatus = Integer.parseInt(((SystemException) e).getCode());
+        } else {
+            httpStatus = HttpStatus.ERROR;
+        }
+        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
     }
 
     /**
@@ -235,7 +245,15 @@ public class BaseController {
         log.error("运行时异常:", e);
         // LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.RUNERROR, getLen());
         // return R.failed(HttpStatus.ERROR, logisticsException.getMessage()+":"+ExceptionUtil.getRootErrorMseeage(e));
-        return R.failed(HttpStatus.ERROR, ExceptionUtil.getRootErrorMseeage(e));
+        int httpStatus;
+        if (e instanceof CommonException) {
+            httpStatus = Integer.parseInt(((CommonException) e).getCode());
+        } else if (e instanceof SystemException) {
+            httpStatus = Integer.parseInt(((SystemException) e).getCode());
+        } else {
+            httpStatus = HttpStatus.ERROR;
+        }
+        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
     }
 
     public void fileStreamWrite(HttpServletResponse response, FileStream fileStream) {
