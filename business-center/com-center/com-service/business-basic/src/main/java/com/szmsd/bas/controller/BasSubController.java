@@ -7,11 +7,11 @@ import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.domain.dto.basSubDto;
 import com.szmsd.bas.driver.UpdateRedis;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+import com.szmsd.bas.service.IBasSubCacheService;
 import com.szmsd.bas.service.IBasSubService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.enums.CodeToNameEnum;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -42,9 +42,11 @@ import java.util.*;
 @RequestMapping("/bas-sub")
 public class BasSubController extends BaseController {
 
-
     @Resource
     private IBasSubService basSubService;
+
+    @Resource
+    private IBasSubCacheService basSubCacheService;
 
     /**
      * 查询模块列表
@@ -68,7 +70,7 @@ public class BasSubController extends BaseController {
     @PreAuthorize("@ss.hasPermi('bas:bassub:listByMain')")
     @ApiOperation(value = "根据主类别查询子类别列表api", notes = "查询子类别列表api")
     @GetMapping("/listByMain")
-    public R<List<BasSub>> listByMain(@RequestParam("mainCode") String mainCode, @RequestParam("mainName") String mainName){
+    public R<List<BasSub>> listByMain(@RequestParam("mainCode") String mainCode, @RequestParam("mainName") String mainName) {
         return R.ok(basSubService.selectBasSubList(new BasSub().setMainCode(mainCode).setMainName(mainName)));
     }
 
@@ -101,24 +103,11 @@ public class BasSubController extends BaseController {
         } else {
             codes.add(code);
         }
-        QueryWrapper<BasSub> queryWrapper = Wrappers.query();
-        queryWrapper.select("main_code", "sub_code", "sub_value", "sub_name", "sub_name_en");
-        queryWrapper.in("main_code", codes);
-        List<BasSub> list = this.basSubService.list(queryWrapper);
-        Map<String, List<BasSubWrapperVO>> map;
-        if (CollectionUtils.isEmpty(list)) {
-            map = Collections.emptyMap();
-        } else {
-            map = new HashMap<>();
-            for (BasSub basSub : list) {
-                String mainCode = basSub.getMainCode();
-                if (map.containsKey(mainCode)) {
-                    map.get(mainCode).add(BeanMapperUtil.map(basSub, BasSubWrapperVO.class));
-                } else {
-                    List<BasSubWrapperVO> voList = new ArrayList<>();
-                    voList.add(BeanMapperUtil.map(basSub, BasSubWrapperVO.class));
-                    map.put(mainCode, voList);
-                }
+        Map<String, List<BasSubWrapperVO>> map = new LinkedHashMap<>(codes.size());
+        for (String itemCode : codes) {
+            List<BasSubWrapperVO> voList = this.basSubCacheService.list(itemCode);
+            if (null != voList && voList.size() > 0) {
+                map.put(itemCode, voList);
             }
         }
         return R.ok(map);

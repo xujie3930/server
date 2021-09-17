@@ -2,6 +2,8 @@ package com.szmsd.doc.api.delivery.request;
 
 import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
+import com.szmsd.doc.validator.DictionaryPluginConstant;
+import com.szmsd.doc.validator.annotation.Dictionary;
 import com.szmsd.doc.validator.annotation.PreNotNull;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -24,10 +26,12 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
     private String sellerCode;*/
 
+    @Dictionary(message = "仓库编码不存在", type = DictionaryPluginConstant.WAR_DICTIONARY_PLUGIN)
     @NotBlank(message = "仓库编码不能为空", groups = {DelOutboundGroup.Batch.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
     private String warehouseCode;
 
+    @Dictionary(message = "出货渠道不存在", type = DictionaryPluginConstant.SUB_DICTIONARY_PLUGIN, param = "&&079")
     @SwaggerDictionary(dicCode = "079", dicKey = "subValue")
     @ApiModelProperty(value = "出货渠道", dataType = "String", position = 1, example = "")
     private String shipmentChannel;
@@ -57,6 +61,7 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "COD", dataType = "Double", position = 8, example = "0.0")
     private BigDecimal codAmount;
 
+    @Dictionary(message = "提货方式不存在", type = DictionaryPluginConstant.SUB_DICTIONARY_PLUGIN, param = "&&058")
     @SwaggerDictionary(dicCode = "058", dicKey = "subValue")
     @NotBlank(message = "提货方式不能为空", groups = {DelOutboundGroup.Batch.class})
     @ApiModelProperty(value = "提货方式", dataType = "String", position = 9, example = "")

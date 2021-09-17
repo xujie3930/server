@@ -30,7 +30,7 @@ public class TestValidator {
 
         PricedProductRequest request = new PricedProductRequest();
         // request.setSkus(new ArrayList<>());
-        request.setClientCode("123");
+        // request.setClientCode("123");
         System.out.println(JSON.toJSONString(validate(request, validator)));
     }
 

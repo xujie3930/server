@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.ComBusinessBasicInterface;
 import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.dao.BasSubMapper;
 import com.szmsd.bas.service.IBasSubService;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -58,16 +60,16 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
             }
             where.in("main_code", strings);
         }
-        if (StringUtils.isNotEmpty(basSub.getMainName()) ) {
+        if (StringUtils.isNotEmpty(basSub.getMainName())) {
             where.like("main_name", basSub.getMainName());
         }
-        if (StringUtils.isNotEmpty(basSub.getSubName()) ) {
+        if (StringUtils.isNotEmpty(basSub.getSubName())) {
             where.like("sub_name", basSub.getSubName());
         }
-        if (StringUtils.isNotEmpty(basSub.getSubCode()) ) {
+        if (StringUtils.isNotEmpty(basSub.getSubCode())) {
             where.like("sub_code", basSub.getSubCode());
         }
-        if (StringUtils.isNotEmpty(basSub.getSubValue()) ) {
+        if (StringUtils.isNotEmpty(basSub.getSubValue())) {
             where.like("sub_value", basSub.getSubValue());
         }
         // where.orderByDesc("create_time");
@@ -87,7 +89,7 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
             codeList = Arrays.asList(split);
         }
         BasSub basSub1 = baseMapper.selectOne(Wrappers.<BasSub>lambdaQuery()
-                .in(CollectionUtils.isNotEmpty(codeList), BasSub::getMainCode,codeList)
+                .in(CollectionUtils.isNotEmpty(codeList), BasSub::getMainCode, codeList)
                 .like(StringUtils.isNotBlank(basSub.getMainName()), BasSub::getMainName, basSub.getMainName())
                 .like(StringUtils.isNotBlank(basSub.getSubName()), BasSub::getMainName, basSub.getSubName())
                 .like(StringUtils.isNotBlank(basSub.getSubCode()), BasSub::getMainName, basSub.getSubCode())
@@ -104,6 +106,7 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
      * @return 结果
      */
     @Override
+    @CacheEvict(value = {ComBusinessBasicInterface.NAME + ":Sub"}, allEntries = true)
     public int insertBasSub(BasSub basSub) {
         return baseMapper.insert(basSub);
     }
@@ -115,6 +118,7 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
      * @return 结果
      */
     @Override
+    @CacheEvict(value = {ComBusinessBasicInterface.NAME + ":Sub"}, allEntries = true)
     public int updateBasSub(BasSub basSub) {
         return baseMapper.updateById(basSub);
     }
@@ -126,6 +130,7 @@ public class BasSubServiceImpl extends ServiceImpl<BasSubMapper, BasSub> impleme
      * @return 结果
      */
     @Override
+    @CacheEvict(value = {ComBusinessBasicInterface.NAME + ":Sub"}, allEntries = true)
     public int deleteBasSubByIds(List<String> ids) {
         return baseMapper.deleteBatchIds(ids);
     }

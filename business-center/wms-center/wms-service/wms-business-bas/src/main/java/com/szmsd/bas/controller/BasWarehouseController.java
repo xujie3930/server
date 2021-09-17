@@ -84,7 +84,7 @@ public class BasWarehouseController extends BaseController {
     @ApiOperation(value = "查询仓库下拉", notes = "全部的仓库")
     public R<List<WarehouseKvDTO>> queryInboundWarehouse(String country) {
         List<WarehouseKvDTO> kvList = basWarehouseService.selectInboundWarehouse();
-        if (StringUtils.isNotEmpty(country))  {
+        if (StringUtils.isNotEmpty(country)) {
             kvList = kvList.stream().filter(kv -> country.equals(kv.getCountry())).collect(Collectors.toList());
         }
         return R.ok(kvList);

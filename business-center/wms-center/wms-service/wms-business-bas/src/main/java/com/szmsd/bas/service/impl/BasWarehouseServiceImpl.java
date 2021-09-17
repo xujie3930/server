@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.BusinessBasInterface;
 import com.szmsd.bas.component.RemoteComponent;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BasWarehouseCus;
@@ -17,6 +18,8 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -46,6 +49,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
      *
      * @param addWarehouseRequest
      */
+    @CacheEvict(value = {BusinessBasInterface.SERVICE_NAME + ":Warehouse"}, allEntries = true)
     @Override
     public void saveOrUpdate(AddWarehouseRequest addWarehouseRequest) {
         log.info("创建/更新仓库: {}", addWarehouseRequest);
@@ -95,6 +99,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
      *
      * @param basWarehouseCusDTO
      */
+    @CacheEvict(value = {BusinessBasInterface.SERVICE_NAME + ":Warehouse"}, allEntries = true)
     @Override
     public void saveWarehouseCus(BasWarehouseCusDTO basWarehouseCusDTO) {
         log.info("更新仓库客户黑白名单：{}", basWarehouseCusDTO);
@@ -124,6 +129,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
      *
      * @param basWarehouseStatusChangeDTO
      */
+    @CacheEvict(value = {BusinessBasInterface.SERVICE_NAME + ":Warehouse"}, allEntries = true)
     @Override
     public void statusChange(BasWarehouseStatusChangeDTO basWarehouseStatusChangeDTO) {
         log.info("仓库状态变更：{}", basWarehouseStatusChangeDTO);
@@ -134,6 +140,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 查询所有的仓库下拉
+     *
      * @return
      */
     @Override
@@ -145,6 +152,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 查询入库单 - 创建 - 目的仓库下拉 【过滤出有效仓库、当前登录人没在黑名单、并且白名单非空或白名单包含当前登录人】
+     *
      * @return
      */
     @Override
@@ -157,6 +165,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 判断当前登录人是是否能使用这个仓库
+     *
      * @param warehouseCode
      * @return
      */
@@ -168,6 +177,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
 
     /**
      * 判断user是是否能使用这个仓库
+     *
      * @param warehouseCode
      * @return
      */
@@ -190,6 +200,7 @@ public class BasWarehouseServiceImpl extends ServiceImpl<BasWarehouseMapper, Bas
         return true;
     }
 
+    @Cacheable(value = BusinessBasInterface.SERVICE_NAME + ":Warehouse", key = "#warehouseCode", condition = "#warehouseCode != null")
     @Override
     public BasWarehouse queryByWarehouseCode(String warehouseCode) {
         LambdaQueryWrapper<BasWarehouse> queryWrapper = Wrappers.lambdaQuery();
