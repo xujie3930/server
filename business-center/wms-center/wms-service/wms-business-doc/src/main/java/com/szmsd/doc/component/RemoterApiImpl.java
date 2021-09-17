@@ -6,8 +6,10 @@ import cn.hutool.core.date.DateUnit;
 import com.alibaba.fastjson.JSONObject;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
@@ -19,6 +21,7 @@ import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.warehouse.req.FileInfoBase64;
 import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.system.api.domain.SysUser;
@@ -115,6 +118,19 @@ public class RemoterApiImpl implements IRemoterApi {
     @Override
     public boolean checkSkuBelong(String sellerCode, String warehouse, String sku) {
         return this.checkSkuBelong(sellerCode, warehouse, Collections.singletonList(sku));
+    }
+
+    @Override
+    public boolean checkSkuPic(List<String> skuList,AttachmentTypeEnum attachmentTypeEnum) {
+        BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+        basAttachmentQueryDTO.setBusinessNoList(skuList);
+        basAttachmentQueryDTO.setAttachmentType(attachmentTypeEnum.getAttachmentType());
+        R<List<BasAttachment>> list = remoteAttachmentService.list(basAttachmentQueryDTO);
+        List<BasAttachment> dataAndException = R.getDataAndException(list);
+        List<String> collect = dataAndException.stream().map(BasAttachment::getBusinessNo).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
+        boolean b = skuList.removeAll(collect);
+        AssertUtil400.isTrue(CollectionUtils.isEmpty(skuList),String.format("裸货上架 SKU需要图片，%s SKU不存在图片",skuList));
+        return true;
     }
 
     @Override
