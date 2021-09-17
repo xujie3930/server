@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -126,6 +127,9 @@ public class DelOutboundVO implements Serializable {
 
     @ApiModelProperty(value = "增值税号")
     private String ioss;
+
+    @ApiModelProperty(value = "COD")
+    private BigDecimal codAmount;
 
     @ApiModelProperty(value = "可用数量，拆分SKU使用到，前端验证")
     private Integer availableInventory;

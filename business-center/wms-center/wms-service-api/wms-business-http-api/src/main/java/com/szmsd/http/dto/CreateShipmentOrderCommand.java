@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -43,4 +44,7 @@ public class CreateShipmentOrderCommand implements Serializable {
 
     @ApiModelProperty(value = "税号")
     private List<Taxation> taxations;
+
+    @ApiModelProperty(value = "COD")
+    private BigDecimal codAmount;
 }
