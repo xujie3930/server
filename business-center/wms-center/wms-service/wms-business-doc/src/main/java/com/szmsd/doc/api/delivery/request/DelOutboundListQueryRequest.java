@@ -28,7 +28,7 @@ public class DelOutboundListQueryRequest implements Serializable {
     @ApiModelProperty(value = "出库订单类型")
     private String orderType;
 
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "创建时间", example = "[\"2021-09-01\", \"2021-09-10\"]")
     private String[] createTimes;
 
     @ApiModelProperty("当前页，从1开始，默认为1")
