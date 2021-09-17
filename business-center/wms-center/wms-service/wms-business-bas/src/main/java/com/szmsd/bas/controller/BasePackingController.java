@@ -7,11 +7,13 @@ import com.szmsd.bas.service.IBasePackingService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +61,14 @@ public class BasePackingController extends BaseController{
     public R listParent()
     {
         List<BasePackingDto> list = basePackingService.selectBasePacking();
+        return R.ok(list);
+    }
+    @PreAuthorize("@ss.hasPermi('BasePacking:BasePacking:list')")
+    @GetMapping("/listPacking/byWarehouseCode")
+    @ApiOperation(value = "查询列表",notes = "查询列表")
+    public R<List<BasePackingDto>> listParent(@RequestBody BasePackingDto basePackingDto)
+    {
+        List<BasePackingDto> list = basePackingService.selectBasePacking( basePackingDto);
         return R.ok(list);
     }
     /**

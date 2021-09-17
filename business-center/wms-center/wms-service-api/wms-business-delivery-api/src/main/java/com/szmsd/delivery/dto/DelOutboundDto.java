@@ -10,6 +10,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -116,6 +117,9 @@ public class DelOutboundDto implements Serializable {
 
     @ApiModelProperty(value = "增值税号")
     private String ioss;
+
+    @ApiModelProperty(value = "COD")
+    private BigDecimal codAmount;
 
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")

@@ -194,7 +194,7 @@ public class InboundApiController extends BaseController {
         String warehouseCode = createInboundReceiptDTOList.get(0).getWarehouseCode();
         boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
         AssertUtil400.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
-
+        //校验vat TODo
         R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
         List<InboundReceiptInfoVO> dataAndException = R.getDataAndException(listR);
         List<InboundReceiptInfoResp> result = dataAndException.stream().map(x -> {
@@ -231,7 +231,7 @@ public class InboundApiController extends BaseController {
     @ApiOperation(value = "获取入库标签-通过单号", notes = "根据入库单号，生成标签条形码，返回的为条形码图片的Base64")
     public R<String> getInboundLabelByOrderNo(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
-        AssertUtil400.isTrue(info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()),"入库单不存在");
+        AssertUtil400.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null && info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()),"入库单不存在");
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
     }
 

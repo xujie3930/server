@@ -92,5 +92,7 @@ public interface IBasePackingService extends IService<BasePacking> {
     BasePacking queryByCode(BasePackingConditionQueryDto conditionQueryDto);
 
     void createPackings(CreatePackingRequest createPackingRequest);
+
+    List<BasePackingDto> selectBasePacking(BasePackingDto basePacking);
 }
 

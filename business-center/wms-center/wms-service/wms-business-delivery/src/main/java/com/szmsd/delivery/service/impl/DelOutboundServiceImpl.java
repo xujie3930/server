@@ -67,6 +67,7 @@ import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -367,7 +368,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     || DelOutboundOrderTypeEnum.DESTROY.getCode().equals(dto.getOrderType())) {
 
                 InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
-                inventoryAvailableQueryDto.setWarehouseCode(dto.getWarehouseCode());
+                String warehouseCode = dto.getWarehouseCode();
+                inventoryAvailableQueryDto.setWarehouseCode(warehouseCode);
                 inventoryAvailableQueryDto.setCusCode(dto.getSellerCode());
                 inventoryAvailableQueryDto.setSkus(skus);
                 // 库存是0的也查询出来，自行做数量验证。同时也能验证SKU是不是自己的
@@ -387,7 +389,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     }
                     InventoryAvailableListVO vo = availableMap.get(sku);
                     if (null == vo) {
-                        throw new CommonException("400", "SKU[" + sku + "]没有库存信息");
+                        throw new CommonException("400", "SKU[" + sku + "]在[" + warehouseCode + "]仓库没有库存信息");
                     }
                     int aiq = availableInventoryMap.getOrDefault(sku, 0);
                     Integer inventory = vo.getAvailableInventory();
@@ -428,6 +430,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // DOC的验证SKU
             this.docValid(dto);
             DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
+            if (null == delOutbound.getCodAmount()) {
+                delOutbound.setCodAmount(BigDecimal.ZERO);
+            }
             // 生成出库单号
             // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
             String sellerCode;
@@ -659,6 +664,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
                 || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState()))) {
             throw new CommonException("400", "单据不能修改");
+        }
+        if (null == delOutbound.getCodAmount()) {
+            delOutbound.setCodAmount(BigDecimal.ZERO);
         }
         // 先取消冻结，再冻结
         // 取消冻结

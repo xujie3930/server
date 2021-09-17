@@ -14,6 +14,7 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -70,8 +71,14 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
     }
 
     @Override
+    @DataScope("")
     public List<BasePackingDto> selectBasePacking() {
         return baseMapper.selectBasePackingGroup(null);
+    }
+
+    @Override
+    public List<BasePackingDto> selectBasePacking(BasePackingDto basePackingDto) {
+        return baseMapper.selectBasePacking(basePackingDto);
     }
 
     /**

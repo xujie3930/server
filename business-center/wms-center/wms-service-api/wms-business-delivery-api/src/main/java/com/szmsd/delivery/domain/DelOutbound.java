@@ -209,4 +209,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "增值税号")
     private String ioss;
+
+    @ApiModelProperty(value = "COD")
+    private BigDecimal codAmount;
 }
