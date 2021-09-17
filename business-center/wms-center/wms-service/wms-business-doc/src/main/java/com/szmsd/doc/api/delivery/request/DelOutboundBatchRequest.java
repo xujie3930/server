@@ -19,9 +19,9 @@ import java.util.List;
 @PreNotNull(field = "deliveryMethod", model = PreNotNull.Model.VALUE, fieldValue = "058002", linkageFields = {"deliveryAgent"}, message = "提货商/快递商不能为空", groups = {DelOutboundGroup.Batch.class})
 public class DelOutboundBatchRequest implements Serializable {
 
-    @NotBlank(message = "客户编码不能为空", groups = {DelOutboundGroup.Batch.class})
+    /*@NotBlank(message = "客户编码不能为空", groups = {DelOutboundGroup.Batch.class})
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
-    private String sellerCode;
+    private String sellerCode;*/
 
     @NotBlank(message = "仓库编码不能为空", groups = {DelOutboundGroup.Batch.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
