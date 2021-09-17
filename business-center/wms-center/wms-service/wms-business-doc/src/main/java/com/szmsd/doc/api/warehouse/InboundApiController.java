@@ -6,7 +6,11 @@ import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.domain.BasSellerCertificate;
+import com.szmsd.bas.dto.VatQueryDto;
+import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -51,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -75,7 +80,7 @@ public class InboundApiController extends BaseController {
     @ApiOperation(value = "入库单 - 详情", notes = "查看入库单详情")
     R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank(message = "入库单仅支持0-30字节") @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
-        AssertUtil400.isTrue(info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()),"入库单不存在");
+        AssertUtil400.isTrue(info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()), "入库单不存在");
         List<InboundReceiptDetailVO> inboundReceiptDetails = info.getData().getInboundReceiptDetails();
 
         List<InboundReceiptDetailResp> detailRespList = Optional.ofNullable(inboundReceiptDetails).orElse(new ArrayList<>()).stream().map(x -> {
@@ -130,6 +135,46 @@ public class InboundApiController extends BaseController {
         return picUrl;
     }
 
+    /**
+     * 校验vat 和仓库是否存在 且属于自己
+     * @param remoterApi
+     * @return
+     */
+    public boolean checkVAT(IRemoterApi remoterApi, List<CreateInboundReceiptDTO> addDto) {
+        // checkWar
+        List<String> warehouseList = addDto.stream().map(InboundReceiptDTO::getWarehouseCode).distinct().collect(Collectors.toList());
+        List<String> vatList = addDto.stream().map(InboundReceiptDTO::getVat).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
+        // 获取仓库列表
+        List<WarehouseKvDTO> warehouseKvDTOS = remoterApi.queryCusInboundWarehouse();
+        Map<String, WarehouseKvDTO> warehouseKvDTOMap = warehouseKvDTOS.stream().collect(Collectors.toMap(WarehouseKvDTO::getKey, x -> x, (x1, x2) -> x1));
+        BasSellerFeignService basSellerFeignService = remoterApi.getBasSellerFeignService();
+        warehouseList.forEach(x -> {
+            WarehouseKvDTO warehouseKvDTO = warehouseKvDTOMap.get(x);
+            AssertUtil400.isTrue(null != warehouseKvDTO, "仓库异常");
+        });
+        List<String> countryList = warehouseKvDTOMap.values().stream().map(WarehouseKvDTO::getCountry).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(vatList)) return true;
+        String joinCountry = String.join(",", countryList);
+        VatQueryDto vatQueryDto = new VatQueryDto();
+        vatQueryDto.setSellerCode(AuthenticationUtil.getSellerCode());
+        vatQueryDto.setCountryCode(joinCountry);
+        R<List<BasSellerCertificate>> listR = basSellerFeignService.listVAT(vatQueryDto);
+        List<BasSellerCertificate> dataAndException = R.getDataAndException(listR);
+        Map<String, List<BasSellerCertificate>> countryMap = dataAndException.stream().collect(Collectors.groupingBy(BasSellerCertificate::getCountryCode));
+
+        addDto.forEach(x -> {
+            String vat = x.getVat();
+            if (StringUtils.isNotBlank(vat)) {
+                WarehouseKvDTO warehouseKvDTO = warehouseKvDTOMap.get(x.getWarehouseCode());
+                String country = warehouseKvDTO.getCountry();
+                List<BasSellerCertificate> basSellerCertificates = countryMap.get(country);
+                AssertUtil400.isTrue(CollectionUtils.isNotEmpty(basSellerCertificates), String.format("VAT[%s]不存在", vat));
+            }
+        });
+        return true;
+    }
+
+
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/saveOrUpdate/batch")
     @ApiOperation(value = "新增-批量入库单", notes = "新建入库单，入库单提交后，视入库仓库是否需要人工审核，" +
@@ -141,6 +186,7 @@ public class InboundApiController extends BaseController {
 
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
+
             List<BasAttachmentDataDTO> basAttachmentDataDTOS = iRemoterApi.uploadFile(x.getDocumentsFileBase64List(), AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
 
             List<AttachmentFileDTO> collect1 = basAttachmentDataDTOS.stream().map(file -> {
@@ -152,6 +198,7 @@ public class InboundApiController extends BaseController {
 
             x.calculate();
             x.checkOtherInfo();
+
             CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
             BeanUtils.copyProperties(x, createInboundReceiptDTO);
             createInboundReceiptDTO.setSourceType(SourceTypeEnum.DOC.name());
@@ -181,11 +228,11 @@ public class InboundApiController extends BaseController {
                 AssertUtil400.isTrue(StringUtils.isNotBlank(x.getDeliveryNo()), "送货方式为快递到仓时,送货单号必填");
             }
         });
-        List<String> warehouseCodeList = addDTO.stream().map(InboundReceiptDTO::getWarehouseCode).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
-        warehouseCodeList.forEach(x -> {
-            boolean b = iRemoterApi.verifyWarehouse(x);
-            AssertUtil400.isTrue(b, String.format("请检查%s仓库是否存在", x));
-        });
+//        List<String> warehouseCodeList = addDTO.stream().map(InboundReceiptDTO::getWarehouseCode).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
+//        warehouseCodeList.forEach(x -> {
+//            boolean b = iRemoterApi.verifyWarehouse(x);
+//            AssertUtil400.isTrue(b, String.format("请检查%s仓库是否存在", x));
+//        });
 
         List<String> skuList = addDTO.stream().map(CreateInboundReceiptDTO::getInboundReceiptDetails)
                 .flatMap(x -> x.stream().map(InboundReceiptDetailDTO::getSku)).distinct().collect(Collectors.toList());
@@ -195,6 +242,7 @@ public class InboundApiController extends BaseController {
         boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
         AssertUtil400.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
         //校验vat TODo
+        this.checkVAT(iRemoterApi, addDTO);
         R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
         List<InboundReceiptInfoVO> dataAndException = R.getDataAndException(listR);
         List<InboundReceiptInfoResp> result = dataAndException.stream().map(x -> {
@@ -231,7 +279,7 @@ public class InboundApiController extends BaseController {
     @ApiOperation(value = "获取入库标签-通过单号", notes = "根据入库单号，生成标签条形码，返回的为条形码图片的Base64")
     public R<String> getInboundLabelByOrderNo(@Valid @NotBlank @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
-        AssertUtil400.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null && info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()),"入库单不存在");
+        AssertUtil400.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null && info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()), "入库单不存在");
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
     }
 

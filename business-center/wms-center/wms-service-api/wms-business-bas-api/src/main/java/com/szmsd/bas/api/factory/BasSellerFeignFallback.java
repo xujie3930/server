@@ -2,8 +2,10 @@ package com.szmsd.bas.api.factory;
 
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.BasSellerEmailDto;
 import com.szmsd.bas.dto.ServiceConditionDto;
+import com.szmsd.bas.dto.VatQueryDto;
 import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -41,6 +43,11 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
 
             @Override
             public R<String> getRealState(String sellerCode) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<BasSellerCertificate>> listVAT(VatQueryDto vatQueryDto) {
                 return R.convertResultJson(throwable);
             }
         };
