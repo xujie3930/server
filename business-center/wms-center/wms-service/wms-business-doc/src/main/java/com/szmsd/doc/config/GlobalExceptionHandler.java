@@ -252,6 +252,7 @@ public class GlobalExceptionHandler {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseBody
     public R<Map<String, Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException cause) {
         return render(HttpStatus.BAD_REQUEST, cause);
     }
@@ -264,6 +265,7 @@ public class GlobalExceptionHandler {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseBody
     public R<Map<String, Object>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException cause) {
         return render(HttpStatus.BAD_REQUEST, cause);
     }
@@ -276,6 +278,7 @@ public class GlobalExceptionHandler {
      */
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    @ResponseBody
     public R<Map<String, Object>> handleHttpMediaTypeNotSupportedException(Exception cause) {
         return render(HttpStatus.UNSUPPORTED_MEDIA_TYPE, cause);
     }
@@ -288,6 +291,7 @@ public class GlobalExceptionHandler {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(CommonException.class)
+    @ResponseBody
     public R<Map<String, Object>> handleCommonException(Exception cause) {
         return render(HttpStatus.BAD_REQUEST, cause);
     }
@@ -300,6 +304,7 @@ public class GlobalExceptionHandler {
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(SystemException.class)
+    @ResponseBody
     public R<Map<String, Object>> handleSystemException(Exception cause) {
         return render(HttpStatus.INTERNAL_SERVER_ERROR, cause);
     }

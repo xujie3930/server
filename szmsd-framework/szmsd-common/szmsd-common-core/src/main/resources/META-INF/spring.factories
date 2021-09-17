@@ -8,4 +8,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.common.core.feign.FeignExceptionErrorDecoder,\
   com.szmsd.common.core.feign.FeignRequestInterceptorFilterConfiguration,\
   com.szmsd.common.core.feign.FeignRequestInterceptor,\
-  com.szmsd.common.core.config.TokenConfiguration
+  com.szmsd.common.core.config.TokenConfiguration,\
+  com.szmsd.common.core.web.CharsetHandlerExceptionResolver

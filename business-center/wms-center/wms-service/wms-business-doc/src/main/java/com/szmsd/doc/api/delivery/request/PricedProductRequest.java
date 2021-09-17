@@ -45,7 +45,4 @@ public class PricedProductRequest implements Serializable {
     @ApiModelProperty(value = "产品属性信息，SKU二选一", dataType = "String", position = 4, example = "[\"GeneralCargo\", \"Powder\"]")
     private List<String> productAttributes;
 
-    @ApiModelProperty(value = "client")
-    private String client;
-
 }
