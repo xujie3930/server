@@ -41,6 +41,11 @@ public class BasePackingFeignFallback implements FallbackFactory<BasePackingFeig
             public R<List<BasePackingDto>> listParent() {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<List<BasePackingDto>> listParent(BasePackingDto warehouseCode) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

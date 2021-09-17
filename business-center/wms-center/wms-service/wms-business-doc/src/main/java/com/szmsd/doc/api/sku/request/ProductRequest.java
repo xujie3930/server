@@ -5,6 +5,7 @@ import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
@@ -90,13 +91,21 @@ public class ProductRequest extends BaseProductRequest {
         return this;
     }
 
-    public ProductRequest checkPack(BasePackingFeignService basePackingFeignService) {
+    /**
+     * 校验物流包装 属于这个仓库
+     *
+     * @param basePackingFeignService
+     * @return
+     */
+    public ProductRequest checkPack(BasePackingClientService basePackingFeignService) {
         // 3、选择物物流包装OMS要校验是否存在；
         String suggestPackingMaterialCode = super.getSuggestPackingMaterialCode();
         if (StringUtils.isNotBlank(suggestPackingMaterialCode)) {
-            R<List<BasePackingDto>> basePackingDtoR = basePackingFeignService.listParent();
-            List<BasePackingDto> dataAndException = R.getDataAndException(basePackingDtoR);
-            BasePackingDto basePackingDto = dataAndException.stream().filter(x -> suggestPackingMaterialCode.equals(x.getPackageMaterialCode())).findAny()
+            BasePackingDto basePackingDto1 = new BasePackingDto();
+            basePackingDto1.setWarehouseCode(super.getWarehouseCode());
+            List<BasePackingDto> dataAndException = basePackingFeignService.listParent(basePackingDto1);
+            BasePackingDto basePackingDto = dataAndException.stream()
+                    .filter(x -> suggestPackingMaterialCode.equals(x.getPackageMaterialCode())).findAny()
                     .orElseThrow(() -> new RuntimeException("请检查物流包装是否存在!"));
             String packageMaterialName = basePackingDto.getPackingMaterialType();
             super.setSuggestPackingMaterial(packageMaterialName);

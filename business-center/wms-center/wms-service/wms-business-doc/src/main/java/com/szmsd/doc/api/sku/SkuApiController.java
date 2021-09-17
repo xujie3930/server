@@ -1,8 +1,10 @@
 package com.szmsd.doc.api.sku;
 
 import com.szmsd.bas.api.feign.BasePackingFeignService;
+import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.common.core.domain.R;
@@ -11,14 +13,17 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.doc.api.sku.request.BarCodeReq;
+import com.szmsd.doc.api.sku.request.BasePackingAddReq;
 import com.szmsd.doc.api.sku.request.BaseProductQueryRequest;
 import com.szmsd.doc.api.sku.request.ProductRequest;
+import com.szmsd.doc.api.sku.resp.BasePackingResp;
 import com.szmsd.doc.api.sku.resp.BaseProductResp;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
 import io.swagger.annotations.*;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +31,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,9 +49,11 @@ public class SkuApiController {
     @Autowired
     private BaseProductClientService baseProductClientService;
     @Resource
+    private BasePackingClientService basePackingClientService;
+    @Resource
     private DocSubConfigData docSubConfigData;
     @Resource
-    private BasePackingFeignService basePackingFeignService;
+    private BasePackingClientService basePackingFeignService;
     @Resource
     private IRemoterApi remoterApi;
 
@@ -78,6 +87,17 @@ public class SkuApiController {
     }
 
     @PreAuthorize("hasAuthority('client')")
+    @PostMapping("/package/save")
+    @ApiOperation(value = "新增-包材", notes = "新增-包材")
+    public R savePackage(@RequestBody @Validated BasePackingAddReq basePackingAddReq) {
+        basePackingAddReq.setSellerCode(AuthenticationUtil.getSellerCode());
+        basePackingAddReq.calculateTheVolume();
+        BaseProductDto product = BeanMapperUtil.map(basePackingAddReq, BaseProductDto.class);
+        baseProductClientService.add(product);
+        return R.ok();
+    }
+
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("getBarCode")
     @ApiOperation(value = "SKU标签生成", notes = "生成sku编号，生成标签条形码，返回的为条形码图片的Base64")
     public R getBarCode(@RequestBody @Validated BarCodeReq barCodeReq) {
@@ -88,5 +108,24 @@ public class SkuApiController {
 //        AssertUtil.isTrue(b, String.format("请检查SKU:%s是否存在", skuCode));
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(skuCode));
     }
+
+    @PreAuthorize("hasAuthority('client')")
+    @GetMapping("/listPacking/byWarehouseCode")
+    @ApiOperation(value = "查询物流包装列表", notes = "查询物流包装列表-查询仓库下")
+    public R<List<BasePackingResp>> listParent(@Valid @NotBlank(message = "仓库不能为空") @Param(value = "byWarehouseCode") String warehouseCode) {
+        BasePackingDto basePackingDto = new BasePackingDto();
+        basePackingDto.setWarehouseCode(warehouseCode);
+        List<BasePackingDto> basePackingDtos = basePackingClientService.listParent(basePackingDto);
+        List<BasePackingResp> collect = basePackingDtos.stream().map(x -> {
+            BasePackingResp basePackingResp = new BasePackingResp();
+            BeanUtils.copyProperties(x, basePackingResp);
+            return basePackingResp;
+        }).collect(Collectors.toList());
+        return R.ok(collect);
+    }
+    /**
+     * 新增包材
+     *
+     */
 
 }

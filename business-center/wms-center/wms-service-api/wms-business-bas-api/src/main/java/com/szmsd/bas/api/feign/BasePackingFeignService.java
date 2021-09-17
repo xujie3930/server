@@ -9,6 +9,7 @@ import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.CreatePackingRequest;
 import com.szmsd.common.core.domain.R;
 import io.swagger.annotations.ApiOperation;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,4 +48,8 @@ public interface BasePackingFeignService {
     @GetMapping("/base/packing/listPacking")
     @ApiOperation(value = "查询包装列表", notes = "查询包装列表")
     R<List<BasePackingDto>> listParent();
+
+    @GetMapping("/base/packing/listPacking/byWarehouseCode")
+    @ApiOperation(value = "查询包装列表",notes = "查询包装列表")
+    R<List<BasePackingDto>> listParent(@RequestBody BasePackingDto basePackingDto);
 }
