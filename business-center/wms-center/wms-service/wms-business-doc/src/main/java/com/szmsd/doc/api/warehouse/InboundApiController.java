@@ -243,6 +243,8 @@ public class InboundApiController extends BaseController {
         AssertUtil400.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
         //校验vat TODo
         this.checkVAT(iRemoterApi, addDTO);
+        List<String> collect = addDTO.stream().filter(x -> "055003".equals(x.getWarehouseMethodCode())).flatMap(z -> z.getInboundReceiptDetails().stream().map(InboundReceiptDetailDTO::getSku)).collect(Collectors.toList());
+        iRemoterApi.checkSkuPic(collect,AttachmentTypeEnum.SKU_IMAGE);
         R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
         List<InboundReceiptInfoVO> dataAndException = R.getDataAndException(listR);
         List<InboundReceiptInfoResp> result = dataAndException.stream().map(x -> {

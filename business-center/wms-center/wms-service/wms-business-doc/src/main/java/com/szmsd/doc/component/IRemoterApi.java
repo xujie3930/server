@@ -47,14 +47,24 @@ public interface IRemoterApi {
      */
     boolean checkSkuBelong(String sellerCode, String warehouse, String sku);
 
+    /**
+     * 校验sku是否有图片
+     * @param skuList
+     * @return
+     */
+    boolean checkSkuPic(List<String> skuList,AttachmentTypeEnum attachmentTypeEnum);
+
     boolean checkSkuBelong(String sku);
 
     boolean checkSkuBelong(String sellerCode, String warehouse, List<String> sku);
 
     Map<String, BasSubWrapperVO> getSubNameByCode(String subCode);
+
     List<BaseProduct> listSku(BaseProduct baseProduct);
+
     /**
      * 校验包材
+     *
      * @return
      */
     boolean checkPackBelong(String bindCode);

@@ -1,9 +1,10 @@
 package com.szmsd.bas.api.domain.dto;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
+
+import java.util.List;
 
 
 /**
@@ -25,6 +26,9 @@ public class BasAttachmentQueryDTO {
 
     @ApiModelProperty(value = "业务编号")
     private String businessNo;
+
+    @ApiModelProperty(value = "业务编号集合",hidden = true)
+    private List<String> businessNoList;
 
     @ApiModelProperty(value = "业务明细号")
     private String businessItemNo;

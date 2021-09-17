@@ -53,6 +53,10 @@
         <where>
             <if test="businessCode != null and businessCode != ''">AND t.business_code = #{businessCode}</if>
             <if test="businessNo != null and businessNo != ''">AND t.business_no = #{businessNo}</if>
+            <if test="businessNoList != null and businessNoList.size >0">AND t.business_no in
+                <foreach collection="businessNoList" open="(" separator="," close=")" item="item">
+                    #{item}
+                </foreach></if>
             <if test="businessItemNo != null and businessItemNo != ''">AND t.business_item_no = #{businessItemNo}</if>
             <if test="attachmentType != null and attachmentType != ''">AND t.attachment_type = #{attachmentType}</if>
         </where>

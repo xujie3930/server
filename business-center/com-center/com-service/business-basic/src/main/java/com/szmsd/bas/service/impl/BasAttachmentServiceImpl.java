@@ -13,6 +13,7 @@ import com.szmsd.bas.util.FileUtil;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.text.UUID;
+import com.szmsd.common.core.utils.StringToolkit;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,6 +55,11 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
 
     @Override
     public List<BasAttachment> selectList(BasAttachmentQueryDTO queryDto) {
+        String businessNo = queryDto.getBusinessNo();
+        if (StringUtils.isNotBlank(businessNo)){
+            queryDto.setBusinessNo(null);
+            queryDto.setBusinessNoList( StringToolkit.getCodeByArray(businessNo));
+        }
         return baseMapper.selectList(queryDto);
     }
 
