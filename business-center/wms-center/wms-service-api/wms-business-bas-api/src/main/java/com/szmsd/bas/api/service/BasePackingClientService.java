@@ -2,6 +2,7 @@ package com.szmsd.bas.api.service;
 
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingConditionQueryDto;
+import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.CreatePackingRequest;
 import com.szmsd.common.core.domain.R;
@@ -27,4 +28,7 @@ public interface BasePackingClientService {
     BasePacking queryByCode(BasePackingConditionQueryDto conditionQueryDto);
 
     R createPackings(CreatePackingRequest createPackingRequest);
+
+    List<BasePackingDto> listParent(BasePackingDto warehouseCode);
+    List<BasePackingDto> listParent();
 }

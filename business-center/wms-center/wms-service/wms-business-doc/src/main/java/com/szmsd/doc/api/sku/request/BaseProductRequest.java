@@ -28,7 +28,7 @@ public class BaseProductRequest {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "英文产品名称", example = "English", required = true)
-    @Size(max = 255)
+    @Size(max = 200,message = "英文产品名称最大支持200字符")
     @NotBlank(message = "英文产品名称不能为空")
     private String productName;
     //
@@ -69,7 +69,7 @@ public class BaseProductRequest {
     private String productImage;
 
     @ApiModelProperty(value = "产品文件格式默认jpg jpg / png / jpeg")
-    @Size(max = 40)
+    @Size(max = 4,message = "产品文件格式异常")
     private String suffix = "jpg";
 
     @DecimalMin(value = "0.01", message = "初始体积异常")
@@ -86,7 +86,7 @@ public class BaseProductRequest {
 
     @ApiModelProperty(value = "中文申报品名", example = "中文申报品名", required = true)
     @Excel(name = "中文申报品名")
-    @Size(max = 200)
+    @Size(max = 200,message = "中文申报品名仅支持200字符")
     @NotBlank(message = "中文申报品名不能为空")
     private String productNameChinese;
     @DecimalMax(value = "100000000", message = "申报价值异常")
@@ -98,7 +98,7 @@ public class BaseProductRequest {
     private Double declaredValue;
     @SwaggerDictionary(dicCode = "059", dicKey = "subValue")
     @ApiModelProperty(value = "产品属性编号", example = "GeneralCargo", required = true)
-    @Size(max = 50)
+    @Size(max = 50,message = "产品属性异常")
     @NotBlank(message = "产品属性编号不能为空")
     private String productAttribute;
 
@@ -109,7 +109,7 @@ public class BaseProductRequest {
     private String productAttributeName;
     @SwaggerDictionary(dicCode = "060", dicKey = "subValue")
     @ApiModelProperty(value = "带电信息编号 主子类别(060 / ddxx -#{subValue})", example = "drycell")
-    @Size(max = 50)
+    @Size(max = 50,message = "带电信息编号异常")
     private String electrifiedMode;
     @SwaggerDictionary(dicCode = "060", dicKey = "subName")
     @ApiModelProperty(value = "带电信息名 主子类别(060 / ddxx -#{subName})", example = "干电池", hidden = true)
@@ -118,7 +118,7 @@ public class BaseProductRequest {
     private String electrifiedModeName;
     @SwaggerDictionary(dicCode = "061", dicKey = "subValue")
     @ApiModelProperty(value = "电池包装编号 主子类别(061 / dcbb -#{subValue})", example = "built_in")
-    @Size(max = 50)
+    @Size(max = 50,message = "电池包装编号异常")
     private String batteryPackaging;
     @SwaggerDictionary(dicCode = "061", dicKey = "subName")
     @ApiModelProperty(value = "电池包装名 主子类别(061 / dcbb -#{subName})", example = "内置", hidden = true)
@@ -130,7 +130,7 @@ public class BaseProductRequest {
     private Boolean havePackingMaterial = false;
 
     @ApiModelProperty(value = "附带包材 产品编码 /product/listSku", example = "SCN72000081")
-    @Size(max = 100)
+    @Size(max = 100,message = "附带包材异常")
     private String bindCode;
 
     @ApiModelProperty(value = "附带包材 产品名 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", notes = "category: 包材 sellerCode: CNYWO7",hidden = true)
@@ -140,26 +140,26 @@ public class BaseProductRequest {
 
     @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋", hidden = true)
     @Excel(name = "物流包装要求")
-    @Size(max = 50)
+    @Size(max = 50,message = "物流包装要求异常")
     private String suggestPackingMaterial;
 
     @ApiModelProperty(value = "物流包装要求编码 packing/listPacking -#{packageMaterialCode}", example = "B001")
-    @Size(max = 100)
+    @Size(max = 100,message = "物流包装要求异常")
     private String suggestPackingMaterialCode;
 
     @ApiModelProperty(value = "包装材料价格区间(可修改) packing/listPacking -#{priceRange}", example = "10.00-10.00")
     @Excel(name = "价格区间")
-    @Size(max = 255)
+    @Size(max = 255,message = "价格区间异常")
     private String priceRange;
 
     @ApiModelProperty(value = "产品说明", example = "产品说明", required = true)
     @Excel(name = "产品说明")
-    @Size(max = 1000)
+    @Size(max = 200,message = "产品说明仅支持200字符")
     @NotBlank(message = "产品说明不能为空")
     private String productDescription;
 
     @ApiModelProperty(value = "产品介绍地址", example = "产品介绍地址")
-    @Size(max = 1000)
+    @Size(max = 1000,message = "产品介绍地址仅支持1000字符")
     private String productIntroductAddress;
 
     @ApiModelProperty(value = "类别", allowableValues = "sku", hidden = true)
