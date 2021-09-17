@@ -36,25 +36,25 @@ public class BaseProductRequest {
 //    @Size(max = 50)
 //    @NotBlank(message = "产品编码不能为空")
 //    private String code;
-    @DecimalMax(value = Integer.MAX_VALUE + "", message = "初始重量异常")
+    @DecimalMax(value = "999999", message = "初始重量异常")
     @DecimalMin(value = "0.01", message = "初始重量异常")
     @ApiModelProperty(value = "初始重量g", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始重量不能为空")
     private Double initWeight;
-    @DecimalMax(value = Integer.MAX_VALUE + "", message = "初始长度异常")
+    @DecimalMax(value =  "500", message = "初始长度异常")
     @DecimalMin(value = "0.01", message = "初始长度异常")
     @ApiModelProperty(value = "初始长 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始长度不能为空")
     private Double initLength;
-    @DecimalMax(value = Integer.MAX_VALUE + "", message = "初始宽度异常")
+    @DecimalMax(value = "500", message = "初始宽度异常")
     @DecimalMin(value = "0.01", message = "初始宽度异常")
     @ApiModelProperty(value = "初始宽 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始宽度不能为空")
     private Double initWidth;
-    @DecimalMax(value = Integer.MAX_VALUE + "", message = "初始高度异常")
+    @DecimalMax(value = "500", message = "初始高度异常")
     @DecimalMin(value = "0.01", message = "初始高度异常")
     @ApiModelProperty(value = "初始高 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
@@ -89,7 +89,7 @@ public class BaseProductRequest {
     @Size(max = 200,message = "中文申报品名仅支持200字符")
     @NotBlank(message = "中文申报品名不能为空")
     private String productNameChinese;
-    @DecimalMax(value = "100000000", message = "申报价值异常")
+    @DecimalMax(value = "1000", message = "申报价值异常")
     @DecimalMin(value = "0", message = "申报价值异常")
     @ApiModelProperty(value = "申报价值", required = true)
     @Excel(name = "申报价值")

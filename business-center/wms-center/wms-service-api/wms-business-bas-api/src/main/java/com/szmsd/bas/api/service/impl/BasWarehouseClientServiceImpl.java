@@ -5,6 +5,7 @@ import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.dto.AddWarehouseRequest;
 import com.szmsd.bas.dto.BasWarehouseQueryDTO;
+import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.bas.vo.BasWarehouseVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -42,5 +43,10 @@ public class BasWarehouseClientServiceImpl implements BasWarehouseClientService 
     @Override
     public TableDataInfo<BasWarehouseVO> queryByWarehouseCodes(BasWarehouseQueryDTO queryDTO) {
         return this.basWarehouseFeignService.pagePost(queryDTO);
+    }
+
+    @Override
+    public List<WarehouseKvDTO> queryCusInboundWarehouse() {
+        return R.getDataAndException(this.basWarehouseFeignService.queryCusInboundWarehouse());
     }
 }

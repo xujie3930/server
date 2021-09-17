@@ -13,6 +13,7 @@ import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -97,7 +98,12 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         public List<BasSellerCertificate> listVAT(VatQueryDto vatQueryDto){
             QueryWrapper<BasSellerCertificate> vatQueryWrapper = new QueryWrapper();
             vatQueryWrapper.eq("seller_code",vatQueryDto.getSellerCode());
-            vatQueryWrapper.eq("country_code",vatQueryDto.getCountryCode());
+//            vatQueryWrapper.eq("country_code",vatQueryDto.getCountryCode());
+            String countryCode = vatQueryDto.getCountryCode();
+            if (StringUtils.isNotBlank(countryCode)){
+                List<String> codeByArray = StringToolkit.getCodeByArray(countryCode);
+                vatQueryWrapper.in("country_code",codeByArray);
+            }
             vatQueryWrapper.eq("is_active",true);
             vatQueryWrapper.eq("vaild","1");
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

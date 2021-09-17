@@ -9,12 +9,14 @@ import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.doc.api.warehouse.req.FileInfoBase64;
@@ -24,11 +26,11 @@ import com.szmsd.system.api.feign.RemoteUserService;
 import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -54,6 +56,13 @@ public class RemoterApiImpl implements IRemoterApi {
     private RemoteUserService remoteUserService;
     @Resource
     private RemoteAttachmentService remoteAttachmentService;
+    @Resource
+    private BasSellerFeignService basSellerFeignService;
+
+    @Override
+    public BasSellerFeignService getBasSellerFeignService() {
+        return this.basSellerFeignService;
+    }
 
     @Override
     public RemoteAttachmentService getRemoteAttachmentService() {
@@ -62,6 +71,7 @@ public class RemoterApiImpl implements IRemoterApi {
 
     @Override
     public List<BasAttachmentDataDTO> uploadFile(List<FileInfoBase64> base64List, AttachmentTypeEnum attachmentTypeEnum) {
+        base64List = base64List.stream().filter(x -> StringUtils.isNotBlank(x.getFileBase64())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(base64List)) return new ArrayList<>();
         MockMultipartFile[] mockMultipartFiles = new MockMultipartFile[base64List.size()];
         for (int i = 0; i < base64List.size(); i++) {
@@ -72,6 +82,11 @@ public class RemoterApiImpl implements IRemoterApi {
         }
         R<List<BasAttachmentDataDTO>> listR = remoteAttachmentService.uploadAttachment(mockMultipartFiles, attachmentTypeEnum, null, null);
         return R.getDataAndException(listR);
+    }
+
+    @Override
+    public List<WarehouseKvDTO> queryCusInboundWarehouse() {
+        return basWarehouseClientService.queryCusInboundWarehouse();
     }
 
     @Override
