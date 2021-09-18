@@ -60,8 +60,9 @@ public class InboundReceiptReq {
     @Size(max = 30, message = "送货方式编码仅支持0-30字符")
     @ApiModelProperty(value = "送货方式编码 (0-30]", example = "053001", required = true)
     private String deliveryWayCode;
-    //    @Size(max = 200, message = "送货单号仅支持0-30字符")
-    @ApiModelProperty(value = "送货单号（快递单号） 可支持多个", example = "1121")
+
+    @Size(max = 200, message = "送货单号仅支持0-200字符")
+    @ApiModelProperty(value = "送货单号（快递单号） 可支持多个", example = "1121,22")
     private String deliveryNo;
 
     public InboundReceiptReq setDeliveryNo(String deliveryNo) {
