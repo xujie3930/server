@@ -138,12 +138,12 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String bindCodeName;
 
-    @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋", hidden = true)
+    @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋")
     @Excel(name = "物流包装要求")
     @Size(max = 50,message = "物流包装要求仅支持50字符")
     private String suggestPackingMaterial;
 
-    @ApiModelProperty(value = "物流包装要求编码 packing/listPacking -#{packageMaterialCode}", example = "B001")
+    @ApiModelProperty(value = "物流包装要求编码 packing/listPacking -#{packageMaterialCode}", example = "B001", hidden = true)
     @Size(max = 100,message = "物流包装要求仅支持100字符")
     private String suggestPackingMaterialCode;
 

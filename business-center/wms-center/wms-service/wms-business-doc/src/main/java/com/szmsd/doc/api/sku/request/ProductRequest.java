@@ -99,16 +99,17 @@ public class ProductRequest extends BaseProductRequest {
      */
     public ProductRequest checkPack(BasePackingClientService basePackingFeignService) {
         // 3、选择物物流包装OMS要校验是否存在；
-        String suggestPackingMaterialCode = super.getSuggestPackingMaterialCode();
-        if (StringUtils.isNotBlank(suggestPackingMaterialCode)) {
+        String suggestPackingMaterial = super.getSuggestPackingMaterial();
+        if (StringUtils.isNotBlank(suggestPackingMaterial)) {
             BasePackingDto basePackingDto1 = new BasePackingDto();
             basePackingDto1.setWarehouseCode(super.getWarehouseCode());
             List<BasePackingDto> dataAndException = basePackingFeignService.listParent(basePackingDto1);
             BasePackingDto basePackingDto = dataAndException.stream()
-                    .filter(x -> suggestPackingMaterialCode.equals(x.getPackageMaterialCode())).findAny()
+                    .filter(x -> suggestPackingMaterial.equals(x.getPackingMaterialType())).findAny()
                     .orElseThrow(() -> new CommonException("400","请检查物流包装是否存在!"));
             String packageMaterialName = basePackingDto.getPackingMaterialType();
             super.setSuggestPackingMaterial(packageMaterialName);
+            super.setSuggestPackingMaterialCode(basePackingDto.getPackageMaterialCode());
         }
         return this;
     }
