@@ -91,7 +91,11 @@ public class SkuApiController {
         basePackingAddReq.setSellerCode(AuthenticationUtil.getSellerCode());
         basePackingAddReq.calculateTheVolume();
         BaseProductDto product = BeanMapperUtil.map(basePackingAddReq, BaseProductDto.class);
-        baseProductClientService.add(product);
+        try {
+            baseProductClientService.add(product);
+        }catch (Exception e){
+            throw new CommonException("400",e.getMessage());
+        }
         return R.ok();
     }
 

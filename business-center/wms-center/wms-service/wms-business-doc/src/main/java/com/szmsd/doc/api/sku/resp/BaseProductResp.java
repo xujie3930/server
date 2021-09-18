@@ -18,18 +18,18 @@ import java.util.Date;
 
 
 /**
-* <p>
-    * 
-    * </p>
-*
-* @author jr
-* @since 2021-03-04
-*/
+ * <p>
+ *
+ * </p>
+ *
+ * @author jr
+ * @since 2021-03-04
+ */
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-@ApiModel(value="", description="BaseProduct产品(sku/包材)对象")
-public class    BaseProductResp  {
+@ApiModel(value = "", description = "BaseProduct产品(sku/包材)对象")
+public class BaseProductResp {
 
     private static final long serialVersionUID = 1L;
 
@@ -57,19 +57,19 @@ public class    BaseProductResp  {
     private String code;
 
     @ApiModelProperty(value = "初始重量g")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double initWeight;
 
     @ApiModelProperty(value = "初始长 cm")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double initLength;
 
     @ApiModelProperty(value = "初始宽 cm")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double initWidth;
 
     @ApiModelProperty(value = "初始高 cm")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double initHeight;
 
 //    @ApiModelProperty(value = "是否激活",hidden = true)
@@ -84,7 +84,7 @@ public class    BaseProductResp  {
 //    private String suffix;
 
     @ApiModelProperty(value = "初始体积 cm3")
-    @Digits(integer = 14,fraction = 2)
+    @Digits(integer = 14, fraction = 2)
     private BigDecimal initVolume;
 
     @ApiModelProperty(value = "客户（卖家）编码")
@@ -99,7 +99,7 @@ public class    BaseProductResp  {
 
     @ApiModelProperty(value = "申报价值")
     @Excel(name = "申报价值")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double declaredValue;
 
 //    @ApiModelProperty(value = "产品属性编号")
