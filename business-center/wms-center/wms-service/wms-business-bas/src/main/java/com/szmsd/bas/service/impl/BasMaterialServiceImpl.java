@@ -109,7 +109,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
                 basMaterial.setCode("WL"+basMaterial.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
             }else{
                 if(basMaterial.getCode().length()<2){
-                    throw new BaseException("sku编码长度不能小于两个字符");
+                    throw new CommonException("400", "sku编码长度不能小于两个字符");
                 }
             }
             queryWrapper.eq("code",basMaterial.getCode());
@@ -121,7 +121,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
             MaterialRequest materialRequest = BeanMapperUtil.map(basMaterial,MaterialRequest.class);
             R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
             if(!r.getData().getSuccess()){
-                throw new BaseException("传wms失败:" + r.getData().getMessage());
+                throw new CommonException("400", "传wms失败:" + r.getData().getMessage());
             }
             return baseMapper.insert(basMaterial);
         }
