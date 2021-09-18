@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
+import com.szmsd.putinstorage.enums.SourceTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -98,6 +99,8 @@ public class InboundReceiptReq {
     @ApiModelProperty(value = "单证信息文件", hidden = true)
     private List<AttachmentFileDTO> documentsFile;
 
+    @ApiModelProperty(value = "数据来源",hidden = true)
+    private String sourceType= SourceTypeEnum.DOC.name();
 //    @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
 //    private String status;
 

@@ -28,7 +28,7 @@ public class BaseProductRequest {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "英文产品名称", example = "English", required = true)
-    @Size(max = 200,message = "英文产品名称最大支持200字符")
+    @Size(max = 200, message = "英文产品名称最大支持200字符")
     @NotBlank(message = "英文产品名称不能为空")
     private String productName;
     //
@@ -42,7 +42,7 @@ public class BaseProductRequest {
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始重量不能为空")
     private Double initWeight;
-    @DecimalMax(value =  "500", message = "初始长度最大仅支持500 cm")
+    @DecimalMax(value = "500", message = "初始长度最大仅支持500 cm")
     @DecimalMin(value = "0.01", message = "初始长度最小仅支持0.01 cm")
     @ApiModelProperty(value = "初始长 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
@@ -69,7 +69,7 @@ public class BaseProductRequest {
     private String productImage;
 
     @ApiModelProperty(value = "产品文件格式默认jpg jpg / png / jpeg")
-    @Size(max = 4,message = "产品文件格式不支持")
+    @Size(max = 4, message = "产品文件格式不支持")
     private String suffix = "jpg";
 
     @DecimalMin(value = "0.01", message = "初始体积最小仅支持0.01 cm3")
@@ -86,7 +86,7 @@ public class BaseProductRequest {
 
     @ApiModelProperty(value = "中文申报品名", example = "中文申报品名", required = true)
     @Excel(name = "中文申报品名")
-    @Size(max = 200,message = "中文申报品名仅支持200字符")
+    @Size(max = 200, message = "中文申报品名仅支持200字符")
     @NotBlank(message = "中文申报品名不能为空")
     private String productNameChinese;
     @DecimalMax(value = "1000", message = "申报价值最大仅支持1000")
@@ -98,7 +98,7 @@ public class BaseProductRequest {
     private Double declaredValue;
     @SwaggerDictionary(dicCode = "059", dicKey = "subValue")
     @ApiModelProperty(value = "产品属性编号", example = "GeneralCargo", required = true)
-    @Size(max = 50,message = "产品属性最大仅支持50字符")
+    @Size(max = 50, message = "产品属性最大仅支持50字符")
     @NotBlank(message = "产品属性编号不能为空")
     private String productAttribute;
 
@@ -109,7 +109,7 @@ public class BaseProductRequest {
     private String productAttributeName;
     @SwaggerDictionary(dicCode = "060", dicKey = "subValue")
     @ApiModelProperty(value = "带电信息编号 主子类别(060 / ddxx -#{subValue})", example = "drycell")
-    @Size(max = 50,message = "带电信息编号仅支持50字符")
+    @Size(max = 50, message = "带电信息编号仅支持50字符")
     private String electrifiedMode;
     @SwaggerDictionary(dicCode = "060", dicKey = "subName")
     @ApiModelProperty(value = "带电信息名 主子类别(060 / ddxx -#{subName})", example = "干电池", hidden = true)
@@ -118,7 +118,7 @@ public class BaseProductRequest {
     private String electrifiedModeName;
     @SwaggerDictionary(dicCode = "061", dicKey = "subValue")
     @ApiModelProperty(value = "电池包装编号 主子类别(061 / dcbb -#{subValue})", example = "built_in")
-    @Size(max = 50,message = "电池包装编号仅支持50字符")
+    @Size(max = 50, message = "电池包装编号仅支持50字符")
     private String batteryPackaging;
     @SwaggerDictionary(dicCode = "061", dicKey = "subName")
     @ApiModelProperty(value = "电池包装名 主子类别(061 / dcbb -#{subName})", example = "内置", hidden = true)
@@ -130,36 +130,36 @@ public class BaseProductRequest {
     private Boolean havePackingMaterial = false;
 
     @ApiModelProperty(value = "附带包材 产品编码 /product/listSku", example = "SCN72000081")
-    @Size(max = 100,message = "附带包材仅支持100字符")
+    @Size(max = 100, message = "附带包材仅支持100字符")
     private String bindCode;
 
-    @ApiModelProperty(value = "附带包材 产品名 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", notes = "category: 包材 sellerCode: CNYWO7",hidden = true)
+    @ApiModelProperty(value = "附带包材 产品名 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", notes = "category: 包材 sellerCode: CNYWO7", hidden = true)
     @Excel(name = "绑定专属包材产品名")
     @Size(max = 100)
     private String bindCodeName;
 
     @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋")
     @Excel(name = "物流包装要求")
-    @Size(max = 50,message = "物流包装要求仅支持50字符")
+    @Size(max = 50, message = "物流包装要求仅支持50字符")
     private String suggestPackingMaterial;
 
     @ApiModelProperty(value = "物流包装要求编码 packing/listPacking -#{packageMaterialCode}", example = "B001", hidden = true)
-    @Size(max = 100,message = "物流包装要求仅支持100字符")
+    @Size(max = 100, message = "物流包装要求仅支持100字符")
     private String suggestPackingMaterialCode;
 
     @ApiModelProperty(value = "包装材料价格区间(可修改) packing/listPacking -#{priceRange}", example = "10.00-10.00")
     @Excel(name = "价格区间")
-    @Size(max = 255,message = "价格区间仅支持255字符")
+    @Size(max = 255, message = "价格区间仅支持255字符")
     private String priceRange;
 
     @ApiModelProperty(value = "产品说明", example = "产品说明", required = true)
     @Excel(name = "产品说明")
-    @Size(max = 200,message = "产品说明仅支持200字符")
+    @Size(max = 200, message = "产品说明仅支持200字符")
     @NotBlank(message = "产品说明不能为空")
     private String productDescription;
 
     @ApiModelProperty(value = "产品介绍地址", example = "产品介绍地址")
-    @Size(max = 1000,message = "产品介绍地址仅支持1000字符")
+    @Size(max = 1000, message = "产品介绍地址仅支持1000字符")
     private String productIntroductAddress;
 
     @ApiModelProperty(value = "类别", allowableValues = "sku", hidden = true)
@@ -167,7 +167,7 @@ public class BaseProductRequest {
     private String category = "SKU";
 
     @ApiModelProperty(value = "类别编码", hidden = true)
-    @Size(max = 100,message = "类别编码不支持100字符")
+    @Size(max = 100, message = "类别编码不支持100字符")
     private String categoryCode;
 
 //    @ApiModelProperty(value = "是否仓库验收")
@@ -234,7 +234,7 @@ public class BaseProductRequest {
     @Size(max = 50, message = "仓库编码不能大于50字符")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "关联单号",hidden = true)
+    @ApiModelProperty(value = "关联单号", hidden = true)
     @Size(max = 100)
     private String orderNo;
 
@@ -249,7 +249,12 @@ public class BaseProductRequest {
     @Size(max = 200, message = "备注仅支持200字符")
     @ApiModelProperty(value = "备注", example = "备注")
     private String remark;
-
+    @Size(max = 200, message = "材质最大仅支持200字符")
+    @ApiModelProperty(value = "材质")
+    private String materialQuality;
+    @Size(max = 200, message = "用途最大仅支持200字符")
+    @ApiModelProperty(value = "用途")
+    private String purpose;
     @ApiModelProperty(value = "来源", hidden = true)
     private String source = SourceTypeEnum.DOC.name();
 }

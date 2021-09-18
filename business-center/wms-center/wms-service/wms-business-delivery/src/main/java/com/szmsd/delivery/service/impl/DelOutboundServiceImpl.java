@@ -116,6 +116,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private IDelOutboundCombinationService delOutboundCombinationService;
     @Autowired
     private IDelOutboundExceptionService delOutboundExceptionService;
+    @Autowired
+    private IDelOutboundDocService delOutboundDocService;
 
     /**
      * 查询出库单模块
@@ -352,8 +354,18 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (CollectionUtils.isEmpty(details)) {
                 throw new CommonException("400", "明细信息不能为空");
             }
-            // 查询sku
             List<String> skus = details.stream().map(DelOutboundDetailDto::getSku).distinct().collect(Collectors.toList());
+            // 验证产品是否有效
+            DelOutboundOtherInServiceDto inServiceDto = new DelOutboundOtherInServiceDto();
+            inServiceDto.setClientCode(dto.getSellerCode());
+            inServiceDto.setCountryCode(dto.getAddress().getCountryCode());
+            inServiceDto.setWarehouseCode(dto.getWarehouseCode());
+            inServiceDto.setSkus(skus);
+            String shipmentRule = dto.getShipmentRule();
+            if (!this.delOutboundDocService.inServiceValid(inServiceDto, shipmentRule)) {
+                throw new CommonException("400", "发货规则[" + shipmentRule + "]不存在");
+            }
+            // 查询sku
             BaseProductConditionQueryDto productConditionQueryDto = new BaseProductConditionQueryDto();
             productConditionQueryDto.setSkus(skus);
             productConditionQueryDto.setSellerCode(dto.getSellerCode());
