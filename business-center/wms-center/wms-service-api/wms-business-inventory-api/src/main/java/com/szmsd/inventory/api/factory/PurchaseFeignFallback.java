@@ -5,6 +5,7 @@ import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.api.feign.PurchaseFeignService;
 import com.szmsd.inventory.domain.dto.TransportWarehousingAddDTO;
 import feign.hystrix.FallbackFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * @ClassName: PurchaseFeignFallback
@@ -12,6 +13,7 @@ import feign.hystrix.FallbackFactory;
  * @Author: 11
  * @Date: 2021-04-27 11:50
  */
+@Component
 public class PurchaseFeignFallback implements FallbackFactory<PurchaseFeignService> {
     @Override
     public PurchaseFeignService create(Throwable throwable) {
