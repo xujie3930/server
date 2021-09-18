@@ -86,7 +86,6 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                 beforeInventory.setCusCode(sku1.getSellerCode());
                 afterInventory.setCusCode(sku1.getSellerCode());
             }
-
             //07-16 集运出库转采购入库后，第一次采购入库完成后，同步处理出库的库存冻结
             String orderNo = inboundInventoryDTO.getOrderNo();
             // 08-17 取消之前的提交

@@ -69,7 +69,7 @@ public class BaseProductRequest {
     private String productImage;
 
     @ApiModelProperty(value = "产品文件格式默认jpg jpg / png / jpeg")
-    @Size(max = 4,message = "产品文件格式异常")
+    @Size(max = 4,message = "产品文件格式不支持")
     private String suffix = "jpg";
 
     @DecimalMin(value = "0.01", message = "初始体积最小仅支持0.01 cm3")

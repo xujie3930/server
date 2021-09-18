@@ -21,6 +21,7 @@ import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.req.CreateInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.req.InboundReceiptDetailReq;
+import com.szmsd.doc.api.warehouse.req.TransportWarehousingAddRep;
 import com.szmsd.doc.api.warehouse.resp.AttachmentFileResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptDetailResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptInfoResp;
@@ -28,6 +29,8 @@ import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.doc.utils.GoogleBarCodeUtils;
+import com.szmsd.inventory.api.feign.PurchaseFeignService;
+import com.szmsd.inventory.domain.dto.TransportWarehousingAddDTO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
@@ -80,7 +83,7 @@ public class InboundApiController extends BaseController {
     @ApiOperation(value = "入库单 - 详情", notes = "查看入库单详情")
     R<InboundReceiptInfoResp> receiptInfoQuery(@Valid @NotBlank(message = "入库单仅支持0-30字节") @Size(max = 30) @PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
-        AssertUtil400.isTrue(info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()), "入库单不存在");
+        AssertUtil400.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null && info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()), "入库单不存在");
         List<InboundReceiptDetailVO> inboundReceiptDetails = info.getData().getInboundReceiptDetails();
 
         List<InboundReceiptDetailResp> detailRespList = Optional.ofNullable(inboundReceiptDetails).orElse(new ArrayList<>()).stream().map(x -> {
@@ -137,6 +140,7 @@ public class InboundApiController extends BaseController {
 
     /**
      * 校验vat 和仓库是否存在 且属于自己
+     *
      * @param remoterApi
      * @return
      */
@@ -150,7 +154,7 @@ public class InboundApiController extends BaseController {
         BasSellerFeignService basSellerFeignService = remoterApi.getBasSellerFeignService();
         warehouseList.forEach(x -> {
             WarehouseKvDTO warehouseKvDTO = warehouseKvDTOMap.get(x);
-            AssertUtil400.isTrue(null != warehouseKvDTO, "仓库异常");
+            AssertUtil400.isTrue(null != warehouseKvDTO, "仓库不存在");
         });
         List<String> countryList = warehouseKvDTOMap.values().stream().map(WarehouseKvDTO::getCountry).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(vatList)) return true;
@@ -244,7 +248,7 @@ public class InboundApiController extends BaseController {
         //校验vat TODo
         this.checkVAT(iRemoterApi, addDTO);
         List<String> collect = addDTO.stream().filter(x -> "055003".equals(x.getWarehouseMethodCode())).flatMap(z -> z.getInboundReceiptDetails().stream().map(InboundReceiptDetailDTO::getSku)).collect(Collectors.toList());
-        iRemoterApi.checkSkuPic(collect,AttachmentTypeEnum.SKU_IMAGE);
+        iRemoterApi.checkSkuPic(collect, AttachmentTypeEnum.SKU_IMAGE);
         R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
         List<InboundReceiptInfoVO> dataAndException = R.getDataAndException(listR);
         List<InboundReceiptInfoResp> result = dataAndException.stream().map(x -> {
@@ -283,6 +287,12 @@ public class InboundApiController extends BaseController {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
         AssertUtil400.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getData() != null && info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode()), "入库单不存在");
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
+    }
+
+    @PostMapping(value = "transport/warehousing")
+    @ApiOperation(value = "转运入库-提交")
+    public R transportWarehousingSubmit(@Validated @RequestBody TransportWarehousingAddRep transportWarehousingAddDTO) {
+        return R.ok();
     }
 
 }

@@ -18,5 +18,5 @@ import java.util.List;
 public interface BasePackingMapper extends BaseMapper<BasePacking> {
     List<BasePackingDto> selectBasePackingGroup(@Param("packingMaterialType") String packingMaterialType);
 
-    List<BasePackingDto> selectBasePacking(BasePackingDto warehouseCode);
+    List<BasePackingDto> selectBasePacking(@Param("cm") BasePackingDto warehouseCode);
 }

@@ -50,7 +50,7 @@
         price is not null
         and currency is not null
         and is_active = 1
-        <if test="warehouseCode != null and warehouseCode != ''">
+        <if test="cm.warehouseCode != null and cm.warehouseCode != ''">
             AND warehouse_code = #{cm.warehouseCode}
         </if>
         group by warehouse_code, packing_material_type
