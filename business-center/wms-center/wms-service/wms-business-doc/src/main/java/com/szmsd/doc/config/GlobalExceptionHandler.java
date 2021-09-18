@@ -6,7 +6,6 @@ import com.szmsd.common.core.exception.com.SystemException;
 import feign.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -84,71 +84,84 @@ public class GlobalExceptionHandler {
             StringBuilder builder = new StringBuilder();
             BindingResult bindingResult = manv.getBindingResult();
             List<ObjectError> allErrors = bindingResult.getAllErrors();
-//            for (ObjectError objectError : allErrors) {
-//                builder.append("[");
-//                Object[] arguments = objectError.getArguments();
-//                if (objectError instanceof FieldError) {
-//                    if (null == arguments) {
-//                        FieldError fieldError = (FieldError) objectError;
-//                        builder.append(fieldError.getField());
-//                    } else {
-//                        for (Object argument : arguments) {
-//                            if (argument instanceof DefaultMessageSourceResolvable) {
-//                                DefaultMessageSourceResolvable defaultMessageSourceResolvable = (DefaultMessageSourceResolvable) argument;
-//                                String[] codes = defaultMessageSourceResolvable.getCodes();
-//                                if (null != codes) {
-//                                    for (String s : codes) {
-//                                        builder.append(s);
-//                                        builder.append(",");
-//                                    }
-//                                    builder.deleteCharAt(builder.length() - 1);
-//                                } else {
-//                                    builder.append(defaultMessageSourceResolvable.getDefaultMessage());
-//                                }
-//                            } else {
-//                                if (argument instanceof String[]) {
-//                                    String[] codes = (String[]) argument;
-//                                    for (String s : codes) {
-//                                        builder.append(s);
-//                                        builder.append(",");
-//                                    }
-//                                    builder.deleteCharAt(builder.length() - 1);
-//                                } else {
-//                                    builder.append(argument);
-//                                }
-//                            }
-//                            builder.append(",");
-//                        }
-//                        builder.deleteCharAt(builder.length() - 1);
-//                    }
-//                } else {
-//                    String[] codes = null;
-//                    if (null != arguments) {
-//                        for (Object argument : arguments) {
-//                            if (argument instanceof String[]) {
-//                                codes = (String[]) argument;
-//                            }
-//                        }
-//                    }
-//                    if (null != codes) {
-//                        for (String s : codes) {
-//                            builder.append(s);
-//                            builder.append(",");
-//                        }
-//                        builder.deleteCharAt(builder.length() - 1);
-//                    }
-//                }
-//                builder.append("]");
-//                builder.append(objectError.getDefaultMessage());
-//                builder.append(",");
-//            }
-//            if (builder.lastIndexOf(",") == builder.length() - 1) {
-//                builder.deleteCharAt(builder.length() - 1);
-//            }
-//            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
-//            message = builder.toString();
-            message = allErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage).reduce((a, b) -> a + "," + b).orElse("");
+            String linePrefix = "";
+            for (ObjectError objectError : allErrors) {
+                // builder.append("[");
+                Object[] arguments = objectError.getArguments();
+                if (objectError instanceof FieldError) {
+                    /*if (null == arguments) {
+                        FieldError fieldError = (FieldError) objectError;
+                        builder.append(fieldError.getField());
+                    } else {
+                        for (Object argument : arguments) {
+                            if (argument instanceof DefaultMessageSourceResolvable) {
+                                DefaultMessageSourceResolvable defaultMessageSourceResolvable = (DefaultMessageSourceResolvable) argument;
+                                String[] codes = defaultMessageSourceResolvable.getCodes();
+                                if (null != codes) {
+                                    for (String s : codes) {
+                                        builder.append(s);
+                                        builder.append(",");
+                                    }
+                                    builder.deleteCharAt(builder.length() - 1);
+                                } else {
+                                    builder.append(defaultMessageSourceResolvable.getDefaultMessage());
+                                }
+                            } else {
+                                if (argument instanceof String[]) {
+                                    String[] codes = (String[]) argument;
+                                    for (String s : codes) {
+                                        builder.append(s);
+                                        builder.append(",");
+                                    }
+                                    builder.deleteCharAt(builder.length() - 1);
+                                } else {
+                                    builder.append(argument);
+                                }
+                            }
+                            builder.append(",");
+                        }
+                        builder.deleteCharAt(builder.length() - 1);
+                    }*/
+                    FieldError fieldError = (FieldError) objectError;
+                    String field = fieldError.getField();
+                    if (field.contains("[")) {
+                        int fi = field.indexOf("[");
+                        int ei = field.indexOf("]");
+                        linePrefix = field.substring(fi + 1, ei);
+                    }
+                    if (!"".equals(linePrefix)) {
+                        int i = Integer.parseInt(linePrefix);
+                        linePrefix = "第" + (i + 1) + "行";
+                    }
+                } else {
+                    String[] codes = null;
+                    if (null != arguments) {
+                        for (Object argument : arguments) {
+                            if (argument instanceof String[]) {
+                                codes = (String[]) argument;
+                            }
+                        }
+                    }
+                    if (null != codes) {
+                        for (String s : codes) {
+                            builder.append(s);
+                            builder.append(",");
+                        }
+                        builder.deleteCharAt(builder.length() - 1);
+                    }
+                }
+                // builder.append("]");
+                builder.append(linePrefix)
+                        .append(objectError.getDefaultMessage());
+                builder.append(",");
+            }
+            if (builder.lastIndexOf(",") == builder.length() - 1) {
+                builder.deleteCharAt(builder.length() - 1);
+            }
             code = HttpStatus.BAD_REQUEST.value();
+            message = builder.toString();
+//            message = allErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage).reduce((a, b) -> a + "," + b).orElse("");
+//            code = HttpStatus.BAD_REQUEST.value();
         } else if (exception instanceof IllegalArgumentException) {
             code = HttpStatus.BAD_REQUEST.value();
             message = exception.getMessage();
