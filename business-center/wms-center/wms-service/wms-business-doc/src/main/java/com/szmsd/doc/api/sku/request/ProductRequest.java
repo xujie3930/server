@@ -10,7 +10,6 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.component.IRemoterApi;
@@ -48,10 +47,10 @@ public class ProductRequest extends BaseProductRequest {
          /*   DocSubConfigData.SubCode subCode = docSubConfigData.getSubCode();
             String charged = subCode.getCharged();*/
             if ("Battery".equals(super.getProductAttribute())) {
-                AssertUtil.isTrue(StringUtils.isNotBlank(super.getElectrifiedMode()), "产品属性【带电】，带电信息不能为空");
+                AssertUtil400.isTrue(StringUtils.isNotBlank(super.getElectrifiedMode()), "产品属性【带电】，带电信息不能为空");
 //                AssertUtil.isTrue(StringUtils.isNotBlank(super.getElectrifiedModeName()), "产品属性【带电】，带电信息不能为空");
 
-                AssertUtil.isTrue(StringUtils.isNotBlank(super.getBatteryPackaging()), "产品属性【带电】，电池包装不能为空");
+                AssertUtil400.isTrue(StringUtils.isNotBlank(super.getBatteryPackaging()), "产品属性【带电】，电池包装不能为空");
 //                AssertUtil.isTrue(StringUtils.isNotBlank(super.getBatteryPackagingName()), "产品属性【带电】，电池包装不能为空");
             } else {
                 super.setElectrifiedMode(null);
@@ -62,7 +61,7 @@ public class ProductRequest extends BaseProductRequest {
         }
         // 2、是否附带包材=是，附带包材必填；
         Optional.ofNullable(super.getHavePackingMaterial()).filter(x -> x).ifPresent(x -> {
-            AssertUtil.isTrue(StringUtils.isNotBlank(super.getBindCode()), "附带包材选项,需要选择附带包材");
+            AssertUtil400.isTrue(StringUtils.isNotBlank(super.getBindCode()), "附带包材选项,需要选择附带包材");
 //            AssertUtil.isTrue(StringUtils.isNotBlank(super.getBindCodeName()), "附带包材选项,需要选择附带包材");
             String sellerCode = AuthenticationUtil.getSellerCode();
             BaseProduct queryDTO = new BaseProduct();

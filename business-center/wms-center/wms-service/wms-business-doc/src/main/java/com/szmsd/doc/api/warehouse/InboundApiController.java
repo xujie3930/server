@@ -376,7 +376,7 @@ public class InboundApiController {
         AssertUtil400.isTrue(containsDeliveryWayCode, "送货方式不存在");
     }
     @PostMapping("/page")
-    @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
+    @ApiOperation(value = "入库单管理-列表查询", notes = "入库管理 - 分页查询")
     public TableDataInfo<InboundReceiptResp> postPage(@RequestBody InboundReceiptQueryReq queryDTO) {
         InboundReceiptQueryDTO inboundReceiptQueryDTO = new InboundReceiptQueryDTO();
         BeanUtils.copyProperties(queryDTO,inboundReceiptQueryDTO);

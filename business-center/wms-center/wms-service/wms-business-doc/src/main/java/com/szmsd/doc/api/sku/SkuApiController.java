@@ -5,6 +5,7 @@ import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasePackingDto;
+import com.szmsd.bas.dto.BasePackingQueryDto;
 import com.szmsd.bas.dto.BaseProductDto;
 import com.szmsd.bas.dto.BaseProductQueryDto;
 import com.szmsd.common.core.domain.R;
@@ -12,10 +13,7 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.doc.api.sku.request.BarCodeReq;
-import com.szmsd.doc.api.sku.request.BasePackingAddReq;
-import com.szmsd.doc.api.sku.request.BaseProductQueryRequest;
-import com.szmsd.doc.api.sku.request.ProductRequest;
+import com.szmsd.doc.api.sku.request.*;
 import com.szmsd.doc.api.sku.resp.BasePackingResp;
 import com.szmsd.doc.api.sku.resp.BaseProductResp;
 import com.szmsd.doc.component.IRemoterApi;
@@ -59,7 +57,7 @@ public class SkuApiController {
 
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("list")
-    @ApiOperation(value = "查询列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
+    @ApiOperation(value = "查询SKU列表", notes = "查询SKU信息，支持分页呈现，用于入库，或者新SKU出库、集运出库")
     public TableDataInfo<BaseProductResp> list(@Validated @RequestBody BaseProductQueryRequest baseProductQueryRequest) {
         baseProductQueryRequest.setSellerCode(AuthenticationUtil.getSellerCode());
         TableDataInfo<BaseProduct> list = baseProductClientService.list(BeanMapperUtil.map(baseProductQueryRequest, BaseProductQueryDto.class));
@@ -110,11 +108,11 @@ public class SkuApiController {
     }
 
     @PreAuthorize("hasAuthority('client')")
-    @GetMapping("/listPacking/byWarehouseCode")
+    @PostMapping("/listPacking/byWarehouseCode")
     @ApiOperation(value = "查询物流包装列表", notes = "查询物流包装列表-查询仓库下")
-    public R<List<BasePackingResp>> listParent(@Valid @NotBlank(message = "仓库不能为空") @Param(value = "byWarehouseCode") String warehouseCode) {
+    public R<List<BasePackingResp>> listParent(@Validated @RequestBody BasePackingQueryReq warehouseCode) {
         BasePackingDto basePackingDto = new BasePackingDto();
-        basePackingDto.setWarehouseCode(warehouseCode);
+        BeanUtils.copyProperties(warehouseCode,basePackingDto);
         List<BasePackingDto> basePackingDtos = basePackingClientService.listParent(basePackingDto);
         List<BasePackingResp> collect = basePackingDtos.stream().map(x -> {
             BasePackingResp basePackingResp = new BasePackingResp();
