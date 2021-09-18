@@ -139,6 +139,8 @@ public class DeliveryController {
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
         canceledDto.setOrderType(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER);
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        canceledDto.setSellerCode(sellerCode);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -184,6 +186,8 @@ public class DeliveryController {
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
         canceledDto.setOrderType(DelOutboundOrderTypeEnum.NORMAL);
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        canceledDto.setSellerCode(sellerCode);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -225,6 +229,8 @@ public class DeliveryController {
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
         canceledDto.setOrderType(DelOutboundOrderTypeEnum.COLLECTION);
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        canceledDto.setSellerCode(sellerCode);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -333,6 +339,8 @@ public class DeliveryController {
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
         canceledDto.setOrderType(DelOutboundOrderTypeEnum.BATCH);
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        canceledDto.setSellerCode(sellerCode);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -393,6 +401,8 @@ public class DeliveryController {
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
         canceledDto.setOrderType(DelOutboundOrderTypeEnum.SELF_PICK);
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        canceledDto.setSellerCode(sellerCode);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
@@ -429,6 +439,8 @@ public class DeliveryController {
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
         canceledDto.setOrderType(DelOutboundOrderTypeEnum.DESTROY);
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        canceledDto.setSellerCode(sellerCode);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 }

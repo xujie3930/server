@@ -13,10 +13,14 @@ import com.szmsd.bas.dto.VatQueryDto;
 import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
 import com.szmsd.doc.api.warehouse.req.CreateInboundReceiptReq;
@@ -44,6 +48,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -56,10 +61,7 @@ import javax.validation.constraints.Size;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Validated
@@ -76,6 +78,8 @@ public class InboundApiController extends BaseController {
     private IRemoterApi iRemoterApi;
     @Resource
     private DocSubConfigData docSubConfigData;
+    @Resource
+    private PurchaseFeignService purchaseFeignService;
 
     @PreAuthorize("hasAuthority('client')")
     @GetMapping("/info/{warehouseNo}")
@@ -172,7 +176,8 @@ public class InboundApiController extends BaseController {
                 WarehouseKvDTO warehouseKvDTO = warehouseKvDTOMap.get(x.getWarehouseCode());
                 String country = warehouseKvDTO.getCountry();
                 List<BasSellerCertificate> basSellerCertificates = countryMap.get(country);
-                AssertUtil400.isTrue(CollectionUtils.isNotEmpty(basSellerCertificates), String.format("VAT[%s]不存在", vat));
+                List<String> vatListCheck = basSellerCertificates.stream().map(BasSellerCertificate::getVat).collect(Collectors.toList());
+                AssertUtil400.isTrue(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat), String.format("VAT[%s]不存在", vat));
             }
         });
         return true;
@@ -289,10 +294,83 @@ public class InboundApiController extends BaseController {
         return R.ok(GoogleBarCodeUtils.generateBarCodeBase64(warehouseNo));
     }
 
+    public void checkCategoryCode(String categoryCode) {
+        List<String> categoryCodeList = new ArrayList<>();
+        categoryCodeList.add("056001");
+        categoryCodeList.add("056002");
+        boolean containsCate = categoryCodeList.contains(categoryCode);
+        AssertUtil400.isTrue(containsCate, "类别不存在");
+    }
+
+    @Resource
+    private DelOutboundFeignService delOutboundFeignService;
+
     @PostMapping(value = "transport/warehousing")
     @ApiOperation(value = "转运入库-提交")
-    public R transportWarehousingSubmit(@Validated @RequestBody TransportWarehousingAddRep transportWarehousingAddDTO) {
+    public R transportWarehousingSubmit(@Validated @RequestBody TransportWarehousingAddRep transportWarehousingAddRep) {
+
+        String categoryCode = transportWarehousingAddRep.getWarehouseCategoryCode();
+        this.checkCategoryCode(categoryCode);
+
+        // 送货方式
+        String deliveryWay = transportWarehousingAddRep.getDeliveryWay();
+        checkDeliveryWayCode(deliveryWay);
+
+        //校验出库单订单归属人 状态 及仓库地址 集运 没有采购单
+        DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
+        delOutboundListQueryDto.setCustomCode(AuthenticationUtil.getSellerCode());
+        delOutboundListQueryDto.setOrderType(DelOutboundOrderTypeEnum.COLLECTION.getCode());
+        TableDataInfo<DelOutboundListVO> info = delOutboundFeignService.page(delOutboundListQueryDto);
+        AssertUtil400.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getRows() != null, "出库单不存在");
+        List<DelOutboundListVO> rows = info.getRows();
+        Map<String, List<DelOutboundListVO>> collect = rows.stream().collect(Collectors.groupingBy(DelOutboundListVO::getWarehouseCode));
+        AssertUtil400.isTrue(MapUtils.isEmpty(collect), "出库单不存在");
+        AssertUtil400.isTrue(collect.keySet().size() <= 1, "请选择相同仓库的出库订单");
+        List<DelOutboundListVO> result = rows.stream().filter(x -> StringUtils.isBlank(x.getPurchaseNo())).collect(Collectors.toList());
+        AssertUtil400.isTrue(CollectionUtils.isEmpty(result), String.format("该出库订单%s已被使用", result));
+        //check vat
+        // 获取仓库列表
+        List<WarehouseKvDTO> warehouseKvDTOS = iRemoterApi.queryCusInboundWarehouse();
+        Map<String, WarehouseKvDTO> warehouseKvDTOMap = warehouseKvDTOS.stream().collect(Collectors.toMap(WarehouseKvDTO::getKey, x -> x, (x1, x2) -> x1));
+        BasSellerFeignService basSellerFeignService = iRemoterApi.getBasSellerFeignService();
+        String warehouseCode = rows.get(0).getWarehouseCode();
+        WarehouseKvDTO warehouseKvDTO = warehouseKvDTOMap.get(warehouseCode);
+        AssertUtil400.isTrue(null != warehouseKvDTO, "仓库不存在");
+        String vat = transportWarehousingAddRep.getVat();
+        if (StringUtils.isNotBlank(vat)) {
+            List<String> countryList = warehouseKvDTOMap.values().stream().map(WarehouseKvDTO::getCountry).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+
+            String joinCountry = String.join(",", countryList);
+            VatQueryDto vatQueryDto = new VatQueryDto();
+            vatQueryDto.setSellerCode(AuthenticationUtil.getSellerCode());
+            vatQueryDto.setCountryCode(joinCountry);
+            R<List<BasSellerCertificate>> listR = basSellerFeignService.listVAT(vatQueryDto);
+            List<BasSellerCertificate> dataAndException = R.getDataAndException(listR);
+            Map<String, List<BasSellerCertificate>> countryMap = dataAndException.stream().collect(Collectors.groupingBy(BasSellerCertificate::getCountryCode));
+
+            String country = warehouseKvDTO.getCountry();
+            List<BasSellerCertificate> basSellerCertificates = countryMap.get(country);
+            List<String> vatListCheck = basSellerCertificates.stream().map(BasSellerCertificate::getVat).collect(Collectors.toList());
+            AssertUtil400.isTrue(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat), String.format("VAT[%s]不存在", vat));
+
+        }
+
+
+        TransportWarehousingAddDTO transportWarehousingAddDTO = new TransportWarehousingAddDTO();
+        transportWarehousingAddDTO.setWarehouseCode(warehouseCode);
+        BeanUtils.copyProperties(transportWarehousingAddRep, transportWarehousingAddDTO);
+        R info2 = purchaseFeignService.transportWarehousingSubmit(transportWarehousingAddDTO);
+        AssertUtil400.isTrue(info2.getCode() == HttpStatus.SUCCESS && info2.getData() != null, "出库单不存在");
         return R.ok();
+    }
+
+    private void checkDeliveryWayCode(String deliveryWayCode) {
+        List<String> deliveryWayCodeList = new ArrayList<String>();
+        deliveryWayCodeList.add("053001");
+        deliveryWayCodeList.add("053002");
+        deliveryWayCodeList.add("053003");
+        boolean containsDeliveryWayCode = deliveryWayCodeList.contains(deliveryWayCode);
+        AssertUtil400.isTrue(containsDeliveryWayCode, "送货方式不存在");
     }
 
 }

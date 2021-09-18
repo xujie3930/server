@@ -1182,6 +1182,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (null != dto.getOrderType()) {
                 queryWrapper.eq(DelOutbound::getOrderType, dto.getOrderType().getCode());
             }
+            // 只能取消自己的单据
+            if (null != dto.getSellerCode()) {
+                queryWrapper.eq(DelOutbound::getSellerCode, dto.getSellerCode());
+            }
             outboundList = this.list(queryWrapper);
             cancelSize = orderNos1.size();
         }

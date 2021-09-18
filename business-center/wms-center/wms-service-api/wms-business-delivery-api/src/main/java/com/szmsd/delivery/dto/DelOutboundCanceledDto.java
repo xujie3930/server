@@ -24,4 +24,7 @@ public class DelOutboundCanceledDto implements Serializable {
 
     @ApiModelProperty(value = "订单类型")
     private DelOutboundOrderTypeEnum orderType;
+
+    @ApiModelProperty(value = "客户代码")
+    private String sellerCode;
 }
