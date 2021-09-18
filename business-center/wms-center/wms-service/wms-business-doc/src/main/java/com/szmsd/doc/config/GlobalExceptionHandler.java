@@ -57,6 +57,10 @@ public class GlobalExceptionHandler {
             CommonException commonException = (CommonException) exception;
             code = Integer.parseInt(commonException.getCode());
             message = convertMessage(code, commonException.getMessage(), exception.getMessage(), commonException.getValues());
+        } else if (exception instanceof SystemException) {
+            SystemException systemException = (SystemException) exception;
+            code = Integer.parseInt(systemException.getCode());
+            message = convertMessage(code, systemException.getMessage(), exception.getMessage(), systemException.getValues());
         } else if (exception instanceof HystrixFeignException) {
             HystrixFeignException hystrix = (HystrixFeignException) exception;
             code = hystrix.getCode();
