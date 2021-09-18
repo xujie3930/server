@@ -361,7 +361,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (CollectionUtils.isEmpty(productList)) {
                 throw new CommonException("400", "查询SKU信息失败");
             }
-            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (a, b) -> a));
+            Map<String, BaseProduct> productMap = new HashMap<>(productList.size());
+            for (BaseProduct product : productList) {
+                productMap.put(product.getCode(), product);
+                if (StringUtils.isNotEmpty(product.getBindCode())) {
+                    // 将SKU的包材也添加到查询条件中
+                    skus.add(product.getBindCode());
+                }
+            }
             if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(dto.getOrderType())
                     || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(dto.getOrderType())
                     || DelOutboundOrderTypeEnum.BATCH.getCode().equals(dto.getOrderType())
