@@ -19,11 +19,11 @@ public class BasePackingResp {
     @ApiModelProperty(value = "包材类别")
     private String packingMaterialType;
 
-    @ApiModelProperty(value = "包材代码，例如B001")
-    private String packageMaterialCode;
+//    @ApiModelProperty(value = "包材代码，例如B001")
+//    private String packageMaterialCode;
 
-    @ApiModelProperty(value = "包材名称")
-    private String packageMaterialName;
+//    @ApiModelProperty(value = "包材名称")
+//    private String packageMaterialName;
 
     @ApiModelProperty(value = "价格范围")
     private String priceRange;

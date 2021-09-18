@@ -23,13 +23,11 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.doc.api.AssertUtil400;
-import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
-import com.szmsd.doc.api.warehouse.req.CreateInboundReceiptReq;
-import com.szmsd.doc.api.warehouse.req.InboundReceiptDetailReq;
-import com.szmsd.doc.api.warehouse.req.TransportWarehousingAddRep;
+import com.szmsd.doc.api.warehouse.req.*;
 import com.szmsd.doc.api.warehouse.resp.AttachmentFileResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptDetailResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptInfoResp;
+import com.szmsd.doc.api.warehouse.resp.InboundReceiptResp;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
 import com.szmsd.doc.utils.AuthenticationUtil;
@@ -37,17 +35,16 @@ import com.szmsd.doc.utils.GoogleBarCodeUtils;
 import com.szmsd.inventory.api.feign.PurchaseFeignService;
 import com.szmsd.inventory.domain.dto.TransportWarehousingAddDTO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
-import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
-import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptDTO;
-import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
+import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.enums.SourceTypeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.BeanUtils;
@@ -64,12 +61,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Validated
 @Api(tags = {"入库信息"})
 @RestController
 @RequestMapping("/api/inboundReceipt")
-public class InboundApiController extends BaseController {
+public class InboundApiController {
 
     @Resource
     private InboundReceiptFeignService inboundReceiptFeignService;
@@ -377,5 +375,24 @@ public class InboundApiController extends BaseController {
         boolean containsDeliveryWayCode = deliveryWayCodeList.contains(deliveryWayCode);
         AssertUtil400.isTrue(containsDeliveryWayCode, "送货方式不存在");
     }
-
+    @PostMapping("/page")
+    @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
+    public TableDataInfo<InboundReceiptResp> postPage(@RequestBody InboundReceiptQueryReq queryDTO) {
+        InboundReceiptQueryDTO inboundReceiptQueryDTO = new InboundReceiptQueryDTO();
+        BeanUtils.copyProperties(queryDTO,inboundReceiptQueryDTO);
+        inboundReceiptQueryDTO.setCusCode(AuthenticationUtil.getSellerCode());
+        TableDataInfo<InboundReceiptVO> inboundReceiptVOTableDataInfo = inboundReceiptFeignService.postPage(inboundReceiptQueryDTO);
+        List<InboundReceiptVO> rows = inboundReceiptVOTableDataInfo.getRows();
+        TableDataInfo<InboundReceiptResp> inboundReceiptRespTableDataInfo = new TableDataInfo<>();
+        BeanUtils.copyProperties(inboundReceiptRespTableDataInfo,inboundReceiptRespTableDataInfo);
+        List<InboundReceiptResp> collect = rows.stream().map(x -> {
+            InboundReceiptResp inboundReceiptResp = new InboundReceiptResp();
+            BeanUtils.copyProperties(x, inboundReceiptResp);
+            return inboundReceiptResp;
+        }).collect(Collectors.toList());
+        inboundReceiptRespTableDataInfo.setCode(200);
+        inboundReceiptRespTableDataInfo.setTotal(inboundReceiptVOTableDataInfo.getTotal());
+        inboundReceiptRespTableDataInfo.setRows(collect);
+        return inboundReceiptRespTableDataInfo;
+    }
 }

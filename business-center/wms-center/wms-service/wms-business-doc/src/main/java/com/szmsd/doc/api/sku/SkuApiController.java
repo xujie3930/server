@@ -123,9 +123,5 @@ public class SkuApiController {
         }).collect(Collectors.toList());
         return R.ok(collect);
     }
-    /**
-     * 新增包材
-     *
-     */
 
 }

@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Api(tags = {"仓库信息"})
 @RestController
 @RequestMapping("/api/bas")
-public class BaseWarehouseApiController extends BaseController {
+public class BaseWarehouseApiController{
 
     @Resource
     private BasWarehouseClientService basWarehouseClientService;
