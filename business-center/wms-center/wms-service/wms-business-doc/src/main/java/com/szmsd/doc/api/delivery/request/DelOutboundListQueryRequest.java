@@ -1,5 +1,8 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.doc.api.SwaggerDictionary;
+import com.szmsd.doc.validator.DictionaryPluginConstant;
+import com.szmsd.doc.validator.annotation.Dictionary;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -22,6 +25,8 @@ public class DelOutboundListQueryRequest implements Serializable {
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
 
+    @Dictionary(message = "订单状态不存在", type = DictionaryPluginConstant.SUB_DICTIONARY_PLUGIN, param = "&&065")
+    @SwaggerDictionary(dicCode = "065", dicKey = "subValue")
     @ApiModelProperty(value = "订单状态")
     private String state;
 
