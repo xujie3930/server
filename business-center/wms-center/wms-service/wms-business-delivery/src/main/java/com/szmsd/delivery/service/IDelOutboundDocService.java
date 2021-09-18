@@ -1,7 +1,9 @@
 package com.szmsd.delivery.service;
 
 import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
+import com.szmsd.http.vo.PricedProduct;
 
 import java.util.List;
 
@@ -12,4 +14,21 @@ import java.util.List;
 public interface IDelOutboundDocService {
 
     List<DelOutboundAddResponse> add(List<DelOutboundDto> list);
+
+    /**
+     * 产品服务列表
+     *
+     * @param dto dto
+     * @return PricedProduct
+     */
+    List<PricedProduct> inService(DelOutboundOtherInServiceDto dto);
+
+    /**
+     * 服务验证
+     *
+     * @param dto          dto
+     * @param shipmentRule shipmentRule
+     * @return boolean
+     */
+    boolean inServiceValid(DelOutboundOtherInServiceDto dto, String shipmentRule);
 }
