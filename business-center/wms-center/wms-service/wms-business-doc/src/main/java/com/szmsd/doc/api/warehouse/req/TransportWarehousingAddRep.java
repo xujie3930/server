@@ -59,7 +59,7 @@ public class TransportWarehousingAddRep {
     @ApiModelProperty(value = "类别编码 (0-30]", example = "056001", required = true)
     private String warehouseCategoryCode;
 
-    @Length(max = 30, message = "转运入库出库单号仅支持30条")
+    @Size(max = 30, message = "转运入库出库单号仅支持30条")
     @NotEmpty(message = "转运入库出库单号不能为空")
     @ApiModelProperty(value = "转运单列表 - 出库单号", example = "[\"CKCNYWO721082500000008\"]", required = true)
     List<String> transferNoList;
