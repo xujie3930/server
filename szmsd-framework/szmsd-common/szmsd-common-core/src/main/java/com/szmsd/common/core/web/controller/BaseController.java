@@ -173,14 +173,6 @@ public class BaseController {
         return R.failed(HttpStatus.ERROR, e.getMessage());
     }
 
-    //基础业务异常拦截
-    @ExceptionHandler({BaseException.class})
-    @ResponseBody
-    public R handleBaseException(BaseException baseException) {
-        log.error("基础业务异常拦截 BaseException {}", baseException.getDefaultMessage());
-        return R.failed(HttpStatus.WEB_MSG, baseException.getDefaultMessage());
-    }
-
     //自定义异常拦截
     @ExceptionHandler({ApiException.class})
     @ResponseBody
