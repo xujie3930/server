@@ -361,7 +361,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (CollectionUtils.isEmpty(productList)) {
                 throw new CommonException("400", "查询SKU信息失败");
             }
-            Set<String> productCodeSet = productList.stream().map(BaseProduct::getCode).collect(Collectors.toSet());
+            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (a, b) -> a));
             if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(dto.getOrderType())
                     || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(dto.getOrderType())
                     || DelOutboundOrderTypeEnum.BATCH.getCode().equals(dto.getOrderType())
@@ -384,7 +384,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
                 for (DelOutboundDetailDto detail : details) {
                     String sku = detail.getSku();
-                    if (!productCodeSet.contains(sku)) {
+                    BaseProduct product = productMap.get(sku);
+                    if (null == product) {
                         throw new CommonException("400", "SKU[" + sku + "]不属于当前客户");
                     }
                     InventoryAvailableListVO vo = availableMap.get(sku);
@@ -399,8 +400,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     }
                     availableInventoryMap.put(sku, outQty);
                     // 验证包材数量
-                    String bindCode = detail.getBindCode();
+                    String bindCode = product.getBindCode();
                     if (StringUtils.isNotEmpty(bindCode)) {
+                        // 添加包材绑定信息
+                        product.setBindCode(bindCode);
                         vo = availableMap.get(bindCode);
                         if (null == vo) {
                             throw new CommonException("400", "SKU[" + sku + "]的包材[" + bindCode + "]不存在");
@@ -414,7 +417,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     || DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(dto.getOrderType())) {
                 for (DelOutboundDetailDto detail : details) {
                     String sku = detail.getSku();
-                    if (!productCodeSet.contains(sku)) {
+                    if (!productMap.containsKey(sku)) {
                         throw new CommonException("400", "SKU[" + sku + "]不属于当前客户");
                     }
                 }
