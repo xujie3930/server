@@ -31,6 +31,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.security.auth.login.LoginException;
 import javax.servlet.ServletOutputStream;
@@ -195,15 +196,29 @@ public class BaseController {
     public R<?> handleException(Exception e) {
         log.error("系统异常拦截 Exception: {}", e.getMessage(), e);
         int httpStatus;
-        if (e instanceof CommonException) {
-            httpStatus = Integer.parseInt(((CommonException) e).getCode());
-        } else if (e instanceof SystemException) {
+        if (e instanceof SystemException) {
             httpStatus = Integer.parseInt(((SystemException) e).getCode());
-        } else if (e instanceof MethodArgumentNotValidException) {
-            httpStatus = HttpStatus.BAD_REQUEST;
         } else {
             httpStatus = HttpStatus.ERROR;
         }
+        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
+    }
+
+    @ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({CommonException.class})
+    @ResponseBody
+    public R<?> handleCommonException(Exception e) {
+        log.error("系统异常拦截 CommonException: {}", e.getMessage(), e);
+        int httpStatus = Integer.parseInt(((CommonException) e).getCode());
+        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
+    }
+
+    @ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ResponseBody
+    public R<?> handleMethodArgumentNotValidException(Exception e) {
+        log.error("系统异常拦截 MethodArgumentNotValidException: {}", e.getMessage(), e);
+        int httpStatus = org.springframework.http.HttpStatus.BAD_REQUEST.value();
         return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
     }
 
