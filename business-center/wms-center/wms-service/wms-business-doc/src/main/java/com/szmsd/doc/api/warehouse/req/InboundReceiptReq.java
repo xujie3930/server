@@ -45,7 +45,7 @@ public class InboundReceiptReq {
     //    @SwaggerDictionary(dicCode = "055")
     @NotBlank(message = "入库方式编码不能为空")
     @Size(max = 30, message = "入库方式编码仅支持0-30字符")
-    @ApiModelProperty(value = "入库方式编码 (0-30]", example = "055001", allowableValues = "055001:SKU点数上架,055002:重新贴标上架,055003:裸货上架,055004:包材入库,055008:重新贴标上架", required = true)
+    @ApiModelProperty(value = "入库方式编码 (0-30]", example = "055001", allowableValues = "055001:SKU点数上架,055002:重新贴标上架,055003:裸货上架,055004:包材入库", required = true)
     private String warehouseMethodCode;
     @SwaggerDictionary(dicCode = "056")
     @NotBlank(message = "类别编码不能为空")
