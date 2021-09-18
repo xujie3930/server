@@ -25,6 +25,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -191,13 +192,15 @@ public class BaseController {
     //全局系统异常拦截
     @ExceptionHandler({Exception.class})
     @ResponseBody
-    public R handleException(Exception e) {
-        log.error("系统异常拦截 Exception: {}", e);
+    public R<?> handleException(Exception e) {
+        log.error("系统异常拦截 Exception: {}", e.getMessage(), e);
         int httpStatus;
         if (e instanceof CommonException) {
             httpStatus = Integer.parseInt(((CommonException) e).getCode());
         } else if (e instanceof SystemException) {
             httpStatus = Integer.parseInt(((SystemException) e).getCode());
+        } else if (e instanceof MethodArgumentNotValidException) {
+            httpStatus = HttpStatus.BAD_REQUEST;
         } else {
             httpStatus = HttpStatus.ERROR;
         }
