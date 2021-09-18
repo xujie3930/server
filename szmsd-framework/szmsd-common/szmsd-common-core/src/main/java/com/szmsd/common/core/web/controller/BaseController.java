@@ -182,20 +182,6 @@ public class BaseController {
         return R.failed(e.getCode(), e.getMessage());
     }
 
-    //全局系统异常拦截
-    @ExceptionHandler({Exception.class})
-    @ResponseBody
-    public R<?> handleException(Exception e) {
-        log.error("系统异常拦截 Exception: {}", e.getMessage(), e);
-        int httpStatus;
-        if (e instanceof SystemException) {
-            httpStatus = Integer.parseInt(((SystemException) e).getCode());
-        } else {
-            httpStatus = HttpStatus.ERROR;
-        }
-        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
-    }
-
     @ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
     @ExceptionHandler({CommonException.class})
     @ResponseBody
@@ -211,6 +197,20 @@ public class BaseController {
     public R<?> handleMethodArgumentNotValidException(Exception e) {
         log.error("系统异常拦截 MethodArgumentNotValidException: {}", e.getMessage(), e);
         int httpStatus = org.springframework.http.HttpStatus.BAD_REQUEST.value();
+        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
+    }
+
+    //全局系统异常拦截
+    @ExceptionHandler({Exception.class})
+    @ResponseBody
+    public R<?> handleException(Exception e) {
+        log.error("系统异常拦截 Exception: {}", e.getMessage(), e);
+        int httpStatus;
+        if (e instanceof SystemException) {
+            httpStatus = Integer.parseInt(((SystemException) e).getCode());
+        } else {
+            httpStatus = HttpStatus.ERROR;
+        }
         return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
     }
 
