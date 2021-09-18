@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -25,6 +26,7 @@ public class DelOutboundAddressRequest {
     @ApiModelProperty(value = "电话号码", dataType = "String", example = "13888888888")
     private String phoneNo;
 
+    @Email(message = "邮箱格式不正确", groups = {DelOutboundGroup.Default.class})
     @Size(max = 50, message = "邮箱长度不能超过50个字符", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "邮箱", dataType = "String", example = "zhangsan@xx.com")
     private String email;
