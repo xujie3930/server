@@ -35,35 +35,34 @@ public class BasePackingAddReq {
     @ApiModelProperty(value = "包材编码")
     @Size(max = 50,message = "包材编码最多支持50字符")
     private String code;
-    @DecimalMax(value = "999999", message = "初始重量异常")
-    @DecimalMin(value = "0.01", message = "初始重量异常")
+    @DecimalMax(value = "999999", message = "初始重量最大仅支持999999 g")
+    @DecimalMin(value = "0.01", message = "初始重量最小仅支持0.01 g")
     @ApiModelProperty(value = "初始重量g", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始重量不能为空")
     private Double initWeight;
-    @DecimalMax(value =  "500", message = "初始长度异常")
-    @DecimalMin(value = "0.01", message = "初始长度异常")
+    @DecimalMax(value =  "500", message = "初始长度最大仅支持500 cm")
+    @DecimalMin(value = "0.01", message = "初始长度最小仅支持0.01 cm")
     @ApiModelProperty(value = "初始长 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始长度不能为空")
     private Double initLength;
-    @DecimalMax(value = "500", message = "初始宽度异常")
-    @DecimalMin(value = "0.01", message = "初始宽度异常")
+    @DecimalMax(value = "500", message = "初始宽度最大仅支持500 cm")
+    @DecimalMin(value = "0.01", message = "初始宽度最小仅支持0.01 cm")
     @ApiModelProperty(value = "初始宽 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始宽度不能为空")
     private Double initWidth;
-    @DecimalMax(value = "500", message = "初始高度异常")
-    @DecimalMin(value = "0.01", message = "初始高度异常")
+    @DecimalMax(value = "500", message = "初始高度最大仅支持500 cm")
+    @DecimalMin(value = "0.01", message = "初始高度最小仅支持0.01 cm")
     @ApiModelProperty(value = "初始高 cm", example = "1", required = true)
     @Digits(integer = 8, fraction = 2)
     @NotNull(message = "初始高度不能为空")
     private Double initHeight;
 
-
-    @DecimalMin(value = "0.01", message = "初始体积异常")
+    @DecimalMin(value = "0.01", message = "初始体积最小仅支持0.01 cm3")
     @ApiModelProperty(value = "初始体积 cm3", example = "1", required = true, hidden = true)
-    @Digits(integer = 14, fraction = 2)
+    @Digits(integer = 14, fraction = 2,message = "体积格式仅支持2位小数,14位整数")
 //    @NotNull(message = "初始体积不能为空")
     private BigDecimal initVolume;
 
