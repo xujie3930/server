@@ -410,7 +410,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     String bindCode = product.getBindCode();
                     if (StringUtils.isNotEmpty(bindCode)) {
                         // 添加包材绑定信息
-                        product.setBindCode(bindCode);
+                        detail.setBindCode(bindCode);
                         vo = availableMap.get(bindCode);
                         if (null == vo) {
                             throw new CommonException("400", "SKU[" + sku + "]的包材[" + bindCode + "]不存在");
