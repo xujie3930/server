@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Api(tags = {"库存信息"})
 @RestController
 @RequestMapping("/api/inventory")
-public class InventoryApiController extends BaseController {
+public class InventoryApiController {
 
     @Resource
     private InventoryFeignClientService inventoryFeignService;
@@ -56,4 +56,6 @@ public class InventoryApiController extends BaseController {
         List<SkuInventoryAgeVo> skuInventoryAgeVos = inventoryFeignService.queryInventoryAgeBySku(warehouseCode, sku);
         return R.ok(SkuInventoryAgeResp.convert(skuInventoryAgeVos, warehouseCode, sku));
     }
+
+
 }
