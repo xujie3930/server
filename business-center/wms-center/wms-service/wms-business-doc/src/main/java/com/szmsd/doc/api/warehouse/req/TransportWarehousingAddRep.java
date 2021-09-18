@@ -29,8 +29,7 @@ import java.util.List;
 public class TransportWarehousingAddRep {
 
     @Size(max = 50, message = "目标仓库仅支持50字符")
-    @NotBlank(message = "目标仓库不能为空")
-    @ApiModelProperty(value = "目标仓库编码", example = "NJ", required = true)
+    @ApiModelProperty(value = "目标仓库编码", example = "NJ",hidden = true, required = true)
     @Excel(name = "目标仓库code")
     private String warehouseCode;
 

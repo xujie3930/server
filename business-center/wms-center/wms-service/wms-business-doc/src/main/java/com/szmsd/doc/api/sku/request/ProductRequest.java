@@ -11,6 +11,7 @@ import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.component.IRemoterApi;
 import com.szmsd.doc.config.DocSubConfigData;
@@ -106,7 +107,7 @@ public class ProductRequest extends BaseProductRequest {
             List<BasePackingDto> dataAndException = basePackingFeignService.listParent(basePackingDto1);
             BasePackingDto basePackingDto = dataAndException.stream()
                     .filter(x -> suggestPackingMaterialCode.equals(x.getPackageMaterialCode())).findAny()
-                    .orElseThrow(() -> new RuntimeException("请检查物流包装是否存在!"));
+                    .orElseThrow(() -> new CommonException("400","请检查物流包装是否存在!"));
             String packageMaterialName = basePackingDto.getPackingMaterialType();
             super.setSuggestPackingMaterial(packageMaterialName);
         }
@@ -119,21 +120,21 @@ public class ProductRequest extends BaseProductRequest {
         String productAttributeConfig = mainSubCode.getProductAttribute();
         Optional<BasSubWrapperVO> basSubWrapperOpt = Optional.ofNullable(iRemoterApi.getSubNameByCode(productAttributeConfig))
                 .flatMap(x -> Optional.ofNullable(x.get(super.getProductAttribute())));
-        String productAttributeName = basSubWrapperOpt.map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("产品属性不存在"));
-        String productAttribute = basSubWrapperOpt.map(BasSubWrapperVO::getSubValue).orElseThrow(() -> new RuntimeException("产品属性不存在"));
+        String productAttributeName = basSubWrapperOpt.map(BasSubWrapperVO::getSubName).orElseThrow(() -> new CommonException("400","产品属性不存在"));
+        String productAttribute = basSubWrapperOpt.map(BasSubWrapperVO::getSubValue).orElseThrow(() -> new CommonException("400","产品属性不存在"));
         super.setProductAttribute(productAttribute);
         super.setProductAttributeName(productAttributeName);
 
         String electrifiedMode = super.getElectrifiedMode();
         Optional.ofNullable(electrifiedMode).filter(StringUtils::isNotBlank).ifPresent(code -> {
             String electrifiedModeName = Optional.ofNullable(iRemoterApi.getSubNameByCode(mainSubCode.getElectrifiedMode()))
-                    .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("带电信息不存在"));
+                    .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() ->new CommonException("400","带电信息不存在"));
             super.setElectrifiedModeName(electrifiedModeName);
         });
         String batteryPackaging = super.getBatteryPackaging();
         Optional.ofNullable(batteryPackaging).filter(StringUtils::isNotBlank).ifPresent(code -> {
             String batteryPackagingeName = Optional.ofNullable(iRemoterApi.getSubNameByCode(mainSubCode.getBatteryPackaging()))
-                    .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() -> new RuntimeException("电池包装不存在"));
+                    .map(map -> map.get(code)).map(BasSubWrapperVO::getSubName).orElseThrow(() ->new CommonException("400","电池包装不存在"));
             super.setBatteryPackagingName(batteryPackagingeName);
         });
 

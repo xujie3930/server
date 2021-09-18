@@ -28,5 +28,5 @@ public interface PurchaseFeignService {
 
     @PostMapping(value = "/transport/warehousing")
     @ApiOperation(value = "转运入库-提交")
-     R transportWarehousingSubmit(@RequestBody TransportWarehousingAddDTO transportWarehousingAddDTO);
+    R transportWarehousingSubmit(@RequestBody TransportWarehousingAddDTO transportWarehousingAddDTO);
 }
