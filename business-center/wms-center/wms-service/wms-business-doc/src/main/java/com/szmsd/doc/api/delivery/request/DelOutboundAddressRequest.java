@@ -44,12 +44,12 @@ public class DelOutboundAddressRequest {
 
     @NotBlank(message = "城市不能为空", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class, DelOutboundGroup.Collection.class, DelOutboundGroup.Batch.class})
     @Size(max = 50, message = "城市长度不能超过50个字符", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "城市", dataType = "String", example = "city xxx")
+    @ApiModelProperty(value = "城市", required = true, dataType = "String", example = "city xxx")
     private String city;
 
     @NotBlank(message = "省份/州不能为空", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class, DelOutboundGroup.Collection.class, DelOutboundGroup.Batch.class})
     @Size(max = 50, message = "省份/州长度不能超过50个字符", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "省份/州", dataType = "String", example = "stateOrProvince xxx")
+    @ApiModelProperty(value = "省份/州", required = true, dataType = "String", example = "stateOrProvince xxx")
     private String stateOrProvince;
 
     @NotBlank(message = "国家代码不能为空", groups = {DelOutboundGroup.PackageTransfer.class, DelOutboundGroup.Normal.class, DelOutboundGroup.Collection.class})
