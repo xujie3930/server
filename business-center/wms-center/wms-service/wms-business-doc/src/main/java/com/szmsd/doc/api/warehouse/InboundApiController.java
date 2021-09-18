@@ -20,6 +20,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.warehouse.req.BatchInboundReceiptReq;
@@ -316,19 +317,22 @@ public class InboundApiController extends BaseController {
         String deliveryWay = transportWarehousingAddRep.getDeliveryWay();
         checkDeliveryWayCode(deliveryWay);
 
-        //校验出库单订单归属人 状态 及仓库地址 集运 没有采购单
+        //校验出库单订单归属人 状态 及仓库地址 转运 没有采购单
         DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
         delOutboundListQueryDto.setCustomCode(AuthenticationUtil.getSellerCode());
-        delOutboundListQueryDto.setOrderType(DelOutboundOrderTypeEnum.COLLECTION.getCode());
+        delOutboundListQueryDto.setOrderNo(String.join(",",transportWarehousingAddRep.getTransferNoList()));
+        delOutboundListQueryDto.setOrderType(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode());
         TableDataInfo<DelOutboundListVO> info = delOutboundFeignService.page(delOutboundListQueryDto);
         AssertUtil400.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getRows() != null, "出库单不存在");
         List<DelOutboundListVO> rows = info.getRows();
         Map<String, List<DelOutboundListVO>> collect = rows.stream().collect(Collectors.groupingBy(DelOutboundListVO::getWarehouseCode));
-        AssertUtil400.isTrue(MapUtils.isEmpty(collect), "出库单不存在");
+        AssertUtil400.isTrue(MapUtils.isNotEmpty(collect), "出库单不存在");
         AssertUtil400.isTrue(collect.keySet().size() <= 1, "请选择相同仓库的出库订单");
-        List<DelOutboundListVO> result = rows.stream().filter(x -> StringUtils.isBlank(x.getPurchaseNo())).collect(Collectors.toList());
-        AssertUtil400.isTrue(CollectionUtils.isEmpty(result), String.format("该出库订单%s已被使用", result));
-        //check vat
+        // 判断状态
+        List<DelOutboundListVO> result = rows.stream().filter(x -> !x.getState().equals(DelOutboundStateEnum.DELIVERED.getCode())).collect(Collectors.toList());
+//        List<DelOutboundListVO> result = rows.stream().filter(x -> StringUtils.isNotBlank(x.getPurchaseNo())).collect(Collectors.toList());
+        AssertUtil400.isTrue(CollectionUtils.isEmpty(result), String.format("该出库订单%s不存在", result.stream().map(DelOutboundListVO::getOrderNo).collect(Collectors.toList())));
+//        //check vat
         // 获取仓库列表
         List<WarehouseKvDTO> warehouseKvDTOS = iRemoterApi.queryCusInboundWarehouse();
         Map<String, WarehouseKvDTO> warehouseKvDTOMap = warehouseKvDTOS.stream().collect(Collectors.toMap(WarehouseKvDTO::getKey, x -> x, (x1, x2) -> x1));
@@ -355,10 +359,11 @@ public class InboundApiController extends BaseController {
 
         }
 
-
         TransportWarehousingAddDTO transportWarehousingAddDTO = new TransportWarehousingAddDTO();
-        transportWarehousingAddDTO.setWarehouseCode(warehouseCode);
         BeanUtils.copyProperties(transportWarehousingAddRep, transportWarehousingAddDTO);
+        transportWarehousingAddDTO.setWarehouseCode(warehouseCode);
+            List<String> idList = rows.stream().map(DelOutboundListVO::getId).map(String::valueOf).collect(Collectors.toList());
+        transportWarehousingAddDTO.setIdList(idList);
         R info2 = purchaseFeignService.transportWarehousingSubmit(transportWarehousingAddDTO);
         AssertUtil400.isTrue(info2.getCode() == HttpStatus.SUCCESS && info2.getData() != null, "出库单不存在");
         return R.ok();
