@@ -288,6 +288,19 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * handleMethodArgumentNotValidException
+     *
+     * @param cause Exception
+     * @return ResponseDto
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public R<Map<String, Object>> handleMethodArgumentNotValidException(Exception cause) {
+        return render(HttpStatus.BAD_REQUEST, cause);
+    }
+
+    /**
      * handleCommonException
      *
      * @param cause Exception
