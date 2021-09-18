@@ -28,14 +28,7 @@ public class InboundReceiptInfoResp {
     @ApiModelProperty(value = "客户编码")
     private String cusCode;
 
-    @ApiModelProperty(value = "普通入库（OMS用）：Normal" +
-            "集运入库（OMS用）：Collection" +
-            "包裹转运入库（OMS用）：PackageTransfer" +
-            "新SKU入库（OMS用）：NewSku" +
-            "拆分SKU入库（OMS用）：SplitSku" +
-            "上架入库（Yewu用）：Putaway" +
-            "点数入库（Yewu用）：Counting" +
-            "包裹转运入库（OMS用）：PackageTransfer")
+    @ApiModelProperty(value = "入库单类型")
     private String orderType;
 
     @ApiModelProperty(value = "目的仓库编码")
