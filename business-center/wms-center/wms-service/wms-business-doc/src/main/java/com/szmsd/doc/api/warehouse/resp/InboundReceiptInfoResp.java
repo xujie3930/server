@@ -22,11 +22,11 @@ public class InboundReceiptInfoResp {
     @ApiModelProperty(value = "入库单号")
     private String warehouseNo;
 
-    @ApiModelProperty(value = "采购单")
-    private String orderNo;
-
-    @ApiModelProperty(value = "客户编码")
-    private String cusCode;
+//    @ApiModelProperty(value = "采购单")
+//    private String orderNo;
+//
+//    @ApiModelProperty(value = "客户编码")
+//    private String cusCode;
 
     @ApiModelProperty(value = "入库单类型")
     private String orderType;
@@ -61,8 +61,8 @@ public class InboundReceiptInfoResp {
     @ApiModelProperty(value = "挂号")
     private String trackingNumber;
 
-    @ApiModelProperty(value = "状态")
-    private String status;
+//    @ApiModelProperty(value = "状态")
+//    private String status;
 
     @ApiModelProperty(value = "备注")
     private String remark;
@@ -71,12 +71,12 @@ public class InboundReceiptInfoResp {
     private List<InboundReceiptDetailResp> inboundReceiptDetails;
 
     // --------------------多语言字段--------------------
+//
+//    @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
+//    private String statusName;
 
-    @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
-    private String statusName;
-
-    @ApiModelProperty(value = "客户名称 - 当前系统语言")
-    private String cusName;
+//    @ApiModelProperty(value = "客户名称 - 当前系统语言")
+//    private String cusName;
 
     @ApiModelProperty(value = "目的仓库名称 - 当前系统语言")
     private String warehouseName;
