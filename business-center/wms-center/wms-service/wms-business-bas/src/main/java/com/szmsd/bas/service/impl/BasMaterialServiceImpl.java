@@ -15,6 +15,7 @@ import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BasMaterialVO;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -113,7 +114,7 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
             }
             queryWrapper.eq("code",basMaterial.getCode());
             if(super.count(queryWrapper)==1){
-                throw new BaseException("包材编码重复");
+                throw new CommonException("400", "包材编码重复");
             }
             basMaterial.setCategory("包材");
             basMaterial.setIsActive(true);
