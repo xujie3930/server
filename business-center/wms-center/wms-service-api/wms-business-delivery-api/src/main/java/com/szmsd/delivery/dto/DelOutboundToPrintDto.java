@@ -7,6 +7,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -19,4 +20,10 @@ public class DelOutboundToPrintDto implements Serializable {
     @NotNull(message = "ID不能为空", groups = ValidationUpdateGroup.class)
     @ApiModelProperty(value = "ID")
     private Long id;
+
+    @ApiModelProperty(hidden = true)
+    private boolean batch;
+
+    @ApiModelProperty(hidden = true)
+    private List<Long> ids;
 }

@@ -14,6 +14,9 @@ import java.io.Serializable;
 @ApiModel(value = "DelOutboundLabelResponse", description = "DelOutboundLabelResponse对象")
 public class DelOutboundLabelResponse implements Serializable {
 
+    @ApiModelProperty(value = "ID", hidden = true)
+    private Long id;
+
     @ApiModelProperty(value = "订单号")
     private String orderNo;
 
