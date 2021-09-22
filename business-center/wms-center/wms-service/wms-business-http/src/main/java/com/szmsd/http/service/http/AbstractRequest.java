@@ -163,7 +163,7 @@ abstract class AbstractRequest extends BaseRequest {
         }
         String s = Utils.get(apiConfig, api);
         if (this.isEmpty(s)) {
-            throw new CommonException("999", "api is null");
+            throw new CommonException("999", "api [" + api + "] is null");
         }
         return s;
     }
