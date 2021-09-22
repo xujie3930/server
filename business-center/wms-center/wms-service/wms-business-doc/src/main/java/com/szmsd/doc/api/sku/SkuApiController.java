@@ -83,6 +83,16 @@ public class SkuApiController {
         baseProductClientService.add(product);
         return R.ok();
     }
+    @PreAuthorize("hasAuthority('client')")
+    @PostMapping("/collection/save")
+    @ApiOperation(value = "集运新增SKU", notes = "创建SKU，创建成功，同步推送WMS")
+    public R collectionSave(@RequestBody @Validated ProductCollectionReq productRequest) {
+        productRequest.setSellerCode(AuthenticationUtil.getSellerCode());
+        productRequest/*.uploadFile(remoterApi)*/.validData(remoterApi)/*.calculateTheVolume()*/.checkPack(basePackingFeignService).setTheCode(remoterApi, docSubConfigData);
+        BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
+        baseProductClientService.add(product);
+        return R.ok();
+    }
 
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/package/save")

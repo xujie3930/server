@@ -350,7 +350,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         //SKU需要仓库测量尺寸
         baseProduct.setWarehouseAcceptance(false);
-        baseProduct.setSource(BaseMainEnum.NORMAL_IN.getCode());
+        if(StringUtils.isBlank(baseProduct.getSource())){
+            baseProduct.setSource(BaseMainEnum.NORMAL_IN.getCode());
+        }
         baseProduct.setWeight(baseProduct.getInitWeight());
         baseProduct.setWidth(baseProduct.getInitWidth());
         baseProduct.setLength(baseProduct.getInitLength());
