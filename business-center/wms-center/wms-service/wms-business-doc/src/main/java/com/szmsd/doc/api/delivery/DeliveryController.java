@@ -77,7 +77,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(productList, PricedProductResponse.class));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/package-transfer")
     @ApiOperation(value = "#2 出库管理 - 单据创建（转运出库）", position = 200)
@@ -115,7 +115,7 @@ public class DeliveryController {
         address.setCountry(country);
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @GetMapping("/package-transfer/label")
     @ApiOperation(value = "#3 出库管理 - 获取标签（转运出库）", position = 201, notes = "")
@@ -130,7 +130,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.labelBase64(labelDto));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/package-transfer")
     @ApiOperation(value = "#4 出库管理 - 取消单据（转运出库）", position = 202)
@@ -195,7 +195,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/collection")
     @ApiOperation(value = "#8 出库管理 - 订单创建（集运出库）", position = 500)
@@ -217,7 +217,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundCollectionResponse.class));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/collection")
     @ApiOperation(value = "#9 出库管理 - 取消单据（集运出库）", position = 501)
@@ -242,7 +242,7 @@ public class DeliveryController {
 
     // @ApiOperation(value = "#10 出库管理 - 更新信息（集运出库）", position = 502)
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/batch")
     @ApiOperation(value = "#11 出库管理 - 订单创建（批量出库）", position = 600)
@@ -294,7 +294,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundBatchResponse.class));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/packing/batch")
     @ApiOperation(value = "#12 出库管理 - 装箱结果（批量出库）", position = 601)
@@ -311,7 +311,7 @@ public class DeliveryController {
         return R.ok(responseList);
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/label/batch")
     @ApiOperation(value = "#13 出库管理 - 标签上传（批量出库）", position = 602)
@@ -336,7 +336,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/batch")
     @ApiOperation(value = "#14 出库管理 - 取消单据（批量出库）", position = 603)
@@ -354,7 +354,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/selfPick")
     @ApiOperation(value = "#15 出库管理 - 订单创建（自提出库）", position = 700)
@@ -376,7 +376,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundSelfPickResponse.class));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/label/selfPick")
     @ApiOperation(value = "#16 出库管理 - 标签上传（自提出库）", position = 701)
@@ -401,7 +401,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/selfPick")
     @ApiOperation(value = "#17 出库管理 - 取消单据（自提出库）", position = 702)
@@ -419,7 +419,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/destroy")
     @ApiOperation(value = "#18 出库管理 - 订单创建（销毁出库）", position = 800)
@@ -441,7 +441,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundDestroyResponse.class));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/destroy")
     @ApiOperation(value = "#19 出库管理 - 取消单据（销毁出库）", position = 801)
