@@ -8,6 +8,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.doc.api.warehouse.req.FileInfoBase64;
+import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -68,4 +69,6 @@ public interface IRemoterApi {
      * @return
      */
     boolean checkPackBelong(String bindCode);
+    //校验并设置skuName信息
+    boolean checkSkuBelong(String cusCode, List<String> skuList, List<CreateInboundReceiptDTO> addDTO);
 }

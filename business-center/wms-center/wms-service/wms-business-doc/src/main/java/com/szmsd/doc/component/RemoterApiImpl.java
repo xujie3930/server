@@ -24,6 +24,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.warehouse.req.FileInfoBase64;
 import com.szmsd.doc.utils.AuthenticationUtil;
+import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.feign.RemoteUserService;
 import jodd.util.StringUtil;
@@ -145,7 +146,22 @@ public class RemoterApiImpl implements IRemoterApi {
         baseProductConditionQueryDto.setSellerCode(sellerCode);
 //        baseProductConditionQueryDto.setWarehouseCode(warehouse);
         List<BaseProduct> baseProducts = baseProductClientService.queryProductList(baseProductConditionQueryDto);
-        if (CollectionUtils.isNotEmpty(baseProducts)) return true;
+        if (CollectionUtils.isNotEmpty(baseProducts) && sku.size() == baseProducts.size()) return true;
+        return false;
+    }
+
+    @Override
+    public boolean checkSkuBelong(String cusCode, List<String> skuList, List<CreateInboundReceiptDTO> addDTO) {
+        BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
+        baseProductConditionQueryDto.setSkus(skuList);
+        baseProductConditionQueryDto.setSellerCode(cusCode);
+        List<BaseProduct> baseProducts = baseProductClientService.queryProductList(baseProductConditionQueryDto);
+        Map<String, String> collect = baseProducts.stream().collect(Collectors.toMap(BaseProduct::getCode, BaseProduct::getProductName));
+        addDTO.forEach(x-> x.getInboundReceiptDetails().forEach(inboundReceiptDetailDTO -> {
+            String sku = inboundReceiptDetailDTO.getSku();
+            Optional.ofNullable(collect.get(sku)).ifPresent(inboundReceiptDetailDTO::setSkuName);
+        }));
+        if (CollectionUtils.isNotEmpty(baseProducts) && skuList.size() == baseProducts.size()) return true;
         return false;
     }
 
