@@ -678,7 +678,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             String orderType = delOutbound.getOrderType();
             // 只有转运出库，集运出库业务才可以处理
-            if (!DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+            if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
                 return;
             }
             List<DelOutboundDetail> details = delOutboundWrapperContext.getDetailList();
