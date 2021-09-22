@@ -35,6 +35,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -149,8 +150,9 @@ public class DelOutboundImportController extends BaseController {
             outputStream = response.getOutputStream();
             //response为HttpServletResponse对象
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            String efn = URLEncoder.encode(fileName, "utf-8");
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), "ISO8859-1") + ".xls");
+            response.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xls");
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
