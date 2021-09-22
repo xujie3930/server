@@ -27,6 +27,7 @@ public class BasSubCacheServiceImpl implements IBasSubCacheService {
         QueryWrapper<BasSub> queryWrapper = Wrappers.query();
         queryWrapper.select("main_code", "sub_code", "sub_value", "sub_name", "sub_name_en");
         queryWrapper.eq("main_code", code);
+        queryWrapper.orderByAsc("sort");
         List<BasSub> list = this.basSubService.list(queryWrapper);
         if (!CollectionUtils.isEmpty(list)) {
             return BeanMapperUtil.mapList(list, BasSubWrapperVO.class);
