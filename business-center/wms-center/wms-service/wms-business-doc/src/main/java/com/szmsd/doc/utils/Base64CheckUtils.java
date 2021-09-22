@@ -13,7 +13,7 @@ public final class Base64CheckUtils extends Base64Utils {
 
     public static byte[] checkAndConvert(String productImageBase64) {
         byte[] bytes = Base64CheckUtils.decodeFromString(productImageBase64);
-        AssertUtil400.isTrue(bytes.length <= 10 * 1024, "文件最大仅支持10M");
+        AssertUtil400.isTrue(bytes.length <= 10 * 1024 * 1024, "文件最大仅支持10M");
         return bytes;
     }
 
