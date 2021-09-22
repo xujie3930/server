@@ -32,7 +32,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -117,7 +116,7 @@ public class DeliveryController {
 
     //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
-    @GetMapping("/package-transfer/label")
+    @PostMapping("/package-transfer/label")
     @ApiOperation(value = "#3 出库管理 - 获取标签（转运出库）", position = 201, notes = "")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundLabelRequest", required = true)
     public R<List<DelOutboundLabelResponse>> packageTransferLabel(@RequestBody @Validated DelOutboundLabelRequest request) {

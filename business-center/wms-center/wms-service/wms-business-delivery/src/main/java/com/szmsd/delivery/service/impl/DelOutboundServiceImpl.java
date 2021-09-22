@@ -37,6 +37,7 @@ import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundExceptionService;
+import com.szmsd.delivery.util.GoogleBarCodeUtils;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
@@ -61,14 +62,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Base64Utils;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1402,8 +1404,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 responseList.add(response);
                 continue;
             }
+            String base64Str = GoogleBarCodeUtils.generateBarCodeBase64(orderNo);
+            response.setBase64(base64Str);
+            response.setFileName(orderNo + ".pdf");
+            response.setStatus(true);
             response.setId(outbound.getId());
-            String shipmentOrderNumber = outbound.getShipmentOrderNumber();
+            /*String shipmentOrderNumber = outbound.getShipmentOrderNumber();
             if (StringUtils.isEmpty(shipmentOrderNumber)) {
                 response.setStatus(false);
                 response.setMessage("未获取承运商标签");
@@ -1436,7 +1442,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 response.setMessage("读取标签文件失败");
             } finally {
                 IOUtils.closeQuietly(fileInputStream);
-            }
+            }*/
             responseList.add(response);
         }
         return responseList;
