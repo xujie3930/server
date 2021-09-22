@@ -253,7 +253,8 @@ public class InboundApiController {
         String cusCode = createInboundReceiptDTOList.get(0).getCusCode();
 
         String warehouseCode = createInboundReceiptDTOList.get(0).getWarehouseCode();
-        boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
+//        boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
+        boolean b = iRemoterApi.checkSkuBelong(cusCode, skuList,addDTO);
         AssertUtil400.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
         //校验vat TODo
         this.checkVAT(iRemoterApi, addDTO);
