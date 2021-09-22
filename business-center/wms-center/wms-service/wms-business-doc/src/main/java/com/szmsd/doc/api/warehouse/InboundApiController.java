@@ -176,18 +176,15 @@ public class InboundApiController {
                 String country = warehouseKvDTO.getCountry();
                 List<BasSellerCertificate> basSellerCertificates = countryMap.get(country);
                 List<String> vatListCheck = basSellerCertificates.stream().map(BasSellerCertificate::getVat).collect(Collectors.toList());
-                if (CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat)){
+                if (!(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat))){
                     errorVatMap.put(andIncrement,vat);
                 }
                // AssertUtil400.isTrue(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat), String.format("VAT[%s]不存在", vat));
             }
         });
-
-        AssertUtil400.isTrue(errorVatMap.isEmpty(), () -> {
-            StringBuilder errorVatStr = new StringBuilder();
-            errorVatMap.forEach((x, y) -> errorVatStr.append(String.format("第%s行VAT【%s】不存在!", x, y)).append(";"));
-            return errorVatStr.toString();
-        });
+        StringBuilder errorVatStr = new StringBuilder();
+        errorVatMap.forEach((x, y) -> errorVatStr.append(String.format("第%s行VAT【%s】不存在!", x, y)).append(";"));
+        AssertUtil400.isTrue(errorVatMap.isEmpty(), errorVatStr.toString());
         return true;
     }
 
