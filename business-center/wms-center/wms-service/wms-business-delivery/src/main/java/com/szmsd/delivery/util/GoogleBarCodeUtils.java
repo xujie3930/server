@@ -205,9 +205,9 @@ public class GoogleBarCodeUtils {
         g2d.setColor(Color.BLACK);
     }
 
-    public static void main(String[] args) throws IOException {
+    /*public static void main(String[] args) throws IOException {
         String scnywo7000209 = generateBarCodeBase64("SCNYWO7000209");
         System.out.println(scnywo7000209);
-    }
+    }*/
 
 }
