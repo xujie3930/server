@@ -365,6 +365,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (!this.delOutboundDocService.inServiceValid(inServiceDto, shipmentRule)) {
                 throw new CommonException("400", "发货规则[" + shipmentRule + "]不存在");
             }
+            if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(dto.getOrderType())) {
+                // 如果是转运出库，后续的SKU验证不需要
+                return;
+            }
             // 查询sku
             BaseProductConditionQueryDto productConditionQueryDto = new BaseProductConditionQueryDto();
             productConditionQueryDto.setSkus(skus);
@@ -432,8 +436,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         }
                     }
                 }
-            } else if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(dto.getOrderType())
-                    || DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(dto.getOrderType())) {
+            } else if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(dto.getOrderType())) {
                 for (DelOutboundDetailDto detail : details) {
                     String sku = detail.getSku();
                     if (!productMap.containsKey(sku)) {
@@ -790,7 +793,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public boolean toPrint(DelOutboundToPrintDto dto) {
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(DelOutbound::getIsPrint, true);
-        updateWrapper.eq(DelOutbound::getId, dto.getId());
+        if (dto.isBatch()) {
+            updateWrapper.in(DelOutbound::getId, dto.getIds());
+        } else {
+            updateWrapper.eq(DelOutbound::getId, dto.getId());
+        }
         return super.update(updateWrapper);
     }
 
@@ -1395,6 +1402,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 responseList.add(response);
                 continue;
             }
+            response.setId(outbound.getId());
             String shipmentOrderNumber = outbound.getShipmentOrderNumber();
             if (StringUtils.isEmpty(shipmentOrderNumber)) {
                 response.setStatus(false);

@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -428,7 +429,22 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 获取标签（根据订单号批量查询，DOC支持）", position = 1301)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundLabelDto")
     public R<List<DelOutboundLabelResponse>> labelBase64(@RequestBody @Validated DelOutboundLabelDto dto) {
-        return R.ok(this.delOutboundService.labelBase64(dto));
+        List<DelOutboundLabelResponse> data = this.delOutboundService.labelBase64(dto);
+        if (CollectionUtils.isNotEmpty(data)) {
+            List<Long> ids = new ArrayList<>();
+            for (DelOutboundLabelResponse response : data) {
+                if (null != response.getStatus() && response.getStatus()) {
+                    ids.add(response.getId());
+                }
+            }
+            if (CollectionUtils.isNotEmpty(ids)) {
+                DelOutboundToPrintDto toPrintDto = new DelOutboundToPrintDto();
+                toPrintDto.setBatch(true);
+                toPrintDto.setIds(ids);
+                this.delOutboundService.toPrint(toPrintDto);
+            }
+        }
+        return R.ok(data);
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:uploadBoxLabel')")

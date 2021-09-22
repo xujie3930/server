@@ -314,7 +314,8 @@ public class InboundApiController {
     @PostMapping(value = "transport/warehousing")
     @ApiOperation(value = "转运入库-提交")
     public R transportWarehousingSubmit(@Validated @RequestBody TransportWarehousingAddRep transportWarehousingAddRep) {
-
+        long count = transportWarehousingAddRep.getTransferNoList().stream().filter(StringUtils::isNotBlank).count();
+        AssertUtil400.isTrue(count>0,"转运入库出库单号不能为空");
         String categoryCode = transportWarehousingAddRep.getWarehouseCategoryCode();
         this.checkCategoryCode(categoryCode);
 
@@ -333,6 +334,8 @@ public class InboundApiController {
         Map<String, List<DelOutboundListVO>> collect = rows.stream().collect(Collectors.groupingBy(DelOutboundListVO::getWarehouseCode));
         AssertUtil400.isTrue(MapUtils.isNotEmpty(collect), "出库单不存在");
         AssertUtil400.isTrue(collect.keySet().size() <= 1, "请选择相同仓库的出库订单");
+        List<String> isNotLabelBoxList = rows.stream().filter(x -> !x.getIsLabelBox()).map(DelOutboundListVO::getOrderNo).collect(Collectors.toList());
+        AssertUtil400.isTrue(CollectionUtils.isEmpty(isNotLabelBoxList), String.format("出库单：%s需要打印标签", isNotLabelBoxList));
         // 判断状态
         List<DelOutboundListVO> result = rows.stream().filter(x -> !x.getState().equals(DelOutboundStateEnum.DELIVERED.getCode())).collect(Collectors.toList());
 //        List<DelOutboundListVO> result = rows.stream().filter(x -> StringUtils.isNotBlank(x.getPurchaseNo())).collect(Collectors.toList());
