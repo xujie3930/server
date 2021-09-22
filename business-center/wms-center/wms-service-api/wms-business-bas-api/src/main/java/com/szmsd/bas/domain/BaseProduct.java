@@ -243,4 +243,10 @@ public class BaseProduct extends BaseEntity {
     @Size(max = 200)
     private String hsCode;
 
+    @ApiModelProperty(value = "材质")
+    private String materialQuality;
+
+    @ApiModelProperty(value = "用途")
+    private String purpose;
+
 }

@@ -9,6 +9,8 @@ import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.ApiException;
+import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.exception.com.SystemException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.*;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -23,11 +25,13 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.security.auth.login.LoginException;
 import javax.servlet.ServletOutputStream;
@@ -169,14 +173,6 @@ public class BaseController {
         return R.failed(HttpStatus.ERROR, e.getMessage());
     }
 
-    //基础业务异常拦截
-    @ExceptionHandler({BaseException.class})
-    @ResponseBody
-    public R handleBaseException(BaseException baseException) {
-        log.error("基础业务异常拦截 BaseException {}", baseException.getDefaultMessage());
-        return R.failed(HttpStatus.WEB_MSG, baseException.getDefaultMessage());
-    }
-
     //自定义异常拦截
     @ExceptionHandler({ApiException.class})
     @ResponseBody
@@ -186,12 +182,36 @@ public class BaseController {
         return R.failed(e.getCode(), e.getMessage());
     }
 
+    @ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({CommonException.class})
+    @ResponseBody
+    public R<?> handleCommonException(Exception e) {
+        log.error("系统异常拦截 CommonException: {}", e.getMessage(), e);
+        int httpStatus = Integer.parseInt(((CommonException) e).getCode());
+        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
+    }
+
+    @ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ResponseBody
+    public R<?> handleMethodArgumentNotValidException(Exception e) {
+        log.error("系统异常拦截 MethodArgumentNotValidException: {}", e.getMessage(), e);
+        int httpStatus = org.springframework.http.HttpStatus.BAD_REQUEST.value();
+        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
+    }
+
     //全局系统异常拦截
     @ExceptionHandler({Exception.class})
     @ResponseBody
-    public R handleException(Exception e) {
-        log.error("系统异常拦截 Exception: {}", e);
-        return R.failed(HttpStatus.ERROR, ExceptionUtil.getRootErrorMseeage(e));
+    public R<?> handleException(Exception e) {
+        log.error("系统异常拦截 Exception: {}", e.getMessage(), e);
+        int httpStatus;
+        if (e instanceof SystemException) {
+            httpStatus = Integer.parseInt(((SystemException) e).getCode());
+        } else {
+            httpStatus = HttpStatus.ERROR;
+        }
+        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
     }
 
     /**
@@ -235,7 +255,15 @@ public class BaseController {
         log.error("运行时异常:", e);
         // LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.RUNERROR, getLen());
         // return R.failed(HttpStatus.ERROR, logisticsException.getMessage()+":"+ExceptionUtil.getRootErrorMseeage(e));
-        return R.failed(HttpStatus.ERROR, ExceptionUtil.getRootErrorMseeage(e));
+        int httpStatus;
+        if (e instanceof CommonException) {
+            httpStatus = Integer.parseInt(((CommonException) e).getCode());
+        } else if (e instanceof SystemException) {
+            httpStatus = Integer.parseInt(((SystemException) e).getCode());
+        } else {
+            httpStatus = HttpStatus.ERROR;
+        }
+        return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
     }
 
     public void fileStreamWrite(HttpServletResponse response, FileStream fileStream) {

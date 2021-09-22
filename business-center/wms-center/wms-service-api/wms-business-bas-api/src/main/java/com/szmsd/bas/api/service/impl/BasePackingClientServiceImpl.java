@@ -4,6 +4,7 @@ import com.szmsd.bas.api.feign.BasePackingFeignService;
 import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.dto.BasePackingConditionQueryDto;
+import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.CreatePackingRequest;
 import com.szmsd.common.core.domain.R;
@@ -35,5 +36,15 @@ public class BasePackingClientServiceImpl implements BasePackingClientService {
     @Override
     public R createPackings(CreatePackingRequest createPackingRequest){
         return this.basePackingFeignService.createPackings(createPackingRequest);
+    }
+
+    @Override
+    public List<BasePackingDto> listParent(BasePackingDto warehouseCode) {
+        return R.getDataAndException(this.basePackingFeignService.listParent(warehouseCode));
+    }
+
+    @Override
+    public List<BasePackingDto> listParent() {
+        return R.getDataAndException(this.basePackingFeignService.listParent());
     }
 }

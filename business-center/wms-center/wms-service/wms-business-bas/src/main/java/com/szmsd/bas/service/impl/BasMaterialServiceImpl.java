@@ -15,6 +15,7 @@ import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BasMaterialVO;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -108,19 +109,19 @@ public class BasMaterialServiceImpl extends ServiceImpl<BasMaterialMapper, BasMa
                 basMaterial.setCode("WL"+basMaterial.getSellerCode()+baseSerialNumberService.generateNumber("MATERIAL"));
             }else{
                 if(basMaterial.getCode().length()<2){
-                    throw new BaseException("sku编码长度不能小于两个字符");
+                    throw new CommonException("400", "sku编码长度不能小于两个字符");
                 }
             }
             queryWrapper.eq("code",basMaterial.getCode());
             if(super.count(queryWrapper)==1){
-                throw new BaseException("包材编码重复");
+                throw new CommonException("400", "包材编码重复");
             }
             basMaterial.setCategory("包材");
             basMaterial.setIsActive(true);
             MaterialRequest materialRequest = BeanMapperUtil.map(basMaterial,MaterialRequest.class);
             R<ResponseVO> r = htpBasFeignService.createMaterial(materialRequest);
             if(!r.getData().getSuccess()){
-                throw new BaseException("传wms失败:" + r.getData().getMessage());
+                throw new CommonException("400", "传wms失败:" + r.getData().getMessage());
             }
             return baseMapper.insert(basMaterial);
         }

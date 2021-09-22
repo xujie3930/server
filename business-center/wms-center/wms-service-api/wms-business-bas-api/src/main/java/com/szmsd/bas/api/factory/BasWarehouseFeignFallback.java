@@ -4,6 +4,7 @@ import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.dto.AddWarehouseRequest;
 import com.szmsd.bas.dto.BasWarehouseQueryDTO;
+import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.bas.vo.BasWarehouseVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
@@ -40,6 +41,11 @@ public class BasWarehouseFeignFallback implements FallbackFactory<BasWarehouseFe
             @Override
             public TableDataInfo<BasWarehouseVO> pagePost(BasWarehouseQueryDTO queryDTO) {
                throw new BaseException("查询仓库信息失败!");
+            }
+
+            @Override
+            public R<List<WarehouseKvDTO>> queryCusInboundWarehouse() {
+                return R.convertResultJson(throwable);
             }
         };
     }

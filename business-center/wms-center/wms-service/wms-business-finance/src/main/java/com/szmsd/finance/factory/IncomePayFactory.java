@@ -47,7 +47,9 @@ public class IncomePayFactory extends AbstractPayFactory {
                 if (dto.getPayType() == BillEnum.PayType.PAYMENT && oldBalance.getCurrentBalance().compareTo(changeAmount) < 0) {
                     return false;
                 }
-                BalanceDTO result = calculateBalance(oldBalance, changeAmount);
+                // BalanceDTO result = calculateBalance(oldBalance, changeAmount);
+                oldBalance.rechargeAndSetAmount(changeAmount);
+                BalanceDTO result = oldBalance;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result);
                 recordOpLog(dto, result.getCurrentBalance());
                 setSerialBillLog(dto);

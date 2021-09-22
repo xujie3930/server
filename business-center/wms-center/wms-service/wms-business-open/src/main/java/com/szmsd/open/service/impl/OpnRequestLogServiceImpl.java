@@ -1,11 +1,15 @@
 package com.szmsd.open.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.open.domain.OpnRequestLog;
 import com.szmsd.open.mapper.OpnRequestLogMapper;
 import com.szmsd.open.service.IOpnRequestLogService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,8 +46,15 @@ public class OpnRequestLogServiceImpl extends ServiceImpl<OpnRequestLogMapper, O
      */
     @Override
     public List<OpnRequestLog> selectOpnRequestLogList(OpnRequestLog opnRequestLog) {
-        QueryWrapper<OpnRequestLog> where = new QueryWrapper<OpnRequestLog>();
-        return baseMapper.selectList(where);
+        QueryWrapper<OpnRequestLog> queryWrapper = Wrappers.query();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "trace_id", opnRequestLog.getTraceId());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_uri", opnRequestLog.getRequestUri());
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_body", opnRequestLog.getRequestBody());
+        if (null != opnRequestLog.getRequestTimeStart() && null != opnRequestLog.getRequestTimeEnd()) {
+            queryWrapper.between("request_time", DateFormatUtils.format(opnRequestLog.getRequestTimeStart(), "yyyy-MM-dd"), DateFormatUtils.format(opnRequestLog.getRequestTimeEnd(), "yyyy-MM-dd"));
+        }
+        queryWrapper.orderByDesc("create_time");
+        return baseMapper.selectList(queryWrapper);
     }
 
     /**

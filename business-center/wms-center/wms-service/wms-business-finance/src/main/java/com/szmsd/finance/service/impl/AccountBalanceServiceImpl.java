@@ -10,11 +10,13 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.finance.enums.CreditConstant;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
@@ -24,6 +26,7 @@ import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.service.IThirdRechargeRecordService;
 import com.szmsd.finance.util.SnowflakeId;
 import com.szmsd.finance.vo.PreOnlineIncomeVo;
+import com.szmsd.finance.vo.UserCreditInfoVO;
 import com.szmsd.finance.ws.WebSocketServer;
 import com.szmsd.http.api.feign.HttpRechargeFeignService;
 import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
@@ -38,6 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 
@@ -203,16 +208,17 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     private ChargeFeignService chargeFeignService;
 
     /**
-     *  冻结 解冻 需要把费用扣减加到 操作费用表
+     * 冻结 解冻 需要把费用扣减加到 操作费用表
+     *
      * @param dto
      */
     private void addOptLog(CustPayDTO dto) {
-        /*log.info("addOptLog {} ", JSONObject.toJSONString(dto));
+        log.info("addOptLog {} ", JSONObject.toJSONString(dto));
         BillEnum.PayMethod payType = dto.getPayMethod();
         boolean b = !(payType == BillEnum.PayMethod.BALANCE_FREEZE || payType == BillEnum.PayMethod.BALANCE_THAW);
         if (b) return;
         ChargeLog chargeLog = new ChargeLog();
-        BeanUtils.copyProperties(dto,chargeLog);
+        BeanUtils.copyProperties(dto, chargeLog);
         chargeLog
                 .setCustomCode(dto.getCusCode()).setPayMethod(payType.name())
                 .setOrderNo(dto.getNo()).setOperationPayMethod("业务操作").setSuccess(true)
@@ -223,7 +229,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
         }
         chargeFeignService.add(chargeLog);
-        log.info("{} -  扣减操作费 {}", payType, JSONObject.toJSONString(chargeLog));*/
+        log.info("{} -  扣减操作费 {}", payType, JSONObject.toJSONString(chargeLog));
     }
 
     @Transactional
@@ -273,6 +279,13 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         return flag ? R.ok() : R.failed("冻结金额不足以解冻");
     }
 
+    /**
+     * 查询该用户对应币别的余额
+     *
+     * @param cusCode      客户编码
+     * @param currencyCode 币别
+     * @return 查询结果
+     */
     @Override
     public BalanceDTO getBalance(String cusCode, String currencyCode) {
         QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
@@ -280,9 +293,13 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         queryWrapper.eq("currency_code", currencyCode);
         AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
         if (accountBalance != null) {
-            return new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
+            BalanceDTO balanceDTO = new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
+            CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
+            BeanUtils.copyProperties(accountBalance, creditInfoBO);
+            balanceDTO.setCreditInfoBO(creditInfoBO);
+            return balanceDTO;
         }
-        log.info("getBalance() cusCode: {} currencyCode: {}",cusCode,currencyCode);
+        log.info("getBalance() cusCode: {} currencyCode: {}", cusCode, currencyCode);
         accountBalance = new AccountBalance(cusCode, currencyCode, getCurrencyName(currencyCode));
         accountBalanceMapper.insert(accountBalance);
         return new BalanceDTO(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
@@ -290,13 +307,18 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Override
     @Transactional
-    public void setBalance(String cusCode, String currencyCode, BalanceDTO result) {
+    public void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit) {
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(AccountBalance::getCusCode, cusCode);
         lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode, currencyCode);
         lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance, result.getCurrentBalance());
         lambdaUpdateWrapper.set(AccountBalance::getFreezeBalance, result.getFreezeBalance());
         lambdaUpdateWrapper.set(AccountBalance::getTotalBalance, result.getTotalBalance());
+        if (needUpdateCredit) {
+            lambdaUpdateWrapper.set(AccountBalance::getCreditUseAmount, result.getCreditInfoBO().getCreditUseAmount());
+            lambdaUpdateWrapper.set(AccountBalance::getCreditBufferUseAmount, result.getCreditInfoBO().getCreditBufferUseAmount());
+            lambdaUpdateWrapper.set(AccountBalance::getCreditStatus, result.getCreditInfoBO().getCreditStatus());
+        }
         accountBalanceMapper.update(null, lambdaUpdateWrapper);
     }
 
@@ -472,5 +494,101 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         boolean b2 = StringUtils.isEmpty(currencyCode);
         boolean b3 = amount == null;
         return b1 || b2 || b3 || amount.setScale(2, BigDecimal.ROUND_FLOOR).compareTo(BigDecimal.ZERO) < 1;
+    }
+
+    @Override
+    public void updateCreditStatus(CustPayDTO dto) {
+        int update = accountBalanceMapper.update(new AccountBalance(), Wrappers.<AccountBalance>lambdaUpdate()
+                .eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode())
+                .eq(AccountBalance::getCusCode, dto.getCusCode())
+                .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
+                .set(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ARREARAGE_DEACTIVATION.getValue())
+        );
+        AssertUtil.isTrue(update <= 1, "更新授信额度状态异常");
+        log.info("更新{}条授信额度状态 {}", update, JSONObject.toJSONString(dto));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserCredit(UserCreditDTO userCreditDTO) {
+        log.info("更新用户授信额度信息 {}", userCreditDTO);
+        AccountBalance accountBalanceBefore = accountBalanceMapper.selectOne(Wrappers.<AccountBalance>lambdaQuery()
+                .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode())
+        .eq(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode()));
+        AssertUtil.notNull(accountBalanceBefore, "该用户没有此币别账户");
+
+        LambdaUpdateWrapper<AccountBalance> updateWrapper = Wrappers.<AccountBalance>lambdaUpdate()
+                .eq(AccountBalance::getCurrencyCode, userCreditDTO.getCurrencyCode())
+                .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode())
+                .set(AccountBalance::getCreditStatus,CreditConstant.CreditStatusEnum.ACTIVE.getValue())
+                .last("LIMIT 1");
+        if (null == userCreditDTO.getCreditType()) {
+            int update = accountBalanceMapper.update(new AccountBalance(), updateWrapper
+                    .set(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.DISABLED.getValue())
+                    .last("LIMIT 1")
+            );
+            log.info("禁用用户授信额度{}- {}条", userCreditDTO, update);
+        } else {
+            AssertUtil.notNull(userCreditDTO.getCreditLine(),"金额不能为空");
+            Integer creditType = userCreditDTO.getCreditType();
+            CreditConstant.CreditTypeEnum thisByTypeCode = CreditConstant.CreditTypeEnum.getThisByTypeCode(creditType);
+            switch (thisByTypeCode) {
+                case QUOTA:
+                    Integer integer = accountBalanceMapper.selectCount(Wrappers.<AccountBalance>lambdaQuery()
+                            .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode())
+                            .ne(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode())
+                            .eq(AccountBalance::getCreditType,CreditConstant.CreditTypeEnum.QUOTA.getValue())
+                    );
+                    AssertUtil.isTrue(integer==0,"该账户已激活其他币别信用额,暂不支持修改");
+                    log.info("更新用户授信额度信息 - before {}", JSONObject.toJSONString(accountBalanceBefore));
+                    int update = accountBalanceMapper.update(new AccountBalance(), updateWrapper
+                            .set(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.QUOTA.getValue())
+                            .set(AccountBalance::getCreditLine,userCreditDTO.getCreditLine())
+                    );
+                    log.info("设置授信额度{}- {}条", userCreditDTO, update);
+                    return;
+                case TIME_LIMIT:
+                    Integer integer2 = accountBalanceMapper.selectCount(Wrappers.<AccountBalance>lambdaQuery()
+                            .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode())
+                            .ne(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode())
+                            .eq(AccountBalance::getCreditType,CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
+                    );
+                    AssertUtil.isTrue(integer2==0,"该账户已激活其他币别信用期限,暂不支持修改");
+                    AssertUtil.notNull(userCreditDTO.getCreditTimeInterval(), "授信期限不能为空");
+                    AssertUtil.isTrue(userCreditDTO.getCreditTimeInterval() >= 3, "授信期限不能小于3天");
+                    boolean newCreate = accountBalanceBefore.getCreditBeginTime() == null;
+                    LocalDateTime start = LocalDateTime.now();
+                    LocalDateTime end = start.plus(userCreditDTO.getCreditTimeInterval(), CreditConstant.CREDIT_UNIT);
+                    LocalDateTime bufferEnd = end.plus(CreditConstant.CREDIT_BUFFER_Interval, CreditConstant.CREDIT_UNIT);
+                    int update2 = accountBalanceMapper.update(new AccountBalance(), updateWrapper
+                            .set(AccountBalance::getCreditTimeUnit, CreditConstant.CREDIT_UNIT)
+                            .set(AccountBalance::getCreditBufferTimeUnit, CreditConstant.CREDIT_UNIT)
+                            .set(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
+                            .set(AccountBalance::getCreditTimeInterval, userCreditDTO.getCreditTimeInterval())
+                            .set(newCreate, AccountBalance::getCreditBeginTime, start)
+                            .set(newCreate, AccountBalance::getCreditEndTime, end)
+                            .set(newCreate,AccountBalance::getCreditBufferTimeInterval,CreditConstant.CREDIT_BUFFER_Interval)
+                            .set(newCreate, AccountBalance::getCreditBufferTime, bufferEnd)
+                    );
+                    log.info("设置授信额度{}- {}条", userCreditDTO, update2);
+                    return;
+                default:
+                    return;
+            }
+        }
+    }
+
+    @Override
+    public UserCreditInfoVO queryUserCredit(String cusCode) {
+        AccountBalance accountBalanceBefore = accountBalanceMapper.selectOne(Wrappers.<AccountBalance>lambdaQuery()
+                .eq(AccountBalance::getCusCode, cusCode)
+                .isNotNull(AccountBalance::getCreditType)
+                .last("LIMIT 1")
+        );
+        UserCreditInfoVO userCreditInfoVO = new UserCreditInfoVO();
+        if (null != accountBalanceBefore) {
+            BeanUtils.copyProperties(accountBalanceBefore, userCreditInfoVO);
+        }
+        return userCreditInfoVO;
     }
 }

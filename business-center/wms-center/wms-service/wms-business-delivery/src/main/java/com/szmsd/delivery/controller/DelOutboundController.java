@@ -57,6 +57,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -309,14 +310,15 @@ public class DelOutboundController extends BaseController {
             //response为HttpServletResponse对象
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gb2312"), "ISO8859-1") + "." + ext);
+            String efn = URLEncoder.encode(fileName, "utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + efn + "." + ext);
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
-            throw new CommonException("999", "文件不存在，" + e.getMessage());
+            throw new CommonException("400", "文件不存在，" + e.getMessage());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            throw new CommonException("999", "文件流处理失败，" + e.getMessage());
+            throw new CommonException("500", "文件流处理失败，" + e.getMessage());
         } finally {
             IoUtil.flush(outputStream);
             IoUtil.close(outputStream);

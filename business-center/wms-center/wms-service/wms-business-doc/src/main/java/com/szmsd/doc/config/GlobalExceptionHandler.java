@@ -2,10 +2,10 @@ package com.szmsd.doc.config;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.exception.com.SystemException;
 import feign.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -57,6 +57,10 @@ public class GlobalExceptionHandler {
             CommonException commonException = (CommonException) exception;
             code = Integer.parseInt(commonException.getCode());
             message = convertMessage(code, commonException.getMessage(), exception.getMessage(), commonException.getValues());
+        } else if (exception instanceof SystemException) {
+            SystemException systemException = (SystemException) exception;
+            code = Integer.parseInt(systemException.getCode());
+            message = convertMessage(code, systemException.getMessage(), exception.getMessage(), systemException.getValues());
         } else if (exception instanceof HystrixFeignException) {
             HystrixFeignException hystrix = (HystrixFeignException) exception;
             code = hystrix.getCode();
@@ -80,11 +84,12 @@ public class GlobalExceptionHandler {
             StringBuilder builder = new StringBuilder();
             BindingResult bindingResult = manv.getBindingResult();
             List<ObjectError> allErrors = bindingResult.getAllErrors();
+            String linePrefix = "";
             for (ObjectError objectError : allErrors) {
-                builder.append("[");
+                // builder.append("[");
                 Object[] arguments = objectError.getArguments();
                 if (objectError instanceof FieldError) {
-                    if (null == arguments) {
+                    /*if (null == arguments) {
                         FieldError fieldError = (FieldError) objectError;
                         builder.append(fieldError.getField());
                     } else {
@@ -116,6 +121,17 @@ public class GlobalExceptionHandler {
                             builder.append(",");
                         }
                         builder.deleteCharAt(builder.length() - 1);
+                    }*/
+                    FieldError fieldError = (FieldError) objectError;
+                    String field = fieldError.getField();
+                    if (field.contains("[")) {
+                        int fi = field.indexOf("[");
+                        int ei = field.indexOf("]");
+                        linePrefix = field.substring(fi + 1, ei);
+                    }
+                    if (!"".equals(linePrefix)) {
+                        int i = Integer.parseInt(linePrefix);
+                        linePrefix = "第" + (i + 1) + "行";
                     }
                 } else {
                     String[] codes = null;
@@ -134,23 +150,26 @@ public class GlobalExceptionHandler {
                         builder.deleteCharAt(builder.length() - 1);
                     }
                 }
-                builder.append("]");
-                builder.append(objectError.getDefaultMessage());
+                // builder.append("]");
+                builder.append(linePrefix)
+                        .append(objectError.getDefaultMessage());
                 builder.append(",");
             }
             if (builder.lastIndexOf(",") == builder.length() - 1) {
                 builder.deleteCharAt(builder.length() - 1);
             }
-            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            code = HttpStatus.BAD_REQUEST.value();
             message = builder.toString();
+//            message = allErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage).reduce((a, b) -> a + "," + b).orElse("");
+//            code = HttpStatus.BAD_REQUEST.value();
         } else if (exception instanceof IllegalArgumentException) {
-            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            code = HttpStatus.BAD_REQUEST.value();
             message = exception.getMessage();
             if (StringUtils.isEmpty(message)) {
                 message = "不合法的参数异常";
             }
         } else if (exception instanceof UnexpectedTypeException) {
-            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            code = HttpStatus.BAD_REQUEST.value();
             message = "不合法的参数异常";
         } else if (exception instanceof NoSuchMethodException) {
             code = HttpStatus.INTERNAL_SERVER_ERROR.value();
@@ -171,7 +190,7 @@ public class GlobalExceptionHandler {
             }
         }
         if (0 == code) {
-            code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+            code = HttpStatus.BAD_REQUEST.value();
         }
         if (StringUtils.isEmpty(message)) {
             message = exception.getMessage();
@@ -250,6 +269,7 @@ public class GlobalExceptionHandler {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseBody
     public R<Map<String, Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException cause) {
         return render(HttpStatus.BAD_REQUEST, cause);
     }
@@ -262,6 +282,7 @@ public class GlobalExceptionHandler {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseBody
     public R<Map<String, Object>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException cause) {
         return render(HttpStatus.BAD_REQUEST, cause);
     }
@@ -274,7 +295,47 @@ public class GlobalExceptionHandler {
      */
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    @ResponseBody
     public R<Map<String, Object>> handleHttpMediaTypeNotSupportedException(Exception cause) {
         return render(HttpStatus.UNSUPPORTED_MEDIA_TYPE, cause);
+    }
+
+    /**
+     * handleMethodArgumentNotValidException
+     *
+     * @param cause Exception
+     * @return ResponseDto
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public R<Map<String, Object>> handleMethodArgumentNotValidException(Exception cause) {
+        return render(HttpStatus.BAD_REQUEST, cause);
+    }
+
+    /**
+     * handleCommonException
+     *
+     * @param cause Exception
+     * @return ResponseDto
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(CommonException.class)
+    @ResponseBody
+    public R<Map<String, Object>> handleCommonException(Exception cause) {
+        return render(HttpStatus.BAD_REQUEST, cause);
+    }
+
+    /**
+     * handleSystemException
+     *
+     * @param cause Exception
+     * @return ResponseDto
+     */
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(SystemException.class)
+    @ResponseBody
+    public R<Map<String, Object>> handleSystemException(Exception cause) {
+        return render(HttpStatus.INTERNAL_SERVER_ERROR, cause);
     }
 }

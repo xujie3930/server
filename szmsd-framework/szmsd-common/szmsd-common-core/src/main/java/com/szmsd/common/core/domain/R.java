@@ -5,6 +5,8 @@ import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.com.LogisticsException;
 import com.szmsd.common.core.exception.com.LogisticsExceptionUtil;
+import com.szmsd.common.core.exception.com.SystemException;
+import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
 
@@ -100,8 +102,22 @@ public class R<T> implements Serializable {
         }
         if (throwable instanceof CommonException) {
             CommonException commonException = (CommonException) throwable;
-            r.setCode(Constants.FAIL);
+            // code使用异常返回的code
+            // r.setCode(Constants.FAIL);
+            if (null == commonException.getCode()) {
+                r.setCode(HttpStatus.BAD_REQUEST.value());
+            } else {
+                r.setCode(Integer.parseInt(commonException.getCode()));
+            }
             r.setMsg(commonException.getMessage());
+        } else if (throwable instanceof SystemException) {
+            SystemException systemException = (SystemException) throwable;
+            if (null == systemException.getCode()) {
+                r.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            } else {
+                r.setCode(Integer.parseInt(systemException.getCode()));
+            }
+            r.setMsg(systemException.getMessage());
         } else {
             r.setCode(Constants.FAIL);
             r.setMsg(throwable.getMessage());
@@ -113,9 +129,11 @@ public class R<T> implements Serializable {
         if (null != r) {
             if (Constants.SUCCESS == r.getCode()) {
                 return r.getData();
+            } else if (HttpStatus.BAD_REQUEST.value() == r.getCode()) {
+                throw new CommonException("" + r.getCode(), r.getMsg());
             } else {
                 // 抛出接口返回的异常信息
-                throw new CommonException("" + r.getCode(), r.getMsg());
+                throw new SystemException("" + r.getCode(), r.getMsg());
             }
         }
         return null;

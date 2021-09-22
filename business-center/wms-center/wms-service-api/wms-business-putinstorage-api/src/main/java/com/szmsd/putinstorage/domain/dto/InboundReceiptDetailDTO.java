@@ -26,7 +26,7 @@ public class InboundReceiptDetailDTO {
     @ApiModelProperty(value = "申报数量",required = true)
     private Integer declareQty;
 
-    @ApiModelProperty(value = "上架数量")
+    @ApiModelProperty(value = "上架数量",hidden = true)
     private Integer putQty;
 
     @ApiModelProperty(value = "原产品编码")
@@ -38,7 +38,7 @@ public class InboundReceiptDetailDTO {
     @ApiModelProperty(value = "对版图片")
     private AttachmentFileDTO editionImage;
 
-    @ApiModelProperty(value = "采购-运单号/出库-出库单号作为该单号")
+    @ApiModelProperty(value = "出库-出库单号作为该单号",hidden = true)
     private String deliveryNo;
 
 

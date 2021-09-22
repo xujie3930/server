@@ -48,13 +48,15 @@ public class FileUtil {
         Files res = new Files();
         // 获取保存的路径，本地磁盘中的一个文件夹
         String newName = "";
-        String suffix = myFile.getOriginalFilename().substring(myFile.getOriginalFilename().indexOf(".") + 1);
+        String originalFilename = myFile.getOriginalFilename();
+        originalFilename = Optional.ofNullable(originalFilename).filter(StringUtils::isNotBlank).orElse("a.jpg");
+        String suffix = originalFilename.substring(originalFilename.indexOf(".") + 1);
         // 文件原名称
         if (fileGen.getRename()) {
             // 上传文件重命名
-            newName = myFile.getOriginalFilename().substring(0, myFile.getOriginalFilename().indexOf(".")) + "_" + String.valueOf(System.currentTimeMillis()).concat(".").concat(suffix);
+            newName = originalFilename.substring(0, originalFilename.indexOf(".")) + "_" + String.valueOf(System.currentTimeMillis()).concat(".").concat(suffix);
         } else {
-            newName = myFile.getOriginalFilename().substring(0, myFile.getOriginalFilename().indexOf(".")).concat(".").concat(suffix);
+            newName = originalFilename.substring(0, originalFilename.indexOf(".")).concat(".").concat(suffix);
         }
         type = Optional.ofNullable(type).orElse(AttachmentTypeEnum.PREFIX_TEMP);
         String prefix = lineToHump(type.getBusinessCode()) + "/" + type.getFileDirectory();

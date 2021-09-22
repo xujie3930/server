@@ -60,7 +60,7 @@ public class DelOutboundAddress extends BaseEntity {
     @ApiModelProperty(value = "区域")
     private String zone;
 
-    @ApiModelProperty(value = "省份/洲")
+    @ApiModelProperty(value = "省份/州")
     private String stateOrProvince;
 
     @ApiModelProperty(value = "城市")

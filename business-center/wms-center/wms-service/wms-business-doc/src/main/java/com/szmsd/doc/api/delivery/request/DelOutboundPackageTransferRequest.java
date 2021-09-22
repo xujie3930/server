@@ -1,6 +1,9 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
+import com.szmsd.doc.validator.DictionaryPluginConstant;
+import com.szmsd.doc.validator.annotation.Dictionary;
 import com.szmsd.doc.validator.annotation.PreNotNull;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,6 +12,7 @@ import lombok.Data;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -22,11 +26,12 @@ import java.util.List;
 @PreNotNull(field = "packageConfirm", fieldValue = "076002", model = PreNotNull.Model.VALUE, linkageFields = {"packageWeightDeviation"}, message = "重量误差范围不能为空")
 public class DelOutboundPackageTransferRequest implements Serializable {
 
-    @NotNull(message = "客户编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    /*@NotBlank(message = "客户编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
-    private String sellerCode;
+    private String sellerCode;*/
 
-    @NotNull(message = "仓库编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
+    @Dictionary(message = "仓库编码不存在", type = DictionaryPluginConstant.WAR_DICTIONARY_PLUGIN)
+    @NotBlank(message = "仓库编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
     private String warehouseCode;
 
@@ -54,9 +59,11 @@ public class DelOutboundPackageTransferRequest implements Serializable {
     @ApiModelProperty(value = "高 CM", required = true, dataType = "Double", position = 4, example = "10")
     private Double height;
 
+    @Dictionary(message = "重量尺寸确认不存在", type = DictionaryPluginConstant.SUB_DICTIONARY_PLUGIN, param = "076")
+    @SwaggerDictionary(dicCode = "076")
     @NotBlank(message = "重量尺寸确认不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @Size(max = 30, message = "重量尺寸确认不能超过30个字符", groups = {DelOutboundGroup.PackageTransfer.class})
-    @ApiModelProperty(value = "重量尺寸确认，076001：仓库数据直接发货，076002：需要确认重量信息", required = true, dataType = "String", position = 5, example = "076001")
+    @ApiModelProperty(value = "重量尺寸确认", required = true, dataType = "String", position = 5, example = "076001")
     private String packageConfirm;
 
     @Max(value = Integer.MAX_VALUE, message = "重量误差范围不能大于2147483647", groups = {DelOutboundGroup.PackageTransfer.class})
@@ -68,24 +75,30 @@ public class DelOutboundPackageTransferRequest implements Serializable {
     @ApiModelProperty(value = "增值税号", dataType = "String", position = 7, example = "F00X")
     private String ioss;
 
+    @Min(value = 0, message = "COD不能小于0", groups = {DelOutboundGroup.Default.class})
+    @ApiModelProperty(value = "COD", dataType = "Double", position = 8, example = "0.0")
+    private BigDecimal codAmount;
+
     @NotBlank(message = "物流服务不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @Size(max = 50, message = "物流服务不能超过50个字符", groups = {DelOutboundGroup.PackageTransfer.class})
-    @ApiModelProperty(value = "物流服务", dataType = "String", position = 8, example = "FX")
+    @ApiModelProperty(value = "物流服务", dataType = "String", position = 9, example = "FX")
     private String shipmentRule;
 
     @Size(max = 50, message = "参考号不能超过50个字符", groups = {DelOutboundGroup.PackageTransfer.class})
-    @ApiModelProperty(value = "参考号", dataType = "String", position = 9, example = "")
+    @ApiModelProperty(value = "参考号", dataType = "String", position = 10, example = "")
     private String refNo;
 
     @Size(max = 500, message = "备注不能超过500个字符", groups = {DelOutboundGroup.PackageTransfer.class})
-    @ApiModelProperty(value = "备注", dataType = "String", position = 10, example = "")
+    @ApiModelProperty(value = "备注", dataType = "String", position = 11, example = "")
     private String remark;
 
     @Valid
-    @ApiModelProperty(value = "地址信息", dataType = "DelOutboundAddressRequest", position = 11)
+    @NotNull(message = "地址信息不能为空", groups = {DelOutboundGroup.Default.class})
+    @ApiModelProperty(value = "地址信息", dataType = "DelOutboundAddressRequest", position = 12)
     private DelOutboundAddressRequest address;
 
     @Valid
-    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundDetailRequest", position = 12)
+    @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
+    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundDetailRequest", position = 13)
     private List<DelOutboundDetailRequest> details;
 }

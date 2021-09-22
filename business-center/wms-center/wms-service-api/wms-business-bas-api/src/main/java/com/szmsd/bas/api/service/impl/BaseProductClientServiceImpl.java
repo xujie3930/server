@@ -14,6 +14,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -45,6 +46,10 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
         return this.baseProductFeignService.checkSkuValidToDelivery(baseProduct).getData();
     }
 
+    @Override
+    public List<BaseProduct> listSku(BaseProduct baseProduct) {
+        return R.getDataAndException(this.baseProductFeignService.listSku(baseProduct));
+    }
     @Override
     public R measuringProduct(MeasuringProductRequest measuringProductRequest) {
         return this.baseProductFeignService.measuringProduct(measuringProductRequest);

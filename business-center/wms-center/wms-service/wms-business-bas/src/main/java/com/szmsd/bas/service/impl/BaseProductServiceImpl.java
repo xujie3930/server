@@ -26,6 +26,7 @@ import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -328,7 +329,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }
         } else {
             if (baseProductDto.getCode().length() < 2) {
-                throw new BaseException(baseProductDto.getCategory() + "编码长度不能小于两个字符");
+                throw new CommonException("400", baseProductDto.getCode() + "编码长度不能小于两个字符");
             }
         }
         //验证 填写信息
@@ -336,7 +337,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", baseProductDto.getCode());
         if (super.count(queryWrapper) == 1) {
-            throw new BaseException(baseProductDto.getCategory() + "编码重复");
+            throw new CommonException("400", baseProductDto.getCode() + "编码重复");
         }
         //默认激活
         baseProductDto.setIsActive(true);
@@ -437,10 +438,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         BaseProduct baseProduct = super.getById(baseProductDto.getId());
         ObjectUtil.fillNull(productRequest, baseProduct);
-        if (CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())) {
-            AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProduct.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
-            this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
-        }
+        AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProduct.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
+        this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
         productRequest.setProductDesc(baseProductDto.getProductDescription());
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
@@ -741,7 +740,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             throw new BaseException("wms服务调用失败");
         }
         if (r.getData() == null) {
-            throw new BaseException("wms服务调用失败");
+            //throw new BaseException("wms服务调用失败");
         } else {
             if (r.getData().getSuccess() == null) {
                 if (r.getData().getErrors() != null) {

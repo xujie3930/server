@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
@@ -71,6 +74,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Resource
     private IInboundTrackingService iInboundTrackingService;
 
+    @Resource
+    private RemoteAttachmentService remoteAttachmentService;
+
     /**
      * 入库单查询
      *
@@ -126,6 +132,22 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     }
 
     /**
+     * 裸货上架需要校验sku
+     * @param createInboundReceiptDTO
+     */
+    public void checkSkuPic(CreateInboundReceiptDTO createInboundReceiptDTO) {
+        if (!"055003".equals(createInboundReceiptDTO.getWarehouseMethodCode())) return;
+        List<String> skuList = createInboundReceiptDTO.getInboundReceiptDetails().stream().map(InboundReceiptDetailDTO::getSku).distinct().collect(Collectors.toList());
+        BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+        basAttachmentQueryDTO.setBusinessNoList(skuList);
+        basAttachmentQueryDTO.setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType());
+        R<List<BasAttachment>> list = remoteAttachmentService.list(basAttachmentQueryDTO);
+        List<BasAttachment> dataAndException = R.getDataAndException(list);
+        List<String> collect = dataAndException.stream().map(BasAttachment::getBusinessNo).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
+        boolean b = skuList.removeAll(collect);
+        AssertUtil.isTrue(CollectionUtils.isEmpty(skuList), String.format("裸货上架 SKU需要图片，%s SKU不存在图片", skuList));
+    }
+    /**
      * 创建入库单
      *
      * @param createInboundReceiptDTO
@@ -138,7 +160,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         packageTransferCheck(createInboundReceiptDTO);
         Integer totalDeclareQty = createInboundReceiptDTO.getTotalDeclareQty();
         AssertUtil.isTrue(totalDeclareQty > 0, "合计申报数量不能为" + totalDeclareQty);
-
+        //裸货上架 图片不能为空
+        this.checkSkuPic(createInboundReceiptDTO);
         // 保存入库单
         InboundReceipt inboundReceipt = this.saveOrUpdate((InboundReceiptDTO) createInboundReceiptDTO);
         String warehouseNo = inboundReceipt.getWarehouseNo();
@@ -166,8 +189,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
         }
         // 创建入库单物流信息列表
-        //remoteComponent.createTracking(createInboundReceiptDTO);
-        //log.info("创建入库单：操作完成");
+        remoteComponent.createTracking(createInboundReceiptDTO);
+        log.info("创建入库单：操作完成");
         return this.queryInfo(warehouseNo, false);
     }
 

@@ -95,4 +95,6 @@ public class InboundReceipt extends BaseEntity {
     @TableField(fill = FieldFill.UPDATE)
     private String updateBy;
 
+    @ApiModelProperty(value = "数据来源")
+    private String sourceType;
 }

@@ -47,7 +47,7 @@ public class SwaggerAutoConfiguration {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 // 页面标题
-                .title("出口易 RESTful API")
+                .title("DM FULFILLMENT RESTful API")
                 // 创建人信息
                 .contact(new Contact("admin", "", ""))
                 // 版本号

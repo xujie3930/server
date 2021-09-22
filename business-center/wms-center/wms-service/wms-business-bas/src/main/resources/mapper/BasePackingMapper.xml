@@ -33,7 +33,7 @@
             id, create_by, update_by, del_flag, name, code, seller_code, category, price, priority_level, category_name, describe
         </sql>
     <select id="selectBasePackingGroup" resultType="com.szmsd.bas.dto.BasePackingDto">
-    select CONCAT(min(price),"-",max(price)) as priceRange,packing_material_type from base_packing
+    select CONCAT(min(price),"-",max(price)) as priceRange,packing_material_type,package_material_code,package_material_name from base_packing
     where
     price is not null
     and currency is not null
@@ -44,5 +44,15 @@
     group by warehouse_code, packing_material_type
     </select>
 
-
+    <select id="selectBasePacking" resultType="com.szmsd.bas.dto.BasePackingDto">
+        select CONCAT(min(price),"-",max(price)) as priceRange,packing_material_type,package_material_code,package_material_name,warehouse_code from base_packing
+        where
+        price is not null
+        and currency is not null
+        and is_active = 1
+        <if test="cm.warehouseCode != null and cm.warehouseCode != ''">
+            AND warehouse_code = #{cm.warehouseCode}
+        </if>
+        group by warehouse_code, packing_material_type
+    </select>
 </mapper>

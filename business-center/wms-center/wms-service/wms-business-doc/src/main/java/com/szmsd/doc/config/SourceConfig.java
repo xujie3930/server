@@ -7,7 +7,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
+import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -25,12 +27,16 @@ public class SourceConfig extends ResourceServerConfigurerAdapter {
     public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 
         RemoteTokenServices tokenServices = new RemoteTokenServices();
+        DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
+        UserAuthenticationConverter userTokenConverter = new CommonUserConverter();
+        accessTokenConverter.setUserTokenConverter(userTokenConverter);
         // 配置去哪里验证token
         tokenServices.setRestTemplate(restTemplate);
         tokenServices.setCheckTokenEndpointUrl("http://szmsd-auth/oauth/check_token");
         // 配置组件的clientid和密码,这个也是在auth中配置好的
         tokenServices.setClientId("doc");
         tokenServices.setClientSecret("123456");
+        tokenServices.setAccessTokenConverter(accessTokenConverter);
         resources.tokenServices(tokenServices)
                 .stateless(true);
     }

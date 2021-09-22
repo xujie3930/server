@@ -24,7 +24,7 @@ import java.util.Enumeration;
  * @author zhangyuyuan
  * @date 2021-07-28 9:28
  */
-@Api(tags = {"测试"})
+@Api(tags = {"授权测试"})
 @ApiSort(100)
 @RestController
 @RequestMapping("/api/test")

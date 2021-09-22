@@ -45,12 +45,16 @@
                     <result column="attribute3" property="attribute3"/>
                     <result column="attribute4" property="attribute4"/>
                     <result column="attribute5" property="attribute5"/>
+                    <result column="material_quality" property="materialQuality"/>
+                    <result column="purpose" property="purpose"/>
         </resultMap>
 
         <!-- 通用查询结果列 -->
         <sql id="Base_Column_List">
                 create_by_name,
                 create_time,
+                material_quality,
+                purpose,
                 update_by_name,
                 update_time,
                 remark,

@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Api(tags = {"仓库信息"})
 @RestController
 @RequestMapping("/api/bas")
-public class BaseWarehouseApiController extends BaseController {
+public class BaseWarehouseApiController{
 
     @Resource
     private BasWarehouseClientService basWarehouseClientService;
@@ -48,6 +48,7 @@ public class BaseWarehouseApiController extends BaseController {
         List<BasWarehouseResp> collect = rows.stream().map(BasWarehouseResp::convertThis).collect(Collectors.toList());
         long total = basWarehousePage.getTotal();
         TableDataInfo<BasWarehouseResp> tableDataInfo = new TableDataInfo(collect, (int) total);
+        tableDataInfo.setCode(200);
         return tableDataInfo;
     }
 

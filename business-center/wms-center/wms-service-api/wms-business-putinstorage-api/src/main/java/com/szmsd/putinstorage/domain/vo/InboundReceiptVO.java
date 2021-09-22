@@ -60,4 +60,6 @@ public class InboundReceiptVO {
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 
+    @ApiModelProperty(value = "数据来源")
+    private String sourceType;
 }

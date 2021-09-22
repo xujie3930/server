@@ -1,6 +1,8 @@
 package com.szmsd.putinstorage.api.factory;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundCountVO;
@@ -59,6 +61,11 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
             @Override
             public R tracking(ReceivingTrackingRequest receivingCompletedRequest) {
                 return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public TableDataInfo<InboundReceiptVO> postPage(InboundReceiptQueryDTO queryDTO) {
+                throw new CommonException("查询异常");
             }
         };
     }
