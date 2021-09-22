@@ -138,7 +138,8 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String bindCodeName;
 
-    @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋")
+    @NotBlank(message = "物流包装要求不能为空")
+    @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋",required = true)
     @Excel(name = "物流包装要求")
     @Size(max = 50, message = "物流包装要求仅支持50字符")
     private String suggestPackingMaterial;
@@ -238,10 +239,6 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String orderNo;
 
-//    @ApiModelProperty(value = "来源")
-//    @Size(max = 50)
-//    private String source;
-
     @ApiModelProperty(value = "海关编码", example = "110011001")
     @Size(max = 200, message = "海关编码仅支持200字符")
     private String hsCode;
@@ -255,6 +252,8 @@ public class BaseProductRequest {
     @Size(max = 200, message = "用途最大仅支持200字符")
     @ApiModelProperty(value = "用途")
     private String purpose;
-    @ApiModelProperty(value = "来源", hidden = true)
-    private String source = SourceTypeEnum.DOC.name();
+
+    @Size(max = 50)
+    @ApiModelProperty(value = "来源 默认:084001", allowableValues = "084001:正常录入,084002:集运录入")
+    private String source = "084001";
 }

@@ -15,7 +15,6 @@ import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
@@ -44,7 +43,6 @@ import com.szmsd.putinstorage.enums.SourceTypeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.BeanUtils;
@@ -60,8 +58,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Validated
 @Api(tags = {"入库信息"})
@@ -168,16 +166,27 @@ public class InboundApiController {
         R<List<BasSellerCertificate>> listR = basSellerFeignService.listVAT(vatQueryDto);
         List<BasSellerCertificate> dataAndException = R.getDataAndException(listR);
         Map<String, List<BasSellerCertificate>> countryMap = dataAndException.stream().collect(Collectors.groupingBy(BasSellerCertificate::getCountryCode));
-
+        Map<Integer, String> errorVatMap = new LinkedHashMap<>();
+        AtomicInteger atomicInteger = new AtomicInteger(1);
         addDto.forEach(x -> {
+            int andIncrement = atomicInteger.getAndIncrement();
             String vat = x.getVat();
             if (StringUtils.isNotBlank(vat)) {
                 WarehouseKvDTO warehouseKvDTO = warehouseKvDTOMap.get(x.getWarehouseCode());
                 String country = warehouseKvDTO.getCountry();
                 List<BasSellerCertificate> basSellerCertificates = countryMap.get(country);
                 List<String> vatListCheck = basSellerCertificates.stream().map(BasSellerCertificate::getVat).collect(Collectors.toList());
-                AssertUtil400.isTrue(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat), String.format("VAT[%s]不存在", vat));
+                if (CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat)){
+                    errorVatMap.put(andIncrement,vat);
+                }
+               // AssertUtil400.isTrue(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat), String.format("VAT[%s]不存在", vat));
             }
+        });
+
+        AssertUtil400.isTrue(errorVatMap.isEmpty(), () -> {
+            StringBuilder errorVatStr = new StringBuilder();
+            errorVatMap.forEach((x, y) -> errorVatStr.append(String.format("第%s行VAT【%s】不存在!", x, y)).append(";"));
+            return errorVatStr.toString();
         });
         return true;
     }
