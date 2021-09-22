@@ -388,8 +388,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                     log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
                 } else {
                     remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
-                    this.updateByWarehouseNo(inboundReceipt);
                 }
+                this.updateByWarehouseNo(inboundReceipt);
                 this.inbound(inboundReceiptInfoVO);
             } catch (Exception e) {
                 log.error(e.getMessage());
