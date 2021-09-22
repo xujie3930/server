@@ -176,10 +176,10 @@ public class InboundApiController {
                 String country = warehouseKvDTO.getCountry();
                 List<BasSellerCertificate> basSellerCertificates = countryMap.get(country);
                 List<String> vatListCheck = basSellerCertificates.stream().map(BasSellerCertificate::getVat).collect(Collectors.toList());
-                if (!(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat))){
-                    errorVatMap.put(andIncrement,vat);
+                if (!(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat))) {
+                    errorVatMap.put(andIncrement, vat);
                 }
-               // AssertUtil400.isTrue(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat), String.format("VAT[%s]不存在", vat));
+                // AssertUtil400.isTrue(CollectionUtils.isNotEmpty(basSellerCertificates) && vatListCheck.contains(vat), String.format("VAT[%s]不存在", vat));
             }
         });
         StringBuilder errorVatStr = new StringBuilder();
@@ -254,7 +254,7 @@ public class InboundApiController {
 
         String warehouseCode = createInboundReceiptDTOList.get(0).getWarehouseCode();
 //        boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
-        boolean b = iRemoterApi.checkSkuBelong(cusCode, skuList,addDTO);
+        boolean b = iRemoterApi.checkSkuBelong(cusCode, skuList, addDTO);
         AssertUtil400.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
         //校验vat TODo
         this.checkVAT(iRemoterApi, addDTO);
@@ -315,7 +315,7 @@ public class InboundApiController {
     @ApiOperation(value = "转运入库-提交")
     public R transportWarehousingSubmit(@Validated @RequestBody TransportWarehousingAddRep transportWarehousingAddRep) {
         long count = transportWarehousingAddRep.getTransferNoList().stream().filter(StringUtils::isNotBlank).count();
-        AssertUtil400.isTrue(count>0,"转运入库出库单号不能为空");
+        AssertUtil400.isTrue(count > 0, "转运入库出库单号不能为空");
         String categoryCode = transportWarehousingAddRep.getWarehouseCategoryCode();
         this.checkCategoryCode(categoryCode);
 
@@ -326,7 +326,7 @@ public class InboundApiController {
         //校验出库单订单归属人 状态 及仓库地址 转运 没有采购单
         DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
         delOutboundListQueryDto.setCustomCode(AuthenticationUtil.getSellerCode());
-        delOutboundListQueryDto.setOrderNo(String.join(",",transportWarehousingAddRep.getTransferNoList()));
+        delOutboundListQueryDto.setOrderNo(String.join(",", transportWarehousingAddRep.getTransferNoList()));
         delOutboundListQueryDto.setOrderType(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode());
         TableDataInfo<DelOutboundListVO> info = delOutboundFeignService.page(delOutboundListQueryDto);
         AssertUtil400.isTrue(info.getCode() == HttpStatus.SUCCESS && info.getRows() != null, "出库单不存在");
@@ -334,7 +334,7 @@ public class InboundApiController {
         Map<String, List<DelOutboundListVO>> collect = rows.stream().collect(Collectors.groupingBy(DelOutboundListVO::getWarehouseCode));
         AssertUtil400.isTrue(MapUtils.isNotEmpty(collect), "出库单不存在");
         AssertUtil400.isTrue(collect.keySet().size() <= 1, "请选择相同仓库的出库订单");
-        List<String> isNotLabelBoxList = rows.stream().filter(x -> !x.getIsLabelBox()).map(DelOutboundListVO::getOrderNo).collect(Collectors.toList());
+        List<String> isNotLabelBoxList = rows.stream().filter(x -> !x.getIsPrint()).map(DelOutboundListVO::getOrderNo).collect(Collectors.toList());
         AssertUtil400.isTrue(CollectionUtils.isEmpty(isNotLabelBoxList), String.format("出库单：%s需要打印标签", isNotLabelBoxList));
         // 判断状态
         List<DelOutboundListVO> result = rows.stream().filter(x -> !x.getState().equals(DelOutboundStateEnum.DELIVERED.getCode())).collect(Collectors.toList());
@@ -370,7 +370,7 @@ public class InboundApiController {
         TransportWarehousingAddDTO transportWarehousingAddDTO = new TransportWarehousingAddDTO();
         BeanUtils.copyProperties(transportWarehousingAddRep, transportWarehousingAddDTO);
         transportWarehousingAddDTO.setWarehouseCode(warehouseCode);
-            List<String> idList = rows.stream().map(DelOutboundListVO::getId).map(String::valueOf).collect(Collectors.toList());
+        List<String> idList = rows.stream().map(DelOutboundListVO::getId).map(String::valueOf).collect(Collectors.toList());
         transportWarehousingAddDTO.setIdList(idList);
         R info2 = purchaseFeignService.transportWarehousingSubmit(transportWarehousingAddDTO);
         AssertUtil400.isTrue(info2.getCode() == HttpStatus.SUCCESS && info2.getData() != null, "出库单不存在");
@@ -385,16 +385,17 @@ public class InboundApiController {
         boolean containsDeliveryWayCode = deliveryWayCodeList.contains(deliveryWayCode);
         AssertUtil400.isTrue(containsDeliveryWayCode, "送货方式不存在");
     }
+
     @PostMapping("/page")
     @ApiOperation(value = "入库单管理-列表查询", notes = "入库管理 - 分页查询")
     public TableDataInfo<InboundReceiptResp> postPage(@RequestBody InboundReceiptQueryReq queryDTO) {
         InboundReceiptQueryDTO inboundReceiptQueryDTO = new InboundReceiptQueryDTO();
-        BeanUtils.copyProperties(queryDTO,inboundReceiptQueryDTO);
+        BeanUtils.copyProperties(queryDTO, inboundReceiptQueryDTO);
         inboundReceiptQueryDTO.setCusCode(AuthenticationUtil.getSellerCode());
         TableDataInfo<InboundReceiptVO> inboundReceiptVOTableDataInfo = inboundReceiptFeignService.postPage(inboundReceiptQueryDTO);
         List<InboundReceiptVO> rows = inboundReceiptVOTableDataInfo.getRows();
         TableDataInfo<InboundReceiptResp> inboundReceiptRespTableDataInfo = new TableDataInfo<>();
-        BeanUtils.copyProperties(inboundReceiptRespTableDataInfo,inboundReceiptRespTableDataInfo);
+        BeanUtils.copyProperties(inboundReceiptRespTableDataInfo, inboundReceiptRespTableDataInfo);
         List<InboundReceiptResp> collect = rows.stream().map(x -> {
             InboundReceiptResp inboundReceiptResp = new InboundReceiptResp();
             BeanUtils.copyProperties(x, inboundReceiptResp);
