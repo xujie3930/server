@@ -166,7 +166,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     @Override
     public R<?> delOutboundFreeze(DelOutboundOperationVO dto) {
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
-        if (CollectionUtils.isEmpty(details)) {
+        if (CollectionUtils.isEmpty(details)&&!dto.getOrderType().equals("Freight")) {
             log.error("calculate() 出库单的详情信息为空");
             return R.failed("出库单的详情信息为空");
         }

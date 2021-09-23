@@ -73,6 +73,9 @@ public class QueryChargeVO implements Serializable {
     @ApiModelProperty(value = "支付类型名称")
     private String payMethodName;
 
+    @ApiModelProperty(value = "费用币别")
+    private String currencyCode;
+
     public String getPayMethodName() {
         return this.payMethod != null ? BillEnum.PayMethod.valueOf(this.payMethod).getPaymentName() : null;
     }

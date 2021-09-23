@@ -247,10 +247,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
 
         boolean flag = abstractPayFactory.updateBalance(dto);
-        if (flag)
-        //冻结 解冻 需要把费用扣减加到 操作费用表
+        if (flag && "Freight".equals(dto.getOrderType()))
+        // 冻结 解冻 需要把费用扣减加到 操作费用表
         {
-            log.info("thawBalance - {}", JSONObject.toJSONString(cfbDTO));
+            log.info("Freight thawBalance - {}", JSONObject.toJSONString(cfbDTO));
             this.addOptLog(dto);
         }
         return flag ? R.ok() : R.failed("可用余额不足以冻结");
