@@ -66,6 +66,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -357,15 +358,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 throw new CommonException("400", "明细信息不能为空");
             }
             List<String> skus = details.stream().map(DelOutboundDetailDto::getSku).distinct().collect(Collectors.toList());
-            // 验证产品是否有效
-            DelOutboundOtherInServiceDto inServiceDto = new DelOutboundOtherInServiceDto();
-            inServiceDto.setClientCode(dto.getSellerCode());
-            inServiceDto.setCountryCode(dto.getAddress().getCountryCode());
-            inServiceDto.setWarehouseCode(dto.getWarehouseCode());
-            inServiceDto.setSkus(skus);
-            String shipmentRule = dto.getShipmentRule();
-            if (!this.delOutboundDocService.inServiceValid(inServiceDto, shipmentRule)) {
-                throw new CommonException("400", "发货规则[" + shipmentRule + "]不存在");
+            // 判断地址信息上的国家是否存在
+            DelOutboundAddressDto addressDto = dto.getAddress();
+            if (null != addressDto && StringUtils.isNotEmpty(addressDto.getCountryCode())) {
+                // 验证产品是否有效
+                DelOutboundOtherInServiceDto inServiceDto = new DelOutboundOtherInServiceDto();
+                inServiceDto.setClientCode(dto.getSellerCode());
+                inServiceDto.setCountryCode(addressDto.getCountryCode());
+                inServiceDto.setWarehouseCode(dto.getWarehouseCode());
+                inServiceDto.setSkus(skus);
+                String shipmentRule = dto.getShipmentRule();
+                if (!this.delOutboundDocService.inServiceValid(inServiceDto, shipmentRule)) {
+                    throw new CommonException("400", "发货规则[" + shipmentRule + "]不存在");
+                }
             }
             if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(dto.getOrderType())) {
                 // 如果是转运出库，后续的SKU验证不需要
