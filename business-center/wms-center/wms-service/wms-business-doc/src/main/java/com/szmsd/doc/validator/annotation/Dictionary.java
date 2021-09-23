@@ -35,4 +35,13 @@ public @interface Dictionary {
      * 参数
      */
     String param() default "";
+
+    /**
+     * 强制验证
+     * true: 字段没有值也验证
+     * false: 字段有值时才验证
+     *
+     * @return boolean
+     */
+    boolean required() default false;
 }

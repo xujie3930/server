@@ -2,9 +2,12 @@ package com.szmsd.doc.validator;
 
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.doc.validator.annotation.Dictionary;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.Collection;
 
 public class DictionaryValidator implements ConstraintValidator<Dictionary, Object> {
 
@@ -22,6 +25,15 @@ public class DictionaryValidator implements ConstraintValidator<Dictionary, Obje
         }
         if (null == o) {
             return true;
+        }
+        boolean required = dictionary.required();
+        if (!required) {
+            // 目前支持的数据类型
+            if (o instanceof String && StringUtils.isEmpty((String) o)) {
+                return true;
+            } else if (o instanceof Collection && CollectionUtils.isEmpty((Collection<?>) o)) {
+                return true;
+            }
         }
         String type = this.dictionary.type();
         Object bean = SpringUtils.getBean(type);
