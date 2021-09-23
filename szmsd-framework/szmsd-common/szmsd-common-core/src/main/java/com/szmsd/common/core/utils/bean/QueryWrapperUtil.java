@@ -137,7 +137,7 @@ public final class QueryWrapperUtil {
                 // 大于等于 >=
                 queryWrapper.ge("DATE_FORMAT(" + column + ", '%Y-%m-%d')", values[0]);
             }
-            if (StringUtils.isNotEmpty(values[1])) {
+            if (values.length > 1 && StringUtils.isNotEmpty(values[1])) {
                 // 小于等于 <=
                 queryWrapper.le("DATE_FORMAT(" + column + ", '%Y-%m-%d')", values[1]);
             }
