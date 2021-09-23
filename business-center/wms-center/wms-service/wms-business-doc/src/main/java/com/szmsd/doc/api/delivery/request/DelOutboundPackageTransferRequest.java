@@ -30,7 +30,7 @@ public class DelOutboundPackageTransferRequest implements Serializable {
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
     private String sellerCode;*/
 
-    @Dictionary(message = "仓库编码不存在", type = DictionaryPluginConstant.WAR_DICTIONARY_PLUGIN)
+    @Dictionary(message = "仓库编码不存在", type = DictionaryPluginConstant.WAR_DICTIONARY_PLUGIN, groups = {DelOutboundGroup.Default.class})
     @NotBlank(message = "仓库编码不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
     private String warehouseCode;
@@ -59,7 +59,7 @@ public class DelOutboundPackageTransferRequest implements Serializable {
     @ApiModelProperty(value = "高 CM", required = true, dataType = "Double", position = 4, example = "10")
     private Double height;
 
-    @Dictionary(message = "重量尺寸确认不存在", type = DictionaryPluginConstant.SUB_DICTIONARY_PLUGIN, param = "076")
+    @Dictionary(message = "重量尺寸确认不存在", type = DictionaryPluginConstant.SUB_DICTIONARY_PLUGIN, param = "076", groups = {DelOutboundGroup.Default.class})
     @SwaggerDictionary(dicCode = "076")
     @NotBlank(message = "重量尺寸确认不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @Size(max = 30, message = "重量尺寸确认不能超过30个字符", groups = {DelOutboundGroup.PackageTransfer.class})
