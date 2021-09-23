@@ -37,7 +37,6 @@ import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundExceptionService;
-import com.szmsd.delivery.util.GoogleBarCodeUtils;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
@@ -55,6 +54,7 @@ import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,15 +62,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Base64Utils;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1409,45 +1406,42 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 responseList.add(response);
                 continue;
             }
-            String base64Str = GoogleBarCodeUtils.generateBarCodeBase64(orderNo);
+            String pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(outbound) + "/" + orderNo + ".pdf";
+            File labelFile = new File(pathname);
+            byte[] fb = null;
+            if (labelFile.exists()) {
+                FileInputStream fileInputStream = null;
+                try {
+                    fileInputStream = new FileInputStream(labelFile);
+                    fb = IOUtils.toByteArray(fileInputStream);
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    response.setStatus(false);
+                    response.setMessage("获取标签文件失败," + e.getMessage());
+                    responseList.add(response);
+                    continue;
+                } finally {
+                    IOUtils.closeQuietly(fileInputStream);
+                }
+            } else {
+                // 查询地址信息
+                DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
+                try {
+                    ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress);
+                    FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    response.setStatus(false);
+                    response.setMessage("生成标签文件失败," + e.getMessage());
+                    responseList.add(response);
+                    continue;
+                }
+            }
+            String base64Str = Base64Utils.encodeToString(fb);
             response.setBase64(base64Str);
             response.setFileName(orderNo + ".pdf");
             response.setStatus(true);
             response.setId(outbound.getId());
-            /*String shipmentOrderNumber = outbound.getShipmentOrderNumber();
-            if (StringUtils.isEmpty(shipmentOrderNumber)) {
-                response.setStatus(false);
-                response.setMessage("未获取承运商标签");
-                responseList.add(response);
-                continue;
-            }
-            String pathname = DelOutboundServiceImplUtil.getLabelFilePath(outbound) + "/" + shipmentOrderNumber;
-            File labelFile = new File(pathname);
-            if (!labelFile.exists()) {
-                response.setStatus(false);
-                response.setMessage("标签文件不存在");
-                responseList.add(response);
-                continue;
-            }
-            FileInputStream fileInputStream = null;
-            try {
-                fileInputStream = new FileInputStream(labelFile);
-                byte[] byteArray = IOUtils.toByteArray(fileInputStream);
-                String base64Str = new String(Base64Utils.encode(byteArray), StandardCharsets.UTF_8);
-                response.setBase64(base64Str);
-                response.setFileName(shipmentOrderNumber + ".pdf");
-                response.setStatus(true);
-            } catch (FileNotFoundException e) {
-                logger.error(e.getMessage());
-                response.setStatus(false);
-                response.setMessage("未找到标签文件");
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-                response.setStatus(false);
-                response.setMessage("读取标签文件失败");
-            } finally {
-                IOUtils.closeQuietly(fileInputStream);
-            }*/
             responseList.add(response);
         }
         return responseList;

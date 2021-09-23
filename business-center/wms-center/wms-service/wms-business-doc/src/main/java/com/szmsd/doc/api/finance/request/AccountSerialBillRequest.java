@@ -35,7 +35,7 @@ public class AccountSerialBillRequest extends QueryDto {
     //    @Size(max = 200, message = "客户名称最大支持200字符")
 //    @ApiModelProperty(value = "客户名称 [200]")
 //    private String cusName;
-    @SwaggerDictionary(dicCode = "008")
+    @SwaggerDictionary(dicCode = "008",dicKey = "subValue")
     @Size(max = 30, message = "币种编号最大支持30字符")
     @ApiModelProperty(value = "币种编号 主子类别 008 [30]", example = "CNY")
     private String currencyCode;
