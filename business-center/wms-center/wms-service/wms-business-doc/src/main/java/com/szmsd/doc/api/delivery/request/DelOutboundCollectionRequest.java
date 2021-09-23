@@ -21,7 +21,7 @@ public class DelOutboundCollectionRequest implements Serializable {
     @ApiModelProperty(value = "客户编码", required = true, dataType = "String")
     private String sellerCode;*/
 
-    @Dictionary(message = "仓库编码不存在", type = DictionaryPluginConstant.WAR_DICTIONARY_PLUGIN)
+    @Dictionary(message = "仓库编码不存在", type = DictionaryPluginConstant.WAR_DICTIONARY_PLUGIN, groups = {DelOutboundGroup.Default.class})
     @NotBlank(message = "仓库编码不能为空", groups = {DelOutboundGroup.Collection.class})
     @ApiModelProperty(value = "仓库编码", required = true, dataType = "String")
     private String warehouseCode;
