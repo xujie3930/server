@@ -148,7 +148,7 @@ public class ProductRequest extends BaseProductRequest {
         byte[] bytes = Base64CheckUtils.checkAndConvert(productImageBase64);
         RemoteAttachmentService remoteAttachmentService = remoterApi.getRemoteAttachmentService();
 
-        MockMultipartFile byteArrayMultipartFile = new MockMultipartFile(super.getProductName(), "", "jpg", bytes);
+        MockMultipartFile byteArrayMultipartFile = new MockMultipartFile(super.getProductName(), "", this.getSuffix(), bytes);
         MockMultipartFile[] mockMultipartFiles = {byteArrayMultipartFile};
         R<List<BasAttachmentDataDTO>> listR = remoteAttachmentService.uploadAttachment(mockMultipartFiles, AttachmentTypeEnum.SKU_IMAGE, null, null);
         List<BasAttachmentDataDTO> dataAndException = R.getDataAndException(listR);
