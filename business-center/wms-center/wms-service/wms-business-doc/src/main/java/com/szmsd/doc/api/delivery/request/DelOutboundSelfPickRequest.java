@@ -34,7 +34,7 @@ public class DelOutboundSelfPickRequest implements Serializable {
     @Dictionary(message = "提货方式不存在", type = DictionaryPluginConstant.SUB_DICTIONARY_PLUGIN, param = "&&058", groups = {DelOutboundGroup.Default.class})
     @SwaggerDictionary(dicCode = "058", dicKey = "subValue")
     @NotBlank(message = "提货方式不能为空", groups = {DelOutboundGroup.SelfPick.class})
-    @ApiModelProperty(value = "提货方式", dataType = "String", position = 2, example = "")
+    @ApiModelProperty(value = "提货方式", dataType = "String", required = true, position = 2, example = "")
     private String deliveryMethod;
 
     @NotNull(message = "提货时间不能为空", groups = {DelOutboundGroup.SelfPick.class})
@@ -42,7 +42,8 @@ public class DelOutboundSelfPickRequest implements Serializable {
     private Date deliveryTime;
 
     @Size(max = 200, message = "提货商/快递商不能超过200个字符", groups = {DelOutboundGroup.SelfPick.class})
-    @ApiModelProperty(value = "提货商/快递商", dataType = "String", position = 4, example = "")
+    @NotBlank(message = "提货商/快递商不能为空", groups = {DelOutboundGroup.SelfPick.class})
+    @ApiModelProperty(value = "提货商/快递商", dataType = "String", required = true, position = 4, example = "")
     private String deliveryAgent;
 
     @NotBlank(message = "提货/快递信息不能为空", groups = {DelOutboundGroup.SelfPick.class})
