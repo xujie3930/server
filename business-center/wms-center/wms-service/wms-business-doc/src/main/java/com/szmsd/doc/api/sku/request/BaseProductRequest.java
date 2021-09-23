@@ -254,6 +254,6 @@ public class BaseProductRequest {
     private String purpose;
 
     @Size(max = 50)
-    @ApiModelProperty(value = "来源 默认:084001", allowableValues = "084001:正常录入,084002:集运录入")
+    @ApiModelProperty(value = "来源 默认:084001", allowableValues = "084001:正常录入,084002:集运录入",hidden = true)
     private String source = "084001";
 }
