@@ -3,6 +3,11 @@ package com.szmsd.delivery.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.enums.SqlLike;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -10,14 +15,18 @@ import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.util.ITextPdfUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
@@ -71,10 +80,28 @@ public final class DelOutboundServiceImplUtil {
         return delOutbound.getOrderType() + "/" + datePath;
     }
 
+    /**
+     * 承运商标签文件路径
+     *
+     * @param delOutbound delOutbound
+     * @return String
+     */
     public static String getLabelFilePath(DelOutbound delOutbound) {
         String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
         String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
         return basedir + "/shipment/label/" + labelBizPath;
+    }
+
+    /**
+     * 转运简易标签文件路径
+     *
+     * @param delOutbound delOutbound
+     * @return String
+     */
+    public static String getPackageTransferLabelFilePath(DelOutbound delOutbound) {
+        String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
+        String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
+        return basedir + "/simple/label/" + labelBizPath;
     }
 
     /**
@@ -232,5 +259,91 @@ public final class DelOutboundServiceImplUtil {
         QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
+    }
+
+    public static ByteArrayOutputStream renderPackageTransfer(DelOutbound delOutbound, DelOutboundAddress delOutboundAddress) throws Exception {
+        Document document = new Document();
+        document.top(0f);
+        document.left(0f);
+        document.right(0f);
+        document.bottom(0f);
+        document.setMargins(10f, 10f, 0f, 0f);
+        // 页面大小
+        int width = 100;
+        int height = 100;
+        float dpi = 72f;
+        Rectangle rec = new Rectangle(ITextPdfUtil.mm2px(width, dpi), ITextPdfUtil.mm2px(height, dpi));
+        rec.rotate();
+        document.setPageSize(rec);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        // 为该Document创建应该Writer实例
+        PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
+        document.open();
+        String fontA = DelOutboundServiceImplUtil.class.getClassLoader().getResource("fonts/ARIALUNI.TTF").getPath();
+        BaseFont bf = BaseFont.createFont(fontA, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        //3. 注册字体
+        Font font = new Font(bf, 18);
+        //3. 添加段落,并设置字体
+        // 文本块(Chunk)、短语(Phrase)和段落(paragraph)处理文本
+        Paragraph paragraph = new Paragraph(delOutbound.getShipmentRule(), font);
+        paragraph.setAlignment(Element.ALIGN_RIGHT);
+        paragraph.setSpacingBefore(0f);
+        paragraph.setSpacingAfter(0f);
+        paragraph.setPaddingTop(0f);
+        document.add(paragraph);
+        //3.添加pdf tables 3表示列数，
+        PdfPTable pdfPTable = new PdfPTable(1);
+        pdfPTable.setWidthPercentage(100f);
+        pdfPTable.setSpacingBefore(5f);
+        pdfPTable.setSpacingAfter(0f);
+        pdfPTable.setWidths(new float[]{1f});
+        pdfPTable.setPaddingTop(0f);
+        for (int i = 0; i < 2; i++) {
+            PdfPCell pdfPCell = new PdfPCell();
+            pdfPCell.setPadding(0f);
+            pdfPCell.setPaddingLeft(5f);
+            pdfPCell.setPaddingRight(5f);
+            pdfPCell.setBorder(15);
+            pdfPCell.setBorderWidth(1.5f);
+            if (i == 0) {
+                pdfPCell.setFixedHeight(140f);
+                Phrase element = new Phrase("To:");
+                pdfPCell.addElement(element);
+                pdfPCell.addElement(new Phrase(delOutboundAddress.getConsignee()));
+                pdfPCell.addElement(new Phrase(delOutboundAddress.getStreet1()));
+                pdfPCell.addElement(new Phrase(delOutboundAddress.getStreet2()));
+                pdfPCell.addElement(new Phrase(delOutboundAddress.getCity() + " " + delOutboundAddress.getStateOrProvince() + " " + delOutboundAddress.getPostCode()));
+                Paragraph country = new Paragraph(delOutboundAddress.getCountry(), font);
+                country.setAlignment(Element.ALIGN_RIGHT);
+                country.setSpacingBefore(0f);
+                country.setSpacingAfter(0f);
+                pdfPCell.addElement(country);
+                pdfPCell.addElement(new Phrase("TEL：" + delOutboundAddress.getPhoneNo()));
+            } else {
+                pdfPCell.setFixedHeight(40f);
+                font.setSize(12f);
+                pdfPCell.addElement(new Phrase("Custom:" + delOutbound.getRemark(), font));
+            }
+            pdfPTable.addCell(pdfPCell);
+        }
+        document.add(pdfPTable);
+        Paragraph country = new Paragraph(delOutbound.getWeight() + " g");
+        country.setAlignment(Element.ALIGN_RIGHT);
+        country.setSpacingBefore(0f);
+        country.setSpacingAfter(0f);
+        document.add(country);
+        String content = delOutbound.getOrderNo();
+        BufferedImage bufferedImage = ITextPdfUtil.getBarCode(content);
+        BufferedImage image = ITextPdfUtil.insertWords(bufferedImage, content);
+        Image image1 = Image.getInstance(image, null);
+        // 计算缩放比例
+        // 渲染在画布上的宽度只有200，以200作为基础比例
+        float scalePercent = 200f / image.getWidth();
+        image1.scalePercent(scalePercent * 100f);
+        image1.setAbsolutePosition(20f, 25f);
+        document.add(image1);
+        document.close();
+        writer.close();
+        return byteArrayOutputStream;
     }
 }
