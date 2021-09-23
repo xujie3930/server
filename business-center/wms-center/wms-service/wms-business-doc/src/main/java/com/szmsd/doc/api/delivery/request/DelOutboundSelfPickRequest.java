@@ -9,10 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -53,6 +50,7 @@ public class DelOutboundSelfPickRequest implements Serializable {
     @ApiModelProperty(value = "提货/快递信息", dataType = "String", position = 5, example = "")
     private String deliveryInfo;
 
+    @Pattern(message = "参考号只能是数字", regexp = "^[0-9]*$", groups = {DelOutboundGroup.Default.class})
     @Size(max = 50, message = "参考号不能超过50个字符", groups = {DelOutboundGroup.SelfPick.class})
     @ApiModelProperty(value = "参考号", dataType = "String", position = 6, example = "")
     private String refNo;

@@ -83,6 +83,7 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "物流服务", dataType = "String", position = 13, example = "")
     private String shipmentRule;
 
+    @Pattern(message = "参考号只能是数字", regexp = "^[0-9]*$", groups = {DelOutboundGroup.Default.class})
     @Size(max = 50, message = "参考号不能超过50个字符", groups = {DelOutboundGroup.Batch.class})
     @ApiModelProperty(value = "参考号", dataType = "String", position = 14, example = "")
     private String refNo;
