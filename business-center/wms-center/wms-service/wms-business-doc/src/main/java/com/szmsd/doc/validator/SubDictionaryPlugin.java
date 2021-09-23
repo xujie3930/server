@@ -17,7 +17,7 @@ public class SubDictionaryPlugin implements DictionaryPlugin {
     private BasSubClientService basSubClientService;
 
     public SubDictionaryPlugin() {
-        this.lruCache = CacheUtil.newLRUCache(32, (8 * 3600 * 1000));
+        this.lruCache = CacheUtil.newLRUCache(32, (3600 * 1000));
     }
 
     @Override
