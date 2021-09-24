@@ -99,12 +99,12 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(dto.getCountryCode());
         BasRegionSelectListVO country = R.getDataAndException(countryR);
         if (null == country) {
-            throw new CommonException("999", "国家信息不存在");
+            throw new CommonException("400", "国家信息不存在");
         }
         // 查询仓库信息
         BasWarehouse warehouse = this.basWarehouseClientService.queryByWarehouseCode(dto.getWarehouseCode());
         if (null == warehouse) {
-            throw new CommonException("999", "仓库信息不存在");
+            throw new CommonException("400", "仓库信息不存在");
         }
         // 传入参数：仓库，SKU
         PricedProductInServiceCriteria criteria = new PricedProductInServiceCriteria();
