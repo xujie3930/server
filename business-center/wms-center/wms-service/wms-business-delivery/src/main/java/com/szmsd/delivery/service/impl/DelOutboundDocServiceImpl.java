@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -60,33 +61,38 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         List<DelOutboundAddResponse> responses = this.delOutboundService.insertDelOutbounds(list);
 
         // 获取出库单ID
-        List<Long> ids = responses.stream().map(DelOutboundAddResponse::getId).collect(Collectors.toList());
+        List<Long> ids = responses.stream().map(DelOutboundAddResponse::getId).filter(Objects::nonNull).collect(Collectors.toList());
 
-        // 批量提审出库单
-        DelOutboundBringVerifyDto bringVerifyDto = new DelOutboundBringVerifyDto();
-        bringVerifyDto.setIds(ids);
-        List<DelOutboundBringVerifyVO> bringVerifyVOList = this.delOutboundBringVerifyService.bringVerify(bringVerifyDto);
+        if (CollectionUtils.isNotEmpty(ids)) {
+            // 批量提审出库单
+            DelOutboundBringVerifyDto bringVerifyDto = new DelOutboundBringVerifyDto();
+            bringVerifyDto.setIds(ids);
+            List<DelOutboundBringVerifyVO> bringVerifyVOList = this.delOutboundBringVerifyService.bringVerify(bringVerifyDto);
 
-        Map<String, DelOutboundBringVerifyVO> bringVerifyVOMap = new HashMap<>();
-        for (DelOutboundBringVerifyVO bringVerifyVO : bringVerifyVOList) {
-            bringVerifyVOMap.put(bringVerifyVO.getOrderNo(), bringVerifyVO);
-        }
-
-        // 查询出库单信息
-        List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
-        Map<Long, DelOutbound> delOutboundMap = delOutboundList.stream().collect(Collectors.toMap(DelOutbound::getId, v -> v, (a, b) -> a));
-
-        for (DelOutboundAddResponse response : responses) {
-            // 提审结果
-            DelOutboundBringVerifyVO bringVerifyVO = bringVerifyVOMap.get(response.getOrderNo());
-            if (null != bringVerifyVO) {
-                response.setStatus(bringVerifyVO.getSuccess());
-                response.setMessage(bringVerifyVO.getMessage());
+            Map<String, DelOutboundBringVerifyVO> bringVerifyVOMap = new HashMap<>();
+            for (DelOutboundBringVerifyVO bringVerifyVO : bringVerifyVOList) {
+                bringVerifyVOMap.put(bringVerifyVO.getOrderNo(), bringVerifyVO);
             }
-            // 挂号
-            DelOutbound delOutbound = delOutboundMap.get(response.getId());
-            if (null != delOutbound) {
-                response.setTrackingNo(delOutbound.getTrackingNo());
+
+            // 查询出库单信息
+            List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
+            Map<Long, DelOutbound> delOutboundMap = delOutboundList.stream().collect(Collectors.toMap(DelOutbound::getId, v -> v, (a, b) -> a));
+
+            for (DelOutboundAddResponse response : responses) {
+                if (!response.getStatus()) {
+                    continue;
+                }
+                // 提审结果
+                DelOutboundBringVerifyVO bringVerifyVO = bringVerifyVOMap.get(response.getOrderNo());
+                if (null != bringVerifyVO) {
+                    response.setStatus(bringVerifyVO.getSuccess());
+                    response.setMessage(bringVerifyVO.getMessage());
+                }
+                // 挂号
+                DelOutbound delOutbound = delOutboundMap.get(response.getId());
+                if (null != delOutbound) {
+                    response.setTrackingNo(delOutbound.getTrackingNo());
+                }
             }
         }
 

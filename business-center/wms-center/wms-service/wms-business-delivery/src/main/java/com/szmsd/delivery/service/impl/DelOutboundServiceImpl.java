@@ -521,13 +521,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 组合信息
                 this.delOutboundCombinationService.save(orderNo, dto.getCombinations());
             }
+            response.setStatus(true);
             response.setId(delOutbound.getId());
             response.setOrderNo(orderNo);
             return response;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            // 异常传播
-            throw e;
+            // 返回异常错误信息
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return response;
         }
     }
 
