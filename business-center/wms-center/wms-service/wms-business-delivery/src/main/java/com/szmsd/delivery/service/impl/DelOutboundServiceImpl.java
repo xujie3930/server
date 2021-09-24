@@ -447,9 +447,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             } else if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(dto.getOrderType())) {
                 for (DelOutboundDetailDto detail : details) {
                     String sku = detail.getSku();
-                    if (!productMap.containsKey(sku)) {
+                    BaseProduct product = productMap.get(sku);
+                    if (null == product) {
                         throw new CommonException("400", "SKU[" + sku + "]不属于当前客户");
                     }
+                    detail.setLength(product.getLength());
+                    detail.setWidth(product.getWidth());
+                    detail.setHeight(product.getHeight());
+                    detail.setWeight(product.getWeight());
+                    detail.setBindCode(product.getBindCode());
                 }
             }
         }
@@ -515,13 +521,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 组合信息
                 this.delOutboundCombinationService.save(orderNo, dto.getCombinations());
             }
+            response.setStatus(true);
             response.setId(delOutbound.getId());
             response.setOrderNo(orderNo);
             return response;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            // 异常传播
-            throw e;
+            // 返回异常错误信息
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return response;
         }
     }
 
