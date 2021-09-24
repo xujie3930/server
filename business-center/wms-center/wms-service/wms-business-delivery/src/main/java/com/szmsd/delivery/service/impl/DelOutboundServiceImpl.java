@@ -415,6 +415,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     if (null == product) {
                         throw new CommonException("400", "SKU[" + sku + "]不属于当前客户");
                     }
+                    detail.setLength(product.getLength());
+                    detail.setWidth(product.getWidth());
+                    detail.setHeight(product.getHeight());
+                    detail.setWeight(product.getWeight());
                     InventoryAvailableListVO vo = availableMap.get(sku);
                     if (null == vo) {
                         throw new CommonException("400", "SKU[" + sku + "]在[" + warehouseCode + "]仓库没有库存信息");
