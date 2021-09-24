@@ -447,9 +447,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             } else if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(dto.getOrderType())) {
                 for (DelOutboundDetailDto detail : details) {
                     String sku = detail.getSku();
-                    if (!productMap.containsKey(sku)) {
+                    BaseProduct product = productMap.get(sku);
+                    if (null == product) {
                         throw new CommonException("400", "SKU[" + sku + "]不属于当前客户");
                     }
+                    detail.setLength(product.getLength());
+                    detail.setWidth(product.getWidth());
+                    detail.setHeight(product.getHeight());
+                    detail.setWeight(product.getWeight());
+                    detail.setBindCode(product.getBindCode());
                 }
             }
         }
