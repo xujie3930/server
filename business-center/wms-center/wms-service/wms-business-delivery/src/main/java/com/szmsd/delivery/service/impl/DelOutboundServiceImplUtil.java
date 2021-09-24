@@ -23,10 +23,14 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.util.ITextPdfUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.springframework.core.io.UrlResource;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
@@ -279,8 +283,13 @@ public final class DelOutboundServiceImplUtil {
         // 为该Document创建应该Writer实例
         PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
         document.open();
-        String fontA = DelOutboundServiceImplUtil.class.getClassLoader().getResource("fonts/ARIALUNI.TTF").getPath();
-        BaseFont bf = BaseFont.createFont(fontA, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        URL fontUrl = DelOutboundServiceImplUtil.class.getClassLoader().getResource("fonts/ARIALUNI.TTF");
+        UrlResource urlResource = new UrlResource(fontUrl);
+        InputStream inputStream = urlResource.getInputStream();
+        byte[] fontBytes = new byte[inputStream.available()];
+        inputStream.read(fontBytes);
+        IOUtils.closeQuietly(inputStream);
+        BaseFont bf = BaseFont.createFont("ARIALUNI.TTF", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, BaseFont.NOT_CACHED, fontBytes, fontBytes);
         //3. 注册字体
         Font font = new Font(bf, 18);
         //3. 添加段落,并设置字体
