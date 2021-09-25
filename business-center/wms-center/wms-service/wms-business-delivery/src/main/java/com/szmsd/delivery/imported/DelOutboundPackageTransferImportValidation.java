@@ -34,23 +34,26 @@ public class DelOutboundPackageTransferImportValidation implements ImportValidat
         // 外联数据
         this.outerContext.put(sort, warehouseCode);
         String shipmentRule = object.getShipmentRule();
-        if (this.importContext.isEmpty(shipmentRule, rowIndex, 3, null, "物流服务不能为空")) {
-            return;
+        if (!this.importContext.isEmpty(shipmentRule, rowIndex, 3, null, "物流服务不能为空")) {
+            this.importContext.stringLength(shipmentRule, 50, rowIndex, 3, "物流服务不能超过50个字符");
         }
         // 收件人
         String consignee = object.getConsignee();
-        if (this.importContext.isEmpty(consignee, rowIndex, 4, null, "收件人不能为空")) {
-            return;
+        if (!this.importContext.isEmpty(consignee, rowIndex, 4, null, "收件人不能为空")) {
+            this.importContext.stringLength(shipmentRule, 50, rowIndex, 4, "收件人不能超过50个字符");
         }
         // 街道1
         String street1 = object.getStreet1();
-        if (this.importContext.isEmpty(street1, rowIndex, 5, null, "街道1不能为空")) {
-            return;
+        if (!this.importContext.isEmpty(street1, rowIndex, 5, null, "街道1不能为空")) {
+            this.importContext.stringLength(street1, 500, rowIndex, 5, "街道1不能超过50个字符");
         }
+        this.importContext.stringLength(object.getStreet2(), 500, rowIndex, 6, "街道2不能超过500个字符");
+        this.importContext.stringLength(object.getCity(), 50, rowIndex, 7, "城镇/城市不能超过50个字符");
+        this.importContext.stringLength(object.getStateOrProvince(), 50, rowIndex, 8, "州/省不能超过50个字符");
         // 邮编
         String postCode = object.getPostCode();
-        if (this.importContext.isEmpty(postCode, rowIndex, 9, null, "邮编不能为空")) {
-            return;
+        if (!this.importContext.isEmpty(postCode, rowIndex, 9, null, "邮编不能为空")) {
+            this.importContext.stringLength(postCode, 50, rowIndex, 9, "邮编不能超过50个字符");
         }
         // 国家不能为空
         String country = object.getCountry();
