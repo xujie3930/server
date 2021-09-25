@@ -54,6 +54,14 @@ public class ImportContext<T> extends CacheContext.MapCacheContext<String, Objec
         return false;
     }
 
+    public boolean stringLength(String text, int maxLength, int rowIndex, int columnIndex, String message) {
+        if (null != text && text.length() > maxLength) {
+            this.addMessage(new ImportMessage(rowIndex, columnIndex, null, message));
+            return true;
+        }
+        return false;
+    }
+
     public List<T> getDataList() {
         return dataList;
     }
