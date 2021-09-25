@@ -377,6 +377,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             BaseProductConditionQueryDto productConditionQueryDto = new BaseProductConditionQueryDto();
             productConditionQueryDto.setSkus(skus);
             productConditionQueryDto.setSellerCode(dto.getSellerCode());
+            if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(dto.getOrderType())) {
+                // 集运出库只查询集运的SKU
+                productConditionQueryDto.setSource("084002");
+            }
             List<BaseProduct> productList = this.baseProductClientService.queryProductList(productConditionQueryDto);
             if (CollectionUtils.isEmpty(productList)) {
                 throw new CommonException("400", "查询SKU信息失败");

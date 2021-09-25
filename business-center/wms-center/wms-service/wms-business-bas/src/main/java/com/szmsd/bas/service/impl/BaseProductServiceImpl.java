@@ -350,7 +350,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         //SKU需要仓库测量尺寸
         baseProduct.setWarehouseAcceptance(false);
-        if(StringUtils.isBlank(baseProduct.getSource())){
+        if (StringUtils.isBlank(baseProduct.getSource())) {
             baseProduct.setSource(BaseMainEnum.NORMAL_IN.getCode());
         }
         baseProduct.setWeight(baseProduct.getInitWeight());
@@ -515,6 +515,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         }
         if (null != conditionQueryDto.getSellerCode()) {
             queryWrapper.eq(BaseProduct::getSellerCode, conditionQueryDto.getSellerCode());
+        }
+        if (null != conditionQueryDto.getSource()) {
+            queryWrapper.eq(BaseProduct::getSource, conditionQueryDto.getSource());
         }
         queryWrapper.in(BaseProduct::getCode, conditionQueryDto.getSkus());
         return this.list(queryWrapper);

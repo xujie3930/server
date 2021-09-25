@@ -16,4 +16,7 @@ public class BaseProductConditionQueryDto {
 
     @ApiModelProperty(value = "仓库编码")
     private List<String> skus;
+
+    @ApiModelProperty(value = "SKU来源")
+    private String source;
 }
