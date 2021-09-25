@@ -1,5 +1,6 @@
 package com.szmsd.doc.utils;
 
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.doc.api.AssertUtil400;
 import org.springframework.util.Base64Utils;
 
@@ -12,7 +13,13 @@ import org.springframework.util.Base64Utils;
 public final class Base64CheckUtils extends Base64Utils {
 
     public static byte[] checkAndConvert(String productImageBase64) {
-        byte[] bytes = Base64CheckUtils.decodeFromString(productImageBase64);
+        byte[] bytes = new byte[0];
+        try {
+            bytes = Base64CheckUtils.decodeFromString(productImageBase64);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CommonException("400", "Base64文件解析异常!");
+        }
         AssertUtil400.isTrue(bytes.length <= 10 * 1024 * 1024, "文件最大仅支持10M");
         return bytes;
     }
