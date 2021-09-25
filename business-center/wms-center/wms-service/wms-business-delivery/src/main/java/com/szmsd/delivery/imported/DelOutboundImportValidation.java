@@ -75,17 +75,30 @@ public class DelOutboundImportValidation implements ImportValidation<DelOutbound
         @Override
         public void valid(int rowIndex, DelOutboundImportDto object) {
             // 物流服务不能为空
-            this.importContext.isEmpty(object.getShipmentRule(), rowIndex, 4, null, "物流服务不能为空");
+            if (!this.importContext.isEmpty(object.getShipmentRule(), rowIndex, 4, null, "物流服务不能为空")) {
+                this.importContext.stringLength(object.getShipmentRule(), 50, rowIndex, 4, "物流服务不能超过50个字符");
+            }
             // 收件人姓名不能为空
-            this.importContext.isEmpty(object.getConsignee(), rowIndex, 5, null, "收件人姓名不能为空");
+            if (!this.importContext.isEmpty(object.getConsignee(), rowIndex, 5, null, "收件人姓名不能为空")) {
+                this.importContext.stringLength(object.getConsignee(), 50, rowIndex, 5, "收件人姓名不能超过50个字符");
+            }
             // 街道1不能为空
-            this.importContext.isEmpty(object.getStreet1(), rowIndex, 6, null, "街道1不能为空");
+            if (!this.importContext.isEmpty(object.getStreet1(), rowIndex, 6, null, "街道1不能为空")) {
+                this.importContext.stringLength(object.getStreet1(), 500, rowIndex, 6, "街道1不能超过50个字符");
+            }
+            this.importContext.stringLength(object.getStreet2(), 500, rowIndex, 7, "街道2不能超过50个字符");
             // 城镇/城市不能为空
-            this.importContext.isEmpty(object.getCity(), rowIndex, 8, null, "城镇/城市不能为空");
+            if (!this.importContext.isEmpty(object.getCity(), rowIndex, 8, null, "城镇/城市不能为空")) {
+                this.importContext.stringLength(object.getCity(), 50, rowIndex, 8, "城镇/城市不能超过50个字符");
+            }
             // 州/省不能为空
-            this.importContext.isEmpty(object.getStateOrProvince(), rowIndex, 9, null, "州/省不能为空");
+            if (!this.importContext.isEmpty(object.getStateOrProvince(), rowIndex, 9, null, "州/省不能为空")) {
+                this.importContext.stringLength(object.getStateOrProvince(), 50, rowIndex, 9, "州/省不能超过50个字符");
+            }
             // 邮编不能为空
-            this.importContext.isEmpty(object.getPostCode(), rowIndex, 10, null, "邮编不能为空");
+            if (!this.importContext.isEmpty(object.getPostCode(), rowIndex, 10, null, "邮编不能为空")) {
+                this.importContext.stringLength(object.getPostCode(), 50, rowIndex, 10, "邮编不能超过50个字符");
+            }
             // 国家不能为空
             String country = object.getCountry();
             if (this.importContext.isEmpty(country, rowIndex, 11, null, "国家不能为空")) {
@@ -93,6 +106,7 @@ public class DelOutboundImportValidation implements ImportValidation<DelOutbound
             }
             String countryCode = this.getCountryCode(country);
             this.importContext.isEmpty(countryCode, rowIndex, 11, country, "国家不存在");
+            this.importContext.stringLength(object.getPhoneNo(), 50, rowIndex, 12, "联系方式不能超过50个字符");
         }
 
         public String getCountryCode(String country) {
@@ -119,9 +133,13 @@ public class DelOutboundImportValidation implements ImportValidation<DelOutbound
             // 提货日期不能为空
             this.importContext.isNull(object.getDeliveryTime(), rowIndex, 14, null, "预计提货时间不能为空");
             // 自提人不能为空
-            this.importContext.isEmpty(object.getDeliveryAgent(), rowIndex, 13, null, "自提人不能为空");
+            if (!this.importContext.isEmpty(object.getDeliveryAgent(), rowIndex, 13, null, "自提人不能为空")) {
+                this.importContext.stringLength(object.getDeliveryAgent(), 200, rowIndex, 13, "物流服务不能超过50个字符");
+            }
             // 提货人联系方式/快递单号不能为空
-            this.importContext.isEmpty(object.getDeliveryInfo(), rowIndex, 14, null, "提货人联系方式/快递单号不能为空");
+            if (!this.importContext.isEmpty(object.getDeliveryInfo(), rowIndex, 14, null, "提货人联系方式/快递单号不能为空")) {
+                this.importContext.stringLength(object.getDeliveryInfo(), 200, rowIndex, 14, "物流服务不能超过50个字符");
+            }
         }
 
         public String getDeliveryMethod(String deliveryMethodName) {
