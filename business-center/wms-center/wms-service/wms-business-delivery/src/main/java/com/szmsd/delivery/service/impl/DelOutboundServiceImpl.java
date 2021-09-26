@@ -555,8 +555,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundAddResponse> insertDelOutbounds(List<DelOutboundDto> dtoList) {
         List<DelOutboundAddResponse> result = new ArrayList<>();
+        int index = 1;
         for (DelOutboundDto dto : dtoList) {
-            result.add(this.createDelOutbound(dto));
+            DelOutboundAddResponse delOutbound = this.createDelOutbound(dto);
+            delOutbound.setIndex(index);
+            result.add(delOutbound);
+            index++;
         }
         return result;
     }

@@ -14,6 +14,9 @@ import java.io.Serializable;
 @ApiModel(value = "DelOutboundAddResponse", description = "DelOutboundAddResponse对象")
 public class DelOutboundAddResponse implements Serializable {
 
+    @ApiModelProperty(value = "索引", dataType = "Integer")
+    private Integer index;
+
     @ApiModelProperty(value = "ID", dataType = "Long", example = "157")
     private Long id;
 
