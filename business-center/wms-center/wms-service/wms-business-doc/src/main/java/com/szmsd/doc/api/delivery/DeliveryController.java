@@ -18,6 +18,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
 import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.CountryCache;
 import com.szmsd.doc.api.delivery.request.*;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
@@ -285,6 +286,13 @@ public class DeliveryController {
                     if (StringUtils.isEmpty(detail.getNewLabelCode())) {
                         throw new CommonException("400", "新标签不能为空");
                     }
+                }
+            }
+            // 验证
+            if (StringUtils.isNotBlank(dto.getShipmentChannel())) {
+                //DMShipmentChannel 渠道发货，提货方式、时间、供应商，快递信息不需要必填
+                if (!"DMShipmentChannel".equalsIgnoreCase(dto.getShipmentChannel().trim())){
+                    AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryMethod()),"提货方式不能为空");
                 }
             }
             this.setAddressCountry(dto);
