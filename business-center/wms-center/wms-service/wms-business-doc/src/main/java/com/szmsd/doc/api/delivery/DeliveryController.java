@@ -335,7 +335,8 @@ public class DeliveryController {
     public R<Integer> labelBatch(@RequestParam("orderNo") String orderNo, HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
-
+        AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo),"单据号不能为空");
+        AssertUtil400.isTrue(verifyOrderSelf(orderNo),"单据号不存在");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
         R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL, "", "");
         List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
@@ -349,6 +350,21 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
     }
 
+    /**
+     * 校验单据是否存在
+     * @param orderNo
+     * @return
+     */
+    public boolean verifyOrderSelf(String orderNo) {
+        DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
+        delOutboundListQueryDto.setOrderNo(orderNo);
+//        delOutboundListQueryDto.setState();
+        TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
+        if (null == page || page.getTotal() == 0) {
+            return false;
+        }
+        return true;
+    }
     //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/batch")
@@ -400,7 +416,8 @@ public class DeliveryController {
     public R<Integer> labelSelfPick(@RequestParam("orderNo") String orderNo, HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
-
+        AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo),"单据号不能为空");
+        AssertUtil400.isTrue(verifyOrderSelf(orderNo),"单据号不存在");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
         R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT, "", "");
         List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
