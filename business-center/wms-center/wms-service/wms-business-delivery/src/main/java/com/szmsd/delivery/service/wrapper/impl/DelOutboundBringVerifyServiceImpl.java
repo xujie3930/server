@@ -1,7 +1,11 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
@@ -73,6 +77,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IDelOutboundPackingService delOutboundPackingService;
     @Autowired
     private IDelOutboundCombinationService delOutboundCombinationService;
+    @Autowired
+    private RemoteAttachmentService remoteAttachmentService;
 
     @Override
     public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
@@ -96,6 +102,15 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
                         || isAuditFailed)) {
                     throw new CommonException("400", "单据状态不正确，不能提审");
+                }
+                // 判断面单是否上传
+                BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                basAttachmentQueryDTO.setAttachmentType(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getAttachmentType());
+                R<List<BasAttachment>> list = remoteAttachmentService.list(basAttachmentQueryDTO);
+                List<BasAttachment> dataAndException = R.getDataAndException(list);
+                if(dataAndException.size() == 0) {
+                    throw new CommonException("400", delOutbound.getOrderNo() + "单据面单未上传，不能提审");
                 }
                 ApplicationContext context = this.initContext(delOutbound);
                 BringVerifyEnum currentState;

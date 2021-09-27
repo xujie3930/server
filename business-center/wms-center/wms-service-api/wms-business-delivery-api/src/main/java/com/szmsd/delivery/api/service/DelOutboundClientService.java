@@ -1,11 +1,15 @@
 package com.szmsd.delivery.api.service;
 
+import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
+import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
 import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
 import com.szmsd.http.vo.PricedProduct;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -110,4 +114,12 @@ public interface DelOutboundClientService {
      * @return DelOutboundListExceptionMessageVO
      */
     List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos);
+
+    /**
+     * 提审
+     *
+     * @param dto
+     * @return
+     */
+    List<DelOutboundBringVerifyVO> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto);
 }

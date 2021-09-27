@@ -6,6 +6,7 @@ import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
+import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
 import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
 import com.szmsd.http.vo.PricedProduct;
@@ -87,5 +88,10 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
             return Collections.emptyList();
         }
         return R.getDataAndException(this.delOutboundFeignService.exceptionMessageList(orderNos));
+    }
+
+    @Override
+    public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.bringVerify(dto));
     }
 }

@@ -3,6 +3,7 @@ package com.szmsd.delivery.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.domain.DelOutboundPackingDetail;
@@ -62,6 +63,8 @@ public class DelOutboundPackingServiceImpl extends ServiceImpl<DelOutboundPackin
     @Override
     public List<DelOutboundPacking> selectDelOutboundPackingList(DelOutboundPacking delOutboundPacking) {
         QueryWrapper<DelOutboundPacking> where = new QueryWrapper<DelOutboundPacking>();
+        where.eq(StringUtils.isNotEmpty(delOutboundPacking.getOrderNo()),"order_no", delOutboundPacking.getOrderNo())
+                .eq(delOutboundPacking.getType() != null,"type", delOutboundPacking.getType());
         return baseMapper.selectList(where);
     }
 
