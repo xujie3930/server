@@ -337,7 +337,8 @@ public class DeliveryController {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
         AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo),"单据号不能为空");
-        AssertUtil400.isTrue(verifyOrderSelf(orderNo),"单据号不存在");
+        TableDataInfo<DelOutboundListVO> delOutboundListTableDataInfo = getDelOutboundListTableDataInfo(orderNo, DelOutboundOrderTypeEnum.BATCH);
+        AssertUtil400.isTrue(verifyOrderSelf(orderNo,DelOutboundOrderTypeEnum.BATCH),"单据号不存在");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
         R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL, "", "");
         List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
@@ -348,7 +349,14 @@ public class DeliveryController {
         delOutboundUploadBoxLabelDto.setOrderNo(orderNo);
         delOutboundUploadBoxLabelDto.setBatchLabels(dataDTOList);
         delOutboundUploadBoxLabelDto.setAttachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL);
-        return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
+        int i = this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto);
+        //提成功后 发起提审
+        DelOutboundBringVerifyDto delOutboundBringVerifyDto = new DelOutboundBringVerifyDto();
+        DelOutboundListVO delOutboundListVO = delOutboundListTableDataInfo.getRows().get(0);
+        Long id = delOutboundListVO.getId();
+        delOutboundBringVerifyDto.setIds(Collections.singletonList(id));
+        delOutboundClientService.bringVerify(delOutboundBringVerifyDto);
+        return R.ok(i);
     }
 
     /**
@@ -356,17 +364,25 @@ public class DeliveryController {
      * @param orderNo
      * @return
      */
-    public boolean verifyOrderSelf(String orderNo) {
-        DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
-        delOutboundListQueryDto.setOrderNo(orderNo);
-        //待提审 待发货 审核失败
-        delOutboundListQueryDto.setState(DelOutboundStateEnum.REVIEWED.getCode()+","+DelOutboundStateEnum.DELIVERED.getCode()+","+DelOutboundStateEnum.AUDIT_FAILED.getCode());
-        TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
+    public boolean verifyOrderSelf(String orderNo,DelOutboundOrderTypeEnum orderType) {
+        TableDataInfo<DelOutboundListVO> page = getDelOutboundListTableDataInfo(orderNo, orderType);
         if (null == page || page.getTotal() == 0) {
             return false;
         }
         return true;
     }
+
+    private TableDataInfo<DelOutboundListVO> getDelOutboundListTableDataInfo(String orderNo, DelOutboundOrderTypeEnum orderType) {
+        DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
+        delOutboundListQueryDto.setOrderNo(orderNo);
+        delOutboundListQueryDto.setOrderType(orderType.getCode());
+        delOutboundListQueryDto.setCustomCode(AuthenticationUtil.getSellerCode());
+        //待发货 审核失败
+        delOutboundListQueryDto.setState(DelOutboundStateEnum.DELIVERED.getCode()+","+DelOutboundStateEnum.AUDIT_FAILED.getCode());
+        TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
+        return page;
+    }
+
     //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/batch")
@@ -419,7 +435,7 @@ public class DeliveryController {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
         AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo),"单据号不能为空");
-        AssertUtil400.isTrue(verifyOrderSelf(orderNo),"单据号不存在");
+        AssertUtil400.isTrue(verifyOrderSelf(orderNo,DelOutboundOrderTypeEnum.SELF_PICK),"单据号不存在");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
         R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT, "", "");
         List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);

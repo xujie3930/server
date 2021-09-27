@@ -11,6 +11,7 @@ import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.vo.PricedProduct;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
@@ -152,4 +153,8 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/exceptionMessageList")
     @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述")
     R<List<DelOutboundListExceptionMessageVO>> exceptionMessageList(@RequestBody List<String> orderNos);
+
+    @PostMapping("/api/outbound/bringVerify")
+    @ApiOperation(value = "出库管理 - 提审", position = 600)
+    R<List<DelOutboundBringVerifyVO>> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto);
 }
