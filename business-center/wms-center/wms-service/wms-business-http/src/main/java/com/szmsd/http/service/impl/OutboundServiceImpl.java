@@ -1,18 +1,21 @@
 package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IOutboundService;
 import com.szmsd.http.service.http.WmsRequest;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import com.szmsd.http.vo.ResponseVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
  * @author zhangyuyuan
  * @date 2021-03-09 11:23
  */
+@Slf4j
 @Service
 public class OutboundServiceImpl extends WmsRequest implements IOutboundService {
 
@@ -22,6 +25,7 @@ public class OutboundServiceImpl extends WmsRequest implements IOutboundService 
 
     @Override
     public CreateShipmentResponseVO shipmentCreate(CreateShipmentRequestDto dto) {
+        log.info("shipmentCreate：{}", JSONObject.toJSONString(dto));
         return JSON.parseObject(httpPost(dto.getWarehouseCode(), "outbound.create", dto), CreateShipmentResponseVO.class);
     }
 

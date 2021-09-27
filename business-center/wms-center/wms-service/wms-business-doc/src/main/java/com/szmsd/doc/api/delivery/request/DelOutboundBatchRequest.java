@@ -63,7 +63,7 @@ public class DelOutboundBatchRequest implements Serializable {
 
     @Dictionary(message = "提货方式不存在", type = DictionaryPluginConstant.SUB_DICTIONARY_PLUGIN, param = "&&058", groups = {DelOutboundGroup.Default.class})
     @SwaggerDictionary(dicCode = "058", dicKey = "subValue")
-    @NotBlank(message = "提货方式不能为空", groups = {DelOutboundGroup.Batch.class})
+//    @NotBlank(message = "提货方式不能为空", groups = {DelOutboundGroup.Batch.class})
     @ApiModelProperty(value = "提货方式", dataType = "String", position = 9, example = "")
     private String deliveryMethod;
 
