@@ -12,6 +12,7 @@ import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -246,7 +247,11 @@ public final class DelOutboundServiceImplUtil {
         }
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.shipment_rule", queryDto.getShipmentRule());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.warehouse_code", queryDto.getWarehouseCode());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.state", queryDto.getState());
+        //QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.state", queryDto.getState());
+        if (StringUtils.isNotBlank(queryDto.getState())) {
+            queryWrapper.in("o.state", StringToolkit.getCodeByArray(queryDto.getState()));
+        }
+
         String orderType = queryDto.getOrderType();
         if (StringUtils.isNotEmpty(orderType)) {
             if (orderType.contains(",")) {

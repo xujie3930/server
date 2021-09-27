@@ -15,6 +15,7 @@ import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
 import com.szmsd.delivery.vo.DelOutboundListVO;
@@ -358,7 +359,8 @@ public class DeliveryController {
     public boolean verifyOrderSelf(String orderNo) {
         DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
         delOutboundListQueryDto.setOrderNo(orderNo);
-//        delOutboundListQueryDto.setState();
+        //待发货 审核失败
+        delOutboundListQueryDto.setState(DelOutboundStateEnum.DELIVERED.getCode()+","+DelOutboundStateEnum.AUDIT_FAILED.getCode());
         TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
         if (null == page || page.getTotal() == 0) {
             return false;
