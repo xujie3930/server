@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author zhangyuyuan
@@ -294,6 +295,11 @@ public class DeliveryController {
                 if (!"DMShipmentChannel".equalsIgnoreCase(dto.getShipmentChannel().trim())){
                     AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryMethod()),"提货方式不能为空");
                 }
+            }
+            // 验证 按包装要求需要填写包装详情
+            if (null != dto.getIsPackingByRequired() && dto.getIsPackingByRequired()) {
+                List<DelOutboundPackingDto> packings = dto.getPackings();
+                AssertUtil400.isTrue(CollectionUtils.isNotEmpty(packings), "按要求装箱需要填写装箱信息");
             }
             this.setAddressCountry(dto);
         }

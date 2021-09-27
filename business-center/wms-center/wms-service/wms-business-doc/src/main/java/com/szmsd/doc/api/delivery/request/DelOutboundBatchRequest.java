@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-@ApiModel(value = "DelOutboundBatchRequest", description = "DelOutboundBatchRequest对象")
+@ApiModel(description = "DelOutboundBatchRequest对象")
 @PreNotNull(field = "deliveryMethod", model = PreNotNull.Model.VALUE, fieldValue = "058002", linkageFields = {"deliveryTime"}, message = "提货时间不能为空", groups = {DelOutboundGroup.Batch.class})
 @PreNotNull(field = "deliveryMethod", model = PreNotNull.Model.VALUE, fieldValue = "058002", linkageFields = {"deliveryAgent"}, message = "提货商/快递商不能为空", groups = {DelOutboundGroup.Batch.class})
 public class DelOutboundBatchRequest implements Serializable {
@@ -102,7 +102,7 @@ public class DelOutboundBatchRequest implements Serializable {
     private List<DelOutboundBatchSkuDetailRequest> details;
 
     @Valid
-    @ApiModelProperty(value = "装箱信息", dataType = "DelOutboundBatchPackingRequest", position = 18)
+    @ApiModelProperty(value = "装箱信息", position = 18)
     private List<DelOutboundBatchPackingRequest> packings;
 
 }

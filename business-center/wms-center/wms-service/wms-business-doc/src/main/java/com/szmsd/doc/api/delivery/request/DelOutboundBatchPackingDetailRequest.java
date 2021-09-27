@@ -7,7 +7,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-@ApiModel(value = "DelOutboundBatchPackingRequest", description = "DelOutboundBatchPackingRequest对象")
+@ApiModel(description = "DelOutboundBatchPackingRequest对象")
 public class DelOutboundBatchPackingDetailRequest implements Serializable {
 
     @ApiModelProperty(value = "SKU")

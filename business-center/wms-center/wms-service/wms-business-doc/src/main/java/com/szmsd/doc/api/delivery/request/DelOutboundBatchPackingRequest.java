@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-@ApiModel(value = "DelOutboundBatchPackingRequest", description = "DelOutboundBatchPackingRequest对象")
+@ApiModel(description = "包装信息 - 选则按要求装箱需要填写")
 public class DelOutboundBatchPackingRequest implements Serializable {
 
     @ApiModelProperty(value = "数量")
