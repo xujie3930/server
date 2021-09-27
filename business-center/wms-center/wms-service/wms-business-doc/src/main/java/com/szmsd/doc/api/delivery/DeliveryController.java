@@ -359,8 +359,8 @@ public class DeliveryController {
     public boolean verifyOrderSelf(String orderNo) {
         DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
         delOutboundListQueryDto.setOrderNo(orderNo);
-        //待发货 审核失败
-        delOutboundListQueryDto.setState(DelOutboundStateEnum.DELIVERED.getCode()+","+DelOutboundStateEnum.AUDIT_FAILED.getCode());
+        //待提审 待发货 审核失败
+        delOutboundListQueryDto.setState(DelOutboundStateEnum.REVIEWED.getCode()+","+DelOutboundStateEnum.DELIVERED.getCode()+","+DelOutboundStateEnum.AUDIT_FAILED.getCode());
         TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
         if (null == page || page.getTotal() == 0) {
             return false;

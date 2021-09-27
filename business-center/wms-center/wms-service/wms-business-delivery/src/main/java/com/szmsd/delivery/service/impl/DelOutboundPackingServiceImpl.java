@@ -62,6 +62,7 @@ public class DelOutboundPackingServiceImpl extends ServiceImpl<DelOutboundPackin
     @Override
     public List<DelOutboundPacking> selectDelOutboundPackingList(DelOutboundPacking delOutboundPacking) {
         QueryWrapper<DelOutboundPacking> where = new QueryWrapper<DelOutboundPacking>();
+        where.eq("order_no", delOutboundPacking.getOrderNo()).eq("type", delOutboundPacking.getType());
         return baseMapper.selectList(where);
     }
 
