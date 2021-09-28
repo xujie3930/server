@@ -437,7 +437,7 @@ public class DeliveryController {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
         AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo),"单据号不能为空");
-        AssertUtil400.isTrue(verifyOrderSelf(orderNo,DelOutboundOrderTypeEnum.SELF_PICK),"单据号不存在");
+        AssertUtil400.isTrue(verifyOrderSelf(orderNo,DelOutboundOrderTypeEnum.SELF_PICK),"有部分单号已经开始操作，不能上传");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
         R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT, "", "");
         List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
