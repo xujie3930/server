@@ -103,14 +103,17 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         || isAuditFailed)) {
                     throw new CommonException("400", "单据状态不正确，不能提审");
                 }
-                // 判断面单是否上传
-                BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
-                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
-                basAttachmentQueryDTO.setAttachmentType(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getAttachmentType());
-                R<List<BasAttachment>> list = remoteAttachmentService.list(basAttachmentQueryDTO);
-                List<BasAttachment> dataAndException = R.getDataAndException(list);
-                if(dataAndException.size() == 0) {
-                    throw new CommonException("400", delOutbound.getOrderNo() + "单据面单未上传，不能提审");
+
+                // 自提单判断面单是否上传
+                if(DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())){
+                    BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                    basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                    basAttachmentQueryDTO.setAttachmentType(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getAttachmentType());
+                    R<List<BasAttachment>> list = remoteAttachmentService.list(basAttachmentQueryDTO);
+                    List<BasAttachment> dataAndException = R.getDataAndException(list);
+                    if(dataAndException.size() == 0) {
+                        throw new CommonException("400", delOutbound.getOrderNo() + "单据面单未上传，不能提审");
+                    }
                 }
                 ApplicationContext context = this.initContext(delOutbound);
                 BringVerifyEnum currentState;
