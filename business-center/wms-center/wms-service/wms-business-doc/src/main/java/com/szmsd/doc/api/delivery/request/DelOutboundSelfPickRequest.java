@@ -38,7 +38,7 @@ public class DelOutboundSelfPickRequest implements Serializable {
     private String deliveryMethod;
 
     @NotNull(message = "提货时间不能为空", groups = {DelOutboundGroup.SelfPick.class})
-    @ApiModelProperty(value = "提货时间", dataType = "Date", position = 3, example = "")
+    @ApiModelProperty(value = "提货时间", required = true,dataType = "Date", position = 3, example = "")
     private Date deliveryTime;
 
     @Size(max = 200, message = "提货商/快递商不能超过200个字符", groups = {DelOutboundGroup.SelfPick.class})

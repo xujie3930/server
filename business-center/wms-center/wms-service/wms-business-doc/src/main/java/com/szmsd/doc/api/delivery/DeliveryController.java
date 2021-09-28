@@ -28,6 +28,7 @@ import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +39,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangyuyuan
@@ -254,6 +256,48 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");
         }
+        AtomicInteger lineNum = new AtomicInteger(0);
+        request.getRequestList().forEach(dto -> {
+            Long boxNumber = dto.getBoxNumber();
+            int thisLineNum = lineNum.getAndIncrement();
+            // 验证 按包装要求需要填写包装详情
+            if (null != dto.getIsPackingByRequired() && dto.getIsPackingByRequired()) {
+                AssertUtil400.isTrue(null != boxNumber, String.format("第%s条数据,选择按要求装箱需要填写装箱数量", thisLineNum));
+                AssertUtil400.isTrue(CollectionUtils.isNotEmpty(dto.getPackings()), String.format("第%s条数据选择按要求装箱需要填写装箱信息", thisLineNum));
+                AtomicInteger innerLineNum = new AtomicInteger(0);
+                dto.getPackings().forEach(x -> {
+                    x.setQty(boxNumber);
+                    int thisInnerLineNum = innerLineNum.getAndIncrement();
+                    List<DelOutboundBatchPackingDetailRequest> details = x.getDetails();
+                    AssertUtil400.isTrue(CollectionUtils.isNotEmpty(details), String.format("第%s条数据中的第%s条装箱明细未填写", thisLineNum, thisInnerLineNum));
+                    AtomicInteger labelNo = new AtomicInteger(0);
+                    List<String> collect = details.stream().map(DelOutboundBatchPackingDetailRequest::getSku).collect(Collectors.toList());
+                    long count = collect.stream().distinct().count();
+                    AssertUtil400.isTrue(collect.size() == count, "请检查是否装箱明细中存在相同的SKU");
+                    details.forEach(z -> {
+                        if (z.getNeedNewLabel()) {
+                            // 判断是否需要标签
+                            String newLabelCode = z.getNewLabelCode();
+                            AssertUtil400.isTrue(StringUtils.isNotEmpty(newLabelCode), String.format("第%s条数据中的第%s条装箱明细中的第%s条新标签未填写", thisLineNum, thisInnerLineNum, labelNo));
+                        }
+                    });
+                });
+                // 生成对应的明细信息
+                List<DelOutboundBatchSkuDetailRequest> details = dto.getPackings().stream().map(DelOutboundBatchPackingRequest::getDetails).flatMap(newDetail -> {
+                    return newDetail.stream().map(d -> {
+                        DelOutboundBatchSkuDetailRequest delOutboundBatchSkuDetailRequest = new DelOutboundBatchSkuDetailRequest();
+                        BeanUtils.copyProperties(d, delOutboundBatchSkuDetailRequest);
+                        //sku数量= 箱数*单个sku数量
+                        delOutboundBatchSkuDetailRequest.setQty(d.getQty() * boxNumber);
+                        return delOutboundBatchSkuDetailRequest;
+                    });
+                }).collect(Collectors.toList());
+                dto.setDetails(details);
+            } else {
+                AssertUtil400.isTrue(CollectionUtils.isNotEmpty(dto.getDetails()), String.format("第%s条数据明细信息不能为空", thisLineNum));
+            }
+        });
+
         String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
@@ -301,8 +345,8 @@ public class DeliveryController {
             if (null != dto.getIsPackingByRequired() && dto.getIsPackingByRequired()) {
                 List<DelOutboundPackingDto> packings = dto.getPackings();
                 AssertUtil400.isTrue(CollectionUtils.isNotEmpty(packings), "按要求装箱需要填写装箱信息");
-                // 验证数量
-               // packings.stream().map(DelOutboundPackingDto::getQty).map(getQ)
+            }else {
+                AssertUtil400.isTrue(CollectionUtils.isNotEmpty(dto.getDetails()), "明细信息不能为空");
             }
             this.setAddressCountry(dto);
         }
