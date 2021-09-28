@@ -20,7 +20,7 @@ public class DelOutboundBatchPackingDetailRequest implements Serializable {
     @Min(value = 0,message = "数量异常")
     @ApiModelProperty(value = "数量")
     private Long qty;
-    @ApiModelProperty(value = "是否需要贴新SKU标签 默认：false",allowableValues = "true,false")
+    @ApiModelProperty(value = "是否需要贴新SKU标签(对应生成明细中的sku是否贴新标签，true时需要填写新标签) 默认：false",allowableValues = "true,false")
     private Boolean needNewLabel = false;
     @ApiModelProperty(value = "指定编码")
     private String newLabelCode;

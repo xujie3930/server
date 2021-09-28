@@ -97,12 +97,12 @@ public class DelOutboundBatchRequest implements Serializable {
     private DelOutboundAddressRequest address;
 
     @Valid
-    @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
+//    @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "明细信息", dataType = "DelOutboundBatchSkuDetailRequest", position = 17)
     private List<DelOutboundBatchSkuDetailRequest> details;
 
     @Valid
-    @ApiModelProperty(value = "装箱信息", position = 18)
+    @ApiModelProperty(value = "装箱信息 是否默认仓库装箱数据 必填，且不需要填写明细", position = 18)
     private List<DelOutboundBatchPackingRequest> packings;
 
 }

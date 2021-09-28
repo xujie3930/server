@@ -15,9 +15,9 @@ import java.util.List;
 @Data
 @ApiModel(description = "包装信息 - 选则按要求装箱需要填写")
 public class DelOutboundBatchPackingRequest implements Serializable {
-    @NotNull(message = "数量不能为空")
+//    @NotNull(message = "数量不能为空")
     @Min(value = 0,message = "数量异常")
-    @ApiModelProperty(value = "数量")
+    @ApiModelProperty(value = "包裹数量",hidden = true)
     private Long qty;
 
     @ApiModelProperty(value = "箱号",hidden = true)
