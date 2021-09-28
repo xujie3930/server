@@ -283,13 +283,13 @@ public class DeliveryController {
                 }
             }
             // 验证
-            if (null != dto.getIsLabelBox() && dto.getIsLabelBox()) {
+                //if (null != dto.getIsLabelBox() && dto.getIsLabelBox()) {
                 for (DelOutboundDetailDto detail : dto.getDetails()) {
-                    if (StringUtils.isEmpty(detail.getNewLabelCode())) {
+                    if (detail.getNeedNewLabel() && StringUtils.isBlank(detail.getNewLabelCode())) {
                         throw new CommonException("400", "新标签不能为空");
                     }
                 }
-            }
+                //}
             // 验证
             if (StringUtils.isNotBlank(dto.getShipmentChannel())) {
                 //DMShipmentChannel 渠道发货，提货方式、时间、供应商，快递信息不需要必填
@@ -301,6 +301,8 @@ public class DeliveryController {
             if (null != dto.getIsPackingByRequired() && dto.getIsPackingByRequired()) {
                 List<DelOutboundPackingDto> packings = dto.getPackings();
                 AssertUtil400.isTrue(CollectionUtils.isNotEmpty(packings), "按要求装箱需要填写装箱信息");
+                // 验证数量
+               // packings.stream().map(DelOutboundPackingDto::getQty).map(getQ)
             }
             this.setAddressCountry(dto);
         }
