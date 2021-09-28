@@ -424,7 +424,7 @@ public class DeliveryController {
         delOutboundListQueryDto.setOrderType(orderType.getCode());
         delOutboundListQueryDto.setCustomCode(AuthenticationUtil.getSellerCode());
         //待发货 审核失败
-        delOutboundListQueryDto.setState(DelOutboundStateEnum.DELIVERED.getCode()+","+DelOutboundStateEnum.AUDIT_FAILED.getCode());
+        delOutboundListQueryDto.setState(DelOutboundStateEnum.DELIVERED.getCode()+","+DelOutboundStateEnum.AUDIT_FAILED.getCode()+","+DelOutboundStateEnum.REVIEWED.getCode());
         TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
         return page;
     }
@@ -458,6 +458,17 @@ public class DeliveryController {
             throw new CommonException("400", "请求对象不能为空");
         }
         String sellerCode = AuthenticationUtil.getSellerCode();
+        requestList.forEach(x -> {
+            MultipartFile multipartFile = x.getMultipartFile();
+            if (null != multipartFile) {
+                MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
+                R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT, "", "");
+                List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
+                if (CollectionUtils.isNotEmpty(attachmentDataDTOList)) {
+                    x.setDocumentsFiles(BeanMapperUtil.mapList(attachmentDataDTOList, AttachmentDataDTO.class));
+                }
+            }
+        });
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
         for (DelOutboundDto dto : dtoList) {
             dto.setSellerCode(sellerCode);

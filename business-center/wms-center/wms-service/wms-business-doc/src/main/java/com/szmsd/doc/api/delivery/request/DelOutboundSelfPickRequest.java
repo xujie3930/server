@@ -1,5 +1,6 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.validator.DictionaryPluginConstant;
@@ -7,6 +8,7 @@ import com.szmsd.doc.validator.annotation.Dictionary;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -72,5 +74,12 @@ public class DelOutboundSelfPickRequest implements Serializable {
     @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "明细信息", dataType = "DelOutboundSkuDetailNoLabelRequest", position = 10)
     private List<DelOutboundSkuDetailNoLabelRequest> details;
+
+    @NotNull(message = "面单文件不能为空", groups = {DelOutboundGroup.Default.class})
+    @ApiModelProperty(value = "面单文件",required = true, position = 10)
+    private MultipartFile multipartFile;
+
+    @ApiModelProperty(value = "文件信息",hidden = true)
+    private List<AttachmentDataDTO> documentsFiles;
 
 }
