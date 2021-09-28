@@ -31,7 +31,8 @@ public class DelOutboundDetailDto implements Serializable {
 
     @ApiModelProperty(value = "指定编码")
     private String newLabelCode;
-
+    @ApiModelProperty(value = "是否需要贴新SKU标签 默认：false",allowableValues = "true,false")
+    private Boolean needNewLabel = false;
     @ApiModelProperty(value = "行号")
     private Long lineNo;
 
