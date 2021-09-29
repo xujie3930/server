@@ -124,6 +124,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<List<DelOutboundBringVerifyVO>> bringVerify(DelOutboundBringVerifyDto dto) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R updateShipmentLabel(List<String> idList) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

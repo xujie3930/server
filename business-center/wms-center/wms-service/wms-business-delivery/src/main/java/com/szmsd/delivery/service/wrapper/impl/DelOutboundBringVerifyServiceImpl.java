@@ -81,6 +81,42 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private RemoteAttachmentService remoteAttachmentService;
 
     @Override
+    public void updateShipmentLabel(List<String> ids) {
+        // 根据id查询出库信息
+        List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
+        delOutboundList.forEach(delOutbound -> {
+            ApplicationContext context = this.initContext(delOutbound);
+            BringVerifyEnum currentState;
+            String bringVerifyState = delOutbound.getBringVerifyState();
+            if (StringUtils.isEmpty(bringVerifyState)) {
+                currentState = BringVerifyEnum.SHIPMENT_LABEL;
+            } else {
+                currentState = BringVerifyEnum.get(bringVerifyState);
+                // 兼容
+                if (null == currentState) {
+                    currentState = BringVerifyEnum.BEGIN;
+                }
+            }
+            ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
+            try {
+                applicationContainer.action();
+            } catch (CommonException e) {
+                // 回滚操作
+                applicationContainer.setEndState(BringVerifyEnum.BEGIN);
+                applicationContainer.rollback();
+                // 更新状态
+                DelOutbound updateDelOutbound = new DelOutbound();
+                updateDelOutbound.setId(delOutbound.getId());
+                updateDelOutbound.setBringVerifyState(BringVerifyEnum.BEGIN.name());
+                this.delOutboundService.updateById(updateDelOutbound);
+                // 抛出异常
+                throw e;
+            }
+        });
+
+    }
+
+    @Override
     public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
         List<Long> ids = dto.getIds();
         if (CollectionUtils.isEmpty(ids)) {

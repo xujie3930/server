@@ -94,4 +94,9 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.bringVerify(dto));
     }
+
+    @Override
+    public void updateShipmentLabel(List<String> idList) {
+        R.getDataAndException(this.delOutboundFeignService.updateShipmentLabel(idList));
+    }
 }

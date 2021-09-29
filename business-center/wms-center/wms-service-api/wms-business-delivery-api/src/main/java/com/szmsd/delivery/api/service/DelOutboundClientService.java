@@ -122,4 +122,10 @@ public interface DelOutboundClientService {
      * @return
      */
     List<DelOutboundBringVerifyVO> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto);
+
+    /**
+     * 通知发货
+     * @param idList
+     */
+    void updateShipmentLabel(@RequestBody List<String> idList);
 }
