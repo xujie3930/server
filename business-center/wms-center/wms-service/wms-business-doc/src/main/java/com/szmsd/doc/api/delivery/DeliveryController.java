@@ -25,11 +25,14 @@ import com.szmsd.doc.api.delivery.request.*;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.api.delivery.response.*;
 import com.szmsd.doc.utils.AuthenticationUtil;
+import com.szmsd.doc.utils.Base64CheckUtils;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.*;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -256,21 +259,31 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");
         }
-        AtomicInteger lineNum = new AtomicInteger(0);
+        AtomicInteger lineNum = new AtomicInteger(1);
         request.getRequestList().forEach(dto -> {
+            if (StringUtils.isNotBlank(dto.getFile())) {
+                byte[] bytes = Base64CheckUtils.checkAndConvert(dto.getFile());
+                MultipartFile multipartFile = new MockMultipartFile("面单文件", "", "pdf", bytes);
+                MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
+                R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.PAYMENT_DOCUMENT, "", "");
+                List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
+                if (CollectionUtils.isNotEmpty(attachmentDataDTOList)) {
+                    dto.setDocumentsFiles(BeanMapperUtil.mapList(attachmentDataDTOList, AttachmentDataDTO.class));
+                }
+            }
             Long boxNumber = dto.getBoxNumber();
             int thisLineNum = lineNum.getAndIncrement();
             // 验证 按包装要求需要填写包装详情
             if (null != dto.getIsPackingByRequired() && dto.getIsPackingByRequired()) {
                 AssertUtil400.isTrue(null != boxNumber, String.format("第%s条数据,选择按要求装箱需要填写装箱数量", thisLineNum));
                 AssertUtil400.isTrue(CollectionUtils.isNotEmpty(dto.getPackings()), String.format("第%s条数据选择按要求装箱需要填写装箱信息", thisLineNum));
-                AtomicInteger innerLineNum = new AtomicInteger(0);
+                AtomicInteger innerLineNum = new AtomicInteger(1);
                 dto.getPackings().forEach(x -> {
                     x.setQty(boxNumber);
                     int thisInnerLineNum = innerLineNum.getAndIncrement();
                     List<DelOutboundBatchPackingDetailRequest> details = x.getDetails();
                     AssertUtil400.isTrue(CollectionUtils.isNotEmpty(details), String.format("第%s条数据中的第%s条装箱明细未填写", thisLineNum, thisInnerLineNum));
-                    AtomicInteger labelNo = new AtomicInteger(0);
+                    AtomicInteger labelNo = new AtomicInteger(1);
                     List<String> collect = details.stream().map(DelOutboundBatchPackingDetailRequest::getSku).collect(Collectors.toList());
                     long count = collect.stream().distinct().count();
                     AssertUtil400.isTrue(collect.size() == count, "请检查是否装箱明细中存在相同的SKU");
@@ -293,6 +306,11 @@ public class DeliveryController {
                     });
                 }).collect(Collectors.toList());
                 dto.setDetails(details);
+                // 按照包数生成对应包数的打包信息
+                List<DelOutboundBatchPackingRequest> packings = dto.getPackings();
+                for (int i = 0; i < dto.getBoxNumber()-1; i++) {
+                    packings.add(packings.get(0));
+                }
             } else {
                 AssertUtil400.isTrue(CollectionUtils.isNotEmpty(dto.getDetails()), String.format("第%s条数据明细信息不能为空", thisLineNum));
             }
@@ -452,15 +470,16 @@ public class DeliveryController {
     @PostMapping("/selfPick")
     @ApiOperation(value = "#15 出库管理 - 订单创建（自提出库）", position = 700)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundSelfPickListRequest", required = true)
-    public R<List<DelOutboundSelfPickResponse>> selfPick(@Validated(DelOutboundGroup.SelfPick.class) DelOutboundSelfPickListRequest request) {
+    public R<List<DelOutboundSelfPickResponse>> selfPick(@RequestBody @Validated(DelOutboundGroup.SelfPick.class) DelOutboundSelfPickListRequest request) {
         List<DelOutboundSelfPickRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");
         }
         String sellerCode = AuthenticationUtil.getSellerCode();
         requestList.forEach(x -> {
-            MultipartFile multipartFile = x.getMultipartFile();
-            if (null != multipartFile) {
+            if (StringUtils.isNotBlank(x.getFile())) {
+                byte[] bytes = Base64CheckUtils.checkAndConvert(x.getFile());
+                MultipartFile multipartFile = new MockMultipartFile("面单文件", "", "pdf", bytes);
                 MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
                 R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT, "", "");
                 List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);

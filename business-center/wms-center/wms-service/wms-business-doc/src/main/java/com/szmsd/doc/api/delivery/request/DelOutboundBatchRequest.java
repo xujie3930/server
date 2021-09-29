@@ -1,5 +1,6 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.validator.DictionaryPluginConstant;
@@ -92,6 +93,13 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "备注", dataType = "String", position = 15, example = "")
     private String remark;
 
+    @NotBlank(message = "面单文件不能为空", groups = {DelOutboundGroup.Batch.class})
+    @ApiModelProperty(value = "物流面单文件-base64", dataType = "String", required = true, position= 15, example = "")
+    private String file;
+
+    @ApiModelProperty(value = "文件信息",hidden = true)
+    private List<AttachmentDataDTO> documentsFiles;
+
     @Valid
     @ApiModelProperty(value = "地址信息", dataType = "DelOutboundAddressRequest", position = 16)
     private DelOutboundAddressRequest address;
@@ -102,7 +110,7 @@ public class DelOutboundBatchRequest implements Serializable {
     private List<DelOutboundBatchSkuDetailRequest> details;
 
     @Valid
-    @ApiModelProperty(value = "装箱信息 是否默认仓库装箱数据 必填，且不需要填写明细", position = 18)
+    @ApiModelProperty(value = "装箱信息 装箱要求：true装箱信息必填，且不需要填写明细", position = 18)
     private List<DelOutboundBatchPackingRequest> packings;
 
 }
