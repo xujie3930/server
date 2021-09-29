@@ -247,7 +247,7 @@ public class DeliveryController {
     // @ApiOperation(value = "#10 出库管理 - 更新信息（集运出库）", position = 502)
 
     //@ApiIgnore
-    @PreAuthorize("hasAuthority('client')")
+//    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/batch")
     @ApiOperation(value = "#11 出库管理 - 订单创建（批量出库）", position = 600)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundBatchListRequest", required = true)
@@ -452,7 +452,7 @@ public class DeliveryController {
     @PostMapping("/selfPick")
     @ApiOperation(value = "#15 出库管理 - 订单创建（自提出库）", position = 700)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundSelfPickListRequest", required = true)
-    public R<List<DelOutboundSelfPickResponse>> selfPick(@RequestBody @Validated(DelOutboundGroup.SelfPick.class) DelOutboundSelfPickListRequest request) {
+    public R<List<DelOutboundSelfPickResponse>> selfPick(@Validated(DelOutboundGroup.SelfPick.class) DelOutboundSelfPickListRequest request) {
         List<DelOutboundSelfPickRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
             throw new CommonException("400", "请求对象不能为空");

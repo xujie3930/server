@@ -1,5 +1,6 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
@@ -8,6 +9,7 @@ import com.szmsd.doc.validator.annotation.Dictionary;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -38,7 +40,8 @@ public class DelOutboundSelfPickRequest implements Serializable {
     @NotBlank(message = "提货方式不能为空", groups = {DelOutboundGroup.SelfPick.class})
     @ApiModelProperty(value = "提货方式", dataType = "String", required = true, position = 2, example = "")
     private String deliveryMethod;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @NotNull(message = "提货时间不能为空", groups = {DelOutboundGroup.SelfPick.class})
     @ApiModelProperty(value = "提货时间", required = true,dataType = "Date", position = 3, example = "")
     private Date deliveryTime;
