@@ -78,9 +78,9 @@ public class DelOutboundSelfPickRequest implements Serializable {
     @ApiModelProperty(value = "明细信息", dataType = "DelOutboundSkuDetailNoLabelRequest", position = 10)
     private List<DelOutboundSkuDetailNoLabelRequest> details;
 
-    @NotNull(message = "面单文件不能为空", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "面单文件",required = true, position = 10)
-    private MultipartFile multipartFile;
+    @NotBlank(message = "面单文件不能为空", groups = {DelOutboundGroup.Default.class})
+    @ApiModelProperty(value = "面单文件(base64--pdf)",required = true, position = 10)
+    private String file;
 
     @ApiModelProperty(value = "文件信息",hidden = true)
     private List<AttachmentDataDTO> documentsFiles;
