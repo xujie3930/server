@@ -266,7 +266,8 @@ public class DeliveryController {
         }
         AtomicInteger lineNum = new AtomicInteger(1);
         request.getRequestList().forEach(dto -> {
-            if (StringUtils.isNotBlank(dto.getFile())) {
+            if (StringUtils.isNotBlank(dto.getShipmentChannel()) && !"DMShipmentChannel".equals(dto.getShipmentChannel())) {
+                AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getFile()), "自提出库需要上传面单文件");
                 byte[] bytes = Base64CheckUtils.checkAndConvert(dto.getFile());
                 MultipartFile multipartFile = new MockMultipartFile("面单文件", "", "pdf", bytes);
                 MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
