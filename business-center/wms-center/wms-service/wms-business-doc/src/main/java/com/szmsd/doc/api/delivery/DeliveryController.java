@@ -45,8 +45,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -363,6 +365,9 @@ public class DeliveryController {
                 //DMShipmentChannel 渠道发货，提货方式、时间、供应商，快递信息不需要必填
                 if (!"DMShipmentChannel".equalsIgnoreCase(dto.getShipmentChannel().trim())){
                     AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryMethod()),"提货方式不能为空");
+                    AssertUtil400.isTrue(Objects.nonNull(dto.getDeliveryTime()),"提货时间不能为空");
+                    AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryAgent()),"提货供应商/快递商不能为空");
+                    //AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryInfo()),"提货/快递信息不能为空");
                 }
             }
             // 验证 按包装要求需要填写包装详情
@@ -450,6 +455,9 @@ public class DeliveryController {
             Long id = delOutboundVO.getId();
             delOutboundBringVerifyDto.setIds(Collections.singletonList(id));
             delOutboundClientService.bringVerify(delOutboundBringVerifyDto);
+        }else {
+            //更新发货指令
+            delOutboundClientService.updateShipmentLabel(Collections.singletonList(delOutboundVO.getId() + ""));
         }
         return R.ok(i);
     }
@@ -476,7 +484,7 @@ public class DeliveryController {
             delOutboundListQueryDto.setState(String.join(",", state));
         } else {
             //待发货 审核失败 待提审
-            delOutboundListQueryDto.setState(DelOutboundStateEnum.DELIVERED.getCode() + "," + DelOutboundStateEnum.AUDIT_FAILED.getCode() + "," + DelOutboundStateEnum.REVIEWED.getCode());
+            delOutboundListQueryDto.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode() + "," + DelOutboundStateEnum.REVIEWED.getCode());
         }
        TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
         return page;
@@ -537,7 +545,7 @@ public class DeliveryController {
     //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/label/selfPick")
-    @ApiOperation(value = "#16 出库管理 - 标签上传（自提出库）", position = 701)
+    @ApiOperation(value = "#16 出库管理 - 标签上传（自提出库--修改标签）", position = 701)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "String", name = "orderNo", value = "单据号", required = true),
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "文件", required = true, allowMultiple = true)

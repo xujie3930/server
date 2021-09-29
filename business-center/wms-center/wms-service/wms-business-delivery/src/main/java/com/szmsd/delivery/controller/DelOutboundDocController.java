@@ -6,6 +6,7 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.service.IDelOutboundDocService;
+import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -37,7 +38,8 @@ public class DelOutboundDocController extends BaseController {
 
     @Autowired
     private IDelOutboundDocService delOutboundDocService;
-
+    @Autowired
+    private IDelOutboundBringVerifyService iDelOutboundBringVerifyService;
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundDoc:add')")
     @Log(title = "出库单模块", businessType = BusinessType.INSERT)
     @PostMapping("/shipment")
@@ -45,6 +47,15 @@ public class DelOutboundDocController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<List<DelOutboundAddResponse>> add(@RequestBody List<DelOutboundDto> dto) {
         return R.ok(delOutboundDocService.add(dto));
+    }
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundDoc:add')")
+    @Log(title = "出库单模块", businessType = BusinessType.INSERT)
+    @PostMapping("/updateShipmentLabel")
+    @ApiOperation(value = "出库管理 - DOC支持 - 修改发货指令", position = 100)
+    @ApiImplicitParam(name = "idList", value = "出库单id", dataType = "String")
+    public R updateShipmentLabel(@RequestBody List<String> idList) {
+        iDelOutboundBringVerifyService.updateShipmentLabel(idList);
+        return R.ok(1);
     }
 
 }

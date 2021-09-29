@@ -157,4 +157,9 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/bringVerify")
     @ApiOperation(value = "出库管理 - 提审", position = 600)
     R<List<DelOutboundBringVerifyVO>> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto);
+
+    @PostMapping("/api/outbound/doc/updateShipmentLabel")
+    @ApiOperation(value = "出库管理 - DOC支持 - 修改发货指令", position = 100)
+    @ApiImplicitParam(name = "idList", value = "出库单id", dataType = "String")
+    R updateShipmentLabel(@RequestBody List<String> idList);
 }

@@ -35,6 +35,12 @@ public interface IDelOutboundBringVerifyService {
     DelOutboundWrapperContext initContext(DelOutbound delOutbound);
 
     /**
+     * 通知修改wms发货指令
+     * @param ids
+     */
+    void updateShipmentLabel(List<String> ids);
+
+    /**
      * 计算包裹费用
      *
      * @param delOutboundWrapperContext delOutboundWrapperContext
