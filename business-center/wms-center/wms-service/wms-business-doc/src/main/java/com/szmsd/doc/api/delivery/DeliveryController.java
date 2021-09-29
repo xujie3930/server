@@ -1,11 +1,13 @@
 package com.szmsd.doc.api.delivery;
 
+import cn.hutool.core.codec.Base64;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -26,9 +28,11 @@ import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.api.delivery.response.*;
 import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.doc.utils.Base64CheckUtils;
+import com.szmsd.http.api.service.IHtpOutboundClientService;
+import com.szmsd.http.dto.ShipmentLabelChangeRequestDto;
 import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.http.vo.ResponseVO;
 import io.swagger.annotations.*;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -400,9 +405,10 @@ public class DeliveryController {
     public R<Integer> labelBatch(@RequestParam("orderNo") String orderNo, HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
-        AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo),"单据号不能为空");
-        TableDataInfo<DelOutboundListVO> delOutboundListTableDataInfo = getDelOutboundListTableDataInfo(orderNo, DelOutboundOrderTypeEnum.BATCH);
-        AssertUtil400.isTrue(verifyOrderSelf(orderNo,DelOutboundOrderTypeEnum.BATCH),"单据号不存在");
+        AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo), "单据号不能为空");
+        AssertUtil400.isTrue(null != multipartFile, "文件不能为空");
+        TableDataInfo<DelOutboundListVO> delOutboundListTableDataInfo = getDelOutboundListTableDataInfo(orderNo, DelOutboundOrderTypeEnum.BATCH,DelOutboundStateEnum.REVIEWED.getCode(), DelOutboundStateEnum.AUDIT_FAILED.getCode(), DelOutboundStateEnum.DELIVERED.getCode(), DelOutboundStateEnum.PROCESSING.getCode(), DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode(), DelOutboundStateEnum.WHSE_PROCESSING.getCode());
+        AssertUtil400.isTrue(!(null == delOutboundListTableDataInfo || delOutboundListTableDataInfo.getTotal() == 0), "单据号不存在");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
         R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL, "", "");
         List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
@@ -414,12 +420,36 @@ public class DeliveryController {
         delOutboundUploadBoxLabelDto.setBatchLabels(dataDTOList);
         delOutboundUploadBoxLabelDto.setAttachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL);
         int i = this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto);
-        //提成功后 发起提审
-        DelOutboundBringVerifyDto delOutboundBringVerifyDto = new DelOutboundBringVerifyDto();
-        DelOutboundListVO delOutboundListVO = delOutboundListTableDataInfo.getRows().get(0);
-        Long id = delOutboundListVO.getId();
-        delOutboundBringVerifyDto.setIds(Collections.singletonList(id));
-        delOutboundClientService.bringVerify(delOutboundBringVerifyDto);
+        DelOutboundListVO delOutboundVO= delOutboundListTableDataInfo.getRows().get(0);
+        try {
+            // 更新箱标文件
+            byte[] byteArray = multipartFile.getBytes();
+            String encode = Base64.encode(byteArray);
+            ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+            shipmentLabelChangeRequestDto.setWarehouseCode(delOutboundVO.getWarehouseCode());
+            shipmentLabelChangeRequestDto.setOrderNo(delOutboundVO.getOrderNo());
+            shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+            shipmentLabelChangeRequestDto.setLabel(encode);
+            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+            ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
+            if (null == responseVO || null == responseVO.getSuccess()) {
+                throw new CommonException("400", "更新标签失败");
+            }
+            if (!responseVO.getSuccess()) {
+                throw new CommonException("400", StringUtils.nvl(responseVO.getMessage(), "更新标签失败2"));
+            }
+        } catch (IOException e) {
+            throw new CommonException("500", "读取标签文件失败");
+        }
+
+        //提成功后 发起提审 //待提审审核失败才发起提审
+        if (DelOutboundStateEnum.REVIEWED.getCode().equals(delOutboundVO.getState())
+                || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutboundVO.getState())) {
+            DelOutboundBringVerifyDto delOutboundBringVerifyDto = new DelOutboundBringVerifyDto();
+            Long id = delOutboundVO.getId();
+            delOutboundBringVerifyDto.setIds(Collections.singletonList(id));
+            delOutboundClientService.bringVerify(delOutboundBringVerifyDto);
+        }
         return R.ok(i);
     }
 
@@ -428,22 +458,26 @@ public class DeliveryController {
      * @param orderNo
      * @return
      */
-    public boolean verifyOrderSelf(String orderNo,DelOutboundOrderTypeEnum orderType) {
-        TableDataInfo<DelOutboundListVO> page = getDelOutboundListTableDataInfo(orderNo, orderType);
+    public boolean verifyOrderSelf(String orderNo,DelOutboundOrderTypeEnum orderType,String... state) {
+        TableDataInfo<DelOutboundListVO> page = getDelOutboundListTableDataInfo(orderNo, orderType,state);
         if (null == page || page.getTotal() == 0) {
             return false;
         }
         return true;
     }
 
-    private TableDataInfo<DelOutboundListVO> getDelOutboundListTableDataInfo(String orderNo, DelOutboundOrderTypeEnum orderType) {
+    private TableDataInfo<DelOutboundListVO> getDelOutboundListTableDataInfo(String orderNo, DelOutboundOrderTypeEnum orderType,String... state) {
         DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
         delOutboundListQueryDto.setOrderNo(orderNo);
         delOutboundListQueryDto.setOrderType(orderType.getCode());
         delOutboundListQueryDto.setCustomCode(AuthenticationUtil.getSellerCode());
-        //待发货 审核失败
-        delOutboundListQueryDto.setState(DelOutboundStateEnum.DELIVERED.getCode()+","+DelOutboundStateEnum.AUDIT_FAILED.getCode()+","+DelOutboundStateEnum.REVIEWED.getCode());
-        TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
+        if (state != null) {
+            delOutboundListQueryDto.setState(String.join(",", state));
+        } else {
+            //待发货 审核失败 待提审
+            delOutboundListQueryDto.setState(DelOutboundStateEnum.DELIVERED.getCode() + "," + DelOutboundStateEnum.AUDIT_FAILED.getCode() + "," + DelOutboundStateEnum.REVIEWED.getCode());
+        }
+       TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
         return page;
     }
 
