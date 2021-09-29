@@ -9,6 +9,7 @@ import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
+import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -227,6 +228,20 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         @Override
         public ApplicationState quoState() {
             return PRC_PRICING;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            if (context instanceof DelOutboundWrapperContext) {
+                DelOutbound delOutbound = ((DelOutboundWrapperContext) context).getDelOutbound();
+                String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
+                String deliveryMethod = StringUtils.nvl(delOutbound.getDeliveryMethod(), "");
+                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(deliveryMethod)) {
+                    return false;
+                }
+            }
+            return super.otherCondition(context, currentState);
         }
 
         @Override

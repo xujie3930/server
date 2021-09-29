@@ -1,6 +1,7 @@
 package com.szmsd.doc.api.delivery;
 
 import cn.hutool.core.codec.Base64;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
@@ -33,6 +34,7 @@ import com.szmsd.http.dto.ShipmentLabelChangeRequestDto;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.ResponseVO;
 import io.swagger.annotations.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,7 @@ import java.util.stream.Collectors;
  * @author zhangyuyuan
  * @date 2021-07-28 16:05
  */
+@Slf4j
 @Api(tags = {"出库管理"})
 @ApiSort(100)
 @RestController
@@ -401,7 +404,7 @@ public class DeliveryController {
     }
 
     //@ApiIgnore
-    @PreAuthorize("hasAuthority('client')")
+//    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/label/batch")
     @ApiOperation(value = "#13 出库管理 - 标签上传（批量出库）", position = 602)
     @ApiImplicitParams({
@@ -427,26 +430,6 @@ public class DeliveryController {
         delOutboundUploadBoxLabelDto.setAttachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL);
         int i = this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto);
         DelOutboundListVO delOutboundVO= delOutboundListTableDataInfo.getRows().get(0);
-        try {
-            // 更新箱标文件
-            byte[] byteArray = multipartFile.getBytes();
-            String encode = Base64.encode(byteArray);
-            ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
-            shipmentLabelChangeRequestDto.setWarehouseCode(delOutboundVO.getWarehouseCode());
-            shipmentLabelChangeRequestDto.setOrderNo(delOutboundVO.getOrderNo());
-            shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
-            shipmentLabelChangeRequestDto.setLabel(encode);
-            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
-            ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
-            if (null == responseVO || null == responseVO.getSuccess()) {
-                throw new CommonException("400", "更新标签失败");
-            }
-            if (!responseVO.getSuccess()) {
-                throw new CommonException("400", StringUtils.nvl(responseVO.getMessage(), "更新标签失败2"));
-            }
-        } catch (IOException e) {
-            throw new CommonException("500", "读取标签文件失败");
-        }
 
         //提成功后 发起提审 //待提审审核失败才发起提审
         if (DelOutboundStateEnum.REVIEWED.getCode().equals(delOutboundVO.getState())
@@ -456,6 +439,27 @@ public class DeliveryController {
             delOutboundBringVerifyDto.setIds(Collections.singletonList(id));
             delOutboundClientService.bringVerify(delOutboundBringVerifyDto);
         }else {
+            try {
+                // 待提审/审核失败单据未推送给wms，无法更新箱标文件 其他情况则需要更新单据文件
+                byte[] byteArray = multipartFile.getBytes();
+                String encode = Base64.encode(byteArray);
+                ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+                shipmentLabelChangeRequestDto.setWarehouseCode(delOutboundVO.getWarehouseCode());
+                shipmentLabelChangeRequestDto.setOrderNo(delOutboundVO.getOrderNo());
+                shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+                shipmentLabelChangeRequestDto.setLabel(encode);
+                IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+                ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
+                log.info("更新标签文件：单号：{}-{}",delOutboundVO.getOrderNo(), JSONObject.toJSONString(responseVO));
+                if (null == responseVO || null == responseVO.getSuccess()) {
+                    throw new CommonException("400", "更新标签失败");
+                }
+                if (!responseVO.getSuccess()) {
+                    throw new CommonException("400", StringUtils.nvl(responseVO.getMessage(), "更新标签失败2"));
+                }
+            } catch (IOException e) {
+                throw new CommonException("400", "读取标签文件失败");
+            }
             //更新发货指令
             delOutboundClientService.updateShipmentLabel(Collections.singletonList(delOutboundVO.getId() + ""));
         }

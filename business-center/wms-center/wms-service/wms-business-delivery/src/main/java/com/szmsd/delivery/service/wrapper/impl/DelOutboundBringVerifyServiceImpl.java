@@ -77,8 +77,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IDelOutboundPackingService delOutboundPackingService;
     @Autowired
     private IDelOutboundCombinationService delOutboundCombinationService;
-    @Autowired
-    private RemoteAttachmentService remoteAttachmentService;
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -86,34 +84,17 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
         delOutboundList.forEach(delOutbound -> {
             ApplicationContext context = this.initContext(delOutbound);
-            BringVerifyEnum currentState;
-            String bringVerifyState = delOutbound.getBringVerifyState();
-            if (StringUtils.isEmpty(bringVerifyState)) {
-                currentState = BringVerifyEnum.SHIPMENT_LABEL;
+            //创建出库单已经提审了
+            ShipmentEnum currentState;
+            String shipmentState = delOutbound.getShipmentState();
+            if (StringUtils.isEmpty(shipmentState)) {
+                currentState = ShipmentEnum.BEGIN;
             } else {
-                currentState = BringVerifyEnum.get(bringVerifyState);
-                // 兼容
-                if (null == currentState) {
-                    currentState = BringVerifyEnum.BEGIN;
-                }
+                currentState = ShipmentEnum.get(shipmentState);
             }
-            ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
-            try {
-                applicationContainer.action();
-            } catch (CommonException e) {
-                // 回滚操作
-                applicationContainer.setEndState(BringVerifyEnum.BEGIN);
-                applicationContainer.rollback();
-                // 更新状态
-                DelOutbound updateDelOutbound = new DelOutbound();
-                updateDelOutbound.setId(delOutbound.getId());
-                updateDelOutbound.setBringVerifyState(BringVerifyEnum.BEGIN.name());
-                this.delOutboundService.updateById(updateDelOutbound);
-                // 抛出异常
-                throw e;
-            }
+            ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, ShipmentEnum.END, ShipmentEnum.BEGIN);
+            applicationContainer.action();
         });
-
     }
 
     @Override
