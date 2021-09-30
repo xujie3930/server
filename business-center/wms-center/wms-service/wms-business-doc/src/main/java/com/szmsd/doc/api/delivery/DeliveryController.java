@@ -1,6 +1,7 @@
 package com.szmsd.doc.api.delivery;
 
 import cn.hutool.core.codec.Base64;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
@@ -491,7 +492,9 @@ public class DeliveryController {
             //审核失败 待提审
             delOutboundListQueryDto.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode() + "," + DelOutboundStateEnum.REVIEWED.getCode());
         }
-       TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
+        log.info("出库管理fegin-请求参数：{}", JSON.toJSONString(delOutboundListQueryDto));
+        TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
+        log.info("出库管理fegin-返回结果：{}", JSON.toJSONString(page));
         return page;
     }
 
