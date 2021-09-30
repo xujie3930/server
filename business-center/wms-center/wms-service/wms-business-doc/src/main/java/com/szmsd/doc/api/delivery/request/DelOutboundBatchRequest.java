@@ -79,7 +79,7 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "提货/快递信息", dataType = "String", position = 12, example = "")
     private String deliveryInfo;
 
-    @NotBlank(message = "物流服务不能为空", groups = {DelOutboundGroup.Batch.class})
+//    @NotBlank(message = "物流服务不能为空", groups = {DelOutboundGroup.Batch.class})
     @Size(max = 50, message = "物流服务不能超过50个字符", groups = {DelOutboundGroup.Batch.class})
     @ApiModelProperty(value = "物流服务", dataType = "String", position = 13, example = "")
     private String shipmentRule;
