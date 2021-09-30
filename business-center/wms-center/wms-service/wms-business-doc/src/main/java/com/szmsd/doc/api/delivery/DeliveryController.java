@@ -488,7 +488,7 @@ public class DeliveryController {
         if (state != null) {
             delOutboundListQueryDto.setState(String.join(",", state));
         } else {
-            //待发货 审核失败 待提审
+            //审核失败 待提审
             delOutboundListQueryDto.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode() + "," + DelOutboundStateEnum.REVIEWED.getCode());
         }
        TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
