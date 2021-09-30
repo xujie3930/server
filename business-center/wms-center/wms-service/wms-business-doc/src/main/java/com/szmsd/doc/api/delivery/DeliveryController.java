@@ -379,6 +379,7 @@ public class DeliveryController {
                 AssertUtil400.isTrue(CollectionUtils.isNotEmpty(packings), "按要求装箱需要填写装箱信息");
             }else {
                 AssertUtil400.isTrue(CollectionUtils.isNotEmpty(dto.getDetails()), "明细信息不能为空");
+                dto.setPackings(null);
             }
             this.setAddressCountry(dto);
         }
