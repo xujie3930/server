@@ -484,8 +484,8 @@ public class DeliveryController {
         if (state != null) {
             delOutboundListQueryDto.setState(String.join(",", state));
         } else {
-            //审核失败 待提审
-            delOutboundListQueryDto.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode() + "," + DelOutboundStateEnum.REVIEWED.getCode());
+            //审核失败 待提审 待发货
+            delOutboundListQueryDto.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode() + "," + DelOutboundStateEnum.REVIEWED.getCode() + "," + DelOutboundStateEnum.DELIVERED.getCode());
         }
         log.info("出库管理fegin-请求参数：{}", JSON.toJSONString(delOutboundListQueryDto));
         TableDataInfo<DelOutboundListVO> page = this.delOutboundFeignService.page(delOutboundListQueryDto);
