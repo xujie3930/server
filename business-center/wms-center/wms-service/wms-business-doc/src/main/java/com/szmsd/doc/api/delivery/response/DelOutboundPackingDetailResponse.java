@@ -14,6 +14,4 @@ public class DelOutboundPackingDetailResponse {
     @ApiModelProperty(value = "数量")
     private Long qty;
 
-    @ApiModelProperty(value = "指定编码")
-    private String newLabelCode;
 }
