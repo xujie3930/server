@@ -3,6 +3,7 @@ package com.szmsd.finance.factory;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -12,6 +13,7 @@ import com.szmsd.finance.service.IAccountSerialBillService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -86,7 +88,10 @@ public class RefundPayFactory extends AbstractPayFactory {
         serialBill.setNo(dto.getNo());
         serialBill.setRemark(dto.getRemark());
         serialBill.setPaymentTime(new Date());
-        accountSerialBillService.add(serialBill);
+        AccountSerialBill accountSerialBill = new AccountSerialBill();
+        BeanUtils.copyProperties(serialBill,accountSerialBill);
+        accountSerialBillService.save(accountSerialBill);
+        //accountSerialBillService.add(serialBill);
     }
 
 }
