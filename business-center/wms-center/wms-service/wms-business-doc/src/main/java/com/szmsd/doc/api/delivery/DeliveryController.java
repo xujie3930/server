@@ -387,7 +387,7 @@ public class DeliveryController {
     @PostMapping("/packing/batch")
     @ApiOperation(value = "#12 出库管理 - 装箱结果（批量出库）", position = 601)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackingRequest", required = true)
-    public R<List<DelOutboundSelfPickResponse>> packingBatch(@RequestBody @Validated DelOutboundPackingRequest request) {
+    public R<List<DelOutboundPackingResponse>> packingBatch(@RequestBody @Validated DelOutboundPackingRequest request) {
         DelOutboundPacking delOutboundPacking = new DelOutboundPacking();
         delOutboundPacking.setOrderNo(request.getOrderNo());
         delOutboundPacking.setType(2);
@@ -395,7 +395,7 @@ public class DeliveryController {
         if (CollectionUtils.isEmpty(packingList)) {
             return R.ok(Collections.emptyList());
         }
-        List<DelOutboundSelfPickResponse> responseList = BeanMapperUtil.mapList(packingList, DelOutboundSelfPickResponse.class);
+        List<DelOutboundPackingResponse> responseList = BeanMapperUtil.mapList(packingList, DelOutboundPackingResponse.class);
         return R.ok(responseList);
     }
 
