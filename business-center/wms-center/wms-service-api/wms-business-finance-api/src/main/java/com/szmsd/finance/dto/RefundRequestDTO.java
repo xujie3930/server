@@ -87,7 +87,7 @@ public class RefundRequestDTO {
 
     @ApiModelProperty(value = "赔付金额")
     @Excel(name = "赔付金额")
-    private String payoutAmount;
+    private BigDecimal payoutAmount;
 
     @ApiModelProperty(value = "赔付币别")
     private String compensationPaymentCurrency;

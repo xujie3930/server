@@ -1,12 +1,8 @@
 package com.szmsd.delivery.api.service;
 
-import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
-import com.szmsd.delivery.vo.DelOutboundAddResponse;
-import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
-import com.szmsd.delivery.vo.DelOutboundLabelResponse;
-import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.http.vo.PricedProduct;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -100,6 +96,14 @@ public interface DelOutboundClientService {
     List<DelOutboundPacking> queryList(DelOutboundPacking request);
 
     /**
+     * 装箱信息
+     *
+     * @param request request
+     * @return DelOutboundPackingVO
+     */
+    List<DelOutboundPackingVO> listByOrderNo(DelOutboundPacking request);
+
+    /**
      * 重新获取挂号
      *
      * @param dto dto
@@ -125,6 +129,7 @@ public interface DelOutboundClientService {
 
     /**
      * 通知发货
+     *
      * @param idList
      */
     void updateShipmentLabel(@RequestBody List<String> idList);

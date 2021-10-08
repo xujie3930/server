@@ -113,5 +113,6 @@
                 AND treatment_properties_code = #{treatmentPropertiesCode}
             </if>
         </where>
+        ORDER BY id DESC
     </select>
 </mapper>

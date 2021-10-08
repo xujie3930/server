@@ -105,7 +105,7 @@ public class FssRefundRequest extends BaseEntity {
 
     @ApiModelProperty(value = "赔付金额")
     @Excel(name = "赔付金额")
-    private String payoutAmount;
+    private BigDecimal payoutAmount;
 
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
     @Excel(name = "供应商确认不赔付（0：否，1：是）")

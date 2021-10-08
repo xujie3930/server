@@ -211,6 +211,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             warehouseNo = remoteComponent.getWarehouseNo(inboundReceiptDTO.getCusCode());
         }
         inboundReceipt.setWarehouseNo(warehouseNo);
+        inboundReceiptDTO.setOrderNo(warehouseNo);
         this.saveOrUpdate(inboundReceipt);
 
         // 保存附件

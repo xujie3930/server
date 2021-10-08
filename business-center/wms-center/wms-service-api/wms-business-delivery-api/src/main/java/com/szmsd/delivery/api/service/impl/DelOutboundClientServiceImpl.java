@@ -5,10 +5,7 @@ import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
-import com.szmsd.delivery.vo.DelOutboundAddResponse;
-import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
-import com.szmsd.delivery.vo.DelOutboundLabelResponse;
-import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.http.vo.PricedProduct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +72,11 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     @Override
     public List<DelOutboundPacking> queryList(DelOutboundPacking request) {
         return R.getDataAndException(this.delOutboundFeignService.queryList(request));
+    }
+
+    @Override
+    public List<DelOutboundPackingVO> listByOrderNo(DelOutboundPacking request) {
+        return R.getDataAndException(this.delOutboundFeignService.listByOrderNo(request));
     }
 
     @Override

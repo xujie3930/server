@@ -3,20 +3,22 @@ package com.szmsd.finance.compont;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.date.DateUnit;
+import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.domain.BasSub;
-import com.szmsd.bas.api.enums.BaseMainEnum;
+import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.finance.enums.FssRefundConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @ClassName: RemoteApiImpl
@@ -27,11 +29,13 @@ import java.util.*;
 @Slf4j
 @Component
 public class RemoteApiImpl implements IRemoteApi {
+
     /**
      * 缓存 code 默认一个小时
      */
     TimedCache<String, List<BasSub>> codeCache = CacheUtil.newTimedCache(DateUnit.SECOND.getMillis() * 2);
-
+    @Resource
+    private BasFeignService basFeignService;
     @Resource
     private BasSubFeignService basSubFeignService;
     @Resource
@@ -49,14 +53,32 @@ public class RemoteApiImpl implements IRemoteApi {
         if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subName)) return new BasSub();
         List<BasSub> basSubs = codeCache.get(mainCode);
         if (CollectionUtils.isEmpty(basSubs)) {
-            R<List<BasSub>> subList = basSubFeignService.listByMain(mainCode, null);
-            AssertUtil.isTrue(subList.getCode() == HttpStatus.SUCCESS, "获取code失败");
+            R<List<BasSub>> subList = basSubFeignService.listByMain(mainCode, "");
+            AssertUtil.isTrue(subList.getCode() == HttpStatus.SUCCESS, "获取code失败" + subList.getMsg());
             List<BasSub> data = subList.getData();
             if (CollectionUtils.isEmpty(data)) data = new ArrayList<>();
             codeCache.put(mainCode, data);
             basSubs = data;
         }
         return basSubs.stream().filter(x -> x.getSubName().equals(subName.trim())).findAny().orElse(new BasSub());
+    }
+
+    /**
+     * 单号生成
+     *
+     * @return
+     */
+    @Override
+    public List<String> genNo(Integer count) {
+        String code = FssRefundConstant.GENERATE_CODE;
+        String appId = FssRefundConstant.GENERATE_APP_ID;
+        log.info("调用自动生成单号：code={}", code);
+        R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId(appId).setCode(code).setCount(count));
+        AssertUtil.notNull(r, "单号生成失败");
+        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
+        List<String> data = r.getData();
+        log.info("调用自动生成单号：调用完成, {}-{}", code, data);
+        return data;
     }
 
     /**
@@ -70,7 +92,7 @@ public class RemoteApiImpl implements IRemoteApi {
     public String getSubCode(String mainCode, String subName) {
         if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subName)) return "";
         BasSub subCodeObj = getSubCodeObj(mainCode, subName);
-        AssertUtil.isTrue(StringUtils.isNotBlank(subCodeObj.getSubCode()), String.format("未%s该类别,请联系管理员", subName));
+        AssertUtil.isTrue(StringUtils.isNotBlank(subCodeObj.getSubCode()), String.format("未找到%s该类别,请联系管理员", subName));
         return subCodeObj.getSubCode();
     }
 
@@ -87,4 +109,5 @@ public class RemoteApiImpl implements IRemoteApi {
         BasSub subCodeObj = getSubCodeObj(mainCode, subName);
         return subCodeObj.getSubCode();
     }
+
 }

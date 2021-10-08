@@ -8,6 +8,7 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.service.IDelOutboundPackingService;
+import com.szmsd.delivery.vo.DelOutboundPackingVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -111,6 +112,13 @@ public class DelOutboundPackingController extends BaseController {
     @ApiOperation(value = "删除装箱信息模块", notes = "删除装箱信息模块")
     public R remove(@RequestBody List<String> ids) {
         return toOk(delOutboundPackingService.deleteDelOutboundPackingByIds(ids));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutboundPacking:DelOutboundPacking:listByOrderNo')")
+    @PostMapping("/listByOrderNo")
+    @ApiOperation(value = "查询装箱信息", notes = "查询装箱信息")
+    public R<List<DelOutboundPackingVO>> listByOrderNo(@RequestBody DelOutboundPacking delOutboundPacking) {
+        return R.ok(delOutboundPackingService.listByOrderNo(delOutboundPacking.getOrderNo(), delOutboundPacking.getType()));
     }
 
 }

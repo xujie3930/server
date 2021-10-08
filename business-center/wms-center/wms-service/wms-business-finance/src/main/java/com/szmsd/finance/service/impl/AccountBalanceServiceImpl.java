@@ -363,6 +363,26 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     }
 
     /**
+     * 退费
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public R refund(CustPayDTO dto) {
+//        fillCustInfo(loginUser,dto);
+        /*if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+        }*/
+        setCurrencyName(dto);
+        dto.setPayType(BillEnum.PayType.REFUND);
+        dto.setPayMethod(BillEnum.PayMethod.REFUND);
+        AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
+        boolean flag = abstractPayFactory.updateBalance(dto);
+        return flag ? R.ok() : R.failed();
+    }
+
+    /**
      * 线下充值
      *
      * @param dto
@@ -371,9 +391,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R offlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
-        if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
+        /*if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
-        }
+        }*/
         setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);

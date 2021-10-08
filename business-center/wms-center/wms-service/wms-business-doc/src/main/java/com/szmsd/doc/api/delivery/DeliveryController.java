@@ -23,6 +23,7 @@ import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundLabelResponse;
 import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.delivery.vo.DelOutboundPackingVO;
 import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.CountryCache;
 import com.szmsd.doc.api.delivery.request.*;
@@ -37,6 +38,7 @@ import com.szmsd.http.vo.ResponseVO;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
@@ -387,15 +389,15 @@ public class DeliveryController {
     @PostMapping("/packing/batch")
     @ApiOperation(value = "#12 出库管理 - 装箱结果（批量出库）", position = 601)
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackingRequest", required = true)
-    public R<List<DelOutboundSelfPickResponse>> packingBatch(@RequestBody @Validated DelOutboundPackingRequest request) {
+    public R<List<DelOutboundPackingResponse>> packingBatch(@RequestBody @Validated DelOutboundPackingRequest request) {
         DelOutboundPacking delOutboundPacking = new DelOutboundPacking();
         delOutboundPacking.setOrderNo(request.getOrderNo());
         delOutboundPacking.setType(2);
-        List<DelOutboundPacking> packingList = this.delOutboundClientService.queryList(delOutboundPacking);
+        List<DelOutboundPackingVO> packingList = this.delOutboundClientService.listByOrderNo(delOutboundPacking);
         if (CollectionUtils.isEmpty(packingList)) {
             return R.ok(Collections.emptyList());
         }
-        List<DelOutboundSelfPickResponse> responseList = BeanMapperUtil.mapList(packingList, DelOutboundSelfPickResponse.class);
+        List<DelOutboundPackingResponse> responseList = BeanMapperUtil.mapList(packingList, DelOutboundPackingResponse.class);
         return R.ok(responseList);
     }
 
@@ -481,10 +483,10 @@ public class DeliveryController {
         delOutboundListQueryDto.setOrderNo(orderNo);
         delOutboundListQueryDto.setOrderType(orderType.getCode());
         delOutboundListQueryDto.setCustomCode(AuthenticationUtil.getSellerCode());
-        if (state != null) {
+        if (ArrayUtils.isEmpty(state)) {
             delOutboundListQueryDto.setState(String.join(",", state));
         } else {
-            //审核失败 待提审
+            //审核失败 待提审 待发货
             delOutboundListQueryDto.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode() + "," + DelOutboundStateEnum.REVIEWED.getCode());
         }
         log.info("出库管理fegin-请求参数：{}", JSON.toJSONString(delOutboundListQueryDto));

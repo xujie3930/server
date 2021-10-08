@@ -2,6 +2,8 @@ package com.szmsd.finance.compont;
 
 import com.szmsd.bas.api.domain.BasSub;
 
+import java.util.List;
+
 /**
  * @ClassName: IRemoteApi
  * @Description:
@@ -10,6 +12,8 @@ import com.szmsd.bas.api.domain.BasSub;
  */
 public interface IRemoteApi {
     BasSub getSubCodeObj(String mainCode, String subName);
+
+    List<String> genNo(Integer count);
 
     String getSubCode(String mainCode, String subName);
 
