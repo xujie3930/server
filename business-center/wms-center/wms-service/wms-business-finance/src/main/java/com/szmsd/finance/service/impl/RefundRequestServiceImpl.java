@@ -100,7 +100,10 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         AssertUtil.notNull(updateDTO.getId(), "id is require");
         FssRefundRequest fssRefundRequest = new FssRefundRequest();
         BeanUtils.copyProperties(updateDTO, fssRefundRequest);
-        return baseMapper.updateById(fssRefundRequest);
+        fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus());
+        return baseMapper.update(fssRefundRequest,Wrappers.<FssRefundRequest>lambdaUpdate()
+                .in(FssRefundRequest::getAuditStatus,RefundStatusEnum.BRING_INTO_COURT.getStatus()
+                        ,RefundStatusEnum.INITIAL.getStatus()));
     }
 
     @Override
