@@ -28,14 +28,15 @@ public class RefundRequestVO {
 
     @ApiModelProperty(value = "id")
     private Integer id;
-@FieldJsonI18n
+
     @ApiModelProperty(value = "处理编号")
     @Excel(name = "处理编号")
     private String processNo;
 
-    @ApiModelProperty(value = "状态[0：待审核,1：拒绝,2：审核通过]")
-    @Excel(name = "状态",readConverterExp = "0=待审核,1=拒绝,2=审核通过")
+    @ApiModelProperty(value = "状态[0=初始,1=提审,2=异常,3=完成]")
+    @Excel(name = "状态",readConverterExp = "0=初始,1=提审,2=异常,3=完成")
     private Integer auditStatus;
+
     @ApiModelProperty(value = "申请时间")
     @Excel(name = "申请时间")
     private Date createTime;
@@ -145,10 +146,11 @@ public class RefundRequestVO {
 
     @ApiModelProperty(value = "标准赔付")
     @Excel(name = "标准赔付")
-    private String standardPayout;
+    private BigDecimal standardPayout;
 
     @ApiModelProperty(value = "额外赔付")
-    private String additionalPayout;
+    @Excel(name = "额外赔付")
+    private BigDecimal additionalPayout;
 
     @ApiModelProperty(value = "赔付币别")
     private String compensationPaymentCurrency;
@@ -157,16 +159,16 @@ public class RefundRequestVO {
     private String compensationPaymentCurrencyCode;
 
     @ApiModelProperty(value = "供应商是否完成赔付（0：未完成，1：已完成）")
-    private Boolean compensationPaymentFlag;
+    private String compensationPaymentFlag;
 
     @ApiModelProperty(value = "赔付金额")
-    private String payoutAmount;
+    private BigDecimal payoutAmount;
 
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
-    private Boolean noCompensationFlag;
+    private String noCompensationFlag;
 
     @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
-    private Boolean compensationPaymentArrivedFlag;
+    private String compensationPaymentArrivedFlag;
 
     @ApiModelProperty(value = "数量")
     private String num;

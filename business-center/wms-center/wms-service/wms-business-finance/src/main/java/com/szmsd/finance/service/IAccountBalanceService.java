@@ -20,6 +20,8 @@ public interface IAccountBalanceService {
 
     R onlineIncome(CustPayDTO dto);
 
+    R refund(CustPayDTO dto);
+
     R offlineIncome(CustPayDTO dto);
 
     R balanceExchange(CustPayDTO dto);

@@ -18,6 +18,9 @@ public class PayFactoryBuilder {
     private IncomePayFactory incomePayFactory;
 
     @Autowired
+    private RefundPayFactory refundPayFactory;
+
+    @Autowired
     private PaymentPayFactory paymentPayFactory;
 
     @Autowired
@@ -39,6 +42,7 @@ public class PayFactoryBuilder {
                 .put(BillEnum.PayType.EXCHANGE,exchangePayFactory)
                 .put(BillEnum.PayType.FREEZE,balanceFreezeFactory)
                 .put(BillEnum.PayType.PAYMENT_NO_FREEZE,paymentNoFreezePayFactory)
+                .put(BillEnum.PayType.REFUND,refundPayFactory)
                 .build();
 
     }

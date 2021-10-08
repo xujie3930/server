@@ -15,6 +15,7 @@ public class BillEnum implements Serializable {
      * 兑换("03"),
      * 冻结("04"),
      * 解冻结("05"),
+     * 退费("06"),
      */
     public enum PayType implements IEnum<String> {
         INCOME("01"),
@@ -22,6 +23,7 @@ public class BillEnum implements Serializable {
         EXCHANGE("03"),
         FREEZE("04"),
         PAYMENT_NO_FREEZE("05"),
+        REFUND("06"),
         ;
         PayType(String payType){
             this.payType=payType;
@@ -88,6 +90,10 @@ public class BillEnum implements Serializable {
          * 余额转换
          */
         BALANCE_EXCHANGE("12","余额转换"),
+        /**
+         * 退费
+         */
+        REFUND("13","退费"),
         ;
 
 
