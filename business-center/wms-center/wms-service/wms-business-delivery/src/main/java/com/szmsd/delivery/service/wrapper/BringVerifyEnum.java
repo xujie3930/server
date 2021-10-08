@@ -9,7 +9,6 @@ import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
-import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -162,6 +161,27 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             return true;
         }
 
+        /**
+         * 批量出库-自提出库
+         *
+         * @param context      context
+         * @param currentState currentState
+         * @return boolean
+         */
+        @SuppressWarnings({"all"})
+        public boolean batchSelfPick(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            if (context instanceof DelOutboundWrapperContext) {
+                DelOutbound delOutbound = ((DelOutboundWrapperContext) context).getDelOutbound();
+                String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
+                String shipmentChannel = StringUtils.nvl(delOutbound.getShipmentChannel(), "");
+                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) || "SelfPick".equals(shipmentChannel)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         @Override
         public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
@@ -233,15 +253,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         @Override
         public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
             //批量出库->自提出库 不做prc
-            if (context instanceof DelOutboundWrapperContext) {
-                DelOutbound delOutbound = ((DelOutboundWrapperContext) context).getDelOutbound();
-                String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
-                String deliveryMethod = StringUtils.nvl(delOutbound.getDeliveryMethod(), "");
-                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(deliveryMethod)) {
-                    return false;
-                }
-            }
-            return super.otherCondition(context, currentState);
+            return super.batchSelfPick(context, currentState);
         }
 
         @Override
@@ -352,6 +364,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
+        }
+
+        @Override
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
@@ -418,6 +436,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
+        }
+
+        @Override
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
@@ -461,6 +485,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
+        }
+
+        @Override
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
@@ -501,6 +531,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         @Override
         public ApplicationState quoState() {
             return SHIPMENT_ORDER;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
         }
 
         @Override

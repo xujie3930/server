@@ -106,7 +106,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         map.put(THAW_BALANCE.name(), new ThawBalanceHandle());
         map.put(PRC_PRICING.name(), new PrcPricingHandle());
         map.put(FREEZE_BALANCE.name(), new FreezeBalanceHandle());
-        map.put(FREEZE_INVENTORY.name(), new FreezeBalanceHandle());
+        map.put(FREEZE_INVENTORY.name(), new FreezeInventoryHandle());
         map.put(SHIPMENT_SHIPPING.name(), new ShipmentShippingHandle());
         map.put(END.name(), new EndHandle());
         return map;
@@ -139,6 +139,27 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
          * @return boolean
          */
         public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            return true;
+        }
+
+        /**
+         * 批量出库-自提出库
+         *
+         * @param context      context
+         * @param currentState currentState
+         * @return boolean
+         */
+        @SuppressWarnings({"all"})
+        public boolean batchSelfPick(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            if (context instanceof DelOutboundWrapperContext) {
+                DelOutbound delOutbound = ((DelOutboundWrapperContext) context).getDelOutbound();
+                String orderType = com.szmsd.common.core.utils.StringUtils.nvl(delOutbound.getOrderType(), "");
+                String shipmentChannel = com.szmsd.common.core.utils.StringUtils.nvl(delOutbound.getShipmentChannel(), "");
+                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) || "SelfPick".equals(shipmentChannel)) {
+                    return false;
+                }
+            }
             return true;
         }
 
@@ -500,6 +521,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         }
 
         @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
+        }
+
+        @Override
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
@@ -546,6 +573,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         @Override
         public ApplicationState quoState() {
             return PRC_PRICING;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
         }
 
         @Override
@@ -626,6 +659,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         @Override
         public ApplicationState quoState() {
             return FREEZE_BALANCE;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
         }
 
         @Override
