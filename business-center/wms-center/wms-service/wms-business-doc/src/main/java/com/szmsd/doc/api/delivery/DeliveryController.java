@@ -45,11 +45,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -96,7 +94,6 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(productList, PricedProductResponse.class));
     }
 
-    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/package-transfer")
     @ApiOperation(value = "#2 出库管理 - 单据创建（转运出库）", position = 200)
@@ -134,7 +131,6 @@ public class DeliveryController {
         address.setCountry(country);
     }
 
-    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/package-transfer/label")
     @ApiOperation(value = "#3 出库管理 - 获取标签（转运出库）", position = 201, notes = "")
@@ -149,7 +145,6 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.labelBase64(labelDto));
     }
 
-    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/package-transfer")
     @ApiOperation(value = "#4 出库管理 - 取消单据（转运出库）", position = 202)
@@ -214,7 +209,6 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/collection")
     @ApiOperation(value = "#8 出库管理 - 订单创建（集运出库）", position = 500)
@@ -236,7 +230,6 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundCollectionResponse.class));
     }
 
-    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/collection")
     @ApiOperation(value = "#9 出库管理 - 取消单据（集运出库）", position = 501)
@@ -261,7 +254,7 @@ public class DeliveryController {
 
     // @ApiOperation(value = "#10 出库管理 - 更新信息（集运出库）", position = 502)
 
-    @ApiIgnore
+    //@ApiIgnore
 //    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/batch")
     @ApiOperation(value = "#11 出库管理 - 订单创建（批量出库）", position = 600)
@@ -321,7 +314,7 @@ public class DeliveryController {
                 dto.setDetails(details);
                 // 按照包数生成对应包数的打包信息
                 List<DelOutboundBatchPackingRequest> packings = dto.getPackings();
-                for (int i = 0; i < dto.getBoxNumber()-1; i++) {
+                for (int i = 0; i < dto.getBoxNumber() - 1; i++) {
                     packings.add(packings.get(0));
                 }
             } else {
@@ -358,20 +351,20 @@ public class DeliveryController {
                 }
             }
             // 验证
-                //if (null != dto.getIsLabelBox() && dto.getIsLabelBox()) {
-                for (DelOutboundDetailDto detail : dto.getDetails()) {
-                    if (detail.getNeedNewLabel() && StringUtils.isBlank(detail.getNewLabelCode())) {
-                        throw new CommonException("400", "新标签不能为空");
-                    }
+            //if (null != dto.getIsLabelBox() && dto.getIsLabelBox()) {
+            for (DelOutboundDetailDto detail : dto.getDetails()) {
+                if (detail.getNeedNewLabel() && StringUtils.isBlank(detail.getNewLabelCode())) {
+                    throw new CommonException("400", "新标签不能为空");
                 }
-                //}
+            }
+            //}
             // 验证
             if (StringUtils.isNotBlank(dto.getShipmentChannel())) {
                 //DMShipmentChannel 渠道发货，提货方式、时间、供应商，快递信息不需要必填
-                if (!"DMShipmentChannel".equalsIgnoreCase(dto.getShipmentChannel().trim())){
-                    AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryMethod()),"提货方式不能为空");
-                    AssertUtil400.isTrue(Objects.nonNull(dto.getDeliveryTime()),"提货时间不能为空");
-                    AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryAgent()),"提货供应商/快递商不能为空");
+                if (!"DMShipmentChannel".equalsIgnoreCase(dto.getShipmentChannel().trim())) {
+                    AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryMethod()), "提货方式不能为空");
+                    AssertUtil400.isTrue(Objects.nonNull(dto.getDeliveryTime()), "提货时间不能为空");
+                    AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryAgent()), "提货供应商/快递商不能为空");
                     //AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getDeliveryInfo()),"提货/快递信息不能为空");
                 }
             }
@@ -379,7 +372,7 @@ public class DeliveryController {
             if (null != dto.getIsPackingByRequired() && dto.getIsPackingByRequired()) {
                 List<DelOutboundPackingDto> packings = dto.getPackings();
                 AssertUtil400.isTrue(CollectionUtils.isNotEmpty(packings), "按要求装箱需要填写装箱信息");
-            }else {
+            } else {
                 AssertUtil400.isTrue(CollectionUtils.isNotEmpty(dto.getDetails()), "明细信息不能为空");
                 dto.setPackings(null);
             }
@@ -389,7 +382,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundBatchResponse.class));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/packing/batch")
     @ApiOperation(value = "#12 出库管理 - 装箱结果（批量出库）", position = 601)
@@ -406,7 +399,7 @@ public class DeliveryController {
         return R.ok(responseList);
     }
 
-    @ApiIgnore
+    //@ApiIgnore
 //    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/label/batch")
     @ApiOperation(value = "#13 出库管理 - 标签上传（批量出库）", position = 602)
@@ -419,7 +412,7 @@ public class DeliveryController {
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
         AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo), "单据号不能为空");
         AssertUtil400.isTrue(null != multipartFile, "文件不能为空");
-        TableDataInfo<DelOutboundListVO> delOutboundListTableDataInfo = getDelOutboundListTableDataInfo(orderNo, DelOutboundOrderTypeEnum.BATCH,DelOutboundStateEnum.REVIEWED.getCode(), DelOutboundStateEnum.AUDIT_FAILED.getCode(), DelOutboundStateEnum.DELIVERED.getCode(), DelOutboundStateEnum.PROCESSING.getCode(), DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode(), DelOutboundStateEnum.WHSE_PROCESSING.getCode());
+        TableDataInfo<DelOutboundListVO> delOutboundListTableDataInfo = getDelOutboundListTableDataInfo(orderNo, DelOutboundOrderTypeEnum.BATCH, DelOutboundStateEnum.REVIEWED.getCode(), DelOutboundStateEnum.AUDIT_FAILED.getCode(), DelOutboundStateEnum.DELIVERED.getCode(), DelOutboundStateEnum.PROCESSING.getCode(), DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode(), DelOutboundStateEnum.WHSE_PROCESSING.getCode());
         AssertUtil400.isTrue(!(null == delOutboundListTableDataInfo || delOutboundListTableDataInfo.getTotal() == 0), "单据号不存在");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
         R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL, "", "");
@@ -432,7 +425,7 @@ public class DeliveryController {
         delOutboundUploadBoxLabelDto.setBatchLabels(dataDTOList);
         delOutboundUploadBoxLabelDto.setAttachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL);
         int i = this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto);
-        DelOutboundListVO delOutboundVO= delOutboundListTableDataInfo.getRows().get(0);
+        DelOutboundListVO delOutboundVO = delOutboundListTableDataInfo.getRows().get(0);
 
         //提成功后 发起提审 //待提审审核失败才发起提审
         if (DelOutboundStateEnum.REVIEWED.getCode().equals(delOutboundVO.getState())
@@ -441,7 +434,7 @@ public class DeliveryController {
             Long id = delOutboundVO.getId();
             delOutboundBringVerifyDto.setIds(Collections.singletonList(id));
             delOutboundClientService.bringVerify(delOutboundBringVerifyDto);
-        }else {
+        } else {
             try {
                 // 待提审/审核失败单据未推送给wms，无法更新箱标文件 其他情况则需要更新单据文件
                 byte[] byteArray = multipartFile.getBytes();
@@ -453,7 +446,7 @@ public class DeliveryController {
                 shipmentLabelChangeRequestDto.setLabel(encode);
                 IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
                 ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
-                log.info("更新标签文件：单号：{}-{}",delOutboundVO.getOrderNo(), JSONObject.toJSONString(responseVO));
+                log.info("更新标签文件：单号：{}-{}", delOutboundVO.getOrderNo(), JSONObject.toJSONString(responseVO));
                 if (null == responseVO || null == responseVO.getSuccess()) {
                     throw new CommonException("400", "更新标签失败");
                 }
@@ -471,18 +464,19 @@ public class DeliveryController {
 
     /**
      * 校验单据是否存在
+     *
      * @param orderNo
      * @return
      */
-    public boolean verifyOrderSelf(String orderNo,DelOutboundOrderTypeEnum orderType,String... state) {
-        TableDataInfo<DelOutboundListVO> page = getDelOutboundListTableDataInfo(orderNo, orderType,state);
+    public boolean verifyOrderSelf(String orderNo, DelOutboundOrderTypeEnum orderType, String... state) {
+        TableDataInfo<DelOutboundListVO> page = getDelOutboundListTableDataInfo(orderNo, orderType, state);
         if (null == page || page.getTotal() == 0) {
             return false;
         }
         return true;
     }
 
-    private TableDataInfo<DelOutboundListVO> getDelOutboundListTableDataInfo(String orderNo, DelOutboundOrderTypeEnum orderType,String... state) {
+    private TableDataInfo<DelOutboundListVO> getDelOutboundListTableDataInfo(String orderNo, DelOutboundOrderTypeEnum orderType, String... state) {
         DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
         delOutboundListQueryDto.setOrderNo(orderNo);
         delOutboundListQueryDto.setOrderType(orderType.getCode());
@@ -499,7 +493,7 @@ public class DeliveryController {
         return page;
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/batch")
     @ApiOperation(value = "#14 出库管理 - 取消单据（批量出库）", position = 603)
@@ -517,7 +511,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/selfPick")
     @ApiOperation(value = "#15 出库管理 - 订单创建（自提出库）", position = 700)
@@ -551,7 +545,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundSelfPickResponse.class));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/label/selfPick")
     @ApiOperation(value = "#16 出库管理 - 标签上传（自提出库--修改标签）", position = 701)
@@ -562,8 +556,8 @@ public class DeliveryController {
     public R<Integer> labelSelfPick(@RequestParam("orderNo") String orderNo, HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
-        AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo),"单据号不能为空");
-        AssertUtil400.isTrue(verifyOrderSelf(orderNo,DelOutboundOrderTypeEnum.SELF_PICK),"有部分单号已经开始操作，不能上传");
+        AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo), "单据号不能为空");
+        AssertUtil400.isTrue(verifyOrderSelf(orderNo, DelOutboundOrderTypeEnum.SELF_PICK), "有部分单号已经开始操作，不能上传");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
         R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT, "", "");
         List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
@@ -577,7 +571,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.uploadBoxLabel(delOutboundUploadBoxLabelDto));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/selfPick")
     @ApiOperation(value = "#17 出库管理 - 取消单据（自提出库）", position = 702)
@@ -595,7 +589,7 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/destroy")
     @ApiOperation(value = "#18 出库管理 - 订单创建（销毁出库）", position = 800)
@@ -617,7 +611,7 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundDestroyResponse.class));
     }
 
-    @ApiIgnore
+    //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @DeleteMapping("/cancel/destroy")
     @ApiOperation(value = "#19 出库管理 - 取消单据（销毁出库）", position = 801)
