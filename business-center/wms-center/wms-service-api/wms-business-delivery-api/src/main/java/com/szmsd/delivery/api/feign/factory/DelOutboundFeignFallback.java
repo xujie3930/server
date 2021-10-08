@@ -111,6 +111,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             }
 
             @Override
+            public R<List<DelOutboundPackingVO>> listByOrderNo(DelOutboundPacking delOutboundPacking) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R<Integer> againTrackingNo(DelOutboundAgainTrackingNoDto dto) {
                 return R.convertResultJson(throwable);
             }

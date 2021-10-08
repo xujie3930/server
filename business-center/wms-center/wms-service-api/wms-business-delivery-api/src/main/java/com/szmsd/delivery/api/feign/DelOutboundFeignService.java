@@ -146,6 +146,10 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - 装箱信息")
     R<List<DelOutboundPacking>> queryList(@RequestBody DelOutboundPacking request);
 
+    @PostMapping("/del-outbound-packing/listByOrderNo")
+    @ApiOperation(value = "出库管理 - 查询装箱信息")
+    R<List<DelOutboundPackingVO>> listByOrderNo(@RequestBody DelOutboundPacking delOutboundPacking);
+
     @PostMapping("/api/outbound/againTrackingNo")
     @ApiOperation(value = "出库管理 - 异常列表 - 重新获取挂号")
     R<Integer> againTrackingNo(@RequestBody DelOutboundAgainTrackingNoDto dto);
