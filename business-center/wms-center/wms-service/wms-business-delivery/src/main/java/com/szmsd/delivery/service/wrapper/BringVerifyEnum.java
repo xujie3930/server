@@ -484,11 +484,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             return SHIPMENT_RULE;
         }
 
-        @Override
-        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
-            //批量出库->自提出库 不做prc
-            return super.batchSelfPick(context, currentState);
-        }
+        // 批量出库，自提出库需要创建发货规则，字段使用提货商/快递商
+//        @Override
+//        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+//            //批量出库->自提出库 不做prc
+//            return super.batchSelfPick(context, currentState);
+//        }
 
         @Override
         public void handle(ApplicationContext context) {
@@ -498,7 +499,13 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 调用新增/修改发货规则
             AddShipmentRuleRequest addShipmentRuleRequest = new AddShipmentRuleRequest();
             addShipmentRuleRequest.setWarehouseCode(delOutbound.getWarehouseCode());
-            addShipmentRuleRequest.setShipmentRule(delOutbound.getShipmentRule());
+            String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
+            String shipmentChannel = StringUtils.nvl(delOutbound.getShipmentChannel(), "");
+            if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) || "SelfPick".equals(shipmentChannel)) {
+                addShipmentRuleRequest.setShipmentRule(delOutbound.getDeliveryAgent());
+            } else {
+                addShipmentRuleRequest.setShipmentRule(delOutbound.getShipmentRule());
+            }
             addShipmentRuleRequest.setGetLabelType(delOutbound.getTrackingAcquireType());
             IHtpIBasClientService htpIBasClientService = SpringUtils.getBean(IHtpIBasClientService.class);
             BaseOperationResponse baseOperationResponse = htpIBasClientService.shipmentRule(addShipmentRuleRequest);
