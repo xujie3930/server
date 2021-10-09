@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collections;
@@ -547,6 +548,19 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundSelfPickResponse.class));
     }
 
+    /**
+     * 获取文件扩展名，不包含"."点
+     *
+     * @param fileName 文件名
+     * @return 文件扩展名
+     */
+    public static String getFileExtName(String fileName) {
+        if (fileName.lastIndexOf(".") != -1) {
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+        }
+        return "";
+    }
+
     //@ApiIgnore
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/label/selfPick")
@@ -560,7 +574,16 @@ public class DeliveryController {
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
         AssertUtil400.isTrue(null != multipartFile, "文件不能为空");
         String originalFilename = multipartFile.getOriginalFilename();
-        AssertUtil400.isTrue(null != originalFilename && originalFilename.toLowerCase().endsWith("pdf"), "只能上传pdf文件");
+        if (null == originalFilename) {
+            throw new CommonException("400", "上传文件没有文件名");
+        }
+        String fileExtName = getFileExtName(originalFilename);
+        if (!("pdf".equals(fileExtName)
+                || "jpg".equals(fileExtName)
+                || "jpeg".equals(fileExtName)
+                || "png".equals(fileExtName))) {
+            throw new CommonException("400", "只能上传pdf,jpg,jpeg,png文件");
+        }
         AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo), "单据号不能为空");
         AssertUtil400.isTrue(verifyOrderSelf(orderNo, DelOutboundOrderTypeEnum.SELF_PICK), "有部分单号已经开始操作，不能上传");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
