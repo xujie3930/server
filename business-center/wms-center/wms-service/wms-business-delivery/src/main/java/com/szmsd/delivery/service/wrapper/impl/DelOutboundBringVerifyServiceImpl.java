@@ -539,7 +539,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryInfo());
             createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
         } else if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
-            if ("079001".equals(delOutbound.getShipmentChannel())) {
+            if ("SelfPick".equals(delOutbound.getShipmentChannel())) {
                 createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryInfo());
                 createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
             }
