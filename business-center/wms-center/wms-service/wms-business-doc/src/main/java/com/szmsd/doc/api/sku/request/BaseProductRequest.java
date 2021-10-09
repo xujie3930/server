@@ -231,7 +231,7 @@ public class BaseProductRequest {
 //    @ApiModelProperty(value = "操作时间")
 //    private Date operateOn;
 
-    @ApiModelProperty(value = "仓库编码", example = "NJ", required = true)
+    @ApiModelProperty(value = "仓库编码", example = "NJ", required = true, hidden = true)
     @Size(max = 50, message = "仓库编码不能大于50字符")
     private String warehouseCode;
 
