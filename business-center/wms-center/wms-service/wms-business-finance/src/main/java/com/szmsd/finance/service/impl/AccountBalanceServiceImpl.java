@@ -220,23 +220,26 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     private void addOptLog(CustPayDTO dto) {
         log.info("addOptLog {} ", JSONObject.toJSONString(dto));
-        BillEnum.PayMethod payType = dto.getPayMethod();
-        boolean b = !(payType == BillEnum.PayMethod.BALANCE_FREEZE || payType == BillEnum.PayMethod.BALANCE_THAW || payType==BillEnum.PayMethod.BALANCE_DEDUCTIONS);
+        BillEnum.PayMethod payMethod = dto.getPayMethod();
+        boolean b = !(payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW || payMethod==BillEnum.PayMethod.BALANCE_DEDUCTIONS);
         if (b) return;
         ChargeLog chargeLog = new ChargeLog();
         BeanUtils.copyProperties(dto, chargeLog);
         chargeLog
-                .setCustomCode(dto.getCusCode()).setPayMethod(payType.name())
+                .setCustomCode(dto.getCusCode()).setPayMethod(payMethod.name())
                 .setOrderNo(dto.getNo()).setOperationPayMethod("业务操作").setSuccess(true)
         ;
-        if (payType == BillEnum.PayMethod.BALANCE_FREEZE) {
+        if (payMethod == BillEnum.PayMethod.BALANCE_FREEZE) {
             chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE.name());
-        } else if (payType == BillEnum.PayMethod.BALANCE_THAW) {
+        } else if (payMethod == BillEnum.PayMethod.BALANCE_THAW) {
             chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
+        } else if (payMethod == BillEnum.PayMethod.BALANCE_DEDUCTIONS){
+            chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS.name());
         }
         chargeLog.setRemark("-----------------------------------------");
+        log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
         chargeFeignService.add(chargeLog);
-        log.info("{} -  扣减操作费 {}", payType, JSONObject.toJSONString(chargeLog));
+        log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
     }
 
     @Transactional
