@@ -483,7 +483,7 @@ public class DeliveryController {
         delOutboundListQueryDto.setOrderNo(orderNo);
         delOutboundListQueryDto.setOrderType(orderType.getCode());
         delOutboundListQueryDto.setCustomCode(AuthenticationUtil.getSellerCode());
-        if (ArrayUtils.isEmpty(state)) {
+        if (ArrayUtils.isNotEmpty(state)) {
             delOutboundListQueryDto.setState(String.join(",", state));
         } else {
             //审核失败 待提审 待发货
