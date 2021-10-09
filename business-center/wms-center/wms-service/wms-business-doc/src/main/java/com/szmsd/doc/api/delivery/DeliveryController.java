@@ -558,6 +558,9 @@ public class DeliveryController {
     public R<Integer> labelSelfPick(@RequestParam("orderNo") String orderNo, HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile multipartFile = multipartHttpServletRequest.getFile("file");
+        AssertUtil400.isTrue(null != multipartFile, "文件不能为空");
+        String originalFilename = multipartFile.getOriginalFilename();
+        AssertUtil400.isTrue(null != originalFilename && originalFilename.toLowerCase().endsWith("pdf"), "只能上传pdf文件");
         AssertUtil400.isTrue(StringUtils.isNotBlank(orderNo), "单据号不能为空");
         AssertUtil400.isTrue(verifyOrderSelf(orderNo, DelOutboundOrderTypeEnum.SELF_PICK), "有部分单号已经开始操作，不能上传");
         MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
