@@ -510,8 +510,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             }
             IHtpIBasClientService htpIBasClientService = SpringUtils.getBean(IHtpIBasClientService.class);
             BaseOperationResponse baseOperationResponse = htpIBasClientService.shipmentRule(addShipmentRuleRequest);
-            if (null == baseOperationResponse || null == baseOperationResponse.getSuccess()) {
+            if (null == baseOperationResponse) {
                 throw new CommonException("400", "新增/修改发货规则失败");
+            }
+            if (null == baseOperationResponse.getSuccess()) {
+                baseOperationResponse.setSuccess(false);
             }
             if (!baseOperationResponse.getSuccess()) {
                 String msg = baseOperationResponse.getMessage();
