@@ -786,7 +786,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
             shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
             shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
-            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) || "SelfPick".equals(delOutbound.getShipmentChannel())) {
+                shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+            } else {
+                shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            }
             shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
             shipmentUpdateRequestDto.setIsEx(false);
             shipmentUpdateRequestDto.setExType(null);
