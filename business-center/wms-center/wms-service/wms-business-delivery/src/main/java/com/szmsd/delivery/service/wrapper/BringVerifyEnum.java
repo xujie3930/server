@@ -503,10 +503,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             String shipmentChannel = StringUtils.nvl(delOutbound.getShipmentChannel(), "");
             if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) || "SelfPick".equals(shipmentChannel)) {
                 addShipmentRuleRequest.setShipmentRule(delOutbound.getDeliveryAgent());
+                addShipmentRuleRequest.setGetLabelType(DelOutboundTrackingAcquireTypeEnum.NONE.getCode());
             } else {
                 addShipmentRuleRequest.setShipmentRule(delOutbound.getShipmentRule());
+                addShipmentRuleRequest.setGetLabelType(delOutbound.getTrackingAcquireType());
             }
-            addShipmentRuleRequest.setGetLabelType(delOutbound.getTrackingAcquireType());
             IHtpIBasClientService htpIBasClientService = SpringUtils.getBean(IHtpIBasClientService.class);
             BaseOperationResponse baseOperationResponse = htpIBasClientService.shipmentRule(addShipmentRuleRequest);
             if (null == baseOperationResponse || null == baseOperationResponse.getSuccess()) {
