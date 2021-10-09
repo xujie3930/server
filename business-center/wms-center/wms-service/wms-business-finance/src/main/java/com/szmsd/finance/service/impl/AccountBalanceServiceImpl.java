@@ -10,7 +10,6 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
@@ -42,8 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -201,6 +198,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         log.info("feeDeductions#updateBalance -{}", JSONObject.toJSONString(dto));
         boolean flag = abstractPayFactory.updateBalance(dto);
+        if (flag) {
+            log.info("费用扣除-操作费日志 - {}", JSONObject.toJSONString(dto));
+            this.addOptLog(dto);
+        }
         return flag ? R.ok() : R.failed("余额不足");
     }
 
@@ -228,6 +229,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         } else if (payType == BillEnum.PayMethod.BALANCE_THAW) {
             chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
         }
+        chargeLog.setRemark("-----------------------------------------");
         chargeFeignService.add(chargeLog);
         log.info("{} -  扣减操作费 {}", payType, JSONObject.toJSONString(chargeLog));
     }
@@ -273,6 +275,20 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (flag)
         //冻结 解冻 需要把费用扣减加到 操作费用表
         {
+            LambdaQueryWrapper<AccountBalanceChange> wr = Wrappers.<AccountBalanceChange>lambdaQuery()
+                    .eq(AccountBalanceChange::getNo, dto.getNo())
+                    .eq(AccountBalanceChange::getOrderType, "物流基础费")
+                    .orderByDesc(AccountBalanceChange::getId);
+            Integer integer = accountBalanceChangeMapper.selectCount(wr);
+            if (integer > 1) {
+                // 冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除
+                int delete = accountBalanceChangeMapper.delete(Wrappers.<AccountBalanceChange>lambdaUpdate()
+                        .eq(AccountBalanceChange::getNo, dto.getNo())
+                        .eq(AccountBalanceChange::getOrderType, "物流基础费")
+                        .orderByDesc(AccountBalanceChange::getId)
+                        .last("LIMIT " + (integer - 1)));
+                log.info("删除物流基础费 {}", delete);
+            }
             log.info("thawBalance - {}", JSONObject.toJSONString(cfbDTO));
             this.addOptLog(dto);
         }
@@ -391,9 +407,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R offlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
-        /*if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
+        if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
-        }*/
+        }
         setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);

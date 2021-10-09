@@ -68,6 +68,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     }
 
     public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
+        //冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除
         AccountBalanceChange accountBalanceChange = new AccountBalanceChange();
         BeanUtils.copyProperties(dto, accountBalanceChange);
         if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
