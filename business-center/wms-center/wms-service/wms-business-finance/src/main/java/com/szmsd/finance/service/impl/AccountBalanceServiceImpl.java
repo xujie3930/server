@@ -12,6 +12,7 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
@@ -21,6 +22,7 @@ import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
+import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.service.IThirdRechargeRecordService;
 import com.szmsd.finance.util.SnowflakeId;
@@ -70,6 +72,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Resource
     private WebSocketServer webSocketServer;
+
+    @Resource
+    private IAccountSerialBillService accountSerialBillService;
 
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
@@ -216,7 +221,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     private void addOptLog(CustPayDTO dto) {
         log.info("addOptLog {} ", JSONObject.toJSONString(dto));
         BillEnum.PayMethod payType = dto.getPayMethod();
-        boolean b = !(payType == BillEnum.PayMethod.BALANCE_FREEZE || payType == BillEnum.PayMethod.BALANCE_THAW);
+        boolean b = !(payType == BillEnum.PayMethod.BALANCE_FREEZE || payType == BillEnum.PayMethod.BALANCE_THAW || payType==BillEnum.PayMethod.BALANCE_DEDUCTIONS);
         if (b) return;
         ChargeLog chargeLog = new ChargeLog();
         BeanUtils.copyProperties(dto, chargeLog);
@@ -275,17 +280,18 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (flag)
         //冻结 解冻 需要把费用扣减加到 操作费用表
         {
-            LambdaQueryWrapper<AccountBalanceChange> wr = Wrappers.<AccountBalanceChange>lambdaQuery()
-                    .eq(AccountBalanceChange::getNo, dto.getNo())
-                    .eq(AccountBalanceChange::getOrderType, "物流基础费")
-                    .orderByDesc(AccountBalanceChange::getId);
-            Integer integer = accountBalanceChangeMapper.selectCount(wr);
+
+            LambdaQueryWrapper<AccountSerialBill> wr = Wrappers.<AccountSerialBill>lambdaQuery()
+                    .eq(AccountSerialBill::getNo, dto.getNo())
+                    .eq(AccountSerialBill::getBusinessCategory, "物流基础费")
+                    .orderByDesc(AccountSerialBill::getId);
+            Integer integer = accountSerialBillService.getBaseMapper().selectCount(wr);
             if (integer > 1) {
                 // 冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除
-                int delete = accountBalanceChangeMapper.delete(Wrappers.<AccountBalanceChange>lambdaUpdate()
-                        .eq(AccountBalanceChange::getNo, dto.getNo())
-                        .eq(AccountBalanceChange::getOrderType, "物流基础费")
-                        .orderByDesc(AccountBalanceChange::getId)
+                int delete = accountSerialBillService.getBaseMapper().delete(Wrappers.<AccountSerialBill>lambdaUpdate()
+                        .eq(AccountSerialBill::getNo, dto.getNo())
+                        .eq(AccountSerialBill::getBusinessCategory, "物流基础费")
+                        .orderByDesc(AccountSerialBill::getId)
                         .last("LIMIT " + (integer - 1)));
                 log.info("删除物流基础费 {}", delete);
             }
