@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.domain.BasAttachment;
@@ -62,6 +63,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             } else {
                 String orderType = delOutbound.getOrderType();
                 boolean overBreak = false;
+                logger.info("出库单类型：{}，出库单详细信息：{}", orderType, JSON.toJSONString(delOutbound));
                 // 验证重量有没有超出返回
                 if ((DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(orderType) || DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType))
                         // 需要确认重量信息
@@ -91,12 +93,14 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                         this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
                     }
                 } else if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(orderType) && delOutbound.getIsLabelBox()) {
+                    logger.info("判断是否需要上传箱标");
                     // 判断是否需要上传箱标
                     // 批量出库，判断有没有上传箱标
                     BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
                     basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
                     basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
                     R<List<BasAttachment>> listR = this.attachmentService.list(basAttachmentQueryDTO);
+                    logger.info("查询箱标信息返回的结果：{}", JSON.toJSONString(listR));
                     if (null != listR && null != listR.getData()) {
                         List<BasAttachment> attachmentList = listR.getData();
                         if (CollectionUtils.isEmpty(attachmentList)) {
@@ -114,6 +118,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                             shipmentUpdateRequestDto.setExRemark(exRemark);
                             shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
                             this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+                            logger.info("发送失败的发货指令");
                         }
                     }
                 }
