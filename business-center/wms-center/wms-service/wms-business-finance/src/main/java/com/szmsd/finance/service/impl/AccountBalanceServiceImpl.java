@@ -186,6 +186,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
+        if (flag){
+            log.info("仓储费扣除--{}",JSONObject.toJSONString(dto));
+            this.addOptLog(dto);
+        }
         return flag ? R.ok() : R.failed("余额不足");
     }
 
@@ -221,8 +225,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     private void addOptLog(CustPayDTO dto) {
         log.info("addOptLog {} ", JSONObject.toJSONString(dto));
         BillEnum.PayMethod payMethod = dto.getPayMethod();
-        boolean b = !(payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW || payMethod==BillEnum.PayMethod.BALANCE_DEDUCTIONS);
-        if (b) return;
+        /*boolean b = !(payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW || payMethod==BillEnum.PayMethod.BALANCE_DEDUCTIONS);
+        if (b) return;*/
         ChargeLog chargeLog = new ChargeLog();
         BeanUtils.copyProperties(dto, chargeLog);
         chargeLog
