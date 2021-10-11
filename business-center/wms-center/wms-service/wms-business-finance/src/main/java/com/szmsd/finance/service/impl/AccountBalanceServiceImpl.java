@@ -288,11 +288,12 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         //冻结 解冻 需要把费用扣减加到 操作费用表
         {
 
-//            LambdaQueryWrapper<AccountSerialBill> wr = Wrappers.<AccountSerialBill>lambdaQuery()
-//                    .eq(AccountSerialBill::getNo, dto.getNo())
-//                    .eq(AccountSerialBill::getBusinessCategory, "物流基础费")
-//                    .orderByDesc(AccountSerialBill::getId);
-//            Integer integer = accountSerialBillService.getBaseMapper().selectCount(wr);
+            LambdaQueryWrapper<AccountSerialBill> wr = Wrappers.<AccountSerialBill>lambdaQuery()
+                    .eq(AccountSerialBill::getNo, dto.getNo())
+                    .orderByDesc(AccountSerialBill::getId);
+            List<AccountSerialBill> accountSerialBills = accountSerialBillService.getBaseMapper().selectList(wr);
+            String s = JSONObject.toJSONString(accountSerialBills);
+            log.info(" 解冻数据-- {}",s);
             //if (integer > 1) {
             // 冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除 物流基础费会先解冻，然后直接扣除
             int delete = accountSerialBillService.getBaseMapper().delete(Wrappers.<AccountSerialBill>lambdaUpdate()
