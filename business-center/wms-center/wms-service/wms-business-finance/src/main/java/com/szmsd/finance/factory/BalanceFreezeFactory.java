@@ -1,5 +1,6 @@
 package com.szmsd.finance.factory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -82,6 +83,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         setOpLogAmount(accountBalanceChange, dto.getAmount());
         accountBalanceChange.setCurrentBalance(result);
         accountBalanceChangeMapper.insert(accountBalanceChange);
+        log.info("recordOpLog= {}   === {}", JSONObject.toJSONString(dto), JSONObject.toJSONString(accountBalanceChange));
         return accountBalanceChange;
     }
 
