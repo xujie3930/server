@@ -186,6 +186,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
+        if (flag){
+            log.info("仓储费扣除--{}",JSONObject.toJSONString(dto));
+            this.addOptLog(dto);
+        }
         return flag ? R.ok() : R.failed("余额不足");
     }
 
@@ -221,8 +225,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     private void addOptLog(CustPayDTO dto) {
         log.info("addOptLog {} ", JSONObject.toJSONString(dto));
         BillEnum.PayMethod payMethod = dto.getPayMethod();
-        boolean b = !(payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW || payMethod==BillEnum.PayMethod.BALANCE_DEDUCTIONS);
-        if (b) return;
+        /*boolean b = !(payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW || payMethod==BillEnum.PayMethod.BALANCE_DEDUCTIONS);
+        if (b) return;*/
         ChargeLog chargeLog = new ChargeLog();
         BeanUtils.copyProperties(dto, chargeLog);
         chargeLog
@@ -289,15 +293,15 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                     .eq(AccountSerialBill::getBusinessCategory, "物流基础费")
                     .orderByDesc(AccountSerialBill::getId);
             Integer integer = accountSerialBillService.getBaseMapper().selectCount(wr);
-            if (integer > 1) {
-                // 冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除
+            //if (integer > 1) {
+                // 冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除 物流基础费会先解冻，然后直接扣除
                 int delete = accountSerialBillService.getBaseMapper().delete(Wrappers.<AccountSerialBill>lambdaUpdate()
                         .eq(AccountSerialBill::getNo, dto.getNo())
                         .eq(AccountSerialBill::getBusinessCategory, "物流基础费")
                         .orderByDesc(AccountSerialBill::getId)
                         .last("LIMIT " + (integer - 1)));
-                log.info("删除物流基础费 {}", delete);
-            }
+                log.info("删除物流基础费 {}条", delete);
+            //}
             log.info("thawBalance - {}", JSONObject.toJSONString(cfbDTO));
             this.addOptLog(dto);
         }
