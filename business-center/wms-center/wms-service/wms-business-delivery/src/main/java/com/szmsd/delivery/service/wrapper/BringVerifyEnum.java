@@ -891,8 +891,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if (condition) {
                 DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
                 DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-                // 自提出库
-                return DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType());
+                // 自提出库 或者 批量出库（渠道是自提出库）
+                return DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())
+                        || (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel()));
             }
             return false;
         }
