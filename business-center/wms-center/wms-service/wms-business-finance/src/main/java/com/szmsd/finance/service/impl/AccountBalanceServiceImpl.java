@@ -560,6 +560,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Transactional(rollbackFor = Exception.class)
     public void updateUserCredit(UserCreditDTO userCreditDTO) {
         log.info("更新用户授信额度信息 {}", userCreditDTO);
+        if (StringUtils.isBlank(userCreditDTO.getCurrencyCode()) || StringUtils.isBlank(userCreditDTO.getCusCode()))
+            return;
         AccountBalance accountBalanceBefore = accountBalanceMapper.selectOne(Wrappers.<AccountBalance>lambdaQuery()
                 .eq(AccountBalance::getCusCode, userCreditDTO.getCusCode())
         .eq(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode()));

@@ -50,13 +50,13 @@ public class FileUtil {
         String newName = "";
         String originalFilename = myFile.getOriginalFilename();
         originalFilename = Optional.ofNullable(originalFilename).filter(StringUtils::isNotBlank).orElse("a.jpg");
-        String suffix = originalFilename.substring(originalFilename.indexOf(".") + 1);
+        String suffix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
         // 文件原名称
         if (fileGen.getRename()) {
             // 上传文件重命名
-            newName = originalFilename.substring(0, originalFilename.indexOf(".")) + "_" + String.valueOf(System.currentTimeMillis()).concat(".").concat(suffix);
+            newName = originalFilename.substring(0, originalFilename.lastIndexOf(".")) + "_" + String.valueOf(System.currentTimeMillis()).concat(".").concat(suffix);
         } else {
-            newName = originalFilename.substring(0, originalFilename.indexOf(".")).concat(".").concat(suffix);
+            newName = originalFilename.substring(0, originalFilename.lastIndexOf(".")).concat(".").concat(suffix);
         }
         type = Optional.ofNullable(type).orElse(AttachmentTypeEnum.PREFIX_TEMP);
         String prefix = lineToHump(type.getBusinessCode()) + "/" + type.getFileDirectory();
