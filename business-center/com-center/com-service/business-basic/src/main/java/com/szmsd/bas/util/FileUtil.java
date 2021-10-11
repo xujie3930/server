@@ -149,7 +149,8 @@ public class FileUtil {
 
     public static String getFileSuffix(String fileUrl) {
         try {
-            return "." + getFileNames(fileUrl)[1];
+            // return "." + getFileNames(fileUrl)[1];
+            return fileUrl.substring(fileUrl.lastIndexOf("."));
         } catch (Exception e) {
             return "";
         }
