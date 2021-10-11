@@ -574,8 +574,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 .last("LIMIT 1");
         if (null == userCreditDTO.getCreditType()) {
             int update = accountBalanceMapper.update(new AccountBalance(), updateWrapper
+                    .eq(AccountBalance::getCusCode,userCreditDTO.getCusCode())
+                    .eq(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode())
                     .set(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.DISABLED.getValue())
-                    .last("LIMIT 1")
+//                    .last("LIMIT 1")
             );
             log.info("禁用用户授信额度{}- {}条", userCreditDTO, update);
         } else {
