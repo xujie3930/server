@@ -135,7 +135,7 @@ public abstract class AbstractPayFactory {
         }
         List<AccountSerialBillDTO> collect = dto.getSerialBillInfoList()
                 .stream().map(value -> new AccountSerialBillDTO(dto, value)).collect(Collectors.toList());
-        List<AccountSerialBillDTO> distanctList = collect.stream().filter(x -> StringUtils.isNotBlank(x.getBusinessCategory()) && "物流基础费".equals(x.getBusinessCategory())).collect(Collectors.toList());
+        List<AccountSerialBillDTO> distanctList = collect.stream().filter(x -> StringUtils.isNotBlank(x.getChargeCategory()) && "物流基础费".equals(x.getChargeCategory()) && BillEnum.PayMethod.BALANCE_DEDUCTIONS.equals(x.getPayMethod())).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(distanctList) && distanctList.size() > 1) {
             AccountSerialBillDTO accountSerialBillDTO = distanctList.get(0);
             log.info("删除物流操作费{}", JSONObject.toJSONString(accountSerialBillDTO));
