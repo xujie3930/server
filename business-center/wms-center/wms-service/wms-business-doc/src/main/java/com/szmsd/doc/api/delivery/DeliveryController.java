@@ -271,8 +271,9 @@ public class DeliveryController {
         request.getRequestList().forEach(dto -> {
             if (StringUtils.isNotBlank(dto.getShipmentChannel()) && !"DMShipmentChannel".equals(dto.getShipmentChannel())) {
                 AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getFile()), "自提出库需要上传面单文件");
+                AssertUtil400.isTrue(StringUtils.isNotBlank(dto.getFileName()), "面单文件名不能为空");
                 byte[] bytes = Base64CheckUtils.checkAndConvert(dto.getFile());
-                MultipartFile multipartFile = new MockMultipartFile("面单文件", "", "pdf", bytes);
+                MultipartFile multipartFile = new MockMultipartFile("面单文件", dto.getFileName(), "pdf", bytes);
                 MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
                 R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.PAYMENT_DOCUMENT, "", "");
                 List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
