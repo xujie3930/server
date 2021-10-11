@@ -156,7 +156,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 DelOutbound delOutbound = ((DelOutboundWrapperContext) context).getDelOutbound();
                 String orderType = com.szmsd.common.core.utils.StringUtils.nvl(delOutbound.getOrderType(), "");
                 String shipmentChannel = com.szmsd.common.core.utils.StringUtils.nvl(delOutbound.getShipmentChannel(), "");
-                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) || "SelfPick".equals(shipmentChannel)) {
+                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(shipmentChannel)) {
                     return false;
                 }
             }
@@ -786,7 +786,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
             shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
             shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
-            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) || "SelfPick".equals(delOutbound.getShipmentChannel())) {
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
                 shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
             } else {
                 shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());

@@ -175,7 +175,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 DelOutbound delOutbound = ((DelOutboundWrapperContext) context).getDelOutbound();
                 String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
                 String shipmentChannel = StringUtils.nvl(delOutbound.getShipmentChannel(), "");
-                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) || "SelfPick".equals(shipmentChannel)) {
+                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(shipmentChannel)) {
                     return false;
                 }
             }
@@ -501,7 +501,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             addShipmentRuleRequest.setWarehouseCode(delOutbound.getWarehouseCode());
             String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
             String shipmentChannel = StringUtils.nvl(delOutbound.getShipmentChannel(), "");
-            if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) || "SelfPick".equals(shipmentChannel)) {
+            if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(shipmentChannel)) {
                 addShipmentRuleRequest.setShipmentRule(delOutbound.getDeliveryAgent());
                 addShipmentRuleRequest.setGetLabelType(DelOutboundTrackingAcquireTypeEnum.NONE.getCode());
             } else {
