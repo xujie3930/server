@@ -94,23 +94,26 @@ public class DelOutboundBatchRequest implements Serializable {
     private String remark;
 
 //    @NotBlank(message = "面单文件不能为空", groups = {DelOutboundGroup.Batch.class})
-    @ApiModelProperty(value = "物流面单文件-base64 自提出库需要上传", dataType = "String", required = true, position= 15, example = "")
+    @ApiModelProperty(value = "物流面单文件-base64 自提出库需要上传", dataType = "String", required = true, position= 16, example = "")
     private String file;
+
+    @ApiModelProperty(value = "物流面单文件-文件名称", dataType = "String", required = true, position= 17, example = "")
+    private String fileName;
 
     @ApiModelProperty(value = "文件信息",hidden = true)
     private List<AttachmentDataDTO> documentsFiles;
 
     @Valid
-    @ApiModelProperty(value = "地址信息", dataType = "DelOutboundAddressRequest", position = 16)
+    @ApiModelProperty(value = "地址信息", dataType = "DelOutboundAddressRequest", position = 18)
     private DelOutboundAddressRequest address;
 
     @Valid
 //    @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundBatchSkuDetailRequest", position = 17)
+    @ApiModelProperty(value = "明细信息", dataType = "DelOutboundBatchSkuDetailRequest", position = 19)
     private List<DelOutboundBatchSkuDetailRequest> details;
 
     @Valid
-    @ApiModelProperty(value = "装箱信息 装箱要求：true装箱信息必填，且不需要填写明细", position = 18)
+    @ApiModelProperty(value = "装箱信息 装箱要求：true装箱信息必填，且不需要填写明细", position = 20)
     private List<DelOutboundBatchPackingRequest> packings;
 
 }
