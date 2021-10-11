@@ -289,15 +289,15 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                     .eq(AccountSerialBill::getBusinessCategory, "物流基础费")
                     .orderByDesc(AccountSerialBill::getId);
             Integer integer = accountSerialBillService.getBaseMapper().selectCount(wr);
-            if (integer > 1) {
-                // 冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除
+            //if (integer > 1) {
+                // 冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除 物流基础费会先解冻，然后直接扣除
                 int delete = accountSerialBillService.getBaseMapper().delete(Wrappers.<AccountSerialBill>lambdaUpdate()
                         .eq(AccountSerialBill::getNo, dto.getNo())
                         .eq(AccountSerialBill::getBusinessCategory, "物流基础费")
                         .orderByDesc(AccountSerialBill::getId)
                         .last("LIMIT " + (integer - 1)));
-                log.info("删除物流基础费 {}", delete);
-            }
+                log.info("删除物流基础费 {}条", delete);
+            //}
             log.info("thawBalance - {}", JSONObject.toJSONString(cfbDTO));
             this.addOptLog(dto);
         }
