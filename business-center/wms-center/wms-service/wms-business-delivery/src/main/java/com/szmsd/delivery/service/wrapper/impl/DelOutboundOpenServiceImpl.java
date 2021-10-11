@@ -1,6 +1,5 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.domain.BasAttachment;
@@ -42,6 +41,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
     private IDelOutboundService delOutboundService;
     @Autowired
     private IHtpOutboundClientService htpOutboundClientService;
+    @SuppressWarnings({"all"})
     @Autowired
     private RemoteAttachmentService attachmentService;
 
@@ -63,7 +63,6 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             } else {
                 String orderType = delOutbound.getOrderType();
                 boolean overBreak = false;
-                logger.info("出库单类型：{}，出库单详细信息：{}", orderType, JSON.toJSONString(delOutbound));
                 // 验证重量有没有超出返回
                 if ((DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(orderType) || DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType))
                         // 需要确认重量信息
@@ -93,14 +92,12 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                         this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
                     }
                 } else if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(orderType) && delOutbound.getIsLabelBox()) {
-                    logger.info("判断是否需要上传箱标");
                     // 判断是否需要上传箱标
                     // 批量出库，判断有没有上传箱标
                     BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
                     basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
                     basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
                     R<List<BasAttachment>> listR = this.attachmentService.list(basAttachmentQueryDTO);
-                    logger.info("查询箱标信息返回的结果：{}", JSON.toJSONString(listR));
                     if (null != listR && null != listR.getData()) {
                         List<BasAttachment> attachmentList = listR.getData();
                         if (CollectionUtils.isEmpty(attachmentList)) {
@@ -118,7 +115,6 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                             shipmentUpdateRequestDto.setExRemark(exRemark);
                             shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
                             this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
-                            logger.info("发送失败的发货指令");
                         }
                     }
                 }
@@ -148,11 +144,42 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             if (null == delOutbound) {
                 throw new CommonException("400", "单据不存在");
             }
+            boolean overBreak = false;
+            String orderType = delOutbound.getOrderType();
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(orderType) && delOutbound.getIsLabelBox()) {
+                // 判断是否需要上传箱标
+                // 批量出库，判断有没有上传箱标
+                BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
+                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                R<List<BasAttachment>> listR = this.attachmentService.list(basAttachmentQueryDTO);
+                if (null != listR && null != listR.getData()) {
+                    List<BasAttachment> attachmentList = listR.getData();
+                    if (CollectionUtils.isEmpty(attachmentList)) {
+                        // 箱标文件不存在，不再继续处理
+                        overBreak = true;
+                        // 发送箱标文件未上传的发货指令
+                        ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+                        shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                        shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+                        shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+                        shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+                        shipmentUpdateRequestDto.setIsEx(true);
+                        shipmentUpdateRequestDto.setExType("OutboundIntercept");
+                        String exRemark = "发货指令异常，箱标文件未上传";
+                        shipmentUpdateRequestDto.setExRemark(exRemark);
+                        shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+                        this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+                    }
+                }
+            }
             DelOutboundOperationLogEnum.OPN_CONTAINERS.listener(delOutbound);
             // 更新包裹信息
             this.delOutboundService.shipmentContainers(dto);
             // 执行异步任务
-            EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
+            if (!overBreak) {
+                EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
+            }
             return 1;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
