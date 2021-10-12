@@ -171,7 +171,11 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                         ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
                         shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
                         shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
-                        shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+                        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
+                            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+                        } else {
+                            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+                        }
                         shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
                         shipmentUpdateRequestDto.setIsEx(true);
                         shipmentUpdateRequestDto.setExType("OutboundIntercept");

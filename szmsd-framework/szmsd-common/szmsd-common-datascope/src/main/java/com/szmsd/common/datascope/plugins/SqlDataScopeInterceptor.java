@@ -78,7 +78,7 @@ public class SqlDataScopeInterceptor implements Interceptor {
         if (null != sqlContext) {
             String sqlContextSql = sqlContext.getSql();
             if (StringUtils.isNotEmpty(sqlContextSql)) {
-                logger.info("====》获取到需要拦截的sql:{}", sqlContextSql);
+                logger.debug("====》获取到需要拦截的sql:{}", sqlContextSql);
                 String originalSql = boundSql.getSql();
                 // 处理sql
                 String dataScopeSql = parserSql(originalSql, sqlContextSql);
