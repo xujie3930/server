@@ -432,7 +432,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                         throw new CommonException("500", "创建文件夹失败，" + e.getMessage());
                     }
                 }
-                String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getShipmentOrderNumber();
+                String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
                 File mergeFile = new File(mergeFilePath);
                 if (!mergeFile.exists()) {
                     // 合并文件
@@ -509,6 +509,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
                 }
             } catch (IOException e) {
+                logger.error(e.getMessage(), e);
                 throw new CommonException("500", "读取标签文件失败");
             }
         }
