@@ -535,18 +535,21 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setTrackingNo(trackingNo);
         createShipmentRequestDto.setShipmentRule(delOutbound.getShipmentRule());
         createShipmentRequestDto.setPackingRule(delOutbound.getPackingRule());
+        boolean isBatchSelfPick = false;
         if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
             createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryInfo());
             createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
         } else if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
             if ("SelfPick".equals(delOutbound.getShipmentChannel())) {
+                isBatchSelfPick = true;
                 createShipmentRequestDto.setTrackingNo(delOutbound.getDeliveryInfo());
                 createShipmentRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
             }
         }
         createShipmentRequestDto.setRemark(delOutbound.getRemark());
         createShipmentRequestDto.setRefOrderNo(delOutbound.getOrderNo());
-        if (null != address) {
+        // 如果是批量出库，出库渠道是自提，不传地址信息
+        if (null != address && !isBatchSelfPick) {
             createShipmentRequestDto.setAddress(new ShipmentAddressDto(address.getConsignee(),
                     address.getCountryCode(), country.getName(), address.getZone(), address.getStateOrProvince(), address.getCity(),
                     address.getStreet1(), address.getStreet2(), address.getStreet3(), address.getPostCode(), address.getPhoneNo(), address.getEmail()));
