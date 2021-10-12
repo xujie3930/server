@@ -32,6 +32,9 @@ public final class PdfUtil {
         PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
         int mergeSize = 0;
         for (String source : sourcePath) {
+            if (null == source || "".equals(source)) {
+                continue;
+            }
             String fileExtName = getFileExtName(source);
             if ("pdf".equals(fileExtName)) {
                 File file = new File(source);

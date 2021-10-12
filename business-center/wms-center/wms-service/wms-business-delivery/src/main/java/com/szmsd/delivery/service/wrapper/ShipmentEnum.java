@@ -449,8 +449,25 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                             BasAttachment attachment = attachmentList.get(0);
                             // 箱标文件 - 上传的
                             String boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
-                            // 标签文件 - 从承运商物流那边获取的
-                            String labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+                            String labelFilePath = "";
+                            if ((DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel()))) {
+                                // 批量出库的自提出库标签是上传的
+                                // 查询上传的文件
+                                basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                                basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
+                                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                                R<List<BasAttachment>> documentListR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                                if (null != documentListR && null != documentListR.getData()) {
+                                    List<BasAttachment> documentList = documentListR.getData();
+                                    if (CollectionUtils.isNotEmpty(documentList)) {
+                                        BasAttachment basAttachment = documentList.get(0);
+                                        labelFilePath = basAttachment.getAttachmentPath() + "/" + basAttachment.getAttachmentName() + basAttachment.getAttachmentFormat();
+                                    }
+                                }
+                            } else {
+                                // 标签文件 - 从承运商物流那边获取的
+                                labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+                            }
                             // 合并文件
                             try {
                                 if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath)) {
@@ -500,7 +517,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            return StringUtils.isNotEmpty(delOutbound.getShipmentOrderNumber());
+            return StringUtils.isNotEmpty(delOutbound.getShipmentOrderNumber())
+                    || (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel()));
         }
 
         @Override
