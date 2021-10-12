@@ -70,6 +70,11 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
                 return R.failed();
             }
 
+            @Override
+            public R onlineIncome(CustPayDTO dto) {
+                log.info("充值失败，服务调用降级");
+                return R.failed();
+            }
         };
     }
 }

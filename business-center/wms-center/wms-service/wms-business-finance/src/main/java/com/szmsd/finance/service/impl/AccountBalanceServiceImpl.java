@@ -10,9 +10,9 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
@@ -22,6 +22,7 @@ import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
+import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.service.IThirdRechargeRecordService;
 import com.szmsd.finance.util.SnowflakeId;
@@ -42,8 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -73,6 +72,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Resource
     private WebSocketServer webSocketServer;
+
+    @Resource
+    private IAccountSerialBillService accountSerialBillService;
 
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
@@ -184,6 +186,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
+        if (flag){
+            log.info("仓储费扣除--{}",JSONObject.toJSONString(dto));
+            this.addOptLog(dto);
+        }
         return flag ? R.ok() : R.failed("余额不足");
     }
 
@@ -201,6 +207,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         log.info("feeDeductions#updateBalance -{}", JSONObject.toJSONString(dto));
         boolean flag = abstractPayFactory.updateBalance(dto);
+        if (flag) {
+            log.info("费用扣除-操作费日志 - {}", JSONObject.toJSONString(dto));
+            this.addOptLog(dto);
+        }
         return flag ? R.ok() : R.failed("余额不足");
     }
 
@@ -214,22 +224,26 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     private void addOptLog(CustPayDTO dto) {
         log.info("addOptLog {} ", JSONObject.toJSONString(dto));
-        BillEnum.PayMethod payType = dto.getPayMethod();
-        boolean b = !(payType == BillEnum.PayMethod.BALANCE_FREEZE || payType == BillEnum.PayMethod.BALANCE_THAW);
-        if (b) return;
+        BillEnum.PayMethod payMethod = dto.getPayMethod();
+        /*boolean b = !(payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW || payMethod==BillEnum.PayMethod.BALANCE_DEDUCTIONS);
+        if (b) return;*/
         ChargeLog chargeLog = new ChargeLog();
         BeanUtils.copyProperties(dto, chargeLog);
         chargeLog
-                .setCustomCode(dto.getCusCode()).setPayMethod(payType.name())
+                .setCustomCode(dto.getCusCode()).setPayMethod(payMethod.name())
                 .setOrderNo(dto.getNo()).setOperationPayMethod("业务操作").setSuccess(true)
         ;
-        if (payType == BillEnum.PayMethod.BALANCE_FREEZE) {
+        if (payMethod == BillEnum.PayMethod.BALANCE_FREEZE) {
             chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE.name());
-        } else if (payType == BillEnum.PayMethod.BALANCE_THAW) {
+        } else if (payMethod == BillEnum.PayMethod.BALANCE_THAW) {
             chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
+        } else if (payMethod == BillEnum.PayMethod.BALANCE_DEDUCTIONS){
+            chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS.name());
         }
+        chargeLog.setRemark("-----------------------------------------");
+        log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
         chargeFeignService.add(chargeLog);
-        log.info("{} -  扣减操作费 {}", payType, JSONObject.toJSONString(chargeLog));
+        log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
     }
 
     @Transactional
@@ -273,6 +287,21 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (flag)
         //冻结 解冻 需要把费用扣减加到 操作费用表
         {
+
+//            LambdaQueryWrapper<AccountSerialBill> wr = Wrappers.<AccountSerialBill>lambdaQuery()
+//                    .eq(AccountSerialBill::getNo, dto.getNo())
+//                    .orderByDesc(AccountSerialBill::getId);
+//            List<AccountSerialBill> accountSerialBills = accountSerialBillService.getBaseMapper().selectList(wr);
+//            String s = JSONObject.toJSONString(accountSerialBills);
+//            log.info(" 解冻数据-- {}",s);
+            //if (integer > 1) {
+            // 冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除 物流基础费会先解冻，然后直接扣除
+//            int delete = accountSerialBillService.getBaseMapper().delete(Wrappers.<AccountSerialBill>lambdaUpdate()
+//                    .eq(AccountSerialBill::getNo, dto.getNo())
+//                    .eq(AccountSerialBill::getBusinessCategory, "物流基础费")
+//                    .orderByDesc(AccountSerialBill::getId));
+//            log.info("删除物流基础费 {}条", delete);
+            //}
             log.info("thawBalance - {}", JSONObject.toJSONString(cfbDTO));
             this.addOptLog(dto);
         }
@@ -357,6 +386,26 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.ONLINE_INCOME);
+        AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
+        boolean flag = abstractPayFactory.updateBalance(dto);
+        return flag ? R.ok() : R.failed();
+    }
+
+    /**
+     * 退费
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public R refund(CustPayDTO dto) {
+//        fillCustInfo(loginUser,dto);
+        /*if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
+            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+        }*/
+        setCurrencyName(dto);
+        dto.setPayType(BillEnum.PayType.REFUND);
+        dto.setPayMethod(BillEnum.PayMethod.REFUND);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
         return flag ? R.ok() : R.failed();
@@ -526,8 +575,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 .last("LIMIT 1");
         if (null == userCreditDTO.getCreditType()) {
             int update = accountBalanceMapper.update(new AccountBalance(), updateWrapper
+                    .eq(AccountBalance::getCusCode,userCreditDTO.getCusCode())
+                    .eq(AccountBalance::getCurrencyCode,userCreditDTO.getCurrencyCode())
                     .set(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.DISABLED.getValue())
-                    .last("LIMIT 1")
+//                    .last("LIMIT 1")
             );
             log.info("禁用用户授信额度{}- {}条", userCreditDTO, update);
         } else {

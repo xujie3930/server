@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @ApiModel(value = "DelOutboundPackingResponse", description = "DelOutboundPackingResponse对象")
 public class DelOutboundPackingResponse {
@@ -28,4 +30,7 @@ public class DelOutboundPackingResponse {
 
     @ApiModelProperty(value = "包材类型")
     private String packingMaterial;
+
+    @ApiModelProperty(value = "明细")
+    private List<DelOutboundPackingDetailResponse> details;
 }

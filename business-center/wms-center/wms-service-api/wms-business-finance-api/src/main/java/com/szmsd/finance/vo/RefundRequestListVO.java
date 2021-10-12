@@ -35,8 +35,8 @@ public class RefundRequestListVO {
     @Excel(name = "处理编号")
     private String processNo;
 
-    @ApiModelProperty(value = "状态[0：待审核,1：拒绝,2：审核通过]")
-    @Excel(name = "状态",readConverterExp = "0=待审核,1=拒绝,2=审核通过")
+    @ApiModelProperty(value = "状态[0=初始,1=提审,2=异常,3=完成]")
+    @Excel(name = "状态",readConverterExp = "0=初始,1=提审,2=异常,3=完成")
     private Integer auditStatus;
     @ApiModelProperty(value = "申请时间")
     @Excel(name = "申请时间")

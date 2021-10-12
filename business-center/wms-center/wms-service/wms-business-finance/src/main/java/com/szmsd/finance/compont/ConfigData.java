@@ -21,7 +21,7 @@ import javax.annotation.PostConstruct;
 @Component
 @ConfigurationProperties(prefix = ConfigData.CONFIG_PREFIX)
 public class ConfigData {
-    static final String CONFIG_PREFIX = "com.szmsd.bas.api";
+    static final String CONFIG_PREFIX = "com.szmsd.fss.api";
 
     private MainSubCode mainSubCode;
 

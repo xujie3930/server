@@ -166,7 +166,19 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         InboundReceipt inboundReceipt = this.saveOrUpdate((InboundReceiptDTO) createInboundReceiptDTO);
         String warehouseNo = inboundReceipt.getWarehouseNo();
         createInboundReceiptDTO.setWarehouseNo(warehouseNo);
-
+        //校验快递单号唯一
+        List<String> deliveryNoList = createInboundReceiptDTO.getDeliveryNoList();
+        if (CollectionUtils.isNotEmpty(deliveryNoList)) {
+//            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery()
+//                    .ne(null != createInboundReceiptDTO.getId(), InboundReceipt::getId, createInboundReceiptDTO.getId())
+//                    .in(InboundReceipt::getTrackingNumber, deliveryNoList);
+//
+//            deliveryNoList.forEach(deliveryNo->{
+//                in.or(x->x.like(InboundReceipt::getTrackingNumber,deliveryNoList).())
+//            });
+//            List<InboundReceipt> inboundReceipts = baseMapper.selectList(in            );
+//            AssertUtil.isTrue(CollectionUtils.isEmpty(inboundReceipts),"快递单号重复");
+        }
         // 保存入库单明细
         List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetails();
         inboundReceiptDetailDTOS.forEach(item -> item.setWarehouseNo(warehouseNo));
@@ -211,6 +223,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             warehouseNo = remoteComponent.getWarehouseNo(inboundReceiptDTO.getCusCode());
         }
         inboundReceipt.setWarehouseNo(warehouseNo);
+        inboundReceiptDTO.setOrderNo(warehouseNo);
         this.saveOrUpdate(inboundReceipt);
 
         // 保存附件

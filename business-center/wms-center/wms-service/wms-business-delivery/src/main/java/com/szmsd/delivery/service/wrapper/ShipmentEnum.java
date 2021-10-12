@@ -106,7 +106,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         map.put(THAW_BALANCE.name(), new ThawBalanceHandle());
         map.put(PRC_PRICING.name(), new PrcPricingHandle());
         map.put(FREEZE_BALANCE.name(), new FreezeBalanceHandle());
-        map.put(FREEZE_INVENTORY.name(), new FreezeBalanceHandle());
+        map.put(FREEZE_INVENTORY.name(), new FreezeInventoryHandle());
         map.put(SHIPMENT_SHIPPING.name(), new ShipmentShippingHandle());
         map.put(END.name(), new EndHandle());
         return map;
@@ -139,6 +139,27 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
          * @return boolean
          */
         public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            return true;
+        }
+
+        /**
+         * 批量出库-自提出库
+         *
+         * @param context      context
+         * @param currentState currentState
+         * @return boolean
+         */
+        @SuppressWarnings({"all"})
+        public boolean batchSelfPick(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            if (context instanceof DelOutboundWrapperContext) {
+                DelOutbound delOutbound = ((DelOutboundWrapperContext) context).getDelOutbound();
+                String orderType = com.szmsd.common.core.utils.StringUtils.nvl(delOutbound.getOrderType(), "");
+                String shipmentChannel = com.szmsd.common.core.utils.StringUtils.nvl(delOutbound.getShipmentChannel(), "");
+                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(shipmentChannel)) {
+                    return false;
+                }
+            }
             return true;
         }
 
@@ -411,7 +432,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                         throw new CommonException("500", "创建文件夹失败，" + e.getMessage());
                     }
                 }
-                String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getShipmentOrderNumber();
+                String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
                 File mergeFile = new File(mergeFilePath);
                 if (!mergeFile.exists()) {
                     // 合并文件
@@ -428,8 +449,25 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                             BasAttachment attachment = attachmentList.get(0);
                             // 箱标文件 - 上传的
                             String boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
-                            // 标签文件 - 从承运商物流那边获取的
-                            String labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+                            String labelFilePath = "";
+                            if ((DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel()))) {
+                                // 批量出库的自提出库标签是上传的
+                                // 查询上传的文件
+                                basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                                basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
+                                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                                R<List<BasAttachment>> documentListR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                                if (null != documentListR && null != documentListR.getData()) {
+                                    List<BasAttachment> documentList = documentListR.getData();
+                                    if (CollectionUtils.isNotEmpty(documentList)) {
+                                        BasAttachment basAttachment = documentList.get(0);
+                                        labelFilePath = basAttachment.getAttachmentPath() + "/" + basAttachment.getAttachmentName() + basAttachment.getAttachmentFormat();
+                                    }
+                                }
+                            } else {
+                                // 标签文件 - 从承运商物流那边获取的
+                                labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+                            }
                             // 合并文件
                             try {
                                 if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath)) {
@@ -471,6 +509,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
                 }
             } catch (IOException e) {
+                logger.error(e.getMessage(), e);
                 throw new CommonException("500", "读取标签文件失败");
             }
         }
@@ -479,7 +518,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            return StringUtils.isNotEmpty(delOutbound.getShipmentOrderNumber());
+            return StringUtils.isNotEmpty(delOutbound.getShipmentOrderNumber())
+                    || (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel()));
         }
 
         @Override
@@ -497,6 +537,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         @Override
         public ApplicationState quoState() {
             return THAW_BALANCE;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
         }
 
         @Override
@@ -546,6 +592,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         @Override
         public ApplicationState quoState() {
             return PRC_PRICING;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
         }
 
         @Override
@@ -626,6 +678,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         @Override
         public ApplicationState quoState() {
             return FREEZE_BALANCE;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
         }
 
         @Override
@@ -747,7 +805,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
             shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
             shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
-            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
+                shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+            } else {
+                shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            }
             shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
             shipmentUpdateRequestDto.setIsEx(false);
             shipmentUpdateRequestDto.setExType(null);

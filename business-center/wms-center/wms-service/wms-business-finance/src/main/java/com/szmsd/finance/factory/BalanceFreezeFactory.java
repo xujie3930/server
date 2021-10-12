@@ -1,5 +1,6 @@
 package com.szmsd.finance.factory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -68,6 +69,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     }
 
     public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
+        //冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除
         AccountBalanceChange accountBalanceChange = new AccountBalanceChange();
         BeanUtils.copyProperties(dto, accountBalanceChange);
         if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
@@ -81,6 +83,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         setOpLogAmount(accountBalanceChange, dto.getAmount());
         accountBalanceChange.setCurrentBalance(result);
         accountBalanceChangeMapper.insert(accountBalanceChange);
+        log.info("recordOpLog= {}   === {}", JSONObject.toJSONString(dto), JSONObject.toJSONString(accountBalanceChange));
         return accountBalanceChange;
     }
 

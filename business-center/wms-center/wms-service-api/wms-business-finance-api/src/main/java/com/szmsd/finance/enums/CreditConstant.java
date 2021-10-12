@@ -52,6 +52,7 @@ public final class CreditConstant {
         /**
          * 额度 期限
          */
+        DEFAULT(-1,""),
         QUOTA(0, "额度"),
         TIME_LIMIT(1, "期限");
         @EnumValue
@@ -67,7 +68,7 @@ public final class CreditConstant {
             return Arrays.stream(CreditTypeEnum.values())
                     .filter(x -> x.getValue().equals(code))
                     .findAny()
-                    .orElseThrow(() -> new RuntimeException("类型异常"));
+                    .orElse(DEFAULT);
         }
     }
 }

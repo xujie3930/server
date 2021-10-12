@@ -357,7 +357,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             List<String> skus = details.stream().map(DelOutboundDetailDto::getSku).distinct().collect(Collectors.toList());
             // 判断地址信息上的国家是否存在
             DelOutboundAddressDto addressDto = dto.getAddress();
-            if (null != addressDto && StringUtils.isNotEmpty(addressDto.getCountryCode())) {
+            if (null != addressDto && StringUtils.isNotEmpty(dto.getShipmentRule()) && StringUtils.isNotEmpty(addressDto.getCountryCode())) {
                 // 验证产品是否有效
                 DelOutboundOtherInServiceDto inServiceDto = new DelOutboundOtherInServiceDto();
                 inServiceDto.setClientCode(dto.getSellerCode());

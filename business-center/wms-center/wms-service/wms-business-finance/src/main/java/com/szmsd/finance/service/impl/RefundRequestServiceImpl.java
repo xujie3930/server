@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasSub;
+import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -12,13 +14,12 @@ import com.szmsd.finance.compont.IRemoteApi;
 import com.szmsd.finance.config.ExportValid;
 import com.szmsd.finance.config.FileVerifyUtil;
 import com.szmsd.finance.domain.FssRefundRequest;
-import com.szmsd.finance.dto.ConfirmOperationDTO;
-import com.szmsd.finance.dto.RefundRequestDTO;
-import com.szmsd.finance.dto.RefundRequestListDTO;
-import com.szmsd.finance.dto.RefundRequestQueryDTO;
+import com.szmsd.finance.dto.*;
+import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.enums.RefundProcessEnum;
 import com.szmsd.finance.enums.RefundStatusEnum;
 import com.szmsd.finance.mapper.RefundRequestMapper;
+import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IRefundRequestService;
 import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.finance.vo.RefundRequestVO;
@@ -30,7 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,6 +53,9 @@ import java.util.stream.Collectors;
 public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, FssRefundRequest> implements IRefundRequestService {
     @Resource
     private IRemoteApi remoteApi;
+
+    @Resource
+    private IAccountBalanceService accountBalanceService;
 
     @Override
     public List<RefundRequestListVO> selectRequestList(RefundRequestQueryDTO queryDTO) {
@@ -75,10 +81,14 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertBatchRefundRequest(List<RefundRequestDTO> addList) {
+        List<String> strings = remoteApi.genNo(addList.size());
+        AtomicInteger noLine = new AtomicInteger(0);
         List<FssRefundRequest> collect = addList.stream().map(x -> {
             FssRefundRequest fssRefundRequest = new FssRefundRequest();
             BeanUtils.copyProperties(x, fssRefundRequest);
-            fssRefundRequest.setAuditStatus(RefundStatusEnum.INITIAL.getStatus());
+            fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus())
+                    .setProcessNo(strings.get(noLine.getAndIncrement()))
+            ;
             return fssRefundRequest;
         }).collect(Collectors.toList());
         return this.saveBatch(collect) ? addList.size() : 0;
@@ -90,7 +100,10 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         AssertUtil.notNull(updateDTO.getId(), "id is require");
         FssRefundRequest fssRefundRequest = new FssRefundRequest();
         BeanUtils.copyProperties(updateDTO, fssRefundRequest);
-        return baseMapper.updateById(fssRefundRequest);
+        fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus());
+        return baseMapper.update(fssRefundRequest,Wrappers.<FssRefundRequest>lambdaUpdate()
+                .in(FssRefundRequest::getAuditStatus,RefundStatusEnum.BRING_INTO_COURT.getStatus()
+                        ,RefundStatusEnum.INITIAL.getStatus()));
     }
 
     @Override
@@ -150,11 +163,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
     public int approve(RefundStatusEnum status, List<String> ids) {
         if (CollectionUtils.isEmpty(ids)) return 0;
         LoginUser loginUser = SecurityUtils.getLoginUser();
-
-        //审核完成触发扣减
-        this.afterApprove(status, ids);
-        return baseMapper.update(null, Wrappers.<FssRefundRequest>lambdaUpdate()
+        int update = baseMapper.update(null, Wrappers.<FssRefundRequest>lambdaUpdate()
                 .in(FssRefundRequest::getId, ids)
+                .eq(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus())
 
                 .set(FssRefundRequest::getAuditStatus, status.getStatus())
                 .set(FssRefundRequest::getAuditTime, LocalDateTime.now())
@@ -162,6 +173,10 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 .set(FssRefundRequest::getReviewerCode, loginUser.getSellerCode())
                 .set(FssRefundRequest::getReviewerName, loginUser.getUsername())
         );
+        AssertUtil.isTrue(update == ids.size(), "审核异常!");
+        //审核完成触发扣减
+        this.afterApprove(status, ids);
+        return update;
     }
 
     /**
@@ -187,19 +202,60 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         }));
         log.info("审核处理{}", JSONObject.toJSONString(collect));
         // TODO 订单记录流水、【余额对应调增/调减】、【产生业务账记录】
-        collect.forEach((processEnum,list)->{
+        collect.forEach((processEnum, list) -> {
             switch (processEnum) {
                 case ADD:
-                    //TODO
+                    log.info("ADD--{}", list);
+                    list.forEach(x -> {
+                        CustPayDTO custPayDTO = getCustPayDTO(x);
+                        custPayDTO.setRemark(String.format("退费单%s,余额调增", x.getProcessNo()));
+                        R r = accountBalanceService.refund(custPayDTO);
+                        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg());
+                        log.info("ADD--{}--{}", list, JSONObject.toJSONString(r));
+                    });
                     return;
                 case SUBTRACT:
-                    //TODO
+                    log.info("SUBTRACT--{}", list);
+                    list.forEach(x -> {
+                        CustPayDTO custPayDTO = getCustPayDTO(x);
+                        custPayDTO.setAmount(x.getAmount().multiply(new BigDecimal("-1")));
+                        custPayDTO.setRemark(String.format("退费单%s,余额调减", x.getProcessNo()));
+                        R r = accountBalanceService.refund(custPayDTO);
+                        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg());
+                        log.info("SUBTRACT--{}--{}", list, JSONObject.toJSONString(r));
+                    });
                     return;
                 default:
-                    //TODO
+                    log.info("不处理--{}", list);
                     return;
             }
         });
+    }
+
+    private CustPayDTO getCustPayDTO(FssRefundRequest x) {
+        CustPayDTO custPayDTO = new CustPayDTO();
+        custPayDTO.setAmount(x.getAmount());
+        custPayDTO.setNo(x.getProcessNo());
+        custPayDTO.setCurrencyCode(x.getCurrencyCode());
+        custPayDTO.setCurrencyName(x.getCurrencyName());
+        custPayDTO.setCusCode(x.getCusCode());
+        custPayDTO.setCusId((long) x.getCusId());
+        custPayDTO.setCusName(x.getCusName());
+        List<AccountSerialBillDTO> accountSerialBillList = new ArrayList<>();
+        AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
+        accountSerialBillDTO.setChargeCategory(x.getFeeCategoryName());
+        accountSerialBillDTO.setChargeType(x.getFeeTypeName());
+        accountSerialBillDTO.setPayMethod(BillEnum.PayMethod.REFUND);
+        accountSerialBillDTO.setBusinessCategory(x.getTreatmentProperties());
+        accountSerialBillDTO.setChargeCategory(BillEnum.PayMethod.REFUND.getPaymentName());
+        accountSerialBillDTO.setAmount(x.getAmount());
+        accountSerialBillDTO.setCusCode(x.getCusCode());
+        accountSerialBillDTO.setCusName(x.getCusName());
+        accountSerialBillDTO.setCurrencyCode(x.getCurrencyCode());
+        accountSerialBillDTO.setCurrencyName(x.getCurrencyName());
+        accountSerialBillList.add(accountSerialBillDTO);
+        custPayDTO.setSerialBillInfoList(accountSerialBillList);
+        return custPayDTO;
     }
 
     @Override

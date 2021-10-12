@@ -50,13 +50,13 @@ public class FileUtil {
         String newName = "";
         String originalFilename = myFile.getOriginalFilename();
         originalFilename = Optional.ofNullable(originalFilename).filter(StringUtils::isNotBlank).orElse("a.jpg");
-        String suffix = originalFilename.substring(originalFilename.indexOf(".") + 1);
+        String suffix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
         // 文件原名称
         if (fileGen.getRename()) {
             // 上传文件重命名
-            newName = originalFilename.substring(0, originalFilename.indexOf(".")) + "_" + String.valueOf(System.currentTimeMillis()).concat(".").concat(suffix);
+            newName = originalFilename.substring(0, originalFilename.lastIndexOf(".")) + "_" + String.valueOf(System.currentTimeMillis()).concat(".").concat(suffix);
         } else {
-            newName = originalFilename.substring(0, originalFilename.indexOf(".")).concat(".").concat(suffix);
+            newName = originalFilename.substring(0, originalFilename.lastIndexOf(".")).concat(".").concat(suffix);
         }
         type = Optional.ofNullable(type).orElse(AttachmentTypeEnum.PREFIX_TEMP);
         String prefix = lineToHump(type.getBusinessCode()) + "/" + type.getFileDirectory();
@@ -141,7 +141,12 @@ public class FileUtil {
 
     public static String getFileName(String fileUrl) {
         try {
-            return getFileNames(fileUrl)[0];
+            // return getFileNames(fileUrl)[0];
+            // https://web-client-1.dsloco.com/upload/delOutboundDocument/delOutboundDocument/20211012/zzpic4464._1634004959884.png
+            // 先截取到文件名：zzpic4464._1634004959884.png
+            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+            // 再获取到文件名称：zzpic4464._1634004959884
+            return fileName.substring(0, fileName.lastIndexOf("."));
         } catch (Exception e) {
             return "";
         }
@@ -149,7 +154,8 @@ public class FileUtil {
 
     public static String getFileSuffix(String fileUrl) {
         try {
-            return "." + getFileNames(fileUrl)[1];
+            // return "." + getFileNames(fileUrl)[1];
+            return fileUrl.substring(fileUrl.lastIndexOf("."));
         } catch (Exception e) {
             return "";
         }
