@@ -144,15 +144,24 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             if (null == delOutbound) {
                 throw new CommonException("400", "单据不存在");
             }
+            if (logger.isInfoEnabled()) {
+                logger.info("======出库单据信息：{}", delOutbound);
+            }
             boolean overBreak = false;
             String orderType = delOutbound.getOrderType();
             if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(orderType) && delOutbound.getIsLabelBox()) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("======批量出库，需要打印标签，查询附件信息");
+                }
                 // 判断是否需要上传箱标
                 // 批量出库，判断有没有上传箱标
                 BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
                 basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
                 basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
                 R<List<BasAttachment>> listR = this.attachmentService.list(basAttachmentQueryDTO);
+                if (logger.isInfoEnabled()) {
+                    logger.info("======查询附件信息：{}", listR);
+                }
                 if (null != listR && null != listR.getData()) {
                     List<BasAttachment> attachmentList = listR.getData();
                     if (CollectionUtils.isEmpty(attachmentList)) {
