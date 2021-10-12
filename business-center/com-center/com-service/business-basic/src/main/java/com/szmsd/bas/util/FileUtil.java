@@ -141,7 +141,12 @@ public class FileUtil {
 
     public static String getFileName(String fileUrl) {
         try {
-            return getFileNames(fileUrl)[0];
+            // return getFileNames(fileUrl)[0];
+            // https://web-client-1.dsloco.com/upload/delOutboundDocument/delOutboundDocument/20211012/zzpic4464._1634004959884.png
+            // 先截取到文件名：zzpic4464._1634004959884.png
+            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+            // 再获取到文件名称：zzpic4464._1634004959884
+            return fileName.substring(0, fileName.lastIndexOf("."));
         } catch (Exception e) {
             return "";
         }
