@@ -53,7 +53,7 @@ public class AccountBalance extends FssBaseEntity {
     /** 09-07 授信额度新增 */
     @ApiModelProperty(value = "授信类型(0：额度，1：类型)")
     @Excel(name = "授信类型(0：额度，1：类型)")
-    private Integer creditType;
+    private String creditType;
 
     @ApiModelProperty(value = "授信状态（0：未启用，1：启用中，2：欠费停用，3：已禁用）")
     @Excel(name = "授信状态（0：未启用，1：启用中，2：欠费停用，3：已禁用）")
