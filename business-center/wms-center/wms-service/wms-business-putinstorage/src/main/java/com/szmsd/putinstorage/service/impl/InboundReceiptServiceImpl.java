@@ -392,8 +392,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
 
             // 入库按照数量（按申报数量）进行扣费 扣费失败则出库失败，不能出库
-//            log.info("审核通过则扣费{}", JSONObject.toJSONString(inboundReceiptReviewDTO));
-//            remoteComponent.delOutboundCharge(inboundReceiptInfoVO);
+            log.info("审核通过则扣费{}", JSONObject.toJSONString(inboundReceiptReviewDTO));
+            remoteComponent.delOutboundCharge(inboundReceiptInfoVO);
 
 
             try {
