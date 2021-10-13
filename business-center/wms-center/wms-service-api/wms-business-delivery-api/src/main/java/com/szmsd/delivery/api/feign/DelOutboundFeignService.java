@@ -166,4 +166,8 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - DOC支持 - 修改发货指令", position = 100)
     @ApiImplicitParam(name = "idList", value = "出库单id", dataType = "String")
     R updateShipmentLabel(@RequestBody List<String> idList);
+
+    @GetMapping(value = "/api/outbound/getInfoByOrderNo/{orderNo}")
+    @ApiOperation(value = "出库管理 - 详情", position = 201)
+    R<DelOutboundVO> getInfoByOrderNo(@PathVariable("orderNo") String orderNo);
 }

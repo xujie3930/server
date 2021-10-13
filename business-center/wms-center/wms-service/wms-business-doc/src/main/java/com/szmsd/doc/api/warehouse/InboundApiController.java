@@ -22,6 +22,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.doc.api.AssertUtil400;
+import com.szmsd.doc.api.RUtils;
 import com.szmsd.doc.api.warehouse.req.*;
 import com.szmsd.doc.api.warehouse.resp.AttachmentFileResp;
 import com.szmsd.doc.api.warehouse.resp.InboundReceiptDetailResp;
@@ -164,7 +165,7 @@ public class InboundApiController {
         vatQueryDto.setSellerCode(AuthenticationUtil.getSellerCode());
         vatQueryDto.setCountryCode(joinCountry);
         R<List<BasSellerCertificate>> listR = basSellerFeignService.listVAT(vatQueryDto);
-        List<BasSellerCertificate> dataAndException = R.getDataAndException(listR);
+        List<BasSellerCertificate> dataAndException = RUtils.getDataAndException(listR);
         Map<String, List<BasSellerCertificate>> countryMap = dataAndException.stream().collect(Collectors.groupingBy(BasSellerCertificate::getCountryCode));
         Map<Integer, String> errorVatMap = new LinkedHashMap<>();
         AtomicInteger atomicInteger = new AtomicInteger(1);
@@ -261,7 +262,7 @@ public class InboundApiController {
         List<String> collect = addDTO.stream().filter(x -> "055003".equals(x.getWarehouseMethodCode())).flatMap(z -> z.getInboundReceiptDetails().stream().map(InboundReceiptDetailDTO::getSku)).collect(Collectors.toList());
         iRemoterApi.checkSkuPic(collect, AttachmentTypeEnum.SKU_IMAGE);
         R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
-        List<InboundReceiptInfoVO> dataAndException = R.getDataAndException(listR);
+        List<InboundReceiptInfoVO> dataAndException = RUtils.getDataAndException(listR);
         List<InboundReceiptInfoResp> result = dataAndException.stream().map(x -> {
             InboundReceiptInfoResp inboundReceiptInfoResp = new InboundReceiptInfoResp();
             BeanUtils.copyProperties(x, inboundReceiptInfoResp);
@@ -357,7 +358,7 @@ public class InboundApiController {
             vatQueryDto.setSellerCode(AuthenticationUtil.getSellerCode());
             vatQueryDto.setCountryCode(joinCountry);
             R<List<BasSellerCertificate>> listR = basSellerFeignService.listVAT(vatQueryDto);
-            List<BasSellerCertificate> dataAndException = R.getDataAndException(listR);
+            List<BasSellerCertificate> dataAndException = RUtils.getDataAndException(listR);
             Map<String, List<BasSellerCertificate>> countryMap = dataAndException.stream().collect(Collectors.groupingBy(BasSellerCertificate::getCountryCode));
 
             String country = warehouseKvDTO.getCountry();
