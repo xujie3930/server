@@ -74,7 +74,7 @@ public class BalanceDTO {
     public Boolean rechargeAndSetAmount(BigDecimal amount) {
         CreditInfoBO creditInfoBO = this.creditInfoBO;
         Integer creditStatus = creditInfoBO.getCreditStatus();
-        if (!CreditConstant.CreditStatusEnum.NOT_ENABLED.getValue().equals(creditStatus)) {
+        if (!(creditStatus == null || CreditConstant.CreditStatusEnum.NOT_ENABLED.getValue().equals(creditStatus))) {
             // 只要有授信额度 优先充值（还款）授信额度
             BigDecimal bigDecimal = creditInfoBO.rechargeCreditAmount(amount);
             recharge(bigDecimal);
