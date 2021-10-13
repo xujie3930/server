@@ -225,7 +225,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
             amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
-        return this.freezeBalance(dto, count, operation.getFirstPrice(), operation);
+        return this.freezeBalance(dto, count, amount, operation);
     }
 
     /**
