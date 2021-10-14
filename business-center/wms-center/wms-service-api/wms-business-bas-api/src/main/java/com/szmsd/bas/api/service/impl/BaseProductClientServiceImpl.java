@@ -35,8 +35,8 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
     }
 
     @Override
-    public void add(BaseProductDto baseProductDto) {
-        R.getDataAndException(this.baseProductFeignService.add(baseProductDto));
+    public R add(BaseProductDto baseProductDto) {
+        return this.baseProductFeignService.add(baseProductDto);
     }
 
     @Override
