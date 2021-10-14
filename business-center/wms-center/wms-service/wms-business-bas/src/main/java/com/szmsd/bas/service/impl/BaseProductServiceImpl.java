@@ -736,7 +736,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
         }
         if (!s1.toString().equals("")) {
-            throw new BaseException(s1.toString());
+            throw new RuntimeException(s1.toString());
         }
     }
 
