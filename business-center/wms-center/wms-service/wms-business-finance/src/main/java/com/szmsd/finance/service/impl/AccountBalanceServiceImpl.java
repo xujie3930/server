@@ -4,15 +4,18 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.vo.DelOutboundDetailVO;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
-import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
@@ -216,7 +219,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Resource
     private ChargeFeignService chargeFeignService;
-
+    @Resource
+    private DelOutboundFeignService delOutboundFeignService;
     /**
      * 冻结 解冻 需要把费用扣减加到 操作费用表
      *
@@ -242,6 +246,19 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         }
         chargeLog.setRemark("-----------------------------------------");
         log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
+        if (null == chargeLog.getQty() || 0 >= chargeLog.getQty()) {
+            //现在只有出库单需要补，入库单没有这些数据
+            R<DelOutboundVO> infoByOrderNo = delOutboundFeignService.getInfoByOrderNo(chargeLog.getOrderNo());
+            if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
+                DelOutboundVO data = infoByOrderNo.getData();
+                //String trackingNo = data.getTrackingNo();
+                List<DelOutboundDetailVO> details = data.getDetails();
+                if (CollectionUtils.isNotEmpty(details)){
+                    Long qty = details.stream().map(DelOutboundDetailVO::getQty).reduce(Long::sum).orElse(0L);
+                    chargeLog.setQty(qty);
+                }
+            }
+        }
         chargeFeignService.add(chargeLog);
         log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
     }

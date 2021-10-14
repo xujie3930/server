@@ -134,6 +134,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R updateShipmentLabel(List<String> idList) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<DelOutboundVO> getInfoByOrderNo(String orderNo) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

@@ -31,11 +31,10 @@ public class BaseProductRequest {
     @Size(max = 200, message = "英文产品名称最大支持200字符")
     @NotBlank(message = "英文产品名称不能为空")
     private String productName;
-    //
-//    @ApiModelProperty(value = "产品编码", required = true)
-//    @Size(max = 50)
+    @ApiModelProperty(value = "产品编码", required = true)
+    @Size(max = 50)
 //    @NotBlank(message = "产品编码不能为空")
-//    private String code;
+    private String code;
     @DecimalMax(value = "999999", message = "初始重量最大仅支持999999 g")
     @DecimalMin(value = "0.01", message = "初始重量最小仅支持0.01 g")
     @ApiModelProperty(value = "初始重量g", example = "1", required = true)

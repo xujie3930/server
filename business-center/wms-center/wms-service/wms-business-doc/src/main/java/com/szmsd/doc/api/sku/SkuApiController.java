@@ -13,6 +13,7 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.doc.api.RUtils;
 import com.szmsd.doc.api.sku.request.*;
 import com.szmsd.doc.api.sku.resp.BasePackingResp;
 import com.szmsd.doc.api.sku.resp.BaseProductResp;
@@ -80,7 +81,7 @@ public class SkuApiController {
         productRequest.setSellerCode(AuthenticationUtil.getSellerCode());
         productRequest.uploadFile(remoterApi).validData(remoterApi).calculateTheVolume().checkPack(basePackingFeignService).setTheCode(remoterApi, docSubConfigData);
         BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
-        baseProductClientService.add(product);
+        RUtils.getDataAndException(baseProductClientService.add(product));
         return R.ok();
     }
     @PreAuthorize("hasAuthority('client')")
@@ -90,7 +91,7 @@ public class SkuApiController {
         productRequest.setSellerCode(AuthenticationUtil.getSellerCode());
         productRequest/*.uploadFile(remoterApi)*/.validData(remoterApi)/*.calculateTheVolume()*/.checkPack(basePackingFeignService).setTheCode(remoterApi, docSubConfigData);
         BaseProductDto product = BeanMapperUtil.map(productRequest, BaseProductDto.class);
-        baseProductClientService.add(product);
+        RUtils.getDataAndException(baseProductClientService.add(product));
         return R.ok();
     }
 
@@ -101,11 +102,7 @@ public class SkuApiController {
         basePackingAddReq.setSellerCode(AuthenticationUtil.getSellerCode());
         basePackingAddReq.calculateTheVolume();
         BaseProductDto product = BeanMapperUtil.map(basePackingAddReq, BaseProductDto.class);
-        try {
-            baseProductClientService.add(product);
-        }catch (Exception e){
-            throw new CommonException("400",e.getMessage());
-        }
+        RUtils.getDataAndException(baseProductClientService.add(product));
         return R.ok();
     }
 

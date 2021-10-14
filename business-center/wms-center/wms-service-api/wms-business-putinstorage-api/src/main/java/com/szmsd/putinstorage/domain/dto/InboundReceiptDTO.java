@@ -12,7 +12,10 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Validated
 @Data
@@ -64,7 +67,7 @@ public class InboundReceiptDTO {
 
     public InboundReceiptDTO setDeliveryNo(String deliveryNo) {
         this.deliveryNo = deliveryNo;
-        this.deliveryNoList = StringToolkit.getCodeByArray(deliveryNo);
+        this.deliveryNoList =  Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>()).stream().distinct().collect(Collectors.toList());
         return this;
     }
 

@@ -1,5 +1,9 @@
 package com.szmsd.putinstorage.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.putinstorage.domain.InboundTracking;
 import com.szmsd.putinstorage.mapper.InboundTrackingMapper;
 import com.szmsd.putinstorage.service.IInboundTrackingService;
@@ -42,6 +46,15 @@ public class InboundTrackingServiceImpl extends ServiceImpl<InboundTrackingMappe
     @Override
     public List<InboundTracking> selectInboundTrackingList(InboundTracking inboundTracking) {
         QueryWrapper<InboundTracking> where = new QueryWrapper<InboundTracking>();
+        List<String> trackingNumberList = inboundTracking.getTrackingNumberList();
+        String orderNo = inboundTracking.getOrderNo();
+        String trackingNumber = inboundTracking.getTrackingNumber();
+        List<String> orderNoList = inboundTracking.getOrderNoList();
+        Wrappers.<InboundTracking>lambdaQuery()
+                .eq(StringUtils.isNotBlank(trackingNumber), InboundTracking::getTrackingNumber, trackingNumber)
+                .eq(StringUtils.isNotBlank(orderNo), InboundTracking::getOrderNo, orderNo)
+                .in(CollectionUtils.isNotEmpty(trackingNumberList), InboundTracking::getTrackingNumber, trackingNumberList)
+                .in(CollectionUtils.isNotEmpty(orderNoList), InboundTracking::getOrderNo, orderNoList);
         return baseMapper.selectList(where);
     }
 

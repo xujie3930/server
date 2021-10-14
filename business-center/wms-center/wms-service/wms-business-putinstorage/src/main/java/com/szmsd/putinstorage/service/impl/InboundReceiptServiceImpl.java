@@ -1,6 +1,7 @@
 package com.szmsd.putinstorage.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,6 +12,7 @@ import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
 import com.szmsd.common.security.domain.LoginUser;
@@ -98,7 +100,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             queryDTO.setOrderNoList(Stream.of(orderNoSplit, orderNoList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
         }
 
-        return baseMapper.selectList(queryDTO);
+        return baseMapper.selectListByCondiction(queryDTO);
     }
 
     /**
@@ -133,6 +135,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 裸货上架需要校验sku
+     *
      * @param createInboundReceiptDTO
      */
     public void checkSkuPic(CreateInboundReceiptDTO createInboundReceiptDTO) {
@@ -147,6 +150,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         boolean b = skuList.removeAll(collect);
         AssertUtil.isTrue(CollectionUtils.isEmpty(skuList), String.format("裸货上架 SKU需要图片，%s SKU不存在图片", skuList));
     }
+
     /**
      * 创建入库单
      *
@@ -169,15 +173,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         //校验快递单号唯一
         List<String> deliveryNoList = createInboundReceiptDTO.getDeliveryNoList();
         if (CollectionUtils.isNotEmpty(deliveryNoList)) {
-//            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery()
-//                    .ne(null != createInboundReceiptDTO.getId(), InboundReceipt::getId, createInboundReceiptDTO.getId())
-//                    .in(InboundReceipt::getTrackingNumber, deliveryNoList);
-//
-//            deliveryNoList.forEach(deliveryNo->{
-//                in.or(x->x.like(InboundReceipt::getTrackingNumber,deliveryNoList).())
-//            });
-//            List<InboundReceipt> inboundReceipts = baseMapper.selectList(in            );
-//            AssertUtil.isTrue(CollectionUtils.isEmpty(inboundReceipts),"快递单号重复");
+            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().ne(InboundReceipt::getWarehouseNo, warehouseNo);
+            String join = String.join(",", deliveryNoList);
+            in.and(x->x.apply("CONCAT(',',delivery_no,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))",join));
+            List<InboundReceipt> inboundReceipts = baseMapper.selectList(in);
+            String errorMsg = inboundReceipts.stream().map(x -> x.getWarehouseNo() + ":" + x.getDeliveryNo()).collect(Collectors.joining("\n", "快递单号重复：", ""));
+            AssertUtil.isTrue(CollectionUtils.isEmpty(inboundReceipts), errorMsg);
         }
         // 保存入库单明细
         List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetails();
@@ -268,6 +269,26 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Override
     public InboundReceiptInfoVO queryInfo(String warehouseNo) {
         InboundReceiptInfoVO inboundReceiptInfoVO = queryInfo(warehouseNo, true);
+        if (inboundReceiptInfoVO != null) {
+            String deliveryNo = inboundReceiptInfoVO.getDeliveryNo();
+            List<String> codeByArray = StringToolkit.getCodeByArray(deliveryNo);
+            if (CollectionUtils.isNotEmpty(codeByArray)) {
+                //查询收货信息
+                List<InboundTracking> inboundTrackings = iInboundTrackingService.selectInboundTrackingList(new InboundTracking().setOrderNo(warehouseNo));
+                Map<String, InboundTracking> collect1 = inboundTrackings.stream().filter(x -> StringUtils.isNotBlank(x.getTrackingNumber())).collect(Collectors.toMap(InboundTracking::getTrackingNumber, x -> x));
+                List<InboundTrackingVO> collect = codeByArray.stream()
+                        .map(x -> {
+                            InboundTrackingVO inboundTrackingVO = new InboundTrackingVO().setTrackingNumber(x).setOrderNo(warehouseNo);
+                            InboundTracking inboundTracking = collect1.get(x);
+                            if (null != inboundTracking) {
+                                inboundTrackingVO.setArrivalStatus("1");
+                                inboundTrackingVO.setOperateOn(inboundTracking.getOperateOn());
+                            }
+                            return inboundTrackingVO;
+                        }).collect(Collectors.toList());
+                inboundReceiptInfoVO.setInboundTrackingList(collect);
+            }
+        }
         return inboundReceiptInfoVO;
     }
 
@@ -392,8 +413,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
 
             // 入库按照数量（按申报数量）进行扣费 扣费失败则出库失败，不能出库
-//            log.info("审核通过则扣费{}", JSONObject.toJSONString(inboundReceiptReviewDTO));
-//            remoteComponent.delOutboundCharge(inboundReceiptInfoVO);
+            log.info("审核通过则扣费{}", JSONObject.toJSONString(inboundReceiptReviewDTO));
+            remoteComponent.delOutboundCharge(inboundReceiptInfoVO);
 
 
             try {

@@ -1,9 +1,6 @@
 package com.szmsd.doc.api.warehouse.resp;
 
-import com.szmsd.common.core.language.annotation.FieldJsonI18n;
-import com.szmsd.common.core.language.constant.RedisLanguageTable;
-import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
+import com.szmsd.putinstorage.domain.vo.InboundTrackingVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -69,6 +66,9 @@ public class InboundReceiptInfoResp {
 
     @ApiModelProperty(value = "入库明细")
     private List<InboundReceiptDetailResp> inboundReceiptDetails;
+
+    @ApiModelProperty(value = "物流到货明细")
+    private List<InboundTrackingVO> inboundTrackingList;
 
     // --------------------多语言字段--------------------
 //

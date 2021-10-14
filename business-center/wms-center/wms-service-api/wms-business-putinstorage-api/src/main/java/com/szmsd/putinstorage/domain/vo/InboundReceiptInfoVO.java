@@ -76,6 +76,9 @@ public class InboundReceiptInfoVO {
     @ApiModelProperty(value = "入库明细")
     private List<InboundReceiptDetailVO> inboundReceiptDetails;
 
+    @ApiModelProperty(value = "物流到货明细")
+    private List<InboundTrackingVO> inboundTrackingList;
+
     // --------------------多语言字段--------------------
 
     @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")

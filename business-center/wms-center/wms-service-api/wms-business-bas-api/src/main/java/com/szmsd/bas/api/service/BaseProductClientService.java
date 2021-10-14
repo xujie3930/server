@@ -24,7 +24,7 @@ public interface BaseProductClientService {
     /**
      * 新增产品模块
      */
-    void add(BaseProductDto baseProductDto);
+    R add(BaseProductDto baseProductDto);
 
     /**
      * 检查sku编码是否有效

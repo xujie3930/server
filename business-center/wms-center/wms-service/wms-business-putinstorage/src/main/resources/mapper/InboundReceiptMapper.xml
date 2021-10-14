@@ -144,7 +144,7 @@
         IFNULL(t2.remark, '') remark,
         IFNULL(t.vat, '') vat
     </sql>
-    <select id="selectList" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultType="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
+    <select id="selectListByCondiction" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultType="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
         SELECT <include refid="Column_List_VO"/>
         FROM inbound_receipt t
         <where><include refid="selectListWhere"/></where>
