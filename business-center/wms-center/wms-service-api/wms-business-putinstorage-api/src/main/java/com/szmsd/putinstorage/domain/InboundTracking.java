@@ -3,9 +3,11 @@ package com.szmsd.putinstorage.domain;
 import java.math.BigDecimal;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.szmsd.common.core.web.domain.BaseEntity;
 
 import java.util.Date;
+import java.util.List;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
@@ -53,6 +55,11 @@ public class InboundTracking extends BaseEntity {
     @Excel(name = "入库单号")
     private String orderNo;
 
+    @TableField(exist = false)
+    @ApiModelProperty(value = "入库单号")
+    @Excel(name = "入库单号")
+    private List<String> orderNoList;
+
     @ApiModelProperty(value = "客户编码")
     @Excel(name = "客户编码")
     private String cusCode;
@@ -64,6 +71,11 @@ public class InboundTracking extends BaseEntity {
     @ApiModelProperty(value = "挂号")
     @Excel(name = "挂号")
     private String trackingNumber;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "挂号")
+    @Excel(name = "挂号")
+    private List<String> trackingNumberList;
 
     @ApiModelProperty(value = "操作人")
     @Excel(name = "操作人")
