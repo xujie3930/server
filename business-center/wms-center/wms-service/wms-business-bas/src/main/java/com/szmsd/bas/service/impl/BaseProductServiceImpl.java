@@ -675,7 +675,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 }
             }
             if (StringUtils.isEmpty(b.getSuggestPackingMaterial())) {
-                s.append("物流包装未填写,");
+//                s.append("物流包装未填写,");
             } else {
                 basePacking.setPackingMaterialType(b.getSuggestPackingMaterial());
                 List<BasePackingDto> basePackings = basePackingService.selectBasePackingList(basePacking);
@@ -707,8 +707,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             if (StringUtils.isEmpty(b.getProductDescription())) {
                 s.append("产品说明未填写,");
             } else {
-                if (b.getProductDescription().length() > 10) {
-                    s.append("产品说明超过十个字符,");
+                if (b.getProductDescription().length() > 40) {
+                    s.append("产品说明超过四十个字符,");
                 }
             }
             if (!s.toString().equals("")) {
