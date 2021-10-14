@@ -31,7 +31,7 @@ public class BaseProductRequest {
     @Size(max = 200, message = "英文产品名称最大支持200字符")
     @NotBlank(message = "英文产品名称不能为空")
     private String productName;
-    @ApiModelProperty(value = "产品编码", required = true)
+    @ApiModelProperty(value = "产品编码")
     @Size(max = 50)
 //    @NotBlank(message = "产品编码不能为空")
     private String code;
