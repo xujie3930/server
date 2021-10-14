@@ -173,10 +173,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         //校验快递单号唯一
         List<String> deliveryNoList = createInboundReceiptDTO.getDeliveryNoList();
         if (CollectionUtils.isNotEmpty(deliveryNoList)) {
-            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().and(x -> x.ne(InboundReceipt::getWarehouseNo, createInboundReceiptDTO.getWarehouseNo()));
-            deliveryNoList.forEach(deliveryNo -> in.or(x -> x.like(InboundReceipt::getTrackingNumber, deliveryNoList)));
+            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().ne(InboundReceipt::getWarehouseNo, warehouseNo);
+            String join = String.join(",", deliveryNoList);
+            in.and(x->x.apply("CONCAT(',',delivery_no,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))",join));
             List<InboundReceipt> inboundReceipts = baseMapper.selectList(in);
-            AssertUtil.isTrue(CollectionUtils.isEmpty(inboundReceipts), "快递单号重复");
+            String errorMsg = inboundReceipts.stream().map(x -> x.getWarehouseNo() + ":" + x.getDeliveryNo()).collect(Collectors.joining("\n", "快递单号重复：", ""));
+            AssertUtil.isTrue(CollectionUtils.isEmpty(inboundReceipts), errorMsg);
         }
         // 保存入库单明细
         List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetails();

@@ -590,9 +590,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 String skuCode = "S" + sellerCode + baseSerialNumberService.generateNumber(ProductConstant.SKU_NAME);
                 b.setCode(skuCode);
             } else {
-                if (!Pattern.matches(regex, b.getCode())) {
-                    s.append("SKU不允许出现除了数字字母之外的其它字符，");
-                }
+//                if (!Pattern.matches(regex, b.getCode())) {
+//                    s.append("SKU不允许出现除了数字字母之外的其它字符，");
+//                }
                 if (b.getCode().length() < 2) {
 
                     s.append("SKU长度小于两字符，");
