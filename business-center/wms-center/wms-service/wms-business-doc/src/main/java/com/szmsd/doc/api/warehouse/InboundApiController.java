@@ -201,15 +201,17 @@ public class InboundApiController {
 
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
+            if(CollectionUtils.isNotEmpty(x.getDocumentsFileBase64List())) {
+                List<BasAttachmentDataDTO> basAttachmentDataDTOS = iRemoterApi.uploadFile(x.getDocumentsFileBase64List(), AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
 
-            List<BasAttachmentDataDTO> basAttachmentDataDTOS = iRemoterApi.uploadFile(x.getDocumentsFileBase64List(), AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
+                List<AttachmentFileDTO> collect1 = basAttachmentDataDTOS.stream().map(file -> {
+                    AttachmentFileDTO attachmentFileDTO = new AttachmentFileDTO();
+                    BeanUtils.copyProperties(file, attachmentFileDTO);
+                    return attachmentFileDTO;
+                }).collect(Collectors.toList());
+                x.setDocumentsFile(collect1);
+            }
 
-            List<AttachmentFileDTO> collect1 = basAttachmentDataDTOS.stream().map(file -> {
-                AttachmentFileDTO attachmentFileDTO = new AttachmentFileDTO();
-                BeanUtils.copyProperties(file, attachmentFileDTO);
-                return attachmentFileDTO;
-            }).collect(Collectors.toList());
-            x.setDocumentsFile(collect1);
 
             x.calculate();
             x.checkOtherInfo();

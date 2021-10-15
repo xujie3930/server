@@ -75,6 +75,7 @@ public class RemoterApiImpl implements IRemoterApi {
 
     @Override
     public List<BasAttachmentDataDTO> uploadFile(List<FileInfoBase64> base64List, AttachmentTypeEnum attachmentTypeEnum) {
+        if (CollectionUtils.isEmpty(base64List)) return new ArrayList<>();
         base64List = base64List.stream().filter(x -> StringUtils.isNotBlank(x.getFileBase64())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(base64List)) return new ArrayList<>();
         MockMultipartFile[] mockMultipartFiles = new MockMultipartFile[base64List.size()];
