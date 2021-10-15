@@ -80,7 +80,9 @@ public class CreateInboundReceiptReq extends InboundReceiptReq {
 
         //产品货源地
         String goodsSourceCode = super.getGoodsSourceCode();
-        AssertUtil400.isTrue("0".equals(goodsSourceCode) || "1".equals(goodsSourceCode), "产品货源地不存在");
+        if (StringUtils.isNotBlank(goodsSourceCode)){
+            AssertUtil400.isTrue("0".equals(goodsSourceCode) || "1".equals(goodsSourceCode), "产品货源地不存在");
+        }
         // 裸货上架 过滤图片 TODO
         if ("055003".equals(super.getOrderType())){
             this.getInboundReceiptDetails().stream().map(InboundReceiptDetailReq::getEditionImage);
