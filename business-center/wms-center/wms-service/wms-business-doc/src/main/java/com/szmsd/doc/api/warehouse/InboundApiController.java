@@ -195,7 +195,7 @@ public class InboundApiController {
     @ApiOperation(value = "新增-批量入库单", notes = "新建入库单，入库单提交后，视入库仓库是否需要人工审核，" +
             "如果需要管理人员人工审核，则需进入OMS客户端-仓储服务-入库管理，再次提交入库申请。如仓库设置为自动审核，" +
             "则入库申请单直接推送WMS，并根据相应规则计算费用。支持批量导入入库单")
-    R<List<InboundReceiptInfoResp>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
+    R<List<String>> saveOrUpdateBatch(@RequestBody @Valid BatchInboundReceiptReq batchInboundReceiptReq) {
         String sellerCode = AuthenticationUtil.getSellerCode();
         batchInboundReceiptReq.getBatchInboundReceiptList().forEach(x -> x.setCusCode(sellerCode));
 
@@ -265,12 +265,14 @@ public class InboundApiController {
         iRemoterApi.checkSkuPic(collect, AttachmentTypeEnum.SKU_IMAGE);
         R<List<InboundReceiptInfoVO>> listR = inboundReceiptFeignService.saveOrUpdateBatch(addDTO);
         List<InboundReceiptInfoVO> dataAndException = RUtils.getDataAndException(listR);
-        List<InboundReceiptInfoResp> result = dataAndException.stream().map(x -> {
+        /*List<InboundReceiptInfoResp> result = dataAndException.stream().map(x -> {
             InboundReceiptInfoResp inboundReceiptInfoResp = new InboundReceiptInfoResp();
             BeanUtils.copyProperties(x, inboundReceiptInfoResp);
+            inboundReceiptInfoResp.setWarehouseNo(x.getWarehouseNo());
             return inboundReceiptInfoResp;
-        }).collect(Collectors.toList());
-        return R.ok();
+        }).collect(Collectors.toList());*/
+        List<String> warehouseNoList = dataAndException.stream().map(InboundReceiptInfoVO::getWarehouseNo).collect(Collectors.toList());
+        return R.ok(warehouseNoList);
     }
 
     @PreAuthorize("hasAuthority('client')")
