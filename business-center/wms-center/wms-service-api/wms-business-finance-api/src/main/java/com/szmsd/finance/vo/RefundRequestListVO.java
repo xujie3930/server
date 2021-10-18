@@ -155,16 +155,16 @@ public class RefundRequestListVO {
     private String compensationPaymentCurrencyCode;
 
     @ApiModelProperty(value = "供应商是否完成赔付（0：未完成，1：已完成）")
-    private Boolean compensationPaymentFlag;
+    private String compensationPaymentFlag;
 
     @ApiModelProperty(value = "赔付金额")
     private String payoutAmount;
 
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
-    private Boolean noCompensationFlag;
+    private String noCompensationFlag;
 
     @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
-    private Boolean compensationPaymentArrivedFlag;
+    private String compensationPaymentArrivedFlag;
 
     @ApiModelProperty(value = "数量")
     private String num;
