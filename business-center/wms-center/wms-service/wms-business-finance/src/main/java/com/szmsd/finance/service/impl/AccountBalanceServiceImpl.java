@@ -37,6 +37,7 @@ import com.szmsd.http.dto.recharges.RechargesRequestDTO;
 import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.http.vo.RechargesResponseVo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -346,10 +348,27 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             balanceDTO.setCreditInfoBO(creditInfoBO);
             return balanceDTO;
         }
+
         log.info("getBalance() cusCode: {} currencyCode: {}", cusCode, currencyCode);
-        accountBalance = new AccountBalance(cusCode, currencyCode, getCurrencyName(currencyCode));
+        String currencyName = getCurrencyName(currencyCode);
+        accountBalance = new AccountBalance(cusCode, currencyCode, currencyName);
+        //判断是否有启用中的授信信息，有的话需要设置
+        List<AccountBalance> accountBalances = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
+                .eq(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
+                .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
+                .eq(AccountBalance::getCusCode, cusCode));
+        if (CollectionUtils.isNotEmpty(accountBalances)) {
+            AccountBalance accountBalanceCredit = accountBalances.get(0);
+            BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
+            accountBalance.setId(null).setCurrencyCode(currencyCode).setCurrencyName(currencyName)
+                    .setCreditUseAmount(BigDecimal.ZERO).setCreditBufferUseAmount(BigDecimal.ZERO)
+                    .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
+                    .setCreateTime(new Date());
+        }
         accountBalanceMapper.insert(accountBalance);
-        return new BalanceDTO(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        BalanceDTO balanceDTO = new BalanceDTO(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        BeanUtils.copyProperties(accountBalance, balanceDTO);
+        return balanceDTO;
     }
 
     @Override
@@ -624,8 +643,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 .eq(AccountBalance::getCusCode, cusCode)
         );
 
-        CreditConstant.CreditTypeEnum creditTypeEnum = accountBalancesOld.stream().filter(x -> null != x.getCreditStatus() && x.getCreditType().equals(CreditConstant.CreditStatusEnum.ACTIVE.getValue() + "")).map(AccountBalance::getCreditType).filter(Objects::nonNull).findAny().map(Integer::parseInt).map(CreditConstant.CreditTypeEnum::getThisByTypeCode).orElse(CreditConstant.CreditTypeEnum.DEFAULT);
-
+        CreditConstant.CreditTypeEnum creditTypeEnum = accountBalancesOld.stream().filter(x -> null != x.getCreditStatus() && x.getCreditType().equals(CreditConstant.CreditStatusEnum.ACTIVE.getValue() + "")).map(AccountBalance::getCreditType).filter(Objects::nonNull).findAny().map(CreditConstant.CreditTypeEnum::getThisByTypeCode).orElse(CreditConstant.CreditTypeEnum.DEFAULT);
+//        LocalDateTime start = LocalDateTime.now();
+//        LocalDateTime end = start.plus(userCreditDTO.getCreditTimeInterval(), CreditConstant.CREDIT_UNIT);
+//        LocalDateTime bufferEnd = end.plus(CreditConstant.CREDIT_BUFFER_Interval, CreditConstant.CREDIT_UNIT);
         Map<String, AccountBalance> oldAccountInfo = accountBalancesOld.stream().collect(Collectors.toMap(AccountBalance::getCurrencyCode, x -> x));
 
         switch (creditTypeEnum) {
@@ -730,16 +751,17 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     }
 
     @Override
-    public UserCreditInfoVO queryUserCredit(String cusCode) {
-        AccountBalance accountBalanceBefore = accountBalanceMapper.selectOne(Wrappers.<AccountBalance>lambdaQuery()
+    public List<UserCreditInfoVO> queryUserCredit(String cusCode) {
+        List<AccountBalance> accountBalances = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
                 .eq(AccountBalance::getCusCode, cusCode)
                 .isNotNull(AccountBalance::getCreditType)
-                .last("LIMIT 1")
         );
-        UserCreditInfoVO userCreditInfoVO = new UserCreditInfoVO();
-        if (null != accountBalanceBefore) {
-            BeanUtils.copyProperties(accountBalanceBefore, userCreditInfoVO);
-        }
-        return userCreditInfoVO;
+        List<UserCreditInfoVO> collect = accountBalances.stream().map(x -> {
+            UserCreditInfoVO userCreditInfoVO = new UserCreditInfoVO();
+            BeanUtils.copyProperties(x, userCreditInfoVO);
+            userCreditInfoVO.setCreditType(CreditConstant.CreditTypeEnum.getThisByTypeCode(x.getCreditType()).name());
+            return userCreditInfoVO;
+        }).collect(Collectors.toList());
+        return collect;
     }
 }

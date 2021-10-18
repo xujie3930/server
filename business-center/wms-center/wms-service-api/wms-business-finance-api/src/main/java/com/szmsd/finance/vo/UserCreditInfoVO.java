@@ -2,6 +2,7 @@ package com.szmsd.finance.vo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.finance.enums.CreditConstant;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,8 +22,8 @@ public class UserCreditInfoVO {
     /**
      * 09-07 授信额度新增
      */
-    @ApiModelProperty(value = "授信类型(0：额度，1：期限)")
-    @Excel(name = "授信类型(0：额度，1：期限)")
+    @ApiModelProperty(value = "授信类型(QUOTA：额度，TIME_LIMIT：期限)")
+    @Excel(name = "授信类型(QUOTA：额度，TIME_LIMIT：期限)")
     private String creditType;
 
     @ApiModelProperty(value = "授信额度")
@@ -33,13 +34,15 @@ public class UserCreditInfoVO {
     @Excel(name = "授信时间间隔")
     private Integer creditTimeInterval;
     @NotBlank
-    @ApiModelProperty(value = "币种编码",required = true)
+    @ApiModelProperty(value = "币种编码", required = true)
     private String currencyCode;
     @ApiModelProperty(value = "币种名")
     private String currencyName;
     @NotBlank
-    @ApiModelProperty(value = "客户编码",required = true)
+    @ApiModelProperty(value = "客户编码", required = true)
     private String cusCode;
+    @ApiModelProperty(value = "授信状态", required = true)
+    private Integer creditStatus;
 
     @Override
     public String toString() {

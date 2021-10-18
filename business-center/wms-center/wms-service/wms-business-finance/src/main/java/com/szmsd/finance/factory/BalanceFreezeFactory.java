@@ -49,11 +49,12 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         try {
             if(lock.tryLock(time, unit)) {
                 BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
-                if (!checkBalance(balance, dto)) {
+                if (!checkAndSetBalance(balance, dto)) {
                     return false;
                 }
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), balance);
                 recordOpLog(dto, balance.getCurrentBalance());
+                recordDetailLog(dto,balance);
             }
             return true;
         } catch (InterruptedException e) {
@@ -87,7 +88,13 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         return accountBalanceChange;
     }
 
-    private boolean checkBalance(BalanceDTO balance, CustPayDTO dto) {
+    /**
+     * 校验越是否够扣除，不够使用授信额，再不够返回false
+     * @param balance
+     * @param dto
+     * @return
+     */
+    private boolean checkAndSetBalance(BalanceDTO balance, CustPayDTO dto) {
         BigDecimal changeAmount = dto.getAmount();
         if (BillEnum.PayMethod.BALANCE_FREEZE == dto.getPayMethod()) {
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);

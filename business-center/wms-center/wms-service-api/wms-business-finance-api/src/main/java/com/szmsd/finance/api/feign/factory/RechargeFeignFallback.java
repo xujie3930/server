@@ -65,7 +65,7 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
             }
 
             @Override
-            public R<UserCreditInfoVO> queryUserCredit(String cusCode) {
+            public R<List<UserCreditInfoVO>> queryUserCredit(String cusCode) {
                 log.info("查询用户授信额度失败，服务调用降级");
                 return R.failed();
             }
