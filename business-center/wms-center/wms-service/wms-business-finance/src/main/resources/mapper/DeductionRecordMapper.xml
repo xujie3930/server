@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.finance.mapper.DeductionRecordMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.finance.domain.FssDeductionRecord">
+        <id column="id" property="id"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="version" property="version"/>
+        <result column="cus_code" property="cusCode"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="pay_method" property="payMethod"/>
+        <result column="product_category" property="productCategory"/>
+        <result column="charge_category" property="chargeCategory"/>
+        <result column="charge_type" property="chargeType"/>
+        <result column="amount" property="amount"/>
+        <result column="currency_code" property="currencyCode"/>
+        <result column="actual_deduction" property="actualDeduction"/>
+        <result column="credit_use_amount" property="creditUseAmount"/>
+        <result column="credit_type" property="creditType"/>
+        <result column="credit_begin_time" property="creditBeginTime"/>
+        <result column="credit_end_time" property="creditEndTime"/>
+        <result column="repayment_amount" property="repaymentAmount"/>
+        <result column="remaining_repayment_amount" property="remainingRepaymentAmount"/>
+        <result column="type" property="type"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, create_by, update_by, version, cus_code, order_no, pay_method, product_category, charge_category, charge_type, amount, currency_code, actual_deduction, credit_use_amount, credit_type, credit_begin_time, credit_end_time, repayment_amount, remaining_repayment_amount, type
+    </sql>
+</mapper>

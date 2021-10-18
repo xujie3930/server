@@ -8,4 +8,38 @@
         </where>
     </select>
 
+    <update id="updateCreditBatch" parameterType="list">
+        update fss_account_balance
+        <trim prefix="set" suffixOverrides=",">
+            credit_status = 1,
+            <trim prefix="credit_type = case" suffix="end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.currencyCode != null">
+                        when currency_code = #{i.currencyCode} then #{i.creditType.type}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="credit_line = case" suffix="end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditLine != null">
+                        when currency_code= #{i.currencyCode} then #{i.creditLine}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="credit_time_interval = case" suffix="end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditTimeInterval != null">
+                        when currency_code= #{i.currencyCode} then #{i.creditTimeInterval}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        WHERE cus_code = #{cusCode}
+        <if test="currencyCodeList != null and currencyCodeList.size() > 0">
+            AND currency_code in
+            <foreach collection="currencyCodeList" open="(" separator="," close=")" item="item">
+                #{item}
+            </foreach>
+        </if>
+    </update>
 </mapper>
