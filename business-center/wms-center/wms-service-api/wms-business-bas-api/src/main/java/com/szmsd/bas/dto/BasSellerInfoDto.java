@@ -18,7 +18,7 @@ public class BasSellerInfoDto extends BasSeller {
 
     @Valid
     @ApiModelProperty(value = "用户授信额度")
-    private List<UserCreditDTO> userCreditDTOList;
+    private List<UserCreditDetailDTO> userCreditList;
 
     @ApiModelProperty(value = "创建人")
     @Excel(name = "创建人")

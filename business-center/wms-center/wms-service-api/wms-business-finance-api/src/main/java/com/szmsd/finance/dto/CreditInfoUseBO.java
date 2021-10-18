@@ -1,57 +1,28 @@
-package com.szmsd.finance.domain;
+package com.szmsd.finance.dto;
 
-import java.math.BigDecimal;
-
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.szmsd.common.core.web.domain.BaseEntity;
-
-import java.util.Date;
-
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.alibaba.fastjson.JSONObject;
+import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.finance.enums.CreditConstant;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
-import com.szmsd.common.core.annotation.Excel;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 /**
- * <p>
- * 扣费信息记录表
- * </p>
- *
- * @author 11
- * @since 2021-10-14
+ * @ClassName: CreditInfoBO
+ * @Description: 授信额度信息
+ * @Author: 11
+ * @Date: 2021-09-07 14:56
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@Accessors(chain = true)
-@ApiModel(value = "扣费信息记录表", description = "FssDeductionRecord对象")
-public class FssDeductionRecord extends BaseEntity {
-
-    private static final long serialVersionUID = 1L;
-
-    @ApiModelProperty(value = "主键ID")
-    @TableId(value = "id", type = IdType.AUTO)
-    @Excel(name = "主键ID")
-    private Integer id;
-
-    @ApiModelProperty(value = "创建人")
-    @Excel(name = "创建人")
-    private String createBy;
-
-    @ApiModelProperty(value = "修改人")
-    @Excel(name = "修改人")
-    private String updateBy;
-
-    @ApiModelProperty(value = "版本号")
-    @Excel(name = "版本号")
-    private BigDecimal version;
-
-    @ApiModelProperty(value = "客户代码")
-    @Excel(name = "客户代码")
-    private String cusCode;
+@Setter
+@Getter
+@ApiModel(description = "授信额度信息")
+public class CreditInfoUseBO {
 
     @ApiModelProperty(value = "订单号")
     @Excel(name = "订单号")
@@ -113,5 +84,8 @@ public class FssDeductionRecord extends BaseEntity {
     @Excel(name = "扣费类型（0=扣款,1=还款）")
     private Integer type;
 
-
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }

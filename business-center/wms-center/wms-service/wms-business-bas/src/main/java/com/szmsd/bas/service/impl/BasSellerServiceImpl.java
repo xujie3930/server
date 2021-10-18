@@ -40,6 +40,7 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.UserCreditDTO;
+import com.szmsd.finance.enums.CreditConstant;
 import com.szmsd.finance.vo.UserCreditInfoVO;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SellerRequest;
@@ -333,11 +334,10 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             }
             basSellerInfoVO.setBasSellerCertificateList(basSellerCertificateVOS);
 
-            R<UserCreditInfoVO> userCreditInfoVOR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
-            if (userCreditInfoVOR.getCode()==HttpStatus.SUCCESS){
-                UserCreditInfoVO data = userCreditInfoVOR.getData();
-                BeanUtils.copyProperties(data,basSellerInfoVO);
-            }
+            R<List<UserCreditInfoVO>> listR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
+            List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
+            List<UserCreditInfoVO> collect = dataAndException.stream().filter(x -> (x.getCreditStatus() != null) && (CreditConstant.CreditStatusEnum.ACTIVE.getValue()).equals(x.getCreditStatus())).collect(Collectors.toList());
+            basSellerInfoVO.setUserCreditList(collect);
             return basSellerInfoVO;
         }
 
@@ -401,7 +401,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             }
 
             UserCreditDTO userCreditDTO = new UserCreditDTO();
-            userCreditDTO.setUserCreditDetailList(userCreditDTO.getUserCreditDetailList());
+            userCreditDTO.setUserCreditDetailList(basSellerInfoDto.getUserCreditList());
             userCreditDTO.setCusCode(basSellerInfoDto.getSellerCode());
             R r1 = rechargesFeignService.updateUserCredit(userCreditDTO);
             R.getDataAndException(r1);

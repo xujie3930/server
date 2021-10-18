@@ -56,5 +56,5 @@ public interface IAccountBalanceService {
 
     void updateUserCredit(UserCreditDTO userCreditDTO);
 
-    UserCreditInfoVO queryUserCredit(String cusCode);
+    List<UserCreditInfoVO> queryUserCredit(String cusCode);
 }

@@ -4,14 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
-import com.szmsd.finance.dto.AccountBalanceChangeDTO;
-import com.szmsd.finance.dto.AccountSerialBillDTO;
-import com.szmsd.finance.dto.BalanceDTO;
-import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.domain.FssDeductionRecord;
+import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
+import com.szmsd.finance.service.IDeductionRecordService;
 import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.util.SnowflakeId;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +49,10 @@ public abstract class AbstractPayFactory {
     @Resource
     private IAccountSerialBillService accountSerialBillService;
 
+    @Resource
+    private IDeductionRecordService iDeductionRecordService;
+
+
     public abstract boolean updateBalance(CustPayDTO dto);
 
     public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
@@ -68,6 +71,23 @@ public abstract class AbstractPayFactory {
         return accountBalanceChange;
     }
 
+    /**
+     * 详细使用记录
+     *
+     * @param custPayDTO
+     * @param balanceDTO
+     */
+    public void recordDetailLog(CustPayDTO custPayDTO, BalanceDTO balanceDTO) {
+        FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
+        CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
+        BeanUtils.copyProperties(creditInfoBO,fssDeductionRecord);
+        BeanUtils.copyProperties(custPayDTO, fssDeductionRecord);
+        fssDeductionRecord.setOrderNo(custPayDTO.getNo());
+        fssDeductionRecord.setActualDeduction(balanceDTO.getActualDeduction());
+        fssDeductionRecord.setCreditUseAmount(balanceDTO.getCreditUseAmount());
+        iDeductionRecordService.save(fssDeductionRecord);
+    }
+
     protected abstract void setOpLogAmount(AccountBalanceChange accountBalanceChange, BigDecimal amount);
 
     protected BigDecimal getCurrentBalance(String cusCode, String currencyCode) {
@@ -80,29 +100,33 @@ public abstract class AbstractPayFactory {
 
     /**
      * 查询该用户对应币别的余额
-     * @param cusCode 客户编码
+     *
+     * @param cusCode      客户编码
      * @param currencyCode 币别
      * @return 查询结果
      */
     protected BalanceDTO getBalance(String cusCode, String currencyCode) {
         return accountBalanceService.getBalance(cusCode, currencyCode);
     }
-    protected void updateCreditStatus(CustPayDTO dto){
+
+    protected void updateCreditStatus(CustPayDTO dto) {
         iAccountBalanceService.updateCreditStatus(dto);
     }
 
     /**
      * 需要扣减信用额
+     *
      * @param cusCode
      * @param currencyCode
      * @param result
      * @param need
      */
-    protected void setBalance(String cusCode, String currencyCode, BalanceDTO result,boolean needUpdateCredit) {
-        accountBalanceService.setBalance(cusCode, currencyCode, result,true);
+    protected void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit) {
+        accountBalanceService.setBalance(cusCode, currencyCode, result, true);
     }
+
     protected void setBalance(String cusCode, String currencyCode, BalanceDTO result) {
-        accountBalanceService.setBalance(cusCode, currencyCode, result ,false);
+        accountBalanceService.setBalance(cusCode, currencyCode, result, false);
     }
 
     public abstract BalanceDTO calculateBalance(BalanceDTO oldBalance, BigDecimal changeAmount);

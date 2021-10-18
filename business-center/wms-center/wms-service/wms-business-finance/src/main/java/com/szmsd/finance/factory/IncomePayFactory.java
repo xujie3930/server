@@ -52,6 +52,7 @@ public class IncomePayFactory extends AbstractPayFactory {
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance);
                 recordOpLog(dto, oldBalance.getCurrentBalance());
                 setSerialBillLog(dto);
+                recordDetailLog(dto,oldBalance);
             }
             return true;
         } catch (Exception e) {

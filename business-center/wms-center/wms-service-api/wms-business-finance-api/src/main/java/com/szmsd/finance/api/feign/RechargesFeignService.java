@@ -49,7 +49,7 @@ public interface RechargesFeignService {
 
     @ApiOperation(value = "查询用户信用额信息")
     @GetMapping("/accountBalance/queryUserCredit/{cusCode}")
-    R<UserCreditInfoVO> queryUserCredit(@PathVariable("cusCode") String cusCode);
+    R<List<UserCreditInfoVO>> queryUserCredit(@PathVariable("cusCode") String cusCode);
 
     @ApiOperation(value = "在线充值")
     @PostMapping("/accountBalance/onlineIncome")

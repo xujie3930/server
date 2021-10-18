@@ -53,7 +53,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
                         return false;
                     }
                     this.calculateBalance(oldBalance, changeAmount);*/
-                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount,true,BalanceDTO::pay)){
+                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount,true, BalanceDTO::pay)){
                         return false;
                     }
                 }
@@ -71,6 +71,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 }
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance,true);
                 recordOpLog(dto, oldBalance.getCurrentBalance());
+                recordDetailLog(dto,oldBalance);
                 setSerialBillLog(dto);
             }
             return true;

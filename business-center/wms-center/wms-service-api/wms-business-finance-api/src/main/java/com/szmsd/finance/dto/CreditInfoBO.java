@@ -25,9 +25,9 @@ public class CreditInfoBO {
     /**
      * 09-07 授信额度新增
      */
-    @ApiModelProperty(value = "授信类型(0：额度，1：期限)")
-    @Excel(name = "授信类型(0：额度，1：期限)")
-    private Integer creditType;
+    @ApiModelProperty(value = "授信类型(QUOTA：额度，TIME_LIMIT：期限)")
+    @Excel(name = "授信类型(QUOTA：额度，TIME_LIMIT：期限)")
+    private String creditType;
 
     @ApiModelProperty(value = "授信状态（0：未启用，1：启用中，2：欠费停用，3：已禁用）")
     @Excel(name = "授信状态（0：未启用，1：启用中，2：欠费停用，3：已禁用）")
@@ -40,6 +40,10 @@ public class CreditInfoBO {
     @ApiModelProperty(value = "使用额度金额")
     @Excel(name = "使用额度金额")
     private BigDecimal creditUseAmount;
+
+    @ApiModelProperty(value = "本次使用额度金额")
+    @Excel(name = "本次使用额度金额")
+    private BigDecimal thisUseCreditUseAmount;
 
     @ApiModelProperty(value = "授信开始时间")
     @Excel(name = "授信开始时间")
@@ -91,7 +95,7 @@ public class CreditInfoBO {
                 } else {
                     // 刚好够扣则设置停用
                     if (amount.compareTo(canUseAmount) == 0) {
-                        this.creditType = CreditConstant.CreditStatusEnum.ARREARAGE_DEACTIVATION.getValue();
+                        this.creditStatus = CreditConstant.CreditStatusEnum.ARREARAGE_DEACTIVATION.getValue();
                     }
                     if (updateCredit)
                     this.creditUseAmount = this.creditUseAmount.add(amount);

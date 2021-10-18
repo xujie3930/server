@@ -29,7 +29,7 @@ import java.math.BigDecimal;
 public class UserCreditDetailDTO {
 
     @NotNull(message = "授信类型不能为空")
-    @ApiModelProperty(value = "授信类型(0：额度，1：期限)")
+    @ApiModelProperty(value = "授信类型(QUOTA：额度，TIME_LIMIT：期限)")
     @Excel(name = "授信类型(QUOTA：额度，TIME_LIMIT：期限)")
     private CreditConstant.CreditTypeEnum creditType;
 

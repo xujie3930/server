@@ -130,7 +130,7 @@ public class AccountBalanceController extends FssBaseController {
     @PreAuthorize("@ss.hasPermi('ExchangeRate:thawBalance')")
     @ApiOperation(value = "查询用户信用额信息")
     @GetMapping("/queryUserCredit/{cusCode}")
-    public R<UserCreditInfoVO> queryUserCredit(@PathVariable("cusCode") String cusCode){
+    public R<List<UserCreditInfoVO>> queryUserCredit(@PathVariable("cusCode") String cusCode){
         return R.ok(accountBalanceService.queryUserCredit(cusCode));
     }
 

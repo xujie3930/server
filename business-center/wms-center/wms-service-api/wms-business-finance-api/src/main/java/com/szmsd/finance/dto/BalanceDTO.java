@@ -1,5 +1,6 @@
 package com.szmsd.finance.dto;
 
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.finance.enums.CreditConstant;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -22,6 +23,12 @@ public class BalanceDTO {
 
     @ApiModelProperty(value = "总余额")
     private BigDecimal totalBalance;
+
+    @ApiModelProperty(value = "实际扣费金额(余额扣费)")
+    private BigDecimal actualDeduction;
+
+    @ApiModelProperty(value = "使用授信金额")
+    private BigDecimal creditUseAmount;
 
     @ApiModelProperty(value = "授信信息")
     private CreditInfoBO creditInfoBO;
@@ -48,17 +55,22 @@ public class BalanceDTO {
         Integer creditStatus = creditInfoBO.getCreditStatus();
         if (CreditConstant.CreditStatusEnum.ACTIVE.getValue().equals(creditStatus)) {
             if (this.currentBalance.compareTo(amount) >= 0) {
+                this.actualDeduction = amount;
+                this.creditUseAmount = BigDecimal.ZERO;
                 if (null != function) return function.apply(this, amount);
             } else {
                 boolean b = false;
-                //余额不足扣减，使用授信额度
+                // 余额不足扣减，使用授信额度
                 if (null != function) function.apply(this, amount);
                 //把余额全部冻结 剩余需要扣除的钱
                 BigDecimal needDeducted = amount.subtract(this.currentBalance);
+                this.actualDeduction = this.currentBalance;
+                this.creditUseAmount = needDeducted;
                 b = this.creditInfoBO.changeCreditAmount(needDeducted, updateCredit);
                 return b;
             }
         } else {
+            this.actualDeduction = amount;
             //正常逻辑走
             if (null != function) return function.apply(this, amount);
         }
@@ -132,6 +144,9 @@ public class BalanceDTO {
             this.currentBalance = this.currentBalance.add(amount);
             // 总余额
             this.totalBalance = this.totalBalance.add(amount);
+//            creditInfoUseBO.setType(1);
+//            creditInfoUseBO.getRepaymentAmount()
+//            creditInfoUseBO.setRepaymentAmount();
             return true;
         }
         return false;
