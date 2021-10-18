@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.javafaker.CreditCardType;
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
@@ -608,7 +609,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         CreditConstant.CreditTypeEnum newCreditTypeEnum = userCreditDetailList.stream().map(UserCreditDetailDTO::getCreditType).filter(Objects::nonNull).findAny().orElse(CreditConstant.CreditTypeEnum.DEFAULT);
         LambdaUpdateWrapper<AccountBalance> accountOldWrapper = Wrappers.<AccountBalance>lambdaUpdate()
                 .eq(AccountBalance::getCusCode, cusCode);
-        Integer creditTimeInterval = userCreditDTO.getUserCreditDetailList().stream().map(UserCreditDetailDTO::getCreditTimeInterval).findAny().orElse(0);
+        Integer creditTimeInterval = userCreditDTO.getUserCreditDetailList().stream().map(UserCreditDetailDTO::getCreditTimeInterval).filter(Objects::nonNull).findAny().orElse(0);
         if (CollectionUtils.isEmpty(userCreditDetailList)) {
             //清空需要归还所有的欠款
         } else {
@@ -754,6 +755,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public List<UserCreditInfoVO> queryUserCredit(String cusCode) {
         List<AccountBalance> accountBalances = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
                 .eq(AccountBalance::getCusCode, cusCode)
+                .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
                 .isNotNull(AccountBalance::getCreditType)
         );
         List<UserCreditInfoVO> collect = accountBalances.stream().map(x -> {
@@ -762,6 +764,14 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             userCreditInfoVO.setCreditType(CreditConstant.CreditTypeEnum.getThisByTypeCode(x.getCreditType()).name());
             return userCreditInfoVO;
         }).collect(Collectors.toList());
+        boolean present = collect.stream().anyMatch(x -> null != x.getCreditType() && (CreditConstant.CreditTypeEnum.TIME_LIMIT.name() + "").equals(x.getCreditType()));
+        if (present && CollectionUtils.isNotEmpty(collect)) {
+            UserCreditInfoVO userCreditInfoVO = collect.get(0);
+            userCreditInfoVO.setCreditLine(null);
+            userCreditInfoVO.setCurrencyCode(null);
+            userCreditInfoVO.setCurrencyName(null);
+            collect = Collections.singletonList(userCreditInfoVO);
+        }
         return collect;
     }
 }

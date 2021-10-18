@@ -66,6 +66,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 dto.setCurrencyCode(accountBalanceChange.getCurrencyCode());
                 dto.setCurrencyName(accountBalanceChange.getCurrencyName());
                 setSerialBillLog(dto,afterBalanceChange);
+                recordDetailLog(dto,beforeSubtract);
             }
             return true;
         } catch (Exception e) {
