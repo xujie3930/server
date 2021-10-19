@@ -87,8 +87,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             FssRefundRequest fssRefundRequest = new FssRefundRequest();
             BeanUtils.copyProperties(x, fssRefundRequest);
             fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus())
-                    .setProcessNo(strings.get(noLine.getAndIncrement()))
-            ;
+                    .setProcessNo(strings.get(noLine.getAndIncrement()));
             return fssRefundRequest;
         }).collect(Collectors.toList());
         return this.saveBatch(collect) ? addList.size() : 0;
@@ -103,7 +102,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus());
         return baseMapper.update(fssRefundRequest,Wrappers.<FssRefundRequest>lambdaUpdate()
                 .in(FssRefundRequest::getAuditStatus,RefundStatusEnum.BRING_INTO_COURT.getStatus()
-                        ,RefundStatusEnum.INITIAL.getStatus()));
+                        ,RefundStatusEnum.INITIAL.getStatus()).eq(FssRefundRequest::getId,updateDTO.getId()));
     }
 
     @Override

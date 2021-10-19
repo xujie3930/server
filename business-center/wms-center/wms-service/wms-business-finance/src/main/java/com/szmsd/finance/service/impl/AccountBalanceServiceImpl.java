@@ -381,7 +381,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance, result.getCurrentBalance());
         lambdaUpdateWrapper.set(AccountBalance::getFreezeBalance, result.getFreezeBalance());
         lambdaUpdateWrapper.set(AccountBalance::getTotalBalance, result.getTotalBalance());
-        if (needUpdateCredit) {
+        if (needUpdateCredit && null != result.getCreditInfoBO()) {
             lambdaUpdateWrapper.set(AccountBalance::getCreditUseAmount, result.getCreditInfoBO().getCreditUseAmount());
             lambdaUpdateWrapper.set(AccountBalance::getCreditBufferUseAmount, result.getCreditInfoBO().getCreditBufferUseAmount());
             lambdaUpdateWrapper.set(AccountBalance::getCreditStatus, result.getCreditInfoBO().getCreditStatus());
@@ -774,15 +774,15 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             return userCreditInfoVO;
         }).collect(Collectors.toList());
         boolean present = collect.stream().anyMatch(x -> null != x.getCreditType() && (CreditConstant.CreditTypeEnum.TIME_LIMIT.name() + "").equals(x.getCreditType()));
-        if ( CollectionUtils.isNotEmpty(collect)) {
-            if (present){
+        if (CollectionUtils.isNotEmpty(collect)) {
+            if (present) {
                 UserCreditInfoVO userCreditInfoVO = collect.get(0);
                 userCreditInfoVO.setCreditLine(null);
                 userCreditInfoVO.setCurrencyCode(null);
                 userCreditInfoVO.setCurrencyName(null);
                 collect = Collections.singletonList(userCreditInfoVO);
-            }else {
-                collect.forEach(x->x.setCreditTimeInterval(null));
+            } else {
+                collect.forEach(x -> x.setCreditTimeInterval(null));
             }
 
         }
