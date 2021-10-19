@@ -650,7 +650,12 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 .eq(AccountBalance::getCusCode, cusCode)
         );
 
-        CreditConstant.CreditTypeEnum creditTypeEnum = accountBalancesOld.stream().filter(x -> null != x.getCreditStatus() && x.getCreditType().equals(CreditConstant.CreditStatusEnum.ACTIVE.getValue() + "")).map(AccountBalance::getCreditType).filter(Objects::nonNull).findAny().map(CreditConstant.CreditTypeEnum::getThisByTypeCode).orElse(CreditConstant.CreditTypeEnum.DEFAULT);
+        CreditConstant.CreditTypeEnum creditTypeEnum = accountBalancesOld.stream()
+                .filter(x -> null != x.getCreditType())
+                .findAny()
+                .map(AccountBalance::getCreditType)
+                .map(CreditConstant.CreditTypeEnum::getThisByTypeCode)
+                .orElse(CreditConstant.CreditTypeEnum.DEFAULT);
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plus(creditTimeInterval, CreditConstant.CREDIT_UNIT);
         LocalDateTime bufferEnd = end.plus(CreditConstant.CREDIT_BUFFER_Interval, CreditConstant.CREDIT_UNIT);
@@ -689,7 +694,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             case TIME_LIMIT:
                 switch (newCreditTypeEnum) {
                     case QUOTA:
-                        //更新限额也直接更新 但是未归还的也会查询出来，但是金额是0
+                        //更新限额也直接更新 但是未归还的也会查询出来，但是金额是0 需要更新授信类型
+                        accountBalanceMapper.update(new AccountBalance(),Wrappers.<AccountBalance>lambdaUpdate()
+                                .eq(AccountBalance::getCusCode,cusCode).set(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.QUOTA.getValue()));
                         this.updateCreditBatch(userCreditDetailList, cusCode);
                         return;
                     case TIME_LIMIT:

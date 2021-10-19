@@ -70,5 +70,11 @@ public final class CreditConstant {
                     .findAny()
                     .orElse(DEFAULT);
         }
+        public static CreditTypeEnum getThisByTypeCode(Integer code) {
+            return Arrays.stream(CreditTypeEnum.values())
+                    .filter(x -> (x.getValue()).equals(code))
+                    .findAny()
+                    .orElse(DEFAULT);
+        }
     }
 }
