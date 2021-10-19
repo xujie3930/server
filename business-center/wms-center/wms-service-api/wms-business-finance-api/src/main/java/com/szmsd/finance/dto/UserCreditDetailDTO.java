@@ -50,7 +50,7 @@ public class UserCreditDetailDTO {
     @ApiModelProperty(value = "币种编码")
     private String currencyCode;
 
-    @NotBlank(groups = Quota.class, message = "币种名不能为空")
+//    @NotBlank(groups = Quota.class, message = "币种名不能为空")
     @ApiModelProperty(value = "币种名")
     private String currencyName;
 
