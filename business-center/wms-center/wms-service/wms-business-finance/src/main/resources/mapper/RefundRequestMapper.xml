@@ -51,11 +51,12 @@
         <result column="attachment" property="attachment"/>
         <result column="create_by" property="createBy"/>
         <result column="update_by" property="updateBy"/>
+        <result column="review_remark" property="reviewRemark"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        create_by_name,
+        create_by_name,review_remark,
                 create_time,
                 update_by_name,
                 update_time,

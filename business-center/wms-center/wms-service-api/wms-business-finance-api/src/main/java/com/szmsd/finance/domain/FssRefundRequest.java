@@ -204,5 +204,8 @@ public class FssRefundRequest extends BaseEntity {
     @TableField(fill = FieldFill.UPDATE)
     private String updateBy;
 
+    @ApiModelProperty(value = "审核驳回原因")
+    @Excel(name = "审核驳回原因")
+    private String reviewRemark;
 
 }
