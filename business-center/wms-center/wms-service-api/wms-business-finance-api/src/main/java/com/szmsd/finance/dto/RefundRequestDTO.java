@@ -121,7 +121,7 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "币种名称")
     @Excel(name = "币种")
     private String currencyName;
-    @ApiModelProperty(value = "币种编码")
+    @ApiModelProperty(value = "币种编码 [subValue] == CNY")
     private String currencyCode;
 
 
