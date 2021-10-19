@@ -2,6 +2,7 @@ package com.szmsd.bas.controller;
 
 
 import com.szmsd.bas.api.domain.BasRegion;
+import com.szmsd.bas.api.domain.dto.BasRegionQueryDTO;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.service.IBasRegionService;
@@ -46,8 +47,8 @@ public class BasRegionController extends BaseController {
     @PreAuthorize("@ss.hasPermi('BasRegion:BasRegion:list')")
     @GetMapping("/list")
     @ApiOperation(value = "查询地区信息模块列表", notes = "查询地区信息模块列表")
-    public TableDataInfo list(BasRegion basRegion) {
-        startPage();
+    public TableDataInfo list(BasRegionQueryDTO basRegion) {
+        startPage(basRegion);
         List<BasRegion> list = basRegionService.selectBasRegionList(basRegion);
         return getDataTable(list);
     }
@@ -71,7 +72,7 @@ public class BasRegionController extends BaseController {
     @Log(title = "地区信息模块", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     @ApiOperation(value = "导出地区信息模块列表", notes = "导出地区信息模块列表")
-    public void export(HttpServletResponse response, BasRegion basRegion) throws IOException {
+    public void export(HttpServletResponse response, BasRegionQueryDTO basRegion) throws IOException {
         List<BasRegion> list = basRegionService.selectBasRegionList(basRegion);
         ExcelUtil<BasRegion> util = new ExcelUtil<BasRegion>(BasRegion.class);
         util.exportExcel(response, list, "BasRegion");

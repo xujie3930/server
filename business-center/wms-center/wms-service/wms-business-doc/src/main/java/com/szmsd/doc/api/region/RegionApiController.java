@@ -1,6 +1,7 @@
 package com.szmsd.doc.api.region;
 
 import com.szmsd.bas.api.domain.BasRegion;
+import com.szmsd.bas.api.domain.dto.BasRegionQueryDTO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductQueryDto;
@@ -42,7 +43,7 @@ public class RegionApiController {
     @PostMapping("list")
     @ApiOperation(value = "分页查询地区列表", notes = "查询地区列表，支持分页呈现")
     public TableDataInfo<RegionResp> list(@Validated @RequestBody RegionReq regionReq) {
-        TableDataInfo<BasRegion> tableDataInfo = basRegionFeignService.list(BeanMapperUtil.map(regionReq, BasRegion.class));
+        TableDataInfo<BasRegion> tableDataInfo = basRegionFeignService.list(BeanMapperUtil.map(regionReq, BasRegionQueryDTO.class));
         TableDataInfo<RegionResp> regionResp = new TableDataInfo<>();
         BeanUtils.copyProperties(tableDataInfo, regionResp);
         List<BasRegion> rows = tableDataInfo.getRows();
