@@ -49,7 +49,7 @@ public class IncomePayFactory extends AbstractPayFactory {
                 }
                 // BalanceDTO result = calculateBalance(oldBalance, changeAmount);
                 oldBalance.rechargeAndSetAmount(changeAmount);
-                setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance);
+                setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance,true);
                 recordOpLog(dto, oldBalance.getCurrentBalance());
                 setSerialBillLog(dto);
                 recordDetailLog(dto, oldBalance);

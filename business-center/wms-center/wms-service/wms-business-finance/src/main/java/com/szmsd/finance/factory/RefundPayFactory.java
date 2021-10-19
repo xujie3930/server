@@ -52,7 +52,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                 // BalanceDTO result = calculateBalance(oldBalance, changeAmount);
                 oldBalance.rechargeAndSetAmount(changeAmount);
                 BalanceDTO result = oldBalance;
-                setBalance(dto.getCusCode(), dto.getCurrencyCode(), result);
+                setBalance(dto.getCusCode(), dto.getCurrencyCode(), result,true);
                 recordOpLog(dto, result.getCurrentBalance());
                 recordDetailLog(dto, oldBalance);
                 setSerialBillLog(dto);

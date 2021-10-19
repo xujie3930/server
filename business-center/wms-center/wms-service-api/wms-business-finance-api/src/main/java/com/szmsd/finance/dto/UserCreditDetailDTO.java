@@ -14,6 +14,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * @ClassName: CreditInfoBO
@@ -52,6 +53,30 @@ public class UserCreditDetailDTO {
     @NotBlank(groups = Quota.class, message = "币种名不能为空")
     @ApiModelProperty(value = "币种名")
     private String currencyName;
+
+    @ApiModelProperty(value = "授信开始时间", hidden = true)
+    @Excel(name = "授信开始时间")
+    private LocalDateTime creditBeginTime;
+
+    @ApiModelProperty(value = "授信结束时间", hidden = true)
+    @Excel(name = "授信结束时间")
+    private LocalDateTime creditEndTime;
+
+    @ApiModelProperty(value = "授信时间单位", hidden = true)
+    @Excel(name = "授信时间单位")
+    private String creditTimeUnit;
+
+    @ApiModelProperty(value = "授信缓冲截止时间", hidden = true)
+    @Excel(name = "授信缓冲截止时间")
+    private LocalDateTime creditBufferTime;
+
+    @ApiModelProperty(value = "授信缓冲时间间隔", hidden = true)
+    @Excel(name = "授信缓冲时间间隔")
+    private Integer creditBufferTimeInterval;
+
+    @ApiModelProperty(value = "授信缓冲时间单位", hidden = true)
+    @Excel(name = "授信缓冲时间单位")
+    private String creditBufferTimeUnit;
 
     @Override
     public String toString() {

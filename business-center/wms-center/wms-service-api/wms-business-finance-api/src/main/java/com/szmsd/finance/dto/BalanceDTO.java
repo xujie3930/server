@@ -145,7 +145,7 @@ public class BalanceDTO {
      * @return
      */
     private Boolean recharge(BigDecimal amount) {
-        if (this.currentBalance.compareTo(amount) >= 0) {
+        if (amount.compareTo(BigDecimal.ZERO) >= 0) {
             // 可用
             this.currentBalance = this.currentBalance.add(amount);
             // 总余额

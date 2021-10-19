@@ -9,6 +9,8 @@ import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.chargerules.domain.Operation;
+import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
@@ -17,6 +19,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
 import com.szmsd.putinstorage.component.CheckTag;
@@ -356,7 +359,17 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         log.info("#B3 接收完成入库：{}", receivingCompletedRequest);
         updateStatus(receivingCompletedRequest.getOrderNo(), InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
         log.info("#B3 接收完成入库：操作完成");
-
+        //接收入库完成重新计算扣除入库费用
+        //解冻之前的冻结费
+        InboundReceiptInfoVO inboundReceiptInfoVO = queryInfo(receivingCompletedRequest.getOrderNo());
+        List<InboundReceiptDetailVO> details = inboundReceiptInfoVO.getInboundReceiptDetails();
+//        Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
+        //TODO 默认按照数量来计算
+//        Operation operation = getOperationDetails(dto, OrderTypeEnum.Receipt, null, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
+//        for (DelOutboundOperationDetailVO vo : details) {
+//            amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
+//            log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
+//        }
     }
 
     /**

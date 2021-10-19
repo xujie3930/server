@@ -2,6 +2,7 @@ package com.szmsd.finance.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -85,6 +86,14 @@ public class RefundRequestDTO {
     @Excel(name = "供应商是否完成赔付（是/否）")
     private String compensationPaymentFlag;
 
+    public void setCompensationPaymentFlag(String compensationPaymentFlag) {
+        if (StringUtils.isNotBlank(compensationPaymentFlag)) {
+            this.compensationPaymentFlag = compensationPaymentFlag;
+        } else {
+            this.compensationPaymentFlag = null;
+        }
+    }
+
     @ApiModelProperty(value = "赔付金额")
     @Excel(name = "赔付金额")
     private BigDecimal payoutAmount;
@@ -126,8 +135,24 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
     private String noCompensationFlag;
 
+    public void setNoCompensationFlag(String noCompensationFlag) {
+        if (StringUtils.isNotBlank(noCompensationFlag)) {
+            this.noCompensationFlag = noCompensationFlag;
+        } else {
+            this.noCompensationFlag = null;
+        }
+    }
+
     @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
     private String compensationPaymentArrivedFlag;
+
+    public void setCompensationPaymentArrivedFlag(String compensationPaymentArrivedFlag) {
+        if (StringUtils.isNotBlank(compensationPaymentArrivedFlag)) {
+            this.compensationPaymentArrivedFlag = compensationPaymentArrivedFlag;
+        } else {
+            this.compensationPaymentArrivedFlag = null;
+        }
+    }
 
     @ApiModelProperty(value = "费用类别")
     private String feeCategoryName;
@@ -137,7 +162,6 @@ public class RefundRequestDTO {
 
     @ApiModelProperty(value = "处理号类型")
     private String orderType;
-
 
 
     @ApiModelProperty(value = "附件")

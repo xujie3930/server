@@ -385,6 +385,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             lambdaUpdateWrapper.set(AccountBalance::getCreditUseAmount, result.getCreditInfoBO().getCreditUseAmount());
             lambdaUpdateWrapper.set(AccountBalance::getCreditBufferUseAmount, result.getCreditInfoBO().getCreditBufferUseAmount());
             lambdaUpdateWrapper.set(AccountBalance::getCreditStatus, result.getCreditInfoBO().getCreditStatus());
+            lambdaUpdateWrapper.set(AccountBalance::getCreditBeginTime, result.getCreditInfoBO().getCreditBeginTime());
+            lambdaUpdateWrapper.set(AccountBalance::getCreditEndTime, result.getCreditInfoBO().getCreditEndTime());
+            lambdaUpdateWrapper.set(AccountBalance::getCreditBufferTime, result.getCreditInfoBO().getCreditBufferTime());
         }
         accountBalanceMapper.update(null, lambdaUpdateWrapper);
     }
@@ -645,9 +648,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         );
 
         CreditConstant.CreditTypeEnum creditTypeEnum = accountBalancesOld.stream().filter(x -> null != x.getCreditStatus() && x.getCreditType().equals(CreditConstant.CreditStatusEnum.ACTIVE.getValue() + "")).map(AccountBalance::getCreditType).filter(Objects::nonNull).findAny().map(CreditConstant.CreditTypeEnum::getThisByTypeCode).orElse(CreditConstant.CreditTypeEnum.DEFAULT);
-//        LocalDateTime start = LocalDateTime.now();
-//        LocalDateTime end = start.plus(userCreditDTO.getCreditTimeInterval(), CreditConstant.CREDIT_UNIT);
-//        LocalDateTime bufferEnd = end.plus(CreditConstant.CREDIT_BUFFER_Interval, CreditConstant.CREDIT_UNIT);
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = start.plus(creditTimeInterval, CreditConstant.CREDIT_UNIT);
+        LocalDateTime bufferEnd = end.plus(CreditConstant.CREDIT_BUFFER_Interval, CreditConstant.CREDIT_UNIT);
         Map<String, AccountBalance> oldAccountInfo = accountBalancesOld.stream().collect(Collectors.toMap(AccountBalance::getCurrencyCode, x -> x));
 
         switch (creditTypeEnum) {
@@ -670,6 +673,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                         List<UserCreditDetailDTO> updateCreditList = accountBalancesOld.stream().map(x -> {
                             UserCreditDetailDTO userCreditDetailDTO = new UserCreditDetailDTO();
                             userCreditDetailDTO.setCurrencyCode(x.getCurrencyCode()).setCreditTimeInterval(creditTimeInterval);
+                            userCreditDetailDTO.setCreditTimeUnit(CreditConstant.CREDIT_UNIT.name())
+                                    .setCreditBeginTime(start).setCreditEndTime(end).setCreditBufferTime(bufferEnd);
                             userCreditDetailDTO.setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT);
                             return userCreditDetailDTO;
                         }).collect(Collectors.toList());
@@ -688,6 +693,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                         // 更新账期直接更新
                         List<UserCreditDetailDTO> updateCreditList = accountBalancesOld.stream().map(x -> {
                             UserCreditDetailDTO userCreditDetailDTO = new UserCreditDetailDTO();
+                            userCreditDetailDTO.setCreditTimeUnit(CreditConstant.CREDIT_UNIT.name())
+                                    .setCreditBeginTime(start).setCreditEndTime(end).setCreditBufferTime(bufferEnd);
                             userCreditDetailDTO.setCurrencyCode(x.getCurrencyCode()).setCreditTimeInterval(creditTimeInterval);
                             userCreditDetailDTO.setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT);
                             return userCreditDetailDTO;
@@ -716,6 +723,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                         List<UserCreditDetailDTO> updateCreditList = accountBalancesOld.stream().map(x -> {
                             UserCreditDetailDTO userCreditDetailDTO = new UserCreditDetailDTO();
                             userCreditDetailDTO.setCurrencyCode(x.getCurrencyCode());
+                            userCreditDetailDTO.setCreditTimeUnit(CreditConstant.CREDIT_UNIT.name())
+                                    .setCreditBeginTime(start).setCreditEndTime(end).setCreditBufferTime(bufferEnd);
                             userCreditDetailDTO.setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT);
                             return userCreditDetailDTO;
                         }).collect(Collectors.toList());
@@ -765,12 +774,17 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             return userCreditInfoVO;
         }).collect(Collectors.toList());
         boolean present = collect.stream().anyMatch(x -> null != x.getCreditType() && (CreditConstant.CreditTypeEnum.TIME_LIMIT.name() + "").equals(x.getCreditType()));
-        if (present && CollectionUtils.isNotEmpty(collect)) {
-            UserCreditInfoVO userCreditInfoVO = collect.get(0);
-            userCreditInfoVO.setCreditLine(null);
-            userCreditInfoVO.setCurrencyCode(null);
-            userCreditInfoVO.setCurrencyName(null);
-            collect = Collections.singletonList(userCreditInfoVO);
+        if ( CollectionUtils.isNotEmpty(collect)) {
+            if (present){
+                UserCreditInfoVO userCreditInfoVO = collect.get(0);
+                userCreditInfoVO.setCreditLine(null);
+                userCreditInfoVO.setCurrencyCode(null);
+                userCreditInfoVO.setCurrencyName(null);
+                collect = Collections.singletonList(userCreditInfoVO);
+            }else {
+                collect.forEach(x->x.setCreditTimeInterval(null));
+            }
+
         }
         return collect;
     }
