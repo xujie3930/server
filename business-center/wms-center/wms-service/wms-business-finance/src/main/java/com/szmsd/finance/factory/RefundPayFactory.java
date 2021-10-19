@@ -47,7 +47,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                 BigDecimal changeAmount = dto.getAmount();
                 if (changeAmount.compareTo(BigDecimal.ZERO)>=0){
                     oldBalance.rechargeAndSetAmount(changeAmount);
-                }else {
+                } else {
                     oldBalance.pay(changeAmount.negate());
                 }
                 BalanceDTO result = oldBalance;

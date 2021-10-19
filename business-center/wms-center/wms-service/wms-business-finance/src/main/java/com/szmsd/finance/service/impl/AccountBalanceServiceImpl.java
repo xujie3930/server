@@ -361,14 +361,17 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (CollectionUtils.isNotEmpty(accountBalances)) {
             AccountBalance accountBalanceCredit = accountBalances.get(0);
             BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
-            accountBalance.setId(null).setCurrencyCode(currencyCode).setCurrencyName(currencyName)
-                    .setCreditUseAmount(BigDecimal.ZERO).setCreditBufferUseAmount(BigDecimal.ZERO)
-                    .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
-                    .setCreateTime(new Date());
+            accountBalance.setId(null);
         }
+        accountBalance.setCurrencyCode(currencyCode).setCurrencyName(currencyName)
+                .setCreditUseAmount(BigDecimal.ZERO).setCreditBufferUseAmount(BigDecimal.ZERO)
+                .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
+                .setCreateTime(new Date());
         accountBalanceMapper.insert(accountBalance);
         BalanceDTO balanceDTO = new BalanceDTO(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
         BeanUtils.copyProperties(accountBalance, balanceDTO);
+        CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
+        BeanUtils.copyProperties(accountBalance, creditInfoBO);
         return balanceDTO;
     }
 
