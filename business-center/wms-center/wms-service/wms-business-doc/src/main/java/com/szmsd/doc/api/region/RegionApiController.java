@@ -43,7 +43,7 @@ public class RegionApiController {
     @PostMapping("list")
     @ApiOperation(value = "分页查询地区列表", notes = "查询地区列表，支持分页呈现")
     public TableDataInfo<RegionResp> list(@Validated @RequestBody RegionReq regionReq) {
-        TableDataInfo<BasRegion> tableDataInfo = basRegionFeignService.list(BeanMapperUtil.map(regionReq, BasRegionQueryDTO.class));
+        TableDataInfo<BasRegion> tableDataInfo = basRegionFeignService.postList(BeanMapperUtil.map(regionReq, BasRegionQueryDTO.class));
         TableDataInfo<RegionResp> regionResp = new TableDataInfo<>();
         BeanUtils.copyProperties(tableDataInfo, regionResp);
         List<BasRegion> rows = tableDataInfo.getRows();
