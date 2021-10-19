@@ -220,7 +220,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                         custPayDTO.setAmount(x.getAmount().multiply(new BigDecimal("-1")));
                         custPayDTO.setRemark(String.format("退费单%s,余额调减", x.getProcessNo()));
                         R r = accountBalanceService.refund(custPayDTO);
-                        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg());
+                        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg()+"请检查改币别账户余额是否充足");
                         log.info("SUBTRACT--{}--{}", list, JSONObject.toJSONString(r));
                     });
                     return;
