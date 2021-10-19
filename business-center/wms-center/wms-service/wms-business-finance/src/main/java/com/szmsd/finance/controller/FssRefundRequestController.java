@@ -150,14 +150,10 @@ public class FssRefundRequestController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('FssRefundRequest:FssRefundRequest:update')")
     @Log(title = "退费记录表模块", businessType = BusinessType.UPDATE)
-    @GetMapping("approve/{status}/{idList}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "status"),
-            @ApiImplicitParam(name = "idList", value = "审核勾选列表", example = "1")
-    })
+    @PutMapping("approve")
     @ApiOperation(value = "审批", notes = "审核退费记录")
-    public R approve(@PathVariable("status") RefundStatusEnum status, @PathVariable("idList") List<String> ids) {
-        return toOk(fssRefundRequestService.approve(status, ids));
+    public R approve(@Validated @RequestBody RefundReviewDTO refundReviewDTO) {
+        return toOk(fssRefundRequestService.approve(refundReviewDTO));
     }
 
     /**

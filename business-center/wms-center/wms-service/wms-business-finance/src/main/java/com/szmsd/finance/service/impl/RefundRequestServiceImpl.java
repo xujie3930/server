@@ -100,15 +100,17 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         FssRefundRequest fssRefundRequest = new FssRefundRequest();
         BeanUtils.copyProperties(updateDTO, fssRefundRequest);
         fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus());
-        return baseMapper.update(fssRefundRequest,Wrappers.<FssRefundRequest>lambdaUpdate()
-                .in(FssRefundRequest::getAuditStatus,RefundStatusEnum.BRING_INTO_COURT.getStatus()
-                        ,RefundStatusEnum.INITIAL.getStatus()).eq(FssRefundRequest::getId,updateDTO.getId()));
+        return baseMapper.update(fssRefundRequest, Wrappers.<FssRefundRequest>lambdaUpdate()
+                .in(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus()
+                        , RefundStatusEnum.INITIAL.getStatus()).eq(FssRefundRequest::getId, updateDTO.getId()));
     }
 
     @Override
     public int deleteRefundRequestByIds(List<String> ids) {
         if (CollectionUtils.isEmpty(ids)) return 1;
-        return baseMapper.deleteBatchIds(ids);
+        return baseMapper.delete(Wrappers.<FssRefundRequest>lambdaUpdate().
+                in(FssRefundRequest::getId, ids)
+                .in(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus(), RefundStatusEnum.INITIAL.getStatus()));
     }
 
     @Override
@@ -159,13 +161,16 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int approve(RefundStatusEnum status, List<String> ids) {
-        if (CollectionUtils.isEmpty(ids)) return 0;
+    public int approve( RefundReviewDTO refundReviewDTO) {
+        List<String> ids = refundReviewDTO.getIdList();
+        RefundStatusEnum status = refundReviewDTO.getStatus();
+        String reviewRemark = refundReviewDTO.getReviewRemark();
         LoginUser loginUser = SecurityUtils.getLoginUser();
         int update = baseMapper.update(null, Wrappers.<FssRefundRequest>lambdaUpdate()
                 .in(FssRefundRequest::getId, ids)
                 .eq(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus())
 
+                .set(FssRefundRequest::getReviewRemark, reviewRemark)
                 .set(FssRefundRequest::getAuditStatus, status.getStatus())
                 .set(FssRefundRequest::getAuditTime, LocalDateTime.now())
                 .set(FssRefundRequest::getReviewerId, loginUser.getUserId())
@@ -220,7 +225,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                         custPayDTO.setAmount(x.getAmount().multiply(new BigDecimal("-1")));
                         custPayDTO.setRemark(String.format("退费单%s,余额调减", x.getProcessNo()));
                         R r = accountBalanceService.refund(custPayDTO);
-                        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg()+"请检查改币别账户余额是否充足");
+                        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg() + "请检查改币别账户余额是否充足");
                         log.info("SUBTRACT--{}--{}", list, JSONObject.toJSONString(r));
                     });
                     return;

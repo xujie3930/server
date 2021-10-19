@@ -176,6 +176,9 @@ public class RefundRequestVO {
     @ApiModelProperty(value = "处理号类型")
     private String orderType;
 
+    @ApiModelProperty(value = "审核处理结果")
+    private String reviewRemark;
+
     @ApiModelProperty(value = "附件")
     private List<AttachmentFileDTO> attachment;
 
