@@ -45,12 +45,11 @@ public class RefundPayFactory extends AbstractPayFactory {
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
-                //余额不足
-                if (dto.getPayType() == BillEnum.PayType.PAYMENT && oldBalance.getCurrentBalance().compareTo(changeAmount) < 0) {
-                    return false;
+                if (changeAmount.compareTo(BigDecimal.ZERO)>=0){
+                    oldBalance.rechargeAndSetAmount(changeAmount);
+                }else {
+                    oldBalance.pay(changeAmount.negate());
                 }
-                // BalanceDTO result = calculateBalance(oldBalance, changeAmount);
-                oldBalance.rechargeAndSetAmount(changeAmount);
                 BalanceDTO result = oldBalance;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result,true);
                 recordOpLog(dto, result.getCurrentBalance());
