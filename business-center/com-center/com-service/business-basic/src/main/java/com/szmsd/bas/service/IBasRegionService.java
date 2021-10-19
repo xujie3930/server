@@ -2,6 +2,7 @@ package com.szmsd.bas.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.api.domain.BasRegion;
+import com.szmsd.bas.api.domain.dto.BasRegionQueryDTO;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 
@@ -31,7 +32,7 @@ public interface IBasRegionService extends IService<BasRegion> {
      * @param basRegion 地区信息模块
      * @return 地区信息模块集合
      */
-    List<BasRegion> selectBasRegionList(BasRegion basRegion);
+    List<BasRegion> selectBasRegionList(BasRegionQueryDTO basRegion);
 
     /**
      * 查询国家

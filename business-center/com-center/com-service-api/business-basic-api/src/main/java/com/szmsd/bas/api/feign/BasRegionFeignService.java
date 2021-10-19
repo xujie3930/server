@@ -1,6 +1,7 @@
 package com.szmsd.bas.api.feign;
 
 import com.szmsd.bas.api.domain.BasRegion;
+import com.szmsd.bas.api.domain.dto.BasRegionQueryDTO;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.factory.BasRegionFeignServiceFallbackFactory;
@@ -22,7 +23,7 @@ import java.util.List;
 public interface BasRegionFeignService {
 
     @RequestMapping(value = "/bas-region/list", method = RequestMethod.GET)
-    TableDataInfo<BasRegion> list(BasRegion basRegion);
+    TableDataInfo<BasRegion> list(BasRegionQueryDTO basRegion);
 
     @RequestMapping(value = "/bas-region/countryList", method = RequestMethod.GET)
     R<List<BasRegionSelectListVO>> countryList(BasRegionSelectListQueryDto queryDto);

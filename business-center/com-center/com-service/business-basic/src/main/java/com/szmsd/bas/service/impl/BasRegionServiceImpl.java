@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.szmsd.bas.api.domain.BasRegion;
+import com.szmsd.bas.api.domain.dto.BasRegionQueryDTO;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.dao.BasRegionMapper;
@@ -51,7 +52,7 @@ public class BasRegionServiceImpl extends ServiceImpl<BasRegionMapper, BasRegion
      * @return 地区信息模块
      */
     @Override
-    public List<BasRegion> selectBasRegionList(BasRegion basRegion) {
+    public List<BasRegion> selectBasRegionList(BasRegionQueryDTO basRegion) {
         QueryWrapper<BasRegion> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "name", basRegion.getName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "address_code", basRegion.getAddressCode());

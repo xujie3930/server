@@ -1,6 +1,7 @@
 package com.szmsd.bas.api.factory;
 
 import com.szmsd.bas.api.domain.BasRegion;
+import com.szmsd.bas.api.domain.dto.BasRegionQueryDTO;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
@@ -23,7 +24,7 @@ public class BasRegionFeignServiceFallbackFactory implements FallbackFactory<Bas
         return new BasRegionFeignService() {
 
             @Override
-            public TableDataInfo<BasRegion> list(BasRegion basRegion) {
+            public TableDataInfo<BasRegion> list(BasRegionQueryDTO basRegion) {
                 return null;
             }
 
