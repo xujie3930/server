@@ -24,8 +24,8 @@ public class BasRegionFeignServiceFallbackFactory implements FallbackFactory<Bas
         return new BasRegionFeignService() {
 
             @Override
-            public TableDataInfo<BasRegion> list(BasRegionQueryDTO basRegion) {
-                return null;
+            public TableDataInfo<BasRegion> postList(BasRegionQueryDTO basRegion) {
+                throw  new RuntimeException(throwable.getMessage());
             }
 
             @Override

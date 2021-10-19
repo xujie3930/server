@@ -52,7 +52,14 @@ public class BasRegionController extends BaseController {
         List<BasRegion> list = basRegionService.selectBasRegionList(basRegion);
         return getDataTable(list);
     }
-
+    @PreAuthorize("@ss.hasPermi('BasRegion:BasRegion:list')")
+    @PostMapping("/postList")
+    @ApiOperation(value = "查询地区信息模块列表", notes = "查询地区信息模块列表")
+    public TableDataInfo postList(@RequestBody BasRegionQueryDTO basRegion) {
+        startPage(basRegion);
+        List<BasRegion> list = basRegionService.selectBasRegionList(basRegion);
+        return getDataTable(list);
+    }
     /**
      * 查询地区信息模块列表
      */
