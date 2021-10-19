@@ -3,6 +3,8 @@ package com.szmsd.chargerules.service;
 
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
+import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
+import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 
@@ -38,6 +40,8 @@ public interface IOperationService {
      */
     Operation details(int id);
 
+    Operation queryDetails(OperationDTO dto);
+
     /**
      * 出库扣款
      * @param dto dto
@@ -51,6 +55,8 @@ public interface IOperationService {
      * @return result
      */
     R delOutboundFreeze(DelOutboundOperationVO delOutboundVO);
+
+    Operation getOperationDetails(DelOutboundOrderEnum outboundOrderEnum, OrderTypeEnum orderTypeEnum, String warehouseCode, Double weight);
 
     /**
      * 出库解冻余额

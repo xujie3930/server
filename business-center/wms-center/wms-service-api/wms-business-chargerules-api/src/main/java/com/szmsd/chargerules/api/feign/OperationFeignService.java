@@ -2,6 +2,8 @@ package com.szmsd.chargerules.api.feign;
 
 import com.szmsd.chargerules.api.SpecialOperationInterface;
 import com.szmsd.chargerules.api.feign.factory.SpecialOperationFeignFallback;
+import com.szmsd.chargerules.domain.Operation;
+import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import io.swagger.annotations.ApiOperation;
@@ -20,5 +22,9 @@ public interface OperationFeignService {
 
     @PostMapping(value = "/operation/delOutboundCharge")
     R delOutboundCharge(@RequestBody DelOutboundOperationVO delOutboundVO);
+
+    @ApiOperation(value = "业务计费逻辑 - 详情")
+    @PostMapping("/operation/queryDetails")
+    R<Operation> queryDetails(@RequestBody OperationDTO operationDTO);
 
 }

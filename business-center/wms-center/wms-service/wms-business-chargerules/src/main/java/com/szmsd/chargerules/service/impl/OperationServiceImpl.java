@@ -119,6 +119,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return operationMapper.selectById(id);
     }
 
+    @Override
     public Operation queryDetails(OperationDTO dto) {
         LambdaQueryWrapper<Operation> query = Wrappers.lambdaQuery();
         if (StringUtils.isNotBlank(dto.getOrderType())) {
@@ -166,7 +167,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     @Override
     public R<?> delOutboundFreeze(DelOutboundOperationVO dto) {
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
-        if (CollectionUtils.isEmpty(details)&&!dto.getOrderType().equals("Freight")) {
+        if (CollectionUtils.isEmpty(details) && !dto.getOrderType().equals("Freight")) {
             log.error("calculate() 出库单的详情信息为空");
             return R.failed("出库单的详情信息为空");
         }
@@ -316,6 +317,21 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         Operation operation = this.queryDetails(operationDTO);
         AssertUtil.notNull(operation, message);
         return operation;
+    }
+
+    /**
+     * 查询配置的规则
+     *
+     * @param outboundOrderEnum
+     * @param orderTypeEnum
+     * @param warehouseCode     仓库编码
+     * @param weight            件数/重量
+     * @return null?自行处理错误信息
+     */
+    @Override
+    public Operation getOperationDetails(DelOutboundOrderEnum outboundOrderEnum, OrderTypeEnum orderTypeEnum, String warehouseCode, Double weight) {
+        OperationDTO operationDTO = new OperationDTO(outboundOrderEnum.getCode(), orderTypeEnum.name(), warehouseCode, weight);
+        return this.queryDetails(operationDTO);
     }
 
     private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount, Operation operation) {

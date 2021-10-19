@@ -9,7 +9,10 @@ import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.chargerules.domain.Operation;
+import com.szmsd.chargerules.dto.OperationDTO;
+import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -19,7 +22,9 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
+import com.szmsd.delivery.vo.DelOutboundOperationVO;
+import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
 import com.szmsd.putinstorage.component.CheckTag;
@@ -51,6 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -81,6 +87,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     @Resource
     private RemoteAttachmentService remoteAttachmentService;
+
+    @Resource
+    private OperationFeignService operationFeignService;
+
+    @Resource
+    private RechargesFeignService rechargesFeignService;
 
     /**
      * 入库单查询
@@ -178,7 +190,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         if (CollectionUtils.isNotEmpty(deliveryNoList)) {
             LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().ne(InboundReceipt::getWarehouseNo, warehouseNo);
             String join = String.join(",", deliveryNoList);
-            in.and(x->x.apply("CONCAT(',',delivery_no,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))",join));
+            in.and(x -> x.apply("CONCAT(',',delivery_no,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))", join));
             List<InboundReceipt> inboundReceipts = baseMapper.selectList(in);
             String errorMsg = inboundReceipts.stream().map(x -> x.getWarehouseNo() + ":" + x.getDeliveryNo()).collect(Collectors.joining("\n", "快递单号重复：", ""));
             AssertUtil.isTrue(CollectionUtils.isEmpty(inboundReceipts), errorMsg);
@@ -357,19 +369,51 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Override
     public void completed(ReceivingCompletedRequest receivingCompletedRequest) {
         log.info("#B3 接收完成入库：{}", receivingCompletedRequest);
-        updateStatus(receivingCompletedRequest.getOrderNo(), InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
+        String orderNo = receivingCompletedRequest.getOrderNo();
+        updateStatus(orderNo, InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
         log.info("#B3 接收完成入库：操作完成");
         //接收入库完成重新计算扣除入库费用
         //解冻之前的冻结费
-        InboundReceiptInfoVO inboundReceiptInfoVO = queryInfo(receivingCompletedRequest.getOrderNo());
+        DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+        delOutboundOperationVO.setOrderNo(orderNo);
+        operationFeignService.delOutboundThaw(delOutboundOperationVO);
+        // 重新计费扣款
+        InboundReceiptInfoVO inboundReceiptInfoVO = queryInfo(orderNo);
         List<InboundReceiptDetailVO> details = inboundReceiptInfoVO.getInboundReceiptDetails();
-//        Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
+        Long count = details.stream().filter(x -> null != x.getPutQty()).mapToLong(InboundReceiptDetailVO::getPutQty).sum();
         //TODO 默认按照数量来计算
-//        Operation operation = getOperationDetails(dto, OrderTypeEnum.Receipt, null, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
-//        for (DelOutboundOperationDetailVO vo : details) {
-//            amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
-//            log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
-//        }
+        OperationDTO operationDTO = new OperationDTO();
+        operationDTO.setOperationType(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode());
+        operationDTO.setOrderType(OrderTypeEnum.Receipt.name());
+        operationDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
+        operationDTO.setWeight(null);
+        R<Operation> operationR = operationFeignService.queryDetails(operationDTO);
+        Operation operation = R.getDataAndException(operationR);
+        BigDecimal amount = BigDecimal.ZERO;
+        for (InboundReceiptDetailVO vo : details) {
+            amount = this.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getPutQty()).add(amount);
+        }
+        CustPayDTO custPayDTO = new CustPayDTO();
+        custPayDTO.setCurrencyCode(operation.getCurrencyCode());
+        custPayDTO.setAmount(amount);
+        custPayDTO.setNo(orderNo);
+        custPayDTO.setOrderType(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode());
+        custPayDTO.setCusCode(inboundReceiptInfoVO.getCusCode());
+        R r = rechargesFeignService.feeDeductions(custPayDTO);
+        R.getDataAndException(r);
+
+    }
+
+    /**
+     * #{@link: com.szmsd.chargerules.service.impl.PayServiceImpl#calculate(java.math.BigDecimal, java.math.BigDecimal, java.lang.Long)}
+     *
+     * @param firstPrice
+     * @param nextPrice
+     * @param qty
+     * @return
+     */
+    public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Integer qty) {
+        return qty == 1 ? firstPrice : new BigDecimal(qty - 1).multiply(nextPrice).add(firstPrice);
     }
 
     /**

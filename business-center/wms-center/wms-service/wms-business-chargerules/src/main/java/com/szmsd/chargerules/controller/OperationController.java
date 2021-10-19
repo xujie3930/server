@@ -66,6 +66,13 @@ public class OperationController extends BaseController {
         return R.ok(operationService.details(id));
     }
 
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:queryDetails')")
+    @ApiOperation(value = "业务计费逻辑 - 详情")
+    @PostMapping("/queryDetails")
+    public R<Operation> queryDetails(@RequestBody OperationDTO operationDTO) {
+        return R.ok(operationService.queryDetails(operationDTO));
+    }
+
     @PreAuthorize("@ss.hasPermi('Operation:Operation:getOrderTypeList')")
     @ApiOperation(value = "业务计费逻辑 - 查询订单类型")
     @GetMapping("/getOrderTypeList")
