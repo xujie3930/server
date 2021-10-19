@@ -178,11 +178,11 @@ public class CreditInfoBO {
                             chronoUnit = ChronoUnit.DAYS;
                             bufferChronoUnit = ChronoUnit.DAYS;
                         }
-
+                        this.creditUseAmount = this.creditBufferUseAmount;
+                        this.creditBufferUseAmount = BigDecimal.ZERO;
                         this.creditBeginTime = this.creditEndTime;
                         this.creditEndTime = this.creditEndTime.plus(this.creditTimeInterval, chronoUnit);
                         this.creditBufferTime = this.creditEndTime.plus(this.creditBufferTimeInterval, bufferChronoUnit);
-                        this.creditUseAmount = this.creditBufferUseAmount;
                         this.creditStatus = CreditConstant.CreditStatusEnum.ACTIVE.getValue();
                         return amount;
                     } else {

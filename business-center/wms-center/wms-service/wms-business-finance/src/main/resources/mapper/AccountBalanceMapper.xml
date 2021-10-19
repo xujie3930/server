@@ -33,6 +33,27 @@
                     </if>
                 </foreach>
             </trim>
+            <trim prefix="credit_begin_time = case" suffix="end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditBeginTime != null">
+                        when currency_code= #{i.currencyCode} then #{i.creditBeginTime}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="credit_end_time = case" suffix="end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditEndTime != null">
+                        when currency_code= #{i.currencyCode} then #{i.creditEndTime}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="credit_buffer_time = case" suffix="end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditBufferTime != null">
+                        when currency_code= #{i.currencyCode} then #{i.creditBufferTime}
+                    </if>
+                </foreach>
+            </trim>
         </trim>
         WHERE cus_code = #{cusCode}
         <if test="currencyCodeList != null and currencyCodeList.size() > 0">
