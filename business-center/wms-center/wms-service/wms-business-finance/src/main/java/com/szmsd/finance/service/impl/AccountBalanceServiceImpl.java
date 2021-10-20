@@ -236,21 +236,14 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     private void addOptLog(CustPayDTO dto) {
         log.info("addOptLog {} ", JSONObject.toJSONString(dto));
         BillEnum.PayMethod payMethod = dto.getPayMethod();
-        /*boolean b = !(payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW || payMethod==BillEnum.PayMethod.BALANCE_DEDUCTIONS);
-        if (b) return;*/
         ChargeLog chargeLog = new ChargeLog();
         BeanUtils.copyProperties(dto, chargeLog);
         chargeLog
                 .setCustomCode(dto.getCusCode()).setPayMethod(payMethod.name())
                 .setOrderNo(dto.getNo()).setOperationPayMethod("业务操作").setSuccess(true)
+                .setOperationType("").setPayMethod(payMethod.name())
         ;
-        if (payMethod == BillEnum.PayMethod.BALANCE_FREEZE) {
-            chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE.name());
-        } else if (payMethod == BillEnum.PayMethod.BALANCE_THAW) {
-            chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_THAW.name());
-        } else if (payMethod == BillEnum.PayMethod.BALANCE_DEDUCTIONS) {
-            chargeLog.setOperationType("").setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS.name());
-        }
+
         chargeLog.setRemark("-----------------------------------------");
         log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
         if (null == chargeLog.getQty() || 0 >= chargeLog.getQty()) {
@@ -273,8 +266,13 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                     //String trackingNo = data.getTrackingNo();
                     List<InboundReceiptDetailVO> details = data.getInboundReceiptDetails();
                     if (CollectionUtils.isNotEmpty(details)) {
-                        Integer qty = details.stream().map(InboundReceiptDetailVO::getPutQty).reduce(Integer::sum).orElse(0);
-                        chargeLog.setQty(Long.valueOf(qty));
+                        int qty = 0;
+                        if (payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW) {
+                            qty = details.stream().map(InboundReceiptDetailVO::getDeclareQty).reduce(Integer::sum).orElse(0);
+                        } else if (payMethod == BillEnum.PayMethod.BALANCE_DEDUCTIONS) {
+                            qty = details.stream().map(InboundReceiptDetailVO::getPutQty).reduce(Integer::sum).orElse(0);
+                        }
+                        chargeLog.setQty((long) qty);
                     }
                 }
             }

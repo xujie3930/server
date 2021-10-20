@@ -413,6 +413,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      * @return
      */
     public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Integer qty) {
+        if (qty <= 0) return BigDecimal.ZERO;
         return qty == 1 ? firstPrice : new BigDecimal(qty - 1).multiply(nextPrice).add(firstPrice);
     }
 

@@ -28,6 +28,7 @@ public class PayServiceImpl implements IPayService {
 
     @Override
     public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Long qty) {
+        if (qty <= 0) return BigDecimal.ZERO;
         return qty == 1 ? firstPrice : new BigDecimal(qty - 1).multiply(nextPrice).add(firstPrice);
     }
 
