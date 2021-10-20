@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.github.javafaker.CreditCardType;
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
@@ -37,8 +36,10 @@ import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
 import com.szmsd.http.dto.recharges.RechargesRequestDTO;
 import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.http.vo.RechargesResponseVo;
+import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -224,6 +225,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     private ChargeFeignService chargeFeignService;
     @Resource
     private DelOutboundFeignService delOutboundFeignService;
+    @Resource
+    private InboundReceiptFeignService inboundReceiptFeignService;
 
     /**
      * 冻结 解冻 需要把费用扣减加到 操作费用表
@@ -252,18 +255,29 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
         if (null == chargeLog.getQty() || 0 >= chargeLog.getQty()) {
             //现在只有出库单需要补，入库单没有这些数据
-          if (StringUtils.isNotBlank(chargeLog.getOrderNo())&&chargeLog.getOrderNo().startsWith("CK")){
-              R<DelOutboundVO> infoByOrderNo = delOutboundFeignService.getInfoByOrderNo(chargeLog.getOrderNo());
-              if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
-                  DelOutboundVO data = infoByOrderNo.getData();
-                  //String trackingNo = data.getTrackingNo();
-                  List<DelOutboundDetailVO> details = data.getDetails();
-                  if (CollectionUtils.isNotEmpty(details)) {
-                      Long qty = details.stream().map(DelOutboundDetailVO::getQty).reduce(Long::sum).orElse(0L);
-                      chargeLog.setQty(qty);
-                  }
-              }
-          }
+            if (StringUtils.isNotBlank(chargeLog.getOrderNo()) && chargeLog.getOrderNo().startsWith("CK")) {
+                R<DelOutboundVO> infoByOrderNo = delOutboundFeignService.getInfoByOrderNo(chargeLog.getOrderNo());
+                if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
+                    DelOutboundVO data = infoByOrderNo.getData();
+                    //String trackingNo = data.getTrackingNo();
+                    List<DelOutboundDetailVO> details = data.getDetails();
+                    if (CollectionUtils.isNotEmpty(details)) {
+                        Long qty = details.stream().map(DelOutboundDetailVO::getQty).reduce(Long::sum).orElse(0L);
+                        chargeLog.setQty(qty);
+                    }
+                }
+            } else if (StringUtils.isNotBlank(chargeLog.getOrderNo()) && chargeLog.getOrderNo().startsWith("RK")) {
+                R<InboundReceiptInfoVO> infoByOrderNo = inboundReceiptFeignService.info(chargeLog.getOrderNo());
+                if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
+                    InboundReceiptInfoVO data = infoByOrderNo.getData();
+                    //String trackingNo = data.getTrackingNo();
+                    List<InboundReceiptDetailVO> details = data.getInboundReceiptDetails();
+                    if (CollectionUtils.isNotEmpty(details)) {
+                        Integer qty = details.stream().map(InboundReceiptDetailVO::getPutQty).reduce(Integer::sum).orElse(0);
+                        chargeLog.setQty(Long.valueOf(qty));
+                    }
+                }
+            }
         }
         chargeFeignService.add(chargeLog);
         log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
@@ -697,8 +711,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 switch (newCreditTypeEnum) {
                     case QUOTA:
                         //更新限额也直接更新 但是未归还的也会查询出来，但是金额是0 需要更新授信类型
-                        accountBalanceMapper.update(new AccountBalance(),Wrappers.<AccountBalance>lambdaUpdate()
-                                .eq(AccountBalance::getCusCode,cusCode).set(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.QUOTA.getValue()));
+                        accountBalanceMapper.update(new AccountBalance(), Wrappers.<AccountBalance>lambdaUpdate()
+                                .eq(AccountBalance::getCusCode, cusCode).set(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.QUOTA.getValue()));
                         this.updateCreditBatch(userCreditDetailList, cusCode);
                         return;
                     case TIME_LIMIT:
