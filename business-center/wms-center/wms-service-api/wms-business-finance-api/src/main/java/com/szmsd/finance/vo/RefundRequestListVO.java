@@ -1,15 +1,12 @@
 package com.szmsd.finance.vo;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -100,7 +97,8 @@ public class RefundRequestListVO {
 
     @ApiModelProperty(value = "附注")
     private String remark;
-
+    @ApiModelProperty(value = "审核信息")
+    private String reviewRemark;
     @ApiModelProperty(value = "金额")
     @Excel(name = "金额")
     private BigDecimal amount;

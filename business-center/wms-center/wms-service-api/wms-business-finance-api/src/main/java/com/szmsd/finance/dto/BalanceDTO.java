@@ -1,14 +1,11 @@
 package com.szmsd.finance.dto;
 
-import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.finance.enums.CreditConstant;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 /**
  * @author liulei
@@ -113,7 +110,7 @@ public class BalanceDTO {
     public boolean freeze(BigDecimal amount) {
         this.currentBalance = this.currentBalance.subtract(amount);
         this.freezeBalance = this.freezeBalance.add(amount);
-        return true;
+        return BigDecimal.ZERO.compareTo(this.currentBalance) <= 0;
     }
 
     /**
