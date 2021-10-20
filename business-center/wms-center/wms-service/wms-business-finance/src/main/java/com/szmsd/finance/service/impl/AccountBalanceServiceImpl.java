@@ -252,16 +252,18 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
         if (null == chargeLog.getQty() || 0 >= chargeLog.getQty()) {
             //现在只有出库单需要补，入库单没有这些数据
-            R<DelOutboundVO> infoByOrderNo = delOutboundFeignService.getInfoByOrderNo(chargeLog.getOrderNo());
-            if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
-                DelOutboundVO data = infoByOrderNo.getData();
-                //String trackingNo = data.getTrackingNo();
-                List<DelOutboundDetailVO> details = data.getDetails();
-                if (CollectionUtils.isNotEmpty(details)) {
-                    Long qty = details.stream().map(DelOutboundDetailVO::getQty).reduce(Long::sum).orElse(0L);
-                    chargeLog.setQty(qty);
-                }
-            }
+          if (StringUtils.isNotBlank(chargeLog.getOrderNo())&&chargeLog.getOrderNo().startsWith("CK")){
+              R<DelOutboundVO> infoByOrderNo = delOutboundFeignService.getInfoByOrderNo(chargeLog.getOrderNo());
+              if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
+                  DelOutboundVO data = infoByOrderNo.getData();
+                  //String trackingNo = data.getTrackingNo();
+                  List<DelOutboundDetailVO> details = data.getDetails();
+                  if (CollectionUtils.isNotEmpty(details)) {
+                      Long qty = details.stream().map(DelOutboundDetailVO::getQty).reduce(Long::sum).orElse(0L);
+                      chargeLog.setQty(qty);
+                  }
+              }
+          }
         }
         chargeFeignService.add(chargeLog);
         log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));

@@ -113,12 +113,12 @@ public class PayServiceImpl implements IPayService {
         if (r.getCode() == 200) {
             chargeLogService.update(chargeLog.getId());
         }
-        chargeLog.setSuccess(r.getCode() == 200);
-        chargeLog.setMessage(r.getMsg());
-        int insert = chargeLogService.save(chargeLog);
-        if (insert < 1) {
-            log.error("pay() failed {}", chargeLog);
-        }
+//        chargeLog.setSuccess(r.getCode() == 200);
+//        chargeLog.setMessage(r.getMsg());
+//        int insert = chargeLogService.save(chargeLog);
+//        if (insert < 1) {
+//            log.error("pay() failed {}", chargeLog);
+//        }
     }
 
 }
