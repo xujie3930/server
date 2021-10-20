@@ -110,7 +110,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
      * @see com.szmsd.delivery.service.wrapper.BringVerifyEnum
      */
     BRV_PRC_PRICING {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},长宽高:{2}*{3}*{4},计费重:{5}{6},费用:{7}{8}");
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},长宽高:{2}*{3}*{4},计费重:{5} {6},费用:{7} {8}");
 
         @Override
         public String getType() {
@@ -127,7 +127,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
     },
     BRV_FREEZE_BALANCE {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},费用:{2}{3}");
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},费用:{2} {3}");
 
         @Override
         public String getType() {
@@ -211,7 +211,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
                 String[] strings = new String[list.size()];
                 for (int i = 0; i < list.size(); i++) {
                     InventoryOperateDto dto = list.get(i);
-                    strings[i] = "(" + dto.getSku() + ":" + dto.getNum() + ")";
+                    strings[i] = "(SKU:" + dto.getSku() + ",数量:" + dto.getNum() + ")";
                 }
                 inventoryText = String.join(",", strings);
             }
@@ -244,7 +244,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
                 String[] strings = new String[list.size()];
                 for (int i = 0; i < list.size(); i++) {
                     DelOutboundOperationDetailVO vo = list.get(i);
-                    strings[i] = "(" + vo.getSku() + ":" + vo.getQty() + ":" + vo.getWeight() + ")";
+                    strings[i] = "(SKU:" + vo.getSku() + ",数量:" + vo.getQty() + ",重量:" + vo.getWeight() + ")";
                 }
                 inventoryText = String.join(",", strings);
             }
@@ -283,7 +283,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
     },
     RK_BRV_FREEZE_BALANCE {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},费用:{2}{3}");
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},费用:{2} {3}");
 
         @Override
         public String getType() {
@@ -327,7 +327,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
     },
     RK_BRV_FREEZE_OPERATION {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},费用:{2}{3}");
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},费用:{2} {3}");
 
         @Override
         public String getType() {
