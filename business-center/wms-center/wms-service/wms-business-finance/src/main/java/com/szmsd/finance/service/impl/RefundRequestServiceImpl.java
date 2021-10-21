@@ -7,6 +7,7 @@ import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.compont.ConfigData;
@@ -58,6 +59,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
     private IAccountBalanceService accountBalanceService;
 
     @Override
+    @DataScope(value = "cus_code")
     public List<RefundRequestListVO> selectRequestList(RefundRequestQueryDTO queryDTO) {
         return baseMapper.selectRequestList(queryDTO);
     }
