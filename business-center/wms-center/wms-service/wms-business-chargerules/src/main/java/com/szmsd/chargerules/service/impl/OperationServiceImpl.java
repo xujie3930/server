@@ -234,11 +234,11 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         List<BaseProductMeasureDto> dataAndException = R.getDataAndException(listR);
         Map<String, Double> skuWeightMap = dataAndException.stream().collect(Collectors.toMap(BaseProductMeasureDto::getCode, BaseProductMeasureDto::getWeight));
         for (DelOutboundOperationDetailVO vo : details) {
-            Double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00) * vo.getQty();
+            double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00) * vo.getQty();
             operation = getOperationDetails(dto, OrderTypeEnum.Receipt, weight, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
             String unit = operation.getUnit();
             if ("kg".equalsIgnoreCase(unit)) {
-                amount = operation.getFirstPrice().multiply(new BigDecimal(weight + "")).setScale(2, RoundingMode.HALF_UP).add(amount);
+                amount = operation.getFirstPrice().multiply(new BigDecimal(weight/1000 + "").setScale(2, RoundingMode.HALF_UP)).setScale(2, RoundingMode.HALF_UP).add(amount);
             } else {
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             }
@@ -270,11 +270,11 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         Map<String, Double> skuWeightMap = dataAndException.stream().collect(Collectors.toMap(BaseProductMeasureDto::getCode, BaseProductMeasureDto::getWeight));
 
         for (DelOutboundOperationDetailVO vo : details) {
-            Double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00) * vo.getQty();
+            double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00) * vo.getQty();
             operation = getOperationDetails(dto, weight, "未找到" + DelOutboundOrderEnum.getName(dto.getOrderType()) + "业务费用规则，请联系管理员");
             String unit = operation.getUnit();
             if ("kg".equalsIgnoreCase(unit)) {
-                amount = operation.getFirstPrice().multiply(new BigDecimal(weight + "")).setScale(2, RoundingMode.HALF_UP).add(amount);
+                amount = operation.getFirstPrice().multiply(new BigDecimal(weight/1000 + "").setScale(2, RoundingMode.HALF_UP)).setScale(2, RoundingMode.HALF_UP).add(amount);
             } else {
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             }
