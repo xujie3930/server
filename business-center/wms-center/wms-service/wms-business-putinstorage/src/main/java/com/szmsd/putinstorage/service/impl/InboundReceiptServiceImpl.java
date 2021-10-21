@@ -365,8 +365,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         log.info("#B1 接收入库上架：操作完成");
     }
-@Resource
-private BaseProductFeignService baseProductFeignService;
+
+    @Resource
+    private BaseProductFeignService baseProductFeignService;
 
 
     /**
@@ -409,13 +410,13 @@ private BaseProductFeignService baseProductFeignService;
             operationDTO.setOperationType(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode());
             operationDTO.setOrderType(OrderTypeEnum.Receipt.name());
             operationDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
-            operationDTO.setWeight(null);
+            Double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00) * vo.getPutQty();
+            operationDTO.setWeight(weight);
             R<Operation> operationR = operationFeignService.queryDetails(operationDTO);
             operation = R.getDataAndException(operationR);
             String unit = operation.getUnit();
             if ("kg".equalsIgnoreCase(unit)) {
-                Double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00);
-                amount = operation.getFirstPrice().multiply(new BigDecimal(weight * vo.getPutQty() + "")).setScale(2, RoundingMode.HALF_UP).add(amount);
+                amount = operation.getFirstPrice().multiply(new BigDecimal(weight + "")).setScale(2, RoundingMode.HALF_UP).add(amount);
             } else {
                 amount = this.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getPutQty()).add(amount);
             }
