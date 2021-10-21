@@ -627,8 +627,18 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         List<UserCreditDetailDTO> userCreditDetailList = userCreditDTO.getUserCreditDetailList();
         List<String> currencyCodeList = userCreditDetailList.stream().map(UserCreditDetailDTO::getCurrencyCode).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         CreditConstant.CreditTypeEnum newCreditTypeEnum = userCreditDetailList.stream().map(UserCreditDetailDTO::getCreditType).filter(Objects::nonNull).findAny().orElse(CreditConstant.CreditTypeEnum.DEFAULT);
+
         LambdaUpdateWrapper<AccountBalance> accountOldWrapper = Wrappers.<AccountBalance>lambdaUpdate()
                 .eq(AccountBalance::getCusCode, cusCode);
+        Integer currencyListCount = accountBalanceMapper.selectCount(accountOldWrapper);
+        if (currencyListCount == 0) {
+            UserCreditDetailDTO userCreditDetailDTO = new UserCreditDetailDTO();
+            BeanUtils.copyProperties(userCreditDTO, userCreditDetailDTO);
+            userCreditDetailDTO.setCurrencyName("人民币");
+            userCreditDetailDTO.setCurrencyName("CNY");
+            insertNewCreditAccount(userCreditDTO.getCusCode(), Collections.singletonList(userCreditDetailDTO));
+        }
+
         Integer creditTimeInterval = userCreditDTO.getUserCreditDetailList().stream().map(UserCreditDetailDTO::getCreditTimeInterval).filter(Objects::nonNull).findAny().orElse(0);
         if (CollectionUtils.isEmpty(userCreditDetailList)) {
             //清空需要归还所有的欠款
