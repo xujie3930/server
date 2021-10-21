@@ -8,7 +8,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.dto.BaseProductBatchQueryDto;
+import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
@@ -22,6 +25,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -57,6 +61,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -360,6 +365,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         log.info("#B1 接收入库上架：操作完成");
     }
+@Resource
+private BaseProductFeignService baseProductFeignService;
+
 
     /**
      * #B3 接收完成入库
@@ -381,17 +389,36 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         InboundReceiptInfoVO inboundReceiptInfoVO = queryInfo(orderNo);
         List<InboundReceiptDetailVO> details = inboundReceiptInfoVO.getInboundReceiptDetails();
         Long count = details.stream().filter(x -> null != x.getPutQty()).mapToLong(InboundReceiptDetailVO::getPutQty).sum();
-        //TODO 默认按照数量来计算
-        OperationDTO operationDTO = new OperationDTO();
-        operationDTO.setOperationType(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode());
-        operationDTO.setOrderType(OrderTypeEnum.Receipt.name());
-        operationDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
-        operationDTO.setWeight(null);
-        R<Operation> operationR = operationFeignService.queryDetails(operationDTO);
-        Operation operation = R.getDataAndException(operationR);
+        /**
+         * #{@Like com.szmsd.chargerules.service.impl.OperationServiceImpl#frozenFeesForWarehousing(com.szmsd.delivery.vo.DelOutboundOperationVO, java.math.BigDecimal)}
+         * 这有个bug 区间在不同币别 需要分别冻结 但是一个单现在不能冻结两次
+         */
+        Operation operation = new Operation();
         BigDecimal amount = BigDecimal.ZERO;
+
+        List<String> skuList = details.stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.toList());
+        BaseProductBatchQueryDto baseProductBatchQueryDto = new BaseProductBatchQueryDto();
+        baseProductBatchQueryDto.setSellerCode(delOutboundOperationVO.getCustomCode());
+        baseProductBatchQueryDto.setCodes(skuList);
+        R<List<BaseProductMeasureDto>> listR = baseProductFeignService.batchSKU(baseProductBatchQueryDto);
+        List<BaseProductMeasureDto> dataAndException = R.getDataAndException(listR);
+        Map<String, Double> skuWeightMap = dataAndException.stream().collect(Collectors.toMap(BaseProductMeasureDto::getCode, BaseProductMeasureDto::getWeight));
+
         for (InboundReceiptDetailVO vo : details) {
-            amount = this.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getPutQty()).add(amount);
+            OperationDTO operationDTO = new OperationDTO();
+            operationDTO.setOperationType(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode());
+            operationDTO.setOrderType(OrderTypeEnum.Receipt.name());
+            operationDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
+            operationDTO.setWeight(null);
+            R<Operation> operationR = operationFeignService.queryDetails(operationDTO);
+            operation = R.getDataAndException(operationR);
+            String unit = operation.getUnit();
+            if ("kg".equalsIgnoreCase(unit)) {
+                Double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00);
+                amount = operation.getFirstPrice().multiply(new BigDecimal(weight * vo.getPutQty() + "")).setScale(2, RoundingMode.HALF_UP).add(amount);
+            } else {
+                amount = this.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getPutQty()).add(amount);
+            }
         }
         CustPayDTO custPayDTO = new CustPayDTO();
         custPayDTO.setCurrencyCode(operation.getCurrencyCode());

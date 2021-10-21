@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Slf4j
@@ -29,7 +30,7 @@ public class PayServiceImpl implements IPayService {
     @Override
     public BigDecimal calculate(BigDecimal firstPrice, BigDecimal nextPrice, Long qty) {
         if (qty <= 0) return BigDecimal.ZERO;
-        return qty == 1 ? firstPrice : new BigDecimal(qty - 1).multiply(nextPrice).add(firstPrice);
+        return qty == 1 ? firstPrice : new BigDecimal(qty - 1).multiply(nextPrice).setScale(2, RoundingMode.HALF_UP).add(firstPrice);
     }
 
     @Override
