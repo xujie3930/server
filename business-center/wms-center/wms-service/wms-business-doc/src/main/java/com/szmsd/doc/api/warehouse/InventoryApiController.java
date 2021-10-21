@@ -2,6 +2,7 @@ package com.szmsd.doc.api.warehouse;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.doc.api.RUtils;
 import com.szmsd.doc.api.warehouse.req.InventoryAvailableQueryReq;
 import com.szmsd.doc.api.warehouse.resp.InventoryAvailableListResp;
 import com.szmsd.doc.api.warehouse.resp.SkuInventoryAgeResp;
@@ -9,6 +10,9 @@ import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.SkuInventoryAgeVo;
+import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO;
+import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -31,6 +35,8 @@ public class InventoryApiController {
 
     @Resource
     private InventoryFeignClientService inventoryFeignService;
+    @Resource
+    private InboundReceiptFeignService inboundReceiptFeignService;
 
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/inbound/queryAvailableList")
@@ -57,5 +63,14 @@ public class InventoryApiController {
         return R.ok(SkuInventoryAgeResp.convert(skuInventoryAgeVos, warehouseCode, sku));
     }
 
+    @PreAuthorize("hasAuthority('client')")
+    @PostMapping("/querySkuStockByRange")
+    @ApiOperation(value = "查询sku的入库状况", notes = "查询sku的入库状况-指定范围内")
+    public R<List<SkuInventoryStockRangeVo>> querySkuStockByRange(@RequestBody @Validated InventoryStockByRangeDTO inventoryStockByRangeDTO) {
+        inventoryStockByRangeDTO.valid();
+        R<List<SkuInventoryStockRangeVo>> listR = inboundReceiptFeignService.querySkuStockByRange(inventoryStockByRangeDTO);
+        List<SkuInventoryStockRangeVo> dataAndException = RUtils.getDataAndException(listR);
+        return R.ok(dataAndException);
+    }
 
 }

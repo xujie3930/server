@@ -13,7 +13,9 @@ import com.szmsd.putinstorage.domain.InboundReceiptDetail;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO;
+import com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
+import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import com.szmsd.putinstorage.mapper.InboundReceiptDetailMapper;
 import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import lombok.extern.slf4j.Slf4j;
@@ -201,6 +203,11 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
                 remoteComponent.saveAttachment(inboundReceiptDetail.getWarehouseNo(), inboundReceiptDetailId.toString(), Arrays.asList(editionImage), inboundReceiptEditionImage);
             }
         });
+    }
+
+    @Override
+    public List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO) {
+        return baseMapper.querySkuStockByRange(inventoryStockByRangeDTO);
     }
 }
 

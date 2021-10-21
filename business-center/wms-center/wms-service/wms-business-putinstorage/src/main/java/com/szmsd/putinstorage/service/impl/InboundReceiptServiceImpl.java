@@ -711,5 +711,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         BeanUtils.copyProperties(receivingCompletedRequest, inboundTracking);
         iInboundTrackingService.save(inboundTracking);
     }
+
+    @Override
+    public List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO) {
+        return iInboundReceiptDetailService.querySkuStockByRange(inventoryStockByRangeDTO);
+    }
 }
 

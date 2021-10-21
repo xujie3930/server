@@ -9,6 +9,8 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO;
+import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import com.szmsd.putinstorage.annotation.InboundReceiptLog;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
@@ -31,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -277,6 +278,14 @@ public class InboundReceiptController extends BaseController {
     R tracking(@Validated @RequestBody ReceivingTrackingRequest receivingCompletedRequest) {
         iInboundReceiptService.tracking(receivingCompletedRequest);
         return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('inventory:querySkuStockByRange')")
+    @PostMapping("/querySkuStockByRange")
+    @ApiOperation(value = "查询sku的入库状况", notes = "查询sku的入库状况-指定范围内")
+    public R<List<SkuInventoryStockRangeVo>> querySkuStockByRange(@RequestBody @Validated InventoryStockByRangeDTO inventoryStockByRangeDTO) {
+        inventoryStockByRangeDTO.valid();
+        return R.ok(iInboundReceiptService.querySkuStockByRange(inventoryStockByRangeDTO));
     }
 
 }

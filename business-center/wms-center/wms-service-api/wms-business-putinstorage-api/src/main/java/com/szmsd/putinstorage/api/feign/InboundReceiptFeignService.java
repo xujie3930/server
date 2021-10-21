@@ -8,7 +8,7 @@ import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundCountVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
-import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
+import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
@@ -54,4 +54,8 @@ public interface InboundReceiptFeignService {
     @PostMapping("/inbound/open/receipt/page")
     @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
     TableDataInfo<InboundReceiptVO> postPage(@RequestBody InboundReceiptQueryDTO queryDTO);
+
+    @PostMapping("/querySkuStockByRange")
+    @ApiOperation(value = "查询sku的入库状况", notes = "查询sku的入库状况-指定范围内")
+    R<List<SkuInventoryStockRangeVo>> querySkuStockByRange(@RequestBody InventoryStockByRangeDTO inventoryStockByRangeDTO);
 }

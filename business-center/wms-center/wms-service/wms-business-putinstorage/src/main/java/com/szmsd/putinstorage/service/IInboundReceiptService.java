@@ -53,5 +53,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     void arraigned(List<String> warehouseNos);
 
     void tracking(ReceivingTrackingRequest receivingCompletedRequest);
+
+    List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO);
 }
 
