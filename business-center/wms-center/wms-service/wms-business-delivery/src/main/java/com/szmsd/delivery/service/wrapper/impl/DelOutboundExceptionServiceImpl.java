@@ -76,6 +76,11 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
         }
 
         DelOutboundWrapperContext delOutboundWrapperContext = this.delOutboundBringVerifyService.initContext(delOutbound);
+        // 更新物流服务信息
+        DelOutbound wrapperContextDelOutbound = delOutboundWrapperContext.getDelOutbound();
+        wrapperContextDelOutbound.setShipmentRule(productCode);
+        wrapperContextDelOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
+
         // 创建承运商物流订单
         ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
 
