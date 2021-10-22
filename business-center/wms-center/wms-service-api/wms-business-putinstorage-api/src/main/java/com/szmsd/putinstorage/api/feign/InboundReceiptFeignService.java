@@ -55,7 +55,7 @@ public interface InboundReceiptFeignService {
     @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
     TableDataInfo<InboundReceiptVO> postPage(@RequestBody InboundReceiptQueryDTO queryDTO);
 
-    @PostMapping("/querySkuStockByRange")
+    @PostMapping("/inbound/querySkuStockByRange")
     @ApiOperation(value = "查询sku的入库状况", notes = "查询sku的入库状况-指定范围内")
     R<List<SkuInventoryStockRangeVo>> querySkuStockByRange(@RequestBody InventoryStockByRangeDTO inventoryStockByRangeDTO);
 }
