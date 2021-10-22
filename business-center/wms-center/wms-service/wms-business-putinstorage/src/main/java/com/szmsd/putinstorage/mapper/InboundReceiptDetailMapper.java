@@ -6,6 +6,7 @@ import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO;
 import com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -15,5 +16,5 @@ public interface InboundReceiptDetailMapper extends BaseMapper<InboundReceiptDet
 
     void deleteByWarehouseNo(String warehouseNo);
 
-    List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO);
+    List<SkuInventoryStockRangeVo> querySkuStockByRange(@Param("cm") InventoryStockByRangeDTO inventoryStockByRangeDTO, @Param("userId") Long userId);
 }

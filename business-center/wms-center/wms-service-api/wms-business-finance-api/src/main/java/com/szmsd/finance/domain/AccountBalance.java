@@ -13,6 +13,7 @@ import lombok.experimental.Accessors;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * @author liulei
@@ -108,5 +109,14 @@ public class AccountBalance extends FssBaseEntity {
         this.currentBalance = BigDecimal.ZERO;
         this.freezeBalance = BigDecimal.ZERO;
         this.totalBalance = BigDecimal.ZERO;
+        this.creditUseAmount = BigDecimal.ZERO;
+        this.creditBufferUseAmount = BigDecimal.ZERO;
+    }
+
+    public void showCredit() {
+        this.creditUseAmount = Optional.ofNullable(this.creditUseAmount).orElse(BigDecimal.ZERO);
+        this.creditBufferUseAmount = Optional.ofNullable(this.creditBufferUseAmount).orElse(BigDecimal.ZERO);
+        this.currentBalance = this.currentBalance.subtract(this.creditBufferUseAmount).subtract(this.creditBufferUseAmount);
+        this.totalBalance = this.totalBalance.subtract(this.creditBufferUseAmount).subtract(this.creditBufferUseAmount);
     }
 }
