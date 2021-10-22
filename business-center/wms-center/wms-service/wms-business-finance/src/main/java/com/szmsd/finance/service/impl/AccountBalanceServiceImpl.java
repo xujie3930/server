@@ -635,7 +635,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             UserCreditDetailDTO userCreditDetailDTO = new UserCreditDetailDTO();
             BeanUtils.copyProperties(userCreditDTO, userCreditDetailDTO);
             userCreditDetailDTO.setCurrencyName("人民币");
-            userCreditDetailDTO.setCurrencyName("CNY");
+            userCreditDetailDTO.setCurrencyCode("CNY");
             insertNewCreditAccount(userCreditDTO.getCusCode(), Collections.singletonList(userCreditDetailDTO));
         }
 
