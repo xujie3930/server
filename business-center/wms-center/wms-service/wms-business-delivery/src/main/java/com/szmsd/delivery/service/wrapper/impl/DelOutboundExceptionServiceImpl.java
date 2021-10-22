@@ -88,7 +88,7 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
         ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto = new ShipmentTrackingChangeRequestDto();
         shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
         shipmentTrackingChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
-        shipmentTrackingChangeRequestDto.setTrackingNo(delOutbound.getTrackingNo());
+        shipmentTrackingChangeRequestDto.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
         htpOutboundClientService.shipmentTracking(shipmentTrackingChangeRequestDto);
 
         // 获取标签
