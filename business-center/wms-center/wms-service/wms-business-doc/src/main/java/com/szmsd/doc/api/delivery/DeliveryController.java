@@ -84,7 +84,7 @@ public class DeliveryController {
             throw new CommonException("400", "SKU，产品属性信息不能全部为空");
         }
         // 验证国家是否存在
-        if (null == CountryCache.getCountry(request.getCountryCode())) {
+        if (StringUtils.isNotEmpty(request.getCountryCode()) && null == CountryCache.getCountry(request.getCountryCode())) {
             throw new CommonException("400", "国家编码不存在");
         }
         String sellerCode = AuthenticationUtil.getSellerCode();

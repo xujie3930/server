@@ -20,11 +20,11 @@ public class DelOutboundOtherInServiceDto implements Serializable {
     @ApiModelProperty(value = "客户代码")
     private String clientCode;
 
-    @NotBlank(message = "仓库编码不能为空")
+    // @NotBlank(message = "仓库编码不能为空")
     @ApiModelProperty(value = "仓库编码")
     private String warehouseCode;
 
-    @NotBlank(message = "国家编码不能为空")
+    // @NotBlank(message = "国家编码不能为空")
     @ApiModelProperty(value = "国家编码")
     private String countryCode;
 

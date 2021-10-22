@@ -102,28 +102,44 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
     @Override
     public List<PricedProduct> inService(DelOutboundOtherInServiceDto dto) {
         // 查询国家信息
-        R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(dto.getCountryCode());
-        BasRegionSelectListVO country = R.getDataAndException(countryR);
-        if (null == country) {
-            throw new CommonException("400", "国家信息不存在");
+        String countryCode = dto.getCountryCode();
+        BasRegionSelectListVO country = null;
+        if (StringUtils.isNotEmpty(countryCode)) {
+            R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(countryCode);
+            country = R.getDataAndException(countryR);
+            if (null == country) {
+                throw new CommonException("400", "国家信息不存在");
+            }
         }
         // 查询仓库信息
-        BasWarehouse warehouse = this.basWarehouseClientService.queryByWarehouseCode(dto.getWarehouseCode());
-        if (null == warehouse) {
-            throw new CommonException("400", "仓库信息不存在");
+        String warehouseCode = dto.getWarehouseCode();
+        BasWarehouse warehouse = null;
+        if (StringUtils.isNotEmpty(warehouseCode)) {
+            warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
+            if (null == warehouse) {
+                throw new CommonException("400", "仓库信息不存在");
+            }
         }
         // 传入参数：仓库，SKU
         PricedProductInServiceCriteria criteria = new PricedProductInServiceCriteria();
         criteria.setClientCode(dto.getClientCode());
-        criteria.setCountryName(country.getName());
-        criteria.setFromAddress(new Address(warehouse.getStreet1(),
-                warehouse.getStreet2(),
-                null,
-                warehouse.getPostcode(),
-                warehouse.getCity(),
-                warehouse.getProvince(),
-                new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName())
-        ));
+        CountryInfo countryInfo = null;
+        if (null != country) {
+            criteria.setCountryName(country.getName());
+            countryInfo = new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName());
+        }
+        Address fromAddress = null;
+        if (null != warehouse) {
+            fromAddress = new Address(warehouse.getStreet1(),
+                    warehouse.getStreet2(),
+                    null,
+                    warehouse.getPostcode(),
+                    warehouse.getCity(),
+                    warehouse.getProvince(),
+                    countryInfo
+            );
+        }
+        criteria.setFromAddress(fromAddress);
         if (CollectionUtils.isNotEmpty(dto.getSkus())) {
             // fix:SKU不跟仓库关联，SKU跟卖家编码关联。
             BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();

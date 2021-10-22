@@ -26,12 +26,12 @@ public class PricedProductRequest implements Serializable {
     private String clientCode;*/
 
     @Dictionary(message = "仓库编码不存在", type = DictionaryPluginConstant.WAR_DICTIONARY_PLUGIN)
-    @NotBlank(message = "仓库编码不能为空")
-    @ApiModelProperty(value = "仓库编码，需要去#仓库信息接口中查询", required = true, dataType = "String", position = 2, example = "GZ")
+    // @NotBlank(message = "仓库编码不能为空")
+    @ApiModelProperty(value = "仓库编码，需要去#仓库信息接口中查询", required = false, dataType = "String", position = 2, example = "GZ")
     private String warehouseCode;
 
-    @NotBlank(message = "国家编码不能为空")
-    @ApiModelProperty(value = "国家编码", required = true, dataType = "String", position = 3, example = "CN")
+    // @NotBlank(message = "国家编码不能为空")
+    @ApiModelProperty(value = "国家编码", required = false, dataType = "String", position = 3, example = "CN")
     private String countryCode;
 
     @ApiModelProperty(value = "SKU，产品属性信息二选一", dataType = "String", position = 4, example = "[\"SN001\", \"SN002\"]")
