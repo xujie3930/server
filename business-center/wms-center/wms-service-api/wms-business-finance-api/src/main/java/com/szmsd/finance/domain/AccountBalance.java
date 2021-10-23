@@ -116,7 +116,9 @@ public class AccountBalance extends FssBaseEntity {
     public void showCredit() {
         this.creditUseAmount = Optional.ofNullable(this.creditUseAmount).orElse(BigDecimal.ZERO);
         this.creditBufferUseAmount = Optional.ofNullable(this.creditBufferUseAmount).orElse(BigDecimal.ZERO);
-        this.currentBalance = this.currentBalance.subtract(this.creditUseAmount).subtract(this.creditBufferUseAmount);
-        this.totalBalance = this.totalBalance.subtract(this.creditUseAmount).subtract(this.creditBufferUseAmount);
+        BigDecimal currentBalance = Optional.ofNullable(this.currentBalance).filter(x -> x.compareTo(BigDecimal.ZERO) <= 0).orElse(BigDecimal.ZERO);
+        BigDecimal totalBalance = Optional.ofNullable(this.totalBalance).filter(x -> x.compareTo(BigDecimal.ZERO) <= 0).orElse(BigDecimal.ZERO);
+        this.currentBalance = currentBalance.subtract(this.creditUseAmount).subtract(this.creditBufferUseAmount);
+        this.totalBalance = totalBalance.subtract(this.creditUseAmount).subtract(this.creditBufferUseAmount);
     }
 }
