@@ -1,11 +1,7 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
-import com.szmsd.bas.api.domain.BasAttachment;
-import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
-import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
-import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
@@ -323,9 +319,25 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                                 , Math.toIntExact(1), packing.getPackingNo(), BigDecimal.ZERO, ""));
                     }
                 } else {
+                    BigDecimal declareValue = BigDecimal.ZERO;
+                    Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+                    for (DelOutboundDetail detail : detailList) {
+                        String sku = detail.getSku();
+                        BaseProduct product = productMap.get(sku);
+                        if (null == product) {
+                            throw new CommonException("400", "查询SKU[" + sku + "]信息失败");
+                        }
+                        BigDecimal productDeclaredValue;
+                        if (null != product.getDeclaredValue()) {
+                            productDeclaredValue = BigDecimal.valueOf(product.getDeclaredValue());
+                        } else {
+                            productDeclaredValue = BigDecimal.ZERO;
+                        }
+                        declareValue = declareValue.add(productDeclaredValue);
+                    }
                     packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                             new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                            , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
+                            , Math.toIntExact(1), delOutbound.getOrderNo(), declareValue, ""));
                 }
             }
         }
