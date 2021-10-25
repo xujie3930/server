@@ -113,5 +113,7 @@ public class FssDeductionRecord extends BaseEntity {
     @Excel(name = "扣费类型（0=扣款,1=还款）")
     private Integer type;
 
-
+    @ApiModelProperty(value = "扣费类型（0=扣款,1=还款）")
+    @Excel(name = "账单确认状态(0:初始化未确认，1：已核对， 2：已还款)")
+    private Integer status;
 }

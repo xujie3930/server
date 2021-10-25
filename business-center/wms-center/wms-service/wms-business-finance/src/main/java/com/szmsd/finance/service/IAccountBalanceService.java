@@ -26,7 +26,7 @@ public interface IAccountBalanceService {
 
     R balanceExchange(CustPayDTO dto);
 
-    BigDecimal getCurrentBalance(String cusCode,String currencyCode);
+    BigDecimal getCurrentBalance(String cusCode, String currencyCode);
 
     void setCurrentBalance(String cusCode, String currencyCode, BigDecimal result);
 
@@ -46,7 +46,7 @@ public interface IAccountBalanceService {
 
     BalanceDTO getBalance(String cusCode, String currencyCode);
 
-    void setBalance(String cusCode, String currencyCode, BalanceDTO result,boolean needUpdateCredit);
+    void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit);
 
     boolean withDrawBalanceCheck(String cusCode, String currencyCode, BigDecimal amount);
 
@@ -57,4 +57,27 @@ public interface IAccountBalanceService {
     void updateUserCredit(UserCreditDTO userCreditDTO);
 
     List<UserCreditInfoVO> queryUserCredit(String cusCode);
+
+    /**
+     * 查询授信期更新的用户列表
+     *
+     * @return
+     */
+    List<AccountBalance> queryAndUpdateUserCreditTimeFlag();
+
+    /**
+     * 查询授信额度临期的用户
+     *
+     * @return
+     */
+    List<AccountBalance> queryThePreTermBill();
+
+    /**
+     * 重新刷新账单周期
+     *
+     * @param cusCodeList 客户编号
+     * @return
+     */
+    int reloadCreditTime(List<String> cusCodeList);
+
 }

@@ -1,7 +1,10 @@
 package com.szmsd.finance.mapper;
 
+import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.FssDeductionRecord;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface DeductionRecordMapper extends BaseMapper<FssDeductionRecord> {
 
+    void updateDeductionRecordStatus(List<AccountBalance> updateBillList);
 }

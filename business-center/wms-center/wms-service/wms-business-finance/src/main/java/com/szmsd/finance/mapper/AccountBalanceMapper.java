@@ -26,4 +26,7 @@ public interface AccountBalanceMapper extends BaseMapper<AccountBalance> {
      * @return
      */
     int updateCreditBatch(@Param("updateList") List<UserCreditDetailDTO> updateList, @Param("cusCode") String cusCode, @Param("currencyCodeList") List<String> currencyCodeList);
+
+    List<AccountBalance> queryThePreTermBill();
+
 }

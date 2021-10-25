@@ -1,7 +1,9 @@
 package com.szmsd.finance.service;
 
+import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.FssDeductionRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -63,5 +65,14 @@ public interface IDeductionRecordService extends IService<FssDeductionRecord> {
      */
     int deleteDeductionRecordById(String id);
 
+    /**
+     * 更新账单信息
+     */
+    void updateDeductionRecordStatus(List<String> updateCusCodeList);
+
+    /**
+     * 按周期更新正常的账单
+     */
+    void updateRecordStatusByCreditTimeInterval();
 }
 

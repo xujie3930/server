@@ -51,30 +51,30 @@
 
     <select id="querySkuStockByRange" parameterType="com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO"
             resultType="com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo">
-        SELECT sku,
+        SELECT
+        sku,
         sku_name,
-        SUM(declare_qty) AS forecastTotal,
-        SUM(put_qty) actualOnShelvesTotal,
-        SUM(inTransitTotal) inTransitTotal
-        FROM (
-        SELECT sku,
-        sku_name,
-        declare_qty,
-        put_qty,
-        IF
-        ((declare_qty - put_qty) > 0, (declare_qty - put_qty), 0) AS inTransitTotal
-        FROM `inbound_receipt_detail`
+        SUM( declare_qty ) AS forecastTotal,
+        SUM( put_qty ) actualOnShelvesTotal,
+        SUM( inTransitTotal ) inTransitTotal
+        FROM
+        (
+        SELECT sku, sku_name, declare_qty, put_qty, `status`,
+        IF ( `status` = 5, 0, IF (( declare_qty - put_qty ) > 0,( declare_qty - put_qty ), 0)) AS inTransitTotal
+        FROM
+        `inbound_receipt_detail` ird
+        LEFT JOIN inbound_receipt ir ON ir.warehouse_no = ird.warehouse_no
         <where>
             <if test="cm.timeStart != null and cm.timeEnd != null">
-                AND create_time >= #{cm.timeStart} AND create_time &lt;= #{cm.timeEnd}
+                AND ird.create_time >= #{cm.timeStart} AND ird.create_time &lt;= #{cm.timeEnd}
             </if>
             <if test="cm.skuList != null and cm.skuList.size > 0">
-                AND sku IN
+                AND ird.sku IN
                 <foreach collection="cm.skuList" item="item" open="(" separator="," close=")">
                     #{item}
                 </foreach>
             </if>
-            AND create_by = #{userId}
+            AND ird.create_by = #{userId}
         </where>
         ) temp
         GROUP BY sku

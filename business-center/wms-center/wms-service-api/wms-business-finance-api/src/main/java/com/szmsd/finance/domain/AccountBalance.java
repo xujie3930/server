@@ -51,7 +51,9 @@ public class AccountBalance extends FssBaseEntity {
 
     @ApiModelProperty(value = "总余额")
     private BigDecimal totalBalance;
-    /** 09-07 授信额度新增 */
+    /**
+     * 09-07 授信额度新增
+     */
     @ApiModelProperty(value = "授信类型(0：额度，1：类型)")
     @Excel(name = "授信类型(0：额度，1：类型)")
     private String creditType;
@@ -98,9 +100,10 @@ public class AccountBalance extends FssBaseEntity {
 
     @ApiModelProperty(value = "缓冲时间使用额度")
     @Excel(name = "缓冲时间使用额度")
-    private BigDecimal creditBufferUseAmount;
+    private Boolean creditTimeFlag;
 
-    public AccountBalance() {}
+    public AccountBalance() {
+    }
 
     public AccountBalance(String cusCode, String currencyCode, String currencyName) {
         this.cusCode = cusCode;
@@ -110,15 +113,13 @@ public class AccountBalance extends FssBaseEntity {
         this.freezeBalance = BigDecimal.ZERO;
         this.totalBalance = BigDecimal.ZERO;
         this.creditUseAmount = BigDecimal.ZERO;
-        this.creditBufferUseAmount = BigDecimal.ZERO;
     }
 
     public void showCredit() {
         this.creditUseAmount = Optional.ofNullable(this.creditUseAmount).orElse(BigDecimal.ZERO);
-        this.creditBufferUseAmount = Optional.ofNullable(this.creditBufferUseAmount).orElse(BigDecimal.ZERO);
         BigDecimal currentBalance = Optional.ofNullable(this.currentBalance).filter(x -> x.compareTo(BigDecimal.ZERO) >= 0).orElse(BigDecimal.ZERO);
         BigDecimal totalBalance = Optional.ofNullable(this.totalBalance).filter(x -> x.compareTo(BigDecimal.ZERO) >= 0).orElse(BigDecimal.ZERO);
-        this.currentBalance = currentBalance.subtract(this.creditUseAmount).subtract(this.creditBufferUseAmount);
-        this.totalBalance = totalBalance.subtract(this.creditUseAmount).subtract(this.creditBufferUseAmount);
+        this.currentBalance = currentBalance.subtract(this.creditUseAmount);
+        this.totalBalance = totalBalance.subtract(this.creditUseAmount);
     }
 }
