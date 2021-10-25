@@ -1,5 +1,6 @@
 package com.szmsd.http.api.service;
 
+import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.PricedProductInfo;
@@ -43,4 +44,12 @@ public interface IHtpPricedProductClientService {
      * @return PricedProduct
      */
     List<PricedProduct> inService(PricedProductInServiceCriteria criteria);
+
+    /**
+     * 分页查询产品列表，返回指定页面的数据，以及统计总记录数
+     *
+     * @param pricedProductSearchCriteria pricedProductSearchCriteria
+     * @return PricedProduct
+     */
+    PageVO<PricedProduct> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria);
 }

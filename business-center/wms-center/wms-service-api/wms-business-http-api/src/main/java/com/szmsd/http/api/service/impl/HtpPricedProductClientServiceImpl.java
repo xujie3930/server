@@ -2,6 +2,7 @@ package com.szmsd.http.api.service.impl;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.*;
@@ -46,5 +47,10 @@ public class HtpPricedProductClientServiceImpl implements IHtpPricedProductClien
     @Override
     public List<PricedProduct> inService(PricedProductInServiceCriteria criteria) {
         return R.getDataAndException(this.htpPricedProductFeignService.inService(criteria));
+    }
+
+    @Override
+    public PageVO<PricedProduct> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria) {
+        return R.getDataAndException(this.htpPricedProductFeignService.pageResult(pricedProductSearchCriteria));
     }
 }

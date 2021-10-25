@@ -12,6 +12,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
@@ -32,6 +33,8 @@ import com.szmsd.doc.api.delivery.response.*;
 import com.szmsd.doc.utils.AuthenticationUtil;
 import com.szmsd.doc.utils.Base64CheckUtils;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
+import com.szmsd.http.api.service.IHtpPricedProductClientService;
+import com.szmsd.http.dto.PricedProductSearchCriteria;
 import com.szmsd.http.dto.ShipmentLabelChangeRequestDto;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.ResponseVO;
@@ -48,7 +51,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collections;
@@ -74,10 +76,12 @@ public class DeliveryController {
     private DelOutboundFeignService delOutboundFeignService;
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
+    @Autowired
+    private IHtpPricedProductClientService htpPricedProductClientService;
 
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/priced-product")
-    @ApiOperation(value = "#1 出库管理 - 物流服务列表", position = 100, notes = "接口描述")
+    @ApiOperation(value = "#1.1 出库管理 - 物流服务列表", position = 100, notes = "接口描述")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "PricedProductRequest", required = true)
     public R<List<PricedProductResponse>> pricedProduct(@RequestBody @Validated PricedProductRequest request) {
         if (CollectionUtils.isEmpty(request.getSkus()) && CollectionUtils.isEmpty(request.getProductAttributes())) {
@@ -95,6 +99,14 @@ public class DeliveryController {
             return R.ok();
         }
         return R.ok(BeanMapperUtil.mapList(productList, PricedProductResponse.class));
+    }
+
+    @PreAuthorize("hasAuthority('client')")
+    @PostMapping("/priced-product-page")
+    @ApiOperation(value = "#1.2 出库管理 - 物流服务分页列表", position = 101, notes = "接口描述")
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "PricedProductSearchCriteria", required = true)
+    public R<PageVO<PricedProduct>> pricedProductPage(@RequestBody @Validated PricedProductSearchCriteria request) {
+        return R.ok(this.htpPricedProductClientService.pageResult(request));
     }
 
     @PreAuthorize("hasAuthority('client')")

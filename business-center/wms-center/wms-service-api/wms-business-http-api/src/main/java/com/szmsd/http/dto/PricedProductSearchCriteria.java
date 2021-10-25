@@ -31,4 +31,9 @@ public class PricedProductSearchCriteria extends PageDTO {
     @ApiModelProperty(value = "是否可下单")
     private String inService;
 
+    @ApiModelProperty(value = "当前页码", example = "1")
+    private Integer pageNumber;
+
+    @ApiModelProperty(value = "页面大小", example = "10")
+    private Integer pageSize;
 }
