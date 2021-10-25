@@ -19,6 +19,7 @@ import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundExceptionService;
+import com.szmsd.delivery.service.wrapper.PricingEnum;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
@@ -76,10 +77,25 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
         }
 
         DelOutboundWrapperContext delOutboundWrapperContext = this.delOutboundBringVerifyService.initContext(delOutbound);
+
         // 更新物流服务信息
         DelOutbound wrapperContextDelOutbound = delOutboundWrapperContext.getDelOutbound();
         wrapperContextDelOutbound.setShipmentRule(productCode);
         wrapperContextDelOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
+
+        // PRC计算费用校验
+        ResponseObject<ChargeWrapper, ProblemDetails> prcResponseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.PACKAGE);
+        if (null == prcResponseObject) {
+            // 返回值是空的
+            throw new CommonException("400", "计算包裹费用失败[重新获取挂号]");
+        } else {
+            // 判断返回值
+            if (!prcResponseObject.isSuccess()) {
+                // 计算失败
+                String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(prcResponseObject.getError()), "计算包裹费用失败2[重新获取挂号]");
+                throw new CommonException("400", exceptionMessage);
+            }
+        }
 
         // 创建承运商物流订单
         ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
