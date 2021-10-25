@@ -448,8 +448,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             String productCode = delOutbound.getShipmentRule();
             // 获取产品信息
             IHtpPricedProductClientService htpPricedProductClientService = SpringUtils.getBean(IHtpPricedProductClientService.class);
-            PricedProductInfo pricedProductInfo = htpPricedProductClientService.info(productCode);
+            PricedProductInfo pricedProductInfo = htpPricedProductClientService.infoAndSubProducts(productCode);
             if (null != pricedProductInfo) {
+                delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
                 delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
                 DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
             } else {

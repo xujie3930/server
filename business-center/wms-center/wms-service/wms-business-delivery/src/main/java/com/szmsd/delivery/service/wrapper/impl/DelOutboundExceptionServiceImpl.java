@@ -69,7 +69,7 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
         }
         // 根据产品编码查询产品信息
         String productCode = dto.getShipmentRule();
-        PricedProductInfo pricedProductInfo = htpPricedProductClientService.info(productCode);
+        PricedProductInfo pricedProductInfo = htpPricedProductClientService.infoAndSubProducts(productCode);
         if (null == pricedProductInfo) {
             // 异常信息
             throw new CommonException("400", "查询产品[" + productCode + "]信息失败");

@@ -21,6 +21,14 @@ public interface IHtpPricedProductClientService {
     PricedProductInfo info(String productCode);
 
     /**
+     * 根据产品代码获取产品信息，如果存在子产品信息，则返回第一个子产品的信息
+     *
+     * @param productCode productCode
+     * @return PricedProductInfo
+     */
+    PricedProductInfo infoAndSubProducts(String productCode);
+
+    /**
      * 计算包裹的费用
      *
      * @param command command
