@@ -33,12 +33,13 @@ public class UserCreditInfoVO {
     @ApiModelProperty(value = "授信时间间隔")
     @Excel(name = "授信时间间隔")
     private Integer creditTimeInterval;
-    @NotBlank
+    @ApiModelProperty(value = "授信缓冲时间间隔")
+    @Excel(name = "授信缓冲时间间隔")
+    private Integer creditBufferTimeInterval;
     @ApiModelProperty(value = "币种编码", required = true)
     private String currencyCode;
     @ApiModelProperty(value = "币种名")
     private String currencyName;
-    @NotBlank
     @ApiModelProperty(value = "客户编码", required = true)
     private String cusCode;
     @ApiModelProperty(value = "授信状态", required = true)

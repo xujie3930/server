@@ -653,9 +653,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                     .notIn(CollectionUtils.isNotEmpty(updateCurrencyCodeList), AccountBalance::getCurrencyCode, updateCurrencyCodeList).or().nested(x -> x.eq(AccountBalance::getCusCode, cusCode).ne(AccountBalance::getCreditType, newCreditTypeEnum));
             List<AccountBalance> accountBalances = accountBalanceMapper.selectList(accountOldWrapper);
 
-            Map<String, BigDecimal> needToRepayMap = accountBalances.stream().filter(x -> checkAmountIsZero(x.getCreditUseAmount())).collect(Collectors.toMap(AccountBalance::getCurrencyCode, x -> {
-                return Optional.ofNullable(x.getCreditUseAmount()).orElse(BigDecimal.ZERO);
-            }));
+            Map<String, BigDecimal> needToRepayMap = accountBalances.stream().filter(x -> checkAmountIsZero(x.getCreditUseAmount())).collect(Collectors.toMap(AccountBalance::getCurrencyCode, x -> Optional.ofNullable(x.getCreditUseAmount()).orElse(BigDecimal.ZERO)));
             StringBuilder errorMsg = new StringBuilder();
             needToRepayMap.forEach((x, y) -> {
                 if (!checkAmountIsZero(y)) {
@@ -696,9 +694,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 .map(CreditConstant.CreditTypeEnum::getThisByTypeCode)
                 .orElse(CreditConstant.CreditTypeEnum.DEFAULT);
         LocalDate now = LocalDate.now();
-        LocalDateTime start = now.atTime(0, 0, 0);
-        LocalDateTime end = start.plus(creditTimeInterval, creditTimeUnit).minusSeconds(1);
-        LocalDateTime bufferEnd = end.plus(creditBufferTimeInterval, creditBufferTimeUnit);
+        LocalDateTime newStart = now.atTime(0, 0, 0);
+        LocalDateTime newEnd = newStart.plus(creditTimeInterval, creditTimeUnit).minusSeconds(1);
+        LocalDateTime newBufferEnd = newEnd.plus(creditBufferTimeInterval, creditBufferTimeUnit);
         Map<String, AccountBalance> oldAccountInfo = accountBalancesOld.stream().collect(Collectors.toMap(AccountBalance::getCurrencyCode, x -> x));
 
         switch (creditTypeEnum) {
@@ -722,8 +720,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                             UserCreditDetailDTO userCreditDetailDTO = new UserCreditDetailDTO();
                             userCreditDetailDTO.setCurrencyCode(x.getCurrencyCode()).setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT);
                             userCreditDetailDTO
-                                    .setCreditTimeInterval(creditTimeInterval).setCreditTimeUnit(creditTimeUnit).setCreditBeginTime(start).setCreditEndTime(end)
-                                    .setCreditBufferTime(bufferEnd).setCreditBufferTimeUnit(creditBufferTimeUnit);
+                                    .setCreditTimeInterval(creditTimeInterval).setCreditTimeUnit(creditTimeUnit).setCreditBeginTime(newStart).setCreditEndTime(newEnd)
+                                    .setCreditBufferTimeInterval(creditBufferTimeInterval).setCreditBufferTime(newBufferEnd).setCreditBufferTimeUnit(creditBufferTimeUnit);
                             return userCreditDetailDTO;
                         }).collect(Collectors.toList());
                         this.updateCreditBatch(updateCreditList, cusCode);
@@ -744,16 +742,23 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                     case TIME_LIMIT:
                         // 更新账期直接更新
                         List<UserCreditDetailDTO> updateCreditList = accountBalancesOld.stream().map(x -> {
-                            // 判断是否修改A的值 启用中 时间类型 A变化 账期改账期 或者账期改额度 需要截断账单
-                            boolean needTruncateBillFlag =
-                                    (null != x.getCreditStatus() && !x.getCreditStatus().equals(CreditConstant.CreditStatusEnum.DISABLED.getValue()))
-                                            && (CreditConstant.CreditTypeEnum.TIME_LIMIT.name().equals(x.getCreditType()))
-                                            && (x.getCreditTimeInterval().compareTo(creditTimeInterval) >= 0);
                             UserCreditDetailDTO userCreditDetailDTO = new UserCreditDetailDTO();
-                            userCreditDetailDTO.setCurrencyCode(x.getCurrencyCode()).setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT).setCreditTimeFlag(needTruncateBillFlag);
                             userCreditDetailDTO
-                                    .setCreditTimeInterval(creditTimeInterval).setCreditTimeUnit(creditTimeUnit).setCreditBeginTime(start).setCreditEndTime(end)
-                                    .setCreditBufferTime(bufferEnd).setCreditBufferTimeUnit(creditBufferTimeUnit);
+                                    .setCurrencyCode(x.getCurrencyCode()).setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT)
+                                    .setCreditTimeInterval(creditTimeInterval).setCreditBufferTimeInterval(creditBufferTimeInterval)
+                                    .setCreditTimeUnit(creditTimeUnit).setCreditBufferTimeUnit(creditBufferTimeUnit);
+                            // 判断是否修改A的值 启用中 时间类型 A变化 账期改账期 或者账期改额度 需要截断账单
+                            Integer oldCreditTimeInterval = Optional.ofNullable(x.getCreditTimeInterval()).orElse(0);
+                            // A改大 不更新开始时间 更新结束时间 不截取
+                            if (creditTimeInterval.compareTo(oldCreditTimeInterval) >= 0) {
+                                LocalDateTime creditBeginTime = x.getCreditBeginTime();
+                                LocalDateTime creditEndTime = creditBeginTime.plus(creditTimeInterval, creditTimeUnit).minusSeconds(1);
+                                LocalDateTime creditBufferTime = creditEndTime.plus(creditBufferTimeInterval, creditBufferTimeUnit);
+                                userCreditDetailDTO.setCreditBeginTime(creditBeginTime).setCreditEndTime(creditEndTime).setCreditBufferTime(creditBufferTime);
+                            } else {
+                                // A改小 更新开始时间 更新结束时间及缓存期 截取订单
+                                userCreditDetailDTO.setCreditBeginTime(newStart).setCreditEndTime(newEnd).setCreditBufferTime(newBufferEnd).setCreditTimeFlag(true);
+                            }
                             return userCreditDetailDTO;
                         }).collect(Collectors.toList());
                         this.updateCreditBatch(updateCreditList, cusCode);
@@ -781,8 +786,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                             UserCreditDetailDTO userCreditDetailDTO = new UserCreditDetailDTO();
                             userCreditDetailDTO.setCurrencyCode(x.getCurrencyCode()).setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT);
                             userCreditDetailDTO
-                                    .setCreditTimeInterval(creditTimeInterval).setCreditTimeUnit(creditTimeUnit).setCreditBeginTime(start).setCreditEndTime(end)
-                                    .setCreditBufferTime(bufferEnd).setCreditBufferTimeUnit(creditBufferTimeUnit);
+                                    .setCreditTimeInterval(creditTimeInterval).setCreditTimeUnit(creditTimeUnit).setCreditBeginTime(newStart).setCreditEndTime(newEnd)
+                                    .setCreditBufferTimeInterval(creditBufferTimeInterval).setCreditBufferTime(newBufferEnd).setCreditBufferTimeUnit(creditBufferTimeUnit);
                             return userCreditDetailDTO;
                         }).collect(Collectors.toList());
                         // 更新账期直接更新

@@ -12,66 +12,73 @@
         UPDATE fss_account_balance
         <trim prefix="set" suffixOverrides=",">
             credit_status = 1,
-            <trim prefix="credit_type = case" suffix="end,">
+            <trim prefix="credit_type = case" suffix="ELSE credit_type end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.currencyCode != null">
                         WHEN currency_code = #{i.currencyCode} THEN #{i.creditType.type}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_line = case" suffix="end,">
+            <trim prefix="credit_line = case" suffix="ELSE credit_line end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditLine != null">
                         WHEN currency_code= #{i.currencyCode} THEN #{i.creditLine}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_time_interval = case" suffix="end,">
+            <trim prefix="credit_time_interval = case" suffix="ELSE credit_time_interval end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditTimeInterval != null">
                         WHEN currency_code= #{i.currencyCode} THEN #{i.creditTimeInterval}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_time_unit = case" suffix="end,">
+            <trim prefix="credit_time_unit = case" suffix="ELSE credit_time_unit end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditTimeUnit != null">
                         WHEN currency_code= #{i.currencyCode} THEN #{i.creditTimeUnit}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_buffer_time_unit = case" suffix="end,">
+            <trim prefix="credit_buffer_time_unit = case" suffix="ELSE credit_buffer_time_unit end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditBufferTimeUnit != null">
                         WHEN currency_code= #{i.currencyCode} THEN #{i.creditBufferTimeUnit}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_begin_time = case" suffix="end,">
+            <trim prefix="credit_buffer_time_interval = case" suffix="ELSE credit_buffer_time_interval end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditBufferTimeInterval != null">
+                        WHEN currency_code= #{i.currencyCode} THEN #{i.creditBufferTimeInterval}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="credit_begin_time = case" suffix="ELSE credit_end_time end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditBeginTime != null">
                         WHEN currency_code= #{i.currencyCode} THEN #{i.creditBeginTime}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_end_time = case" suffix="end,">
+            <trim prefix="credit_end_time = case" suffix=" ELSE credit_end_time end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditEndTime != null">
                         WHEN currency_code= #{i.currencyCode} THEN #{i.creditEndTime}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_buffer_time = case" suffix="end,">
+            <trim prefix="credit_buffer_time = case" suffix="ELSE credit_buffer_time end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditBufferTime != null">
                         WHEN currency_code= #{i.currencyCode} THEN #{i.creditBufferTime}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_time_flag = case" suffix="end,">
+            <trim prefix="credit_time_flag = case" suffix="ELSE credit_time_flag end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditTimeFlag != null">
-                        WHEN currency_code= #{i.currencyCode} AND credit_time_flag = 0 THEN 1
+                        WHEN currency_code= #{i.currencyCode} AND credit_time_flag = 0 THEN #{i.creditTimeFlag}
                     </if>
                 </foreach>
             </trim>

@@ -71,7 +71,7 @@ public class UserCreditDetailDTO {
 
     @Min(value = 0, message = "授信缓冲时间不能小于0", groups = Interval.class)
     @NotNull(message = "授信缓冲时间不能为空", groups = Interval.class)
-    @ApiModelProperty(value = "授信缓冲时间间隔", hidden = true)
+    @ApiModelProperty(value = "授信缓冲时间间隔")
     @Excel(name = "授信缓冲时间间隔")
     private Integer creditBufferTimeInterval;
 
