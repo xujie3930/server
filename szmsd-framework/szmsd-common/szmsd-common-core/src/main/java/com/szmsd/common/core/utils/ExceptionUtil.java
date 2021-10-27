@@ -1,5 +1,6 @@
 package com.szmsd.common.core.utils;
 
+import com.szmsd.common.core.exception.web.BaseException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 错误信息处理类。
@@ -39,6 +41,9 @@ public class ExceptionUtil {
                 builder.deleteCharAt(builder.length() - 1);
             }
             return builder.toString();
+        }
+        if (e instanceof BaseException){
+            return ((BaseException) e).getDefaultMessage();
         }
         // 其它异常
         Throwable root = ExceptionUtils.getRootCause(e);
