@@ -109,7 +109,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             }
             return true;*/
             if (!balance.checkAndSetAmountAndCreditAnd(changeAmount,false, BalanceDTO::freeze)) {
-                throw new CommonException("999", "可用余额不足以冻结，费用：" + changeAmount);
+                throw new RuntimeException("可用余额不足以冻结，费用：" + changeAmount);
             }
         }
         if (BillEnum.PayMethod.BALANCE_THAW == dto.getPayMethod()) {

@@ -113,7 +113,7 @@ public class BalanceDTO {
     public boolean freeze(BigDecimal amount) {
         this.currentBalance = this.currentBalance.subtract(amount);
         this.freezeBalance = this.freezeBalance.add(amount);
-        return true;
+        return BigDecimal.ZERO.compareTo(this.currentBalance) <= 0;
     }
 
     /**
