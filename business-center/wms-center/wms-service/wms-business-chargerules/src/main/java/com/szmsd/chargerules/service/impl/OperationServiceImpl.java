@@ -238,7 +238,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
             operation = getOperationDetails(dto, OrderTypeEnum.Receipt, weight, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
             String unit = operation.getUnit();
             if ("kg".equalsIgnoreCase(unit)) {
-                amount = operation.getFirstPrice().multiply(new BigDecimal((weight * vo.getQty() / 1000) + "").setScale(2, RoundingMode.HALF_UP)).add(amount);
+                amount = operation.getFirstPrice().multiply(new BigDecimal((weight * vo.getQty() / 1000) + "").setScale(4, RoundingMode.HALF_UP)).add(amount);
             } else {
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             }

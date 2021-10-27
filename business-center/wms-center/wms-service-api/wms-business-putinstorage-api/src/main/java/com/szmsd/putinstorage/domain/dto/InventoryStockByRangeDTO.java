@@ -35,13 +35,13 @@ public class InventoryStockByRangeDTO {
         }
     }
 
-    @NotNull(message = "开始时间不能为空")
+    @NotNull(message = "开始时间不能为空或格式不正确")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "开始时间 yyyy-MM-dd HH:mm:ss",example = "2021-10-01 10:10:10", required = true)
     private Date timeStart;
 
-    @NotNull(message = "结束时间不能为空")
+    @NotNull(message = "结束时间不能为空或格式不正确")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "结束时间 yyyy-MM-dd HH:mm:ss",example = "2021-10-21 10:10:10", required = true)

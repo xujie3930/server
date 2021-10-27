@@ -60,7 +60,7 @@
         FROM
         (
         SELECT sku, sku_name, declare_qty, put_qty, `status`,
-        IF ( `status` = 5, 0, IF (( declare_qty - put_qty ) > 0,( declare_qty - put_qty ), 0)) AS inTransitTotal
+        IF ( `status` = 5 OR `status` = 0, 0, IF (( declare_qty - put_qty ) > 0,( declare_qty - put_qty ), 0)) AS inTransitTotal
         FROM
         `inbound_receipt_detail` ird
         LEFT JOIN inbound_receipt ir ON ir.warehouse_no = ird.warehouse_no
