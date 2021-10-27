@@ -41,10 +41,6 @@ public class CreditInfoBO {
     @Excel(name = "使用额度金额")
     private BigDecimal creditUseAmount;
 
-    @ApiModelProperty(value = "本次使用额度金额")
-    @Excel(name = "本次使用额度金额")
-    private BigDecimal thisUseCreditUseAmount;
-
     @ApiModelProperty(value = "授信开始时间")
     @Excel(name = "授信开始时间")
     private LocalDateTime creditBeginTime;

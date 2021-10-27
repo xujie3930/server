@@ -401,7 +401,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         // 查询授信额使用数
         Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
         BigDecimal creditUseAmount = Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
-        balanceDTO.setCreditUseAmount(creditUseAmount);
+        balanceDTO.getCreditInfoBO().setCreditUseAmount(creditUseAmount);
         return balanceDTO;
     }
 
