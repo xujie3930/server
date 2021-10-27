@@ -24,11 +24,9 @@ import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
-import com.szmsd.finance.service.IAccountBalanceService;
-import com.szmsd.finance.service.IAccountSerialBillService;
-import com.szmsd.finance.service.ISysDictDataService;
-import com.szmsd.finance.service.IThirdRechargeRecordService;
+import com.szmsd.finance.service.*;
 import com.szmsd.finance.util.SnowflakeId;
+import com.szmsd.finance.vo.CreditUseInfo;
 import com.szmsd.finance.vo.PreOnlineIncomeVo;
 import com.szmsd.finance.vo.UserCreditInfoVO;
 import com.szmsd.finance.ws.WebSocketServer;
@@ -41,6 +39,7 @@ import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +85,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Resource
     private IAccountSerialBillService accountSerialBillService;
 
+    @Resource
+    private IDeductionRecordService iDeductionRecordService;
+
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
         LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
@@ -96,6 +98,16 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
         }
         List<AccountBalance> accountBalances = accountBalanceMapper.listPage(queryWrapper);
+
+        Map<String, CreditUseInfo> creditUseInfoMap = iDeductionRecordService.queryTimeCreditUse(dto.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+        Map<String, CreditUseInfo> needRepayCreditUseInfoMap = iDeductionRecordService.queryTimeCreditUse(dto.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.CHECKED));
+        accountBalances.forEach(x->{
+            String currencyCode = x.getCurrencyCode();
+            BigDecimal creditUseAmount = Optional.ofNullable(creditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+            x.setCreditUseAmount(creditUseAmount);
+            BigDecimal needRepayCreditUseAmount = Optional.ofNullable(needRepayCreditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+            x.setNeedRepayCreditUseAmount(needRepayCreditUseAmount);
+        });
         accountBalances.forEach(AccountBalance::showCredit);
         return accountBalances;
     }
@@ -357,40 +369,39 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public BalanceDTO getBalance(String cusCode, String currencyCode) {
+
         QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cus_code", cusCode);
         queryWrapper.eq("currency_code", currencyCode);
         AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
-        if (accountBalance != null) {
-            BalanceDTO balanceDTO = new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
-            CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
-            BeanUtils.copyProperties(accountBalance, creditInfoBO);
-            balanceDTO.setCreditInfoBO(creditInfoBO);
-            return balanceDTO;
+        if (accountBalance == null) {
+            log.info("getBalance() cusCode: {} currencyCode: {}", cusCode, currencyCode);
+            String currencyName = getCurrencyName(currencyCode);
+            accountBalance = new AccountBalance(cusCode, currencyCode, currencyName);
+            //判断是否有启用中的授信信息，有的话需要设置
+            List<AccountBalance> accountBalances = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
+                    .eq(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
+                    .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
+                    .eq(AccountBalance::getCusCode, cusCode));
+            if (CollectionUtils.isNotEmpty(accountBalances)) {
+                AccountBalance accountBalanceCredit = accountBalances.get(0);
+                BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
+                accountBalance.setId(null);
+                accountBalance.setCurrencyCode(currencyCode).setCurrencyName(currencyName)
+                        .setCreditUseAmount(BigDecimal.ZERO)
+                        .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
+                        .setCreateTime(new Date());
+            }
+            accountBalanceMapper.insert(accountBalance);
         }
-
-        log.info("getBalance() cusCode: {} currencyCode: {}", cusCode, currencyCode);
-        String currencyName = getCurrencyName(currencyCode);
-        accountBalance = new AccountBalance(cusCode, currencyCode, currencyName);
-        //判断是否有启用中的授信信息，有的话需要设置
-        List<AccountBalance> accountBalances = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
-                .eq(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
-                .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
-                .eq(AccountBalance::getCusCode, cusCode));
-        if (CollectionUtils.isNotEmpty(accountBalances)) {
-            AccountBalance accountBalanceCredit = accountBalances.get(0);
-            BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
-            accountBalance.setId(null);
-        }
-        accountBalance.setCurrencyCode(currencyCode).setCurrencyName(currencyName)
-                .setCreditUseAmount(BigDecimal.ZERO)
-                .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
-                .setCreateTime(new Date());
-        accountBalanceMapper.insert(accountBalance);
-        BalanceDTO balanceDTO = new BalanceDTO(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-        BeanUtils.copyProperties(accountBalance, balanceDTO);
+        BalanceDTO balanceDTO = new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
         CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
         BeanUtils.copyProperties(accountBalance, creditInfoBO);
+        balanceDTO.setCreditInfoBO(creditInfoBO);
+        // 查询授信额使用数
+        Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+        BigDecimal creditUseAmount = Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+        balanceDTO.setCreditUseAmount(creditUseAmount);
         return balanceDTO;
     }
 

@@ -42,6 +42,25 @@
 
     <update id="updateDeductionRecordStatus">
         UPDATE fss_deduction_record
-
     </update>
+
+    <select id="queryTimeCreditUse" resultType="com.szmsd.finance.vo.CreditUseInfo">
+        SELECT currency_code,SUM(credit_use_amount) AS creditUseAmount FROM fss_deduction_record
+        WHERE
+        cus_code = #{cusCode}
+        AND type = 0
+        <if test="statusList != null and statusList.size > 0">
+            AND `status` IN
+            <foreach collection="statusList" open="(" separator="," close=")" item="item">
+                #{item}
+            </foreach>
+        </if>
+        <if test="currencyCodeList != null and currencyCodeList.size > 0">
+            AND `currency_code` IN
+            <foreach collection="currencyCodeList" open="(" separator="," close=")" item="item">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY currency_code
+    </select>
 </mapper>

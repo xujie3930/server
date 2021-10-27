@@ -80,11 +80,12 @@ public abstract class AbstractPayFactory {
     public void recordDetailLog(CustPayDTO custPayDTO, BalanceDTO balanceDTO) {
         FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
         CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
-        BeanUtils.copyProperties(creditInfoBO,fssDeductionRecord);
-        BeanUtils.copyProperties(custPayDTO, fssDeductionRecord);
-        fssDeductionRecord.setOrderNo(custPayDTO.getNo());
-        fssDeductionRecord.setActualDeduction(balanceDTO.getActualDeduction());
-        fssDeductionRecord.setCreditUseAmount(balanceDTO.getCreditUseAmount());
+        fssDeductionRecord.setPayMethod(custPayDTO.getPayMethod().name())
+                .setAmount(custPayDTO.getAmount()).setOrderNo(custPayDTO.getNo())
+                .setCusCode(custPayDTO.getCusCode()).setCurrencyCode(custPayDTO.getCurrencyCode())
+                .setActualDeduction(balanceDTO.getActualDeduction()).setCreditUseAmount(balanceDTO.getCreditUseAmount())
+                .setCreditBeginTime(creditInfoBO.getCreditBeginTime()).setCreditEndTime(creditInfoBO.getCreditEndTime())
+        ;
         iDeductionRecordService.save(fssDeductionRecord);
     }
 

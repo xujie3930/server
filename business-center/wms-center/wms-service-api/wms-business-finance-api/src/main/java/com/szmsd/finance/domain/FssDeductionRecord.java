@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.szmsd.common.core.web.domain.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -95,11 +96,11 @@ public class FssDeductionRecord extends BaseEntity {
 
     @ApiModelProperty(value = "授信开始时间")
     @Excel(name = "授信开始时间")
-    private Date creditBeginTime;
+    private LocalDateTime creditBeginTime;
 
     @ApiModelProperty(value = "授信结束时间")
     @Excel(name = "授信结束时间")
-    private Date creditEndTime;
+    private LocalDateTime creditEndTime;
 
     @ApiModelProperty(value = "还款金额")
     @Excel(name = "还款金额")

@@ -1,6 +1,7 @@
 package com.szmsd.finance.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.szmsd.common.core.annotation.Excel;
@@ -69,7 +70,10 @@ public class AccountBalance extends FssBaseEntity {
     @ApiModelProperty(value = "使用额度金额")
     @Excel(name = "使用额度金额")
     private BigDecimal creditUseAmount;
-
+    @TableField(exist = false)
+    @ApiModelProperty(value = "需要偿还的使用额度金额")
+    @Excel(name = "需要偿还的使用额度金额")
+    private BigDecimal needRepayCreditUseAmount;
     @ApiModelProperty(value = "授信开始时间")
     @Excel(name = "授信开始时间")
     private LocalDateTime creditBeginTime;

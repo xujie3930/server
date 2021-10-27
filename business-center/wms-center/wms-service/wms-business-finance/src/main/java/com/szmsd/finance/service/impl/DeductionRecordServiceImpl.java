@@ -9,6 +9,7 @@ import com.szmsd.finance.mapper.DeductionRecordMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IDeductionRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.finance.vo.CreditUseInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -129,6 +132,13 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
         List<String> cusCodeList = accountBalanceList.stream().map(AccountBalance::getCusCode).collect(Collectors.toList());
         log.info("需要正常更新的账单用户-{}", cusCodeList.size());
         updateDeductionRecordStatus(cusCodeList);
+    }
+
+    @Override
+    public Map<String, CreditUseInfo> queryTimeCreditUse(String cusCode,List<String> currencyCodeList,List<CreditConstant.CreditBillStatusEnum> statusList) {
+        List<Integer> statusValueList = statusList.stream().map(CreditConstant.CreditBillStatusEnum::getValue).collect(Collectors.toList());
+        List<CreditUseInfo> creditUseInfos = baseMapper.queryTimeCreditUse(cusCode,statusValueList,currencyCodeList);
+        return creditUseInfos.stream().collect(Collectors.toMap(CreditUseInfo::getCurrencyCode, x -> x));
     }
 }
 
