@@ -64,4 +64,6 @@ public interface IOperationService {
      * @return result
      */
     R delOutboundThaw(DelOutboundOperationVO delOutboundVO);
+
+    int deleteById(Integer id);
 }

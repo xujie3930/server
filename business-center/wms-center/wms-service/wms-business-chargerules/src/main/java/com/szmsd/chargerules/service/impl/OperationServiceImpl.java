@@ -396,6 +396,10 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return payService.thawBalance(cusFreezeBalanceDTO, chargeLog);
     }
 
+    @Override
+    public int deleteById(Integer id) {
+        return baseMapper.deleteById(id);
+    }
 
     private CustPayDTO setCustPayDto(ChargeLog chargeLog) {
         CustPayDTO custPayDTO = new CustPayDTO();

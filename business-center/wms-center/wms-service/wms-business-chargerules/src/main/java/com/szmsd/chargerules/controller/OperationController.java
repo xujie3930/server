@@ -11,6 +11,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,13 @@ public class OperationController extends BaseController {
     @PutMapping("/update")
     public R update(@RequestBody Operation dto) {
         return toOk(operationService.update(dto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:edit')")
+    @ApiOperation(value = "业务计费逻辑 - 删除")
+    @DeleteMapping("/deleteById/{id}")
+    public R deleteById(@PathVariable("id") Integer id) {
+        return toOk(operationService.deleteById(id));
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:list')")
