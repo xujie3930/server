@@ -241,7 +241,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
     private CustPayDTO getCustPayDTO(FssRefundRequest x) {
         CustPayDTO custPayDTO = new CustPayDTO();
         custPayDTO.setAmount(x.getAmount());
-        custPayDTO.setNo(x.getProcessNo());
+        custPayDTO.setNo(Optional.ofNullable(x.getOrderNo()).orElse(""));
         custPayDTO.setCurrencyCode(x.getCurrencyCode());
         custPayDTO.setCurrencyName(x.getCurrencyName());
         custPayDTO.setCusCode(x.getCusCode());
