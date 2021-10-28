@@ -138,7 +138,7 @@
     </select>
 
     <select id="queryFinishList" resultType="com.szmsd.inventory.domain.vo.QueryFinishListVO">
-        SELECT warehouse_no,create_time as no FROM `inbound_receipt` WHERE `status` = 5
+        SELECT warehouse_no as no,create_time FROM `inbound_receipt` WHERE `status` = 5
         <if test="cusCode !=null and cusCode != ''">
             AND cus_code = #{cusCode,jdbcType=VARCHAR}
         </if>

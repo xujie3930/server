@@ -160,7 +160,7 @@
     </select>
 
     <select id="queryFinishList" resultType="com.szmsd.inventory.domain.vo.QueryFinishListVO">
-        SELECT order_no,create_time as no FROM `del_outbound` WHERE state = 'COMPLETED'
+        SELECT order_no as no,create_time FROM `del_outbound` WHERE state = 'COMPLETED'
         <if test = "noList !=null and noList.size() > 0">
             AND order_no IN
             <foreach  collection="noList" item="orderNo" open="(" separator="," close=")">
