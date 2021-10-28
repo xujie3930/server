@@ -66,6 +66,6 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     int updateTrackingNo(DelOutboundBatchUpdateTrackingNoDto dto);
 
     List<DelOutboundListExceptionMessageVO> exceptionMessageList(@Param("orderNos") List<String> orderNos);
-    @DataScope("seller_code")
+
     List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
 }

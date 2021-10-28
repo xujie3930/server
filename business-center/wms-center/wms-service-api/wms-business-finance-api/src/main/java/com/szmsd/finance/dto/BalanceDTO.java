@@ -89,6 +89,10 @@ public class BalanceDTO {
         if (!(creditStatus == null || CreditConstant.CreditStatusEnum.NOT_ENABLED.getValue().equals(creditStatus))) {
             // 只要有授信额度 优先充值（还款）授信额度
             BigDecimal bigDecimal = creditInfoBO.rechargeCreditAmount(amount);
+            if (creditInfoBO.getRepaymentAmount().compareTo(BigDecimal.ZERO)>=0){
+                //还清欠款
+
+            }
             return recharge(bigDecimal);
         } else {
             //正常充值

@@ -155,84 +155,13 @@ public class CreditInfoBO {
                     return BigDecimal.ZERO;
                 }
             case TIME_LIMIT:
-                // 提前还款
-                if (now.isBefore(this.creditEndTime)) {
-                    if (amount.compareTo(this.creditUseAmount) >= 0) {
-                        //只还当前账期的 下一账期转出当前账期，开启下次账期
-                        amount = amount.subtract(this.creditUseAmount);
-                        this.creditUseAmount = BigDecimal.ZERO;
-                        return amount;
-                    } else {
-                        this.creditUseAmount = this.creditUseAmount.subtract(amount);
-                        return BigDecimal.ZERO;
-                    }
-                } else if (now.isBefore(this.creditBufferTime)) {
-                    // 还款
-                    if (amount.compareTo(this.creditUseAmount) >= 0) {
-                        //只还当前账期的 下一账期转出当前账期，开启下次账期
-                        amount = amount.subtract(this.creditUseAmount);
-                        // 往后推 账期天数
-                        ChronoUnit chronoUnit = null;
-                        ChronoUnit bufferChronoUnit = null;
-                        try {
-                            chronoUnit = ChronoUnit.valueOf(this.creditTimeUnit);
-                            bufferChronoUnit = ChronoUnit.valueOf(this.creditBufferTimeUnit);
-                        } catch (IllegalArgumentException e) {
-                            e.printStackTrace();
-                            chronoUnit = ChronoUnit.DAYS;
-                            bufferChronoUnit = ChronoUnit.DAYS;
-                        }
-                        this.creditUseAmount = this.creditBufferUseAmount;
-                        this.creditBufferUseAmount = BigDecimal.ZERO;
-                        this.creditBeginTime = this.creditEndTime;
-                        this.creditEndTime = this.creditEndTime.plus(this.creditTimeInterval, chronoUnit);
-                        this.creditBufferTime = this.creditEndTime.plus(this.creditBufferTimeInterval, bufferChronoUnit);
-                        this.creditStatus = CreditConstant.CreditStatusEnum.ACTIVE.getValue();
-                        return amount;
-                    } else {
-                        this.creditUseAmount = this.creditUseAmount.subtract(amount);
-                        return BigDecimal.ZERO;
-                    }
-                } else {
-                    // 逾期还款
-                    if (amount.compareTo(this.creditUseAmount) >= 0) {
-                        // 充值金额优先还最先的欠款
-                        amount = amount.subtract(this.creditUseAmount);
-                        this.creditUseAmount = BigDecimal.ZERO;
-
-                        // 如果是逾期不还则还需要把欠款全部补齐才能转到余额里面
-                        if (amount.compareTo(this.creditBufferUseAmount) >= 0) {
-                            // 还清所有的欠款  并 开启下次账期 激活账期
-                            amount = amount.subtract(this.creditBufferUseAmount);
-
-                            this.creditBufferUseAmount = BigDecimal.ZERO;
-                            this.creditStatus = CreditConstant.CreditStatusEnum.ACTIVE.getValue();
-                            // 往后推 账期天数
-                            ChronoUnit chronoUnit = null;
-                            ChronoUnit bufferChronoUnit = null;
-                            try {
-                                chronoUnit = ChronoUnit.valueOf(this.creditTimeUnit);
-                                bufferChronoUnit = ChronoUnit.valueOf(this.creditBufferTimeUnit);
-                            } catch (IllegalArgumentException e) {
-                                e.printStackTrace();
-                                chronoUnit = ChronoUnit.DAYS;
-                                bufferChronoUnit = ChronoUnit.DAYS;
-                            }
-                            this.creditBeginTime = now;
-                            this.creditEndTime = now.plus(this.creditTimeInterval, chronoUnit);
-                            this.creditBufferTime = creditEndTime.plus(this.creditBufferTimeInterval, bufferChronoUnit);
-                            this.creditStatus = CreditConstant.CreditStatusEnum.ACTIVE.getValue();
-                            return amount;
-                        } else {
-                            // 还完第一期 第二期不够还
-                            this.creditBufferUseAmount = this.creditBufferUseAmount.subtract(amount);
-                            return BigDecimal.ZERO;
-                        }
-                    } else {
-                        // 充值不够还款 充值金额优先还最先的金额
-                        this.creditUseAmount = this.creditUseAmount.subtract(amount);
-                        return BigDecimal.ZERO;
-                    }
+                // 优先还清欠款 还清后充值余额
+                if (amount.compareTo(this.creditUseAmount) >= 0) {
+                    this.repaymentAmount = this.creditUseAmount;
+                    return  amount.subtract(this.creditUseAmount);
+                }else {
+                    this.repaymentAmount = amount;
+                    return BigDecimal.ZERO;
                 }
             default:
                 return amount;

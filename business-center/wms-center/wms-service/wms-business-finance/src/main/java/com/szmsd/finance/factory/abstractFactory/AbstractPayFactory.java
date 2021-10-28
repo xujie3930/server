@@ -81,7 +81,9 @@ public abstract class AbstractPayFactory {
         FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
         CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
         fssDeductionRecord.setPayMethod(custPayDTO.getPayMethod().name())
-                .setAmount(custPayDTO.getAmount()).setOrderNo(custPayDTO.getNo())
+                .setAmount(custPayDTO.getAmount()).setRepaymentAmount(BigDecimal.ZERO)
+                .setRemainingRepaymentAmount(custPayDTO.getAmount())
+                .setOrderNo(custPayDTO.getNo())
                 .setCusCode(custPayDTO.getCusCode()).setCurrencyCode(custPayDTO.getCurrencyCode())
                 .setActualDeduction(balanceDTO.getActualDeduction()).setCreditUseAmount(balanceDTO.getCreditUseAmount())
                 .setCreditBeginTime(creditInfoBO.getCreditBeginTime()).setCreditEndTime(creditInfoBO.getCreditEndTime())
@@ -168,6 +170,11 @@ public abstract class AbstractPayFactory {
         }
         log.info("删除物流操作费后保存{}", JSONObject.toJSONString(collect));
         accountSerialBillService.saveBatch(collect);
+    }
+
+    protected void addForCreditBill(BigDecimal addMoney,String cusCode,String currencyCode) {
+        if (addMoney.compareTo(BigDecimal.ZERO)>=0) return;
+        iDeductionRecordService.addForCreditBill(addMoney,cusCode,currencyCode);
     }
 
 }

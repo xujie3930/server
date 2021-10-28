@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -20,8 +21,12 @@ import java.util.List;
 @Accessors(chain = true)
 @ApiModel(description = "查询入参")
 public class QueryFinishListDTO extends QueryDto {
+
     @ApiModelProperty(value = "no")
     private String no;
+
+    @ApiModelProperty(value = "cusCode")
+    private String cusCode;
 
     public void setNo(String no) {
         this.no = no;
@@ -30,6 +35,7 @@ public class QueryFinishListDTO extends QueryDto {
 
     @ApiModelProperty(value = "noList", hidden = true)
     private List<String> noList;
+    @NotNull
     @ApiModelProperty(value = "类型：0:入库。1：出库默认：0")
     private Integer type = 0;
 

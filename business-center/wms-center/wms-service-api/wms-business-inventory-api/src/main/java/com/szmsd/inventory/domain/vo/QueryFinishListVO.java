@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 /**
  * @ClassName: QueryFinishListVO
  * @Description:
@@ -17,4 +19,8 @@ import lombok.experimental.Accessors;
 public class QueryFinishListVO {
     @ApiModelProperty(value = "no")
     private String no;
+
+    @ApiModelProperty(value = "创建时间")
+    private Date createTime;
+
 }

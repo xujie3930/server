@@ -54,6 +54,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 BigDecimal addAmount = dto.getRate().multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
                 // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
                 beforeAdd.rechargeAndSetAmount(substractAmount.negate());
+                super.addForCreditBill(beforeAdd.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
                 BalanceDTO afterAdd = beforeAdd;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode2(), afterAdd);
                 setSerialBillLog(dto,accountBalanceChange);

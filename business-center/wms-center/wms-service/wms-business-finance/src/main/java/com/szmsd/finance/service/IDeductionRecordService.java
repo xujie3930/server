@@ -80,5 +80,7 @@ public interface IDeductionRecordService extends IService<FssDeductionRecord> {
     void updateRecordStatusByCreditTimeInterval();
 
     Map<String, CreditUseInfo> queryTimeCreditUse(String cusCode,List<String> currencyCodeList,List<CreditConstant.CreditBillStatusEnum> statusList);
+
+    void addForCreditBill(BigDecimal addMoney,String cusCode,String currencyCode);
 }
 

@@ -135,10 +135,34 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
     }
 
     @Override
-    public Map<String, CreditUseInfo> queryTimeCreditUse(String cusCode,List<String> currencyCodeList,List<CreditConstant.CreditBillStatusEnum> statusList) {
+    public Map<String, CreditUseInfo> queryTimeCreditUse(String cusCode, List<String> currencyCodeList, List<CreditConstant.CreditBillStatusEnum> statusList) {
         List<Integer> statusValueList = statusList.stream().map(CreditConstant.CreditBillStatusEnum::getValue).collect(Collectors.toList());
-        List<CreditUseInfo> creditUseInfos = baseMapper.queryTimeCreditUse(cusCode,statusValueList,currencyCodeList);
+        List<CreditUseInfo> creditUseInfos = baseMapper.queryTimeCreditUse(cusCode, statusValueList, currencyCodeList);
         return creditUseInfos.stream().collect(Collectors.toMap(CreditUseInfo::getCurrencyCode, x -> x));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void addForCreditBill(BigDecimal addMoney, String cusCode, String currencyCode) {
+        List<FssDeductionRecord> fssDeductionRecords = baseMapper.selectList(Wrappers.<FssDeductionRecord>lambdaQuery()
+                .eq(FssDeductionRecord::getCurrencyCode, currencyCode)
+                .eq(FssDeductionRecord::getCusCode, cusCode)
+                .eq(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT)
+                .orderByDesc(FssDeductionRecord::getId)
+        );
+        for (int i = 0; i < fssDeductionRecords.size(); i++) {
+            FssDeductionRecord x = fssDeductionRecords.get(i);
+            if (addMoney.compareTo(x.getRemainingRepaymentAmount()) >= 0) {
+                addMoney = addMoney.subtract(x.getRemainingRepaymentAmount());
+                x.setRemainingRepaymentAmount(BigDecimal.ZERO);
+                x.setRepaymentAmount(x.getCreditUseAmount());
+                x.setStatus(CreditConstant.CreditBillStatusEnum.REPAID.getValue());
+            } else {
+                x.setRepaymentAmount(x.getRepaymentAmount().add(addMoney));
+                x.setRemainingRepaymentAmount(x.getAmount().subtract(x.getRepaymentAmount()));
+            }
+        }
+        this.saveOrUpdateBatch(fssDeductionRecords);
     }
 }
 
