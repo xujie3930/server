@@ -277,6 +277,11 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         // 修改为取消状态
         this.updateStatus(warehouseNo, InboundReceiptEnum.InboundReceiptStatus.CANCELLED);
+
+        //取消时 取消冻结费解冻之前的冻结费
+        DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+        delOutboundOperationVO.setOrderNo(warehouseNo);
+        operationFeignService.delOutboundThaw(delOutboundOperationVO);
         log.info("取消入库单：操作完成");
     }
 
