@@ -1,12 +1,15 @@
 package com.szmsd.delivery.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
+import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
+import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -369,5 +372,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return DelOutboundListExceptionMessageVO
      */
     List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos);
+    @DataScope("cus_code")
+    List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
 }
 

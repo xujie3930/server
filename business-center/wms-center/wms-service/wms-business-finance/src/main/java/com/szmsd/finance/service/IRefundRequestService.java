@@ -1,5 +1,6 @@
 package com.szmsd.finance.service;
 
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.finance.domain.FssRefundRequest;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.finance.dto.*;
@@ -7,6 +8,8 @@ import com.szmsd.finance.enums.RefundStatusEnum;
 import com.szmsd.finance.enums.ReviewStatusEnum;
 import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.finance.vo.RefundRequestVO;
+import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
+import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -41,8 +44,10 @@ public interface IRefundRequestService extends IService<FssRefundRequest> {
 
     int importByTemplate(MultipartFile file);
 
-    int approve( RefundReviewDTO refundReviewDTO);
+    int approve(RefundReviewDTO refundReviewDTO);
 
     int confirmOperation(ConfirmOperationDTO confirmOperationDTO);
+
+    TableDataInfo<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
 }
 

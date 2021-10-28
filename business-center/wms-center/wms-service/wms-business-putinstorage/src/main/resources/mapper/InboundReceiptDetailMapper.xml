@@ -59,7 +59,9 @@
         SUM( inTransitTotal ) inTransitTotal
         FROM
         (
-        SELECT sku, sku_name, declare_qty, put_qty, `status`,
+        SELECT sku, sku_name,
+        IF (`status` = 0 , 0 , declare_qty) as declare_qty,
+        put_qty, `status`,
         IF ( `status` = 5 OR `status` = 0, 0, IF (( declare_qty - put_qty ) > 0,( declare_qty - put_qty ), 0)) AS inTransitTotal
         FROM
         `inbound_receipt_detail` ird
@@ -74,7 +76,7 @@
                     #{item}
                 </foreach>
             </if>
-            AND ird.create_by = #{userId} AND status = 4
+            AND ird.create_by = #{userId} AND status
         </where>
         ) temp
         GROUP BY sku

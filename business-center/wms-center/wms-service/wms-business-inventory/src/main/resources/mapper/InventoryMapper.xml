@@ -127,4 +127,13 @@
         ${ew.customSqlSegment}
     </select>
 
+    <select id="queryFinishList" resultType="com.szmsd.inventory.domain.vo.QueryFinishListVO">
+        SELECT warehouse_no as no FROM `inbound_receipt` WHERE `status` = 5
+        <if test = "noList !=null and noList.size() > 0">
+            AND warehouse_no IN
+            <foreach  collection="noList" item="orderNo" open="(" separator="," close=")">
+                #{orderNo}
+            </foreach>
+        </if>
+    </select>
 </mapper>

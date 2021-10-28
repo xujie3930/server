@@ -11,6 +11,8 @@ import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
+import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
@@ -138,6 +140,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             @Override
             public R<DelOutboundVO> getInfoByOrderNo(String orderNo) {
                 return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public TableDataInfo<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO) {
+                throw new RuntimeException(throwable.getMessage());
             }
         };
     }

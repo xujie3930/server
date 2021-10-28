@@ -52,6 +52,15 @@ public class InventoryController extends BaseController {
         return getDataTable(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('inventory:queryFinishList')")
+    @PostMapping("/queryFinishList")
+    @ApiOperation(value = "查询已完成的单号", notes = "查询已完成的单号")
+    public TableDataInfo<QueryFinishListVO> queryFinishList(@RequestBody QueryFinishListDTO queryFinishListDTO) {
+        startPage(queryFinishListDTO);
+        List<QueryFinishListVO> list = inventoryService.queryFinishList(queryFinishListDTO);
+        return getDataTable(list);
+    }
+
     @PreAuthorize("@ss.hasPermi('inventory:page')")
     @GetMapping("/export")
     @ApiOperation(value = "导出", notes = "库存管理 - 导出")

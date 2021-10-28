@@ -73,6 +73,14 @@ public class CreditInfoBO {
     @Excel(name = "缓冲时间使用额度")
     private BigDecimal creditBufferUseAmount;
 
+    @ApiModelProperty(value = "需要还款额")
+    @Excel(name = "需要还款额")
+    private BigDecimal requiredRepayment;
+
+    @ApiModelProperty(value = "还款额")
+    @Excel(name = "还款额")
+    private BigDecimal repaymentAmount;
+
     /**
      * 使用信用额度扣费
      * 逾期/余额为0时 触发欠费 停用/禁用
@@ -80,7 +88,7 @@ public class CreditInfoBO {
      * @param amount 扣完余额 要使用授信额度的金额
      * @return 是否可以扣费 且 修改授信额
      */
-    protected boolean changeCreditAmount(BigDecimal amount,boolean updateCredit) {
+    protected boolean changeCreditAmount(BigDecimal amount, boolean updateCredit) {
         CreditConstant.CreditTypeEnum creditTypeEnum = CreditConstant.CreditTypeEnum.getThisByTypeCode(this.creditType);
         BigDecimal canUseAmount = this.creditLine.subtract(this.creditUseAmount);
         switch (creditTypeEnum) {
@@ -94,7 +102,7 @@ public class CreditInfoBO {
                         this.creditStatus = CreditConstant.CreditStatusEnum.ARREARAGE_DEACTIVATION.getValue();
                     }
                     if (updateCredit)
-                    this.creditUseAmount = this.creditUseAmount.add(amount);
+                        this.creditUseAmount = this.creditUseAmount.add(amount);
                     return true;
                 }
             case TIME_LIMIT:

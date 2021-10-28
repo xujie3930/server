@@ -11,6 +11,8 @@ import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
+import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -170,4 +172,8 @@ public interface DelOutboundFeignService {
     @GetMapping(value = "/api/outbound/getInfoByOrderNo/{orderNo}")
     @ApiOperation(value = "出库管理 - 详情", position = 201)
     R<DelOutboundVO> getInfoByOrderNo(@PathVariable("orderNo") String orderNo);
+
+    @PostMapping("/api/outbound/queryFinishList")
+    @ApiOperation(value = "查询已完成的单号", notes = "查询已完成的单号")
+    TableDataInfo<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
 }

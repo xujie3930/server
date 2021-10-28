@@ -95,6 +95,11 @@ public class InventoryFeignFallback implements FallbackFactory<InventoryFeignSer
             public R<List<SkuInventoryAgeVo>> queryInventoryAgeBySku(String warehouseCode, String sku) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public TableDataInfo<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO) {
+                throw new RuntimeException(throwable.getMessage());
+            }
         };
     }
 }

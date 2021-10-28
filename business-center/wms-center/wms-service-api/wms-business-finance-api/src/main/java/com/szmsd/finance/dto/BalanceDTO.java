@@ -21,9 +21,11 @@ public class BalanceDTO {
     @ApiModelProperty(value = "总余额")
     private BigDecimal totalBalance;
 
+    /**
+     * 扣钱是写日志使用
+     */
     @ApiModelProperty(value = "实际扣费金额(余额扣费)")
     private BigDecimal actualDeduction;
-
     @ApiModelProperty(value = "使用授信金额")
     private BigDecimal creditUseAmount;
 
@@ -87,18 +89,11 @@ public class BalanceDTO {
         if (!(creditStatus == null || CreditConstant.CreditStatusEnum.NOT_ENABLED.getValue().equals(creditStatus))) {
             // 只要有授信额度 优先充值（还款）授信额度
             BigDecimal bigDecimal = creditInfoBO.rechargeCreditAmount(amount);
-            recharge(bigDecimal);
-            return true;
+            return recharge(bigDecimal);
         } else {
             //正常充值
-            rechargeAmount(amount);
-            return true;
+            return recharge(amount);
         }
-    }
-
-    private void rechargeAmount(BigDecimal amount) {
-        this.currentBalance = this.currentBalance.add(amount);
-        this.totalBalance = this.totalBalance.add(amount);
     }
 
     /**

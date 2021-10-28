@@ -7,9 +7,11 @@ import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.finance.compont.ConfigData;
 import com.szmsd.finance.compont.IRemoteApi;
 import com.szmsd.finance.config.ExportValid;
@@ -24,6 +26,9 @@ import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IRefundRequestService;
 import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.finance.vo.RefundRequestVO;
+import com.szmsd.inventory.api.feign.InventoryFeignService;
+import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
+import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -269,6 +274,22 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         //TODO 订单记录流水、【余额对应调增/调减】、【产生业务账记录】
 
         return 0;
+    }
+
+    @Resource
+    private DelOutboundFeignService delOutboundFeignService;
+    @Resource
+    private InventoryFeignService inventoryFeignService;
+
+    @Override
+    public TableDataInfo<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO) {
+        TableDataInfo<QueryFinishListVO> result;
+        if (queryFinishListDTO.getType() == 1) {
+            result = delOutboundFeignService.queryFinishList(queryFinishListDTO);
+        } else {
+            result = inventoryFeignService.queryFinishList(queryFinishListDTO);
+        }
+        return result;
     }
 }
 
