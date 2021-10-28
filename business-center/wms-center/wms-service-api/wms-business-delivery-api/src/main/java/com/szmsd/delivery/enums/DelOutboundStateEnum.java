@@ -13,6 +13,9 @@ public enum DelOutboundStateEnum {
     // 提审步骤出现异常修改状态为【审核失败】
     AUDIT_FAILED("AUDIT_FAILED", "审核失败"),
 
+    // 提审中，提审之后，处理改成异步
+    REVIEWED_DOING("REVIEWED_DOING", "提审中"),
+
     // 提审成功之后，修改单据状态为【待发货】，这个审核已经向仓库发起创建单据的请求
     // 仓库那边核重之后会调用OMS核重的接口
     DELIVERED("DELIVERED", "待发货"),
