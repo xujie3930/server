@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.FssDeductionRecord;
+import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.enums.CreditConstant;
 import com.szmsd.finance.mapper.DeductionRecordMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
@@ -147,7 +148,8 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
         List<FssDeductionRecord> fssDeductionRecords = baseMapper.selectList(Wrappers.<FssDeductionRecord>lambdaQuery()
                 .eq(FssDeductionRecord::getCurrencyCode, currencyCode)
                 .eq(FssDeductionRecord::getCusCode, cusCode)
-                .eq(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT)
+                .eq(FssDeductionRecord::getPayMethod, BillEnum.PayMethod.BALANCE_DEDUCTIONS.name())
+                .in(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT.getValue(),CreditConstant.CreditBillStatusEnum.CHECKED.getValue())
                 .orderByDesc(FssDeductionRecord::getId)
         );
         for (int i = 0; i < fssDeductionRecords.size(); i++) {
