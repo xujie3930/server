@@ -1,6 +1,7 @@
 package com.szmsd.finance.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasSub;
@@ -143,17 +144,17 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
 
                 x.setTreatmentPropertiesCode(remoteApi.getSubCode(mainSubCode.getTreatmentProperties(), x.getTreatmentProperties()));
 
-                x.setResponsibilityAreaCode(remoteApi.getSubCode(mainSubCode.getResponsibilityArea(), x.getResponsibilityArea()));
+//                x.setResponsibilityAreaCode(remoteApi.getSubCode(mainSubCode.getResponsibilityArea(), x.getResponsibilityArea()));
 
                 BasSub businessTypeObj = remoteApi.getSubCodeObj(mainSubCode.getBusinessType(), x.getBusinessTypeName());
                 x.setBusinessTypeCode(businessTypeObj.getSubCode());
                 String subValue = businessTypeObj.getSubValue();
-                x.setBusinessDetailsCode(remoteApi.getSubCode(subValue, x.getBusinessDetails()));
+//                x.setBusinessDetailsCode(remoteApi.getSubCode(subValue, x.getBusinessDetails()));
 
                 BasSub feeTypeSubCodeObj = remoteApi.getSubCodeObj(mainSubCode.getTypesOfFee(), x.getFeeTypeName());
                 x.setFeeTypeCode(feeTypeSubCodeObj.getSubCode());
-                String feeTypeSubValue = feeTypeSubCodeObj.getSubValue();
-                x.setFeeCategoryCode(remoteApi.getSubCode(feeTypeSubValue, x.getFeeCategoryName()));
+//                String feeTypeSubValue = feeTypeSubCodeObj.getSubValue();
+//                x.setFeeCategoryCode(remoteApi.getSubCode(feeTypeSubValue, x.getFeeCategoryName()));
 
                 x.setAttributesCode(remoteApi.getSubCode(mainSubCode.getProperty(), x.getAttributes()));
                 // 供应商是否完成赔付
@@ -162,6 +163,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     return "0";
                 }).orElse("0");
                 x.setCompensationPaymentFlag(compensationPaymentFlag);
+                x.setCompensationPaymentArrivedFlag((StringUtils.isNotBlank(x.getCompensationPaymentFlag()) && "是".equals(x.getCompensationPaymentFlag())) ? "1" : "0");
+                x.setCurrencyCode(remoteApi.getSubCode(mainSubCode.getCurrency(), x.getCurrencyName()));
+                x.setCompensationPaymentCurrencyCode(remoteApi.getSubCode(mainSubCode.getCurrency(), x.getCompensationPaymentCurrency()));
             });
         }
     }
