@@ -3,6 +3,7 @@ package com.szmsd.finance.factory;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.AccountBalanceChange;
@@ -108,9 +109,15 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 throw new CommonException("999", "可用余额不足以冻结，费用：" + changeAmount);
             }
             return true;*/
-            if (!balance.checkAndSetAmountAndCreditAnd(changeAmount,false, BalanceDTO::freeze)) {
-                throw new RuntimeException("可用余额不足以冻结，费用：" + changeAmount);
+            if (DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode().equals(dto.getOrderType())) {
+                log.info("入库冻结没钱也可以扣--扣除{}", changeAmount);
+                balance.freeze(changeAmount);
+            } else {
+                if (!balance.checkAndSetAmountAndCreditAnd(changeAmount, false, BalanceDTO::freeze)) {
+                    throw new RuntimeException("可用余额不足以冻结，费用：" + changeAmount);
+                }
             }
+
         }
         if (BillEnum.PayMethod.BALANCE_THAW == dto.getPayMethod()) {
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
