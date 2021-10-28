@@ -113,6 +113,26 @@ public class BalanceDTO {
     }
 
     /**
+     * 入库费扣费 扣成负数
+     * @param amount
+     * @return
+     */
+    public Boolean payAnyWay(BigDecimal amount) {
+        if (this.currentBalance.compareTo(amount) >= 0) {
+            // 可用
+            this.currentBalance = this.currentBalance.subtract(amount);
+            // 总余额
+            this.totalBalance = this.totalBalance.subtract(amount);
+            return true;
+        } else {
+            // 可用
+            this.currentBalance = this.currentBalance.subtract(amount);
+            // 总余额
+            this.totalBalance = this.totalBalance.subtract(amount);
+        }
+        return false;
+    }
+    /**
      * 支付
      *
      * @param amount

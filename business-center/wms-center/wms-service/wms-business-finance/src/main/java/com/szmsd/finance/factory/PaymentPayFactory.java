@@ -1,6 +1,7 @@
 package com.szmsd.finance.factory;
 
 import com.szmsd.bas.api.service.SerialNumberClientService;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.AccountBalanceChangeDTO;
 import com.szmsd.finance.dto.BalanceDTO;
@@ -53,8 +54,12 @@ public class PaymentPayFactory extends AbstractPayFactory {
                         return false;
                     }
                     this.calculateBalance(oldBalance, changeAmount);*/
-                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount,true, BalanceDTO::pay)){
-                        return false;
+                    if (StringUtils.isNotBlank(dto.getNo()) && dto.getNo().startsWith("RK")) {
+                        oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, BalanceDTO::payAnyWay);
+                    } else {
+                        if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, BalanceDTO::pay)) {
+                            return false;
+                        }
                     }
                 }
                 if (balanceChange.size() == 1) {
