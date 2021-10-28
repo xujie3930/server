@@ -127,9 +127,10 @@ public class BalanceDTO {
             return true;
         } else {
             // 可用
+            BigDecimal currentBalance = this.currentBalance;
             this.currentBalance = BigDecimal.ZERO;
             // 总余额
-            this.totalBalance = BigDecimal.ZERO;
+            this.totalBalance = this.totalBalance.subtract(currentBalance);
         }
         return false;
     }
