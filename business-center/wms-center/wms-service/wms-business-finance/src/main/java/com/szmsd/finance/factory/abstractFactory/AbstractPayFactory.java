@@ -174,7 +174,7 @@ public abstract class AbstractPayFactory {
     }
 
     protected void addForCreditBill(BigDecimal addMoney,String cusCode,String currencyCode) {
-        if (addMoney.compareTo(BigDecimal.ZERO)>=0) return;
+        if (addMoney.compareTo(BigDecimal.ZERO)<=0) return;
         iDeductionRecordService.addForCreditBill(addMoney,cusCode,currencyCode);
     }
 
