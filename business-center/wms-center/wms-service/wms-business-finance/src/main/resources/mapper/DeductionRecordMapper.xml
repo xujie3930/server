@@ -45,7 +45,7 @@
     </update>
 
     <select id="queryTimeCreditUse" resultType="com.szmsd.finance.vo.CreditUseInfo">
-        SELECT currency_code,SUM(credit_use_amount) AS creditUseAmount FROM fss_deduction_record
+        SELECT currency_code,SUM(remaining_repayment_amount) AS creditUseAmount FROM fss_deduction_record
         WHERE
         cus_code = #{cusCode}
         AND type = 0 AND pay_method = 'BALANCE_DEDUCTIONS'

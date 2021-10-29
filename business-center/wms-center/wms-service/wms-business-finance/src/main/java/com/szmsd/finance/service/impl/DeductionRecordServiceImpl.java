@@ -150,7 +150,7 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
                 .eq(FssDeductionRecord::getCusCode, cusCode)
                 .eq(FssDeductionRecord::getPayMethod, BillEnum.PayMethod.BALANCE_DEDUCTIONS.name())
                 .in(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT.getValue(),CreditConstant.CreditBillStatusEnum.CHECKED.getValue())
-                .orderByDesc(FssDeductionRecord::getId)
+                .orderByAsc(FssDeductionRecord::getId)
         );
         for (int i = 0; i < fssDeductionRecords.size(); i++) {
             FssDeductionRecord x = fssDeductionRecords.get(i);
@@ -160,8 +160,9 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
                 x.setRepaymentAmount(x.getCreditUseAmount());
                 x.setStatus(CreditConstant.CreditBillStatusEnum.REPAID.getValue());
             } else {
+                addMoney = BigDecimal.ZERO;
                 x.setRepaymentAmount(x.getRepaymentAmount().add(addMoney));
-                x.setRemainingRepaymentAmount(x.getAmount().subtract(x.getRepaymentAmount()));
+                x.setRemainingRepaymentAmount(x.getRemainingRepaymentAmount().subtract(x.getAmount()));
             }
         }
         this.saveOrUpdateBatch(fssDeductionRecords);
