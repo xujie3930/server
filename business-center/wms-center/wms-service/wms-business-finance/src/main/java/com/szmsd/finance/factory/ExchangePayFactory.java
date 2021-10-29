@@ -53,7 +53,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 BalanceDTO beforeAdd = getBalance(dto.getCusCode(), dto.getCurrencyCode2());
                 BigDecimal addAmount = dto.getRate().multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
                 // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
-                beforeAdd.rechargeAndSetAmount(substractAmount.negate());
+                beforeAdd.rechargeAndSetAmount(addAmount);
                 super.addForCreditBill(beforeAdd.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
                 BalanceDTO afterAdd = beforeAdd;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode2(), afterAdd);

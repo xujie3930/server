@@ -8,6 +8,7 @@ import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.dto.UserCreditDetailDTO;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,4 +30,5 @@ public interface AccountBalanceMapper extends BaseMapper<AccountBalance> {
 
     List<AccountBalance> queryThePreTermBill();
 
+    List<AccountBalance> queryTheCanUpdateCreditUserList(LocalDateTime endTime);
 }

@@ -103,4 +103,24 @@
           AND credit_begin_time >= DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-%d 00:00:00'), INTERVAL 0 - (credit_time_interval) DAY)
           AND credit_end_time &lt;= NOW()
     </select>
+
+    <select id="queryTheCanUpdateCreditUserList" resultType="com.szmsd.finance.domain.AccountBalance">
+        SELECT
+        fab.cus_code,
+        fab.currency_code,
+        fab.credit_end_time ,
+        SUM(fdr.remaining_repayment_amount) as needReplyAmount
+        FROM
+        fss_account_balance fab
+        LEFT JOIN fss_deduction_record fdr ON fab.cus_code = fdr.cus_code
+        WHERE
+        fab.credit_end_time &gt; NOW()
+        AND fdr.`status` = 1
+        AND fdr.pay_method = 'BALANCE_DEDUCTIONS'
+        AND fdr.type = 0
+        GROUP BY
+        fab.cus_code,
+        fab.currency_code
+        HAVING needReplyAmount =0
+    </select>
 </mapper>

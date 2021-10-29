@@ -101,7 +101,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
         Map<String, CreditUseInfo> creditUseInfoMap = iDeductionRecordService.queryTimeCreditUse(dto.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
         Map<String, CreditUseInfo> needRepayCreditUseInfoMap = iDeductionRecordService.queryTimeCreditUse(dto.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.CHECKED));
-        accountBalances.forEach(x->{
+        accountBalances.forEach(x -> {
             String currencyCode = x.getCurrencyCode();
             BigDecimal creditUseAmount = Optional.ofNullable(creditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
             x.setCreditUseAmount(creditUseAmount);
@@ -877,14 +877,37 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     }
 
     @Override
-    public int reloadCreditTime(List<String> cusCodeList) {
+    public int reloadCreditTime(List<String> cusCodeList, String currencyCode) {
+        log.info("reloadCreditTiem {} -{}", cusCodeList,currencyCode);
         LocalDate now = LocalDate.now();
-        return accountBalanceMapper.update(new AccountBalance(),
+        int update = accountBalanceMapper.update(new AccountBalance(),
                 Wrappers.<AccountBalance>lambdaUpdate().in(AccountBalance::getCusCode, cusCodeList)
+                        .eq(AccountBalance::getCurrencyCode, currencyCode)
                         .set(AccountBalance::getCreditBeginTime, now)
+
                         .setSql("credit_begin_time = DATE_FORMAT( NOW(), '%Y-%m-%d 00:00:00' ) ")
                         .setSql("credit_end_time = DATE_ADD( DATE_FORMAT( NOW(), '%Y-%m-%d 23:59:59' ), INTERVAL credit_time_interval - 1 DAY ) ")
                         .setSql("credit_buffer_time = DATE_ADD( DATE_FORMAT( NOW(), '%Y-%m-%d 23:59:59' ), INTERVAL credit_time_interval + credit_buffer_time_interval - 1 DAY ) ")
         );
+        log.info("reloadCreditTiem {}条", update);
+        return update;
+    }
+
+    @Override
+    public List<AccountBalance> queryTheCanUpdateCreditUserList() {
+        return accountBalanceMapper.queryTheCanUpdateCreditUserList(LocalDate.now().atTime(0, 0, 0));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserCreditTime() {
+        // 查询账期类型的用户并查询出已归还账期内的用户更新授信账单周期
+        List<AccountBalance> accountBalanceList = this.queryTheCanUpdateCreditUserList();
+        log.info("需要还款的账户-{}", accountBalanceList.size());
+        Map<String, List<String>> collect = accountBalanceList.stream().collect(Collectors.groupingBy(AccountBalance::getCurrencyCode, Collectors.mapping(AccountBalance::getCusCode, Collectors.toList())));
+        collect.forEach((currency, cusCodeList) -> {
+            this.reloadCreditTime(cusCodeList, currency);
+        });
+
     }
 }

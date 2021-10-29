@@ -44,5 +44,8 @@ public class CreditTask {
         log.info("---正常结账单---start");
         // 正常更新的用户列表
         iDeductionRecordService.updateRecordStatusByCreditTimeInterval();
+
+        // 更新这些账户的账期
+        iAccountBalanceService.updateUserCreditTime();
     }
 }

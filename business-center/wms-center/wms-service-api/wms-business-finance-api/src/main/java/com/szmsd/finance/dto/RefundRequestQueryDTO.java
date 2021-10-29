@@ -21,7 +21,8 @@ import java.util.List;
 @Accessors(chain = true)
 @ApiModel(description = "退款申请查询条件")
 public class RefundRequestQueryDTO {
-
+    @ApiModelProperty(value = "导出id列表")
+    private List<String> idList;
     @ApiModelProperty(value = "申请时间-开始")
     private Date createTimeStart;
 

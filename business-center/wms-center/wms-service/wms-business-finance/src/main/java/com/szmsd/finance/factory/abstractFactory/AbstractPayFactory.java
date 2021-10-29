@@ -83,6 +83,7 @@ public abstract class AbstractPayFactory {
         fssDeductionRecord.setPayMethod(custPayDTO.getPayMethod().name())
                 .setAmount(custPayDTO.getAmount()).setRepaymentAmount(BigDecimal.ZERO)
                 .setRemainingRepaymentAmount(custPayDTO.getAmount())
+                .setCreditType(Integer.parseInt(balanceDTO.getCreditInfoBO().getCreditType()))
                 .setOrderNo(custPayDTO.getNo())
                 .setCusCode(custPayDTO.getCusCode()).setCurrencyCode(custPayDTO.getCurrencyCode())
                 .setActualDeduction(balanceDTO.getActualDeduction()).setCreditUseAmount(balanceDTO.getCreditUseAmount())

@@ -25,8 +25,8 @@ public class CreditInfoBO {
     /**
      * 09-07 授信额度新增
      */
-    @ApiModelProperty(value = "授信类型(QUOTA：额度，TIME_LIMIT：期限)")
-    @Excel(name = "授信类型(QUOTA：额度，TIME_LIMIT：期限)")
+    @ApiModelProperty(value = "授信类型(0：额度，1：期限)")
+    @Excel(name = "授信类型(0：额度，1：期限)")
     private String creditType;
 
     @ApiModelProperty(value = "授信状态（0：未启用，1：启用中，2：欠费停用，3：已禁用）")
@@ -79,7 +79,7 @@ public class CreditInfoBO {
 
     @ApiModelProperty(value = "还款额")
     @Excel(name = "还款额")
-    private BigDecimal repaymentAmount;
+    private BigDecimal repaymentAmount = BigDecimal.ZERO;
 
     /**
      * 使用信用额度扣费

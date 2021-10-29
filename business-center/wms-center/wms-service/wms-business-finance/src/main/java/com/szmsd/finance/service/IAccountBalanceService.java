@@ -78,6 +78,17 @@ public interface IAccountBalanceService {
      * @param cusCodeList 客户编号
      * @return
      */
-    int reloadCreditTime(List<String> cusCodeList);
+    int reloadCreditTime(List<String> cusCodeList, String currencyCode);
+
+    /**
+     * 查询账期类型的用户并查询出已归还账期内的用户更新授信账单周期
+     * @return
+     */
+    List<AccountBalance> queryTheCanUpdateCreditUserList();
+
+    /**
+     * 更新可以更新用户的账期时间
+     */
+    void updateUserCreditTime();
 
 }

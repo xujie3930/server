@@ -62,9 +62,9 @@ public class BalanceDTO {
                 // 余额不足扣减，使用授信额度
                 BigDecimal currentBalance = this.currentBalance;
                 if (null != function) function.apply(this, amount);
-                //把余额全部冻结 剩余需要扣除的钱
-                this.actualDeduction = currentBalance.compareTo(amount) >= 0 ? amount : currentBalance;
-                BigDecimal needDeducted = amount.subtract(currentBalance);
+                // 可能未负数 把余额全部冻结 剩余需要扣除的钱
+                this.actualDeduction = currentBalance.min(amount).min(BigDecimal.ZERO);
+                BigDecimal needDeducted = amount.subtract(currentBalance.max(BigDecimal.ZERO));
                 this.creditUseAmount = needDeducted;
                 b = this.creditInfoBO.changeCreditAmount(needDeducted, updateCredit);
                 return b;
