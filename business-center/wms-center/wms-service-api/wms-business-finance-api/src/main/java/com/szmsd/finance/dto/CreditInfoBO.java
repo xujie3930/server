@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import java.time.temporal.ChronoUnit;
  */
 @Setter
 @Getter
+@Accessors(chain = true)
 @ApiModel(description = "授信额度信息")
 public class CreditInfoBO {
     /**

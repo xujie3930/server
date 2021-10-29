@@ -56,6 +56,8 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     this.calculateBalance(oldBalance, changeAmount);*/
                     if (StringUtils.isNotBlank(dto.getNo()) && dto.getNo().startsWith("RK")) {
                         oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, BalanceDTO::payAnyWay);
+                        oldBalance.setActualDeduction(changeAmount);
+                        oldBalance.setCreditUseAmount(BigDecimal.ZERO);
                     } else {
                         if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, BalanceDTO::pay)) {
                             return false;
