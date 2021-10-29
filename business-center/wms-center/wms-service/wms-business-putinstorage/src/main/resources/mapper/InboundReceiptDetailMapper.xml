@@ -76,7 +76,7 @@
                     #{item}
                 </foreach>
             </if>
-            AND ird.create_by = #{userId}
+            AND ird.create_by = #{userId} AND status in (3,4)
         </where>
         ) temp
         GROUP BY sku

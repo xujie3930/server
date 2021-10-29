@@ -155,14 +155,14 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
         for (int i = 0; i < fssDeductionRecords.size(); i++) {
             FssDeductionRecord x = fssDeductionRecords.get(i);
             if (addMoney.compareTo(x.getRemainingRepaymentAmount()) >= 0) {
-                addMoney = addMoney.subtract(x.getRemainingRepaymentAmount());
                 x.setRemainingRepaymentAmount(BigDecimal.ZERO);
                 x.setRepaymentAmount(x.getCreditUseAmount());
                 x.setStatus(CreditConstant.CreditBillStatusEnum.REPAID.getValue());
+                addMoney = addMoney.subtract(x.getRemainingRepaymentAmount());
             } else {
-                addMoney = BigDecimal.ZERO;
                 x.setRepaymentAmount(x.getRepaymentAmount().add(addMoney));
-                x.setRemainingRepaymentAmount(x.getRemainingRepaymentAmount().subtract(x.getAmount()));
+                x.setRemainingRepaymentAmount(x.getRemainingRepaymentAmount().subtract(addMoney));
+                addMoney = BigDecimal.ZERO;
             }
         }
         this.saveOrUpdateBatch(fssDeductionRecords);

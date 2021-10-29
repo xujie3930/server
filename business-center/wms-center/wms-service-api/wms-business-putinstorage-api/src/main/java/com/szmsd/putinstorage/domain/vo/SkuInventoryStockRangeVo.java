@@ -13,7 +13,7 @@ import java.util.Date;
 
 /**
  * @ClassName: SkuInventoryAgeVo
- * @Description: sku库龄
+ * @Description: sku库龄 InboundReceiptStatus
  * @Author: 11
  * @Date: 2021-08-06 9:22
  */
