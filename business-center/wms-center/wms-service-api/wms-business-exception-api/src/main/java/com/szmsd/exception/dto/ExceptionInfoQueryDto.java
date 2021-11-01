@@ -27,4 +27,7 @@ public class ExceptionInfoQueryDto {
     @ApiModelProperty(value = "用户编码")
     @Excel(name = "用户编码")
     private String sellerCode;
+
+    @ApiModelProperty(value = "类型")
+    private String state;
 }
