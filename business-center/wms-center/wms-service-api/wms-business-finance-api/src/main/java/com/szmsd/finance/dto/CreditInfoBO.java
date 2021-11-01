@@ -148,20 +148,19 @@ public class CreditInfoBO {
         switch (creditTypeEnum) {
             case QUOTA:
                 if (amount.compareTo(this.creditUseAmount) >= 0) {
-                    amount = amount.subtract(this.creditUseAmount);
-                    this.creditUseAmount = BigDecimal.ZERO;
+                    this.repaymentAmount = this.creditUseAmount;
                     this.creditStatus = CreditConstant.CreditStatusEnum.ACTIVE.getValue();
-                    return amount;
+                    return amount.subtract(this.creditUseAmount);
                 } else {
-                    this.creditUseAmount = this.creditUseAmount.subtract(amount);
+                    this.repaymentAmount = amount;
                     return BigDecimal.ZERO;
                 }
             case TIME_LIMIT:
                 // 优先还清欠款 还清后充值余额
                 if (amount.compareTo(this.creditUseAmount) >= 0) {
                     this.repaymentAmount = this.creditUseAmount;
-                    return  amount.subtract(this.creditUseAmount);
-                }else {
+                    return amount.subtract(this.creditUseAmount);
+                } else {
                     this.repaymentAmount = amount;
                     return BigDecimal.ZERO;
                 }

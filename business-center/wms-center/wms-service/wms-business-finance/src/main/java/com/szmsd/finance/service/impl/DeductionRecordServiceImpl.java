@@ -148,12 +148,11 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
         List<FssDeductionRecord> fssDeductionRecords = baseMapper.selectList(Wrappers.<FssDeductionRecord>lambdaQuery()
                 .eq(FssDeductionRecord::getCurrencyCode, currencyCode)
                 .eq(FssDeductionRecord::getCusCode, cusCode)
-                .eq(FssDeductionRecord::getPayMethod, BillEnum.PayMethod.BALANCE_DEDUCTIONS.name())
+                .in(FssDeductionRecord::getPayMethod, BillEnum.PayMethod.BALANCE_DEDUCTIONS.name(),BillEnum.PayMethod.BUSINESS_OPERATE.name())
                 .in(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT.getValue(),CreditConstant.CreditBillStatusEnum.CHECKED.getValue())
                 .orderByAsc(FssDeductionRecord::getId)
         );
-        for (int i = 0; i < fssDeductionRecords.size(); i++) {
-            FssDeductionRecord x = fssDeductionRecords.get(i);
+        for (FssDeductionRecord x : fssDeductionRecords) {
             if (addMoney.compareTo(x.getRemainingRepaymentAmount()) >= 0) {
                 x.setRemainingRepaymentAmount(BigDecimal.ZERO);
                 x.setRepaymentAmount(x.getCreditUseAmount());

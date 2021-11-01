@@ -86,10 +86,10 @@ public class BalanceDTO {
     public Boolean rechargeAndSetAmount(BigDecimal amount) {
         CreditInfoBO creditInfoBO = this.creditInfoBO;
         Integer creditStatus = creditInfoBO.getCreditStatus();
-        if (!(creditStatus == null || CreditConstant.CreditStatusEnum.NOT_ENABLED.getValue().equals(creditStatus))) {
+        if (!CreditConstant.CreditStatusEnum.NOT_ENABLED.getValue().equals(creditStatus)) {
             // 只要有授信额度 优先充值（还款）授信额度
             BigDecimal bigDecimal = creditInfoBO.rechargeCreditAmount(amount);
-            if (creditInfoBO.getRepaymentAmount().compareTo(BigDecimal.ZERO)>=0){
+            if (creditInfoBO.getRepaymentAmount().compareTo(BigDecimal.ZERO) >= 0) {
                 //还清欠款
 
             }
@@ -114,6 +114,7 @@ public class BalanceDTO {
 
     /**
      * 入库费扣费 扣成负数
+     *
      * @param amount
      * @return
      */
@@ -132,6 +133,7 @@ public class BalanceDTO {
         }
         return false;
     }
+
     /**
      * 支付
      *
