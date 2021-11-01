@@ -48,7 +48,7 @@
         SELECT currency_code,SUM(remaining_repayment_amount) AS creditUseAmount FROM fss_deduction_record
         WHERE
         cus_code = #{cusCode}
-        AND type = 0 AND pay_method = 'BALANCE_DEDUCTIONS'
+        AND type = 0 AND pay_method IN ('BALANCE_DEDUCTIONS','BUSINESS_OPERATE','SPECIAL_OPERATE','WAREHOUSE_RENT','REFUND')
         <if test="statusList != null and statusList.size > 0">
             AND `status` IN
             <foreach collection="statusList" open="(" separator="," close=")" item="item">
