@@ -317,6 +317,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int transportWarehousingSubmit(TransportWarehousingAddDTO transportWarehousingAddDTO) {
         SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
         String sellerCode = loginUserInfo.getSellerCode();
