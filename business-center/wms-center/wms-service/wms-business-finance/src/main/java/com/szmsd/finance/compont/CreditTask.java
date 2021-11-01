@@ -31,7 +31,7 @@ public class CreditTask {
      * 每天0点以后去截断用户的账单
      */
 //    @Scheduled(cron = "* * * * * ?")
-    @Scheduled(cron = "10 0 * * *")
+//    @Scheduled(cron = "10 0 * * * ?")
     public void genBillTask() {
         // 查询授信期更新的用户列表 并更新标识
         List<AccountBalance> updateBillList = iAccountBalanceService.queryAndUpdateUserCreditTimeFlag();

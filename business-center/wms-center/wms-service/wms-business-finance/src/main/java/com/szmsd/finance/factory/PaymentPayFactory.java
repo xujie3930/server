@@ -19,6 +19,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 付款
@@ -133,7 +134,12 @@ public class PaymentPayFactory extends AbstractPayFactory {
      */
     private boolean calculateBalance(BalanceDTO oldBalance, BigDecimal amount, BigDecimal freezeTotal, CustPayDTO dto) {
         int compare = amount.compareTo(freezeTotal);
-        if (compare == 0) { // 实际费用等于冻结额
+        // 冻结额 = 回滚之前的冻结额; 当前余额= 当前余额 + 之前冻结的余额-实际使用的金额;总金额 = 总金额减去实际产生费用;
+        BigDecimal actualDeduction = Optional.ofNullable(oldBalance.getActualDeduction()).orElse(BigDecimal.ZERO);
+        oldBalance.setFreezeBalance(oldBalance.getFreezeBalance().subtract(freezeTotal));
+        oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().add(freezeTotal).subtract(actualDeduction));
+        oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(actualDeduction));
+        /*if (compare == 0) { // 实际费用等于冻结额
             // 冻结金额扣除 总金额扣除
             oldBalance.setFreezeBalance(oldBalance.getFreezeBalance().subtract(amount));
             oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(amount));
@@ -153,7 +159,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
             }
             oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().subtract(difference)); // 可用余额扣除冻结金额不够扣的部分
             oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(amount)); //总金额扣掉实际产生费用
-        }
+        }*/
         setHasFreeze(dto);
         return true;
     }
