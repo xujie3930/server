@@ -108,19 +108,25 @@
         SELECT
         fab.cus_code,
         fab.currency_code,
-        fab.credit_end_time ,
-        SUM(fdr.remaining_repayment_amount) as needReplyAmount
+        fab.credit_end_time,
+        fdr.remaining_repayment_amount
+
+        -- 	IFNULL( fdr.remaining_repayment_amount, 0 ) needReplyAmount
+
         FROM
         fss_account_balance fab
-        LEFT JOIN fss_deduction_record fdr ON fab.cus_code = fdr.cus_code
+        LEFT JOIN ( SELECT SUM( IFNULL( remaining_repayment_amount, 0 ) ) AS remaining_repayment_amount, currency_code, cus_code, `status` FROM fss_deduction_record
         WHERE
-        fab.credit_end_time &gt; NOW()
-        AND fdr.`status` = 1
-        AND fdr.pay_method = 'BALANCE_DEDUCTIONS'
-        AND fdr.type = 0
+        `status` = 1
+        AND pay_method = 'BALANCE_DEDUCTIONS'
+        GROUP BY cus_code, currency_code ) fdr ON fab.cus_code = fdr.cus_code
+        AND fdr.currency_code = fab.currency_code
+        WHERE
+        fab.credit_end_time &lt; NOW()
+        AND IFNULL( fdr.remaining_repayment_amount, 0 ) = 0
+        AND fab.credit_type = 0
         GROUP BY
-        fab.cus_code,
+        cus_code,
         fab.currency_code
-        HAVING needReplyAmount =0
     </select>
 </mapper>

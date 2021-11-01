@@ -38,12 +38,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.validation.groups.Default;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -137,35 +135,46 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         if (isExport) {
             //检验规则
             AtomicInteger importNo = new AtomicInteger(1);
-            basPackingAddList.forEach(basSellAccountPeriodAddDTO -> FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo, ExportValid.class));
+           List<String> errorMsg = new LinkedList<>();
+            basPackingAddList.forEach(basSellAccountPeriodAddDTO -> FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo,errorMsg, Default.class));
+            AssertUtil.isTrue(CollectionUtils.isEmpty(errorMsg), String.join("\n", errorMsg));
             basPackingAddList.forEach(x -> {
                 // 处理性质	责任地区	所属仓库 业务类型	业务明细	费用类型	费用明细 属性
                 ConfigData.MainSubCode mainSubCode = configData.getMainSubCode();
 
                 x.setTreatmentPropertiesCode(remoteApi.getSubCode(mainSubCode.getTreatmentProperties(), x.getTreatmentProperties()));
+                x.setWarehouseCode(remoteApi.getWareHouseCode(x.getWarehouseName()));
 
 //                x.setResponsibilityAreaCode(remoteApi.getSubCode(mainSubCode.getResponsibilityArea(), x.getResponsibilityArea()));
 
-                BasSub businessTypeObj = remoteApi.getSubCodeObj(mainSubCode.getBusinessType(), x.getBusinessTypeName());
-                x.setBusinessTypeCode(businessTypeObj.getSubCode());
-                String subValue = businessTypeObj.getSubValue();
+                x.setBusinessTypeCode(remoteApi.getSubCodeObjSubCode(mainSubCode.getBusinessType(), x.getBusinessTypeName()));
+//                String subValue = businessTypeObj.getSubValue();
 //                x.setBusinessDetailsCode(remoteApi.getSubCode(subValue, x.getBusinessDetails()));
 
-                BasSub feeTypeSubCodeObj = remoteApi.getSubCodeObj(mainSubCode.getTypesOfFee(), x.getFeeTypeName());
-                x.setFeeTypeCode(feeTypeSubCodeObj.getSubCode());
+                x.setFeeTypeCode( remoteApi.getSubCodeObjSubCode(mainSubCode.getTypesOfFee(), x.getFeeTypeName()));
 //                String feeTypeSubValue = feeTypeSubCodeObj.getSubValue();
 //                x.setFeeCategoryCode(remoteApi.getSubCode(feeTypeSubValue, x.getFeeCategoryName()));
+                String attributesCode = remoteApi.getSubCode(mainSubCode.getProperty(), x.getAttributes());
+                if (StringUtils.isNotBlank(attributesCode)){
+                    x.setAttributesCode(attributesCode);
+                }else {
+                    x.setAttributes(null);
+                }
 
-                x.setAttributesCode(remoteApi.getSubCode(mainSubCode.getProperty(), x.getAttributes()));
                 // 供应商是否完成赔付
-                String compensationPaymentFlag = Optional.ofNullable(x.getCompensationPaymentFlag()).map(z -> {
-                    if ("是".equals(z)) return "1";
-                    return "0";
-                }).orElse("0");
-                x.setCompensationPaymentFlag(compensationPaymentFlag);
+                x.setCompensationPaymentFlag((StringUtils.isNotBlank(x.getCompensationPaymentFlag()) && "已完成".equals(x.getCompensationPaymentFlag())) ? "1" : "0");
                 x.setCompensationPaymentArrivedFlag((StringUtils.isNotBlank(x.getCompensationPaymentFlag()) && "是".equals(x.getCompensationPaymentFlag())) ? "1" : "0");
-                x.setCurrencyCode(remoteApi.getSubCode(mainSubCode.getCurrency(), x.getCurrencyName()));
-                x.setCompensationPaymentCurrencyCode(remoteApi.getSubCode(mainSubCode.getCurrency(), x.getCompensationPaymentCurrency()));
+                String currencyCode = remoteApi.getSubCodeObj(mainSubCode.getCurrency(), x.getCurrencyName()).getSubValue();
+                AssertUtil.isTrue(StringUtils.isNotBlank(currencyCode),"请检查"+x.getCurrencyName()+"是否存在");
+                x.setCurrencyCode(currencyCode);
+                String compensationPaymentCurrencyCode = remoteApi.getSubCodeObj(mainSubCode.getCurrency(), x.getCompensationPaymentCurrency()).getSubValue();
+                if (StringUtils.isNotBlank(currencyCode)) {
+                    x.setCompensationPaymentCurrencyCode(compensationPaymentCurrencyCode);
+                }else {
+                    x.setCompensationPaymentCurrency(null);
+                }
+
+
             });
         }
     }

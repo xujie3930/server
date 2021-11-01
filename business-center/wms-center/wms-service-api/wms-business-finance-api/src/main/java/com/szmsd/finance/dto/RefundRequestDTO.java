@@ -84,7 +84,7 @@ public class RefundRequestDTO {
     private BigDecimal additionalPayout;
 
     @ApiModelProperty(value = "供应商是否完成赔付（0：未完成，1：已完成）")
-    @Excel(name = "供应商是否完成赔付（是/否）")
+    @Excel(name = "供应商是否完成赔付", combo = {"未完成", "已完成"},defaultValue = "未完成")
     private String compensationPaymentFlag;
 
     public void setCompensationPaymentFlag(String compensationPaymentFlag) {
@@ -117,7 +117,7 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "金额")
     @Excel(name = "金额")
     private BigDecimal amount;
-    @NotNull(message = "币种名称不能为空")
+    @NotBlank(message = "币种名称不能为空")
     @ApiModelProperty(value = "币种名称")
     @Excel(name = "币种")
     private String currencyName;
@@ -131,7 +131,7 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "属性编码-数组")
     private String attributesCode;
 
-    @Excel(name = "供应商确认不赔付 是/否 ")
+    @Excel(name = "供应商确认不赔付", combo = {"是", "否"},defaultValue = "否")
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
     private String noCompensationFlag;
 
@@ -142,7 +142,8 @@ public class RefundRequestDTO {
             this.noCompensationFlag = null;
         }
     }
-    @Excel(name = "供应商确认赔付未到账 是/否 ")
+
+    @Excel(name = "供应商确认赔付未到账", combo = {"是", "否"},defaultValue = "否")
     @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
     private String compensationPaymentArrivedFlag;
 
@@ -153,6 +154,7 @@ public class RefundRequestDTO {
             this.compensationPaymentArrivedFlag = null;
         }
     }
+
     @Excel(name = "费用类别")
     @ApiModelProperty(value = "费用类别")
     private String feeCategoryName;

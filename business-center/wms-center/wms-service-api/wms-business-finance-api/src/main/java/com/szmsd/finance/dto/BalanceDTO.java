@@ -63,7 +63,7 @@ public class BalanceDTO {
                 BigDecimal currentBalance = this.currentBalance;
                 if (null != function) function.apply(this, amount);
                 // 可能未负数 把余额全部冻结 剩余需要扣除的钱
-                this.actualDeduction = currentBalance.min(amount).min(BigDecimal.ZERO);
+                this.actualDeduction = currentBalance.min(amount).max(BigDecimal.ZERO);
                 BigDecimal needDeducted = amount.subtract(currentBalance.max(BigDecimal.ZERO));
                 this.creditUseAmount = needDeducted;
                 b = this.creditInfoBO.changeCreditAmount(needDeducted, updateCredit);

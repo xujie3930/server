@@ -62,7 +62,7 @@ public class Operation extends BaseEntity {
     private BigDecimal firstPrice;
 
     @ApiModelProperty(value = "续件价格")
-    @TableField
+    @TableField(insertStrategy = FieldStrategy.IGNORED,updateStrategy = FieldStrategy.IGNORED)
     private BigDecimal nextPrice;
 
     @ApiModelProperty(value = "币种编码")
