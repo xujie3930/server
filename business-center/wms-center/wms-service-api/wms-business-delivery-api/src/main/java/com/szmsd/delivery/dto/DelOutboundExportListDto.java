@@ -86,4 +86,6 @@ public class DelOutboundExportListDto implements Serializable {
     @ApiModelProperty(value = "异常状态")
     private String exceptionState;
 
+    @ApiModelProperty(value = "备注")
+    private String remark;
 }
