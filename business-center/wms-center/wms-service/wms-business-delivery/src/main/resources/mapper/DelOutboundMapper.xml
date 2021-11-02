@@ -42,6 +42,7 @@
             o.custom_code,
             o.create_by_name,
             o.create_time,
+            o.remark,
             a.consignee,
             a.phone_no,
             a.email,
