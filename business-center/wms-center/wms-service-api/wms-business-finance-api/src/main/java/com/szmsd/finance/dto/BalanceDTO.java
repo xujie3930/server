@@ -148,11 +148,12 @@ public class BalanceDTO {
             this.totalBalance = this.totalBalance.subtract(amount);
             return true;
         } else {
-            // 可用
-            BigDecimal currentBalance = this.currentBalance;
-            this.currentBalance = BigDecimal.ZERO;
+            // 可能未负数 把余额全部冻结 剩余需要扣除的钱
+//            BigDecimal actualDeduction = currentBalance.min(amount).max(BigDecimal.ZERO);
+            // 可以部分扣除
+            this.currentBalance = this.currentBalance.subtract(this.actualDeduction);
             // 总余额
-            this.totalBalance = this.totalBalance.subtract(currentBalance);
+            this.totalBalance = this.totalBalance.subtract(this.actualDeduction);
         }
         return false;
     }
