@@ -70,7 +70,7 @@ public interface IDeductionRecordService extends IService<FssDeductionRecord> {
     int deleteDeductionRecordById(String id);
 
     /**
-     * 更新账单信息
+     * 更新正常结束的账单信息状态
      */
     void updateDeductionRecordStatus(List<String> updateCusCodeList);
 

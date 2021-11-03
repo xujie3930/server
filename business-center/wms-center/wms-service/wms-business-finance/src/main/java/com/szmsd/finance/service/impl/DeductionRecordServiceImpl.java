@@ -1,7 +1,6 @@
 package com.szmsd.finance.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.FssDeductionRecord;
 import com.szmsd.finance.enums.BillEnum;
@@ -116,9 +115,8 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
         int update = baseMapper.update(new FssDeductionRecord(), Wrappers.<FssDeductionRecord>lambdaUpdate()
                 .in(FssDeductionRecord::getCusCode, updateCusCodeList)
                 .eq(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT.getValue())
-
+                .le(FssDeductionRecord::getCreditEndTime, now)
                 .set(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.CHECKED.getValue())
-                .set(FssDeductionRecord::getCreditEndTime, now)
         );
         log.info("截断账单 - {}条", update);
     }

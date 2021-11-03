@@ -15,7 +15,6 @@ import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
-import com.szmsd.finance.domain.FssRefundRequest;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
@@ -39,7 +38,6 @@ import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -864,7 +862,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public List<AccountBalance> queryAndUpdateUserCreditTimeFlag() {
         List<AccountBalance> accountBalanceList = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
                 .eq(AccountBalance::getCreditTimeFlag, true)
-                .groupBy(AccountBalance::getCusCode));
+                .groupBy(AccountBalance::getCusCode).select(AccountBalance::getCusCode));
         int update = accountBalanceMapper.update(new AccountBalance(), Wrappers.<AccountBalance>lambdaUpdate()
                 .set(AccountBalance::getCreditTimeFlag, false)
                 .eq(AccountBalance::getCreditTimeFlag, true));
@@ -903,7 +901,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public void updateUserCreditTime() {
         // 查询账期类型的用户并查询出已归还账期内的用户更新授信账单周期
         List<AccountBalance> accountBalanceList = this.queryTheCanUpdateCreditUserList();
-        log.info("需要还款的账户-{}", accountBalanceList.size());
+        log.info("可以更新账期的账户-{}", accountBalanceList.size());
         Map<String, List<String>> collect = accountBalanceList.stream().collect(Collectors.groupingBy(AccountBalance::getCurrencyCode, Collectors.mapping(AccountBalance::getCusCode, Collectors.toList())));
         collect.forEach((currency, cusCodeList) -> {
             this.reloadCreditTime(cusCodeList, currency);

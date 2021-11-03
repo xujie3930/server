@@ -33,16 +33,16 @@ public class CreditTask {
 //    @Scheduled(cron = "* * * * * ?")
     @Scheduled(cron = "0 10 0 * * ?")
     public void genBillTask() {
-        // 查询授信期更新的用户列表 并更新标识
+        // 查询修改授信期更新的用户列表 并更新标识
         List<AccountBalance> updateBillList = iAccountBalanceService.queryAndUpdateUserCreditTimeFlag();
         log.info("需要截断用户的数据-{}条-{}", updateBillList.size(), JSONObject.toJSONString(updateBillList));
         log.info("---截断账单---start");
-        // 截断更新的用户列表
+        // 截断在账期结束前 的账单
         List<String> updateCusCodeList = updateBillList.stream().map(AccountBalance::getCusCode).collect(Collectors.toList());
         iDeductionRecordService.updateDeductionRecordStatus(updateCusCodeList);
 
         log.info("---正常结账单---start");
-        // 正常更新的用户列表
+        // 按周期更新正常的账单
         iDeductionRecordService.updateRecordStatusByCreditTimeInterval();
 
         // 更新这些账户的账期

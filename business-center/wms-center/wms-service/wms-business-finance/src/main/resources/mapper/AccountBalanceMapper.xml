@@ -93,14 +93,17 @@
     </update>
 
     <select id="queryThePreTermBill" resultType="com.szmsd.finance.domain.AccountBalance">
-        SELECT credit_end_time,
-               credit_time_unit,
-               credit_time_interval,
-               DATE_ADD(credit_end_time, INTERVAL credit_time_interval DAY)
+        SELECT cus_code
+<!--                ,-->
+<!--               credit_end_time,-->
+<!--               credit_time_unit,-->
+<!--               credit_time_interval,-->
+<!--               DATE_ADD(credit_end_time, INTERVAL credit_time_interval DAY)-->
         FROM fss_account_balance
         WHERE credit_type = 1
-          AND credit_time_flag = 0
-          AND credit_begin_time >= DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-%d 00:00:00'), INTERVAL 0 - (credit_time_interval) DAY)
+<!--          AND credit_time_flag = 0-->
+          AND credit_begin_time >=
+              DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-%d 00:00:00'), INTERVAL 0 - (credit_time_interval) DAY)
           AND credit_end_time &lt;= NOW()
     </select>
 
@@ -118,13 +121,13 @@
         LEFT JOIN ( SELECT SUM( IFNULL( remaining_repayment_amount, 0 ) ) AS remaining_repayment_amount, currency_code, cus_code, `status` FROM fss_deduction_record
         WHERE
         `status` = 1
-        AND pay_method = 'BALANCE_DEDUCTIONS'
+        AND pay_method IN ('BALANCE_DEDUCTIONS','BUSINESS_OPERATE')
         GROUP BY cus_code, currency_code ) fdr ON fab.cus_code = fdr.cus_code
         AND fdr.currency_code = fab.currency_code
         WHERE
         fab.credit_end_time &lt; NOW()
         AND IFNULL( fdr.remaining_repayment_amount, 0 ) = 0
-        AND fab.credit_type = 0
+        AND fab.credit_type = 1
         GROUP BY
         cus_code,
         fab.currency_code
