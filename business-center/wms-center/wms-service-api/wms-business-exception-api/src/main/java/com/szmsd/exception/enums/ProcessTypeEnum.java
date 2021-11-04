@@ -8,6 +8,7 @@ public enum ProcessTypeEnum {
     DESTROY("Destroy","销毁"),
     GOONSHIPPING("GoOnShipping","继续发货"),
     CANCELORDER("CancelOrder","取消订单"),
+    DIRECTLYCOMPLETE("DirectlyComplete","直接完成"),
     ;
 
     private final String code;

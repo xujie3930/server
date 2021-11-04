@@ -7,6 +7,7 @@ import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.domain.FssDeductionRecord;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.finance.enums.CreditConstant;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
@@ -80,11 +81,18 @@ public abstract class AbstractPayFactory {
     public void recordDetailLog(CustPayDTO custPayDTO, BalanceDTO balanceDTO) {
         FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
         CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
-        BeanUtils.copyProperties(creditInfoBO,fssDeductionRecord);
-        BeanUtils.copyProperties(custPayDTO, fssDeductionRecord);
-        fssDeductionRecord.setOrderNo(custPayDTO.getNo());
-        fssDeductionRecord.setActualDeduction(balanceDTO.getActualDeduction());
-        fssDeductionRecord.setCreditUseAmount(balanceDTO.getCreditUseAmount());
+        int creditType = Integer.parseInt(creditInfoBO.getCreditType());
+        fssDeductionRecord.setPayMethod(custPayDTO.getPayMethod().name())
+                .setAmount(custPayDTO.getAmount())
+                .setCreditType(creditType)
+                .setStatus(creditType == CreditConstant.CreditTypeEnum.QUOTA.getValue() ?
+                        CreditConstant.CreditBillStatusEnum.CHECKED.getValue() : CreditConstant.CreditBillStatusEnum.DEFAULT.getValue())
+                .setOrderNo(custPayDTO.getNo())
+                .setCusCode(custPayDTO.getCusCode()).setCurrencyCode(custPayDTO.getCurrencyCode())
+                .setActualDeduction(balanceDTO.getActualDeduction()).setCreditUseAmount(balanceDTO.getCreditUseAmount())
+                .setRemainingRepaymentAmount(balanceDTO.getCreditUseAmount()).setRepaymentAmount(BigDecimal.ZERO)
+                .setCreditBeginTime(creditInfoBO.getCreditBeginTime()).setCreditEndTime(creditInfoBO.getCreditEndTime())
+        ;
         iDeductionRecordService.save(fssDeductionRecord);
     }
 
@@ -167,6 +175,11 @@ public abstract class AbstractPayFactory {
         }
         log.info("删除物流操作费后保存{}", JSONObject.toJSONString(collect));
         accountSerialBillService.saveBatch(collect);
+    }
+
+    protected void addForCreditBill(BigDecimal addMoney, String cusCode, String currencyCode) {
+        if (addMoney.compareTo(BigDecimal.ZERO) <= 0) return;
+        iDeductionRecordService.addForCreditBill(addMoney, cusCode, currencyCode);
     }
 
 }

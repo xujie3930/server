@@ -8,6 +8,7 @@ import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundCountVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
@@ -66,6 +67,11 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
             @Override
             public TableDataInfo<InboundReceiptVO> postPage(InboundReceiptQueryDTO queryDTO) {
                 throw new CommonException("查询异常");
+            }
+
+            @Override
+            public R<List<SkuInventoryStockRangeVo>> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO) {
+                return R.convertResultJson(throwable);
             }
         };
     }

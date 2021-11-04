@@ -7,10 +7,14 @@ import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.bas.api.feign.BasSubFeignService;
+import com.szmsd.bas.api.feign.BasWarehouseFeignService;
+import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.enums.FssRefundConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @ClassName: RemoteApiImpl
@@ -33,7 +38,8 @@ public class RemoteApiImpl implements IRemoteApi {
     /**
      * 缓存 code 默认一个小时
      */
-    TimedCache<String, List<BasSub>> codeCache = CacheUtil.newTimedCache(DateUnit.SECOND.getMillis() * 2);
+    TimedCache<String, List<BasSub>> codeCache = CacheUtil.newTimedCache(DateUnit.MINUTE.getMillis() * 3);
+    TimedCache<Long, List<WarehouseKvDTO>> wareHouseCache = CacheUtil.newTimedCache(DateUnit.MINUTE.getMillis() * 3);
     @Resource
     private BasFeignService basFeignService;
     @Resource
@@ -61,6 +67,12 @@ public class RemoteApiImpl implements IRemoteApi {
             basSubs = data;
         }
         return basSubs.stream().filter(x -> x.getSubName().equals(subName.trim())).findAny().orElse(new BasSub());
+    }
+
+    @Override
+    public String getSubCodeObjSubCode(String mainCode, String subName) {
+        BasSub subCodeObj = getSubCodeObj(mainCode, subName);
+        return Optional.ofNullable(subCodeObj.getSubCode()).orElseThrow(() -> new RuntimeException("请检查" + subName + "是否存在"));
     }
 
     /**
@@ -110,4 +122,20 @@ public class RemoteApiImpl implements IRemoteApi {
         return subCodeObj.getSubCode();
     }
 
+    @Resource
+    private BasWarehouseFeignService basWarehouseFeignService;
+
+    @Override
+    public String getWareHouseCode(String wareHouseName) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        Long userId = loginUser.getUserId();
+        List<WarehouseKvDTO> warehouseKvDTOS = wareHouseCache.get(userId);
+        if (CollectionUtils.isEmpty(warehouseKvDTOS)) {
+            R<List<WarehouseKvDTO>> listR = basWarehouseFeignService.queryCusInboundWarehouse();
+            List<WarehouseKvDTO> dataAndException = R.getDataAndException(listR);
+            wareHouseCache.put(userId, dataAndException);
+            warehouseKvDTOS = dataAndException;
+        }
+        return warehouseKvDTOS.stream().filter(x -> x.getValue().equals(wareHouseName)).map(WarehouseKvDTO::getKey).findAny().orElseThrow(() -> new RuntimeException("请检查该用户是否存在仓库：" + wareHouseName));
+    }
 }

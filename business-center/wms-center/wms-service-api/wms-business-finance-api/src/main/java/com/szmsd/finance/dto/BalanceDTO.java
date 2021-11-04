@@ -1,14 +1,11 @@
 package com.szmsd.finance.dto;
 
-import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.finance.enums.CreditConstant;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 /**
  * @author liulei
@@ -24,9 +21,11 @@ public class BalanceDTO {
     @ApiModelProperty(value = "总余额")
     private BigDecimal totalBalance;
 
+    /**
+     * 扣钱是写日志使用
+     */
     @ApiModelProperty(value = "实际扣费金额(余额扣费)")
     private BigDecimal actualDeduction;
-
     @ApiModelProperty(value = "使用授信金额")
     private BigDecimal creditUseAmount;
 
@@ -62,11 +61,11 @@ public class BalanceDTO {
                 boolean b = false;
                 // 余额不足扣减，使用授信额度
                 BigDecimal currentBalance = this.currentBalance;
-                if (null != function) function.apply(this, amount);
-                //把余额全部冻结 剩余需要扣除的钱
-                BigDecimal needDeducted = amount.subtract(currentBalance);
-                this.actualDeduction = this.currentBalance;
+                // 可能未负数 把余额全部冻结 剩余需要扣除的钱
+                this.actualDeduction = currentBalance.min(amount).max(BigDecimal.ZERO);
+                BigDecimal needDeducted = amount.subtract(currentBalance.max(BigDecimal.ZERO));
                 this.creditUseAmount = needDeducted;
+                if (null != function) function.apply(this, amount);
                 b = this.creditInfoBO.changeCreditAmount(needDeducted, updateCredit);
                 return b;
             }
@@ -87,21 +86,18 @@ public class BalanceDTO {
     public Boolean rechargeAndSetAmount(BigDecimal amount) {
         CreditInfoBO creditInfoBO = this.creditInfoBO;
         Integer creditStatus = creditInfoBO.getCreditStatus();
-        if (!(creditStatus == null || CreditConstant.CreditStatusEnum.NOT_ENABLED.getValue().equals(creditStatus))) {
+        if (!CreditConstant.CreditStatusEnum.NOT_ENABLED.getValue().equals(creditStatus)) {
             // 只要有授信额度 优先充值（还款）授信额度
             BigDecimal bigDecimal = creditInfoBO.rechargeCreditAmount(amount);
-            recharge(bigDecimal);
-            return true;
+            if (creditInfoBO.getRepaymentAmount().compareTo(BigDecimal.ZERO) >= 0) {
+                //还清欠款
+
+            }
+            return recharge(bigDecimal);
         } else {
             //正常充值
-            rechargeAmount(amount);
-            return true;
+            return recharge(amount);
         }
-    }
-
-    private void rechargeAmount(BigDecimal amount) {
-        this.currentBalance = this.currentBalance.add(amount);
-        this.totalBalance = this.totalBalance.add(amount);
     }
 
     /**
@@ -114,6 +110,28 @@ public class BalanceDTO {
         this.currentBalance = this.currentBalance.subtract(amount);
         this.freezeBalance = this.freezeBalance.add(amount);
         return BigDecimal.ZERO.compareTo(this.currentBalance) <= 0;
+    }
+
+    /**
+     * 入库费扣费 扣成负数
+     *
+     * @param amount
+     * @return
+     */
+    public Boolean payAnyWay(BigDecimal amount) {
+        if (this.currentBalance.compareTo(amount) >= 0) {
+            // 可用
+            this.currentBalance = this.currentBalance.subtract(amount);
+            // 总余额
+            this.totalBalance = this.totalBalance.subtract(amount);
+            return true;
+        } else {
+            // 可用
+            this.currentBalance = this.currentBalance.subtract(amount);
+            // 总余额
+            this.totalBalance = this.totalBalance.subtract(amount);
+        }
+        return false;
     }
 
     /**
@@ -130,10 +148,12 @@ public class BalanceDTO {
             this.totalBalance = this.totalBalance.subtract(amount);
             return true;
         } else {
-            // 可用
-            this.currentBalance = BigDecimal.ZERO;
+            // 可能未负数 把余额全部冻结 剩余需要扣除的钱
+//            BigDecimal actualDeduction = currentBalance.min(amount).max(BigDecimal.ZERO);
+            // 可以部分扣除
+            this.currentBalance = this.currentBalance.subtract(this.actualDeduction);
             // 总余额
-            this.totalBalance = BigDecimal.ZERO;
+            this.totalBalance = this.totalBalance.subtract(this.actualDeduction);
         }
         return false;
     }

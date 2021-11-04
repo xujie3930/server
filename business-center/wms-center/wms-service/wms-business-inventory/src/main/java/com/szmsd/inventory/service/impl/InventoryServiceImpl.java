@@ -497,6 +497,11 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         return this.list(query);
     }
 
+    @Override
+    public List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO) {
+        return baseMapper.queryFinishList(queryFinishListDTO);
+    }
+
     /**
      * 可用库存 -（按入库时间 先进先出）总数 剩余的都是
      * 把入库记录 按 库龄 分组求和

@@ -95,6 +95,9 @@ public class DelOutboundListVO implements Serializable {
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
     @ApiModelProperty(value = "收件人")
     private String consignee;
 

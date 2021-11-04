@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.commons.collections4.CollectionUtils;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -29,14 +31,14 @@ public class RefundRequestDTO {
 
     @ApiModelProperty(value = "客户id")
     private Integer cusId;
-
+    @NotBlank(message = "客户代码不能为空")
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
     private String cusCode;
 
     @ApiModelProperty(value = "客户名称")
     private String cusName;
-
+    @NotBlank(message = "处理性质不能为空")
     @ApiModelProperty(value = "处理性质")
     @Excel(name = "处理性质")
     private String treatmentProperties;
@@ -48,13 +50,13 @@ public class RefundRequestDTO {
     private String responsibilityArea;
     @ApiModelProperty(value = "责任地区编码")
     private String responsibilityAreaCode;
-
+    @NotBlank(message = "所属仓库不能为空")
     @ApiModelProperty(value = "所属仓库")
     @Excel(name = "所属仓库")
     private String warehouseName;
     @ApiModelProperty(value = "所属仓库编码")
     private String warehouseCode;
-
+    @NotBlank(message = "业务类型不能为空")
     @ApiModelProperty(value = "业务类型")
     @Excel(name = "业务类型")
     private String businessTypeName;
@@ -66,24 +68,23 @@ public class RefundRequestDTO {
     @Excel(name = "业务明细")
     private String businessDetails;
     @ApiModelProperty(value = "业务明细编码")
-    @Excel(name = "业务明细编码")
     private String businessDetailsCode;
-
+    @NotBlank(message = "费用类型不能为空")
     @ApiModelProperty(value = "费用类型")
     @Excel(name = "费用类型")
     private String feeTypeName;
     @ApiModelProperty(value = "费用类型编码")
     private String feeTypeCode;
 
-
+    @Excel(name = "标准赔付")
     @ApiModelProperty(value = "标准赔付")
     private BigDecimal standardPayout;
-
+    @Excel(name = "额外赔付")
     @ApiModelProperty(value = "额外赔付")
     private BigDecimal additionalPayout;
 
     @ApiModelProperty(value = "供应商是否完成赔付（0：未完成，1：已完成）")
-    @Excel(name = "供应商是否完成赔付（是/否）")
+    @Excel(name = "供应商是否完成赔付", combo = {"未完成", "已完成"},defaultValue = "未完成")
     private String compensationPaymentFlag;
 
     public void setCompensationPaymentFlag(String compensationPaymentFlag) {
@@ -97,7 +98,7 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "赔付金额")
     @Excel(name = "赔付金额")
     private BigDecimal payoutAmount;
-
+    @Excel(name = "赔付币别")
     @ApiModelProperty(value = "赔付币别")
     private String compensationPaymentCurrency;
     @ApiModelProperty(value = "赔付币别编码")
@@ -108,16 +109,15 @@ public class RefundRequestDTO {
     private String orderNo;
 
     @ApiModelProperty(value = "处理编号")
-    @Excel(name = "单号")
     private String processNo;
 
     @ApiModelProperty(value = "数量")
-    @Excel(name = "数量")
     private String num;
+    @NotNull(message = "金额不能为空")
     @ApiModelProperty(value = "金额")
     @Excel(name = "金额")
     private BigDecimal amount;
-
+    @NotBlank(message = "币种名称不能为空")
     @ApiModelProperty(value = "币种名称")
     @Excel(name = "币种")
     private String currencyName;
@@ -131,7 +131,7 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "属性编码-数组")
     private String attributesCode;
 
-
+    @Excel(name = "供应商确认不赔付", combo = {"是", "否"},defaultValue = "否")
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
     private String noCompensationFlag;
 
@@ -143,6 +143,7 @@ public class RefundRequestDTO {
         }
     }
 
+    @Excel(name = "供应商确认赔付未到账", combo = {"是", "否"},defaultValue = "否")
     @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
     private String compensationPaymentArrivedFlag;
 
@@ -154,6 +155,7 @@ public class RefundRequestDTO {
         }
     }
 
+    @Excel(name = "费用类别")
     @ApiModelProperty(value = "费用类别")
     private String feeCategoryName;
 
@@ -162,7 +164,6 @@ public class RefundRequestDTO {
 
     @ApiModelProperty(value = "处理号类型")
     private String orderType;
-
 
     @ApiModelProperty(value = "附件")
     private List<AttachmentFileDTO> attachment;

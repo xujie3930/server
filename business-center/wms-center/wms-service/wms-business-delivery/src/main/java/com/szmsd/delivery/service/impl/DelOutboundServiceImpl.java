@@ -50,7 +50,9 @@ import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
+import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
+import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -1632,6 +1634,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return Collections.emptyList();
         }
         return super.baseMapper.exceptionMessageList(orderNos);
+    }
+
+    @Override
+    public List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO) {
+        return baseMapper.queryFinishList(queryFinishListDTO);
     }
 }
 

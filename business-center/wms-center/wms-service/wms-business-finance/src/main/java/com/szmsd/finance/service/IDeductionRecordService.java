@@ -1,9 +1,15 @@
 package com.szmsd.finance.service;
 
+import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.FssDeductionRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.finance.enums.CreditConstant;
+import com.szmsd.finance.vo.CreditUseInfo;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -63,5 +69,18 @@ public interface IDeductionRecordService extends IService<FssDeductionRecord> {
      */
     int deleteDeductionRecordById(String id);
 
+    /**
+     * 更新正常结束的账单信息状态
+     */
+    void updateDeductionRecordStatus(List<String> updateCusCodeList);
+
+    /**
+     * 按周期更新正常的账单
+     */
+    void updateRecordStatusByCreditTimeInterval();
+
+    Map<String, CreditUseInfo> queryTimeCreditUse(String cusCode,List<String> currencyCodeList,List<CreditConstant.CreditBillStatusEnum> statusList);
+
+    void addForCreditBill(BigDecimal addMoney,String cusCode,String currencyCode);
 }
 

@@ -1,11 +1,7 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
-import com.szmsd.bas.api.domain.BasAttachment;
-import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
-import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
-import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
@@ -77,6 +73,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IDelOutboundPackingService delOutboundPackingService;
     @Autowired
     private IDelOutboundCombinationService delOutboundCombinationService;
+    @Autowired
+    private IDelOutboundBringVerifyAsyncService delOutboundBringVerifyAsyncService;
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -132,33 +130,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 //                    throw new CommonException("400", delOutbound.getOrderNo() + "单据面单未上传，不能提审");
 //                }
 //                }
-                ApplicationContext context = this.initContext(delOutbound);
-                BringVerifyEnum currentState;
-                String bringVerifyState = delOutbound.getBringVerifyState();
-                if (StringUtils.isEmpty(bringVerifyState)) {
-                    currentState = BringVerifyEnum.BEGIN;
-                } else {
-                    currentState = BringVerifyEnum.get(bringVerifyState);
-                    // 兼容
-                    if (null == currentState) {
-                        currentState = BringVerifyEnum.BEGIN;
-                    }
-                }
-                ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
-                try {
-                    applicationContainer.action();
-                } catch (CommonException e) {
-                    // 回滚操作
-                    applicationContainer.setEndState(BringVerifyEnum.BEGIN);
-                    applicationContainer.rollback();
-                    // 更新状态
-                    DelOutbound updateDelOutbound = new DelOutbound();
-                    updateDelOutbound.setId(delOutbound.getId());
-                    updateDelOutbound.setBringVerifyState(BringVerifyEnum.BEGIN.name());
-                    this.delOutboundService.updateById(updateDelOutbound);
-                    // 抛出异常
-                    throw e;
-                }
+                // 创建异步线程执行
+                this.delOutboundBringVerifyAsyncService.bringVerifyAsync(delOutbound);
+                // 修改状态为提交中
+                this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
                 resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), true, "处理成功"));
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -323,9 +298,25 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                                 , Math.toIntExact(1), packing.getPackingNo(), BigDecimal.ZERO, ""));
                     }
                 } else {
+                    BigDecimal declareValue = BigDecimal.ZERO;
+                    Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+                    for (DelOutboundDetail detail : detailList) {
+                        String sku = detail.getSku();
+                        BaseProduct product = productMap.get(sku);
+                        if (null == product) {
+                            throw new CommonException("400", "查询SKU[" + sku + "]信息失败");
+                        }
+                        BigDecimal productDeclaredValue;
+                        if (null != product.getDeclaredValue()) {
+                            productDeclaredValue = BigDecimal.valueOf(product.getDeclaredValue());
+                        } else {
+                            productDeclaredValue = BigDecimal.ZERO;
+                        }
+                        declareValue = declareValue.add(productDeclaredValue);
+                    }
                     packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                             new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                            , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));
+                            , Math.toIntExact(1), delOutbound.getOrderNo(), declareValue, ""));
                 }
             }
         }

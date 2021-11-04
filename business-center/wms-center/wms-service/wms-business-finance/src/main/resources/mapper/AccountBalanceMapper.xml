@@ -9,58 +9,127 @@
     </select>
 
     <update id="updateCreditBatch" parameterType="list">
-        update fss_account_balance
+        UPDATE fss_account_balance
         <trim prefix="set" suffixOverrides=",">
             credit_status = 1,
-            <trim prefix="credit_type = case" suffix="end,">
+            <trim prefix="credit_type = case" suffix="ELSE credit_type end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.currencyCode != null">
-                        when currency_code = #{i.currencyCode} then #{i.creditType.type}
+                        WHEN currency_code = #{i.currencyCode} THEN #{i.creditType.type}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_line = case" suffix="end,">
+            <trim prefix="credit_line = case" suffix="ELSE credit_line end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditLine != null">
-                        when currency_code= #{i.currencyCode} then #{i.creditLine}
+                        WHEN currency_code= #{i.currencyCode} THEN #{i.creditLine}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_time_interval = case" suffix="end,">
+            <trim prefix="credit_time_interval = case" suffix="ELSE credit_time_interval end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditTimeInterval != null">
-                        when currency_code= #{i.currencyCode} then #{i.creditTimeInterval}
+                        WHEN currency_code= #{i.currencyCode} THEN #{i.creditTimeInterval}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_begin_time = case" suffix="end,">
+            <trim prefix="credit_time_unit = case" suffix="ELSE credit_time_unit end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditTimeUnit != null">
+                        WHEN currency_code= #{i.currencyCode} THEN #{i.creditTimeUnit}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="credit_buffer_time_unit = case" suffix="ELSE credit_buffer_time_unit end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditBufferTimeUnit != null">
+                        WHEN currency_code= #{i.currencyCode} THEN #{i.creditBufferTimeUnit}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="credit_buffer_time_interval = case" suffix="ELSE credit_buffer_time_interval end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditBufferTimeInterval != null">
+                        WHEN currency_code= #{i.currencyCode} THEN #{i.creditBufferTimeInterval}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="credit_begin_time = case" suffix="ELSE credit_end_time end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditBeginTime != null">
-                        when currency_code= #{i.currencyCode} then #{i.creditBeginTime}
+                        WHEN currency_code= #{i.currencyCode} THEN #{i.creditBeginTime}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_end_time = case" suffix="end,">
+            <trim prefix="credit_end_time = case" suffix=" ELSE credit_end_time end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditEndTime != null">
-                        when currency_code= #{i.currencyCode} then #{i.creditEndTime}
+                        WHEN currency_code= #{i.currencyCode} THEN #{i.creditEndTime}
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="credit_buffer_time = case" suffix="end,">
+            <trim prefix="credit_buffer_time = case" suffix="ELSE credit_buffer_time end,">
                 <foreach collection="updateList" item="i" index="index">
                     <if test="i.creditBufferTime != null">
-                        when currency_code= #{i.currencyCode} then #{i.creditBufferTime}
+                        WHEN currency_code= #{i.currencyCode} THEN #{i.creditBufferTime}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="credit_time_flag = case" suffix="ELSE credit_time_flag end,">
+                <foreach collection="updateList" item="i" index="index">
+                    <if test="i.creditTimeFlag != null">
+                        WHEN currency_code= #{i.currencyCode} AND credit_time_flag = 0 THEN #{i.creditTimeFlag}
                     </if>
                 </foreach>
             </trim>
         </trim>
         WHERE cus_code = #{cusCode}
         <if test="currencyCodeList != null and currencyCodeList.size() > 0">
-            AND currency_code in
+            AND currency_code IN
             <foreach collection="currencyCodeList" open="(" separator="," close=")" item="item">
                 #{item}
             </foreach>
         </if>
     </update>
+
+    <select id="queryThePreTermBill" resultType="com.szmsd.finance.domain.AccountBalance">
+        SELECT cus_code
+<!--                ,-->
+<!--               credit_end_time,-->
+<!--               credit_time_unit,-->
+<!--               credit_time_interval,-->
+<!--               DATE_ADD(credit_end_time, INTERVAL credit_time_interval DAY)-->
+        FROM fss_account_balance
+        WHERE credit_type = 1
+<!--          AND credit_time_flag = 0-->
+          AND credit_begin_time >=
+              DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-%d 00:00:00'), INTERVAL 0 - (credit_time_interval) DAY)
+          AND credit_end_time &lt;= NOW()
+    </select>
+
+    <select id="queryTheCanUpdateCreditUserList" resultType="com.szmsd.finance.domain.AccountBalance">
+        SELECT
+        fab.cus_code,
+        fab.currency_code,
+        fab.credit_end_time,
+        fdr.remaining_repayment_amount
+
+        -- 	IFNULL( fdr.remaining_repayment_amount, 0 ) needReplyAmount
+
+        FROM
+        fss_account_balance fab
+        LEFT JOIN ( SELECT SUM( IFNULL( remaining_repayment_amount, 0 ) ) AS remaining_repayment_amount, currency_code, cus_code, `status` FROM fss_deduction_record
+        WHERE
+        `status` = 1
+        AND pay_method IN ('BALANCE_DEDUCTIONS','BUSINESS_OPERATE')
+        GROUP BY cus_code, currency_code ) fdr ON fab.cus_code = fdr.cus_code
+        AND fdr.currency_code = fab.currency_code
+        WHERE
+        fab.credit_end_time &lt; NOW()
+        AND IFNULL( fdr.remaining_repayment_amount, 0 ) = 0
+        AND fab.credit_type = 1
+        GROUP BY
+        cus_code,
+        fab.currency_code
+    </select>
 </mapper>

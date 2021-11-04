@@ -1,15 +1,13 @@
 package com.szmsd.finance.vo;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -36,11 +34,9 @@ public class RefundRequestListVO {
     private String processNo;
 
     @ApiModelProperty(value = "状态[0=初始,1=提审,2=异常,3=完成]")
-    @Excel(name = "状态",readConverterExp = "0=初始,1=提审,2=异常,3=完成")
+    @Excel(name = "状态", readConverterExp = "0=初始,1=提审,2=异常,3=完成")
     private Integer auditStatus;
-    @ApiModelProperty(value = "申请时间")
-    @Excel(name = "申请时间")
-    private Date createTime;
+
 
     @ApiModelProperty(value = "处理号（工单id)")
     @Excel(name = "处理号")
@@ -97,7 +93,7 @@ public class RefundRequestListVO {
 
     @ApiModelProperty(value = "费用类别编码")
     private String feeCategoryCode;
-
+    @Excel(name = "附注")
     @ApiModelProperty(value = "附注")
     private String remark;
 
@@ -118,10 +114,22 @@ public class RefundRequestListVO {
 
     @ApiModelProperty(value = "属性编码-数组")
     private String attributesCode;
-
+    @Excel(name = "申请人")
     @ApiModelProperty(value = "申请人")
     private String createByName;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "申请时间")
+    @Excel(name = "申请时间")
+    private Date createTime;
+    @Excel(name = "审核意见")
+    @ApiModelProperty(value = "审核信息")
+    private String reviewRemark;
 
+    @ApiModelProperty(value = "操作人")
+    @Excel(name = "操作人")
+    private String reviewerName;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "处理时间")
     @Excel(name = "处理时间")
     private Date auditTime;
@@ -132,39 +140,34 @@ public class RefundRequestListVO {
     @ApiModelProperty(value = "审核人代码")
     private String reviewerCode;
 
-    @ApiModelProperty(value = "操作人")
-    @Excel(name = "操作人")
-    private String reviewerName;
-
     @ApiModelProperty(value = "客户id")
     private Integer cusId;
-
     @ApiModelProperty(value = "客户名称")
     private String cusName;
-
+    @Excel(name = "标准赔付")
     @ApiModelProperty(value = "标准赔付")
     private String standardPayout;
-
+    @Excel(name = "额外赔付")
     @ApiModelProperty(value = "额外赔付")
     private String additionalPayout;
-
+    @Excel(name = "赔付币别")
     @ApiModelProperty(value = "赔付币别")
     private String compensationPaymentCurrency;
 
     @ApiModelProperty(value = "赔付币别编码")
     private String compensationPaymentCurrencyCode;
-
+    @Excel(name = "供应商是否完成赔付", readConverterExp = "0=未完成,1=已完成")
     @ApiModelProperty(value = "供应商是否完成赔付（0：未完成，1：已完成）")
-    private String compensationPaymentFlag;
-
+    private String compensationPaymentFlag = "0";
+    @Excel(name = "赔付金额")
     @ApiModelProperty(value = "赔付金额")
     private String payoutAmount;
-
+    @Excel(name = "供应商确认不赔付", readConverterExp = "0=否,1=是")
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
-    private String noCompensationFlag;
-
+    private String noCompensationFlag = "0";
+    @Excel(name = "供应商确认赔付未到账", readConverterExp = "0=否,1=是")
     @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
-    private String compensationPaymentArrivedFlag;
+    private String compensationPaymentArrivedFlag = "0";
 
     @ApiModelProperty(value = "数量")
     private String num;

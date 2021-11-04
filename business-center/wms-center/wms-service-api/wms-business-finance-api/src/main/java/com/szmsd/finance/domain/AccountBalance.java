@@ -1,6 +1,7 @@
 package com.szmsd.finance.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.szmsd.common.core.annotation.Excel;
@@ -13,6 +14,7 @@ import lombok.experimental.Accessors;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * @author liulei
@@ -50,7 +52,9 @@ public class AccountBalance extends FssBaseEntity {
 
     @ApiModelProperty(value = "总余额")
     private BigDecimal totalBalance;
-    /** 09-07 授信额度新增 */
+    /**
+     * 09-07 授信额度新增
+     */
     @ApiModelProperty(value = "授信类型(0：额度，1：类型)")
     @Excel(name = "授信类型(0：额度，1：类型)")
     private String creditType;
@@ -66,7 +70,10 @@ public class AccountBalance extends FssBaseEntity {
     @ApiModelProperty(value = "使用额度金额")
     @Excel(name = "使用额度金额")
     private BigDecimal creditUseAmount;
-
+    @TableField(exist = false)
+    @ApiModelProperty(value = "需要偿还的使用额度金额")
+    @Excel(name = "需要偿还的使用额度金额")
+    private BigDecimal needRepayCreditUseAmount;
     @ApiModelProperty(value = "授信开始时间")
     @Excel(name = "授信开始时间")
     private LocalDateTime creditBeginTime;
@@ -97,9 +104,10 @@ public class AccountBalance extends FssBaseEntity {
 
     @ApiModelProperty(value = "缓冲时间使用额度")
     @Excel(name = "缓冲时间使用额度")
-    private BigDecimal creditBufferUseAmount;
+    private Boolean creditTimeFlag;
 
-    public AccountBalance() {}
+    public AccountBalance() {
+    }
 
     public AccountBalance(String cusCode, String currencyCode, String currencyName) {
         this.cusCode = cusCode;
@@ -108,5 +116,14 @@ public class AccountBalance extends FssBaseEntity {
         this.currentBalance = BigDecimal.ZERO;
         this.freezeBalance = BigDecimal.ZERO;
         this.totalBalance = BigDecimal.ZERO;
+        this.creditUseAmount = BigDecimal.ZERO;
+    }
+
+    public void showCredit() {
+        this.creditUseAmount = Optional.ofNullable(this.creditUseAmount).orElse(BigDecimal.ZERO);
+        BigDecimal currentBalance = Optional.ofNullable(this.currentBalance).orElse(BigDecimal.ZERO);
+        BigDecimal totalBalance = Optional.ofNullable(this.totalBalance).orElse(BigDecimal.ZERO);
+        this.currentBalance = currentBalance.subtract(this.creditUseAmount);
+        this.totalBalance = totalBalance.subtract(this.creditUseAmount);
     }
 }

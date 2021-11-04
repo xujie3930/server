@@ -7,13 +7,17 @@ import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.domain.InboundReceiptDetail;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailQueryDTO;
+import com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
+import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import com.szmsd.putinstorage.mapper.InboundReceiptDetailMapper;
 import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +29,7 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -201,6 +206,12 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
                 remoteComponent.saveAttachment(inboundReceiptDetail.getWarehouseNo(), inboundReceiptDetailId.toString(), Arrays.asList(editionImage), inboundReceiptEditionImage);
             }
         });
+    }
+
+    @Override
+    public List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO) {
+        Long userId = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getUserId).orElse(-1L);
+        return baseMapper.querySkuStockByRange(inventoryStockByRangeDTO,userId);
     }
 }
 

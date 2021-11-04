@@ -9,6 +9,7 @@ import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
+import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -20,6 +21,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +37,8 @@ public class RefundPayFactory extends AbstractPayFactory {
 
     @Resource
     private IAccountSerialBillService accountSerialBillService;
+    @Resource
+    private IAccountBalanceService iAccountBalanceService;
     @Override
     @Transactional
     public boolean updateBalance(CustPayDTO dto) {
@@ -47,6 +51,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                 BigDecimal changeAmount = dto.getAmount();
                 if (changeAmount.compareTo(BigDecimal.ZERO)>=0){
                     oldBalance.rechargeAndSetAmount(changeAmount);
+                    super.addForCreditBill(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
                 } else {
                     oldBalance.pay(changeAmount.negate());
                 }
@@ -55,6 +60,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                 recordOpLog(dto, result.getCurrentBalance());
                 recordDetailLog(dto, oldBalance);
                 setSerialBillLog(dto);
+                iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()),dto.getCurrencyCode());
             }
             return true;
         } catch (Exception e) {

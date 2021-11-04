@@ -11,6 +11,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +51,13 @@ public class OperationController extends BaseController {
         return toOk(operationService.update(dto));
     }
 
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:edit')")
+    @ApiOperation(value = "业务计费逻辑 - 删除")
+    @DeleteMapping("/deleteById/{id}")
+    public R deleteById(@PathVariable("id") Integer id) {
+        return toOk(operationService.deleteById(id));
+    }
+
     @PreAuthorize("@ss.hasPermi('Operation:Operation:list')")
     @ApiOperation(value = "业务计费逻辑 - 分页查询")
     @GetMapping("/list")
@@ -64,6 +72,13 @@ public class OperationController extends BaseController {
     @GetMapping("/details/{id}")
     public R<Operation> details(@PathVariable int id) {
         return R.ok(operationService.details(id));
+    }
+
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:queryDetails')")
+    @ApiOperation(value = "业务计费逻辑 - 详情")
+    @PostMapping("/queryDetails")
+    public R<Operation> queryDetails(@RequestBody OperationDTO operationDTO) {
+        return R.ok(operationService.queryDetails(operationDTO));
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:getOrderTypeList')")

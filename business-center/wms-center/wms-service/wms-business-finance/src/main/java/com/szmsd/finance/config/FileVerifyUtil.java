@@ -61,23 +61,22 @@ public final class FileVerifyUtil {
     /**
      * 参数校验
      *
-     * @param i      第x条数据
+     * @param index      第x条数据
      * @param groups 校验规则
      */
-    public static void validate(Object object,AtomicInteger i, Class<?>... groups) {
+    public static void validate(Object object,AtomicInteger index,List<String> errorMsg, Class<?>... groups) {
         ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
         Validator validator = vf.getValidator();
         Set<ConstraintViolation<Object>> set = validator.validate(object, groups);
-        List<String> errorMsg = new ArrayList<>();
-        List<Integer> idList = new ArrayList<>();
+        ArrayList<String> validMsg = new ArrayList<>();
         for (ConstraintViolation<Object> constraintViolation : set) {
             System.out.println(constraintViolation.getPropertyPath() + ":" + constraintViolation.getMessage());
-            errorMsg.add(constraintViolation.getMessage());
-            idList.add(i.getAndIncrement());
+            validMsg.add(constraintViolation.getMessage());
         }
-        if (CollectionUtils.isNotEmpty(errorMsg)) {
-            throw new BaseException(String.format("请检查第%s条数据\r", JSONObject.toJSONString(new HashSet<>(idList))) + errorMsg.toString());
+        if (CollectionUtils.isNotEmpty(validMsg)) {
+            errorMsg.add(String.format("请检查第%s条数据%s", index.get() , String.join(";",validMsg)));
         }
+        index.getAndIncrement();
     }
 
 }

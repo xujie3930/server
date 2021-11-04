@@ -32,6 +32,7 @@ import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
 import com.szmsd.delivery.imported.*;
+import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
@@ -39,6 +40,8 @@ import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
+import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
+import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -92,6 +95,8 @@ public class DelOutboundController extends BaseController {
     private IDelOutboundDetailService delOutboundDetailService;
     @Autowired
     private BaseProductClientService baseProductClientService;
+    @Autowired
+    private IDelOutboundBringVerifyAsyncService delOutboundBringVerifyAsyncService;
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/page")
@@ -100,6 +105,15 @@ public class DelOutboundController extends BaseController {
     public TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto queryDto) {
         startPage(queryDto);
         return getDataTable(this.delOutboundService.selectDelOutboundList(queryDto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inventory:queryFinishList')")
+    @PostMapping("/queryFinishList")
+    @ApiOperation(value = "查询已完成的单号", notes = "查询已完成的单号")
+    public TableDataInfo<QueryFinishListVO> queryFinishList(@RequestBody QueryFinishListDTO queryFinishListDTO) {
+        startPage(queryFinishListDTO);
+        List<QueryFinishListVO> list = delOutboundService.queryFinishList(queryFinishListDTO);
+        return getDataTable(list);
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")

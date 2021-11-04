@@ -2,14 +2,8 @@ package com.szmsd.inventory.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.inventory.domain.Inventory;
-import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
-import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
-import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
-import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
-import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
-import com.szmsd.inventory.domain.vo.InventorySkuVO;
-import com.szmsd.inventory.domain.vo.InventoryVO;
-import com.szmsd.inventory.domain.vo.SkuInventoryAgeVo;
+import com.szmsd.inventory.domain.dto.*;
+import com.szmsd.inventory.domain.vo.*;
 
 import java.util.List;
 
@@ -114,5 +108,7 @@ public interface IInventoryService extends IService<Inventory> {
      * @return
      */
     List<SkuInventoryAgeVo> queryInventoryAgeBySku(String warehouseCode, String sku);
+
+    List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
 }
 

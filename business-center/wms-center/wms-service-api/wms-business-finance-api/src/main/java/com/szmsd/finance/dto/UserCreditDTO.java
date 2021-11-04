@@ -89,7 +89,7 @@ public class UserCreditDTO {
                 }
             });
             if (StringUtils.isNotBlank(errorMsg.toString())) {
-                throw new BaseException(errorMsg.toString());
+                throw new RuntimeException(errorMsg.toString());
             }
         }
     }

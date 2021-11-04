@@ -18,8 +18,11 @@ import java.util.Arrays;
 public final class CreditConstant {
 
     public static final ChronoUnit CREDIT_UNIT = ChronoUnit.DAYS;
-    public static final int CREDIT_BUFFER_Interval = 3;
+    public static final int CREDIT_BUFFER_INTERVAL = 3;
 
+    public static ChronoUnit getCreditUnitByStr(String chronoUnitName){
+       return Arrays.stream(ChronoUnit.values()).filter(x->x.name().equals(chronoUnitName)).findAny().orElse(ChronoUnit.DAYS);
+    }
     /**
      * 授信额度使用状态
      */
@@ -70,5 +73,34 @@ public final class CreditConstant {
                     .findAny()
                     .orElse(DEFAULT);
         }
+        public static CreditTypeEnum getThisByTypeCode(Integer code) {
+            return Arrays.stream(CreditTypeEnum.values())
+                    .filter(x -> (x.getValue()).equals(code))
+                    .findAny()
+                    .orElse(DEFAULT);
+        }
     }
+
+    /**
+     * 授信额度类型
+     */
+    @AllArgsConstructor
+    public enum CreditBillStatusEnum implements IEnum<Integer> {
+        /**
+         * 0:初始化未确认，1：已核对， 2：已还款
+         */
+        DEFAULT(0, "初始化未确认"),
+        CHECKED(1, "已核对"),
+        REPAID(2, "已还款");
+        @EnumValue
+        private final Integer type;
+        private final String desc;
+
+        @Override
+        public Integer getValue() {
+            return type;
+        }
+
+    }
+
 }

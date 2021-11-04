@@ -73,4 +73,7 @@ public interface InventoryFeignService {
     @ApiOperation(value = "查询sku的库龄", notes = "查询sku的库龄-周")
     R<List<SkuInventoryAgeVo>> queryInventoryAgeBySku(@PathVariable("warehouseCode") String warehouseCode, @PathVariable("sku") String sku);
 
+    @PostMapping("/inventory/queryFinishList")
+    @ApiOperation(value = "查询已完成的单号", notes = "查询已完成的单号")
+    TableDataInfo<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
 }

@@ -319,7 +319,7 @@ public class RemoteComponent {
         delOutboundOperationVO.setDetails(details);
         log.info("调用冻结余额 {}", JSONObject.toJSONString(delOutboundOperationVO));
         R r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
-        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg());
+        R.getDataAndException(r);
     }
 
     /**

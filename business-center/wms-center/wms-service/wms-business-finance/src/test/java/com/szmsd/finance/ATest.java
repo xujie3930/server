@@ -1,5 +1,6 @@
 package com.szmsd.finance;
 
+import com.szmsd.finance.compont.CreditTask;
 import com.szmsd.finance.dto.UserCreditDetailDTO;
 import com.szmsd.finance.enums.CreditConstant;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
@@ -49,5 +50,11 @@ public class ATest {
         }
 
         accountBalanceMapper.updateCreditBatch(userCreditDetailDTOS, "CUS",new ArrayList<>());
+    }
+    @Resource
+    private CreditTask creditTask;
+    @Test
+    public void testCredit(){
+        creditTask.genBillTask();
     }
 }

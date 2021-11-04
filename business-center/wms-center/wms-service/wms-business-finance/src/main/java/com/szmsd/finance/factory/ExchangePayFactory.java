@@ -7,6 +7,7 @@ import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
+import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -17,6 +18,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 /**
  * 汇率转换
@@ -30,7 +32,8 @@ public class ExchangePayFactory extends AbstractPayFactory {
 
     @Resource
     private IAccountSerialBillService accountSerialBillService;
-
+    @Resource
+    private IAccountBalanceService iAccountBalanceService;
     @Transactional
     @Override
     public boolean updateBalance(CustPayDTO dto) {
@@ -53,7 +56,8 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 BalanceDTO beforeAdd = getBalance(dto.getCusCode(), dto.getCurrencyCode2());
                 BigDecimal addAmount = dto.getRate().multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
                 // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
-                beforeAdd.rechargeAndSetAmount(substractAmount.negate());
+                beforeAdd.rechargeAndSetAmount(addAmount);
+                super.addForCreditBill(beforeAdd.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode2());
                 BalanceDTO afterAdd = beforeAdd;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode2(), afterAdd);
                 setSerialBillLog(dto,accountBalanceChange);
@@ -67,6 +71,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 dto.setCurrencyName(accountBalanceChange.getCurrencyName());
                 setSerialBillLog(dto,afterBalanceChange);
                 recordDetailLog(dto,beforeSubtract);
+                iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()),dto.getCurrencyCode());
             }
             return true;
         } catch (Exception e) {

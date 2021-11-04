@@ -3,6 +3,9 @@ package com.szmsd.chargerules.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.feign.BaseProductFeignService;
+import com.szmsd.bas.dto.BaseProductBatchQueryDto;
+import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.ChargeLogDto;
@@ -31,9 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.math.RoundingMode;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -119,6 +121,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return operationMapper.selectById(id);
     }
 
+    @Override
     public Operation queryDetails(OperationDTO dto) {
         LambdaQueryWrapper<Operation> query = Wrappers.lambdaQuery();
         if (StringUtils.isNotBlank(dto.getOrderType())) {
@@ -166,7 +169,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     @Override
     public R<?> delOutboundFreeze(DelOutboundOperationVO dto) {
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
-        if (CollectionUtils.isEmpty(details)&&!dto.getOrderType().equals("Freight")) {
+        if (CollectionUtils.isEmpty(details) && !dto.getOrderType().equals("Freight")) {
             log.error("calculate() 出库单的详情信息为空");
             return R.failed("出库单的详情信息为空");
         }
@@ -208,9 +211,12 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return this.freezeBalance(dto, count, operation.getFirstPrice(), operation);
     }
 
+    @Resource
+    private BaseProductFeignService baseProductFeignService;
+
     /**
      * 入库冻结费用
-     * 现在只有数量，既按数量来计算
+     * 按照重量匹配规则：如果单位是 件数 则按首件及续件计算 如果单位是kg：则用重量*首件价格
      *
      * @param dto
      * @param amount 首件价格
@@ -219,10 +225,23 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R<?> frozenFeesForWarehousing(DelOutboundOperationVO dto, BigDecimal amount) {
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
-        //TODO 默认按照数量来计算
-        Operation operation = getOperationDetails(dto, OrderTypeEnum.Receipt, null, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
+        Operation operation = new Operation();
+        List<String> skuList = details.stream().map(DelOutboundOperationDetailVO::getSku).collect(Collectors.toList());
+        BaseProductBatchQueryDto baseProductBatchQueryDto = new BaseProductBatchQueryDto();
+        baseProductBatchQueryDto.setSellerCode(dto.getCustomCode());
+        baseProductBatchQueryDto.setCodes(skuList);
+        R<List<BaseProductMeasureDto>> listR = baseProductFeignService.batchSKU(baseProductBatchQueryDto);
+        List<BaseProductMeasureDto> dataAndException = R.getDataAndException(listR);
+        Map<String, Double> skuWeightMap = dataAndException.stream().collect(Collectors.toMap(BaseProductMeasureDto::getCode, BaseProductMeasureDto::getWeight));
         for (DelOutboundOperationDetailVO vo : details) {
-            amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
+            double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00);
+            operation = getOperationDetails(dto, OrderTypeEnum.Receipt, weight, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
+            String unit = operation.getUnit();
+            if ("kg".equalsIgnoreCase(unit)) {
+                amount = operation.getFirstPrice().multiply(new BigDecimal((weight * vo.getQty() / 1000) + "").setScale(4, RoundingMode.HALF_UP)).add(amount);
+            } else {
+                amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
+            }
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
         return this.freezeBalance(dto, count, amount, operation);
@@ -230,6 +249,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     /**
      * 遍历出库单的详情信息 根据收费规则计算费用
+     * 按照重量匹配规则：如果单位是 件数 则按首件及续件计算 如果单位是kg：则用重量*首件价格
      *
      * @param dto     dto
      * @param details details
@@ -240,10 +260,23 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         Long qty;
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
         Operation operation = new Operation();
+        List<String> skuList = details.stream().map(DelOutboundOperationDetailVO::getSku).collect(Collectors.toList());
+        BaseProductBatchQueryDto baseProductBatchQueryDto = new BaseProductBatchQueryDto();
+        baseProductBatchQueryDto.setSellerCode(dto.getCustomCode());
+        baseProductBatchQueryDto.setCodes(skuList);
+        R<List<BaseProductMeasureDto>> listR = baseProductFeignService.batchSKU(baseProductBatchQueryDto);
+        List<BaseProductMeasureDto> dataAndException = R.getDataAndException(listR);
+        Map<String, Double> skuWeightMap = dataAndException.stream().collect(Collectors.toMap(BaseProductMeasureDto::getCode, BaseProductMeasureDto::getWeight));
+
         for (DelOutboundOperationDetailVO vo : details) {
-            operation = getOperationDetails(dto, vo.getWeight(), "未找到" + DelOutboundOrderEnum.getName(dto.getOrderType()) + "业务费用规则，请联系管理员");
-            qty = vo.getQty();
-            amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), qty).add(amount);
+            double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00);
+            operation = getOperationDetails(dto, weight, "未找到" + DelOutboundOrderEnum.getName(dto.getOrderType()) + "业务费用规则，请联系管理员");
+            String unit = operation.getUnit();
+            if ("kg".equalsIgnoreCase(unit)) {
+                amount = operation.getFirstPrice().multiply(new BigDecimal(weight * vo.getQty() / 1000 + "").setScale(2, RoundingMode.HALF_UP)).setScale(2, RoundingMode.HALF_UP).add(amount);
+            } else {
+                amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
+            }
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
         return this.freezeBalance(dto, count, amount, operation);
@@ -318,6 +351,21 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return operation;
     }
 
+    /**
+     * 查询配置的规则
+     *
+     * @param outboundOrderEnum
+     * @param orderTypeEnum
+     * @param warehouseCode     仓库编码
+     * @param weight            件数/重量
+     * @return null?自行处理错误信息
+     */
+    @Override
+    public Operation getOperationDetails(DelOutboundOrderEnum outboundOrderEnum, OrderTypeEnum orderTypeEnum, String warehouseCode, Double weight) {
+        OperationDTO operationDTO = new OperationDTO(outboundOrderEnum.getCode(), orderTypeEnum.name(), warehouseCode, weight);
+        return this.queryDetails(operationDTO);
+    }
+
     private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount, Operation operation) {
         ChargeLog chargeLog = setChargeLog(dto, count);
         chargeLog.setHasFreeze(true);
@@ -348,6 +396,10 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return payService.thawBalance(cusFreezeBalanceDTO, chargeLog);
     }
 
+    @Override
+    public int deleteById(Integer id) {
+        return baseMapper.deleteById(id);
+    }
 
     private CustPayDTO setCustPayDto(ChargeLog chargeLog) {
         CustPayDTO custPayDTO = new CustPayDTO();

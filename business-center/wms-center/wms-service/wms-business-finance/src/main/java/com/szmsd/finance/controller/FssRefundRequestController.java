@@ -12,6 +12,8 @@ import com.szmsd.finance.enums.ReviewStatusEnum;
 import com.szmsd.finance.service.IRefundRequestService;
 import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.finance.vo.RefundRequestVO;
+import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
+import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -165,6 +167,14 @@ public class FssRefundRequestController extends BaseController {
     @ApiOperation(value = "系统确认-TODO", notes = "系统确认操作费确认退费")
     public R confirmOperation(@Validated @RequestBody ConfirmOperationDTO confirmOperationDTO) {
         return toOk(fssRefundRequestService.confirmOperation(confirmOperationDTO));
+    }
+
+    @PreAuthorize("@ss.hasPermi('inventory:queryFinishList')")
+    @PostMapping("/queryFinishList")
+    @ApiOperation(value = "查询已完成的单号", notes = "查询已完成的单号")
+    public TableDataInfo<QueryFinishListVO> queryFinishList(@RequestBody QueryFinishListDTO queryFinishListDTO) {
+        return fssRefundRequestService.queryFinishList(queryFinishListDTO);
+
     }
 
 }

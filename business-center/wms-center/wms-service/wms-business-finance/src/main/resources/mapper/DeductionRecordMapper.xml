@@ -39,4 +39,28 @@
                 remark,
             id, create_by, update_by, version, cus_code, order_no, pay_method, product_category, charge_category, charge_type, amount, currency_code, actual_deduction, credit_use_amount, credit_type, credit_begin_time, credit_end_time, repayment_amount, remaining_repayment_amount, type
     </sql>
+
+    <update id="updateDeductionRecordStatus">
+        UPDATE fss_deduction_record
+    </update>
+
+    <select id="queryTimeCreditUse" resultType="com.szmsd.finance.vo.CreditUseInfo">
+        SELECT currency_code,SUM(remaining_repayment_amount) AS creditUseAmount FROM fss_deduction_record
+        WHERE
+        cus_code = #{cusCode}
+        AND type = 0 AND pay_method IN ('BALANCE_DEDUCTIONS','BUSINESS_OPERATE')
+        <if test="statusList != null and statusList.size > 0">
+            AND `status` IN
+            <foreach collection="statusList" open="(" separator="," close=")" item="item">
+                #{item}
+            </foreach>
+        </if>
+        <if test="currencyCodeList != null and currencyCodeList.size > 0">
+            AND `currency_code` IN
+            <foreach collection="currencyCodeList" open="(" separator="," close=")" item="item">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY currency_code
+    </select>
 </mapper>

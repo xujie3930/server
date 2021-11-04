@@ -1,11 +1,14 @@
 package com.szmsd.http.api.service.impl;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.PricedProductInfo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +30,16 @@ public class HtpPricedProductClientServiceImpl implements IHtpPricedProductClien
     }
 
     @Override
+    public PricedProductInfo infoAndSubProducts(String productCode) {
+        PricedProductInfo pricedProductInfo = this.info(productCode);
+        List<String> subProducts = pricedProductInfo.getSubProducts();
+        if (StringUtils.isEmpty(pricedProductInfo.getLogisticsRouteId()) && CollectionUtils.isNotEmpty(subProducts)) {
+            return this.info(subProducts.get(0));
+        }
+        return pricedProductInfo;
+    }
+
+    @Override
     public ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> pricing(CalcShipmentFeeCommand command) {
         return R.getDataAndException(this.htpPricedProductFeignService.pricing(command));
     }
@@ -34,5 +47,10 @@ public class HtpPricedProductClientServiceImpl implements IHtpPricedProductClien
     @Override
     public List<PricedProduct> inService(PricedProductInServiceCriteria criteria) {
         return R.getDataAndException(this.htpPricedProductFeignService.inService(criteria));
+    }
+
+    @Override
+    public PageVO<PricedProduct> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria) {
+        return R.getDataAndException(this.htpPricedProductFeignService.pageResult(pricedProductSearchCriteria));
     }
 }

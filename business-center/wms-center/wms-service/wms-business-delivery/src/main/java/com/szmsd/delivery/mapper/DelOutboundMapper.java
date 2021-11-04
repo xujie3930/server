@@ -13,6 +13,8 @@ import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
+import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
+import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -64,4 +66,6 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     int updateTrackingNo(DelOutboundBatchUpdateTrackingNoDto dto);
 
     List<DelOutboundListExceptionMessageVO> exceptionMessageList(@Param("orderNos") List<String> orderNos);
+
+    List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
 }
