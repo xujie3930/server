@@ -388,17 +388,17 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         log.info("#B3 接收完成入库：操作完成");
         //接收入库完成重新计算扣除入库费用
         //解冻之前的冻结费
-        DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+        /*DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
         delOutboundOperationVO.setOrderNo(orderNo);
         operationFeignService.delOutboundThaw(delOutboundOperationVO);
         // 重新计费扣款
         InboundReceiptInfoVO inboundReceiptInfoVO = queryInfo(orderNo);
         List<InboundReceiptDetailVO> details = inboundReceiptInfoVO.getInboundReceiptDetails();
         Long count = details.stream().filter(x -> null != x.getPutQty()).mapToLong(InboundReceiptDetailVO::getPutQty).sum();
-        /**
+        *//**
          * #{@Like com.szmsd.chargerules.service.impl.OperationServiceImpl#frozenFeesForWarehousing(com.szmsd.delivery.vo.DelOutboundOperationVO, java.math.BigDecimal)}
          * 这有个bug 区间在不同币别 需要分别冻结 但是一个单现在不能冻结两次
-         */
+         *//*
         Operation operation = new Operation();
         BigDecimal amount = BigDecimal.ZERO;
 
@@ -433,7 +433,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         custPayDTO.setOrderType(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode());
         custPayDTO.setCusCode(inboundReceiptInfoVO.getCusCode());
         R r = rechargesFeignService.feeDeductions(custPayDTO);
-        R.getDataAndException(r);
+        R.getDataAndException(r);*/
 
     }
 
