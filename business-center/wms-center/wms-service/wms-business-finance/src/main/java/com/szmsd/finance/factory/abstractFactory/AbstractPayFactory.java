@@ -79,6 +79,8 @@ public abstract class AbstractPayFactory {
      * @param balanceDTO
      */
     public void recordDetailLog(CustPayDTO custPayDTO, BalanceDTO balanceDTO) {
+        log.info("添加详细使用记录传参custPayDTO: {}", JSONObject.toJSONString(custPayDTO));
+        log.info("添加详细使用记录传参balanceDTO: {}", JSONObject.toJSONString(balanceDTO));
         FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
         CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
         int creditType = Integer.parseInt(creditInfoBO.getCreditType());
