@@ -1,5 +1,6 @@
 package com.szmsd.finance.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -382,6 +383,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                     .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
                     .eq(AccountBalance::getCusCode, cusCode));
             if (CollectionUtils.isNotEmpty(accountBalances)) {
+                log.info("查询到客户 {} 启用中的授信信息：{}", cusCode, JSON.toJSONString(accountBalances));
                 AccountBalance accountBalanceCredit = accountBalances.get(0);
                 BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
                 accountBalance.setId(null);
@@ -389,6 +391,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                         .setCreditUseAmount(BigDecimal.ZERO)
                         .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
                         .setCreateTime(new Date());
+            }
+            // 如果没有CreditType 则设置默认值，防止后续操作空指针
+            if(StringUtils.isBlank(accountBalance.getCreditType())) {
+                accountBalance.setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue().toString());
             }
             accountBalanceMapper.insert(accountBalance);
         }
