@@ -40,4 +40,8 @@ public class AsyncThreadObject implements Serializable {
     public void unloadTid() {
         MDC.remove("TID");
     }
+
+    public static AsyncThreadObject build() {
+        return new AsyncThreadObject();
+    }
 }

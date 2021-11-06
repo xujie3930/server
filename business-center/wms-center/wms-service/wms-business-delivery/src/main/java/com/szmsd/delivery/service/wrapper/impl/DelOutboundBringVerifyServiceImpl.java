@@ -10,6 +10,7 @@ import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
@@ -131,7 +132,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 //                }
 //                }
                 // 创建异步线程执行
-                this.delOutboundBringVerifyAsyncService.bringVerifyAsync(delOutbound);
+                AsyncThreadObject asyncThreadObject = AsyncThreadObject.build();
+                this.delOutboundBringVerifyAsyncService.bringVerifyAsync(delOutbound, asyncThreadObject);
                 // 修改状态为提交中
                 this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
                 resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), true, "处理成功"));
