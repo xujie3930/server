@@ -122,7 +122,7 @@ public class RefundRequestListVO {
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "申请时间")
-    @Excel(name = "申请时间")
+    @Excel(name = "申请时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
     @Excel(name = "审核意见")
@@ -135,7 +135,7 @@ public class RefundRequestListVO {
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "处理时间")
-    @Excel(name = "处理时间")
+    @Excel(name = "处理时间",dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date auditTime;
 
     @ApiModelProperty(value = "审核人id")
