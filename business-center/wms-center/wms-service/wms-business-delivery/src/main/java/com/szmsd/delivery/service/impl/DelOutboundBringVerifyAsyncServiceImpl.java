@@ -42,23 +42,26 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 currentState = BringVerifyEnum.BEGIN;
             }
         }
+        logger.info("(1)提审异步操作开始，出库单号：{}", delOutbound.getOrderNo());
         ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
         try {
             applicationContainer.action();
+            logger.info("(2)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
             // 回滚操作
             applicationContainer.setEndState(BringVerifyEnum.BEGIN);
             applicationContainer.rollback();
+            // 在rollback方法里面已经将BringVerifyState改成Begin了，这里不需要重复去修改状态
             // 更新状态
-            DelOutbound updateDelOutbound = new DelOutbound();
-            updateDelOutbound.setId(delOutbound.getId());
-            updateDelOutbound.setBringVerifyState(BringVerifyEnum.BEGIN.name());
-            this.delOutboundService.updateById(updateDelOutbound);
+            // DelOutbound updateDelOutbound = new DelOutbound();
+            // updateDelOutbound.setId(delOutbound.getId());
+            // updateDelOutbound.setBringVerifyState(BringVerifyEnum.BEGIN.name());
+            // this.delOutboundService.updateById(updateDelOutbound);
             // 抛出异常
             // throw e;
             // 异步屏蔽异常，将异常打印到日志中
             // 异步错误在单据里面会显示错误信息
-            this.logger.error("提审异步操作失败，" + e.getMessage(), e);
+            this.logger.error("(3)提审异步操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
         }
     }
 

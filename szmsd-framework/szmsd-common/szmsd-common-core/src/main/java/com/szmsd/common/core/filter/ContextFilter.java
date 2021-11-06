@@ -22,6 +22,7 @@ import java.util.Map;
 public class ContextFilter implements Filter {
 
     private static final int CONTENT_LENGTH = 40960;
+    private static final int RESPONSE_CONTENT_LENGTH = 10240;
     private static final String METHOD_GET = "GET";
     private final Logger logger = LoggerFactory.getLogger(ContextFilter.class);
 
@@ -73,6 +74,9 @@ public class ContextFilter implements Filter {
                         .replaceAll(" ", "")
                         .replaceAll("\n", "")
                         .replaceAll("\r", "");
+                if (requestBody.length() > RESPONSE_CONTENT_LENGTH) {
+                    requestBody = responseBody.substring(0, RESPONSE_CONTENT_LENGTH);
+                }
             }
             builder.append("{\"requestBody\":").append(requestBody).append(",");
             builder.append("\"responseBody\":").append(responseBody).append("}");

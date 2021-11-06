@@ -1,5 +1,6 @@
 package com.szmsd.delivery.event.listener;
 
+import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.event.ShipmentPackingEvent;
 import com.szmsd.delivery.service.IDelOutboundPackageQueueService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
@@ -20,7 +21,7 @@ public class ShipmentPackingListener {
     @Autowired
     private IDelOutboundPackageQueueService delOutboundPackageQueueService;
 
-    @Async
+    @Async(value = ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_SHIPMENTPACKINGEVENT)
     @EventListener
     public void onApplicationEvent(ShipmentPackingEvent event) {
         if (null != event.getSource()) {
