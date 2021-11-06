@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.MDC;
 
 import java.text.MessageFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -620,6 +621,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
             userCode = String.valueOf(loginUser.getUserId());
             userName = loginUser.getUsername();
         }
-        EventUtil.publishEvent(new DelOutboundOperationLogEvent(object, this, tid, userCode, userName, ip));
+        Date nowDate = new Date();
+        EventUtil.publishEvent(new DelOutboundOperationLogEvent(object, this, tid, userCode, userName, ip, nowDate));
     }
 }

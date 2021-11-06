@@ -1,5 +1,7 @@
 package com.szmsd.delivery.service.wrapper;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.TimeInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,8 @@ public class ApplicationContainer {
         if (null == this.endState) {
             throw new RuntimeException("endState cannot be null");
         }
+        TimeInterval timer = DateUtil.timer();
+        logger.info("(1){}执行动作开始，currentState:{}, endState:{}", currentState.getClass().getSimpleName(), currentState.name(), endState.name());
         // end state != next state
         while (!this.endState.equals(this.currentState)) {
             ApplicationHandle handle = this.handleMap.get(this.currentState.name());
@@ -61,6 +65,7 @@ public class ApplicationContainer {
             }
             this.currentState = handle.nextState();
         }
+        logger.info("(2){}执行动作结束，currentState:{}, endState:{}, timer:{}", currentState.getClass().getSimpleName(), currentState.name(), endState.name(), timer.intervalRestart());
     }
 
     /**

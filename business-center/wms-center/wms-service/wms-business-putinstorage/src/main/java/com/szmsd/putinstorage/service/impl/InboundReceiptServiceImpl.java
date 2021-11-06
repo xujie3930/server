@@ -147,8 +147,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             List<InboundReceiptDetailDTO> inboundReceiptDetails = createInboundReceiptDTO.getInboundReceiptDetails();
             if (CollectionUtils.isNotEmpty(inboundReceiptDetails) && null == createInboundReceiptDTO.getId()) {
                 String deliveryNo = Optional.ofNullable(inboundReceiptDetails.get(0)).map(InboundReceiptDetailDTO::getDeliveryNo).orElse("");
-                Integer integer = iInboundReceiptDetailService.getBaseMapper().selectCount(Wrappers.<InboundReceiptDetail>lambdaQuery().eq(InboundReceiptDetail::getDeliveryNo, deliveryNo));
-                AssertUtil.isTrue(integer == 0, "该出库单已添加过转运入库单!");
+//                Integer integer = iInboundReceiptDetailService.getBaseMapper().selectCount(Wrappers.<InboundReceiptDetail>lambdaQuery().eq(InboundReceiptDetail::getDeliveryNo, deliveryNo));
+                int count = iInboundReceiptDetailService.checkPackageTransfer(deliveryNo);
+                AssertUtil.isTrue(count == 0, "该出库单已添加过转运入库单!");
             }
         }
     }
@@ -193,7 +194,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         //校验快递单号唯一
         List<String> deliveryNoList = createInboundReceiptDTO.getDeliveryNoList();
         if (CollectionUtils.isNotEmpty(deliveryNoList)) {
-            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().ne(InboundReceipt::getWarehouseNo, warehouseNo);
+            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().ne(InboundReceipt::getWarehouseNo, warehouseNo).ne(InboundReceipt::getStatus, InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue());
             String join = String.join(",", deliveryNoList);
             in.and(x -> x.apply("CONCAT(',',delivery_no,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))", join));
             List<InboundReceipt> inboundReceipts = baseMapper.selectList(in);

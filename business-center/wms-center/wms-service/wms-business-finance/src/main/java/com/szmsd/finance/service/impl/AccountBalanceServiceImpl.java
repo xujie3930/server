@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.base.Strings;
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
@@ -213,7 +214,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             log.info("仓储费扣除--{}", JSONObject.toJSONString(dto));
             this.addOptLog(dto);
         }
-        return flag ? R.ok() : R.failed("余额不足");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
     }
 
     @Transactional
@@ -234,7 +235,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             log.info("费用扣除-操作费日志 - {}", JSONObject.toJSONString(dto));
             this.addOptLog(dto);
         }
-        return flag ? R.ok() : R.failed("余额不足");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
     }
 
     @Resource
@@ -318,7 +319,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             log.info("Freight thawBalance - {}", JSONObject.toJSONString(cfbDTO));
             this.addOptLog(dto);
         }
-        return flag ? R.ok() : R.failed("可用余额不足以冻结");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户可用余额不足以冻结");
     }
 
     @Transactional
@@ -356,7 +357,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             log.info("thawBalance - {}", JSONObject.toJSONString(cfbDTO));
             this.addOptLog(dto);
         }
-        return flag ? R.ok() : R.failed("冻结金额不足以解冻");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getNo()) + "账户冻结金额不足以解冻");
     }
 
     /**
@@ -388,13 +389,13 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
                 accountBalance.setId(null);
                 accountBalance.setCurrencyCode(currencyCode).setCurrencyName(currencyName)
-                        .setCreditUseAmount(BigDecimal.ZERO)
+                        .setCreditUseAmount(BigDecimal.ZERO).setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue().toString())
                         .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
                         .setCreateTime(new Date());
             }
             // 如果没有CreditType 则设置默认值，防止后续操作空指针
-            if(StringUtils.isBlank(accountBalance.getCreditType())) {
-                accountBalance.setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue().toString());
+            if (StringUtils.isBlank(accountBalance.getCreditType())) {
+                accountBalance.setCreditType(CreditConstant.CreditTypeEnum.QUOTA.getValue().toString());
             }
             accountBalanceMapper.insert(accountBalance);
         }
@@ -526,7 +527,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayType(BillEnum.PayType.EXCHANGE);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
-        return flag ? R.ok() : R.failed("余额不足");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
     }
 
     /**
@@ -584,7 +585,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayMethod(BillEnum.PayMethod.WITHDRAW_PAYMENT);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
-        return flag ? R.ok() : R.failed("余额不足");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
     }
 
     private String getCurrencyName(String currencyCode) {
@@ -882,7 +883,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Override
     public int reloadCreditTime(List<String> cusCodeList, String currencyCode) {
-        log.info("reloadCreditTiem {} -{}", cusCodeList,currencyCode);
+        log.info("reloadCreditTiem {} -{}", cusCodeList, currencyCode);
         LocalDate now = LocalDate.now();
         int update = accountBalanceMapper.update(new AccountBalance(),
                 Wrappers.<AccountBalance>lambdaUpdate().in(AccountBalance::getCusCode, cusCodeList)

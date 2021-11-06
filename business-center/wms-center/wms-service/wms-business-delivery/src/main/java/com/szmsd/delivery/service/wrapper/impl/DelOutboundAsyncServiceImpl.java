@@ -1,5 +1,8 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.TimeInterval;
+import com.alibaba.fastjson.JSON;
 import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasePacking;
@@ -89,17 +92,22 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     @Transactional
     @Override
     public int shipmentPacking(Long id, boolean shipmentShipping) {
+        TimeInterval timer = DateUtil.timer();
+        logger.info("(1)出库单核重操作开始");
         // 获取新的出库单信息
         DelOutbound delOutbound = this.delOutboundService.getById(id);
         if (Objects.isNull(delOutbound)) {
+            logger.info("(1.1)单据不存在，id:{}, timer:{}", id, timer.intervalRestart());
             throw new CommonException("400", "单据不存在");
         }
+        logger.info("(1.2)查询到单据信息，delOutbound:{}, timer:{}", JSON.toJSONString(delOutbound), timer.intervalRestart());
         // 只处理状态为【WHSE_PROCESSING,PROCESSING】的记录
         if (!(DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(delOutbound.getState())
                 || DelOutboundStateEnum.PROCESSING.getCode().equals(delOutbound.getState()))) {
             return 0;
         }
         DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
+        logger.info("(2)初始化上下文信息，timer:{}", timer.intervalRestart());
         if (context != null) {
             context.setShipmentShipping(shipmentShipping);
         }
@@ -110,8 +118,14 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         } else {
             currentState = ShipmentEnum.get(shipmentState);
         }
-        ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, ShipmentEnum.END, ShipmentEnum.BEGIN);
-        applicationContainer.action();
+        try {
+            ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, ShipmentEnum.END, ShipmentEnum.BEGIN);
+            applicationContainer.action();
+            logger.info("(3)完成操作，timer:{}", timer.intervalRestart());
+        } catch (Exception e) {
+            logger.info("(3.1)完成操作，操作失败，timer:{}", timer.intervalRestart());
+            throw e;
+        }
         return 1;
     }
 

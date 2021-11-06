@@ -2,6 +2,7 @@ package com.szmsd.http.service.http;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
+import com.alibaba.fastjson.serializer.ValueFilter;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.HttpClientHelper;
@@ -27,10 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangyuyuan
@@ -189,9 +188,31 @@ abstract class AbstractRequest extends BaseRequest {
         String logRequestBody;
         if (null != object && object.getClass().isAnnotationPresent(LogIgnore.class)) {
             LogIgnore logIgnore = object.getClass().getAnnotation(LogIgnore.class);
-            SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
-            filter.getExcludes().addAll(Arrays.asList(logIgnore.value()));
-            logRequestBody = JSON.toJSONString(object, filter);
+            String[] value = logIgnore.value();
+            if (logIgnore.abbr()) {
+                Set<String> fieldSet = Arrays.stream(value).collect(Collectors.toSet());
+                logRequestBody = JSON.toJSONString(object, new ValueFilter() {
+                    @Override
+                    public Object process(Object o, String s, Object o1) {
+                        if (Objects.isNull(o1)) {
+                            return o1;
+                        }
+                        if (!fieldSet.contains(s)) {
+                            return o1;
+                        }
+                        if (o1 instanceof String) {
+                            return "String(length=" + ((String) o1).length() + ")";
+                        } else if (o1 instanceof byte[]) {
+                            return "String(byte[]=" + ((byte[]) o1).length + ")";
+                        }
+                        return "Object(No Math Java Bean Type [" + o1.getClass() + "])";
+                    }
+                });
+            } else {
+                SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+                filter.getExcludes().addAll(Arrays.asList(value));
+                logRequestBody = JSON.toJSONString(object, filter);
+            }
         } else {
             logRequestBody = requestBody;
         }
@@ -344,7 +365,17 @@ abstract class AbstractRequest extends BaseRequest {
                 requestBody = JSON.toJSONString(object);
             }
             HttpResponseBody httpResponseBody1 = HttpClientHelper.httpGetStream(url, headerMap, requestBody);
-            addLog(warehouseCode, urlGroupName, url, HttpMethod.POST.name(), headerMap, requestBody, requestTime, "FileInputStream");
+            StringBuilder responseBody = new StringBuilder();
+            if (httpResponseBody1 instanceof HttpResponseBody.HttpResponseBodyEmpty) {
+                responseBody.append("HttpResponseBodyEmpty{}");
+            } else if (httpResponseBody1 instanceof HttpResponseBody.HttpResponseByteArrayWrapper) {
+                HttpResponseBody.HttpResponseByteArrayWrapper httpResponseByteArrayWrapper = (HttpResponseBody.HttpResponseByteArrayWrapper) httpResponseBody1;
+                responseBody.append("HttpResponseBodyEmpty{")
+                        .append("status=").append(httpResponseByteArrayWrapper.getStatus())
+                        .append("byteArrayLength=").append(httpResponseByteArrayWrapper.getByteArray().length)
+                        .append("}");
+            }
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.POST.name(), headerMap, requestBody, requestTime, responseBody.toString());
             return httpResponseBody1;
         });
     }

@@ -31,6 +31,7 @@ public class DelOutboundOperationLogListener {
         OperationLog operationLog = new OperationLog();
         operationLog.setCreateBy(userCode);
         operationLog.setCreateByName(userName);
+        operationLog.setCreateTime(event.getNowDate());
         operationLog.setTraceId(tid);
         operationLog.setInvoiceNo(operationLogEnum.getInvoiceNo(source));
         operationLog.setInvoiceType(operationLogEnum.getInvoiceType(source));

@@ -39,5 +39,12 @@ public interface IInboundReceiptDetailService extends IService<InboundReceiptDet
     void deleteAndFileByWarehouseNo(String warehouseNo);
 
     List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO);
+
+    /**
+     * 校验包裹转运中是否存在该运单号 且 运单号所关联的订单未取消
+     * @param deliveryNo
+     * @return
+     */
+    int checkPackageTransfer(String deliveryNo);
 }
 

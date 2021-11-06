@@ -1,5 +1,6 @@
 package com.szmsd.finance.vo;
 
+import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
@@ -117,10 +118,13 @@ public class RefundRequestListVO {
     @Excel(name = "申请人")
     @ApiModelProperty(value = "申请人")
     private String createByName;
+
+    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "申请时间")
-    @Excel(name = "申请时间")
+    @Excel(name = "申请时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
+
     @Excel(name = "审核意见")
     @ApiModelProperty(value = "审核信息")
     private String reviewRemark;
@@ -128,10 +132,10 @@ public class RefundRequestListVO {
     @ApiModelProperty(value = "操作人")
     @Excel(name = "操作人")
     private String reviewerName;
-
+    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "处理时间")
-    @Excel(name = "处理时间")
+    @Excel(name = "处理时间",dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date auditTime;
 
     @ApiModelProperty(value = "审核人id")

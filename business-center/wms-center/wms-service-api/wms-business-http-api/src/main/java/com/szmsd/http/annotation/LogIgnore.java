@@ -17,4 +17,11 @@ public @interface LogIgnore {
      * @return 字段
      */
     String[] value() default {};
+
+    /**
+     * 缩写
+     *
+     * @return boolean
+     */
+    boolean abbr() default true;
 }

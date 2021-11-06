@@ -213,5 +213,10 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         Long userId = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getUserId).orElse(-1L);
         return baseMapper.querySkuStockByRange(inventoryStockByRangeDTO,userId);
     }
+
+    @Override
+    public int checkPackageTransfer(String deliveryNo) {
+        return baseMapper.checkPackageTransfer(deliveryNo);
+    }
 }
 
