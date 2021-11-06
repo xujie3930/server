@@ -36,6 +36,7 @@ public interface IDelOutboundBringVerifyService {
 
     /**
      * 通知修改wms发货指令
+     *
      * @param ids
      */
     void updateShipmentLabel(List<String> ids);
@@ -56,6 +57,14 @@ public interface IDelOutboundBringVerifyService {
      * @return ShipmentOrderResult
      */
     ShipmentOrderResult shipmentOrder(DelOutboundWrapperContext delOutboundWrapperContext);
+
+    /**
+     * 获取承运商标签文件
+     *
+     * @param delOutbound delOutbound
+     * @return boolean，true获取成功，false获取失败
+     */
+    boolean getShipmentLabel(DelOutbound delOutbound);
 
     /**
      * 取消承运商物流订单（客户端）

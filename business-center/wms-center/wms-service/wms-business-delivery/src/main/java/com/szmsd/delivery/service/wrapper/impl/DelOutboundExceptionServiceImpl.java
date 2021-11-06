@@ -97,6 +97,7 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
             }
         }
 
+        /*
         // 创建承运商物流订单
         ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
 
@@ -169,10 +170,11 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
             logger.error(e.getMessage(), e);
             throw new CommonException("500", "读取标签文件失败");
         }
+        */
 
         LambdaUpdateWrapper<DelOutbound> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.set(DelOutbound::getTrackingNo, shipmentOrderResult.getMainTrackingNumber());
-        lambdaUpdateWrapper.set(DelOutbound::getShipmentOrderNumber, shipmentOrderResult.getOrderNumber());
+        // lambdaUpdateWrapper.set(DelOutbound::getTrackingNo, shipmentOrderResult.getMainTrackingNumber());
+        // lambdaUpdateWrapper.set(DelOutbound::getShipmentOrderNumber, shipmentOrderResult.getOrderNumber());
         lambdaUpdateWrapper.set(DelOutbound::getShipmentRule, productCode);
         lambdaUpdateWrapper.set(DelOutbound::getShipmentService, pricedProductInfo.getLogisticsRouteId());
         lambdaUpdateWrapper.set(DelOutbound::getTrackingAcquireType, DelOutboundTrackingAcquireTypeEnum.WAREHOUSE_SUPPLIER.getCode());

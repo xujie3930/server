@@ -9,6 +9,8 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.FileStream;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -19,7 +21,9 @@ import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.*;
+import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
@@ -33,14 +37,18 @@ import com.szmsd.http.dto.Package;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -488,6 +496,76 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
             throw new CommonException("400", exceptionMessage);
         }
+    }
+
+    @Override
+    public boolean getShipmentLabel(DelOutbound delOutbound) {
+        String orderNumber = delOutbound.getShipmentOrderNumber();
+        // 获取标签
+        CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
+        command.setWarehouseCode(delOutbound.getWarehouseCode());
+        command.setOrderNumber(orderNumber);
+        // 获取标签文件增加重试机制
+        // 重试间隔：30s
+        int retryCount = 0;
+        boolean requestLabel = false;
+        // 记录最后一次的异常信息
+        CommonException commonException = null;
+        do {
+            DelOutboundOperationLogEnum.SMT_LABEL.listener(delOutbound);
+            logger.info("正在获取标签文件，单号：{}，重试次数：{}", delOutbound.getOrderNo(), retryCount);
+            if (null != commonException) {
+                logger.info("打印上一次的异常信息，", commonException);
+            }
+            ResponseObject<FileStream, ProblemDetails> responseObject = this.htpCarrierClientService.label(command);
+            if (null != responseObject) {
+                if (responseObject.isSuccess()) {
+                    FileStream fileStream = responseObject.getObject();
+                    String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound);
+                    File file = new File(pathname);
+                    if (!file.exists()) {
+                        try {
+                            FileUtils.forceMkdir(file);
+                        } catch (IOException e) {
+                            // 内部异常，不再重试，直接抛出去
+                            throw new CommonException("500", "创建文件夹[" + file.getPath() + "]失败，Error：" + e.getMessage());
+                        }
+                    }
+                    byte[] inputStream;
+                    if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
+                        File labelFile = new File(file.getPath() + "/" + orderNumber);
+                        try {
+                            FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
+                            requestLabel = true;
+                        } catch (IOException e) {
+                            // 内部异常，不再重试，直接抛出去
+                            throw new CommonException("500", "保存标签文件失败，Error：" + e.getMessage());
+                        }
+                    }
+                } else {
+                    // 接口响应异常，继续重试
+                    String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "获取标签文件流失败2");
+                    logger.error(exceptionMessage);
+                    commonException = new CommonException("500", exceptionMessage);
+                }
+            } else {
+                // 接口响应异常继续重试
+                logger.error("获取标签文件流失败");
+                commonException = new CommonException("500", "获取标签文件流失败");
+            }
+            if (!requestLabel) {
+                try {
+                    TimeUnit.SECONDS.sleep(30);
+                } catch (InterruptedException e) {
+                    logger.error(e.getMessage(), e);
+                }
+                retryCount++;
+            }
+        } while (!requestLabel && retryCount < 6);
+        if (null != commonException) {
+            throw commonException;
+        }
+        return false;
     }
 
     @Override

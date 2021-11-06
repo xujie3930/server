@@ -22,6 +22,11 @@ public class ThreadPoolExecutorConfiguration {
      */
     public static final String THREADPOOLEXECUTOR_SHIPMENTPACKINGEVENT = "ThreadPoolExecutor-ShipmentPackingEvent";
 
+    /**
+     * 重新获取标签文件
+     */
+    public static final String THREADPOOLEXECUTOR_SHIPMENTENUMLABEL = "ThreadPoolExecutor-ShipmentEnumLabel";
+
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundReviewed() {
         // 获取机器核数
@@ -52,6 +57,24 @@ public class ThreadPoolExecutorConfiguration {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(availableProcessors, availableProcessors, 30, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentPackingEvent", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 拒绝策略由主线程执行
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        return threadPoolExecutor;
+    }
+
+    @Bean(THREADPOOLEXECUTOR_SHIPMENTENUMLABEL)
+    public ThreadPoolExecutor threadPoolExecutorShipmentEnumLabel() {
+        // 获取机器核数
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        // 核心线程数量
+        availableProcessors = availableProcessors * 2;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(128);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(availableProcessors, availableProcessors, 30, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentEnumLabel", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
         // 拒绝策略由主线程执行
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());

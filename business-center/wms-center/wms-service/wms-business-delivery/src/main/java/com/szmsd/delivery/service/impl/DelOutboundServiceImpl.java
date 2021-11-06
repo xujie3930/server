@@ -1619,6 +1619,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (null == delOutbound) {
             throw new CommonException("400", "单据不存在");
         }
+        // 重新获取挂号场景：
+        // 报异常，核重后的异常。
+        // 在提审的时候异常，会审核失败他们自己会修改。只有核重后的，不能修改表单。
         boolean update = delOutboundExceptionService.againTrackingNo(delOutbound, dto);
         if (update) {
             DelOutboundFurtherHandlerDto furtherHandlerDto = new DelOutboundFurtherHandlerDto();
