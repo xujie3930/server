@@ -81,4 +81,10 @@
         ) temp
         GROUP BY sku
     </select>
+
+    <select id="checkPackageTransfer" resultType="int">
+        SELECT COUNT(1) FROM inbound_receipt ir RIGHT JOIN (
+                SELECT warehouse_no FROM inbound_receipt_detail WHERE delivery_no = #{deliveryNo}
+                ) temp ON temp.warehouse_no = ir.warehouse_no  WHERE ir.`status`  != 0
+    </select>
 </mapper>

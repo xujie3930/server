@@ -147,8 +147,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             List<InboundReceiptDetailDTO> inboundReceiptDetails = createInboundReceiptDTO.getInboundReceiptDetails();
             if (CollectionUtils.isNotEmpty(inboundReceiptDetails) && null == createInboundReceiptDTO.getId()) {
                 String deliveryNo = Optional.ofNullable(inboundReceiptDetails.get(0)).map(InboundReceiptDetailDTO::getDeliveryNo).orElse("");
-                Integer integer = iInboundReceiptDetailService.getBaseMapper().selectCount(Wrappers.<InboundReceiptDetail>lambdaQuery().eq(InboundReceiptDetail::getDeliveryNo, deliveryNo));
-                AssertUtil.isTrue(integer == 0, "该出库单已添加过转运入库单!");
+//                Integer integer = iInboundReceiptDetailService.getBaseMapper().selectCount(Wrappers.<InboundReceiptDetail>lambdaQuery().eq(InboundReceiptDetail::getDeliveryNo, deliveryNo));
+                int count = iInboundReceiptDetailService.checkPackageTransfer(deliveryNo);
+                AssertUtil.isTrue(count == 0, "该出库单已添加过转运入库单!");
             }
         }
     }

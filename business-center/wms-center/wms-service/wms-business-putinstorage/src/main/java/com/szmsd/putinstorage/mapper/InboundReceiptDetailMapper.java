@@ -17,4 +17,6 @@ public interface InboundReceiptDetailMapper extends BaseMapper<InboundReceiptDet
     void deleteByWarehouseNo(String warehouseNo);
 
     List<SkuInventoryStockRangeVo> querySkuStockByRange(@Param("cm") InventoryStockByRangeDTO inventoryStockByRangeDTO, @Param("userId") Long userId);
+
+    int checkPackageTransfer(String deliveryNo);
 }
