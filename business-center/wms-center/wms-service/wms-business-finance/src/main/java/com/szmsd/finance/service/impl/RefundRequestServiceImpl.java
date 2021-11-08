@@ -137,7 +137,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             List<String> errorMsg = new LinkedList<>();
             basPackingAddList.forEach(basSellAccountPeriodAddDTO -> {
                 if (StringUtils.isNotBlank(basSellAccountPeriodAddDTO.getTreatmentProperties()) && "赔偿".equals(basSellAccountPeriodAddDTO.getTreatmentProperties())) {
-                    FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo, errorMsg, Default.class);
+                    FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo, errorMsg, ICompensateCheck.class);
                 } else {
                     FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo, errorMsg, Default.class);
                 }
@@ -175,14 +175,17 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 x.setCurrencyCode(remoteApi.getSubNameByValue(mainSubCode.getCurrency(), x.getCurrencyCode()));
 
                 // 赔付币别
-                String compensationPaymentCurrency = remoteApi.getSubNameByValue(mainSubCode.getCurrency(), x.getCompensationPaymentCurrencyCode());
-                if (StringUtils.isNotBlank(compensationPaymentCurrency))
+                if (StringUtils.isNotBlank(x.getCompensationPaymentCurrencyCode())) {
+                    String compensationPaymentCurrency = remoteApi.getSubNameByValue(mainSubCode.getCurrency(), x.getCompensationPaymentCurrencyCode());
                     x.setCompensationPaymentCurrency(compensationPaymentCurrency);
-                else x.setCompensationPaymentCurrencyCode(null);
+                    if (StringUtils.isBlank(compensationPaymentCurrency)) x.setCompensationPaymentCurrency(null);
+                } else {
+                    x.setCompensationPaymentCurrencyCode(null);
+                }
             });
             StringBuilder errorMsgBuilder = new StringBuilder();
             //客户号-客户预处理号 校验预处理号是否是已完成的订单
-            Map<String, List<String>> collect = basPackingAddList.stream().filter(x -> StringUtils.isNotBlank(x.getProcessNo())).distinct().collect(Collectors.groupingBy(RefundRequestDTO::getCusCode, Collectors.mapping(RefundRequestDTO::getProcessNo, Collectors.toList())));
+            Map<String, List<String>> collect = basPackingAddList.stream().filter(x -> StringUtils.isNotBlank(x.getOrderNo())).distinct().collect(Collectors.groupingBy(RefundRequestDTO::getCusCode, Collectors.mapping(RefundRequestDTO::getOrderNo, Collectors.toList())));
             collect.forEach((cusCode, processNoList) -> {
                 Map<Integer, List<String>> ck = processNoList.stream().collect(Collectors.groupingBy(x -> x.startsWith("CK") ? 1 : 0));
                 ck.forEach((type, list) -> {

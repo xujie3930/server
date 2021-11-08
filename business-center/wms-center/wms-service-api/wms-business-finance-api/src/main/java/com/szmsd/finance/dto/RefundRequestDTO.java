@@ -13,7 +13,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -198,8 +197,4 @@ public class RefundRequestDTO {
     public String toString() {
         return JSONObject.toJSONString(this);
     }
-}
-
-interface ICompensateCheck extends Default {
-
 }
