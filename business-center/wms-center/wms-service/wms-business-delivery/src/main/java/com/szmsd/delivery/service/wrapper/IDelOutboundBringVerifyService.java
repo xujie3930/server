@@ -81,6 +81,14 @@ public interface IDelOutboundBringVerifyService {
     void shipmentShipping(DelOutbound delOutbound);
 
     /**
+     * 创建错误发货指令
+     *
+     * @param delOutbound delOutbound
+     * @param exRemark    exRemark
+     */
+    void shipmentShippingEx(DelOutbound delOutbound, String exRemark);
+
+    /**
      * 取消承运商物流订单（客户端）
      *
      * @param warehouseCode       warehouseCode

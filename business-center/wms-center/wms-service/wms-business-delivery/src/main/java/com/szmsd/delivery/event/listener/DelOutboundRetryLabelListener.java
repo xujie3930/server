@@ -74,6 +74,8 @@ public class DelOutboundRetryLabelListener {
                         failCount++;
                         if (failCount > 5) {
                             state = DelOutboundRetryLabelStateEnum.FAIL.name();
+                            // 发货指令
+                            this.delOutboundBringVerifyService.shipmentShippingEx(delOutbound, lastFailMessage);
                         } else {
                             state = DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name();
                             int t = retryTimeConfiguration[failCount];

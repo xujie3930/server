@@ -675,6 +675,24 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     @Override
+    public void shipmentShippingEx(DelOutbound delOutbound, String exRemark) {
+        ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+        shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+        shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+        } else {
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+        }
+        shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+        shipmentUpdateRequestDto.setIsEx(true);
+        shipmentUpdateRequestDto.setExType("OutboundGetTrackingFailed");
+        shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(exRemark, "操作失败"));
+        shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+        htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+    }
+
+    @Override
     public void cancellation(String warehouseCode, String referenceNumber, String shipmentOrderNumber, String trackingNo) {
         CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
         command.setWarehouseCode(warehouseCode);
