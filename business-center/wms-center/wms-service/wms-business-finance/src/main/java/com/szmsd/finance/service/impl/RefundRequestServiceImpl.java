@@ -1,7 +1,6 @@
 package com.szmsd.finance.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasSub;
@@ -31,6 +30,7 @@ import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
 import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -145,6 +145,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             AssertUtil.isTrue(CollectionUtils.isEmpty(errorMsg), String.join("\n", errorMsg));
             basPackingAddList.forEach(x -> {
                 AssertUtil.isTrue(remoteApi.checkCusCode(x.getCusCode()), "用户" + x.getCusCode() + "不存在");
+                // 校验单号是否属于他且
                 // 处理性质	责任地区	所属仓库 业务类型	业务明细	费用类型	费用明细 属性
                 ConfigData.MainSubCode mainSubCode = configData.getMainSubCode();
 
@@ -179,6 +180,30 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     x.setCompensationPaymentCurrency(compensationPaymentCurrency);
                 else x.setCompensationPaymentCurrencyCode(null);
             });
+            StringBuilder errorMsgBuilder = new StringBuilder();
+            //客户号-客户预处理号 校验预处理号是否是已完成的订单
+            Map<String, List<String>> collect = basPackingAddList.stream().filter(x -> StringUtils.isNotBlank(x.getProcessNo())).distinct().collect(Collectors.groupingBy(RefundRequestDTO::getCusCode, Collectors.mapping(RefundRequestDTO::getProcessNo, Collectors.toList())));
+            collect.forEach((cusCode, processNoList) -> {
+                Map<Integer, List<String>> ck = processNoList.stream().collect(Collectors.groupingBy(x -> x.startsWith("CK") ? 1 : 0));
+                ck.forEach((type, list) -> {
+                    QueryFinishListDTO queryFinishListDTO = new QueryFinishListDTO();
+                    queryFinishListDTO.setCusCode(cusCode);
+                    queryFinishListDTO.setNoList(processNoList);
+                    queryFinishListDTO.setType(type);
+                    queryFinishListDTO.setPageNum(1);
+                    queryFinishListDTO.setPageSize(999);
+                    TableDataInfo<QueryFinishListVO> queryFinishListVOTableDataInfo = this.queryFinishList(queryFinishListDTO);
+                    AssertUtil.isTrue(queryFinishListVOTableDataInfo.getCode() == HttpStatus.SUCCESS, "校验单号失败");
+                    if (queryFinishListVOTableDataInfo.getTotal() != processNoList.size()) {
+                        List<String> collect1 = queryFinishListVOTableDataInfo.getRows().stream().map(QueryFinishListVO::getNo).collect(Collectors.toList());
+                        processNoList.removeAll(collect1);
+                        errorMsgBuilder.append("请检查用户").append(cusCode).append("单号是否已完成:").append(StringUtils.join(processNoList, ",")).append("\n");
+                    }
+                });
+            });
+            if (StringUtils.isNotBlank(errorMsgBuilder.toString())) {
+                throw new RuntimeException(errorMsgBuilder.toString());
+            }
         }
     }
 

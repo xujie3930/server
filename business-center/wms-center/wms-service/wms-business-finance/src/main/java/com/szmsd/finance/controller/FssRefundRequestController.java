@@ -100,11 +100,12 @@ public class FssRefundRequestController extends BaseController {
         ClassPathResource classPathResource = new ClassPathResource("/template/退费申请模板.xls");
         try (InputStream inputStream = classPathResource.getInputStream();
              ServletOutputStream outputStream = response.getOutputStream()) {
-            IOUtils.copy(inputStream, outputStream);
-            response.setContentType("application/vnd.ms-excel");
+
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
             response.setCharacterEncoding("UTF-8");
             String excelName = URLEncoder.encode("退费申请模板", "UTF-8");
             response.setHeader("Content-Disposition", "attachment;filename=" + excelName + ".xls");
+            IOUtils.copy(inputStream, outputStream);
             outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
