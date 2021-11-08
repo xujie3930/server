@@ -1,10 +1,5 @@
 package com.szmsd.delivery.service.wrapper;
 
-import cn.hutool.core.codec.Base64;
-import com.szmsd.bas.api.domain.BasAttachment;
-import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
-import com.szmsd.bas.api.enums.AttachmentTypeEnum;
-import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -17,24 +12,20 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
-import com.szmsd.delivery.util.PdfUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.*;
-import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -346,10 +337,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public void handle(ApplicationContext context) {
-            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
-            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
-            delOutboundBringVerifyService.getShipmentLabel(delOutbound);
+            // 修改为异步执行
+//            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+//            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+//            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+//            delOutboundBringVerifyService.getShipmentLabel(delOutbound);
         }
 
         @Override
@@ -378,7 +370,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public void handle(ApplicationContext context) {
-            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            // 修改为异步执行
+            /*DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
             String pathname = null;
@@ -475,7 +468,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
                 throw new CommonException("500", "读取标签文件失败");
-            }
+            }*/
         }
 
         @Override
@@ -766,7 +759,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+            // 修改为异步执行
+            /*ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
             shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
             shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
             if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
@@ -786,7 +780,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             }
             if (!responseVO.getSuccess()) {
                 throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新发货指令失败2"));
-            }
+            }*/
+            // 提交一个获取标签的任务
+            IDelOutboundRetryLabelService delOutboundRetryLabelService = SpringUtils.getBean(IDelOutboundRetryLabelService.class);
+            delOutboundRetryLabelService.save(delOutbound.getOrderNo());
+            // 修改出库单相关信息
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());

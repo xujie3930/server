@@ -16,10 +16,7 @@ import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
-import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
-import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
-import com.szmsd.delivery.service.wrapper.IDelOutboundExceptionService;
-import com.szmsd.delivery.service.wrapper.PricingEnum;
+import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
@@ -178,6 +175,8 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
         lambdaUpdateWrapper.set(DelOutbound::getShipmentRule, productCode);
         lambdaUpdateWrapper.set(DelOutbound::getShipmentService, pricedProductInfo.getLogisticsRouteId());
         lambdaUpdateWrapper.set(DelOutbound::getTrackingAcquireType, DelOutboundTrackingAcquireTypeEnum.WAREHOUSE_SUPPLIER.getCode());
+        // 将状态设置成begin，重新执行核重之后的流程。
+        lambdaUpdateWrapper.set(DelOutbound::getShipmentState, ShipmentEnum.BEGIN.name());
         lambdaUpdateWrapper.eq(DelOutbound::getId, delOutbound.getId());
         boolean update = delOutboundService.update(null, lambdaUpdateWrapper);
         Object[] params = new Object[]{delOutbound, productCode};

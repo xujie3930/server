@@ -435,8 +435,8 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
     },
     SMT_SHIPMENT_SHIPPING {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},是否异常:{2}");
-        final MessageFormat exFormat = new MessageFormat("出库单:{0},类型:{1},是否异常:{2},异常原因:{3}");
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},挂号:{2},是否异常:{3}");
+        final MessageFormat exFormat = new MessageFormat("出库单:{0},类型:{1},挂号:{2},是否异常:{3},异常原因:{4}");
 
         @Override
         public String getType() {
@@ -447,11 +447,11 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         public String format(DelOutbound delOutbound) {
             if (DelOutboundExceptionStateEnum.ABNORMAL.getCode().equals(delOutbound.getExceptionState())) {
                 Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
-                        "true", delOutbound.getExceptionMessage()};
+                        delOutbound.getTrackingNo(), "true", delOutbound.getExceptionMessage()};
                 return exFormat.format(arguments);
             } else {
                 Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
-                        "false"};
+                        delOutbound.getTrackingNo(), "false"};
                 return format.format(arguments);
             }
         }

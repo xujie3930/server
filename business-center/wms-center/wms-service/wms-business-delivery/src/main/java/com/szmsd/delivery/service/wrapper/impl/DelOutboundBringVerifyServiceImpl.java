@@ -1,7 +1,11 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
+import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
+import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
@@ -10,7 +14,6 @@ import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.FileStream;
-import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -25,6 +28,7 @@ import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
+import com.szmsd.delivery.util.PdfUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.delivery.vo.DelOutboundCombinationVO;
@@ -36,6 +40,7 @@ import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.Package;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
+import com.szmsd.http.vo.ResponseVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +53,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -84,6 +88,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IDelOutboundCombinationService delOutboundCombinationService;
     @Autowired
     private IDelOutboundBringVerifyAsyncService delOutboundBringVerifyAsyncService;
+    @Autowired
+    private RemoteAttachmentService remoteAttachmentService;
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -505,67 +511,167 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
         command.setWarehouseCode(delOutbound.getWarehouseCode());
         command.setOrderNumber(orderNumber);
-        // 获取标签文件增加重试机制
-        // 重试间隔：30s
-        int retryCount = 0;
-        boolean requestLabel = false;
-        // 记录最后一次的异常信息
-        CommonException commonException = null;
-        do {
-            DelOutboundOperationLogEnum.SMT_LABEL.listener(delOutbound);
-            logger.info("正在获取标签文件，单号：{}，重试次数：{}", delOutbound.getOrderNo(), retryCount);
-            if (null != commonException) {
-                logger.info("打印上一次的异常信息，", commonException);
-            }
-            ResponseObject<FileStream, ProblemDetails> responseObject = this.htpCarrierClientService.label(command);
-            if (null != responseObject) {
-                if (responseObject.isSuccess()) {
-                    FileStream fileStream = responseObject.getObject();
-                    String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound);
-                    File file = new File(pathname);
-                    if (!file.exists()) {
-                        try {
-                            FileUtils.forceMkdir(file);
-                        } catch (IOException e) {
-                            // 内部异常，不再重试，直接抛出去
-                            throw new CommonException("500", "创建文件夹[" + file.getPath() + "]失败，Error：" + e.getMessage());
-                        }
+        DelOutboundOperationLogEnum.SMT_LABEL.listener(delOutbound);
+        logger.info("正在获取标签文件，单号：{}", delOutbound.getOrderNo());
+        ResponseObject<FileStream, ProblemDetails> responseObject = this.htpCarrierClientService.label(command);
+        if (null != responseObject) {
+            if (responseObject.isSuccess()) {
+                FileStream fileStream = responseObject.getObject();
+                String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound);
+                File file = new File(pathname);
+                if (!file.exists()) {
+                    try {
+                        FileUtils.forceMkdir(file);
+                    } catch (IOException e) {
+                        // 内部异常，不再重试，直接抛出去
+                        throw new CommonException("500", "创建文件夹[" + file.getPath() + "]失败，Error：" + e.getMessage());
                     }
-                    byte[] inputStream;
-                    if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
-                        File labelFile = new File(file.getPath() + "/" + orderNumber);
-                        try {
-                            FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
-                            requestLabel = true;
-                        } catch (IOException e) {
-                            // 内部异常，不再重试，直接抛出去
-                            throw new CommonException("500", "保存标签文件失败，Error：" + e.getMessage());
-                        }
+                }
+                byte[] inputStream;
+                if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
+                    File labelFile = new File(file.getPath() + "/" + orderNumber);
+                    try {
+                        FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
+                        return true;
+                    } catch (IOException e) {
+                        // 内部异常，不再重试，直接抛出去
+                        throw new CommonException("500", "保存标签文件失败，Error：" + e.getMessage());
                     }
-                } else {
-                    // 接口响应异常，继续重试
-                    String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "获取标签文件流失败2");
-                    logger.error(exceptionMessage);
-                    commonException = new CommonException("500", exceptionMessage);
                 }
             } else {
-                // 接口响应异常继续重试
-                logger.error("获取标签文件流失败");
-                commonException = new CommonException("500", "获取标签文件流失败");
+                // 接口响应异常，继续重试
+                String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "获取标签文件流失败2");
+                logger.error(exceptionMessage);
+                throw new CommonException("500", exceptionMessage);
             }
-            if (!requestLabel) {
-                try {
-                    TimeUnit.SECONDS.sleep(30);
-                } catch (InterruptedException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                retryCount++;
-            }
-        } while (!requestLabel && retryCount < 6);
-        if (null != commonException) {
-            throw commonException;
+        } else {
+            // 接口响应异常继续重试
+            logger.error("获取标签文件流失败");
+            throw new CommonException("500", "获取标签文件流失败");
         }
         return false;
+    }
+
+    @Override
+    public void htpShipmentLabel(DelOutbound delOutbound) {
+        DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
+        String pathname = null;
+        // 如果是批量出库，将批量出库上传的文件和标签文件合并在一起传过去
+        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
+                && delOutbound.getIsLabelBox()) {
+            // 判断文件是否已经创建
+            String mergeFileDirPath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
+            File mergeFileDir = new File(mergeFileDirPath);
+            if (!mergeFileDir.exists()) {
+                try {
+                    FileUtils.forceMkdir(mergeFileDir);
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                    throw new CommonException("500", "创建文件夹失败，" + e.getMessage());
+                }
+            }
+            String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
+            File mergeFile = new File(mergeFilePath);
+            if (!mergeFile.exists()) {
+                // 合并文件
+                // 查询上传文件
+                // 查询上传文件信息
+                BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
+                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                if (null != listR && null != listR.getData()) {
+                    List<BasAttachment> attachmentList = listR.getData();
+                    if (CollectionUtils.isNotEmpty(attachmentList)) {
+                        BasAttachment attachment = attachmentList.get(0);
+                        // 箱标文件 - 上传的
+                        String boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
+                        String labelFilePath = "";
+                        if ((DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel()))) {
+                            // 批量出库的自提出库标签是上传的
+                            // 查询上传的文件
+                            basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                            basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
+                            basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                            R<List<BasAttachment>> documentListR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                            if (null != documentListR && null != documentListR.getData()) {
+                                List<BasAttachment> documentList = documentListR.getData();
+                                if (CollectionUtils.isNotEmpty(documentList)) {
+                                    BasAttachment basAttachment = documentList.get(0);
+                                    labelFilePath = basAttachment.getAttachmentPath() + "/" + basAttachment.getAttachmentName() + basAttachment.getAttachmentFormat();
+                                }
+                            }
+                        } else {
+                            // 标签文件 - 从承运商物流那边获取的
+                            labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+                        }
+                        // 合并文件
+                        try {
+                            if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath)) {
+                                pathname = mergeFilePath;
+                            }
+                        } catch (IOException e) {
+                            logger.error(e.getMessage(), e);
+                            throw new CommonException("500", "合并箱标文件，标签文件失败");
+                        }
+                    } else {
+                        throw new CommonException("500", "箱标文件未上传");
+                    }
+                } else {
+                    throw new CommonException("500", "箱标文件未上传");
+                }
+            }
+        }
+        if (null == pathname) {
+            pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+        }
+        File labelFile = new File(pathname);
+        if (!labelFile.exists()) {
+            throw new CommonException("500", "标签文件不存在");
+        }
+        try {
+            byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
+            String encode = cn.hutool.core.codec.Base64.encode(byteArray);
+            ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+            shipmentLabelChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
+            shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+            shipmentLabelChangeRequestDto.setLabel(encode);
+            ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
+            if (null == responseVO || null == responseVO.getSuccess()) {
+                throw new CommonException("400", "更新标签失败");
+            }
+            if (!responseVO.getSuccess()) {
+                throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new CommonException("500", "读取标签文件失败");
+        }
+    }
+
+    @Override
+    public void shipmentShipping(DelOutbound delOutbound) {
+        ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+        shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+        shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+        } else {
+            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+        }
+        shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+        shipmentUpdateRequestDto.setIsEx(false);
+        shipmentUpdateRequestDto.setExType(null);
+        shipmentUpdateRequestDto.setExRemark(null);
+        shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+        ResponseVO responseVO = htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+        if (null == responseVO || null == responseVO.getSuccess()) {
+            throw new CommonException("400", "更新发货指令失败");
+        }
+        if (!responseVO.getSuccess()) {
+            throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新发货指令失败2"));
+        }
     }
 
     @Override

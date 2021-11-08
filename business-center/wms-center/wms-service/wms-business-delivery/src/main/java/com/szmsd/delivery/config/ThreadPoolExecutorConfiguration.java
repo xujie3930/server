@@ -68,9 +68,9 @@ public class ThreadPoolExecutorConfiguration {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        availableProcessors = availableProcessors * 2;
+        availableProcessors = availableProcessors * 4;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(128);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(availableProcessors, availableProcessors, 30, TimeUnit.SECONDS, queue);
         // 线程池工厂

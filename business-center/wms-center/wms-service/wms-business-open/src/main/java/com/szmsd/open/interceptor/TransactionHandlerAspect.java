@@ -86,7 +86,7 @@ public class TransactionHandlerAspect {
                             result = ResponseVO.failed(e.getMessage());
                         } catch (Exception e) {
                             logger.error(e.getMessage(), e);
-                            result = ResponseVO.failed("执行失败，请重新再试");
+                            result = ResponseVO.failed("执行失败，请重新再试，" + e.getMessage());
                         }
                     }
                 } else {
@@ -94,7 +94,7 @@ public class TransactionHandlerAspect {
                 }
             } catch (InterruptedException e) {
                 logger.error(e.getMessage(), e);
-                result = ResponseVO.failed("执行失败，请重新再试");
+                result = ResponseVO.failed("执行失败，请重新再试，" + e.getMessage());
             } finally {
                 lock.unlock();
             }

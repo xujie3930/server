@@ -67,6 +67,20 @@ public interface IDelOutboundBringVerifyService {
     boolean getShipmentLabel(DelOutbound delOutbound);
 
     /**
+     * 传输标签文件给WMS
+     *
+     * @param delOutbound delOutbound
+     */
+    void htpShipmentLabel(DelOutbound delOutbound);
+
+    /**
+     * 创建发货指令
+     *
+     * @param delOutbound delOutbound
+     */
+    void shipmentShipping(DelOutbound delOutbound);
+
+    /**
      * 取消承运商物流订单（客户端）
      *
      * @param warehouseCode       warehouseCode
