@@ -74,8 +74,8 @@ public class ContextFilter implements Filter {
                         .replaceAll(" ", "")
                         .replaceAll("\n", "")
                         .replaceAll("\r", "");
-                if (requestBody.length() > RESPONSE_CONTENT_LENGTH) {
-                    requestBody = responseBody.substring(0, RESPONSE_CONTENT_LENGTH);
+                if (responseBody.length() > RESPONSE_CONTENT_LENGTH) {
+                    responseBody = responseBody.substring(0, RESPONSE_CONTENT_LENGTH);
                 }
             }
             builder.append("{\"requestBody\":").append(requestBody).append(",");
