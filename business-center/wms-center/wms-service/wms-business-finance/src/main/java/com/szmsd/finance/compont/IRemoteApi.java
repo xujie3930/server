@@ -12,6 +12,9 @@ import java.util.List;
  */
 public interface IRemoteApi {
     BasSub getSubCodeObj(String mainCode, String subName);
+
+    String getSubNameByValue(String mainCode, String subValue);
+
     String getSubCodeObjSubCode(String mainCode, String subName);
 
     List<String> genNo(Integer count);
@@ -25,5 +28,11 @@ public interface IRemoteApi {
      * @param wareHouseName
      * @return
      */
-    String getWareHouseCode(String wareHouseName);
+    String getWareHouseName(String wareHouseName);
+
+    /**
+     * 校验用户id
+     * @param cusCode
+     */
+    boolean checkCusCode(String cusCode);
 }

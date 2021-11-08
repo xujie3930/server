@@ -15,7 +15,6 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.finance.compont.ConfigData;
 import com.szmsd.finance.compont.IRemoteApi;
-import com.szmsd.finance.config.ExportValid;
 import com.szmsd.finance.config.FileVerifyUtil;
 import com.szmsd.finance.domain.FssRefundRequest;
 import com.szmsd.finance.dto.*;
@@ -135,15 +134,22 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         if (isExport) {
             //检验规则
             AtomicInteger importNo = new AtomicInteger(1);
-           List<String> errorMsg = new LinkedList<>();
-            basPackingAddList.forEach(basSellAccountPeriodAddDTO -> FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo,errorMsg, Default.class));
+            List<String> errorMsg = new LinkedList<>();
+            basPackingAddList.forEach(basSellAccountPeriodAddDTO -> {
+                if (StringUtils.isNotBlank(basSellAccountPeriodAddDTO.getTreatmentProperties()) && "赔偿".equals(basSellAccountPeriodAddDTO.getTreatmentProperties())) {
+                    FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo, errorMsg, Default.class);
+                } else {
+                    FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo, errorMsg, Default.class);
+                }
+            });
             AssertUtil.isTrue(CollectionUtils.isEmpty(errorMsg), String.join("\n", errorMsg));
             basPackingAddList.forEach(x -> {
+                AssertUtil.isTrue(remoteApi.checkCusCode(x.getCusCode()), "用户" + x.getCusCode() + "不存在");
                 // 处理性质	责任地区	所属仓库 业务类型	业务明细	费用类型	费用明细 属性
                 ConfigData.MainSubCode mainSubCode = configData.getMainSubCode();
 
                 x.setTreatmentPropertiesCode(remoteApi.getSubCode(mainSubCode.getTreatmentProperties(), x.getTreatmentProperties()));
-                x.setWarehouseCode(remoteApi.getWareHouseCode(x.getWarehouseName()));
+                x.setWarehouseName(remoteApi.getWareHouseName(x.getWarehouseCode()));
 
 //                x.setResponsibilityAreaCode(remoteApi.getSubCode(mainSubCode.getResponsibilityArea(), x.getResponsibilityArea()));
 
@@ -151,37 +157,34 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
 //                String subValue = businessTypeObj.getSubValue();
 //                x.setBusinessDetailsCode(remoteApi.getSubCode(subValue, x.getBusinessDetails()));
 
-                x.setFeeTypeCode( remoteApi.getSubCodeObjSubCode(mainSubCode.getTypesOfFee(), x.getFeeTypeName()));
+                x.setFeeTypeCode(remoteApi.getSubCodeObjSubCode(mainSubCode.getTypesOfFee(), x.getFeeTypeName()));
 //                String feeTypeSubValue = feeTypeSubCodeObj.getSubValue();
 //                x.setFeeCategoryCode(remoteApi.getSubCode(feeTypeSubValue, x.getFeeCategoryName()));
                 String attributesCode = remoteApi.getSubCode(mainSubCode.getProperty(), x.getAttributes());
-                if (StringUtils.isNotBlank(attributesCode)){
+                if (StringUtils.isNotBlank(attributesCode)) {
                     x.setAttributesCode(attributesCode);
-                }else {
+                } else {
                     x.setAttributes(null);
                 }
 
                 // 供应商是否完成赔付
                 x.setCompensationPaymentFlag((StringUtils.isNotBlank(x.getCompensationPaymentFlag()) && "已完成".equals(x.getCompensationPaymentFlag())) ? "1" : "0");
                 x.setCompensationPaymentArrivedFlag((StringUtils.isNotBlank(x.getCompensationPaymentFlag()) && "是".equals(x.getCompensationPaymentFlag())) ? "1" : "0");
-                String currencyCode = remoteApi.getSubCodeObj(mainSubCode.getCurrency(), x.getCurrencyName()).getSubValue();
-                AssertUtil.isTrue(StringUtils.isNotBlank(currencyCode),"请检查"+x.getCurrencyName()+"是否存在");
-                x.setCurrencyCode(currencyCode);
-                String compensationPaymentCurrencyCode = remoteApi.getSubCodeObj(mainSubCode.getCurrency(), x.getCompensationPaymentCurrency()).getSubValue();
-                if (StringUtils.isNotBlank(currencyCode)) {
-                    x.setCompensationPaymentCurrencyCode(compensationPaymentCurrencyCode);
-                }else {
-                    x.setCompensationPaymentCurrency(null);
-                }
 
+                x.setCurrencyCode(remoteApi.getSubNameByValue(mainSubCode.getCurrency(), x.getCurrencyCode()));
 
+                // 赔付币别
+                String compensationPaymentCurrency = remoteApi.getSubNameByValue(mainSubCode.getCurrency(), x.getCompensationPaymentCurrencyCode());
+                if (StringUtils.isNotBlank(compensationPaymentCurrency))
+                    x.setCompensationPaymentCurrency(compensationPaymentCurrency);
+                else x.setCompensationPaymentCurrencyCode(null);
             });
         }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int approve( RefundReviewDTO refundReviewDTO) {
+    public int approve(RefundReviewDTO refundReviewDTO) {
         List<String> ids = refundReviewDTO.getIdList();
         RefundStatusEnum status = refundReviewDTO.getStatus();
         String reviewRemark = refundReviewDTO.getReviewRemark();

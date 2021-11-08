@@ -4,9 +4,11 @@ import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.BasSellerEmailDto;
+import com.szmsd.bas.dto.BasSellerQueryDto;
 import com.szmsd.bas.dto.ServiceConditionDto;
 import com.szmsd.bas.dto.VatQueryDto;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +28,12 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
             public R<String> getLoginSellerCode(){
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public TableDataInfo list(BasSellerQueryDto basSeller) {
+                throw new RuntimeException("获取用户列表失败");
+            }
+
             @Override
             public R<String> getInspection(@RequestBody String sellerCode){
                 return R.convertResultJson(throwable);

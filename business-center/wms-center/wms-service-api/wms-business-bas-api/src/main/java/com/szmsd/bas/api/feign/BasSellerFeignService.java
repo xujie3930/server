@@ -7,9 +7,11 @@ import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasSellerEmailDto;
+import com.szmsd.bas.dto.BasSellerQueryDto;
 import com.szmsd.bas.dto.ServiceConditionDto;
 import com.szmsd.bas.dto.VatQueryDto;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +27,9 @@ public interface BasSellerFeignService {
     @PostMapping(value = "/bas/seller/getLoginSellerCode")
     R<String> getLoginSellerCode();
 
+    @PostMapping("/bas/seller/list")
+    @ApiOperation(value = "分页查询模块列表",notes = "分页查询模块列表")
+    TableDataInfo<BasSellerCertificate> list(@RequestBody BasSellerQueryDto basSeller);
     /**
      * 查询客户验货要求
      *
