@@ -607,7 +607,14 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                         totalAmount = totalAmount.add(amount);
                     }
                     IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
-                    delOutboundChargeService.saveCharges(delOutboundCharges);
+                    try {
+                        logger.info("开始保存出库单费用明细，数据条数：{}", delOutboundCharges.size());
+                        delOutboundChargeService.saveCharges(delOutboundCharges);
+                        logger.info("保存出库单费用明细完成");
+                    } catch (Exception e) {
+                        logger.info("保存出库单费用明细失败，{}", e.getMessage());
+                        throw e;
+                    }
                     delOutbound.setAmount(totalAmount);
                     delOutbound.setCurrencyCode(totalCurrencyCode);
                     DelOutboundOperationLogEnum.SMT_PRC_PRICING.listener(delOutbound);

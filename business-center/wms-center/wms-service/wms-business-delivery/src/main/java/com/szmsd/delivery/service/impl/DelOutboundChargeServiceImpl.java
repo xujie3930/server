@@ -25,7 +25,6 @@ import java.util.List;
 @Service
 public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeMapper, DelOutboundCharge> implements IDelOutboundChargeService {
 
-
     /**
      * 查询出库单费用明细模块
      *
@@ -102,7 +101,6 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
         this.saveBatch(charges);
     }
 
-    @Transactional
     @Override
     public List<DelOutboundCharge> listCharges(String orderNo) {
         LambdaQueryWrapper<DelOutboundCharge> queryWrapper = Wrappers.lambdaQuery();
@@ -110,7 +108,7 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
         return this.list(queryWrapper);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void clearCharges(String orderNo) {
         LambdaQueryWrapper<DelOutboundCharge> queryWrapper = Wrappers.lambdaQuery();
