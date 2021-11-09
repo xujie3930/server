@@ -52,10 +52,13 @@ public class ApplicationContainer {
             if (null == handle) {
                 throw new RuntimeException("[" + this.currentState.name() + "] handle is null");
             }
+            logger.info("(1.1)开始执行，状态：{}", this.currentState.name());
             if (handle.condition(context, this.currentState)) {
                 try {
                     handle.handle(context);
+                    logger.info("(1.2)执行成功，状态：{}", this.currentState.name());
                 } catch (Exception e) {
+                    logger.info("(1.3)执行失败，状态：{}，错误信息：{}", this.currentState.name(), e.getMessage());
                     logger.error(e.getMessage(), e);
                     // 处理错误异常
                     handle.errorHandler(context, e, this.currentState);
