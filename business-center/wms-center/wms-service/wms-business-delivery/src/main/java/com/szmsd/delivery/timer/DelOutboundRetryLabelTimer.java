@@ -39,7 +39,7 @@ public class DelOutboundRetryLabelTimer {
      */
     @Async
     // 秒域 分域 时域 日域 月域 周域 年域
-    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/30 * * * * ?")
     public void retryLabel() {
         logger.info("开始执行任务 - 处理完成的单据");
         // 外层锁，保证定时任务只有一个服务调用
