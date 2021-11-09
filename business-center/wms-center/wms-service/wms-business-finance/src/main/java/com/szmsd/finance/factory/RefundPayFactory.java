@@ -93,6 +93,8 @@ public class RefundPayFactory extends AbstractPayFactory {
         AccountSerialBillDTO serialBill = serialBillInfoList.get(0);
         serialBill.setNo(dto.getNo());
         serialBill.setRemark(dto.getRemark());
+        serialBill.setWarehouseCode(dto.getWarehouseCode());
+        serialBill.setWarehouseName(dto.getWarehouseName());
         serialBill.setPaymentTime(new Date());
         AccountSerialBill accountSerialBill = new AccountSerialBill();
         BeanUtils.copyProperties(serialBill,accountSerialBill);
