@@ -105,6 +105,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         if (!(DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(delOutbound.getState())
                 || DelOutboundStateEnum.PROCESSING.getCode().equals(delOutbound.getState())
                 || DelOutboundStateEnum.DELIVERED.getCode().equals(delOutbound.getState()))) {
+            logger.info("(1.3)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
             return 0;
         }
         DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
