@@ -3,7 +3,7 @@ package com.szmsd.delivery.timer;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.delivery.domain.DelOutboundRetryLabel;
-import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
+import com.szmsd.delivery.enums.DelOutboundRetryLabelStateEnum;
 import com.szmsd.delivery.event.DelOutboundRetryLabelEvent;
 import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
@@ -41,14 +41,18 @@ public class DelOutboundRetryLabelTimer {
     // 秒域 分域 时域 日域 月域 周域 年域
     @Scheduled(cron = "0/10 * * * * ?")
     public void retryLabel() {
-        logger.debug("开始执行任务 - 处理完成的单据");
+        logger.info("开始执行任务 - 处理完成的单据");
         // 外层锁，保证定时任务只有一个服务调用
         String key = applicationName + ":DelOutboundRetryLabelTimer:retryLabel";
         this.doWorker(key, () -> {
             // 查询初始化的任务执行
             LambdaQueryWrapper<DelOutboundRetryLabel> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.select(DelOutboundRetryLabel::getId);
-            queryWrapper.eq(DelOutboundRetryLabel::getState, DelOutboundCompletedStateEnum.INIT.getCode());
+            queryWrapper.and(qw -> {
+                qw.eq(DelOutboundRetryLabel::getState, DelOutboundRetryLabelStateEnum.WAIT.name())
+                        .or()
+                        .eq(DelOutboundRetryLabel::getState, DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name());
+            });
             // 小于6次
             queryWrapper.lt(DelOutboundRetryLabel::getFailCount, 6);
             // 处理时间小于等于当前时间的
