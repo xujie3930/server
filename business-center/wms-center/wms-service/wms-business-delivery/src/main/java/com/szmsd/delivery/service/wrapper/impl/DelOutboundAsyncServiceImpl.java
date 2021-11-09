@@ -123,6 +123,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             applicationContainer.action();
             logger.info("(3)完成操作，timer:{}", timer.intervalRestart());
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             logger.info("(3.1)完成操作，操作失败，timer:{}", timer.intervalRestart());
             throw e;
         }

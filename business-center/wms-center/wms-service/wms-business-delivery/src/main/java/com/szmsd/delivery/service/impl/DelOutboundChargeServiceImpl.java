@@ -9,6 +9,7 @@ import com.szmsd.delivery.mapper.DelOutboundChargeMapper;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -92,7 +93,7 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
         return baseMapper.deleteById(id);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void saveCharges(List<DelOutboundCharge> charges) {
         if (CollectionUtils.isEmpty(charges)) {
