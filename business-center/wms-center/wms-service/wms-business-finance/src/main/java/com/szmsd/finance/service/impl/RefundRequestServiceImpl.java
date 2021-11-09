@@ -198,7 +198,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     if (queryFinishListVOTableDataInfo.getTotal() != processNoList.size()) {
                         List<String> collect1 = queryFinishListVOTableDataInfo.getRows().stream().map(QueryFinishListVO::getNo).collect(Collectors.toList());
                         processNoList.removeAll(collect1);
-                        errorMsgBuilder.append("请检查用户【").append(cusCode).append("】的单号:").append(StringUtils.join(processNoList, ",")).append("是否已完成").append("\n");
+                        errorMsgBuilder.append("请检查用户【").append(cusCode).append("】的单号:").append(StringUtils.join(processNoList, ",")).append("是否已完成/不属于该用户;").append("\n");
                     }
                 });
             });
@@ -274,7 +274,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                         custPayDTO.setAmount(x.getAmount().multiply(new BigDecimal("-1")));
                         custPayDTO.setRemark(String.format("退费单%s,余额调减", x.getProcessNo()));
                         R r = accountBalanceService.refund(custPayDTO);
-                        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg() + "请检查改币别账户余额是否充足");
+                        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg() + "请检查该币别账户余额是否充足");
                         log.info("SUBTRACT--{}--{}", list, JSONObject.toJSONString(r));
                     });
                     return;
@@ -294,6 +294,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         custPayDTO.setCusCode(x.getCusCode());
         custPayDTO.setCusId((long) x.getCusId());
         custPayDTO.setCusName(x.getCusName());
+        custPayDTO.setWarehouseCode(x.getWarehouseCode());
+        custPayDTO.setWarehouseName(x.getWarehouseName());
         List<AccountSerialBillDTO> accountSerialBillList = new ArrayList<>();
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
         accountSerialBillDTO.setChargeCategory(x.getFeeCategoryName());

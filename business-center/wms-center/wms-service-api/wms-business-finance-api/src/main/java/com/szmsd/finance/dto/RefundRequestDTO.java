@@ -68,9 +68,9 @@ public class RefundRequestDTO {
 
 
     @ApiModelProperty(value = "业务明细")
-    @Excel(name = "业务明细")
     private String businessDetails;
     @ApiModelProperty(value = "业务明细编码")
+    @Excel(name = "业务明细")
     private String businessDetailsCode;
     @NotBlank(message = "费用类型不能为空")
     @ApiModelProperty(value = "费用类型")

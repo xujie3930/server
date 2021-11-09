@@ -69,6 +69,11 @@ public class CustPayDTO {
     @ApiModelProperty(value = "充值说明")
     private String remark;
 
+    @ApiModelProperty(value = "仓库编号")
+    private String warehouseCode;
+    @ApiModelProperty(value = "仓库名称")
+    private String warehouseName;
+
     @ApiModelProperty(value = "详情")
     private List<AccountSerialBillDTO> serialBillInfoList;
 
