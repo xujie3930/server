@@ -258,7 +258,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         chargeLog
                 .setCustomCode(dto.getCusCode()).setPayMethod(payMethod.name())
                 .setOrderNo(dto.getNo()).setOperationPayMethod("业务操作").setSuccess(true)
-                .setOperationType("").setPayMethod(payMethod.name())
+                .setOperationType("").setCurrencyCode(dto.getCurrencyCode())
         ;
 
         chargeLog.setRemark("-----------------------------------------");
@@ -275,6 +275,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                         Long qty = details.stream().map(DelOutboundDetailVO::getQty).reduce(Long::sum).orElse(0L);
                         chargeLog.setQty(qty);
                     }
+                    chargeLog.setWarehouseCode(Optional.of(data).map(DelOutboundVO::getWarehouseCode).orElse(""));
                 }
             } else if (StringUtils.isNotBlank(chargeLog.getOrderNo()) && chargeLog.getOrderNo().startsWith("RK")) {
                 R<InboundReceiptInfoVO> infoByOrderNo = inboundReceiptFeignService.info(chargeLog.getOrderNo());
@@ -291,6 +292,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                         }
                         chargeLog.setQty((long) qty);
                     }
+                    Optional<InboundReceiptInfoVO> resultDateOpt = Optional.of(data);
+                    String warehouseNo = resultDateOpt.map(InboundReceiptInfoVO::getWarehouseNo).orElse("");
+                    chargeLog.setWarehouseCode(warehouseNo);
                 }
             }
         }

@@ -172,15 +172,13 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 x.setCompensationPaymentFlag((StringUtils.isNotBlank(x.getCompensationPaymentFlag()) && "已完成".equals(x.getCompensationPaymentFlag())) ? "1" : "0");
                 x.setCompensationPaymentArrivedFlag((StringUtils.isNotBlank(x.getCompensationPaymentFlag()) && "是".equals(x.getCompensationPaymentFlag())) ? "1" : "0");
 
-                x.setCurrencyCode(remoteApi.getSubNameByValue(mainSubCode.getCurrency(), x.getCurrencyCode()));
+                x.setCurrencyName(remoteApi.getSubNameByValue(mainSubCode.getCurrency(), x.getCurrencyCode()));
 
                 // 赔付币别
                 if (StringUtils.isNotBlank(x.getCompensationPaymentCurrencyCode())) {
                     String compensationPaymentCurrency = remoteApi.getSubNameByValue(mainSubCode.getCurrency(), x.getCompensationPaymentCurrencyCode());
                     x.setCompensationPaymentCurrency(compensationPaymentCurrency);
                     if (StringUtils.isBlank(compensationPaymentCurrency)) x.setCompensationPaymentCurrency(null);
-                } else {
-                    x.setCompensationPaymentCurrencyCode(null);
                 }
             });
             StringBuilder errorMsgBuilder = new StringBuilder();
@@ -200,7 +198,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     if (queryFinishListVOTableDataInfo.getTotal() != processNoList.size()) {
                         List<String> collect1 = queryFinishListVOTableDataInfo.getRows().stream().map(QueryFinishListVO::getNo).collect(Collectors.toList());
                         processNoList.removeAll(collect1);
-                        errorMsgBuilder.append("请检查用户").append(cusCode).append("单号是否已完成:").append(StringUtils.join(processNoList, ",")).append("\n");
+                        errorMsgBuilder.append("请检查用户【").append(cusCode).append("】的单号:").append(StringUtils.join(processNoList, ",")).append("是否已完成").append("\n");
                     }
                 });
             });
