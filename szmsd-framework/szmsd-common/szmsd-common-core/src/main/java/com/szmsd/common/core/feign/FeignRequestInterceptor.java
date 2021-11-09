@@ -62,6 +62,10 @@ public class FeignRequestInterceptor implements RequestInterceptor {
         if (StringUtils.isNotBlank(requestId)) {
             template.header("X-TID", requestId);
         }
+        String langr = MDC.get("Langr");
+        if (StringUtils.isNotBlank(langr)) {
+            template.header("Langr", langr);
+        }
     }
 
 }

@@ -3,6 +3,7 @@ package com.szmsd.bas.controller;
 import com.szmsd.bas.domain.SysLanres;
 import com.szmsd.bas.service.ISysLanresService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.language.LanguageService;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -33,9 +34,10 @@ import java.util.*;
 @RequestMapping("/sys-lanres")
 public class SysLanresController extends BaseController {
 
-
     @Resource
     private ISysLanresService sysLanresService;
+    @Resource(name = "sysLanresServiceImpl")
+    private LanguageService languageService;
 
     /**
      * 查询多语言配置表模块列表
@@ -144,7 +146,10 @@ public class SysLanresController extends BaseController {
         String uid = UUID.randomUUID().toString().substring(0, 8);
         sysLanres.setCode(uid);
         sysLanres.setCreateTime(new Date());
-        sysLanresService.insertSysLanres(sysLanres);
+        int i = sysLanresService.insertSysLanres(sysLanres);
+        if (i > 0) {
+            languageService.refresh(sysLanres.getId());
+        }
         return R.ok();
     }
 
@@ -157,7 +162,11 @@ public class SysLanresController extends BaseController {
     @PutMapping
     public R edit(@RequestBody SysLanres sysLanres) {
         sysLanres.setUpdateTime(new Date());
-        return toOk(sysLanresService.updateSysLanres(sysLanres));
+        int rows = sysLanresService.updateSysLanres(sysLanres);
+        if (rows > 0) {
+            languageService.refresh(sysLanres.getId());
+        }
+        return toOk(rows);
     }
 
     /**
@@ -180,7 +189,10 @@ public class SysLanresController extends BaseController {
             }
             String uid = UUID.randomUUID().toString().substring(0, 8);
             sysLanres.setCode(uid);
-            sysLanresService.insertSysLanres(sysLanres);
+            int i = sysLanresService.insertSysLanres(sysLanres);
+            if (i > 0) {
+                languageService.refresh(sysLanres.getId());
+            }
         }
         return R.ok();
     }
@@ -195,7 +207,11 @@ public class SysLanresController extends BaseController {
     @DeleteMapping("/{ids}")
     public R remove(@RequestBody List<String> ids) {
         if (StringUtils.isNotEmpty(ids)) {
-            return toOk(sysLanresService.deleteSysLanresByIds(ids));
+            int rows = sysLanresService.deleteSysLanresByIds(ids);
+            if (rows > 0) {
+                languageService.deletes(ids);
+            }
+            return toOk(rows);
         }
         return R.ok();
     }

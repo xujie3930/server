@@ -1,5 +1,6 @@
 package com.szmsd.delivery.event.listener;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
@@ -46,10 +47,17 @@ public class DelOutboundRetryLabelListener {
         Object source = event.getSource();
         Long id = (Long) source;
         String lockName = applicationName + ":DelOutboundRetryLabelEvent:" + id;
+        logger.info("(1)获取承运商标签，id：{}，lockName：{}", id, lockName);
         RLock lock = redissonClient.getLock(lockName);
         try {
             if (lock.tryLock(0, 10, TimeUnit.SECONDS)) {
+                logger.info("(2)获取到锁，id：{}，lockName：{}", id, lockName);
                 DelOutboundRetryLabel retryLabel = this.delOutboundRetryLabelService.getById(id);
+                if (null == retryLabel) {
+                    logger.info("(4)查询记录失败，id：{}", id);
+                    return;
+                }
+                logger.info("(5)查询记录成功，id：{}，state：{}，对象JSON：{}", id, retryLabel.getState(), JSON.toJSONString(retryLabel));
                 if (DelOutboundRetryLabelStateEnum.WAIT.name().equals(retryLabel.getState())
                         || DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name().equals(retryLabel.getState())) {
                     DelOutbound delOutbound = delOutboundService.getByOrderNo(retryLabel.getOrderNo());
@@ -61,12 +69,16 @@ public class DelOutboundRetryLabelListener {
                     try {
                         // 获取标签
                         delOutboundBringVerifyService.getShipmentLabel(delOutbound);
+                        logger.info("(7)获取标签完成，id：{}", id);
                         // 推送标签
                         this.delOutboundBringVerifyService.htpShipmentLabel(delOutbound);
+                        logger.info("(8)推送标签完成，id：{}", id);
                         // 发货指令
                         this.delOutboundBringVerifyService.shipmentShipping(delOutbound);
+                        logger.info("(9)调用成功发货指令完成，id：{}", id);
                         state = DelOutboundRetryLabelStateEnum.SUCCESS.name();
                     } catch (Exception e) {
+                        logger.info("(8)获取标签失败，id：{}，错误信息：{}", id, e.getMessage());
                         logger.error(e.getMessage(), e);
                         lastFailMessage = e.getMessage();
                         if (lastFailMessage.length() > 500)
@@ -76,6 +88,7 @@ public class DelOutboundRetryLabelListener {
                             state = DelOutboundRetryLabelStateEnum.FAIL.name();
                             // 发货指令
                             this.delOutboundBringVerifyService.shipmentShippingEx(delOutbound, lastFailMessage);
+                            logger.info("(10)调用失败发货指令完成，id：{}", id);
                         } else {
                             state = DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name();
                             int t = retryTimeConfiguration[failCount];
@@ -94,7 +107,11 @@ public class DelOutboundRetryLabelListener {
                     updateWrapper.set(DelOutboundRetryLabel::getNextRetryTime, nextRetryTime);
                     updateWrapper.eq(DelOutboundRetryLabel::getId, retryLabel.getId());
                     this.delOutboundRetryLabelService.update(updateWrapper);
+                } else {
+                    logger.info("(6)状态不正确不处理，id：{}", id);
                 }
+            } else {
+                logger.info("(3)没有获取到锁，id：{}，lockName：{}", id, lockName);
             }
         } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);

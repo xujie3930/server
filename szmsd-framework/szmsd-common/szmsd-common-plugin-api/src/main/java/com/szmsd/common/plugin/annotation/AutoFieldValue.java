@@ -41,4 +41,10 @@ public @interface AutoFieldValue {
      */
     Class<? extends DefaultCommonParameter> cp();
 
+    /**
+     * 默认支持国际化
+     *
+     * @return boolean
+     */
+    boolean i18n() default true;
 }

@@ -1,14 +1,23 @@
 package com.szmsd.bas.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.dao.SysLanresMapper;
 import com.szmsd.bas.domain.SysLanres;
 import com.szmsd.bas.service.ISysLanresService;
+import com.szmsd.common.core.language.LanguageService;
+import com.szmsd.common.core.language.util.LanguageUtil;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.redis.service.RedisService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -19,8 +28,10 @@ import java.util.List;
  * @since 2020-08-06
  */
 @Service
-public class SysLanresServiceImpl extends ServiceImpl<SysLanresMapper, SysLanres> implements ISysLanresService {
+public class SysLanresServiceImpl extends ServiceImpl<SysLanresMapper, SysLanres> implements ISysLanresService, LanguageService {
 
+    @Resource
+    private RedisService redisService;
 
     /**
      * 查询多语言配置表模块
@@ -57,8 +68,8 @@ public class SysLanresServiceImpl extends ServiceImpl<SysLanresMapper, SysLanres
         if (StringUtils.isNotNull(sysLanres.getGrouptype())) {
             where.eq("GROUPTYPE", sysLanres.getGrouptype());
         }
-        if (StringUtils.isNotEmpty(sysLanres.getApp())){
-            where.eq("app",sysLanres.getApp());
+        if (StringUtils.isNotEmpty(sysLanres.getApp())) {
+            where.eq("app", sysLanres.getApp());
         }
         return baseMapper.selectList(where);
     }
@@ -116,5 +127,62 @@ public class SysLanresServiceImpl extends ServiceImpl<SysLanresMapper, SysLanres
         return baseMapper.deleteById(id);
     }
 
+    @Override
+    public void refresh() {
+        LambdaQueryWrapper<SysLanres> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.select(SysLanres::getStrid, SysLanres::getLan1, SysLanres::getLan2);
+        queryWrapper.eq(SysLanres::getDeletedStatus, "1");
+        List<SysLanres> list = this.list(queryWrapper);
+        if (CollectionUtils.isNotEmpty(list)) {
+            // 更新所有的国际化到缓存中
+            for (SysLanres sysLanres : list) {
+                updateRedis(sysLanres);
+            }
+        }
+    }
 
+    private void updateRedis(SysLanres sysLanres) {
+        Map<String, String> map = new HashMap<>();
+        map.put("zh", sysLanres.getStrid());
+        map.put("en", sysLanres.getLan1());
+        map.put("ar", sysLanres.getLan2());
+        this.redisService.setCacheMap(LanguageUtil.buildKey(sysLanres.getStrid()), map);
+    }
+
+    @Override
+    public void refresh(String key) {
+        SysLanres sysLanres = this.selectSysLanresById(key);
+        if (null != sysLanres) {
+            updateRedis(sysLanres);
+        }
+
+    }
+
+    @Override
+    public void refresh(List<String> keys) {
+        List<SysLanres> list = this.listByIds(keys);
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (SysLanres sysLanres : list) {
+                updateRedis(sysLanres);
+            }
+        }
+    }
+
+    @Override
+    public void delete(String key) {
+        SysLanres sysLanres = this.selectSysLanresById(key);
+        if (null != sysLanres) {
+            this.redisService.deleteObject(LanguageUtil.buildKey(sysLanres.getStrid()));
+        }
+    }
+
+    @Override
+    public void deletes(List<String> keys) {
+        List<SysLanres> list = this.listByIds(keys);
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (SysLanres sysLanres : list) {
+                this.redisService.deleteObject(LanguageUtil.buildKey(sysLanres.getStrid()));
+            }
+        }
+    }
 }

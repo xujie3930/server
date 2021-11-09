@@ -1,5 +1,6 @@
 package com.szmsd.common.core.language.util;
 
+import cn.hutool.core.codec.Base64;
 import com.szmsd.common.core.language.enums.LanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
@@ -15,6 +16,12 @@ import java.util.Map;
 
 @Slf4j
 public class LanguageUtil {
+
+    public static String language = "Language";
+
+    public static String buildKey(String key) {
+        return language + ":" + Base64.encode(key, "utf-8");
+    }
 
     /**
      * Redis中获取value当前系统对应的语言翻译

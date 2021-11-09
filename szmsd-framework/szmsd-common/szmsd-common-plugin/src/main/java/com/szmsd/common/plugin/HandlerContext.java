@@ -1,17 +1,21 @@
 package com.szmsd.common.plugin;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.language.util.LanguageUtil;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import com.szmsd.common.plugin.interfaces.CacheContext;
 import com.szmsd.common.plugin.interfaces.CommonPlugin;
 import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
+import com.szmsd.common.redis.service.RedisService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -218,12 +222,33 @@ public class HandlerContext<T> {
                     setValue = map.get(val);
                 }
             }
+            // 是否支持i18n
+            if (autoFieldValue.i18n()) {
+                setValue = toi18n(setValue);
+            }
             if (Objects.nonNull(setValue)) {
                 this.setValue(object, nameField, setValue);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
+    }
+
+    private Object toi18n(Object setValue) {
+        String langr = MDC.get("Langr");
+        if ("zh".equals(langr)) {
+            return setValue;
+        }
+        RedisService redisService = SpringUtils.getBean("redisService");
+        Map<String, String> cacheMap = redisService.getCacheMap(LanguageUtil.buildKey(String.valueOf(setValue)));
+        if (null != cacheMap && cacheMap.size() > 0) {
+            String text = cacheMap.get(langr);
+            if (null == text) {
+                return setValue;
+            }
+            return text;
+        }
+        return setValue;
     }
 
     private DefaultCommonParameter cp(Class<? extends DefaultCommonParameter> cc, String code) {
