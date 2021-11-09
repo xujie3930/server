@@ -57,6 +57,7 @@ public class DelOutboundRetryLabelTimer {
             queryWrapper.lt(DelOutboundRetryLabel::getFailCount, 6);
             // 处理时间小于等于当前时间的
             queryWrapper.le(DelOutboundRetryLabel::getNextRetryTime, new Date());
+            queryWrapper.last("limit 200");
             List<DelOutboundRetryLabel> list = this.delOutboundRetryLabelService.list(queryWrapper);
             if (CollectionUtils.isNotEmpty(list)) {
                 for (DelOutboundRetryLabel retryLabel : list) {

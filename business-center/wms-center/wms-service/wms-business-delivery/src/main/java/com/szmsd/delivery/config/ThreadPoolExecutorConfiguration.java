@@ -76,8 +76,8 @@ public class ThreadPoolExecutorConfiguration {
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentEnumLabel", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
-        // 拒绝策略由主线程执行
-        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
 }
