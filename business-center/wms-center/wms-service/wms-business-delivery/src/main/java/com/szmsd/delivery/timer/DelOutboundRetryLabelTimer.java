@@ -6,6 +6,7 @@ import com.szmsd.delivery.domain.DelOutboundRetryLabel;
 import com.szmsd.delivery.enums.DelOutboundRetryLabelStateEnum;
 import com.szmsd.delivery.event.DelOutboundRetryLabelEvent;
 import com.szmsd.delivery.event.EventUtil;
+import com.szmsd.delivery.event.listener.DelOutboundRetryLabelListener;
 import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
 import com.szmsd.delivery.util.LockerUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -53,8 +54,8 @@ public class DelOutboundRetryLabelTimer {
                         .or()
                         .eq(DelOutboundRetryLabel::getState, DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name());
             });
-            // 小于6次
-            queryWrapper.lt(DelOutboundRetryLabel::getFailCount, 6);
+            // 小于10次
+            queryWrapper.lt(DelOutboundRetryLabel::getFailCount, DelOutboundRetryLabelListener.retryCount);
             // 处理时间小于等于当前时间的
             queryWrapper.le(DelOutboundRetryLabel::getNextRetryTime, new Date());
             queryWrapper.last("limit 200");

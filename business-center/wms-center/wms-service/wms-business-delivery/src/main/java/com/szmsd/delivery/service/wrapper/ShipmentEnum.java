@@ -788,9 +788,6 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             if (!responseVO.getSuccess()) {
                 throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新发货指令失败2"));
             }*/
-            // 提交一个获取标签的任务
-            IDelOutboundRetryLabelService delOutboundRetryLabelService = SpringUtils.getBean(IDelOutboundRetryLabelService.class);
-            delOutboundRetryLabelService.save(delOutbound.getOrderNo());
             // 修改出库单相关信息
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
@@ -798,7 +795,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setShipmentState(END.name());
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
-            updateDelOutbound.setOrderNo(delOutbound.getOrderNo());
+            updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
             // PRC计费
             updateDelOutbound.setLength(delOutbound.getLength());
             updateDelOutbound.setWidth(delOutbound.getWidth());
@@ -810,6 +807,10 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             delOutboundService.shipmentSuccess(updateDelOutbound);
+            // 提交一个获取标签的任务
+            IDelOutboundRetryLabelService delOutboundRetryLabelService = SpringUtils.getBean(IDelOutboundRetryLabelService.class);
+            delOutboundRetryLabelService.save(delOutbound.getOrderNo());
+            // 记录日志
             delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
             DelOutboundOperationLogEnum.SMT_SHIPMENT_SHIPPING.listener(delOutbound);
         }

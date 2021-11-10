@@ -39,7 +39,9 @@ public class DelOutboundRetryLabelListener {
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
     @Autowired
     private IDelOutboundService delOutboundService;
-    private final int[] retryTimeConfiguration = {30, 30, 60, 60, 180, 180};
+    //                                            0   1   2   3   4   5   6   7   8    9    10   11
+    private final int[] retryTimeConfiguration = {30, 30, 60, 60, 60, 60, 60, 60, 180, 180, 180, 180};
+    public static final int retryCount = 10;
 
     @Async(value = ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_SHIPMENTENUMLABEL)
     @EventListener
@@ -84,7 +86,7 @@ public class DelOutboundRetryLabelListener {
                         if (lastFailMessage.length() > 500)
                             lastFailMessage = lastFailMessage.substring(0, 500);
                         failCount++;
-                        if (failCount > 5) {
+                        if (failCount > retryCount) {
                             state = DelOutboundRetryLabelStateEnum.FAIL.name();
                             // 发货指令
                             this.delOutboundBringVerifyService.shipmentShippingEx(delOutbound, lastFailMessage);

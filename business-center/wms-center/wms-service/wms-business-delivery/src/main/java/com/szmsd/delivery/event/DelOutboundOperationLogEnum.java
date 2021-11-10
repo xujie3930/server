@@ -174,7 +174,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
     },
     BRV_SHIPMENT_ORDER {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},结果@挂号:{2},承运商订单号:{3}");
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},创建承运商返回结果,挂号:{2},承运商订单号:{3}");
 
         @Override
         public String getType() {
@@ -374,7 +374,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
     },
     SMT_LABEL {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1}");
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},承运商订单号:{2},挂号:{3}");
 
         @Override
         public String getType() {
@@ -383,7 +383,8 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
 
         @Override
         public String format(DelOutbound delOutbound) {
-            Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
+            Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
+                    delOutbound.getShipmentOrderNumber(), delOutbound.getTrackingNo()};
             return format.format(arguments);
         }
     },
