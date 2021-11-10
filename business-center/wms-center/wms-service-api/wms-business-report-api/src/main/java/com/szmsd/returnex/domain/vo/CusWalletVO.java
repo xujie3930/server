@@ -1,5 +1,6 @@
 package com.szmsd.returnex.domain.vo;
 
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,6 +15,7 @@ public class CusWalletVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @AutoFieldI18n
     @ApiModelProperty(value = "币种")
     private String currency;
 

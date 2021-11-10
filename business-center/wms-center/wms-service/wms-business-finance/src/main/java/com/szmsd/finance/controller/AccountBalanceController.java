@@ -2,6 +2,7 @@ package com.szmsd.finance.controller;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.*;
@@ -29,6 +30,7 @@ public class AccountBalanceController extends FssBaseController {
     @PreAuthorize("@ss.hasPermi('ExchangeRate:listPage')")
     @ApiOperation(value = "分页查询账户余额信息")
     @GetMapping("/listPage")
+    @AutoValue
     public TableDataInfo listPage(AccountBalanceDTO dto) {
         startPage();
         List<AccountBalance> list = accountBalanceService.listPage(dto);

@@ -1,6 +1,7 @@
 package com.szmsd.report.controller;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.report.service.HomeService;
 import com.szmsd.returnex.domain.vo.CusWalletVO;
 import com.szmsd.returnex.domain.vo.DocumentVO;
@@ -29,6 +30,7 @@ public class HomeController {
     @PreAuthorize("@ss.hasPermi('home:querycuswallet')")
     @GetMapping("/{cusCode}/queryCusWallet")
     @ApiOperation(value = "我的钱包", notes = "对应客户钱包")
+    @AutoValue
     public R myWallet(@PathVariable("cusCode") String cusCode) {
         List<CusWalletVO> collect = homeService.selectCusWallet(cusCode);
         return R.ok(collect);

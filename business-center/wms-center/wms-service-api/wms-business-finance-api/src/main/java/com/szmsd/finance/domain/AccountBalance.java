@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -41,6 +42,7 @@ public class AccountBalance extends FssBaseEntity {
     @ApiModelProperty(value = "币种编码")
     private String currencyCode;
 
+    @AutoFieldI18n
     @ApiModelProperty(value = "币种名")
     private String currencyName;
 
