@@ -1,5 +1,6 @@
 package com.szmsd.exception.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.exception.dto.*;
 import com.szmsd.exception.enums.StateSubEnum;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,6 +45,7 @@ public class ExceptionInfoController extends BaseController{
       @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:list')")
       @GetMapping("/list")
       @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+      @AutoValue
       public TableDataInfo list(ExceptionInfoQueryDto dto)
      {
             startPage();

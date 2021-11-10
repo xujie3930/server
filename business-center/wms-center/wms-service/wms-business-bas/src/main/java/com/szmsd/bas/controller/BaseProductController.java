@@ -18,6 +18,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.common.security.utils.SecurityUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,6 +63,7 @@ public class BaseProductController extends BaseController {
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/list")
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
+    @AutoValue
     public TableDataInfo<BaseProduct> list(BaseProductQueryDto queryDto) {
         startPage();
         List<BaseProduct> list = baseProductService.selectBaseProductPage(queryDto);

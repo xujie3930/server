@@ -11,6 +11,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.http.vo.KeyValuePair;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
@@ -30,6 +31,7 @@ public class PricedProductController extends BaseController {
     @Resource
     private IPricedProductService iPricedProductService;
 
+    @AutoValue
     @PreAuthorize("@ss.hasPermi('products:pricedproducts')")
     @PostMapping("/freightCalculation")
     @ApiOperation(value = "运费测算 - 根据包裹基本信息获取可下单报价产品")

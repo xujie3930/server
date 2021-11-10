@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.vo;
 
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class FreightCalculationVO {
     @ApiModelProperty(value = "计费重量")
     private BigDecimal calcWeight;
 
+    @AutoFieldI18n
     @ApiModelProperty("计费重类型")
     private String calcType;
 

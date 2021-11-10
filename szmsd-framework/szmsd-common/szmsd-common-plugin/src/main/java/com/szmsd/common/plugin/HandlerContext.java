@@ -4,6 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.language.util.LanguageUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import com.szmsd.common.plugin.interfaces.CacheContext;
 import com.szmsd.common.plugin.interfaces.CommonPlugin;
@@ -29,6 +30,7 @@ public class HandlerContext<T> {
     private final Logger logger = LoggerFactory.getLogger(HandlerContext.class);
 
     private final CacheContext cacheContext = new CacheContext.HandlerCacheContext();
+    private final CacheContext i18nCacheContext = new CacheContext.HandlerCacheContext();
     private final T t;
 
     public HandlerContext(T t) {
@@ -37,6 +39,8 @@ public class HandlerContext<T> {
 
     public T handlerValue() {
         handlerAutoValue(t);
+        cacheContext.clear();
+        i18nCacheContext.clear();
         return t;
     }
 
@@ -77,6 +81,7 @@ public class HandlerContext<T> {
 
     private boolean getCacheData(Iterable<?> iterable) {
         boolean hasAuto = false;
+        boolean hasI18n = false;
         Object next = iterable.iterator().next();
         Field[] fields = getFields(next);
         if (ArrayUtils.isNotEmpty(fields)) {
@@ -85,6 +90,9 @@ public class HandlerContext<T> {
                 AutoFieldValue autoFieldValue = field.getAnnotation(AutoFieldValue.class);
                 if (null != autoFieldValue) {
                     autoFieldValueMap.put(field.getName(), autoFieldValue);
+                }
+                if (field.isAnnotationPresent(AutoFieldI18n.class)) {
+                    hasI18n = true;
                 }
             }
             if (!autoFieldValueMap.isEmpty()) {
@@ -120,15 +128,15 @@ public class HandlerContext<T> {
                     }
                     Map<Object, Object> map = Collections.emptyMap();
                     for (CommonPlugin plugin : plugins) {
-                        map = plugin.handlerValue(new ArrayList<>(objectSet), cp(autoFieldValue.cp(), autoFieldValue.code()), this.cacheContext);
+                        map = plugin.handlerValue(new ArrayList<>(objectSet), cp(autoFieldValue.cp(), autoFieldValue.code()), this.i18nCacheContext);
                     }
-                    this.cacheContext.set(field, map);
+                    this.i18nCacheContext.set(field, map);
                     b |= 0x01;
                 }
                 hasAuto = b > 0x00;
             }
         }
-        return hasAuto;
+        return hasAuto || hasI18n;
     }
 
     /**
@@ -158,9 +166,13 @@ public class HandlerContext<T> {
         Field[] fields = getFields(object);
         if (ArrayUtils.isNotEmpty(fields)) {
             for (Field field : fields) {
-                AutoFieldValue autoFieldValue = field.getAnnotation(AutoFieldValue.class);
-                if (null != autoFieldValue) {
-                    doJsonEncrypt(field, autoFieldValue, object);
+                if (field.isAnnotationPresent(AutoFieldValue.class)) {
+                    AutoFieldValue autoFieldValue = field.getAnnotation(AutoFieldValue.class);
+                    if (null != autoFieldValue) {
+                        doJsonEncrypt(field, autoFieldValue, object);
+                    }
+                } else if (field.isAnnotationPresent(AutoFieldI18n.class)) {
+                    doI18n(field, object);
                 }
             }
         }
@@ -216,15 +228,15 @@ public class HandlerContext<T> {
             }
             // 获取值
             Object setValue = null;
-            if (this.cacheContext.containsKey(fieldName)) {
-                Map<Object, Object> map = (Map<Object, Object>) this.cacheContext.get(fieldName);
+            if (this.i18nCacheContext.containsKey(fieldName)) {
+                Map<Object, Object> map = (Map<Object, Object>) this.i18nCacheContext.get(fieldName);
                 if (null != map) {
                     setValue = map.get(val);
                 }
             }
             // 是否支持i18n
             if (autoFieldValue.i18n()) {
-                setValue = toi18n(setValue);
+                setValue = toi18n(field.getName(), setValue);
             }
             if (Objects.nonNull(setValue)) {
                 this.setValue(object, nameField, setValue);
@@ -234,11 +246,49 @@ public class HandlerContext<T> {
         }
     }
 
-    private Object toi18n(Object setValue) {
+    private void doI18n(Field field, Object object) {
+        try {
+            field.setAccessible(true);
+            String fieldName = field.getName();
+            Object val = this.getValue(object, fieldName);
+            if (null == val) {
+                return;
+            }
+            val = toi18n(field.getName(), val);
+            if (Objects.nonNull(val)) {
+                field.set(object, val);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private Object toi18n(String fieldName, Object setValue) {
         String langr = MDC.get("Langr");
         if ("zh".equals(langr)) {
             return setValue;
         }
+        if (i18nCacheContext.containsKey(fieldName)) {
+            Map<Object, Object> map = (Map<Object, Object>) i18nCacheContext.get(fieldName);
+            if (map.containsKey(setValue)) {
+                return map.getOrDefault(setValue, setValue);
+            } else {
+                Object value = getI18n(setValue, langr);
+                map.put(setValue, value);
+                i18nCacheContext.set(fieldName, map);
+                return value;
+            }
+        } else {
+            Object value = getI18n(setValue, langr);
+            Map<Object, Object> map = new HashMap<>();
+            map.put(setValue, value);
+            i18nCacheContext.set(fieldName, map);
+            return value;
+        }
+    }
+
+    private Object getI18n(Object setValue, String langr) {
         RedisService redisService = SpringUtils.getBean("redisService");
         Map<String, String> cacheMap = redisService.getCacheMap(LanguageUtil.buildKey(String.valueOf(setValue)));
         if (null != cacheMap && cacheMap.size() > 0) {

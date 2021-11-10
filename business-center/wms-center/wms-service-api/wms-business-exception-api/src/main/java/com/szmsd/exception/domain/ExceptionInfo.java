@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -75,6 +76,7 @@ public class ExceptionInfo extends BaseEntity {
     @Excel(name = "单类型")
     private String orderType;
 
+    @AutoFieldI18n
     @ApiModelProperty(value = "单类型名称")
     @Excel(name = "单类型名称")
     private String orderTypeName;
@@ -83,6 +85,7 @@ public class ExceptionInfo extends BaseEntity {
     @Excel(name = "异常类型")
     private String exceptionType;
 
+    @AutoFieldI18n
     @ApiModelProperty(value = "异常类型名称")
     @Excel(name = "异常类型名称")
     private String exceptionTypeName;

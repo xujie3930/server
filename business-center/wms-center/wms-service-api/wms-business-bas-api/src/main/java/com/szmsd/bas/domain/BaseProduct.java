@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -109,6 +110,7 @@ public class BaseProduct extends BaseEntity {
     @Size(max = 50)
     private String productAttribute;
 
+    @AutoFieldI18n
     @ApiModelProperty(value = "产品属性名")
     @Excel(name = "产品属性名")
     @Size(max = 100)
