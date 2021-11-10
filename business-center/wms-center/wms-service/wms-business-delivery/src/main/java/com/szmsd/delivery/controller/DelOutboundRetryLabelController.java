@@ -37,6 +37,7 @@ public class DelOutboundRetryLabelController extends BaseController {
         QueryWrapperUtil.filterDate(queryWrapper, "create_time", delOutboundRetryLabel.getCreateTimes());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "state", delOutboundRetryLabel.getState());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "order_no", delOutboundRetryLabel.getOrderNo());
+        queryWrapper.orderByDesc("create_time");
         List<DelOutboundRetryLabel> list = delOutboundRetryLabelService.list(queryWrapper);
         return getDataTable(list);
     }
