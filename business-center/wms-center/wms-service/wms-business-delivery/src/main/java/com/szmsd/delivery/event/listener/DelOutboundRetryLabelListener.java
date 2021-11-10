@@ -92,7 +92,7 @@ public class DelOutboundRetryLabelListener {
                         } else {
                             state = DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name();
                             int t = retryTimeConfiguration[failCount];
-                            nextRetryTime = DateUtils.addMinutes(retryLabel.getNextRetryTime(), t);
+                            nextRetryTime = DateUtils.addSeconds(retryLabel.getNextRetryTime(), t);
                         }
                     }
                     int lastRequestConsumeTime = (int) (System.currentTimeMillis() - st);
