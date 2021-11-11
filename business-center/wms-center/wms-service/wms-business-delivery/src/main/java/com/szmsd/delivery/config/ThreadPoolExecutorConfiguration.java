@@ -32,16 +32,16 @@ public class ThreadPoolExecutorConfiguration {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        availableProcessors = availableProcessors * 2;
+        availableProcessors = availableProcessors * 4;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(128);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(512);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(availableProcessors, availableProcessors, 30, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Reviewed", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
         // 拒绝策略由主线程执行
-        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
 
@@ -50,16 +50,16 @@ public class ThreadPoolExecutorConfiguration {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        availableProcessors = availableProcessors * 2;
+        availableProcessors = availableProcessors * 4;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(128);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(512);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(availableProcessors, availableProcessors, 30, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentPackingEvent", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
         // 拒绝策略由主线程执行
-        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
 
@@ -70,7 +70,7 @@ public class ThreadPoolExecutorConfiguration {
         // 核心线程数量
         availableProcessors = availableProcessors * 4;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(512);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(availableProcessors, availableProcessors, 30, TimeUnit.SECONDS, queue);
         // 线程池工厂
