@@ -29,9 +29,9 @@ public class InboundReceiptVO {
 
     @ApiModelProperty(value = "状态")
     private String status;
-    @AutoFieldI18n
+//    @AutoFieldI18n
     @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
-//    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS)
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS)
     private String statusName;
 
     @ApiModelProperty(value = "送货方式名称 - 当前系统语言")

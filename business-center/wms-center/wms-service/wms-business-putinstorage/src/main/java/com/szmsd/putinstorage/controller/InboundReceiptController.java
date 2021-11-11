@@ -67,7 +67,7 @@ public class InboundReceiptController extends BaseController {
     @Resource
     private RemoteComponent remoteComponent;
 
-    @AutoValue
+//    @AutoValue
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
     @GetMapping("/receipt/page")
     @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
