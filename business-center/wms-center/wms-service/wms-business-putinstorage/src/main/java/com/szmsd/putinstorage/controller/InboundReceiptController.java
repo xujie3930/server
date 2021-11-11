@@ -9,6 +9,7 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO;
 import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import com.szmsd.putinstorage.annotation.InboundReceiptLog;
@@ -66,6 +67,7 @@ public class InboundReceiptController extends BaseController {
     @Resource
     private RemoteComponent remoteComponent;
 
+    @AutoValue
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
     @GetMapping("/receipt/page")
     @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
