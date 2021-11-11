@@ -60,4 +60,8 @@ public class DelOutboundRetryLabel extends BaseEntity {
     @TableField(exist = false)
     @ApiModelProperty(value = "创建时间")
     private String[] createTimes;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "IDS")
+    private Long[] ids;
 }

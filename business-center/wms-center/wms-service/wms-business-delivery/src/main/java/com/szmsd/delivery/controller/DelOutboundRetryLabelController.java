@@ -14,6 +14,7 @@ import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -47,10 +48,18 @@ public class DelOutboundRetryLabelController extends BaseController {
     @ApiOperation(value = "出库单标签重试记录手动处理", notes = "出库单标签重试记录手动处理")
     public R<?> handler(@RequestBody DelOutboundRetryLabel delOutboundRetryLabel) {
         Long id = delOutboundRetryLabel.getId();
-        if (null == id) {
-            throw new CommonException("500", "id不能为空");
+        Long[] ids = delOutboundRetryLabel.getIds();
+        if (null == id && ArrayUtils.isEmpty(ids)) {
+            throw new CommonException("500", "id或ids不能为空");
         }
-        EventUtil.publishEvent(new DelOutboundRetryLabelEvent(id));
+        if (null != id) {
+            EventUtil.publishEvent(new DelOutboundRetryLabelEvent(id, true));
+        }
+        if (ArrayUtils.isNotEmpty(ids)) {
+            for (Long aLong : ids) {
+                EventUtil.publishEvent(new DelOutboundRetryLabelEvent(aLong, true));
+            }
+        }
         return R.ok("已提交异步执行");
     }
 }

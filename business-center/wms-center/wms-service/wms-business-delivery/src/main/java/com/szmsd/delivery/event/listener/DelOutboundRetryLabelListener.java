@@ -47,6 +47,7 @@ public class DelOutboundRetryLabelListener {
     @EventListener
     public void onApplicationEvent(DelOutboundRetryLabelEvent event) {
         Object source = event.getSource();
+        boolean force = event.isForce();
         Long id = (Long) source;
         String lockName = applicationName + ":DelOutboundRetryLabelEvent:" + id;
         logger.info("(1)获取承运商标签，id：{}，lockName：{}", id, lockName);
@@ -60,8 +61,8 @@ public class DelOutboundRetryLabelListener {
                     return;
                 }
                 logger.info("(5)查询记录成功，id：{}，state：{}，对象JSON：{}", id, retryLabel.getState(), JSON.toJSONString(retryLabel));
-                if (DelOutboundRetryLabelStateEnum.WAIT.name().equals(retryLabel.getState())
-                        || DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name().equals(retryLabel.getState())) {
+                if ((DelOutboundRetryLabelStateEnum.WAIT.name().equals(retryLabel.getState())
+                        || DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name().equals(retryLabel.getState())) || force) {
                     DelOutbound delOutbound = delOutboundService.getByOrderNo(retryLabel.getOrderNo());
                     String lastFailMessage = "";
                     int failCount = retryLabel.getFailCount();

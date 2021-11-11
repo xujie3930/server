@@ -4,6 +4,8 @@ import org.springframework.context.ApplicationEvent;
 
 public class DelOutboundRetryLabelEvent extends ApplicationEvent {
 
+    private final boolean force;
+
     /**
      * Create a new {@code ApplicationEvent}.
      *
@@ -12,5 +14,15 @@ public class DelOutboundRetryLabelEvent extends ApplicationEvent {
      */
     public DelOutboundRetryLabelEvent(Object source) {
         super(source);
+        this.force = false;
+    }
+
+    public DelOutboundRetryLabelEvent(Object source, boolean force) {
+        super(source);
+        this.force = force;
+    }
+
+    public boolean isForce() {
+        return force;
     }
 }
