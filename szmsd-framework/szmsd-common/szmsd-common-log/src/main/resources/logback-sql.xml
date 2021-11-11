@@ -8,7 +8,7 @@
             <!-- 日志文件名格式 -->
             <fileNamePattern>${log.path}/${springAppName}-sql.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>20MB</maxFileSize>
+                <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
             <!-- 日志最大的历史 30天 -->
             <maxHistory>30</maxHistory>

@@ -990,22 +990,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
                 }
             }
-        } else {
+        } else if (DelOutboundOperationTypeEnum.PROCESSING.getCode().equals(dto.getOperationType())) {
             LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.in(DelOutbound::getOrderNo, orderNos);
             List<DelOutbound> list = super.list(queryWrapper);
             if (CollectionUtils.isNotEmpty(list)) {
                 List<String> processingList = new ArrayList<>();
-                List<String> shippedList = new ArrayList<>();
                 for (DelOutbound delOutbound : list) {
                     // 只有指定的状态才可以修改
                     if (DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(delOutbound.getState())) {
                         processingList.add(delOutbound.getOrderNo());
                         delOutbound.setState(DelOutboundStateEnum.WHSE_PROCESSING.getCode());
-                        DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
-                    } else if (DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(delOutbound.getState())) {
-                        shippedList.add(delOutbound.getOrderNo());
-                        delOutbound.setState(DelOutboundStateEnum.WHSE_COMPLETED.getCode());
                         DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
                     }
                 }
@@ -1020,6 +1015,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_PROCESSING.getCode());
                     this.baseMapper.update(null, updateWrapper);
                 }
+            }
+        } else if (DelOutboundOperationTypeEnum.SHIPPED.getCode().equals(dto.getOperationType())) {
+            LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.in(DelOutbound::getOrderNo, orderNos);
+            List<DelOutbound> list = super.list(queryWrapper);
+            if (CollectionUtils.isNotEmpty(list)) {
+                List<String> shippedList = new ArrayList<>();
+                for (DelOutbound delOutbound : list) {
+                    // 只有指定的状态才可以修改
+                    if (DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(delOutbound.getState())) {
+                        shippedList.add(delOutbound.getOrderNo());
+                        delOutbound.setState(DelOutboundStateEnum.WHSE_COMPLETED.getCode());
+                        DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
+                    }
+                }
                 if (CollectionUtils.isNotEmpty(shippedList)) {
                     LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
                     if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
@@ -1030,6 +1040,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     updateWrapper.set(DelOutbound::getOperationTime, dto.getOperationTime());
                     updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_COMPLETED.getCode());
                     this.baseMapper.update(null, updateWrapper);
+                    // 增加出库单已完成记录
+                    this.delOutboundCompletedService.add(shippedList, DelOutboundOperationTypeEnum.SHIPPED.getCode());
                 }
             }
         }

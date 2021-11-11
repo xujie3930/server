@@ -3,6 +3,7 @@ package com.szmsd.delivery.event.listener;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundRetryLabel;
@@ -70,20 +71,27 @@ public class DelOutboundRetryLabelListener {
                     long st = System.currentTimeMillis();
                     Date nextRetryTime = null;
                     try {
-                        // 获取标签
-                        delOutboundBringVerifyService.getShipmentLabel(delOutbound);
-                        logger.info("(7)获取标签完成，id：{}", id);
-                        // 推送标签
-                        this.delOutboundBringVerifyService.htpShipmentLabel(delOutbound);
-                        logger.info("(8)推送标签完成，id：{}", id);
-                        // 发货指令
-                        this.delOutboundBringVerifyService.shipmentShipping(delOutbound);
-                        logger.info("(9)调用成功发货指令完成，id：{}", id);
-                        state = DelOutboundRetryLabelStateEnum.SUCCESS.name();
+                        if (null != delOutbound) {
+                            // 获取标签
+                            delOutboundBringVerifyService.getShipmentLabel(delOutbound);
+                            logger.info("(7)获取标签完成，id：{}", id);
+                            // 推送标签
+                            this.delOutboundBringVerifyService.htpShipmentLabel(delOutbound);
+                            logger.info("(8)推送标签完成，id：{}", id);
+                            // 发货指令
+                            this.delOutboundBringVerifyService.shipmentShipping(delOutbound);
+                            logger.info("(9)调用成功发货指令完成，id：{}", id);
+                            state = DelOutboundRetryLabelStateEnum.SUCCESS.name();
+                        } else {
+                            throw new CommonException("999", "出库单：" + retryLabel.getOrderNo() + "，不存在");
+                        }
                     } catch (Exception e) {
                         logger.info("(8)获取标签失败，id：{}，错误信息：{}", id, e.getMessage());
                         logger.error(e.getMessage(), e);
                         lastFailMessage = e.getMessage();
+                        if (null == lastFailMessage) {
+                            lastFailMessage = "获取标签失败";
+                        }
                         if (lastFailMessage.length() > 500)
                             lastFailMessage = lastFailMessage.substring(0, 500);
                         failCount++;

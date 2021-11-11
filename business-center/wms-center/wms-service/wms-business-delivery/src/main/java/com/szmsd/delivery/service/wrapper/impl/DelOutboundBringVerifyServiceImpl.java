@@ -506,6 +506,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public boolean getShipmentLabel(DelOutbound delOutbound) {
+        if (null == delOutbound) {
+            throw new CommonException("出库单信息不能为空");
+        }
         String orderNumber = delOutbound.getShipmentOrderNumber();
         // 获取标签
         CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
