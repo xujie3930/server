@@ -5,6 +5,7 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.*;
@@ -45,6 +46,7 @@ public class InventoryController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('inventory:page')")
     @GetMapping("/page")
+    @AutoValue
     @ApiOperation(value = "查询", notes = "库存管理 - 分页查询")
     public TableDataInfo<InventorySkuVO> page(InventorySkuQueryDTO inventorySkuQueryDTO) {
         startPage();

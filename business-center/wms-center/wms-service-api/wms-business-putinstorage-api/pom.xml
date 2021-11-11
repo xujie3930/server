@@ -23,6 +23,10 @@
             <groupId>com.szmsd</groupId>
             <artifactId>szmsd-common-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>szmsd-common-plugin-api</artifactId>
+        </dependency>
 
     </dependencies>
 

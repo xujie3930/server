@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -27,7 +29,7 @@ public class InboundReceiptVO {
 
     @ApiModelProperty(value = "状态")
     private String status;
-
+//    @AutoFieldI18n
     @ApiModelProperty(value = "状态0已取消，1初始，2已提审，3审核通过，-3审核失败，4处理中，5已完成")
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_STATUS)
     private String statusName;

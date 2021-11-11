@@ -22,9 +22,9 @@ public enum LocalLanguageEnum {
     /** 状态：已提审 **/
     INBOUND_RECEIPT_STATUS_2(INBOUND_RECEIPT_STATUS,"2", "已提审", "Arraigned"),
     /** 状态：审核通过 **/
-    INBOUND_RECEIPT_STATUS_3(INBOUND_RECEIPT_STATUS,"3", "审核通过", "Review passed"),
+    INBOUND_RECEIPT_STATUS_3(INBOUND_RECEIPT_STATUS,"3", "审核通过", "Approved"),
     /** 状态：审核失败 **/
-    INBOUND_RECEIPT_STATUS_3_(INBOUND_RECEIPT_STATUS, "-3", "审核失败", "Review failure"),
+    INBOUND_RECEIPT_STATUS_3_(INBOUND_RECEIPT_STATUS, "-3", "审核失败", "Rejected"),
     /** 状态：处理中 **/
     INBOUND_RECEIPT_STATUS_4(INBOUND_RECEIPT_STATUS, "4", "处理中", "Processing"),
     /** 状态：已完成 **/
