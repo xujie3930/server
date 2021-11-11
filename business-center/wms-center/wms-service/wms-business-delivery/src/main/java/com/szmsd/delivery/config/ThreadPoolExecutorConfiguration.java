@@ -32,11 +32,12 @@ public class ThreadPoolExecutorConfiguration {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        availableProcessors = availableProcessors * 4;
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 8;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(512);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
         // 核心和最大一致
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(availableProcessors, availableProcessors, 30, TimeUnit.SECONDS, queue);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 30, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Reviewed", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
@@ -50,11 +51,12 @@ public class ThreadPoolExecutorConfiguration {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        availableProcessors = availableProcessors * 4;
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 8;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(512);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
         // 核心和最大一致
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(availableProcessors, availableProcessors, 30, TimeUnit.SECONDS, queue);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 30, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentPackingEvent", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
@@ -68,11 +70,12 @@ public class ThreadPoolExecutorConfiguration {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        availableProcessors = availableProcessors * 4;
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 8;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(512);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
         // 核心和最大一致
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(availableProcessors, availableProcessors, 30, TimeUnit.SECONDS, queue);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 30, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentEnumLabel", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
