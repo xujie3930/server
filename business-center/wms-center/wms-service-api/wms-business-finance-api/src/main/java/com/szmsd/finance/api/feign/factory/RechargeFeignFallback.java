@@ -26,31 +26,31 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
             @Override
             public R rechargeCallback(RechargesCallbackRequestDTO requestDTO) {
                 log.info("充值回调失败，服务调用降级");
-                return R.failed();
+                return R.convertResultJson(throwable);
             }
 
             @Override
             public R warehouseFeeDeductions(CustPayDTO dto) {
                 log.info("仓储费扣款失败，服务调用降级");
-                return R.failed();
+                return R.convertResultJson(throwable);
             }
 
             @Override
             public R feeDeductions(CustPayDTO dto) {
                 log.info("费扣款失败，服务调用降级");
-                return R.failed();
+                return R.convertResultJson(throwable);
             }
 
             @Override
             public R freezeBalance(CusFreezeBalanceDTO dto) {
                 log.info("冻结余额失败，服务调用降级");
-                return R.failed();
+                return R.convertResultJson(throwable);
             }
 
             @Override
             public R thawBalance(CusFreezeBalanceDTO dto) {
                 log.info("解冻余额失败，服务调用降级");
-                return R.failed();
+                return R.convertResultJson(throwable);
             }
 
             @Override
@@ -61,19 +61,19 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
             @Override
             public R updateUserCredit(UserCreditDTO userCreditDTO) {
                 log.info("修改用户授信额度失败，服务调用降级");
-                return R.failed();
+                return R.convertResultJson(throwable);
             }
 
             @Override
             public R<List<UserCreditInfoVO>> queryUserCredit(String cusCode) {
                 log.info("查询用户授信额度失败，服务调用降级");
-                return R.failed();
+                return R.convertResultJson(throwable);
             }
 
             @Override
             public R onlineIncome(CustPayDTO dto) {
                 log.info("充值失败，服务调用降级");
-                return R.failed();
+                return R.convertResultJson(throwable);
             }
         };
     }
