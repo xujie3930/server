@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -25,7 +26,8 @@ public class InventorySkuVO {
     private String warehouseCode;
 
     @ApiModelProperty(value = "所属仓库")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+    @AutoFieldI18n
+//    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     private String warehouseName;
 
     @ApiModelProperty(value = "sku")
@@ -74,7 +76,7 @@ public class InventorySkuVO {
     @ApiModelProperty(value = "高")
     @Excel(name = "高")
     private Integer skuHeight;
-
+    @AutoFieldI18n
     @ApiModelProperty(value = "产品属性")
     @Excel(name = "产品属性")
     private String skuPropertyName;
