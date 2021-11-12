@@ -39,6 +39,8 @@ public class BalanceDTO {
         this.currentBalance = currentBalance;
         this.freezeBalance = freezeBalance;
         this.totalBalance = totalBalance;
+        this.actualDeduction = BigDecimal.ZERO;
+        this.creditUseAmount = BigDecimal.ZERO;
         this.creditInfoBO = new CreditInfoBO();
     }
 
