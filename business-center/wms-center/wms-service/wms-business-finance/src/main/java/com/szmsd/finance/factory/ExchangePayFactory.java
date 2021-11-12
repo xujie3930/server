@@ -1,5 +1,6 @@
 package com.szmsd.finance.factory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -34,6 +35,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
     private IAccountSerialBillService accountSerialBillService;
     @Resource
     private IAccountBalanceService iAccountBalanceService;
+
     @Transactional
     @Override
     public boolean updateBalance(CustPayDTO dto) {
@@ -60,7 +62,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 super.addForCreditBill(beforeAdd.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode2());
                 BalanceDTO afterAdd = beforeAdd;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode2(), afterAdd);
-                setSerialBillLog(dto,accountBalanceChange);
+                setSerialBillLog(dto, accountBalanceChange);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
                 dto.setAmount(addAmount);
                 dto.setCurrencyCode(dto.getCurrencyCode2());
@@ -69,14 +71,15 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 //设置流水账单
                 dto.setCurrencyCode(accountBalanceChange.getCurrencyCode());
                 dto.setCurrencyName(accountBalanceChange.getCurrencyName());
-                setSerialBillLog(dto,afterBalanceChange);
-                recordDetailLog(dto,beforeSubtract);
-                iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()),dto.getCurrencyCode());
+                setSerialBillLog(dto, afterBalanceChange);
+                recordDetailLog(dto, beforeSubtract);
+                iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
+            e.printStackTrace();
+            log.error("扣减异常 {}", JSONObject.toJSONString(e));
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
         } finally {
@@ -103,7 +106,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
         return oldBalance;
     }
 
-    public void setSerialBillLog(CustPayDTO dto,AccountBalanceChange accountBalanceChange) {
+    public void setSerialBillLog(CustPayDTO dto, AccountBalanceChange accountBalanceChange) {
         AccountSerialBillDTO serialBill = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
         serialBill.setCurrencyCode(accountBalanceChange.getCurrencyCode());
         serialBill.setCurrencyName(accountBalanceChange.getCurrencyName());

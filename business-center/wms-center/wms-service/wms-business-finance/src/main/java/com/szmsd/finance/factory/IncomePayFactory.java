@@ -62,8 +62,9 @@ public class IncomePayFactory extends AbstractPayFactory {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
+            e.printStackTrace();
+            log.error("扣减异常 {}", JSONObject.toJSONString(e));
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
         } finally {

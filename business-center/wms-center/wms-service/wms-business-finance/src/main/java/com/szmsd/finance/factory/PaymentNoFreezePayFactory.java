@@ -1,5 +1,6 @@
 package com.szmsd.finance.factory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.BalanceDTO;
@@ -56,8 +57,9 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
+            e.printStackTrace();
+            log.error("扣减异常 {}", JSONObject.toJSONString(e));
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
         } finally {

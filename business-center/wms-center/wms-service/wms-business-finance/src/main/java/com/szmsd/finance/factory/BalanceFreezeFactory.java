@@ -48,19 +48,20 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         String key = "cky-fss-freeze-balance-all:" + dto.getCusId();
         RLock lock = redissonClient.getLock(key);
         try {
-            if(lock.tryLock(time, unit)) {
+            if (lock.tryLock(time, unit)) {
                 BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 if (!checkAndSetBalance(balance, dto)) {
                     return false;
                 }
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), balance);
                 recordOpLog(dto, balance.getCurrentBalance());
-                recordDetailLog(dto,balance);
+                recordDetailLog(dto, balance);
             }
             return true;
         } catch (InterruptedException e) {
-            e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
+            e.printStackTrace();
+            log.error("扣减异常 {}", JSONObject.toJSONString(e));
             log.error("获取余额异常，加锁失败");
             log.error("异常信息:" + e.getMessage());
         } finally {
@@ -92,6 +93,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
     /**
      * 校验越是否够扣除，不够使用授信额，再不够返回false
+     *
      * @param balance
      * @param dto
      * @return
