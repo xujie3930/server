@@ -81,7 +81,24 @@ public class CreditInfoBO {
 
     @ApiModelProperty(value = "还款额")
     @Excel(name = "还款额")
-    private BigDecimal repaymentAmount = BigDecimal.ZERO;
+    private BigDecimal repaymentAmount;
+
+    public CreditInfoBO() {
+        this.creditType = "0";
+        this.creditStatus = 3;
+        this.creditLine = BigDecimal.ZERO;
+        this.creditUseAmount = BigDecimal.ZERO;
+        this.creditBeginTime = LocalDateTime.of(2000, 1, 1, 1, 1, 1);
+        this.creditEndTime = LocalDateTime.of(2000, 1, 1, 1, 1, 1);
+        this.creditTimeInterval = 0;
+        this.creditTimeUnit = ChronoUnit.DAYS.name();
+        this.creditBufferTime = LocalDateTime.of(2000, 1, 1, 1, 1, 1);
+        this.creditBufferTimeInterval = 0;
+        this.creditBufferTimeUnit = ChronoUnit.DAYS.name();
+        this.creditBufferUseAmount = BigDecimal.ZERO;
+        this.requiredRepayment = BigDecimal.ZERO;
+        this.repaymentAmount = BigDecimal.ZERO;
+    }
 
     /**
      * 使用信用额度扣费
