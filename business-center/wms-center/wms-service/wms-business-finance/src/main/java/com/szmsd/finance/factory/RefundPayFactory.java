@@ -46,15 +46,19 @@ public class RefundPayFactory extends AbstractPayFactory {
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
+            boolean success =false;
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
                 if (changeAmount.compareTo(BigDecimal.ZERO)>=0){
-                    oldBalance.rechargeAndSetAmount(changeAmount);
+                    // 充值
+                    success = oldBalance.rechargeAndSetAmount(changeAmount);
                     super.addForCreditBill(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
                 } else {
-                    oldBalance.pay(changeAmount.negate());
+                    // 退费强制扣钱
+                    success = oldBalance.payAnyWay(changeAmount.negate());
                 }
+                if (!success) return false;
                 BalanceDTO result = oldBalance;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result,true);
                 recordOpLog(dto, result.getCurrentBalance());

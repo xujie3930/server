@@ -126,14 +126,13 @@ public class BalanceDTO {
             this.currentBalance = this.currentBalance.subtract(amount);
             // 总余额
             this.totalBalance = this.totalBalance.subtract(amount);
-            return true;
         } else {
             // 可用
             this.currentBalance = this.currentBalance.subtract(amount);
             // 总余额
             this.totalBalance = this.totalBalance.subtract(amount);
         }
-        return false;
+        return true;
     }
 
     /**
