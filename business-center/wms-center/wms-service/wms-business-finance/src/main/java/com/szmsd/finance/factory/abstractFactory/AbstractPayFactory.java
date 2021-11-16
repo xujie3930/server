@@ -33,7 +33,7 @@ public abstract class AbstractPayFactory {
 
     public static final TimeUnit unit = TimeUnit.MILLISECONDS;
 
-    public static final long time = 1000L;
+    public static final long time = 5000L;
 
     @Autowired
     IAccountBalanceService accountBalanceService;
