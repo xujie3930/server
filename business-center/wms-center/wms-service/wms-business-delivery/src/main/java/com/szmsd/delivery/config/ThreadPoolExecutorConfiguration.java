@@ -112,7 +112,7 @@ public class ThreadPoolExecutorConfiguration {
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_PROCESSING)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundProcessing() {
         // 核心线程数量
-        int corePoolSize = availableProcessors * 8;
+        int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1024);
@@ -129,7 +129,7 @@ public class ThreadPoolExecutorConfiguration {
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_SHIPPED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundShipped() {
         // 核心线程数量
-        int corePoolSize = availableProcessors * 8;
+        int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1024);
@@ -146,7 +146,7 @@ public class ThreadPoolExecutorConfiguration {
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_CANCELED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundCanceled() {
         // 核心线程数量
-        int corePoolSize = availableProcessors * 8;
+        int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1024);
