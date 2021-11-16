@@ -3,14 +3,17 @@ package com.szmsd.delivery.service.wrapper.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TimeInterval;
 import com.alibaba.fastjson.JSON;
+import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
+import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -82,7 +85,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private InboundReceiptFeignService inboundReceiptFeignService;
     @Autowired
     private BaseProductClientService baseProductClientService;
-
+    @Autowired
+    private BasWarehouseFeignService basWarehouseFeignService;
     @Transactional
     @Override
     public int shipmentPacking(Long id) {
@@ -240,6 +244,14 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         dto.setAmount(custPayDTO.getAmount());
                         dto.setProductCategory(BillEnum.PayMethod.BALANCE_DEDUCTIONS.getPaymentName());
                         dto.setChargeCategory("物料费");
+                        dto.setWarehouseCode(basePacking.getWarehouseCode());
+                        R<List<BasWarehouse>> listR = basWarehouseFeignService.queryByWarehouseCodes(Collections.singletonList(basePacking.getWarehouseCode()));
+                        if (listR.getCode() == HttpStatus.SUCCESS) {
+                            List<BasWarehouse> data = listR.getData();
+                            BasWarehouse basWarehouse = Optional.ofNullable(data).orElse(new ArrayList<>()).get(0);
+                            String warehouseName = Optional.ofNullable(basWarehouse).map(BasWarehouse::getWarehouseNameCn).orElse("");
+                            dto.setWarehouseName(warehouseName);
+                        }
                         dto.setChargeType(BillEnum.PayMethod.BALANCE_DEDUCTIONS.getPaymentName());
                         list.add(dto);
                         custPayDTO.setSerialBillInfoList(list);
