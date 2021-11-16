@@ -105,9 +105,9 @@ public class OpnRequestLogServiceImpl extends ServiceImpl<OpnRequestLogMapper, O
     @Override
     public int add(OpnRequestLog log) {
         log.setRequestHeader(this.substring(log.getRequestHeader(), 255));
-        log.setRequestBody(this.substring(log.getRequestBody(), 4096));
+        log.setRequestBody(this.substring(log.getRequestBody(), 40960));
         log.setResponseHeader(this.substring(log.getResponseHeader(), 255));
-        log.setResponseBody(this.substring(log.getResponseBody(), 1024));
+        log.setResponseBody(this.substring(log.getResponseBody(), 10240));
         return this.baseMapper.insert(log);
     }
 
