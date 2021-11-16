@@ -6,7 +6,6 @@ import com.szmsd.delivery.domain.DelOutboundCompleted;
 import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
-import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
 import com.szmsd.delivery.util.LockerUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RedissonClient;
@@ -20,7 +19,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.function.BiConsumer;
 
 /**
  * @author zhangyuyuan
@@ -37,7 +37,48 @@ public class DelOutboundTimer {
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
     @Autowired
-    private IDelOutboundAsyncService delOutboundAsyncService;
+    private DelOutboundTimerAsyncTask delOutboundTimerAsyncTask;
+
+    /**
+     * 单据状态处理中
+     * <p/>
+     * 每分钟执行一次
+     */
+    @Async
+    // 秒域 分域 时域 日域 月域 周域 年域
+    @Scheduled(cron = "0 * * * * ?")
+    public void processing() {
+        String key = applicationName + ":DelOutboundTimer:processing";
+        this.doWorker(key, () -> {
+            // 查询初始化的任务执行
+            LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
+            queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.PROCESSING.getCode());
+            handleProcessing(queryWrapper);
+        });
+    }
+
+    /**
+     * 单据状态处理中失败的
+     * <p/>
+     * 5分钟执行一次
+     */
+    @Async
+    @Scheduled(cron = "0 */5 * * * ?")
+    public void processingFail() {
+        String key = applicationName + ":DelOutboundTimer:processingFail";
+        this.doWorker(key, () -> {
+            // 查询初始化的任务执行
+            // 处理失败的单据
+            LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.FAIL.getCode());
+            queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.PROCESSING.getCode());
+            queryWrapper.lt(DelOutboundCompleted::getHandleSize, 5);
+            // 处理时间小于等于当前时间的
+            queryWrapper.le(DelOutboundCompleted::getNextHandleTime, new Date());
+            handleProcessing(queryWrapper);
+        });
+    }
 
     /**
      * 处理完成的单据
@@ -75,8 +116,7 @@ public class DelOutboundTimer {
             LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.FAIL.getCode());
             queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.SHIPPED.getCode());
-            // 小于3次
-            queryWrapper.lt(DelOutboundCompleted::getHandleSize, 3);
+            queryWrapper.lt(DelOutboundCompleted::getHandleSize, 5);
             // 处理时间小于等于当前时间的
             queryWrapper.le(DelOutboundCompleted::getNextHandleTime, new Date());
             handleCompleted(queryWrapper);
@@ -116,8 +156,7 @@ public class DelOutboundTimer {
             LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.FAIL.getCode());
             queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.CANCELED.getCode());
-            // 小于3次
-            queryWrapper.lt(DelOutboundCompleted::getHandleSize, 3);
+            queryWrapper.lt(DelOutboundCompleted::getHandleSize, 5);
             // 处理时间小于等于当前时间的
             queryWrapper.le(DelOutboundCompleted::getNextHandleTime, new Date());
             this.handleCancelled(queryWrapper);
@@ -128,27 +167,37 @@ public class DelOutboundTimer {
         new LockerUtil<Integer>(redissonClient).tryLock(key, worker);
     }
 
+    private void handleProcessing(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleProcessing(orderNo, id));
+    }
+
     private void handleCompleted(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo) -> this.delOutboundAsyncService.completed(orderNo));
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleCompleted(orderNo, id));
     }
 
     public void handleCancelled(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, orderNo -> this.delOutboundAsyncService.cancelled(orderNo));
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleCancelled(orderNo, id));
     }
 
-    private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, Consumer<String> consumer) {
+    private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer) {
+        // 一次处理200
+        queryWrapper.last("limit 200");
         List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
         if (CollectionUtils.isNotEmpty(delOutboundCompletedList)) {
             for (DelOutboundCompleted delOutboundCompleted : delOutboundCompletedList) {
                 try {
-                    // this.delOutboundService.completed(delOutboundCompleted.getOrderNo());
-                    consumer.accept(delOutboundCompleted.getOrderNo());
-                    // 处理成功
-                    this.delOutboundCompletedService.success(delOutboundCompleted.getId());
+                    consumer.accept(delOutboundCompleted.getOrderNo(), delOutboundCompleted.getId());
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                     // 处理失败
-                    this.delOutboundCompletedService.fail(delOutboundCompleted.getId());
+                    this.delOutboundCompletedService.fail(delOutboundCompleted.getId(), e.getMessage());
+                    // 线程池任务满了，停止执行
+                    if (e instanceof RejectedExecutionException) {
+                        logger.error("=============================================");
+                        logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>线程池队列任务溢出");
+                        logger.error("=============================================");
+                        break;
+                    }
                 }
             }
         }

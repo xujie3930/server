@@ -3,14 +3,12 @@ package com.szmsd.delivery.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutboundCompleted;
 import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
 import com.szmsd.delivery.mapper.DelOutboundCompletedMapper;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -114,11 +112,15 @@ public class DelOutboundCompletedServiceImpl extends ServiceImpl<DelOutboundComp
 
     @Transactional
     @Override
-    public void fail(Long id) {
+    public void fail(Long id, String remark) {
         DelOutboundCompleted modifyDelOutboundCompleted = new DelOutboundCompleted();
         modifyDelOutboundCompleted.setId(id);
         // 修改状态为失败
         modifyDelOutboundCompleted.setState(DelOutboundCompletedStateEnum.FAIL.getCode());
+        if (remark.length() > 500) {
+            remark = remark.substring(0, 500);
+        }
+        modifyDelOutboundCompleted.setRemark(remark);
         // 处理次数累加，下一次处理时间 = 5 * 处理次数
         this.baseMapper.updateRecord(modifyDelOutboundCompleted);
     }

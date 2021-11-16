@@ -11,6 +11,13 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class ThreadPoolExecutorConfiguration {
 
+    private static final int availableProcessors;
+
+    static {
+        // 获取机器核数
+        availableProcessors = Runtime.getRuntime().availableProcessors();
+    }
+
     /**
      * 提审操作后台执行 - 线程池
      */
@@ -27,17 +34,39 @@ public class ThreadPoolExecutorConfiguration {
      */
     public static final String THREADPOOLEXECUTOR_SHIPMENTENUMLABEL = "ThreadPoolExecutor-ShipmentEnumLabel";
 
+    /**
+     * 出库单状态修改
+     * WMS推送出库单状态为处理中。OMS这边修改状态为：仓库处理中
+     */
+    public static final String THREADPOOLEXECUTOR_DELOUTBOUND_PROCESSING = "ThreadPoolExecutor-DelOutbound-Processing";
+
+    /**
+     * 出库单状态修改
+     * WMS推送出库单状态为已完成。
+     * OMS修改状态为：
+     * 1.接收状态，并修改出库单状态为：仓库已完成，并添加异步任务。
+     * 2.异步任务接收，开始执行OMS完成动作。并且修改出库单状态为：已完成
+     */
+    public static final String THREADPOOLEXECUTOR_DELOUTBOUND_SHIPPED = "ThreadPoolExecutor-DelOutbound-Shipped";
+
+    /**
+     * 出库单状态修改
+     * WMS推送出库单状态为已取消。
+     * OMS修改状态为：
+     * 1.接收状态，并修改出库单状态为：仓库已取消，并添加异步任务。
+     * 2.异步任务接收，开始执行OMS取消动作。并且修改出库单状态为：已取消
+     */
+    public static final String THREADPOOLEXECUTOR_DELOUTBOUND_CANCELED = "ThreadPoolExecutor-DelOutbound-Canceled";
+
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundReviewed() {
-        // 获取机器核数
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
         // 核心和最大一致
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 30, TimeUnit.SECONDS, queue);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Reviewed", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
@@ -48,15 +77,13 @@ public class ThreadPoolExecutorConfiguration {
 
     @Bean(THREADPOOLEXECUTOR_SHIPMENTPACKINGEVENT)
     public ThreadPoolExecutor threadPoolExecutorShipmentPackingEvent() {
-        // 获取机器核数
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
         // 核心和最大一致
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 30, TimeUnit.SECONDS, queue);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentPackingEvent", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
@@ -67,15 +94,13 @@ public class ThreadPoolExecutorConfiguration {
 
     @Bean(THREADPOOLEXECUTOR_SHIPMENTENUMLABEL)
     public ThreadPoolExecutor threadPoolExecutorShipmentEnumLabel() {
-        // 获取机器核数
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
         // 核心和最大一致
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 30, TimeUnit.SECONDS, queue);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentEnumLabel", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
@@ -83,4 +108,56 @@ public class ThreadPoolExecutorConfiguration {
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
+
+    @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_PROCESSING)
+    public ThreadPoolExecutor threadPoolExecutorDelOutboundProcessing() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 8;
+        int maximumPoolSize = availableProcessors * 8;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1024);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Processing", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 拒绝策略由主线程执行
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
+    @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_SHIPPED)
+    public ThreadPoolExecutor threadPoolExecutorDelOutboundShipped() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 8;
+        int maximumPoolSize = availableProcessors * 8;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1024);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Shipped", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 拒绝策略由主线程执行
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
+    @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_CANCELED)
+    public ThreadPoolExecutor threadPoolExecutorDelOutboundCanceled() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 8;
+        int maximumPoolSize = availableProcessors * 8;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1024);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Canceled", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 拒绝策略由主线程执行
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
 }

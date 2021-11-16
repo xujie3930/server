@@ -3,6 +3,8 @@ package com.szmsd.delivery.service.wrapper.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TimeInterval;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
@@ -22,6 +24,7 @@ import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -85,6 +88,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private InboundReceiptFeignService inboundReceiptFeignService;
     @Autowired
     private BaseProductClientService baseProductClientService;
+    @SuppressWarnings({"all"})
     @Autowired
     private BasWarehouseFeignService basWarehouseFeignService;
     @Transactional
@@ -136,6 +140,22 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         return 1;
     }
 
+    @Transactional
+    @Override
+    public void processing(String orderNo) {
+        // 修改状态为：仓库处理中
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_PROCESSING.getCode());
+        updateWrapper.eq(DelOutbound::getOrderNo, orderNo);
+        updateWrapper.eq(DelOutbound::getState, DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode());
+        this.delOutboundService.update(updateWrapper);
+        DelOutbound delOutbound = new DelOutbound();
+        delOutbound.setOrderNo(orderNo);
+        delOutbound.setState(DelOutboundStateEnum.WHSE_PROCESSING.getCode());
+        DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
+    }
+
+    @Transactional
     @Override
     public void completed(String orderNo) {
         // 处理阶段
@@ -264,6 +284,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             if ("MODIFY".equals(completedState)) {
                 // 更新出库单状态为已完成
                 this.delOutboundService.completed(delOutbound.getId());
+                delOutbound.setState(DelOutboundStateEnum.COMPLETED.getCode());
+                DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
                 // 处理异常修复
                 if (DelOutboundExceptionStateEnum.ABNORMAL.getCode().equals(delOutbound.getExceptionState())) {
                     this.delOutboundService.exceptionFix(delOutbound.getId());
@@ -426,6 +448,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         }
     }
 
+    @Transactional
     @Override
     public void cancelled(String orderNo) {
         // 处理阶段
@@ -503,6 +526,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             if ("MODIFY".equals(cancelledState)) {
                 // 更新出库单状态
                 this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.CANCELLED);
+                // 增加取消日志
+                delOutbound.setState(DelOutboundStateEnum.CANCELLED.getCode());
+                DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
                 // 处理异常修复
                 if (DelOutboundExceptionStateEnum.ABNORMAL.getCode().equals(delOutbound.getExceptionState())) {
                     this.delOutboundService.exceptionFix(delOutbound.getId());

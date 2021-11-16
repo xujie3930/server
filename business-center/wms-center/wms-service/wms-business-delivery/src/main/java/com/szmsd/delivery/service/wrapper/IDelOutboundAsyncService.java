@@ -24,6 +24,13 @@ public interface IDelOutboundAsyncService {
     int shipmentPacking(Long id, boolean shipmentShipping);
 
     /**
+     * 出库单状态处理中
+     *
+     * @param orderNo orderNo
+     */
+    void processing(String orderNo);
+
+    /**
      * 出库单完成
      *
      * @param orderNo orderNo

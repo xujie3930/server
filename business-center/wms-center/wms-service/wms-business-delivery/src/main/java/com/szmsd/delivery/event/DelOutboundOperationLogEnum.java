@@ -463,7 +463,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
      * @see com.szmsd.delivery.controller.DelOutboundOpenController
      */
     OPN_SHIPMENT {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},更新状态:{2}");
+        final MessageFormat format = new MessageFormat("出库单:{0},更新状态:{1}");
 
         @Override
         public String getType() {
@@ -472,8 +472,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
 
         @Override
         public String format(DelOutbound delOutbound) {
-            Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
-                    DelOutboundStateEnum.getOriginName(delOutbound.getState())};
+            Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundStateEnum.getOriginName(delOutbound.getState())};
             return format.format(arguments);
         }
     },

@@ -29,6 +29,9 @@ public enum DelOutboundOrderTypeEnum {
     }
 
     public static DelOutboundOrderTypeEnum get(String code) {
+        if (null == code) {
+            return null;
+        }
         for (DelOutboundOrderTypeEnum anEnum : DelOutboundOrderTypeEnum.values()) {
             if (anEnum.getCode().equals(code)) {
                 return anEnum;
@@ -38,6 +41,9 @@ public enum DelOutboundOrderTypeEnum {
     }
 
     public static String getCode(String name) {
+        if (null == name) {
+            return null;
+        }
         for (DelOutboundOrderTypeEnum anEnum : DelOutboundOrderTypeEnum.values()) {
             if (anEnum.getName().equals(name)) {
                 return anEnum.getCode();

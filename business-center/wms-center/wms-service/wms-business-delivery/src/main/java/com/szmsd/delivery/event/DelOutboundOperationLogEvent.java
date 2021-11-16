@@ -3,6 +3,7 @@ package com.szmsd.delivery.event;
 import org.springframework.context.ApplicationEvent;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -53,5 +54,31 @@ public class DelOutboundOperationLogEvent extends ApplicationEvent {
 
     public Date getNowDate() {
         return nowDate;
+    }
+
+    public static class BatchObject {
+        private List<String> orderNos;
+        private Object params;
+
+        public BatchObject(List<String> orderNos, Object params) {
+            this.orderNos = orderNos;
+            this.params = params;
+        }
+
+        public List<String> getOrderNos() {
+            return orderNos;
+        }
+
+        public void setOrderNos(List<String> orderNos) {
+            this.orderNos = orderNos;
+        }
+
+        public Object getParams() {
+            return params;
+        }
+
+        public void setParams(Object params) {
+            this.params = params;
+        }
     }
 }

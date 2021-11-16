@@ -74,9 +74,10 @@ public interface IDelOutboundCompletedService extends IService<DelOutboundComple
     /**
      * 处理失败
      *
-     * @param id id
+     * @param id     id
+     * @param remark remark
      */
-    void fail(Long id);
+    void fail(Long id, String remark);
 
     /**
      * 处理成功
