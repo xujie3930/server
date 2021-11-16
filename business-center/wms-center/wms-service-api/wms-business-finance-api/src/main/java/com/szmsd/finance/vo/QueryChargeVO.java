@@ -2,6 +2,7 @@ package com.szmsd.finance.vo;
 
 import com.szmsd.bas.plugin.BasSubCommonPlugin;
 import com.szmsd.bas.plugin.BasSubValueCommonParameter;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import com.szmsd.finance.enums.BillEnum;
 import io.swagger.annotations.ApiModel;
@@ -69,7 +70,8 @@ public class QueryChargeVO implements Serializable {
 
     @ApiModelProperty(value = "支付类型")
     private String payMethod;
-
+    @AutoFieldI18n
+//    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "095", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "支付类型名称")
     private String payMethodName;
 

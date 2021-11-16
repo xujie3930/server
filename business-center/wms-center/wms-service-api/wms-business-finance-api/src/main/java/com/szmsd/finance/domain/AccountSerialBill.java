@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -40,10 +40,9 @@ public class AccountSerialBill extends FssBaseEntity {
 
     @ApiModelProperty(value = "客户名称")
     private String cusName;
-
     @ApiModelProperty(value = "币种id")
     private String currencyCode;
-
+    @AutoFieldI18n
     @ApiModelProperty(value = "币种名")
     @Excel(name = "币种")
     private String currencyName;
@@ -51,33 +50,33 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "发生额")
     @Excel(name = "发生额")
     private BigDecimal amount;
-
+//    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
-
+    @AutoFieldI18n
     @ApiModelProperty(value = "仓库名称")
     @Excel(name = "仓库")
     private String warehouseName;
-
+    @AutoFieldI18n
+//    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "096", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "交易类型")
-    private BillEnum.PayMethod payMethod;
-
+    private String payMethod;
+    @AutoFieldI18n
     @ApiModelProperty(value = "业务类别（性质）")
     @Excel(name = "性质")
     private String businessCategory;
-
     @ApiModelProperty(value = "产品代码")
     @Excel(name = "产品代码")
     private String productCode;
-
+    @AutoFieldI18n
     @ApiModelProperty(value = "产品类别")
     @Excel(name = "产品类别")
     private String productCategory;
-
+    @AutoFieldI18n
     @ApiModelProperty(value = "费用类别")
     @Excel(name = "费用类别")
     private String chargeCategory;
-
+    @AutoFieldI18n
     @ApiModelProperty(value = "费用类型")
     @Excel(name = "费用类型")
     private String chargeType;

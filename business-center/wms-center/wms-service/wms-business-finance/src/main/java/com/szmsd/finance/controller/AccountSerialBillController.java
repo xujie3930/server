@@ -5,6 +5,7 @@ import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.service.IAccountSerialBillService;
@@ -24,7 +25,7 @@ public class AccountSerialBillController extends BaseController {
 
     @Resource
     private IAccountSerialBillService accountSerialBillService;
-
+    @AutoValue
     @PreAuthorize("@ss.hasPermi('AccountSerialBill:listPage')")
     @ApiOperation(value = "流水账单 - 列表")
     @GetMapping("/listPage")
