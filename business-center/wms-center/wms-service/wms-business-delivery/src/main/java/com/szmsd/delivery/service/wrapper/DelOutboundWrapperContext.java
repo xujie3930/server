@@ -7,7 +7,6 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
-import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
@@ -26,6 +25,8 @@ public class DelOutboundWrapperContext implements ApplicationContext {
     private List<BasePacking> packingList;
     // 失败了是否推送发货指令，默认false不推送
     private boolean shipmentShipping;
+    // 发货规则
+    private String shipmentRule;
 
     public DelOutboundWrapperContext() {
     }
@@ -108,4 +109,13 @@ public class DelOutboundWrapperContext implements ApplicationContext {
     public void setShipmentShipping(boolean shipmentShipping) {
         this.shipmentShipping = shipmentShipping;
     }
+
+    public String getShipmentRule() {
+        return shipmentRule;
+    }
+
+    public void setShipmentRule(String shipmentRule) {
+        this.shipmentRule = shipmentRule;
+    }
+
 }

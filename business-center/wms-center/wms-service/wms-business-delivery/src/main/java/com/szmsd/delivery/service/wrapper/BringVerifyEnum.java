@@ -452,6 +452,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if (null != pricedProductInfo) {
                 delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
                 delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
+                delOutboundWrapperContext.setShipmentRule(pricedProductInfo.getShipmentRule());
                 DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
             } else {
                 // 异常信息
@@ -500,13 +501,15 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 调用新增/修改发货规则
             AddShipmentRuleRequest addShipmentRuleRequest = new AddShipmentRuleRequest();
             addShipmentRuleRequest.setWarehouseCode(delOutbound.getWarehouseCode());
+            addShipmentRuleRequest.setOrderNo(delOutbound.getOrderNo());
             String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
             String shipmentChannel = StringUtils.nvl(delOutbound.getShipmentChannel(), "");
             if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(shipmentChannel)) {
                 addShipmentRuleRequest.setShipmentRule(delOutbound.getDeliveryAgent());
                 addShipmentRuleRequest.setGetLabelType(DelOutboundTrackingAcquireTypeEnum.NONE.getCode());
             } else {
-                addShipmentRuleRequest.setShipmentRule(delOutbound.getShipmentRule());
+                // 获取PRC计费之后返回的发货规则
+                addShipmentRuleRequest.setShipmentRule(delOutboundWrapperContext.getShipmentRule());
                 addShipmentRuleRequest.setGetLabelType(delOutbound.getTrackingAcquireType());
             }
             IHtpIBasClientService htpIBasClientService = SpringUtils.getBean(IHtpIBasClientService.class);

@@ -39,11 +39,11 @@ public class LockerUtil<E> {
         logger.info("================thread id: {}, do begin", Thread.currentThread().getId());
         // key
         RLock lock = redissonClient.getLock(key);
-        // time 5 seconds
-        long time = 5;
+        // 获取锁的等待时间，超过这个时间返回false
+        long waitTime = 15;
         TimeUnit timeUnit = TimeUnit.SECONDS;
         try {
-            if (lock.tryLock(time, timeUnit)) {
+            if (lock.tryLock(waitTime, timeUnit)) {
                 return callback.execute();
             } else {
                 throw new CommonException("999", "执行失败，资源被占用");
@@ -52,7 +52,9 @@ public class LockerUtil<E> {
             logger.error(e.getMessage(), e);
             throw new CommonException("999", "执行报错");
         } finally {
-            lock.unlock();
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 

@@ -34,4 +34,7 @@ public class AddShipmentRuleRequest implements Serializable {
      * 仓库核重后获取 Finnal
      */
     private String getLabelType;
+
+    // 无用字段，方便在接口日志里面查询
+    private String orderNo;
 }
