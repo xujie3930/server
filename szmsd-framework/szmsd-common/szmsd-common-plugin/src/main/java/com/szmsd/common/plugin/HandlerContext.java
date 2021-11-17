@@ -126,11 +126,11 @@ public class HandlerContext<T> {
                     if (CollectionUtils.isEmpty(objectSet)) {
                         continue;
                     }
-                    Map<Object, Object> map = Collections.emptyMap();
+                    Map<Object, Object> map = new HashMap<>();
                     for (CommonPlugin plugin : plugins) {
-                        map = plugin.handlerValue(new ArrayList<>(objectSet), cp(autoFieldValue.cp(), autoFieldValue.code()), this.i18nCacheContext);
+                        map = plugin.handlerValue(new ArrayList<>(objectSet), cp(autoFieldValue.cp(), autoFieldValue.code()), this.cacheContext);
                     }
-                    this.i18nCacheContext.set(field, map);
+                    this.cacheContext.set(field, map);
                     b |= 0x01;
                 }
                 hasAuto = b > 0x00;
@@ -228,8 +228,8 @@ public class HandlerContext<T> {
             }
             // 获取值
             Object setValue = null;
-            if (this.i18nCacheContext.containsKey(fieldName)) {
-                Map<Object, Object> map = (Map<Object, Object>) this.i18nCacheContext.get(fieldName);
+            if (this.cacheContext.containsKey(fieldName)) {
+                Map<Object, Object> map = (Map<Object, Object>) this.cacheContext.get(fieldName);
                 if (null != map) {
                     setValue = map.get(val);
                 }

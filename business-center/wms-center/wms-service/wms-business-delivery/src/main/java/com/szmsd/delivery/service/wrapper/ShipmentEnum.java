@@ -731,7 +731,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 throw e;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                throw new CommonException("400", "冻结库存操作失败");
+                throw new CommonException("400", "冻结库存操作失败，" + e.getMessage());
             }
         }
 

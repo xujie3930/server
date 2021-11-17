@@ -23,6 +23,7 @@ import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -49,21 +50,25 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
      * @param afterInventory
      * @param quantity
      */
+    @Async
     @Override
     public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, Integer quantity) {
         this.saveLogs(type, beforeInventory, afterInventory, "", null, null, quantity, "");
     }
 
+    @Async
     @Override
     public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, Integer quantity, String receiptNo) {
         this.saveLogs(type, beforeInventory, afterInventory, receiptNo, null, null, quantity, "");
     }
 
+    @Async
     @Override
     public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity) {
         this.saveLogs(type, beforeInventory, afterInventory, receiptNo, operator, operateOn, quantity, "");
     }
 
+    @Async
     @Override
     public void saveLogs(String type, Inventory beforeInventory, Inventory afterInventory, String receiptNo, String operator, String operateOn, Integer quantity, String... placeholder) {
         InventoryRecord inventoryRecord = new InventoryRecord();
@@ -189,10 +194,10 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
      * @param sku
      * @param warehouse
      * @param startTime yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
-     * @param endTime yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+     * @param endTime   yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
      * @param records
-     * @param count 条数满足后跳出
-     * @param qty records -> quantity >= records 跳出
+     * @param count     条数满足后跳出
+     * @param qty       records -> quantity >= records 跳出
      * @return
      */
     public List<InventoryRecordVO> recursionType1Record(String sku, String warehouse, String startTime, String endTime, List<InventoryRecordVO> records, Integer count, Integer qty) {

@@ -12,10 +12,12 @@ import com.szmsd.inventory.domain.vo.*;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
 import com.szmsd.inventory.service.IInventoryWrapperService;
+import com.szmsd.inventory.service.LockerUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Api(tags = {"库存"})
 @RestController
@@ -35,6 +38,9 @@ public class InventoryController extends BaseController {
     private IInventoryRecordService iInventoryRecordService;
     @Autowired
     private IInventoryWrapperService inventoryWrapperService;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     @PreAuthorize("@ss.hasPermi('inventory:inbound')")
     @PostMapping("/inbound")
@@ -201,5 +207,18 @@ public class InventoryController extends BaseController {
         return R.ok(inventoryService.queryInventoryAgeBySku(warehouseCode,sku));
     }
 
+    @PostMapping("/testLock")
+    public R<?> testLock(@RequestBody InventoryAdjustmentDTO inventoryAdjustmentDTO) {
+        String key = "test:lock:" + inventoryAdjustmentDTO.getSku();
+        new LockerUtil<Integer>(redissonClient).doExecute(key, () -> {
+            try {
+                TimeUnit.MILLISECONDS.sleep(inventoryAdjustmentDTO.getQuantity());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            return null;
+        });
+        return R.ok();
+    }
 
 }
