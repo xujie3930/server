@@ -39,18 +39,19 @@ public class RefundPayFactory extends AbstractPayFactory {
     private IAccountSerialBillService accountSerialBillService;
     @Resource
     private IAccountBalanceService iAccountBalanceService;
+
     @Override
     @Transactional
     public boolean updateBalance(CustPayDTO dto) {
-        log.info("updateBalance {}", JSONObject.toJSONString(dto));
+        log.info("RefundPayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
-            boolean success =false;
+            boolean success = false;
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
-                if (changeAmount.compareTo(BigDecimal.ZERO)>=0){
+                if (changeAmount.compareTo(BigDecimal.ZERO) >= 0) {
                     // 充值
                     success = oldBalance.rechargeAndSetAmount(changeAmount);
                     super.addForCreditBill(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
@@ -60,21 +61,21 @@ public class RefundPayFactory extends AbstractPayFactory {
                 }
                 if (!success) return false;
                 BalanceDTO result = oldBalance;
-                setBalance(dto.getCusCode(), dto.getCurrencyCode(), result,true);
+                setBalance(dto.getCusCode(), dto.getCurrencyCode(), result, true);
                 recordOpLog(dto, result.getCurrentBalance());
                 recordDetailLog(dto, oldBalance);
                 setSerialBillLog(dto);
-                iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()),dto.getCurrencyCode());
+                iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
             }
             return true;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
-            log.error("扣减异常 {}", JSONObject.toJSONString(e));
+            log.error("RefundPayFactory异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
         } finally {
-            if (lock.isLocked()) {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
@@ -92,6 +93,7 @@ public class RefundPayFactory extends AbstractPayFactory {
         oldBalance.setTotalBalance(oldBalance.getTotalBalance().add(changeAmount));
         return oldBalance;
     }
+
     @Override
     public void setSerialBillLog(CustPayDTO dto) {
         log.info("setSerialBillLog {}", JSONObject.toJSONString(dto));
@@ -103,7 +105,7 @@ public class RefundPayFactory extends AbstractPayFactory {
         serialBill.setWarehouseName(dto.getWarehouseName());
         serialBill.setPaymentTime(new Date());
         AccountSerialBill accountSerialBill = new AccountSerialBill();
-        BeanUtils.copyProperties(serialBill,accountSerialBill);
+        BeanUtils.copyProperties(serialBill, accountSerialBill);
         accountSerialBillService.save(accountSerialBill);
         //accountSerialBillService.add(serialBill);
     }

@@ -39,6 +39,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
     @Transactional
     @Override
     public boolean updateBalance(CustPayDTO dto) {
+        log.info("ExchangePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-all:" + dto.getCusId();
         RLock lock = redissonClient.getLock(key);
         try {
@@ -79,11 +80,11 @@ public class ExchangePayFactory extends AbstractPayFactory {
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
-            log.error("扣减异常 {}", JSONObject.toJSONString(e));
+            log.error("ExchangePayFactory异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
         } finally {
-            if (lock.isLocked()) {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }

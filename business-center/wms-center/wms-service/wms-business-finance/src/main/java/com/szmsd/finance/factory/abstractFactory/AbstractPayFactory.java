@@ -33,7 +33,7 @@ public abstract class AbstractPayFactory {
 
     public static final TimeUnit unit = TimeUnit.MILLISECONDS;
 
-    public static final long time = 5000L;
+    public static final long time = 10000L;
 
     @Autowired
     IAccountBalanceService accountBalanceService;
@@ -175,7 +175,7 @@ public abstract class AbstractPayFactory {
             log.info("删除物流操作费{}", JSONObject.toJSONString(accountSerialBillDTO));
             collect.remove(accountSerialBillDTO);
         }
-        log.info("删除物流操作费后保存{}", JSONObject.toJSONString(collect));
+        log.info("扣减操作费删除物流操作费后保存{}", JSONObject.toJSONString(collect));
         accountSerialBillService.saveBatch(collect);
     }
 

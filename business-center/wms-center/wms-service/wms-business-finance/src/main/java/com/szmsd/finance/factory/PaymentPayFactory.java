@@ -41,6 +41,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
     @Transactional
     @Override
     public boolean updateBalance(CustPayDTO dto) {
+        log.info("PaymentPayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-paymentPay" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
@@ -70,7 +71,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     AccountBalanceChange accountBalanceChange = balanceChange.get(0);
                     BigDecimal freeze = accountBalanceChange.getAmountChange();
                     // if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
-                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount,true, (x, y) -> this.calculateBalance(x, y, freeze, dto))) {
+                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, (x, y) -> this.calculateBalance(x, y, freeze, dto))) {
                         return false;
                     }
                 }
@@ -78,20 +79,20 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     log.info("该单存在多个冻结额，操作失败。单号： {} 币种： {}", dto.getNo(), dto.getCurrencyCode());
                     return false;
                 }
-                setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance,true);
+                setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
                 recordOpLog(dto, oldBalance.getCurrentBalance());
-                recordDetailLog(dto,oldBalance);
+                recordDetailLog(dto, oldBalance);
                 setSerialBillLog(dto);
             }
             return true;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
-            log.error("扣减异常 {}", JSONObject.toJSONString(e));
+            log.error("PaymentPay异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
         } finally {
-            if (lock.isLocked()) {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }

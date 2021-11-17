@@ -38,9 +38,10 @@ public class IncomePayFactory extends AbstractPayFactory {
     private IAccountSerialBillService accountSerialBillService;
     @Resource
     private IAccountBalanceService iAccountBalanceService;
+
     @Transactional
     public boolean updateBalance(CustPayDTO dto) {
-        log.info("updateBalance {}", JSONObject.toJSONString(dto));
+        log.info("IncomePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
@@ -54,7 +55,7 @@ public class IncomePayFactory extends AbstractPayFactory {
                 // BalanceDTO result = calculateBalance(oldBalance, changeAmount);
                 oldBalance.rechargeAndSetAmount(changeAmount);
                 super.addForCreditBill(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
-                setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance,true);
+                setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
                 recordOpLog(dto, oldBalance.getCurrentBalance());
                 setSerialBillLog(dto);
                 recordDetailLog(dto, oldBalance);
@@ -64,11 +65,11 @@ public class IncomePayFactory extends AbstractPayFactory {
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
-            log.error("扣减异常 {}", JSONObject.toJSONString(e));
+            log.error("IncomePay异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
         } finally {
-            if (lock.isLocked()) {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }

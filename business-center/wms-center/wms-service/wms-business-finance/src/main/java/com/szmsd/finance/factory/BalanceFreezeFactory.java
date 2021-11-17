@@ -45,6 +45,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     @Transactional
     @Override
     public boolean updateBalance(CustPayDTO dto) {
+        log.info("BalanceFreezeFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-fss-freeze-balance-all:" + dto.getCusId();
         RLock lock = redissonClient.getLock(key);
         try {
@@ -61,11 +62,11 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
-            log.error("扣减异常 {}", JSONObject.toJSONString(e));
+            log.error("BalanceFreezeFactory异常：", e);
             log.error("获取余额异常，加锁失败");
             log.error("异常信息:" + e.getMessage());
         } finally {
-            if (lock.isLocked()) {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
