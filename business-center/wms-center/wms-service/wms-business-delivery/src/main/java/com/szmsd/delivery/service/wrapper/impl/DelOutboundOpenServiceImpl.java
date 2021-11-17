@@ -11,10 +11,10 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
+import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
-import com.szmsd.delivery.event.EventUtil;
-import com.szmsd.delivery.event.ShipmentPackingEvent;
+import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundOpenService;
 import com.szmsd.delivery.util.Utils;
@@ -44,6 +44,8 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
     @SuppressWarnings({"all"})
     @Autowired
     private RemoteAttachmentService attachmentService;
+    @Autowired
+    private IDelOutboundCompletedService delOutboundCompletedService;
 
     @Override
     public int shipmentPacking(ShipmentPackingMaterialRequestDto dto) {
@@ -123,7 +125,9 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                 // 处理结果大于0才认定为执行成功
                 if (result > 0 && !overBreak) {
                     // 执行异步任务
-                    EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
+                    // EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
+                    // 增加出库单已取消记录，异步处理，定时任务
+                    this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
                 }
             }
             DelOutboundOperationLogEnum.OPN_PACKING.listener(new Object[]{delOutbound, isPackingMaterial});
@@ -191,7 +195,9 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             this.delOutboundService.shipmentContainers(dto);
             // 执行异步任务
             if (!overBreak) {
-                EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
+                // EventUtil.publishEvent(new ShipmentPackingEvent(delOutbound.getId()));
+                // 增加出库单已取消记录，异步处理，定时任务
+                this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
             return 1;
         } catch (Exception e) {

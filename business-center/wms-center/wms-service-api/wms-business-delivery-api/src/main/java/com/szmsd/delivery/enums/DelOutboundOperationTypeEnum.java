@@ -12,6 +12,10 @@ public enum DelOutboundOperationTypeEnum {
     SHIPPED("Shipped", "已发货"),
     CANCELED("Canceled", "已取消"),
 
+    // 其它业务操作的枚举
+    BRING_VERIFY("BringVerify", "提审"),
+    SHIPMENT_PACKING("ShipmentPacking", "包裹核重"),
+
     ;
 
     private final String code;

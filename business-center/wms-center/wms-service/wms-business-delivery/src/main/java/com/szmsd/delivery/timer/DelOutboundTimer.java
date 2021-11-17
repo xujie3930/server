@@ -8,6 +8,7 @@ import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.util.LockerUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
@@ -163,6 +165,78 @@ public class DelOutboundTimer {
         });
     }
 
+    /**
+     * 每分钟执行一次
+     */
+    @Async
+    @Scheduled(cron = "0 * * * * ?")
+    public void bringVerify() {
+        logger.debug("开始执行任务 - 提审");
+        String key = applicationName + ":DelOutboundTimer:bringVerify";
+        this.doWorker(key, () -> {
+            // 查询初始化的任务执行
+            LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
+            queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
+            handleBringVerify(queryWrapper);
+        });
+    }
+
+    /**
+     * 5分钟执行一次
+     */
+    @Async
+    @Scheduled(cron = "0 */5 * * * ?")
+    public void bringVerifyFail() {
+        logger.debug("开始执行任务 - 提审");
+        String key = applicationName + ":DelOutboundTimer:bringVerifyFail";
+        this.doWorker(key, () -> {
+            LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.FAIL.getCode());
+            queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
+            queryWrapper.lt(DelOutboundCompleted::getHandleSize, 5);
+            // 处理时间小于等于当前时间的
+            queryWrapper.le(DelOutboundCompleted::getNextHandleTime, new Date());
+            this.handleBringVerify(queryWrapper);
+        });
+    }
+
+    /**
+     * 每分钟执行一次
+     */
+    @Async
+    @Scheduled(cron = "0 * * * * ?")
+    public void shipmentPacking() {
+        logger.debug("开始执行任务 - 核重");
+        String key = applicationName + ":DelOutboundTimer:shipmentPacking";
+        this.doWorker(key, () -> {
+            // 查询初始化的任务执行
+            LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
+            queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
+            handleShipmentPacking(queryWrapper);
+        });
+    }
+
+    /**
+     * 5分钟执行一次
+     */
+    @Async
+    @Scheduled(cron = "0 */5 * * * ?")
+    public void shipmentPackingFail() {
+        logger.debug("开始执行任务 - 核重");
+        String key = applicationName + ":DelOutboundTimer:shipmentPackingFail";
+        this.doWorker(key, () -> {
+            LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.FAIL.getCode());
+            queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
+            queryWrapper.lt(DelOutboundCompleted::getHandleSize, 5);
+            // 处理时间小于等于当前时间的
+            queryWrapper.le(DelOutboundCompleted::getNextHandleTime, new Date());
+            this.handleShipmentPacking(queryWrapper);
+        });
+    }
+
     private void doWorker(String key, LockerUtil.Worker worker) {
         new LockerUtil<Integer>(redissonClient).tryLock(key, worker);
     }
@@ -179,14 +253,27 @@ public class DelOutboundTimer {
         this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleCancelled(orderNo, id));
     }
 
+    public void handleBringVerify(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncBringVerify(orderNo, id));
+    }
+
+    public void handleShipmentPacking(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncShipmentPacking(orderNo, id));
+    }
+
     private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer) {
         // 一次处理200
         queryWrapper.last("limit 200");
         List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
         if (CollectionUtils.isNotEmpty(delOutboundCompletedList)) {
             for (DelOutboundCompleted delOutboundCompleted : delOutboundCompletedList) {
+                // 增加守护锁，同一条记录如果被多次扫描到，只允许有一个在执行，其它的忽略掉
+                String key = applicationName + ":DelOutboundTimer:handle:" + delOutboundCompleted.getId();
+                RLock lock = redissonClient.getLock(key);
                 try {
-                    consumer.accept(delOutboundCompleted.getOrderNo(), delOutboundCompleted.getId());
+                    if (lock.tryLock(0, TimeUnit.SECONDS)) {
+                        consumer.accept(delOutboundCompleted.getOrderNo(), delOutboundCompleted.getId());
+                    }
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                     // 处理失败
@@ -197,6 +284,10 @@ public class DelOutboundTimer {
                         logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>线程池队列任务溢出");
                         logger.error("=============================================");
                         break;
+                    }
+                } finally {
+                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                        lock.unlock();
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package com.szmsd.delivery.timer;
 
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
+import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
 import org.slf4j.Logger;
@@ -19,6 +20,8 @@ public class DelOutboundTimerAsyncTask {
     private IDelOutboundAsyncService delOutboundAsyncService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
+    @Autowired
+    private IDelOutboundBringVerifyAsyncService delOutboundBringVerifyAsyncService;
 
     @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_DELOUTBOUND_PROCESSING)
     public void asyncHandleProcessing(String orderNo, Long id) {
@@ -33,6 +36,16 @@ public class DelOutboundTimerAsyncTask {
     @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_DELOUTBOUND_CANCELED)
     public void asyncHandleCancelled(String orderNo, Long id) {
         this.handle(s -> delOutboundAsyncService.cancelled(orderNo), id);
+    }
+
+    @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
+    public void asyncBringVerify(String orderNo, Long id) {
+        this.handle(s -> delOutboundBringVerifyAsyncService.bringVerifyAsync(orderNo), id);
+    }
+
+    @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_SHIPMENTPACKINGEVENT)
+    public void asyncShipmentPacking(String orderNo, Long id) {
+        this.handle(s -> delOutboundAsyncService.shipmentPacking(orderNo), id);
     }
 
     private void handle(Consumer<String> consumer, Long id) {

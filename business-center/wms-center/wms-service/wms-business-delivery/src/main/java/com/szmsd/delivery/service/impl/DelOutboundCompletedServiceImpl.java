@@ -8,6 +8,7 @@ import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
 import com.szmsd.delivery.mapper.DelOutboundCompletedMapper;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,6 +109,19 @@ public class DelOutboundCompletedServiceImpl extends ServiceImpl<DelOutboundComp
             delOutboundCompletedList.add(delOutboundCompleted);
         }
         this.saveBatch(delOutboundCompletedList);
+    }
+
+    @Transactional
+    @Override
+    public void add(String orderNo, String operationType) {
+        if (StringUtils.isEmpty(orderNo)) {
+            throw new CommonException("999", "出库单号不能为空");
+        }
+        DelOutboundCompleted delOutboundCompleted = new DelOutboundCompleted();
+        delOutboundCompleted.setOrderNo(orderNo);
+        delOutboundCompleted.setState(DelOutboundCompletedStateEnum.INIT.getCode());
+        delOutboundCompleted.setOperationType(operationType);
+        this.save(delOutboundCompleted);
     }
 
     @Transactional

@@ -15,12 +15,12 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
+import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
@@ -86,10 +86,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IDelOutboundPackingService delOutboundPackingService;
     @Autowired
     private IDelOutboundCombinationService delOutboundCombinationService;
-    @Autowired
-    private IDelOutboundBringVerifyAsyncService delOutboundBringVerifyAsyncService;
+    @SuppressWarnings({"all"})
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
+    @Autowired
+    private IDelOutboundCompletedService delOutboundCompletedService;
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -146,8 +147,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 //                }
 //                }
                 // 创建异步线程执行
-                AsyncThreadObject asyncThreadObject = AsyncThreadObject.build();
-                this.delOutboundBringVerifyAsyncService.bringVerifyAsync(delOutbound, asyncThreadObject);
+                /*AsyncThreadObject asyncThreadObject = AsyncThreadObject.build();
+                this.delOutboundBringVerifyAsyncService.bringVerifyAsync(delOutbound, asyncThreadObject);*/
+                // 增加出库单已取消记录，异步处理，定时任务
+                this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
                 // 修改状态为提交中
                 this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
                 resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), true, "处理成功"));

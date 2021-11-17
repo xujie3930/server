@@ -72,6 +72,14 @@ public interface IDelOutboundCompletedService extends IService<DelOutboundComple
     void add(List<String> orderNos, String operationType);
 
     /**
+     * 新增异步任务
+     *
+     * @param orderNo       orderNo
+     * @param operationType operationType
+     */
+    void add(String orderNo, String operationType);
+
+    /**
      * 处理失败
      *
      * @param id     id
