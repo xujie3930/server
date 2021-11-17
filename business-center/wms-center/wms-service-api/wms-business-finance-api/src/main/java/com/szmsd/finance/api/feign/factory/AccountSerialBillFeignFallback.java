@@ -13,6 +13,7 @@ public class AccountSerialBillFeignFallback implements FallbackFactory<AccountSe
 
     @Override
     public AccountSerialBillFeignService create(Throwable throwable) {
+        log.info("create失败，服务调用降级{}", throwable);
         return dto -> R.convertResultJson(throwable);
     }
 

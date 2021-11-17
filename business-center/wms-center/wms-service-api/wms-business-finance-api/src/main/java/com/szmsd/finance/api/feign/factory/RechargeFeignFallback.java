@@ -1,5 +1,6 @@
 package com.szmsd.finance.api.feign.factory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.domain.AccountBalance;
@@ -20,59 +21,60 @@ public class RechargeFeignFallback implements FallbackFactory<RechargesFeignServ
 
     @Override
     public RechargesFeignService create(Throwable throwable) {
-        log.info("RechargeFeignFallback {}", throwable.getMessage());
-        return new RechargesFeignService(){
+        log.info("RechargeFeignFallback:", throwable);
+        return new RechargesFeignService() {
 
             @Override
             public R rechargeCallback(RechargesCallbackRequestDTO requestDTO) {
-                log.info("充值回调失败，服务调用降级");
+                log.info("充值回调失败，服务调用降级:{}", JSONObject.toJSONString(requestDTO), throwable);
                 return R.convertResultJson(throwable);
             }
 
             @Override
             public R warehouseFeeDeductions(CustPayDTO dto) {
-                log.info("仓储费扣款失败，服务调用降级");
+                log.info("仓储费扣款失败，服务调用降级{}", JSONObject.toJSONString(dto), throwable);
                 return R.convertResultJson(throwable);
             }
 
             @Override
             public R feeDeductions(CustPayDTO dto) {
-                log.info("费扣款失败，服务调用降级");
+                log.info("费扣款失败，服务调用降级{}", JSONObject.toJSONString(dto), throwable);
                 return R.convertResultJson(throwable);
             }
 
             @Override
             public R freezeBalance(CusFreezeBalanceDTO dto) {
-                log.info("冻结余额失败，服务调用降级");
+                log.info("冻结余额失败，服务调用降级{}", JSONObject.toJSONString(dto), throwable);
                 return R.convertResultJson(throwable);
             }
 
             @Override
             public R thawBalance(CusFreezeBalanceDTO dto) {
-                log.info("解冻余额失败，服务调用降级");
+                log.info("解冻余额失败，服务调用降级{}", JSONObject.toJSONString(dto), throwable);
                 return R.convertResultJson(throwable);
             }
 
             @Override
             public R<List<AccountBalance>> accountList(AccountBalanceDTO dto) {
+                log.info("accountList失败，服务调用降级{}", JSONObject.toJSONString(dto), throwable);
                 return R.convertResultJson(throwable);
             }
 
             @Override
             public R updateUserCredit(UserCreditDTO userCreditDTO) {
-                log.info("修改用户授信额度失败，服务调用降级");
+                log.info("修改用户授信额度失败，服务调用降级{}", JSONObject.toJSONString(userCreditDTO), throwable);
                 return R.convertResultJson(throwable);
             }
 
             @Override
             public R<List<UserCreditInfoVO>> queryUserCredit(String cusCode) {
-                log.info("查询用户授信额度失败，服务调用降级");
+                log.info("查询用户授信额度失败，服务调用降级{}", cusCode, throwable);
                 return R.convertResultJson(throwable);
             }
 
             @Override
             public R onlineIncome(CustPayDTO dto) {
-                log.info("充值失败，服务调用降级");
+                log.info("充值失败，服务调用降级{}", JSONObject.toJSONString(dto), throwable);
                 return R.convertResultJson(throwable);
             }
         };
