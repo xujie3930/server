@@ -64,7 +64,7 @@ public class ThreadPoolExecutorConfiguration {
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
@@ -81,7 +81,7 @@ public class ThreadPoolExecutorConfiguration {
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
@@ -98,7 +98,7 @@ public class ThreadPoolExecutorConfiguration {
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(256);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
@@ -115,7 +115,7 @@ public class ThreadPoolExecutorConfiguration {
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1024);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
@@ -132,7 +132,7 @@ public class ThreadPoolExecutorConfiguration {
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1024);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
@@ -149,7 +149,7 @@ public class ThreadPoolExecutorConfiguration {
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 8;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1024);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
