@@ -14,6 +14,8 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
@@ -102,8 +104,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @return
      */
     private String getSellCode() {
-        String loginSellerCode = iBasFeignClientService.getLoginSellerCode();
-        return Optional.ofNullable(loginSellerCode).orElse("");
+        return Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+       /* String loginSellerCode = iBasFeignClientService.getLoginSellerCode();
+        return Optional.ofNullable(loginSellerCode).orElse("");*/
     }
 
     /**
