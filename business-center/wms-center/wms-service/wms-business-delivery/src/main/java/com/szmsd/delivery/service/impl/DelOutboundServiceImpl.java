@@ -788,8 +788,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         inventoryOperateListDto.setOperateList(operateList);
         if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(orderType)) {
             inventoryOperateListDto.setFreeType(1);
-            inventoryOperateListDto.setCusCode(cusCode);
         }
+        inventoryOperateListDto.setCusCode(cusCode);
         this.unFreeze(inventoryOperateListDto);
     }
 
@@ -809,6 +809,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             inventoryOperateListDto.setInvoiceNo(orderNo);
             inventoryOperateListDto.setWarehouseCode(warehouseCode);
             inventoryOperateListDto.setOperateList(operateList);
+            inventoryOperateListDto.setCusCode(delOutbound.getSellerCode());
             this.unFreeze(inventoryOperateListDto);
         } else {
             this.unFreeze(orderType, orderNo, warehouseCode, delOutbound.getSellerCode());

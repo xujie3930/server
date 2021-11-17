@@ -17,15 +17,14 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
+import com.szmsd.inventory.domain.InventoryOccupy;
 import com.szmsd.inventory.domain.InventoryRecord;
 import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.*;
 import com.szmsd.inventory.mapper.InventoryMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
 import com.szmsd.inventory.service.IInventoryService;
-import com.szmsd.inventory.service.IPurchaseService;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
-import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import com.szmsd.inventory.service.InventoryOccupyService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -57,8 +56,8 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     private RemoteComponent remoteComponent;
     @Autowired
     private BaseProductClientService baseProductClientService;
-    @Resource
-    private IPurchaseService iPurchaseService;
+    @Autowired
+    private InventoryOccupyService inventoryOccupyService;
 
     /**
      * 上架入库 - Inbound - /api/inbound/receiving #B1 接收入库上架 - 修改库存
@@ -308,7 +307,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     @Transactional
     @Override
     public int freeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType, String cusCode) {
-        return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
+        /*return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
             // 库存可以为负数
             if (null == freeType) {
                 // >=
@@ -333,13 +332,90 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         }, (updateConsumer) -> {
             updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() - num);
             updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() + num);
-        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_3);
+        }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_3);*/
+        // 仓库，SKU，数量不能为空，并且数量不能小于1
+        if (StringUtils.isEmpty(warehouseCode)
+                || StringUtils.isEmpty(sku)
+                || Objects.isNull(num)
+                || num < 1) {
+            throw new CommonException("500", "冻结库存参数不全");
+        }
+        try {
+            // 根据仓库，SKU查询库存记录
+            LambdaQueryWrapper<Inventory> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.eq(Inventory::getWarehouseCode, warehouseCode);
+            queryWrapper.eq(Inventory::getSku, sku);
+            // 额外的条件（如果freeType是空的，可用库存要大于冻结的数量，如果不为空，可用库存不做限制）
+            if (null == freeType) {
+                // >=
+                queryWrapper.ge(Inventory::getAvailableInventory, num);
+            }
+            List<Inventory> list = this.list(queryWrapper);
+            Inventory dbInventory = null;
+            // 库存记录正常情况下，一个仓库下，一个SKU只有一条记录
+            if (CollectionUtils.isNotEmpty(list)) {
+                dbInventory = list.get(0);
+            }
+            // 冻结时，如果库存不存在记录，freeType不为空，就手动新增一条库存记录
+            if (null != freeType && null == dbInventory) {
+                dbInventory = new Inventory();
+                dbInventory.setCusCode(cusCode)
+                        .setSku(sku)
+                        .setWarehouseCode(warehouseCode)
+                        .setTotalInventory(0)
+                        .setAvailableInventory(0)
+                        .setFreezeInventory(0)
+                        .setTotalInbound(0)
+                        .setTotalOutbound(0);
+                // 新增之后会返回id到dbInventory对象中
+                baseMapper.insert(dbInventory);
+            }
+            // 没有库存记录信息
+            if (null == dbInventory) {
+                throw new CommonException("500", "[" + sku + "]冻结库存不足");
+            }
+            // 更新库存记录信息
+            Inventory updateInventory = new Inventory();
+            updateInventory.setWarehouseCode(dbInventory.getWarehouseCode());
+            updateInventory.setSku(dbInventory.getSku());
+            updateInventory.setTotalInventory(dbInventory.getTotalInventory());
+            updateInventory.setAvailableInventory(dbInventory.getAvailableInventory());
+            updateInventory.setFreezeInventory(dbInventory.getFreezeInventory());
+            updateInventory.setTotalInbound(dbInventory.getTotalInbound());
+            updateInventory.setTotalOutbound(dbInventory.getTotalOutbound());
+            // 1.减可用库存。2.增加冻结库存
+            updateInventory.setAvailableInventory(dbInventory.getAvailableInventory() - num);
+            updateInventory.setFreezeInventory(dbInventory.getFreezeInventory() + num);
+            updateInventory.setId(dbInventory.getId());
+            int update = baseMapper.updateById(updateInventory);
+            if (update < 1) {
+                throw new CommonException("500", "[" + sku + "]冻结库存操作失败");
+            }
+            // 添加库存占用记录
+            InventoryOccupy inventoryOccupy = new InventoryOccupy();
+            inventoryOccupy.setCusCode(cusCode);
+            inventoryOccupy.setWarehouseCode(warehouseCode);
+            inventoryOccupy.setSku(sku);
+            inventoryOccupy.setQuantity(num);
+            inventoryOccupy.setReceiptNo(invoiceNo);
+            inventoryOccupy.setInventoryId(dbInventory.getId());
+            this.inventoryOccupyService.save(inventoryOccupy);
+            // 添加日志
+            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_3.getKey(), dbInventory, updateInventory, invoiceNo, null, null, num, "");
+            return update;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            if (e instanceof CommonException) {
+                throw e;
+            }
+            throw new CommonException("500", "冻结库存失败，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku + "，错误原因：" + e.getMessage());
+        }
     }
 
     @Transactional
     @Override
-    public int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType) {
-        return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
+    public int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType, String cusCode) {
+        /*return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
                     if (null == freeType) {
                         // >=
                         queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
@@ -348,13 +424,62 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                 (updateConsumer) -> {
                     updateConsumer.setAvailableInventory(updateConsumer.getAvailableInventory() + num);
                     updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
-                }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_8);
+                }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_8);*/
+        // 仓库，SKU，数量不能为空，并且数量不能小于1
+        if (StringUtils.isEmpty(warehouseCode)
+                || StringUtils.isEmpty(sku)
+                || Objects.isNull(num)
+                || num < 1) {
+            throw new CommonException("500", "解冻库存参数不全");
+        }
+        try {
+            InventoryOccupy occupyInfo = this.inventoryOccupyService.getOccupyInfo(cusCode, warehouseCode, sku, invoiceNo);
+            if (null == occupyInfo) {
+                throw new CommonException("500", "解冻库存失败，无库存占用记录，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku);
+            }
+            // 验证数量是不是一样的
+            if (!num.equals(occupyInfo.getQuantity())) {
+                throw new CommonException("500", "解冻库存失败，占用数量与操作数量不一致");
+            }
+            // 修改库存记录信息
+            Inventory dbInventory = super.getById(occupyInfo.getInventoryId());
+            if (null == dbInventory) {
+                throw new CommonException("500", "解冻库存失败，根据库存占用记录查询库存记录失败");
+            }
+            Inventory updateInventory = new Inventory();
+            // 与冻结库存逻辑相反
+            // 1.加可用库存。2.减少冻结库存
+            updateInventory.setAvailableInventory(dbInventory.getAvailableInventory() + num);
+            updateInventory.setFreezeInventory(dbInventory.getFreezeInventory() - num);
+            updateInventory.setId(dbInventory.getId());
+            int update = baseMapper.updateById(updateInventory);
+            if (update < 1) {
+                throw new CommonException("500", "[" + sku + "]解冻库存失败，修改库存数据失败");
+            }
+            // 删除库存占用记录
+            this.inventoryOccupyService.removeById(occupyInfo.getId());
+            // 填充日志记录，日志不能为空，需要设置一个值
+            updateInventory.setWarehouseCode(dbInventory.getWarehouseCode());
+            updateInventory.setSku(dbInventory.getSku());
+            updateInventory.setTotalInventory(dbInventory.getTotalInventory());
+            updateInventory.setTotalInbound(dbInventory.getTotalInbound());
+            updateInventory.setTotalOutbound(dbInventory.getTotalOutbound());
+            // 添加日志
+            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_8.getKey(), dbInventory, updateInventory, invoiceNo, null, null, num, "");
+            return update;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            if (e instanceof CommonException) {
+                throw e;
+            }
+            throw new CommonException("500", "解冻失败，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku + "，错误原因：" + e.getMessage());
+        }
     }
 
     @Transactional
     @Override
-    public int deduction(String invoiceNo, String warehouseCode, String sku, Integer num) {
-        return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
+    public int deduction(String invoiceNo, String warehouseCode, String sku, Integer num, String cusCode) {
+        /*return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
                     // >=
                     queryWrapperConsumer.ge(Inventory::getFreezeInventory, num);
                 }, null,
@@ -362,19 +487,122 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                     updateConsumer.setTotalInventory(updateConsumer.getTotalInventory() - num);
                     updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
                     updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() + num);
-                }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);
+                }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);*/
+        if (StringUtils.isEmpty(warehouseCode)
+                || StringUtils.isEmpty(sku)
+                || Objects.isNull(num)
+                || num < 1) {
+            throw new CommonException("500", "扣减库存参数不全");
+        }
+        try {
+            InventoryOccupy occupyInfo = this.inventoryOccupyService.getOccupyInfo(cusCode, warehouseCode, sku, invoiceNo);
+            if (null == occupyInfo) {
+                throw new CommonException("500", "扣减库存失败，无库存占用记录，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku);
+            }
+            // 验证数量是不是一样的
+            if (!num.equals(occupyInfo.getQuantity())) {
+                throw new CommonException("500", "扣减库存失败，占用数量与操作数量不一致");
+            }
+            // 修改库存记录信息
+            Inventory dbInventory = super.getById(occupyInfo.getInventoryId());
+            if (null == dbInventory) {
+                throw new CommonException("500", "扣减库存失败，根据库存占用记录查询库存记录失败");
+            }
+            Inventory updateInventory = new Inventory();
+            // 1.总库存减少，2.冻结库存减少，3.出库数量增加
+            updateInventory.setTotalInventory(dbInventory.getTotalInventory() - num);
+            updateInventory.setFreezeInventory(dbInventory.getFreezeInventory() - num);
+            updateInventory.setTotalOutbound(dbInventory.getTotalOutbound() + num);
+            updateInventory.setId(dbInventory.getId());
+            int update = baseMapper.updateById(updateInventory);
+            if (update < 1) {
+                throw new CommonException("500", "[" + sku + "]扣减库存失败，修改库存数据失败");
+            }
+            // 删除库存占用记录
+            this.inventoryOccupyService.removeById(occupyInfo.getId());
+            // 填充日志记录，日志不能为空，需要设置一个值
+            updateInventory.setWarehouseCode(dbInventory.getWarehouseCode());
+            updateInventory.setSku(dbInventory.getSku());
+            updateInventory.setAvailableInventory(dbInventory.getAvailableInventory());
+            updateInventory.setTotalInbound(dbInventory.getTotalInbound());
+            // 添加日志
+            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_2.getKey(), dbInventory, updateInventory, invoiceNo, null, null, num, "");
+            return update;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            if (e instanceof CommonException) {
+                throw e;
+            }
+            throw new CommonException("500", "扣减库存失败，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku + "，错误原因：" + e.getMessage());
+        }
     }
 
     @Transactional
     @Override
-    public int unDeduction(String invoiceNo, String warehouseCode, String sku, Integer num) {
-        return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
+    public int unDeduction(String invoiceNo, String warehouseCode, String sku, Integer num, String cusCode) {
+        /*return this.doWorker(invoiceNo, warehouseCode, sku, num, (queryWrapperConsumer) -> {
                 }, null,
                 (updateConsumer) -> {
                     updateConsumer.setTotalInventory(updateConsumer.getTotalInventory() + num);
                     updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() + num);
                     updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() - num);
-                }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);
+                }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_1);*/
+        if (StringUtils.isEmpty(warehouseCode)
+                || StringUtils.isEmpty(sku)
+                || Objects.isNull(num)
+                || num < 1) {
+            throw new CommonException("500", "取消扣减库存参数不全");
+        }
+        try {
+            // 根据仓库，SKU查询库存记录
+            LambdaQueryWrapper<Inventory> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.eq(Inventory::getWarehouseCode, warehouseCode);
+            queryWrapper.eq(Inventory::getSku, sku);
+            List<Inventory> list = this.list(queryWrapper);
+            Inventory dbInventory = null;
+            // 库存记录正常情况下，一个仓库下，一个SKU只有一条记录
+            if (CollectionUtils.isNotEmpty(list)) {
+                dbInventory = list.get(0);
+            }
+            // 没有库存记录信息
+            if (null == dbInventory) {
+                throw new CommonException("500", "[" + sku + "]取消扣减库存不足");
+            }
+            // 更新库存记录信息
+            Inventory updateInventory = new Inventory();
+            // 1.总库存加，2.冻结库存加，3.出库数量减
+            updateInventory.setTotalInventory(dbInventory.getTotalInventory() + num);
+            updateInventory.setFreezeInventory(dbInventory.getFreezeInventory() + num);
+            updateInventory.setTotalOutbound(dbInventory.getTotalOutbound() - num);
+            updateInventory.setId(dbInventory.getId());
+            int update = baseMapper.updateById(updateInventory);
+            if (update < 1) {
+                throw new CommonException("500", "[" + sku + "]取消扣减库存失败，修改库存数据失败");
+            }
+            // 添加库存占用记录
+            InventoryOccupy inventoryOccupy = new InventoryOccupy();
+            inventoryOccupy.setCusCode(cusCode);
+            inventoryOccupy.setWarehouseCode(warehouseCode);
+            inventoryOccupy.setSku(sku);
+            inventoryOccupy.setQuantity(num);
+            inventoryOccupy.setReceiptNo(invoiceNo);
+            inventoryOccupy.setInventoryId(dbInventory.getId());
+            this.inventoryOccupyService.save(inventoryOccupy);
+            // 填充日志记录，日志不能为空，需要设置一个值
+            updateInventory.setWarehouseCode(dbInventory.getWarehouseCode());
+            updateInventory.setSku(dbInventory.getSku());
+            updateInventory.setAvailableInventory(dbInventory.getAvailableInventory());
+            updateInventory.setTotalInbound(dbInventory.getTotalInbound());
+            // 添加日志
+            iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_1.getKey(), dbInventory, updateInventory, invoiceNo, null, null, num, "");
+            return update;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            if (e instanceof CommonException) {
+                throw e;
+            }
+            throw new CommonException("500", "取消扣减库存失败，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku + "，错误原因：" + e.getMessage());
+        }
     }
 
     /**
@@ -450,27 +678,34 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                          Function<Inventory, Inventory> beforeHandler,
                          Consumer<Inventory> updateConsumer,
                          LocalLanguageEnum type) {
+        // 仓库，SKU，数量不能为空，并且数量不能小于1
         if (StringUtils.isEmpty(warehouseCode)
                 || StringUtils.isEmpty(sku)
                 || Objects.isNull(num)
                 || num < 1) {
             throw new CommonException("999", "参数不全2");
         }
+        // 根据仓库，SKU查询库存记录
         LambdaQueryWrapper<Inventory> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(Inventory::getWarehouseCode, warehouseCode);
         queryWrapper.eq(Inventory::getSku, sku);
+        // 额外的条件（如果freeType是空的，可用库存要大于冻结的数量，如果不为空，可用库存不做限制）
         queryWrapperConsumer.accept(queryWrapper);
         List<Inventory> list = this.list(queryWrapper);
         Inventory dbInventory = null;
+        // 库存记录正常情况下，一个仓库下，一个SKU只有一条记录
         if (CollectionUtils.isNotEmpty(list)) {
             dbInventory = list.get(0);
         }
+        // 冻结时，如果库存不存在记录，freeType不为空，就手动新增一条库存记录
         if (null != beforeHandler) {
             dbInventory = beforeHandler.apply(dbInventory);
         }
+        // 没有库存记录信息
         if (null == dbInventory) {
             throw new CommonException("999", "[" + sku + "]库存不足");
         }
+        // 更新库存记录信息
         Inventory updateInventory = new Inventory();
         updateInventory.setWarehouseCode(dbInventory.getWarehouseCode());
         updateInventory.setSku(dbInventory.getSku());

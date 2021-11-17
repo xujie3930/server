@@ -50,7 +50,7 @@ public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "freeze"),
                         () -> this.inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType(), operateListDto.getCusCode())),
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "unFreeze"),
-                        () -> inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())));
+                        () -> inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType(), operateListDto.getCusCode())));
     }
 
     /**
@@ -67,7 +67,7 @@ public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
         // 失败：回滚取消冻结过的SKU
         return this.doWorker(operateListDto,
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "unFreeze"),
-                        () -> this.inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType())),
+                        () -> this.inventoryService.unFreeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType(), operateListDto.getCusCode())),
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "freeze"),
                         () -> inventoryService.freeze(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getFreeType(), operateListDto.getCusCode())));
     }
@@ -100,9 +100,9 @@ public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
     public int deduction(InventoryOperateListDto operateListDto) {
         return this.doWorker(operateListDto,
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "deduction"),
-                        () -> this.inventoryService.deduction(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum())),
+                        () -> this.inventoryService.deduction(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getCusCode())),
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "unDeduction"),
-                        () -> inventoryService.unDeduction(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum())));
+                        () -> inventoryService.unDeduction(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getCusCode())));
     }
 
     /**
@@ -118,9 +118,9 @@ public class IInventoryWrapperServiceImpl implements IInventoryWrapperService {
     public int unDeduction(InventoryOperateListDto operateListDto) {
         return this.doWorker(operateListDto,
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "unDeduction"),
-                        () -> this.inventoryService.unDeduction(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum())),
+                        () -> this.inventoryService.unDeduction(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getCusCode())),
                 (dto, listDto) -> new LockerUtil<Integer>(redissonClient).doExecute(this.builderOnlyKey(listDto.getWarehouseCode(), dto.getSku(), "deduction"),
-                        () -> inventoryService.deduction(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum())));
+                        () -> inventoryService.deduction(listDto.getInvoiceNo(), listDto.getWarehouseCode(), dto.getSku(), dto.getNum(), operateListDto.getCusCode())));
     }
 
     @Override

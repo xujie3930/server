@@ -26,7 +26,7 @@ public class SwaggerAutoConfiguration {
     public Docket api() {
         List<Parameter> pars = new ArrayList<>();
         pars.add(new ParameterBuilder().name("Authorization")
-                .description("请求令牌")
+                .description("Authorization")
                 .modelRef(new ModelRef("string"))
                 .parameterType("header")
                 .required(true)
@@ -53,7 +53,7 @@ public class SwaggerAutoConfiguration {
                 // 版本号
                 .version("1.0")
                 // 描述
-                .description("API 描述")
+                .description("API description")
                 .build();
     }
 

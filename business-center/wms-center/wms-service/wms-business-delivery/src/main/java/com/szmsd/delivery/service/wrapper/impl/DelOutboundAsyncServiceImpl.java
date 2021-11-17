@@ -391,7 +391,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
      * @param warehouseCode warehouseCode
      * @param orderType     orderType
      */
-    private void deduction(String orderNo, String warehouseCode, String orderType) {
+    private void deduction(String orderNo, String warehouseCode, String orderType, String cusCode) {
         // 转运出库，集运出库在核重之后会去冻结库存，现在需要进行扣减库存
         if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
             return;
@@ -407,6 +407,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         inventoryOperateListDto.setWarehouseCode(warehouseCode);
         List<InventoryOperateDto> operateList = new ArrayList<>(inventoryOperateDtoMap.values());
         inventoryOperateListDto.setOperateList(operateList);
+        inventoryOperateListDto.setCusCode(cusCode);
         this.deduction(inventoryOperateListDto);
     }
 
@@ -432,6 +433,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         String orderNo = delOutbound.getOrderNo();
         String warehouseCode = delOutbound.getWarehouseCode();
         String orderType = delOutbound.getOrderType();
+        String cusCode = delOutbound.getSellerCode();
         if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(orderType)) {
             InventoryOperateDto inventoryOperateDto = new InventoryOperateDto();
             inventoryOperateDto.setSku(delOutbound.getNewSku());
@@ -442,9 +444,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             inventoryOperateListDto.setInvoiceNo(orderNo);
             inventoryOperateListDto.setWarehouseCode(warehouseCode);
             inventoryOperateListDto.setOperateList(operateList);
+            inventoryOperateListDto.setCusCode(cusCode);
             this.deduction(inventoryOperateListDto);
         } else {
-            this.deduction(orderNo, warehouseCode, orderType);
+            this.deduction(orderNo, warehouseCode, orderType, cusCode);
         }
     }
 

@@ -66,9 +66,10 @@ public interface IInventoryService extends IService<Inventory> {
      * @param sku           sku
      * @param num           num
      * @param freeType      freeType
+     * @param cusCode       cusCode
      * @return int
      */
-    int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType);
+    int unFreeze(String invoiceNo, String warehouseCode, String sku, Integer num, Integer freeType, String cusCode);
 
     /**
      * 扣减库存
@@ -77,9 +78,10 @@ public interface IInventoryService extends IService<Inventory> {
      * @param warehouseCode warehouseCode
      * @param sku           sku
      * @param num           num
+     * @param cusCode       cusCode
      * @return int
      */
-    int deduction(String invoiceNo, String warehouseCode, String sku, Integer num);
+    int deduction(String invoiceNo, String warehouseCode, String sku, Integer num, String cusCode);
 
     /**
      * 释放扣减库存
@@ -88,9 +90,10 @@ public interface IInventoryService extends IService<Inventory> {
      * @param warehouseCode warehouseCode
      * @param sku           sku
      * @param num           num
+     * @param cusCode       cusCode
      * @return int
      */
-    int unDeduction(String invoiceNo, String warehouseCode, String sku, Integer num);
+    int unDeduction(String invoiceNo, String warehouseCode, String sku, Integer num, String cusCode);
 
     void adjustment(InventoryAdjustmentDTO inventoryAdjustmentDTO);
 
