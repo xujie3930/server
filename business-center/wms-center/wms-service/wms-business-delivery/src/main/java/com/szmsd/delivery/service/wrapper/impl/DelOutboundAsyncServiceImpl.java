@@ -100,13 +100,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     @Autowired
     private RedissonClient redissonClient;
 
-    @Transactional
     @Override
     public int shipmentPacking(Long id) {
         return this.shipmentPacking(id, true);
     }
 
-    @Transactional
     @Override
     public int shipmentPacking(String orderNo) {
         DelOutbound delOutbound = this.delOutboundService.getByOrderNo(orderNo);
@@ -116,7 +114,6 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         return this.shipmentPacking(delOutbound, true);
     }
 
-    @Transactional
     @Override
     public int shipmentPacking(Long id, boolean shipmentShipping) {
         // 获取新的出库单信息
@@ -198,7 +195,6 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         }
     }
 
-    @Transactional
     @Override
     public void completed(String orderNo) {
         // 处理阶段
@@ -508,7 +504,6 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         }
     }
 
-    @Transactional
     @Override
     public void cancelled(String orderNo) {
         // 处理阶段
