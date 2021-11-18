@@ -31,6 +31,9 @@ public class InventoryOccupy extends BaseEntity {
     @TableField(fill = FieldFill.UPDATE)
     private String updateBy;
 
+    @ApiModelProperty(value = "版本号")
+    private Long version;
+
     @ApiModelProperty(value = "客户编号")
     private String cusCode;
 

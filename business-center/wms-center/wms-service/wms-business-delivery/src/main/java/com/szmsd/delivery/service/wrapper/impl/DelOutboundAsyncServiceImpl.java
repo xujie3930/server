@@ -319,7 +319,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             list.add(dto);
                             custPayDTO.setSerialBillInfoList(list);
                             R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);
-                            DelOutboundServiceImplUtil.chargeOperationThrowCommonException(r);
+                            DelOutboundServiceImplUtil.chargeOperationThrowCommonException2(r);
                         }
                     }
                     completedState = "MODIFY";

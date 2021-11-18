@@ -161,6 +161,10 @@ public final class DelOutboundServiceImplUtil {
         throwCommonException(r, "400", "400", "扣减操作费用失败");
     }
 
+    public static void chargeOperationThrowCommonException2(R<?> r) {
+        throwCommonException(r, "400", "400", "扣减物料费用失败");
+    }
+
     /**
      * 扣减物料费用失败
      *
@@ -184,7 +188,7 @@ public final class DelOutboundServiceImplUtil {
             throwCommonException(code, throwMsg);
         }
         if (Constants.SUCCESS != r.getCode()) {
-            throwCommonException(code2, Utils.defaultValue(r.getMsg(), throwMsg));
+            throwCommonException(code2, throwMsg + "，" + r.getMsg());
         }
     }
 

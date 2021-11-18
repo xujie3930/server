@@ -262,7 +262,7 @@ public class DelOutboundTimer {
     }
 
     private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer) {
-        // 默认200
+        // 默认100
         this.handle(queryWrapper, consumer, 200);
     }
 

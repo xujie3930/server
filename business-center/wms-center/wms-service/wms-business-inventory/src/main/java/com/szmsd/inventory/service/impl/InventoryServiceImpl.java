@@ -343,6 +343,11 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             throw new CommonException("500", "冻结库存参数不全");
         }
         try {
+            // 判断这个单有没有占用记录
+            InventoryOccupy occupyInfo = this.inventoryOccupyService.getOccupyInfo(cusCode, warehouseCode, sku, invoiceNo);
+            if (null != occupyInfo) {
+                return 1;
+            }
             // 根据仓库，SKU查询库存记录
             LambdaQueryWrapper<Inventory> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.eq(Inventory::getWarehouseCode, warehouseCode);
