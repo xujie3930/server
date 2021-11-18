@@ -254,16 +254,21 @@ public class DelOutboundTimer {
     }
 
     public void handleBringVerify(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncBringVerify(orderNo, id));
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncBringVerify(orderNo, id), 100);
     }
 
     public void handleShipmentPacking(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncShipmentPacking(orderNo, id));
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncShipmentPacking(orderNo, id), 100);
     }
 
     private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer) {
+        // 默认200
+        this.handle(queryWrapper, consumer, 200);
+    }
+
+    private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer, int limit) {
         // 一次处理200
-        queryWrapper.last("limit 200");
+        queryWrapper.last("limit " + limit);
         List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
         if (CollectionUtils.isNotEmpty(delOutboundCompletedList)) {
             for (DelOutboundCompleted delOutboundCompleted : delOutboundCompletedList) {
