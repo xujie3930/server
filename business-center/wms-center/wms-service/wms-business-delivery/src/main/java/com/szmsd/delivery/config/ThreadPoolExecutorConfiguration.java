@@ -62,7 +62,7 @@ public class ThreadPoolExecutorConfiguration {
     public ThreadPoolExecutor threadPoolExecutorDelOutboundReviewed() {
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
-        int maximumPoolSize = availableProcessors * 8;
+        int maximumPoolSize = availableProcessors * 4;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
@@ -79,7 +79,7 @@ public class ThreadPoolExecutorConfiguration {
     public ThreadPoolExecutor threadPoolExecutorShipmentPackingEvent() {
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
-        int maximumPoolSize = availableProcessors * 8;
+        int maximumPoolSize = availableProcessors * 4;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
@@ -96,7 +96,7 @@ public class ThreadPoolExecutorConfiguration {
     public ThreadPoolExecutor threadPoolExecutorShipmentEnumLabel() {
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
-        int maximumPoolSize = availableProcessors * 8;
+        int maximumPoolSize = availableProcessors * 4;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
@@ -113,7 +113,7 @@ public class ThreadPoolExecutorConfiguration {
     public ThreadPoolExecutor threadPoolExecutorDelOutboundProcessing() {
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
-        int maximumPoolSize = availableProcessors * 8;
+        int maximumPoolSize = availableProcessors * 4;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
@@ -130,7 +130,7 @@ public class ThreadPoolExecutorConfiguration {
     public ThreadPoolExecutor threadPoolExecutorDelOutboundShipped() {
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
-        int maximumPoolSize = availableProcessors * 8;
+        int maximumPoolSize = availableProcessors * 4;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
@@ -147,7 +147,7 @@ public class ThreadPoolExecutorConfiguration {
     public ThreadPoolExecutor threadPoolExecutorDelOutboundCanceled() {
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
-        int maximumPoolSize = availableProcessors * 8;
+        int maximumPoolSize = availableProcessors * 4;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致
