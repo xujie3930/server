@@ -58,4 +58,8 @@ public interface InboundReceiptFeignService {
     @PostMapping("/inbound/querySkuStockByRange")
     @ApiOperation(value = "查询sku的入库状况", notes = "查询sku的入库状况-指定范围内")
     R<List<SkuInventoryStockRangeVo>> querySkuStockByRange(@RequestBody InventoryStockByRangeDTO inventoryStockByRangeDTO);
+
+    @PostMapping("/inbound/updateTrackingNo")
+    @ApiOperation(value = "修改快递单号信息", notes = "修改快递单号信息")
+    R<Integer> updateTracking(@Validated @RequestBody UpdateTrackingNoRequest updateTrackingNoRequest);
 }

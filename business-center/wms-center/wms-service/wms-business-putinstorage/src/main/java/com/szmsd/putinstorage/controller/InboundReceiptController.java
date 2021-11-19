@@ -9,7 +9,6 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO;
 import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import com.szmsd.putinstorage.annotation.InboundReceiptLog;
@@ -67,7 +66,7 @@ public class InboundReceiptController extends BaseController {
     @Resource
     private RemoteComponent remoteComponent;
 
-//    @AutoValue
+    //    @AutoValue
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
     @GetMapping("/receipt/page")
     @ApiOperation(value = "查询", notes = "入库管理 - 分页查询")
@@ -85,6 +84,7 @@ public class InboundReceiptController extends BaseController {
         List<InboundReceiptVO> list = iInboundReceiptService.selectList(queryDTO);
         return getDataTable(list);
     }
+
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
     @GetMapping("/receipt/list")
     @ApiOperation(value = "查询", notes = "入库管理")
@@ -103,6 +103,14 @@ public class InboundReceiptController extends BaseController {
         } finally {
             CheckTag.remove();
         }
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
+    @PostMapping("/updateTrackingNo")
+    @ApiOperation(value = "修改快递单号信息", notes = "修改快递单号信息 已完成/已取消的订单不能处理")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.CREATE)
+    public R<Integer> updateTrackingNo(@Validated @RequestBody UpdateTrackingNoRequest updateTrackingNoRequest) {
+        return R.ok(iInboundReceiptService.updateTrackingNo(updateTrackingNoRequest));
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")

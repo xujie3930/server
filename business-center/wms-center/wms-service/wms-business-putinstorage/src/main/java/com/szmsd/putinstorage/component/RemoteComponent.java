@@ -35,9 +35,11 @@ import com.szmsd.http.dto.CreateTrackRequest;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryDTO;
+import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
+import com.szmsd.putinstorage.domain.dto.UpdateTrackingNoRequest;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.system.api.domain.SysUser;
@@ -336,5 +338,16 @@ public class RemoteComponent {
         R<ResponseVO> tracking = htpInboundFeignService.createTracking(createTrackRequest);
         AssertUtil.isTrue(tracking.getCode() == HttpStatus.SUCCESS, tracking.getMsg());
 
+    }
+
+    public void createTracking(UpdateTrackingNoRequest updateTrackingNoRequest, InboundReceipt inboundReceipt) {
+        // 创建入库单物流信息列表
+        CreateTrackRequest createTrackRequest = new CreateTrackRequest();
+        createTrackRequest.setWarehouseCode(inboundReceipt.getWarehouseCode())
+                .setRefOrderNo(inboundReceipt.getOrderNo())
+                .setTrackingNumberList(updateTrackingNoRequest.getDeliveryNoList());
+        log.info("更新入库单物流信息列表 {}", createTrackRequest);
+        R<ResponseVO> tracking = htpInboundFeignService.createTracking(createTrackRequest);
+        AssertUtil.isTrue(tracking.getCode() == HttpStatus.SUCCESS, tracking.getMsg());
     }
 }

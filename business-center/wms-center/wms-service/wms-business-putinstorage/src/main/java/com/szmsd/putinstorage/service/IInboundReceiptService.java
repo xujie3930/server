@@ -55,5 +55,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     void tracking(ReceivingTrackingRequest receivingCompletedRequest);
 
     List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO);
+
+    int updateTrackingNo(UpdateTrackingNoRequest updateTrackingNoRequest);
 }
 

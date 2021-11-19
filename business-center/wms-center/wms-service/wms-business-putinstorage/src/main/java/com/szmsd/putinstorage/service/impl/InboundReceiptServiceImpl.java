@@ -10,13 +10,7 @@ import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
-import com.szmsd.bas.dto.BaseProductBatchQueryDto;
-import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
-import com.szmsd.chargerules.domain.Operation;
-import com.szmsd.chargerules.dto.OperationDTO;
-import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
-import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
@@ -25,17 +19,14 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
-import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
 import com.szmsd.putinstorage.domain.InboundReceipt;
-import com.szmsd.putinstorage.domain.InboundReceiptDetail;
 import com.szmsd.putinstorage.domain.InboundTracking;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
@@ -61,7 +52,6 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -226,6 +216,24 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         remoteComponent.createTracking(createInboundReceiptDTO);
         log.info("创建入库单：操作完成");
         return this.queryInfo(warehouseNo, false);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int updateTrackingNo(UpdateTrackingNoRequest updateTrackingNoRequest) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        AssertUtil.notNull(loginUser, "获取用户信息失败");
+        String sellerCode = loginUser.getSellerCode();
+        InboundReceipt inboundReceipt = baseMapper.selectOne(Wrappers.<InboundReceipt>lambdaQuery()
+                .eq(InboundReceipt::getOrderNo,updateTrackingNoRequest.getWarehouseNo())
+                .eq(InboundReceipt::getCusCode, sellerCode));
+        AssertUtil.isTrue(inboundReceipt != null, "入库单不存在!");
+        AssertUtil.isTrue(inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()), "入库单已取消!");
+        AssertUtil.isTrue(inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.COMPLETED.getValue()), "入库单已完成!");
+        int update = baseMapper.update(new InboundReceipt(), Wrappers.<InboundReceipt>lambdaUpdate().set(InboundReceipt::getDeliveryNo, updateTrackingNoRequest.getDeliveryNo()));
+        log.info("更新运单信息-{} -{}条", updateTrackingNoRequest, update);
+        remoteComponent.createTracking(updateTrackingNoRequest, inboundReceipt);
+        return update;
     }
 
     /**

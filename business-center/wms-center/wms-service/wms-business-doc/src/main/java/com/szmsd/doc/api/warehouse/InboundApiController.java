@@ -201,7 +201,7 @@ public class InboundApiController {
 
         List<CreateInboundReceiptReq> createInboundReceiptDTOList = batchInboundReceiptReq.getBatchInboundReceiptList();
         List<CreateInboundReceiptDTO> addDTO = createInboundReceiptDTOList.stream().map(x -> {
-            if(CollectionUtils.isNotEmpty(x.getDocumentsFileBase64List())) {
+            if (CollectionUtils.isNotEmpty(x.getDocumentsFileBase64List())) {
                 List<BasAttachmentDataDTO> basAttachmentDataDTOS = iRemoterApi.uploadFile(x.getDocumentsFileBase64List(), AttachmentTypeEnum.INBOUND_RECEIPT_DOCUMENTS);
 
                 List<AttachmentFileDTO> collect1 = basAttachmentDataDTOS.stream().map(file -> {
@@ -410,5 +410,12 @@ public class InboundApiController {
         inboundReceiptRespTableDataInfo.setTotal(inboundReceiptVOTableDataInfo.getTotal());
         inboundReceiptRespTableDataInfo.setRows(collect);
         return inboundReceiptRespTableDataInfo;
+    }
+
+    @PreAuthorize("@ss.hasPermi('inbound:receipt:updateTrackingNo')")
+    @PostMapping("/updateTrackingNo")
+    @ApiOperation(value = "修改快递单号信息", notes = "修改快递单号信息 已完成/已取消的订单不能处理")
+    public R<Integer> updateTrackingNo(@Validated @RequestBody UpdateTrackingNoRequest updateTrackingNoRequest) {
+        return inboundReceiptFeignService.updateTracking(updateTrackingNoRequest);
     }
 }

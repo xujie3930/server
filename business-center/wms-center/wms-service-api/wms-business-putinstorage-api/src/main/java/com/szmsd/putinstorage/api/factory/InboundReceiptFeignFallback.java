@@ -88,6 +88,12 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
                 log.info("InboundReceiptFeignFallback querySkuStockByRange{}", JSONObject.toJSONString(inventoryStockByRangeDTO), throwable);
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<Integer> updateTracking(UpdateTrackingNoRequest updateTrackingNoRequest) {
+                log.info("InboundReceiptFeignFallback updateTracking{}", updateTrackingNoRequest, throwable);
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }
