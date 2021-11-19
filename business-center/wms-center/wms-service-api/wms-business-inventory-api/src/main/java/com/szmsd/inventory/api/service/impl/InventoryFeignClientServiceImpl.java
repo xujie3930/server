@@ -1,6 +1,9 @@
 package com.szmsd.inventory.api.service.impl;
 
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
@@ -31,9 +34,20 @@ public class InventoryFeignClientServiceImpl implements InventoryFeignClientServ
     }
 
     @Override
-    public List<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto) {
-        return R.getDataAndException(this.inventoryFeignService.queryAvailableList(queryDto));
+    public TableDataInfo<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto) {
+        TableDataInfo<InventoryAvailableListVO> r = this.inventoryFeignService.queryAvailableList(queryDto);
+        if(Constants.SUCCESS != r.getCode()){
+            // 抛出接口返回的异常信息
+            throw new CommonException("" + r.getCode(), r.getMsg());
+        }
+        return r;
     }
+
+    @Override
+    public List<InventoryAvailableListVO> queryAvailableList2(InventoryAvailableQueryDto queryDto) {
+        return R.getDataAndException(this.inventoryFeignService.queryAvailableList2(queryDto));
+    }
+
 
     @Override
     public InventoryAvailableListVO queryOnlyAvailable(InventoryAvailableQueryDto queryDto) {

@@ -1,6 +1,7 @@
 package com.szmsd.inventory.api.service;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
@@ -20,7 +21,9 @@ public interface InventoryFeignClientService {
 
     List<InventorySkuVolumeVO> querySkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO);
 
-    List<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto);
+    TableDataInfo<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto);
+
+    List<InventoryAvailableListVO> queryAvailableList2(InventoryAvailableQueryDto queryDto);
 
     InventoryAvailableListVO queryOnlyAvailable(InventoryAvailableQueryDto queryDto);
 

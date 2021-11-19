@@ -1,8 +1,11 @@
 package com.szmsd.doc.api.warehouse;
 
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.doc.api.RUtils;
+import com.szmsd.doc.api.sku.resp.BaseProductResp;
 import com.szmsd.doc.api.warehouse.req.InventoryAvailableQueryReq;
 import com.szmsd.doc.api.warehouse.resp.InventoryAvailableListResp;
 import com.szmsd.doc.api.warehouse.resp.SkuInventoryAgeResp;
@@ -17,6 +20,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -40,15 +44,24 @@ public class InventoryApiController {
 
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/inbound/queryAvailableList")
-    @ApiOperation(value = "查询可用库存-根据仓库编码，SKU - 不分页", notes = "根据客户代码、所在仓库、sku查询SKU库存")
-    public R<List<InventoryAvailableListResp>> queryAvailableList(@Valid @RequestBody InventoryAvailableQueryReq queryDTO) {
+    @ApiOperation(value = "查询可用库存-根据仓库编码，SKU - 分页", notes = "根据客户代码、所在仓库、sku查询SKU库存")
+    public TableDataInfo<InventoryAvailableListResp> queryAvailableList(@Valid @RequestBody InventoryAvailableQueryReq queryDTO) {
         queryDTO.setCusCode(AuthenticationUtil.getSellerCode());
-        List<InventoryAvailableListVO> inventoryAvailableListVOS = inventoryFeignService.queryAvailableList(queryDTO.convertThis());
-
-        List<InventoryAvailableListResp> returnList = inventoryAvailableListVOS
-                .stream().filter(Objects::nonNull).map(InventoryAvailableListResp::convertThis).collect(Collectors.toList());
-
-        return R.ok(returnList);
+        TableDataInfo<InventoryAvailableListVO> dataInfo = inventoryFeignService.queryAvailableList(queryDTO.convertThis());
+        TableDataInfo<InventoryAvailableListResp> inventoryAvailableListResp = new TableDataInfo<>();
+        BeanUtils.copyProperties(dataInfo, inventoryAvailableListResp);
+        List<InventoryAvailableListVO> rows = dataInfo.getRows();
+        List<InventoryAvailableListResp> collect = rows.stream().map(x -> {
+            InventoryAvailableListResp availableListResp = new InventoryAvailableListResp();
+            BeanUtils.copyProperties(x, availableListResp);
+            return availableListResp;
+        }).collect(Collectors.toList());
+        inventoryAvailableListResp.setRows(collect);
+        return inventoryAvailableListResp;
+//        List<InventoryAvailableListResp> returnList = inventoryAvailableListVOS
+//                .stream().filter(Objects::nonNull).map(InventoryAvailableListResp::convertThis).collect(Collectors.toList());
+//
+//        return R.ok(returnList);
     }
 
     @PreAuthorize("hasAuthority('client')")

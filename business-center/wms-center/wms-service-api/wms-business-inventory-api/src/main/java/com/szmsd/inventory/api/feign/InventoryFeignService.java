@@ -26,7 +26,11 @@ public interface InventoryFeignService {
 
     @PostMapping("/inventory/queryAvailableList2")
     @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 不分页")
-    R<List<InventoryAvailableListVO>> queryAvailableList(@RequestBody InventoryAvailableQueryDto queryDto);
+    R<List<InventoryAvailableListVO>> queryAvailableList2(@RequestBody InventoryAvailableQueryDto queryDto);
+
+    @PostMapping("/inventory/queryAvailableList")
+    @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 分页")
+    TableDataInfo<InventoryAvailableListVO> queryAvailableList(@RequestBody InventoryAvailableQueryDto queryDto);
 
     @PostMapping("/inventory/queryOnlyAvailable")
     @ApiOperation(value = "根据仓库编码，SKU查询可用库存 - 单条")

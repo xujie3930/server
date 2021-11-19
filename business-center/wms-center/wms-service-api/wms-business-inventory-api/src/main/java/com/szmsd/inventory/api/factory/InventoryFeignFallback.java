@@ -32,9 +32,15 @@ public class InventoryFeignFallback implements FallbackFactory<InventoryFeignSer
             }
 
             @Override
-            public R<List<InventoryAvailableListVO>> queryAvailableList(InventoryAvailableQueryDto queryDto) {
-                log.info("InventoryFeignFallback queryAvailableList:{}", JSONObject.toJSONString(queryDto), throwable);
+            public R<List<InventoryAvailableListVO>> queryAvailableList2(InventoryAvailableQueryDto queryDto) {
+                log.info("InventoryFeignFallback queryAvailableList2:{}", JSONObject.toJSONString(queryDto), throwable);
                 return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public TableDataInfo<InventoryAvailableListVO> queryAvailableList(InventoryAvailableQueryDto queryDto) {
+                log.info("InventoryFeignFallback queryAvailableList:{}", JSONObject.toJSONString(queryDto), throwable);
+                return null;
             }
 
             @Override
