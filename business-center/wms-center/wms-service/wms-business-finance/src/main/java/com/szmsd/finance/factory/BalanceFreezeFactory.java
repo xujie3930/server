@@ -57,8 +57,8 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), balance);
                 recordOpLog(dto, balance.getCurrentBalance());
                 recordDetailLog(dto, balance);
+                return true;
             }
-            return true;
         } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();

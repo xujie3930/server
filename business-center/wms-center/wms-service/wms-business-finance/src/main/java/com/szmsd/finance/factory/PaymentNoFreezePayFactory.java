@@ -54,9 +54,8 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
                 recordOpLog(dto, oldBalance.getCurrentBalance());
                 recordDetailLog(dto, oldBalance);
                 setSerialBillLog(dto);
-
+                return true;
             }
-            return true;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();

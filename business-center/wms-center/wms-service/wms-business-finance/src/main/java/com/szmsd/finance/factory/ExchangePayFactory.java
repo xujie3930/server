@@ -75,8 +75,8 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 setSerialBillLog(dto, afterBalanceChange);
                 recordDetailLog(dto, beforeSubtract);
                 iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
+                return true;
             }
-            return true;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
