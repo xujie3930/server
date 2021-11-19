@@ -222,7 +222,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 // 空值默认处理
                 if (StringUtils.isEmpty(completedState)) {
                     // 执行扣减库存
-                    this.deduction(delOutbound);
+                    try {
+                        this.deduction(delOutbound);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        throw new CommonException("500", "执行扣减库存失败，" + e.getMessage());
+                    }
                     completedState = "FEE_DE";
                 }
                 // 销毁，自提，新SKU不扣物流费用

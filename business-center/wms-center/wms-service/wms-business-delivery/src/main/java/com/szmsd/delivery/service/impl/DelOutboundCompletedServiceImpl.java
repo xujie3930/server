@@ -135,7 +135,7 @@ public class DelOutboundCompletedServiceImpl extends ServiceImpl<DelOutboundComp
             remark = remark.substring(0, 500);
         }
         modifyDelOutboundCompleted.setRemark(remark);
-        // 处理次数累加，下一次处理时间 = 5 * 处理次数
+        // 处理次数累加，下一次处理时间 = 系统当前时间 + 5
         this.baseMapper.updateRecord(modifyDelOutboundCompleted);
     }
 

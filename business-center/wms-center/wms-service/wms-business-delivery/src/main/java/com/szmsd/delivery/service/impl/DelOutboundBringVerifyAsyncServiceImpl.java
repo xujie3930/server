@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.ApplicationContainer;
@@ -43,7 +44,11 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
         try {
             if (lock.tryLock(0, TimeUnit.SECONDS)) {
                 DelOutbound delOutbound = delOutboundService.getByOrderNo(orderNo);
-                bringVerifyAsync(delOutbound, AsyncThreadObject.build());
+                // 可以提审的状态：待提审，审核失败
+                if (DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
+                        || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState())) {
+                    bringVerifyAsync(delOutbound, AsyncThreadObject.build());
+                }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -91,11 +96,11 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
             // updateDelOutbound.setId(delOutbound.getId());
             // updateDelOutbound.setBringVerifyState(BringVerifyEnum.BEGIN.name());
             // this.delOutboundService.updateById(updateDelOutbound);
-            // 抛出异常
-            // throw e;
             // 异步屏蔽异常，将异常打印到日志中
             // 异步错误在单据里面会显示错误信息
             this.logger.error("(4)提审异步操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
+            // 抛出异常
+            throw e;
         } finally {
             if (isAsyncThread) {
                 asyncThreadObject.unloadTid();
