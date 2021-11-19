@@ -194,7 +194,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         //校验快递单号唯一
         List<String> deliveryNoList = createInboundReceiptDTO.getDeliveryNoList();
         if (CollectionUtils.isNotEmpty(deliveryNoList)) {
-            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().ne(InboundReceipt::getWarehouseNo, warehouseNo).ne(InboundReceipt::getStatus, InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue());
+            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().ne(createInboundReceiptDTO.getId() != null, InboundReceipt::getId, createInboundReceiptDTO.getId()).ne(InboundReceipt::getWarehouseNo, warehouseNo).ne(InboundReceipt::getStatus, InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue());
             String join = String.join(",", deliveryNoList);
             in.and(x -> x.apply("CONCAT(',',delivery_no,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))", join));
             List<InboundReceipt> inboundReceipts = baseMapper.selectList(in);
