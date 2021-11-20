@@ -25,6 +25,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundCharge;
@@ -169,7 +170,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())) {
                 inventoryAvailableQueryDto.setSource("084002");
             }
-            List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+            List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList2(inventoryAvailableQueryDto);
             // 去查询SKU的信息，集运出库需要查看产品详情，需要单独去查询
             Map<String, BaseProduct> baseProductMap = null;
             if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())) {
@@ -227,7 +228,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 inventoryAvailableQueryDto.setSkus(skus);
                 // 可用库存为0的也需要查询出来
                 inventoryAvailableQueryDto.setQueryType(2);
-                List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+                List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList2(inventoryAvailableQueryDto);
                 if (CollectionUtils.isNotEmpty(availableList)) {
                     InventoryAvailableListVO availableListVO = availableList.get(0);
                     if (null != availableListVO) {
@@ -292,7 +293,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             inventoryAvailableQueryDto.setSkus(skus);
             inventoryAvailableQueryDto.setQueryType(2);
             //如果没有库存不会塞数据 先方判断外面
-            List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+            List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList2(inventoryAvailableQueryDto);
 
             Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(availableList)) {
@@ -407,7 +408,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 inventoryAvailableQueryDto.setSkus(skus);
                 // 库存是0的也查询出来，自行做数量验证。同时也能验证SKU是不是自己的
                 inventoryAvailableQueryDto.setQueryType(2);
-                List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+                List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList2(inventoryAvailableQueryDto);
                 Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
                 Map<String, Integer> availableInventoryMap = new HashMap<>();
                 if (CollectionUtils.isNotEmpty(availableList)) {
@@ -1484,7 +1485,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         inventoryAvailableQueryDto.setSkus(skus);
         // 这里是导入，导入的时候，可用库存必须大于0才查询出来
         inventoryAvailableQueryDto.setQueryType(1);
-        List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList(inventoryAvailableQueryDto);
+        List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList2(inventoryAvailableQueryDto);
         Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(availableList)) {
             for (InventoryAvailableListVO vo : availableList) {
