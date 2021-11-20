@@ -124,6 +124,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
         }
         if (BillEnum.PayMethod.BALANCE_THAW == dto.getPayMethod()) {
+            log.info("解冻参数：{}",JSONObject.toJSONString(dto));
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
             if (accountBalanceChanges.size() > 0) {
                 //查询出此单冻结的金额
@@ -144,6 +145,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     }
 
     private List<AccountBalanceChange> getRecordList(CustPayDTO dto) {
+        log.info("getRecordList：{}",JSONObject.toJSONString(dto));
         LambdaQueryWrapper<AccountBalanceChange> query = Wrappers.lambdaQuery();
         query.eq(AccountBalanceChange::getCurrencyCode, dto.getCurrencyCode());
         query.eq(AccountBalanceChange::getNo, dto.getNo());
