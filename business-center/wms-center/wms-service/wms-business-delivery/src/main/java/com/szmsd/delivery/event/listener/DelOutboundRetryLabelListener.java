@@ -55,7 +55,7 @@ public class DelOutboundRetryLabelListener {
         logger.info("(1)获取承运商标签，id：{}，lockName：{}", id, lockName);
         RLock lock = redissonClient.getLock(lockName);
         try {
-            if (lock.tryLock(0, 10, TimeUnit.SECONDS)) {
+            if (lock.tryLock(0, TimeUnit.SECONDS)) {
                 logger.info("(2)获取到锁，id：{}，lockName：{}", id, lockName);
                 DelOutboundRetryLabel retryLabel = this.delOutboundRetryLabelService.getById(id);
                 if (null == retryLabel) {
