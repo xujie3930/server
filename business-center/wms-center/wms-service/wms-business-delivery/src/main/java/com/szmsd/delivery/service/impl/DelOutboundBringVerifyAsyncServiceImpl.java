@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +35,6 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
     @Autowired
     private RedissonClient redissonClient;
 
-    @Transactional
     @Override
     public void bringVerifyAsync(String orderNo) {
         String key = applicationName + ":DelOutbound:bringVerifyAsync:" + orderNo;
@@ -60,7 +58,6 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
         }
     }
 
-    @Transactional
     @Override
     public void bringVerifyAsync(DelOutbound delOutbound, AsyncThreadObject asyncThreadObject) {
         Thread thread = Thread.currentThread();
@@ -84,6 +81,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
         logger.info("(2)提审异步操作开始，出库单号：{}", delOutbound.getOrderNo());
         ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
         try {
+            // 修改状态为提审中
+            this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
             applicationContainer.action();
             logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
