@@ -67,6 +67,9 @@ public class RefundPayFactory extends AbstractPayFactory {
                 setSerialBillLog(dto);
                 iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
+            } else {
+                log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(dto));
+                throw new RuntimeException("退费业务处理超时,请稍候重试");
             }
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
@@ -74,12 +77,12 @@ public class RefundPayFactory extends AbstractPayFactory {
             log.error("RefundPayFactory异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
+            throw new RuntimeException("退费业务处理超时,请稍候重试!");
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
-        return false;
     }
 
     @Override

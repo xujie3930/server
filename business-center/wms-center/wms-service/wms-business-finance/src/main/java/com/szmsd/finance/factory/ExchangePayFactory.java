@@ -76,6 +76,9 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 recordDetailLog(dto, beforeSubtract);
                 iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
+            } else {
+                log.error("汇率转换,请稍候重试{}", JSONObject.toJSONString(dto));
+                throw new RuntimeException("汇率转换操作超时,请稍候重试");
             }
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
@@ -83,12 +86,12 @@ public class ExchangePayFactory extends AbstractPayFactory {
             log.error("ExchangePayFactory异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
+            throw new RuntimeException("汇率转换,请稍候重试!");
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
-        return false;
     }
 
     @Override

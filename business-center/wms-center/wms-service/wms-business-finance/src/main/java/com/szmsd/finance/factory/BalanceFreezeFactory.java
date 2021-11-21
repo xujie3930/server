@@ -58,6 +58,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 recordOpLog(dto, balance.getCurrentBalance());
                 recordDetailLog(dto, balance);
                 return true;
+            } else {
+                log.error("冻结/解冻操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
+                throw new RuntimeException("冻结/解冻操作超时,请稍候重试");
             }
         } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
@@ -65,12 +68,12 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             log.error("BalanceFreezeFactory异常：", e);
             log.error("获取余额异常，加锁失败");
             log.error("异常信息:" + e.getMessage());
+            throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
-        return false;
     }
 
     public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
@@ -124,7 +127,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
         }
         if (BillEnum.PayMethod.BALANCE_THAW == dto.getPayMethod()) {
-            log.info("解冻参数：{}",JSONObject.toJSONString(dto));
+            log.info("解冻参数：{}", JSONObject.toJSONString(dto));
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
             if (accountBalanceChanges.size() > 0) {
                 //查询出此单冻结的金额
@@ -145,7 +148,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     }
 
     private List<AccountBalanceChange> getRecordList(CustPayDTO dto) {
-        log.info("getRecordList：{}",JSONObject.toJSONString(dto));
+        log.info("getRecordList：{}", JSONObject.toJSONString(dto));
         LambdaQueryWrapper<AccountBalanceChange> query = Wrappers.lambdaQuery();
         query.eq(AccountBalanceChange::getCurrencyCode, dto.getCurrencyCode());
         query.eq(AccountBalanceChange::getNo, dto.getNo());

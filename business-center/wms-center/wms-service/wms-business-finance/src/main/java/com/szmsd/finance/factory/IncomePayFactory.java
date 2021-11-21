@@ -61,6 +61,9 @@ public class IncomePayFactory extends AbstractPayFactory {
                 recordDetailLog(dto, oldBalance);
                 iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
+            } else {
+                log.error("充值操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
+                throw new RuntimeException("充值操作超时,请稍候重试");
             }
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
@@ -68,12 +71,12 @@ public class IncomePayFactory extends AbstractPayFactory {
             log.error("IncomePay异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
+            throw new RuntimeException("充值操作超时,请稍候重试!");
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
-        return false;
     }
 
     @Override
