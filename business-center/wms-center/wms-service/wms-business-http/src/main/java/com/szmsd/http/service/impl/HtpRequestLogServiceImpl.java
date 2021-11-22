@@ -50,7 +50,7 @@ public class HtpRequestLogServiceImpl extends ServiceImpl<HtpRequestLogMapper, H
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "request_url_group", htpRequestLog.getRequestUrlGroup());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_uri", htpRequestLog.getRequestUri());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_body", htpRequestLog.getRequestBody());
-        if (null != htpRequestLog.getRequestTimeStart() && null != htpRequestLog.getRequestTimeEnd()) {
+        if (StringUtils.isNotEmpty(htpRequestLog.getRequestTimeStart()) && StringUtils.isNotEmpty(htpRequestLog.getRequestTimeEnd())) {
             // queryWrapper.between("request_time", DateFormatUtils.format(htpRequestLog.getRequestTimeStart(), "yyyy-MM-dd"), DateFormatUtils.format(htpRequestLog.getRequestTimeEnd(), "yyyy-MM-dd"));
             // 大于等于 >=
             queryWrapper.ge("request_time", htpRequestLog.getRequestTimeStart() + " 00:00:00");
