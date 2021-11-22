@@ -146,13 +146,6 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                     return true;
                 }
                 throw new CommonException("999", "解冻金额不足 单号: " + dto.getNo() + " 金额：" + amountChange);
-            } else {
-                // 校验是否冻结过这个单 如果冻结直接返回
-                Integer integer = accountBalanceChangeMapper.selectCount(Wrappers.<AccountBalanceChange>lambdaQuery().eq(AccountBalanceChange::getNo, dto.getNo()));
-                if (integer == 0) {
-                    throw new CommonException("999", "没有找到该单的冻结额。 单号: " + dto.getNo());
-                }
-                return null;
             }
         }
         return null;
