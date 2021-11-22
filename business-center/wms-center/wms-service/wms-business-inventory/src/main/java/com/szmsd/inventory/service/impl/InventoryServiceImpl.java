@@ -442,7 +442,9 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         try {
             InventoryOccupy occupyInfo = this.inventoryOccupyService.getOccupyInfo(cusCode, warehouseCode, sku, invoiceNo);
             if (null == occupyInfo) {
-                throw new CommonException("500", "解冻库存失败，无库存占用记录，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku);
+                // throw new CommonException("500", "解冻库存失败，无库存占用记录，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku);
+                // 无库存占用记录，直接返回成功
+                return 1;
             }
             // 验证数量是不是一样的
             if (!num.equals(occupyInfo.getQuantity())) {
@@ -504,7 +506,9 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         try {
             InventoryOccupy occupyInfo = this.inventoryOccupyService.getOccupyInfo(cusCode, warehouseCode, sku, invoiceNo);
             if (null == occupyInfo) {
-                throw new CommonException("500", "扣减库存失败，无库存占用记录，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku);
+                // throw new CommonException("500", "扣减库存失败，无库存占用记录，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku);
+                // 无占用记录，不处理扣减库存逻辑
+                return 1;
             }
             // 验证数量是不是一样的
             if (!num.equals(occupyInfo.getQuantity())) {
