@@ -53,9 +53,9 @@ public class HtpRequestLogServiceImpl extends ServiceImpl<HtpRequestLogMapper, H
         if (null != htpRequestLog.getRequestTimeStart() && null != htpRequestLog.getRequestTimeEnd()) {
             // queryWrapper.between("request_time", DateFormatUtils.format(htpRequestLog.getRequestTimeStart(), "yyyy-MM-dd"), DateFormatUtils.format(htpRequestLog.getRequestTimeEnd(), "yyyy-MM-dd"));
             // 大于等于 >=
-            queryWrapper.ge("DATE_FORMAT(request_time, '%Y-%m-%d')", htpRequestLog.getRequestTimeStart());
+            queryWrapper.ge("request_time", htpRequestLog.getRequestTimeStart() + " 00:00:00");
             // 小于等于 <=
-            queryWrapper.le("DATE_FORMAT(request_time, '%Y-%m-%d')", htpRequestLog.getRequestTimeEnd());
+            queryWrapper.le("request_time", htpRequestLog.getRequestTimeEnd() + " 23:59:59");
         }
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);
