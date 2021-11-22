@@ -25,7 +25,6 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundCharge;
@@ -1253,8 +1252,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 throw new CommonException("400", "操作失败，已取消的订单不能取消");
             }
             // 处理未提审，提审失败的
-            if (DelOutboundStateEnum.REVIEWED.getCode().equals(outbound.getState())
-                    || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(outbound.getState())) {
+            if (DelOutboundStateEnum.REVIEWED.getCode().equals(outbound.getState())) {
                 // 未提审的，提审失败的
                 reviewedList.add(orderNo);
                 continue;
