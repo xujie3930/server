@@ -216,7 +216,7 @@ abstract class AbstractRequest extends BaseRequest {
         } else {
             logRequestBody = requestBody;
         }
-        this.addLog(warehouseCode, urlGroupName, url, httpMethod.name(), headerMap, logRequestBody, requestTime, responseBody.getBody());
+        this.addLog(warehouseCode, urlGroupName, url, httpMethod.name(), headerMap, logRequestBody, requestTime, responseBody.getBody(), responseBody.getStatus());
         return responseBody;
     }
 
@@ -312,7 +312,7 @@ abstract class AbstractRequest extends BaseRequest {
             Map<String, String> headerMap = urlConfig.getHeaders();
             String requestBody = JSON.toJSONString(object);
             HttpResponseBody httpResponseBody1 = HttpClientHelper.httpPostStream(url, headerMap, requestBody);
-            addLog(warehouseCode, urlGroupName, url, HttpMethod.POST.name(), headerMap, requestBody, requestTime, "FileInputStream");
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.POST.name(), headerMap, requestBody, requestTime, "FileInputStream", httpResponseBody1.getStatus());
             return httpResponseBody1;
         });
         FileStream responseBody = null;
@@ -375,7 +375,7 @@ abstract class AbstractRequest extends BaseRequest {
                         .append("byteArrayLength=").append(httpResponseByteArrayWrapper.getByteArray().length)
                         .append("}");
             }
-            addLog(warehouseCode, urlGroupName, url, HttpMethod.POST.name(), headerMap, requestBody, requestTime, responseBody.toString());
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.POST.name(), headerMap, requestBody, requestTime, responseBody.toString(), httpResponseBody1.getStatus());
             return httpResponseBody1;
         });
     }
@@ -390,7 +390,7 @@ abstract class AbstractRequest extends BaseRequest {
             Date requestTime = new Date();
             String requestBody = JSON.toJSONString(object);
             HttpResponseBody responseBody = HttpClientHelper.httpPost(url, requestBody, file, headerMap);
-            addLog(warehouseCode, urlGroupName, url, HttpMethod.PUT.name(), headerMap, requestBody, requestTime, responseBody.getBody());
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.PUT.name(), headerMap, requestBody, requestTime, responseBody.getBody(), responseBody.getStatus());
             return responseBody;
         }).getBody();
     }
@@ -405,7 +405,7 @@ abstract class AbstractRequest extends BaseRequest {
             Date requestTime = new Date();
             String requestBody = JSON.toJSONString(object);
             HttpResponseBody responseBody = HttpClientHelper.httpPut(url, requestBody, file, headerMap);
-            addLog(warehouseCode, urlGroupName, url, HttpMethod.PUT.name(), headerMap, requestBody, requestTime, responseBody.getBody());
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.PUT.name(), headerMap, requestBody, requestTime, responseBody.getBody(), responseBody.getStatus());
             return responseBody;
         }).getBody();
     }
@@ -420,7 +420,7 @@ abstract class AbstractRequest extends BaseRequest {
             String requestBody = JSON.toJSONString(object);
             Date requestTime = new Date();
             HttpResponseBody responseBody = HttpClientHelper.httpGet(url, requestBody, headerMap);
-            addLog(warehouseCode, urlGroupName, url, HttpMethod.GET.name(), headerMap, requestBody, requestTime, responseBody.getBody());
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.GET.name(), headerMap, requestBody, requestTime, responseBody.getBody(), responseBody.getStatus());
             return responseBody;
         }).getBody();
     }

@@ -15,9 +15,10 @@ import java.util.Map;
  */
 public class BaseRequest {
 
-    void addLog(String warehouseCode, String urlGroup, String url, String method, Map<String, String> headerMap, String requestBody, Date requestTime, String responseBody) {
+    void addLog(String warehouseCode, String urlGroup, String url, String method, Map<String, String> headerMap, String requestBody, Date requestTime, String responseBody, int status) {
         Date responseTime = new Date();
         HtpRequestLog log = new HtpRequestLog();
+        log.setRemark("" + status);
         log.setTraceId(MDC.get("TID"));
         log.setWarehouseCode(warehouseCode);
         log.setRequestUrlGroup(urlGroup);
