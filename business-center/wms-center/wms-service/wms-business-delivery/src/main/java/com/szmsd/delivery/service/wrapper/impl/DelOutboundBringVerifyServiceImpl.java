@@ -645,10 +645,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             shipmentLabelChangeRequestDto.setLabel(encode);
             ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
             if (null == responseVO || null == responseVO.getSuccess()) {
-                throw new CommonException("400", "更新标签失败");
+                throw new CommonException("400", "更新标签失败，请求无响应");
             }
             if (!responseVO.getSuccess()) {
-                throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
+                throw new CommonException("400", "更新标签失败，" + Utils.defaultValue(responseVO.getMessage(), ""));
             }
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -673,10 +673,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
         ResponseVO responseVO = htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
         if (null == responseVO || null == responseVO.getSuccess()) {
-            throw new CommonException("400", "更新发货指令失败");
+            throw new CommonException("400", "更新发货指令失败，请求无响应");
         }
         if (!responseVO.getSuccess()) {
-            throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新发货指令失败2"));
+            throw new CommonException("400", "更新发货指令失败，" + Utils.defaultValue(responseVO.getMessage(), ""));
         }
     }
 

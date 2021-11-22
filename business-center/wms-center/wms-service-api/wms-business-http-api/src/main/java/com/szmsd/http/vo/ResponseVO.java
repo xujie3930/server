@@ -57,17 +57,30 @@ public class ResponseVO implements Serializable {
         AssertUtil.notNull(result, () -> "RemoteRequest[" + api + "请求失败]");
 
         boolean expression = result.getCode() == HttpStatus.SUCCESS;
-        AssertUtil.isTrue(expression, () -> "RemoteRequest[" + api + "失败:" +  result.getMsg() + "]");
+        AssertUtil.isTrue(expression, () -> "RemoteRequest[" + api + "失败:" + result.getMsg() + "]");
 
     }
+
     public static void resultAssert(R<? extends ResponseVO> result, String api) {
         statusAssert(result, api);
         ResponseVO data = result.getData();
         boolean expression1 = data == null || (data.getSuccess() == null ? false : data.getSuccess());
-        AssertUtil.isTrue(expression1, () -> "RemoteRequest[" + api + "失败:" +  getDefaultStr(data.getMessage()).concat(getDefaultStr(data.getErrors())) + "]");
+        AssertUtil.isTrue(expression1, () -> "RemoteRequest[" + api + "失败:" + getDefaultStr(data.getMessage()).concat(getDefaultStr(data.getErrors())) + "]");
     }
 
     public static String getDefaultStr(String str) {
         return Optional.ofNullable(str).orElse("");
+    }
+
+    public static ResponseVO build(String text) {
+        try {
+            return JSON.parseObject(text, ResponseVO.class);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            ResponseVO responseVO = new ResponseVO();
+            responseVO.setSuccess(false);
+            responseVO.setMessage(text);
+            return responseVO;
+        }
     }
 }

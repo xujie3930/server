@@ -9,7 +9,6 @@ import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.mapper.HtpRequestLogMapper;
 import com.szmsd.http.service.IHtpRequestLogService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +51,11 @@ public class HtpRequestLogServiceImpl extends ServiceImpl<HtpRequestLogMapper, H
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_uri", htpRequestLog.getRequestUri());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_body", htpRequestLog.getRequestBody());
         if (null != htpRequestLog.getRequestTimeStart() && null != htpRequestLog.getRequestTimeEnd()) {
-            queryWrapper.between("request_time", DateFormatUtils.format(htpRequestLog.getRequestTimeStart(), "yyyy-MM-dd"), DateFormatUtils.format(htpRequestLog.getRequestTimeEnd(), "yyyy-MM-dd"));
+            // queryWrapper.between("request_time", DateFormatUtils.format(htpRequestLog.getRequestTimeStart(), "yyyy-MM-dd"), DateFormatUtils.format(htpRequestLog.getRequestTimeEnd(), "yyyy-MM-dd"));
+            // 大于等于 >=
+            queryWrapper.ge("DATE_FORMAT(request_time, '%Y-%m-%d')", htpRequestLog.getRequestTimeStart());
+            // 小于等于 <=
+            queryWrapper.le("DATE_FORMAT(request_time, '%Y-%m-%d')", htpRequestLog.getRequestTimeEnd());
         }
         queryWrapper.orderByDesc("create_time");
         return super.list(queryWrapper);

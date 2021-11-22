@@ -51,7 +51,11 @@ public class OpnRequestLogServiceImpl extends ServiceImpl<OpnRequestLogMapper, O
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_uri", opnRequestLog.getRequestUri());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "request_body", opnRequestLog.getRequestBody());
         if (null != opnRequestLog.getRequestTimeStart() && null != opnRequestLog.getRequestTimeEnd()) {
-            queryWrapper.between("request_time", DateFormatUtils.format(opnRequestLog.getRequestTimeStart(), "yyyy-MM-dd"), DateFormatUtils.format(opnRequestLog.getRequestTimeEnd(), "yyyy-MM-dd"));
+            // queryWrapper.between("request_time", DateFormatUtils.format(opnRequestLog.getRequestTimeStart(), "yyyy-MM-dd"), DateFormatUtils.format(opnRequestLog.getRequestTimeEnd(), "yyyy-MM-dd"));
+            // 大于等于 >=
+            queryWrapper.ge("DATE_FORMAT(request_time, '%Y-%m-%d')", opnRequestLog.getRequestTimeStart());
+            // 小于等于 <=
+            queryWrapper.le("DATE_FORMAT(request_time, '%Y-%m-%d')", opnRequestLog.getRequestTimeEnd());
         }
         queryWrapper.orderByDesc("create_time");
         return baseMapper.selectList(queryWrapper);

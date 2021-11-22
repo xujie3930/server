@@ -31,21 +31,25 @@ public class OutboundServiceImpl extends WmsRequest implements IOutboundService 
 
     @Override
     public ResponseVO shipmentDelete(ShipmentCancelRequestDto dto) {
-        return JSON.parseObject(httpDelete(dto.getWarehouseCode(), "outbound.cancel", dto), ResponseVO.class);
+        String text = httpDelete(dto.getWarehouseCode(), "outbound.cancel", dto);
+        return ResponseVO.build(text);
     }
 
     @Override
     public ResponseVO shipmentTracking(ShipmentTrackingChangeRequestDto dto) {
-        return JSON.parseObject(httpPut(dto.getWarehouseCode(), "outbound.tracking", dto), ResponseVO.class);
+        String text = httpPut(dto.getWarehouseCode(), "outbound.tracking", dto);
+        return ResponseVO.build(text);
     }
 
     @Override
     public ResponseVO shipmentLabel(ShipmentLabelChangeRequestDto dto) {
-        return JSON.parseObject(httpPut(dto.getWarehouseCode(), "outbound.label", dto), ResponseVO.class);
+        String text = httpPut(dto.getWarehouseCode(), "outbound.label", dto);
+        return ResponseVO.build(text);
     }
 
     @Override
     public ResponseVO shipmentShipping(ShipmentUpdateRequestDto dto) {
-        return JSON.parseObject(httpPut(dto.getWarehouseCode(), "outbound.shipping", dto), ResponseVO.class);
+        String text = httpPut(dto.getWarehouseCode(), "outbound.shipping", dto);
+        return ResponseVO.build(text);
     }
 }

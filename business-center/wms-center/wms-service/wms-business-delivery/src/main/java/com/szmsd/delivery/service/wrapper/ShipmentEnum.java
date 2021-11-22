@@ -20,6 +20,7 @@ import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.*;
+import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
@@ -307,7 +308,13 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             shipmentTrackingChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
             shipmentTrackingChangeRequestDto.setTrackingNo(delOutbound.getTrackingNo());
             IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
-            htpOutboundClientService.shipmentTracking(shipmentTrackingChangeRequestDto);
+            ResponseVO responseVO = htpOutboundClientService.shipmentTracking(shipmentTrackingChangeRequestDto);
+            if (null == responseVO || null == responseVO.getSuccess()) {
+                throw new CommonException("400", "更新挂号失败，请求无响应");
+            }
+            if (!responseVO.getSuccess()) {
+                throw new CommonException("400", "更新挂号失败，" + Utils.defaultValue(responseVO.getMessage(), ""));
+            }
         }
 
         @Override
@@ -667,12 +674,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             if (null != freezeBalanceR) {
                 if (Constants.SUCCESS != freezeBalanceR.getCode()) {
                     // 异常信息
-                    String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "冻结费用信息失败2");
-                    throw new CommonException("400", msg);
+                    String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "");
+                    throw new CommonException("400", "冻结费用失败，" + msg);
                 }
             } else {
                 // 异常信息
-                throw new CommonException("400", "冻结费用信息失败");
+                throw new CommonException("400", "冻结费用失败，请求无响应");
             }
         }
 
