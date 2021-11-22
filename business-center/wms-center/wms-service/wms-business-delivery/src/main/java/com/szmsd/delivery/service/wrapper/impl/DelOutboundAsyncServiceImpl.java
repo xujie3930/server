@@ -133,6 +133,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 logger.info("(1)查询到单据信息，delOutbound:{}, timer:{}", JSON.toJSONString(delOutbound), timer.intervalRestart());
                 // 只处理状态为【WHSE_PROCESSING,PROCESSING】的记录
                 if (!(DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(delOutbound.getState())
+                        || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(delOutbound.getState())
                         || DelOutboundStateEnum.PROCESSING.getCode().equals(delOutbound.getState())
                         || DelOutboundStateEnum.DELIVERED.getCode().equals(delOutbound.getState()))) {
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
