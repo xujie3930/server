@@ -38,7 +38,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
 
     @Transactional
     @Override
-    public boolean updateBalance(CustPayDTO dto) {
+    public Boolean updateBalance(CustPayDTO dto) {
         log.info("ExchangePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-all:" + dto.getCusId();
         RLock lock = redissonClient.getLock(key);
@@ -59,8 +59,10 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 BalanceDTO beforeAdd = getBalance(dto.getCusCode(), dto.getCurrencyCode2());
                 BigDecimal addAmount = dto.getRate().multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
                 // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
+                // 计算还款额，并销账（还账单）
                 beforeAdd.rechargeAndSetAmount(addAmount);
                 super.addForCreditBill(beforeAdd.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode2());
+
                 BalanceDTO afterAdd = beforeAdd;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode2(), afterAdd);
                 setSerialBillLog(dto, accountBalanceChange);

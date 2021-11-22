@@ -1,5 +1,6 @@
 package com.szmsd.finance.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.finance.enums.BillEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -77,4 +78,8 @@ public class CustPayDTO {
     @ApiModelProperty(value = "详情")
     private List<AccountSerialBillDTO> serialBillInfoList;
 
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }

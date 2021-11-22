@@ -26,6 +26,7 @@ import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
 import com.szmsd.finance.service.*;
+import com.szmsd.finance.util.LogUtil;
 import com.szmsd.finance.util.SnowflakeId;
 import com.szmsd.finance.vo.CreditUseInfo;
 import com.szmsd.finance.vo.PreOnlineIncomeVo;
@@ -209,9 +210,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         }
         setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
-        boolean flag = abstractPayFactory.updateBalance(dto);
+        log.info(LogUtil.format("仓储费扣除", dto));
+        Boolean flag = abstractPayFactory.updateBalance(dto);
+        if (Objects.isNull(flag)) return R.ok();
         if (flag) {
-            log.info("仓储费扣除--{}", JSONObject.toJSONString(dto));
+            log.info(LogUtil.format(dto, "仓储费扣除", "添加操作费用表"));
             this.addOptLog(dto);
         }
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
@@ -220,7 +223,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Transactional
     @Override
     public R feeDeductions(CustPayDTO dto) {
-        log.info("feeDeductions -{}", JSONObject.toJSONString(dto));
         if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0) return R.ok();
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
@@ -229,10 +231,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
         dto.setPayType(BillEnum.PayType.PAYMENT);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
-        log.info("feeDeductions#updateBalance -{}", JSONObject.toJSONString(dto));
-        boolean flag = abstractPayFactory.updateBalance(dto);
+        log.info(LogUtil.format(dto, "费用扣除"));
+        Boolean flag = abstractPayFactory.updateBalance(dto);
+        if (Objects.isNull(flag)) return R.ok();
         if (flag) {
-            log.info("费用扣除-操作费日志 - {}", JSONObject.toJSONString(dto));
+            log.info(LogUtil.format(dto, "费用扣除", "添加操作费用表"));
             this.addOptLog(dto);
         }
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
@@ -251,7 +254,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      * @param dto
      */
     private void addOptLog(CustPayDTO dto) {
-        log.info("addOptLog {} ", JSONObject.toJSONString(dto));
+        log.info(LogUtil.format(dto, "冻结/解冻日志"));
         BillEnum.PayMethod payMethod = dto.getPayMethod();
         ChargeLog chargeLog = new ChargeLog();
         BeanUtils.copyProperties(dto, chargeLog);
@@ -262,7 +265,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         ;
 
         chargeLog.setRemark("-----------------------------------------");
-        log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
+        log.info(LogUtil.format(chargeLog, "扣减操作费",payMethod.name()));
         if (null == chargeLog.getQty() || 0 >= chargeLog.getQty()) {
             //现在只有出库单需要补，入库单没有这些数据
             if (StringUtils.isNotBlank(chargeLog.getOrderNo()) && chargeLog.getOrderNo().startsWith("CK")) {
@@ -299,7 +302,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             }
         }
         chargeFeignService.add(chargeLog);
-        log.info("{} -  扣减操作费 {}", payMethod, JSONObject.toJSONString(chargeLog));
     }
 
     @Transactional
@@ -315,12 +317,13 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayType(BillEnum.PayType.FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
-
-        boolean flag = abstractPayFactory.updateBalance(dto);
+        log.info(LogUtil.format(cfbDTO, "费用冻结"));
+        Boolean flag = abstractPayFactory.updateBalance(dto);
+        if (Objects.isNull(flag)) return R.ok();
         if (flag && "Freight".equals(dto.getOrderType()))
         // 冻结 解冻 需要把费用扣减加到 操作费用表
         {
-            log.info("Freight thawBalance - {}", JSONObject.toJSONString(cfbDTO));
+            log.info(LogUtil.format(cfbDTO, "费用冻结", "操作费用表"));
             this.addOptLog(dto);
         }
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户可用余额不足以冻结");
@@ -339,7 +342,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_THAW);
         setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
-        boolean flag = abstractPayFactory.updateBalance(dto);
+        log.info(LogUtil.format(cfbDTO, "解冻金额"));
+        Boolean flag = abstractPayFactory.updateBalance(dto);
+        if (Objects.isNull(flag)) return R.ok();
         if (flag)
         //冻结 解冻 需要把费用扣减加到 操作费用表
         {
@@ -358,7 +363,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 //                    .orderByDesc(AccountSerialBill::getId));
 //            log.info("删除物流基础费 {}条", delete);
             //}
-            log.info("thawBalance - {}", JSONObject.toJSONString(cfbDTO));
+            log.info(LogUtil.format(cfbDTO, "解冻金额", "操作费用表"));
             this.addOptLog(dto);
         }
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getNo()) + "账户冻结金额不足以解冻");
@@ -378,6 +383,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         queryWrapper.eq("cus_code", cusCode);
         queryWrapper.eq("currency_code", currencyCode);
         AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
+        // 账户不存在 则为该用户开通相对应的币别账户
         if (accountBalance == null) {
             log.info("getBalance() cusCode: {} currencyCode: {}", cusCode, currencyCode);
             String currencyName = getCurrencyName(currencyCode);
@@ -489,7 +495,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayType(BillEnum.PayType.REFUND);
         dto.setPayMethod(BillEnum.PayMethod.REFUND);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
-        boolean flag = abstractPayFactory.updateBalance(dto);
+        Boolean flag = abstractPayFactory.updateBalance(dto);
+        if (Objects.isNull(flag)) return R.ok();
         return flag ? R.ok() : R.failed();
     }
 
@@ -509,7 +516,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayType(BillEnum.PayType.INCOME);
         dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
-        boolean flag = abstractPayFactory.updateBalance(dto);
+        Boolean flag = abstractPayFactory.updateBalance(dto);
+        if (Objects.isNull(flag)) return R.ok();
         return flag ? R.ok() : R.failed();
     }
 
@@ -530,7 +538,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         }
         dto.setPayType(BillEnum.PayType.EXCHANGE);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
-        boolean flag = abstractPayFactory.updateBalance(dto);
+        Boolean flag = abstractPayFactory.updateBalance(dto);
+        if (Objects.isNull(flag)) return R.ok();
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
     }
 

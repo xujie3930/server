@@ -57,6 +57,7 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
     @Override
     public boolean againTrackingNo(DelOutbound delOutbound, DelOutboundAgainTrackingNoDto dto) {
         String orderNo = delOutbound.getOrderNo();
+        // 删除原来的地址信息，重新新增一个地址信息
         LambdaQueryWrapper<DelOutboundAddress> addressLambdaQueryWrapper = Wrappers.lambdaQuery();
         addressLambdaQueryWrapper.eq(DelOutboundAddress::getOrderNo, orderNo);
         this.delOutboundAddressService.remove(addressLambdaQueryWrapper);
