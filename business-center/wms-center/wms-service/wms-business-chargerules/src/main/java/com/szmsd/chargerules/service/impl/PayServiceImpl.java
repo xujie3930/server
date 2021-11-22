@@ -1,6 +1,8 @@
 package com.szmsd.chargerules.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.chargerules.domain.ChargeLog;
+import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IPayService;
@@ -35,7 +37,7 @@ public class PayServiceImpl implements IPayService {
 
     @Override
     public BigDecimal manySkuCalculate(BigDecimal firstPrice, BigDecimal nextPrice, List<DelOutboundOperationDetailVO> details) {
-        return details.stream().map(value -> this.calculate(firstPrice , nextPrice,
+        return details.stream().map(value -> this.calculate(firstPrice, nextPrice,
                 value.getQty())).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }
 
@@ -47,8 +49,8 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setOperationPayMethod(custPayDTO.getPayMethod().getPaymentName());
         chargeLog.setHasFreeze(false);
         String code = DelOutboundOrderEnum.getCode(custPayDTO.getOrderType());
-        if(code != null) custPayDTO.setOrderType(code);
-        if(BigDecimal.ZERO.compareTo(custPayDTO.getAmount()) >= 0) {
+        if (code != null) custPayDTO.setOrderType(code);
+        if (BigDecimal.ZERO.compareTo(custPayDTO.getAmount()) >= 0) {
             log.info("扣款金额为: {} 不执行操作", custPayDTO.getAmount());
             chargeLog.setSuccess(true);
             chargeLog.setMessage("成功");
@@ -62,12 +64,24 @@ public class PayServiceImpl implements IPayService {
 
     @Override
     public R freezeBalance(CusFreezeBalanceDTO dto, ChargeLog chargeLog) {
+        // 如果该单有冻结额则直接返回
+        ChargeLogDto chargeLogDto = new ChargeLogDto();
+        chargeLogDto.setOrderNo(dto.getNo());
+        chargeLogDto.setSuccess(true);
+        chargeLogDto.setAmount(dto.getAmount());
+        chargeLogDto.setOperationType(dto.getOrderType());
+        chargeLogDto.setCustomCode(dto.getCusCode());
+        log.info("业务冻结操作费：{}-{}-查询条件：{}", JSONObject.toJSONString(dto), JSONObject.toJSONString(chargeLog), JSONObject.toJSONString(chargeLogDto));
+        ChargeLog chargeLog2 = chargeLogService.selectLog(chargeLogDto);
+        if (chargeLog2 != null) {
+            return R.ok();
+        }
         chargeLog.setCustomCode(dto.getCusCode());
         chargeLog.setCurrencyCode(dto.getCurrencyCode());
         chargeLog.setAmount(dto.getAmount());
         String code = DelOutboundOrderEnum.getCode(dto.getOrderType());
-        if(code != null) dto.setOrderType(code);
-        if(BigDecimal.ZERO.compareTo(dto.getAmount()) >= 0) {
+        if (code != null) dto.setOrderType(code);
+        if (BigDecimal.ZERO.compareTo(dto.getAmount()) >= 0) {
             log.info("冻结金额为: {} 不执行操作", dto.getAmount());
             chargeLog.setSuccess(true);
             chargeLog.setMessage("成功");
@@ -93,8 +107,8 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setAmount(dto.getAmount());
         chargeLog.setHasFreeze(false);
         String code = DelOutboundOrderEnum.getCode(dto.getOrderType());
-        if(code != null) dto.setOrderType(code);
-        if(BigDecimal.ZERO.compareTo(dto.getAmount()) >= 0) {
+        if (code != null) dto.setOrderType(code);
+        if (BigDecimal.ZERO.compareTo(dto.getAmount()) >= 0) {
             log.info("解冻金额为: {} 不执行操作", dto.getAmount());
             chargeLog.setSuccess(true);
             chargeLog.setMessage("成功");
@@ -108,8 +122,9 @@ public class PayServiceImpl implements IPayService {
 
     /**
      * 解冻或者扣款成功后 把之前冻结记录的hasFreeze修改为false
+     *
      * @param chargeLog chargeLog
-     * @param r result
+     * @param r         result
      */
     private void updateAndSave(ChargeLog chargeLog, R r) {
         if (r.getCode() == 200) {

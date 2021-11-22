@@ -32,34 +32,35 @@ public class ChargeLogServiceImpl implements IChargeLogService {
     @Override
     public ChargeLog selectLog(ChargeLogDto chargeLogDto) {
         LambdaQueryWrapper<ChargeLog> query = Wrappers.lambdaQuery();
-        if(StringUtils.isNotBlank(chargeLogDto.getOrderNo())) {
+        if (StringUtils.isNotBlank(chargeLogDto.getOrderNo())) {
             query.eq(ChargeLog::getOrderNo, chargeLogDto.getOrderNo());
         }
-        if(StringUtils.isNotBlank(chargeLogDto.getOperationPayMethod())) {
+        if (StringUtils.isNotBlank(chargeLogDto.getOperationPayMethod())) {
             query.eq(ChargeLog::getOperationPayMethod, chargeLogDto.getOperationPayMethod());
         }
-        if(StringUtils.isNotBlank(chargeLogDto.getPayMethod())) {
+        if (StringUtils.isNotBlank(chargeLogDto.getPayMethod())) {
             query.eq(ChargeLog::getPayMethod, chargeLogDto.getPayMethod());
         }
-        if(StringUtils.isNotBlank(chargeLogDto.getOperationType())) {
+        if (StringUtils.isNotBlank(chargeLogDto.getOperationType())) {
             query.eq(ChargeLog::getOperationType, chargeLogDto.getOperationType());
         }
-        if(StringUtils.isNotBlank(chargeLogDto.getWarehouseCode())) {
+        if (StringUtils.isNotBlank(chargeLogDto.getWarehouseCode())) {
             query.eq(ChargeLog::getWarehouseCode, chargeLogDto.getWarehouseCode());
         }
-        if(chargeLogDto.getSuccess() != null) {
+        if (chargeLogDto.getSuccess() != null) {
             query.eq(ChargeLog::getSuccess, chargeLogDto.getSuccess());
         }
-        if(chargeLogDto.getHasFreeze() != null) {
+        if (chargeLogDto.getHasFreeze() != null) {
             query.eq(ChargeLog::getHasFreeze, chargeLogDto.getHasFreeze());
         }
+        query.orderByDesc(ChargeLog::getId).last("LIMIT 1");
         return chargeLogMapper.selectOne(query);
     }
 
     @Override
     public List<ChargeLog> selectPage(ChargeLogDto chargeLogDto) {
         LambdaQueryWrapper<ChargeLog> query = Wrappers.lambdaQuery();
-        query.eq(ChargeLog::getOrderNo,chargeLogDto.getOrderNo());
+        query.eq(ChargeLog::getOrderNo, chargeLogDto.getOrderNo());
         return chargeLogMapper.selectList(query);
     }
 
@@ -71,7 +72,7 @@ public class ChargeLogServiceImpl implements IChargeLogService {
     @Override
     public int update(Long id) {
         LambdaUpdateWrapper<ChargeLog> update = Wrappers.lambdaUpdate();
-        update.set(ChargeLog::getHasFreeze,false).eq(ChargeLog::getId,id);
-        return chargeLogMapper.update(null,update);
+        update.set(ChargeLog::getHasFreeze, false).eq(ChargeLog::getId, id);
+        return chargeLogMapper.update(null, update);
     }
 }
