@@ -39,8 +39,9 @@ public class IncomePayFactory extends AbstractPayFactory {
     @Resource
     private IAccountBalanceService iAccountBalanceService;
 
+    @Override
     @Transactional
-    public boolean updateBalance(CustPayDTO dto) {
+    public Boolean updateBalance(CustPayDTO dto) {
         log.info("IncomePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
@@ -91,6 +92,7 @@ public class IncomePayFactory extends AbstractPayFactory {
         return oldBalance;
     }
 
+    @Override
     public void setSerialBillLog(CustPayDTO dto) {
         log.info("setSerialBillLog {}", JSONObject.toJSONString(dto));
         AccountSerialBillDTO serialBill = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);

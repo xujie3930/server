@@ -13,6 +13,7 @@ import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.service.ISysDictDataService;
+import com.szmsd.finance.util.LogUtil;
 import com.szmsd.finance.util.SnowflakeId;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -44,14 +45,16 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
     @Transactional
     @Override
-    public boolean updateBalance(CustPayDTO dto) {
-        log.info("BalanceFreezeFactory {}", JSONObject.toJSONString(dto));
+    public Boolean updateBalance(CustPayDTO dto) {
+        log.info(LogUtil.format(dto, "冻结/解冻"));
         String key = "cky-fss-freeze-balance-all:" + dto.getCusId();
         RLock lock = redissonClient.getLock(key);
         try {
             if (lock.tryLock(time, unit)) {
                 BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
-                if (!checkAndSetBalance(balance, dto)) {
+                Boolean checkFlag = checkAndSetBalance(balance, dto);
+                if (checkFlag == null) return null;
+                if (!checkFlag) {
                     return false;
                 }
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), balance);
@@ -76,8 +79,8 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         }
     }
 
+    @Override
     public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
-        //冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除
         AccountBalanceChange accountBalanceChange = new AccountBalanceChange();
         BeanUtils.copyProperties(dto, accountBalanceChange);
         if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
@@ -102,12 +105,14 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
      * @param dto
      * @return
      */
-    private boolean checkAndSetBalance(BalanceDTO balance, CustPayDTO dto) {
+    private Boolean checkAndSetBalance(BalanceDTO balance, CustPayDTO dto) {
         BigDecimal changeAmount = dto.getAmount();
         if (BillEnum.PayMethod.BALANCE_FREEZE == dto.getPayMethod()) {
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
             if (accountBalanceChanges.size() > 0) {
-                throw new CommonException("999", "该单已存在冻结额，单号：" + dto.getNo());
+                log.info("该单已存在冻结额，单号:{}", dto.getNo());
+                // throw new CommonException("999", "该单已存在冻结额，单号：" + dto.getNo());
+                return null;
             }
             /*balance.setCurrentBalance(balance.getCurrentBalance().subtract(changeAmount));
             balance.setFreezeBalance(balance.getFreezeBalance().add(changeAmount));
@@ -141,10 +146,16 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                     return true;
                 }
                 throw new CommonException("999", "解冻金额不足 单号: " + dto.getNo() + " 金额：" + amountChange);
+            } else {
+                // 校验是否冻结过这个单 如果冻结直接返回
+                Integer integer = accountBalanceChangeMapper.selectCount(Wrappers.<AccountBalanceChange>lambdaQuery().eq(AccountBalanceChange::getNo, dto.getNo()));
+                if (integer == 0) {
+                    throw new CommonException("999", "没有找到该单的冻结额。 单号: " + dto.getNo());
+                }
+                return null;
             }
-            throw new CommonException("999", "没有找到该单的冻结额。 单号: " + dto.getNo());
         }
-        return true;
+        return null;
     }
 
     private List<AccountBalanceChange> getRecordList(CustPayDTO dto) {

@@ -36,16 +36,13 @@ public abstract class AbstractPayFactory {
     public static final long time = 10000L;
 
     @Autowired
-    IAccountBalanceService accountBalanceService;
+    private IAccountBalanceService iAccountBalanceService;
 
     @Resource
-    AccountBalanceChangeMapper accountBalanceChangeMapper;
+    private AccountBalanceChangeMapper accountBalanceChangeMapper;
 
     @Autowired
-    ISysDictDataService sysDictDataService;
-
-    @Resource
-    private IAccountBalanceService iAccountBalanceService;
+    private ISysDictDataService sysDictDataService;
 
     @Resource
     private IAccountSerialBillService accountSerialBillService;
@@ -53,8 +50,10 @@ public abstract class AbstractPayFactory {
     @Resource
     private IDeductionRecordService iDeductionRecordService;
 
-
-    public abstract boolean updateBalance(CustPayDTO dto);
+    /**
+     * 返回null 则不处理 接口幂等
+     */
+    public abstract Boolean updateBalance(CustPayDTO dto);
 
     public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
         AccountBalanceChange accountBalanceChange = new AccountBalanceChange();
@@ -101,11 +100,11 @@ public abstract class AbstractPayFactory {
     protected abstract void setOpLogAmount(AccountBalanceChange accountBalanceChange, BigDecimal amount);
 
     protected BigDecimal getCurrentBalance(String cusCode, String currencyCode) {
-        return accountBalanceService.getCurrentBalance(cusCode, currencyCode);
+        return iAccountBalanceService.getCurrentBalance(cusCode, currencyCode);
     }
 
     protected void setCurrentBalance(String cusCode, String currencyCode, BigDecimal result) {
-        accountBalanceService.setCurrentBalance(cusCode, currencyCode, result);
+        iAccountBalanceService.setCurrentBalance(cusCode, currencyCode, result);
     }
 
     /**
@@ -116,7 +115,7 @@ public abstract class AbstractPayFactory {
      * @return 查询结果
      */
     protected BalanceDTO getBalance(String cusCode, String currencyCode) {
-        return accountBalanceService.getBalance(cusCode, currencyCode);
+        return iAccountBalanceService.getBalance(cusCode, currencyCode);
     }
 
     protected void updateCreditStatus(CustPayDTO dto) {
@@ -129,14 +128,14 @@ public abstract class AbstractPayFactory {
      * @param cusCode
      * @param currencyCode
      * @param result
-     * @param need
+     * @param needUpdateCredit 是否需要修改授信额
      */
     protected void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit) {
-        accountBalanceService.setBalance(cusCode, currencyCode, result, true);
+        iAccountBalanceService.setBalance(cusCode, currencyCode, result, needUpdateCredit);
     }
 
     protected void setBalance(String cusCode, String currencyCode, BalanceDTO result) {
-        accountBalanceService.setBalance(cusCode, currencyCode, result, false);
+        iAccountBalanceService.setBalance(cusCode, currencyCode, result, false);
     }
 
     public abstract BalanceDTO calculateBalance(BalanceDTO oldBalance, BigDecimal changeAmount);
@@ -149,7 +148,7 @@ public abstract class AbstractPayFactory {
         accountBalanceChange.setCusCode(dto.getCusCode());
         accountBalanceChange.setHasFreeze(false);
         accountBalanceChange.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE); //修改冻结的单
-        accountBalanceService.updateAccountBalanceChange(accountBalanceChange);
+        iAccountBalanceService.updateAccountBalanceChange(accountBalanceChange);
     }
 
     public void setSerialBillLog(CustPayDTO dto) {
