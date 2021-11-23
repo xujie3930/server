@@ -168,6 +168,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
+            updateDelOutbound.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
             // PRC计费
             updateDelOutbound.setLength(delOutbound.getLength());
             updateDelOutbound.setWidth(delOutbound.getWidth());
@@ -255,6 +256,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 返回值
             delOutbound.setTrackingNo(trackingNo);
             delOutbound.setShipmentOrderNumber(orderNumber);
+            delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
             DelOutboundOperationLogEnum.SMT_SHIPMENT_ORDER.listener(delOutbound);
         }
 
@@ -803,6 +805,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
+            updateDelOutbound.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
             // PRC计费
             updateDelOutbound.setLength(delOutbound.getLength());
             updateDelOutbound.setWidth(delOutbound.getWidth());

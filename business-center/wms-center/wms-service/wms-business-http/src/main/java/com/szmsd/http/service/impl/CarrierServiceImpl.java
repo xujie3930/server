@@ -7,6 +7,7 @@ import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.ICarrierService;
 import com.szmsd.http.service.http.SaaSCarrierServiceAdminRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +52,13 @@ public class CarrierServiceImpl extends SaaSCarrierServiceAdminRequest implement
 
     @Override
     public ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(CreateShipmentOrderCommand command) {
-        HttpResponseBody httpResponseBody = httpGetFile(command.getWarehouseCode(), "shipment-order.label", null, command.getOrderNumber());
+        String shipmentOrderLabelUrl = command.getShipmentOrderLabelUrl();
+        HttpResponseBody httpResponseBody;
+        if (StringUtils.isNotEmpty(shipmentOrderLabelUrl)) {
+            httpResponseBody = httpGetFile(command.getWarehouseCode(), "shipment-order.label-url", null, shipmentOrderLabelUrl);
+        } else {
+            httpResponseBody = httpGetFile(command.getWarehouseCode(), "shipment-order.label", null, command.getOrderNumber());
+        }
         ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> responseObject = new ResponseObject.ResponseObjectWrapper<>();
         if (httpResponseBody instanceof HttpResponseBody.HttpResponseByteArrayWrapper) {
             HttpResponseBody.HttpResponseByteArrayWrapper httpResponseByteArrayWrapper = (HttpResponseBody.HttpResponseByteArrayWrapper) httpResponseBody;
