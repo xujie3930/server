@@ -1,6 +1,5 @@
 package com.szmsd.auth.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -74,7 +73,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        DocSavedRequestAwareAuthenticationSuccessHandler successHandler = new DocSavedRequestAwareAuthenticationSuccessHandler(this.docCodeAuthConfiguration);
         http.csrf()
                 .disable()
                 .authorizeRequests()

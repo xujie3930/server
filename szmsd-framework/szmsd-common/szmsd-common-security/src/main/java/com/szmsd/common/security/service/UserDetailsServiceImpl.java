@@ -12,9 +12,14 @@ import com.szmsd.system.api.feign.RemoteUserService;
 import com.szmsd.system.api.model.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -22,6 +27,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +42,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Resource
     private RemoteUserService remoteUserService;
+    @Resource
+    private ApplicationContext applicationContext;
 
     @Override
     public UserDetails loadUserByUsername(String username) {
@@ -51,10 +59,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
         String userType = ServletUtils.getParameter(SecurityConstants.DETAILS_USER_TYPE, defaultUserType);//获取用户类型 00-内部用户，01-vip用户
         SysUserByTypeAndUserType sysUserByTypeAndUserType = new SysUserByTypeAndUserType();
-      if (SecurityConstants.DETAILS_USER_TYPE_CLIENT.equals(userType) &&
+        if (SecurityConstants.DETAILS_USER_TYPE_CLIENT.equals(userType) &&
                 SecurityConstants.DETAILS_CLIENT_CLIENT.equals(clientId)) {//如果是客户端用户
             sysUserByTypeAndUserType.setType(SecurityConstants.DETAILS_TYPE_CLIENT);
-        }else if (SecurityConstants.DETAILS_USER_TYPE_SYS.equals(userType) &&
+        } else if (SecurityConstants.DETAILS_USER_TYPE_SYS.equals(userType) &&
                 SecurityConstants.DETAILS_CLIENT_WEB.equals(clientId)) {//如果是E3 web
             sysUserByTypeAndUserType.setType(SecurityConstants.DETAILS_TYPE_PC);
         } else {//E3 app
@@ -71,15 +79,24 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
     public void checkUser(R<UserInfo> userResult, String username) {
-        if (StringUtils.isNull(userResult) || StringUtils.isNull(userResult.getData())) {
-            log.info("登录用户：{} 不存在.", username);
-            throw new BadCredentialsException("登录用户：" + username + " 不存在");
-        } else if (UserStatus.DELETED.getCode().equals(userResult.getData().getSysUser().getDelFlag())) {
-            log.info("登录用户：{} 已被删除.", username);
-            throw new BadCredentialsException("对不起，您的账号：" + username + " 已被删除");
-        } else if (UserStatus.DISABLE.getCode().equals(userResult.getData().getSysUser().getStatus())) {
-            log.info("登录用户：{} 已被停用.", username);
-            throw new BadCredentialsException("对不起，您的账号：" + username + " 已停用");
+        try {
+            if (StringUtils.isNull(userResult) || StringUtils.isNull(userResult.getData())) {
+                log.info("登录用户：{} 不存在.", username);
+                throw new BadCredentialsException("登录用户：" + username + " 不存在");
+            } else if (UserStatus.DELETED.getCode().equals(userResult.getData().getSysUser().getDelFlag())) {
+                log.info("登录用户：{} 已被删除.", username);
+                throw new BadCredentialsException("对不起，您的账号：" + username + " 已被删除");
+            } else if (UserStatus.DISABLE.getCode().equals(userResult.getData().getSysUser().getStatus())) {
+                log.info("登录用户：{} 已被停用.", username);
+                throw new BadCredentialsException("对不起，您的账号：" + username + " 已停用");
+            }
+        } catch (BadCredentialsException badCredentialsException) {
+            // 用户
+            User user = new User(username, "", Collections.emptyList());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(user, null);
+            AuthenticationFailureBadCredentialsEvent badCredentialsEvent = new AuthenticationFailureBadCredentialsEvent(authentication, badCredentialsException);
+            applicationContext.publishEvent(badCredentialsEvent);
+            throw badCredentialsException;
         }
     }
 
