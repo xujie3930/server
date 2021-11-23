@@ -88,13 +88,13 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 log.error("支付超时,请稍候重试{}", JSONObject.toJSONString(dto));
                 throw new RuntimeException("支付超时,请稍候重试");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("PaymentPay异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
-            throw new RuntimeException("支付超时,请稍候重试!");
+            throw new RuntimeException("支付异常:" + e.getMessage());
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();

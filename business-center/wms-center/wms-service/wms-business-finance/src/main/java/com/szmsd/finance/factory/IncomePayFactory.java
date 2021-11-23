@@ -66,7 +66,7 @@ public class IncomePayFactory extends AbstractPayFactory {
                 log.error("充值操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
                 throw new RuntimeException("充值操作超时,请稍候重试");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("IncomePay异常:", e);

@@ -59,7 +59,7 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
                 log.error("支付操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
                 throw new RuntimeException("支付操作超时,请稍候重试");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("PaymentNoFreeze扣减异常:", e);

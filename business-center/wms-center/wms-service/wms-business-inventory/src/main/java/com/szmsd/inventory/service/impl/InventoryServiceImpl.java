@@ -15,6 +15,8 @@ import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.domain.BaseEntity;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.InventoryOccupy;
@@ -28,6 +30,8 @@ import com.szmsd.inventory.service.InventoryOccupyService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -37,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -60,6 +65,9 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     private BaseProductClientService baseProductClientService;
     @Autowired
     private InventoryOccupyService inventoryOccupyService;
+    @Resource
+    private RedissonClient redissonClient;
+    private final static long WAIT_TIME = 10L;
 
     /**
      * 上架入库 - Inbound - /api/inbound/receiving #B1 接收入库上架 - 修改库存
@@ -70,89 +78,100 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     @Override
     public void inbound(InboundInventoryDTO inboundInventoryDTO) {
         log.info("上架入库：{}", inboundInventoryDTO);
-        Lock lock = new ReentrantLock(true);
+        String lockKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        RLock lock = redissonClient.getLock("InventoryServiceImpl#inbound" + lockKey);
+        // 获取锁
         try {
-            // 获取锁
-            lock.lock();
-            // 获取库存 仓库代码 + SKU
-            String sku = inboundInventoryDTO.getSku();
-            String warehouseCode = inboundInventoryDTO.getWarehouseCode();
-            Integer qty = inboundInventoryDTO.getQty();
-            // before inventory
-            Inventory beforeInventory = baseMapper.selectOne(new QueryWrapper<Inventory>().eq("warehouse_code", warehouseCode).eq("sku", sku));
-            Inventory afterInventory = new Inventory();
-            if (beforeInventory == null) {
-                beforeInventory = new Inventory().setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(0).setAvailableInventory(0).setAvailableInventory(0).setTotalInbound(0);
-                BaseProduct sku1 = remoteComponent.getSku(sku);
-                beforeInventory.setCusCode(sku1.getSellerCode());
-                afterInventory.setCusCode(sku1.getSellerCode());
-            }
-            //07-16 集运出库转采购入库后，第一次采购入库完成后，同步处理出库的库存冻结
-            String orderNo = inboundInventoryDTO.getOrderNo();
-            // 08-17 取消之前的提交
-           /* //根据入库单查询是否有采购单号
-            InboundReceiptInfoVO receiptInfo = remoteComponent.getReceiptInfo(orderNo);
-            String purchaseOrder = receiptInfo.getOrderNo();
-            if (StringUtils.isNotBlank(purchaseOrder)) {
-                log.info("采购单 入库 -- 修改 库存 {}", purchaseOrder);
-                List<InboundReceiptVO> receiptInfoList = remoteComponent.getReceiptInfoList(purchaseOrder);
-                List<String> warehouseNoList = receiptInfoList.stream().map(InboundReceiptVO::getWarehouseNo).collect(Collectors.toList());
+            if (lock.tryLock(WAIT_TIME, TimeUnit.SECONDS)) {
+                // 获取库存 仓库代码 + SKU
+                String sku = inboundInventoryDTO.getSku();
+                String warehouseCode = inboundInventoryDTO.getWarehouseCode();
+                Integer qty = inboundInventoryDTO.getQty();
+                // before inventory
+                Inventory beforeInventory = baseMapper.selectOne(new QueryWrapper<Inventory>().eq("warehouse_code", warehouseCode).eq("sku", sku));
+                Inventory afterInventory = new Inventory();
+                if (beforeInventory == null) {
+                    beforeInventory = new Inventory().setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(0).setAvailableInventory(0).setAvailableInventory(0).setTotalInbound(0);
+                    BaseProduct sku1 = remoteComponent.getSku(sku);
+                    beforeInventory.setCusCode(sku1.getSellerCode());
+                    afterInventory.setCusCode(sku1.getSellerCode());
+                }
+                //07-16 集运出库转采购入库后，第一次采购入库完成后，同步处理出库的库存冻结
+                String orderNo = inboundInventoryDTO.getOrderNo();
+                // 08-17 取消之前的提交
+               /* //根据入库单查询是否有采购单号
+                InboundReceiptInfoVO receiptInfo = remoteComponent.getReceiptInfo(orderNo);
+                String purchaseOrder = receiptInfo.getOrderNo();
+                if (StringUtils.isNotBlank(purchaseOrder)) {
+                    log.info("采购单 入库 -- 修改 库存 {}", purchaseOrder);
+                    List<InboundReceiptVO> receiptInfoList = remoteComponent.getReceiptInfoList(purchaseOrder);
+                    List<String> warehouseNoList = receiptInfoList.stream().map(InboundReceiptVO::getWarehouseNo).collect(Collectors.toList());
 
-                //根据采购单号查询所有的入库单 统计之前该入库单 关联这个sku的冻结的数量
-                List<InventoryRecord> inventoryRecordVOS = iInventoryRecordService.getBaseMapper()
-                        .selectList(Wrappers.<InventoryRecord>lambdaQuery().eq(InventoryRecord::getSku, sku).in(InventoryRecord::getReceiptNo, warehouseNoList));
+                    //根据采购单号查询所有的入库单 统计之前该入库单 关联这个sku的冻结的数量
+                    List<InventoryRecord> inventoryRecordVOS = iInventoryRecordService.getBaseMapper()
+                            .selectList(Wrappers.<InventoryRecord>lambdaQuery().eq(InventoryRecord::getSku, sku).in(InventoryRecord::getReceiptNo, warehouseNoList));
 
-                //之前冻结的数量
-                int beforeFreeze = inventoryRecordVOS.stream().map(InventoryRecord::getOperator).mapToInt(Integer::parseInt).reduce(Integer::sum).orElse(0);
-                //查询该订单的采购单明细 根据sku查询出库单该sku数量
-                PurchaseInfoVO purchaseInfoVO = iPurchaseService.selectPurchaseByPurchaseNo(purchaseOrder);
-                List<PurchaseInfoDetailVO> purchaseDetailsAddList = purchaseInfoVO.getPurchaseDetailsAddList();
-                //总采购数量 = 出库的sku数量
-                Integer purchaseNum = purchaseDetailsAddList.stream().filter(x -> x.getSku().equals(sku)).findAny()
-                        .map(PurchaseInfoDetailVO::getPurchaseQuantity).orElse(0);
-                // 集运出库单出库A  SKU   M个，转入库单，WMS上架N个，此时SKU的库存情况：总库存+N，可用库存：+N-M，冻结库存：+M，总入库+N
-                //还能冻结的数量 = 总采购数-之前的冻结数
-                int canFreeze = purchaseNum - beforeFreeze;
-                int afterTotalInventory = beforeInventory.getTotalInventory() + qty;
-                int afterTotalInbound = beforeInventory.getTotalInbound() + qty;
-                int afterAvailableInventory = beforeInventory.getAvailableInventory();
-                if (canFreeze > 0) {
-                    //之前的冻结库存
-                    int freezeInventory = Optional.ofNullable(afterInventory.getFreezeInventory()).orElse(0) + qty;
-                    //入库数 = 冻结++
-                    if (qty >= canFreeze) {
-                        //入库数>可冻结数 则 多余的 = 可用库存
-                        afterAvailableInventory += (qty - canFreeze);
-                         freezeInventory += canFreeze;
+                    //之前冻结的数量
+                    int beforeFreeze = inventoryRecordVOS.stream().map(InventoryRecord::getOperator).mapToInt(Integer::parseInt).reduce(Integer::sum).orElse(0);
+                    //查询该订单的采购单明细 根据sku查询出库单该sku数量
+                    PurchaseInfoVO purchaseInfoVO = iPurchaseService.selectPurchaseByPurchaseNo(purchaseOrder);
+                    List<PurchaseInfoDetailVO> purchaseDetailsAddList = purchaseInfoVO.getPurchaseDetailsAddList();
+                    //总采购数量 = 出库的sku数量
+                    Integer purchaseNum = purchaseDetailsAddList.stream().filter(x -> x.getSku().equals(sku)).findAny()
+                            .map(PurchaseInfoDetailVO::getPurchaseQuantity).orElse(0);
+                    // 集运出库单出库A  SKU   M个，转入库单，WMS上架N个，此时SKU的库存情况：总库存+N，可用库存：+N-M，冻结库存：+M，总入库+N
+                    //还能冻结的数量 = 总采购数-之前的冻结数
+                    int canFreeze = purchaseNum - beforeFreeze;
+                    int afterTotalInventory = beforeInventory.getTotalInventory() + qty;
+                    int afterTotalInbound = beforeInventory.getTotalInbound() + qty;
+                    int afterAvailableInventory = beforeInventory.getAvailableInventory();
+                    if (canFreeze > 0) {
+                        //之前的冻结库存
+                        int freezeInventory = Optional.ofNullable(afterInventory.getFreezeInventory()).orElse(0) + qty;
+                        //入库数 = 冻结++
+                        if (qty >= canFreeze) {
+                            //入库数>可冻结数 则 多余的 = 可用库存
+                            afterAvailableInventory += (qty - canFreeze);
+                             freezeInventory += canFreeze;
+                        } else {
+                            //入库数<可冻结数 之前的冻结库存 + 入库数
+                             freezeInventory += qty;
+                        }
+                        afterInventory.setFreezeInventory(freezeInventory).setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
+                        afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss", inboundInventoryDTO.getOperateOn()));
+                        this.saveOrUpdate(afterInventory);
                     } else {
-                        //入库数<可冻结数 之前的冻结库存 + 入库数
-                         freezeInventory += qty;
+                        //入库数 = 可用++
+                        afterAvailableInventory += qty;
+                        afterInventory.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
+                        this.saveOrUpdate(afterInventory);
                     }
-                    afterInventory.setFreezeInventory(freezeInventory).setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
+                } else */
+                {
+                    // after inventory
+                    int afterTotalInventory = beforeInventory.getTotalInventory() + qty;
+                    int afterAvailableInventory = beforeInventory.getAvailableInventory() + qty;
+                    int afterTotalInbound = beforeInventory.getTotalInbound() + qty;
+                    afterInventory.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
                     afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss", inboundInventoryDTO.getOperateOn()));
                     this.saveOrUpdate(afterInventory);
-                } else {
-                    //入库数 = 可用++
-                    afterAvailableInventory += qty;
-                    afterInventory.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
-                    this.saveOrUpdate(afterInventory);
                 }
-            } else */
-            {
-                // after inventory
-                int afterTotalInventory = beforeInventory.getTotalInventory() + qty;
-                int afterAvailableInventory = beforeInventory.getAvailableInventory() + qty;
-                int afterTotalInbound = beforeInventory.getTotalInbound() + qty;
-                afterInventory.setId(beforeInventory.getId()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterTotalInbound);
-                afterInventory.setLastInboundTime(DateUtils.dateTime("yyyy-MM-dd'T'HH:mm:ss", inboundInventoryDTO.getOperateOn()));
-                this.saveOrUpdate(afterInventory);
-            }
 
-            // 记录库存日志
-            iInventoryRecordService.saveLogs(INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty);
+                // 记录库存日志
+                iInventoryRecordService.saveLogs(INVENTORY_RECORD_TYPE_1.getKey(), beforeInventory, afterInventory, inboundInventoryDTO.getOrderNo(), inboundInventoryDTO.getOperator(), inboundInventoryDTO.getOperateOn(), qty);
+            } else {
+                throw new RuntimeException("请求超时,请稍后重试");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            log.error("上架入库异常：", e);
+            throw new RuntimeException("上架入库异常,请稍后重试");
         } finally {
-            lock.unlock();
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
+
     }
 
     /**

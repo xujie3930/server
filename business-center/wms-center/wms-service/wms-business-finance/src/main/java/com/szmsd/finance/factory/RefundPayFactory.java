@@ -71,7 +71,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                 log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(dto));
                 throw new RuntimeException("退费业务处理超时,请稍候重试");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("RefundPayFactory异常:", e);

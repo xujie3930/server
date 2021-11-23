@@ -225,7 +225,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         AssertUtil.notNull(loginUser, "获取用户信息失败");
         String sellerCode = loginUser.getSellerCode();
         InboundReceipt inboundReceipt = baseMapper.selectOne(Wrappers.<InboundReceipt>lambdaQuery()
-                .eq(InboundReceipt::getOrderNo,updateTrackingNoRequest.getWarehouseNo())
+                .eq(InboundReceipt::getOrderNo, updateTrackingNoRequest.getWarehouseNo())
                 .eq(InboundReceipt::getCusCode, sellerCode));
         AssertUtil.isTrue(inboundReceipt != null, "入库单不存在!");
         AssertUtil.isTrue(inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()), "入库单已取消!");
@@ -305,11 +305,13 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         InboundReceiptInfoVO inboundReceiptInfoVO = queryInfo(warehouseNo, true);
         if (inboundReceiptInfoVO != null) {
             String deliveryNo = inboundReceiptInfoVO.getDeliveryNo();
-            List<String> codeByArray = StringToolkit.getCodeByArray(deliveryNo);
+            List<String> codeByArray = Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>());
+            // 查询收货信息
+            List<InboundTracking> inboundTrackings = iInboundTrackingService.selectInboundTrackingList(new InboundTracking().setOrderNo(warehouseNo));
+            Map<String, InboundTracking> collect1 = inboundTrackings.stream().filter(x -> StringUtils.isNotBlank(x.getTrackingNumber())).collect(Collectors.toMap(InboundTracking::getTrackingNumber, x -> x));
+            codeByArray.addAll(collect1.keySet());
             if (CollectionUtils.isNotEmpty(codeByArray)) {
-                //查询收货信息
-                List<InboundTracking> inboundTrackings = iInboundTrackingService.selectInboundTrackingList(new InboundTracking().setOrderNo(warehouseNo));
-                Map<String, InboundTracking> collect1 = inboundTrackings.stream().filter(x -> StringUtils.isNotBlank(x.getTrackingNumber())).collect(Collectors.toMap(InboundTracking::getTrackingNumber, x -> x));
+                codeByArray = codeByArray.stream().distinct().collect(Collectors.toList());
                 List<InboundTrackingVO> collect = codeByArray.stream()
                         .map(x -> {
                             InboundTrackingVO inboundTrackingVO = new InboundTrackingVO().setTrackingNumber(x).setOrderNo(warehouseNo);

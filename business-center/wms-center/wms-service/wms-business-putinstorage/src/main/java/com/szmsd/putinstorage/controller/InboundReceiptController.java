@@ -9,6 +9,8 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO;
 import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import com.szmsd.putinstorage.annotation.InboundReceiptLog;
@@ -26,6 +28,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,11 +37,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -57,6 +64,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/inbound")
 public class InboundReceiptController extends BaseController {
 
+    private final static long LOCK_TIME = 10L;
+
     @Resource
     private IInboundReceiptService iInboundReceiptService;
 
@@ -65,6 +74,8 @@ public class InboundReceiptController extends BaseController {
 
     @Resource
     private RemoteComponent remoteComponent;
+    @Resource
+    private RedissonClient redissonClient;
 
     //    @AutoValue
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")
@@ -98,10 +109,26 @@ public class InboundReceiptController extends BaseController {
     @ApiOperation(value = "创建/修改", notes = "入库管理 - 新增/创建")
     @InboundReceiptLog(record = InboundReceiptRecordEnum.CREATE)
     public R<InboundReceiptInfoVO> saveOrUpdate(@RequestBody CreateInboundReceiptDTO createInboundReceiptDTO) {
+        String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        RLock lock = redissonClient.getLock("InboundReceiptController#saveOrUpdate" + localKey);
         try {
-            return R.ok(iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO));
+            if (lock.tryLock(LOCK_TIME, TimeUnit.SECONDS)) {
+                try {
+                    return R.ok(iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO));
+                } finally {
+                    CheckTag.remove();
+                }
+            } else {
+                return R.failed("请求超时，请稍候重试!");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            log.error("创建修改失败：", e);
+            return R.failed("创建/修改入库单失败!");
         } finally {
-            CheckTag.remove();
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 
@@ -118,15 +145,30 @@ public class InboundReceiptController extends BaseController {
     @ApiOperation(value = "创建/修改-批量", notes = "批量 入库管理 - 新增/创建")
     @InboundReceiptLog(record = InboundReceiptRecordEnum.CREATE)
     public R<List<InboundReceiptInfoVO>> saveOrUpdateBatch(@RequestBody List<CreateInboundReceiptDTO> createInboundReceiptDTOList) {
+        String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        RLock lock = redissonClient.getLock("InboundReceiptController#saveOrUpdateBatch" + localKey);
         try {
-            List<InboundReceiptInfoVO> resultList = new ArrayList<>();
-            createInboundReceiptDTOList.forEach(createInboundReceiptDTO -> {
-                InboundReceiptInfoVO inboundReceiptInfoVO = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
-                resultList.add(inboundReceiptInfoVO);
-            });
-            return R.ok(resultList);
+            if (lock.tryLock(LOCK_TIME, TimeUnit.SECONDS)) {
+                try {
+                    List<InboundReceiptInfoVO> resultList = new ArrayList<>();
+                    createInboundReceiptDTOList.forEach(createInboundReceiptDTO -> {
+                        InboundReceiptInfoVO inboundReceiptInfoVO = iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
+                        resultList.add(inboundReceiptInfoVO);
+                    });
+                    return R.ok(resultList);
+                } finally {
+                    CheckTag.remove();
+                }
+            } else {
+                return R.failed("请求超时，请稍候重试!");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("批量创建/修改入库单失败!");
         } finally {
-            CheckTag.remove();
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 
@@ -135,8 +177,23 @@ public class InboundReceiptController extends BaseController {
     @ApiOperation(value = "取消", notes = "入库管理 - 取消")
     @InboundReceiptLog(record = InboundReceiptRecordEnum.CANCEL)
     public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
-        iInboundReceiptService.cancel(warehouseNo);
-        return R.ok();
+        String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        RLock lock = redissonClient.getLock("InboundReceiptController#cancel" + localKey);
+        try {
+            if (lock.tryLock(LOCK_TIME, TimeUnit.SECONDS)) {
+                iInboundReceiptService.cancel(warehouseNo);
+                return R.ok();
+            } else {
+                return R.failed("请求超时，请稍候重试!");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("取消入库单失败!");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:info')")
@@ -189,7 +246,7 @@ public class InboundReceiptController extends BaseController {
         boolean isXlsx = "xlsx".equals(suffix);
         AssertUtil.isTrue(isXls || isXlsx, "请上传xls或xlsx文件");
         List<String> error = new ArrayList<>();
-        List<InboundReceiptDetailVO> inboundReceiptDetailVOS;
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = new ArrayList<>();
         try {
             ExcelUtil<InboundReceiptDetailVO> excelUtil = new ExcelUtil<>(InboundReceiptDetailVO.class);
             inboundReceiptDetailVOS = excelUtil.importExcel(file.getInputStream());
@@ -220,8 +277,23 @@ public class InboundReceiptController extends BaseController {
     @ApiOperation(value = "#B1 接收入库上架", notes = "#B1 接收入库上架")
     @InboundReceiptLog(record = InboundReceiptRecordEnum.PUT)
     public R receiving(@RequestBody ReceivingRequest receivingRequest) {
-        iInboundReceiptService.receiving(receivingRequest);
-        return R.ok();
+        String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        RLock lock = redissonClient.getLock("InboundReceiptController#receiving" + localKey);
+        try {
+            if (lock.tryLock(LOCK_TIME, TimeUnit.SECONDS)) {
+                iInboundReceiptService.receiving(receivingRequest);
+                return R.ok();
+            } else {
+                return R.failed("请求超时，请稍候重试!");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("接收入库上架失败!");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receiving:completed')")
@@ -229,8 +301,23 @@ public class InboundReceiptController extends BaseController {
     @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")
     @InboundReceiptLog(record = InboundReceiptRecordEnum.COMPLETED)
     public R completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest) {
-        iInboundReceiptService.completed(receivingCompletedRequest);
-        return R.ok();
+        String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        RLock lock = redissonClient.getLock("InboundReceiptController#completed" + localKey);
+        try {
+            if (lock.tryLock(LOCK_TIME,TimeUnit.SECONDS)) {
+                iInboundReceiptService.completed(receivingCompletedRequest);
+                return R.ok();
+            } else {
+                return R.failed("请求超时，请稍候重试!");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("接收完成入库异常!");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:arraigned')")
@@ -286,8 +373,23 @@ public class InboundReceiptController extends BaseController {
     @PostMapping("/receiving/tracking")
     @ApiOperation(value = "#B5 物流到货接收确认", notes = "#B5 物流到货接收确认")
     R tracking(@Validated @RequestBody ReceivingTrackingRequest receivingCompletedRequest) {
-        iInboundReceiptService.tracking(receivingCompletedRequest);
-        return R.ok();
+        String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        RLock lock = redissonClient.getLock("InboundReceiptController#tracking" + localKey);
+        try {
+            if (lock.tryLock(LOCK_TIME, TimeUnit.SECONDS)) {
+                iInboundReceiptService.tracking(receivingCompletedRequest);
+                return R.ok();
+            } else {
+                return R.failed("物流到货接收确认等待超时,请稍候重试!");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("物流到货接收确认处理异常!");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('inventory:querySkuStockByRange')")
