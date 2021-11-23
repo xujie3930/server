@@ -1,5 +1,6 @@
 package com.szmsd.open.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.open.vo.ResponseVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
@@ -28,6 +29,7 @@ public class InboundReceiptController extends BaseController {
     @PostMapping("/receiving")
     @ApiOperation(value = "#B1 接收入库上架", notes = "#B1 接收入库上架")
     public ResponseVO receiving(@RequestBody ReceivingRequest receivingRequest) {
+        log.info("#B1 接收入库上架：{}", JSONObject.toJSONString(receivingRequest));
         R.getDataAndException(inboundReceiptFeignService.receiving(receivingRequest));
         return ResponseVO.ok();
     }
@@ -35,6 +37,7 @@ public class InboundReceiptController extends BaseController {
     @PostMapping("/receiving/completed")
     @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")
     public ResponseVO completed(@RequestBody ReceivingCompletedRequest receivingCompletedRequest) {
+        log.info("#B3 接收完成入库：{}", JSONObject.toJSONString(receivingCompletedRequest));
         R.getDataAndException(inboundReceiptFeignService.completed(receivingCompletedRequest));
         return ResponseVO.ok();
     }
@@ -42,6 +45,7 @@ public class InboundReceiptController extends BaseController {
     @PostMapping("/receiving/tracking")
     @ApiOperation(value = "#B5 物流到货接收确认", notes = "#B5 物流到货接收确认")
     public ResponseVO tracking(@Validated @RequestBody ReceivingTrackingRequest receivingCompletedRequest) {
+        log.info("#B5 物流到货接收确认：{}", JSONObject.toJSONString(receivingCompletedRequest));
         R.getDataAndException(inboundReceiptFeignService.tracking(receivingCompletedRequest));
         return ResponseVO.ok();
     }
