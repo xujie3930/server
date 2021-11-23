@@ -28,11 +28,9 @@ import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
-import com.szmsd.http.api.service.IHtpIBasClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.*;
-import com.szmsd.http.vo.BaseOperationResponse;
 import com.szmsd.http.vo.PricedProductInfo;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -497,37 +495,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            DelOutboundOperationLogEnum.BRV_SHIPMENT_RULE.listener(delOutbound);
-            // 调用新增/修改发货规则
-            AddShipmentRuleRequest addShipmentRuleRequest = new AddShipmentRuleRequest();
-            addShipmentRuleRequest.setWarehouseCode(delOutbound.getWarehouseCode());
-            addShipmentRuleRequest.setOrderNo(delOutbound.getOrderNo());
-            String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
-            String shipmentChannel = StringUtils.nvl(delOutbound.getShipmentChannel(), "");
-            if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(shipmentChannel)) {
-                addShipmentRuleRequest.setShipmentRule(delOutbound.getDeliveryAgent());
-                addShipmentRuleRequest.setGetLabelType(DelOutboundTrackingAcquireTypeEnum.NONE.getCode());
-            } else {
-                // 获取PRC计费之后返回的发货规则
-                addShipmentRuleRequest.setShipmentRule(delOutboundWrapperContext.getShipmentRule());
-                addShipmentRuleRequest.setGetLabelType(delOutbound.getTrackingAcquireType());
-            }
-            IHtpIBasClientService htpIBasClientService = SpringUtils.getBean(IHtpIBasClientService.class);
-            BaseOperationResponse baseOperationResponse = htpIBasClientService.shipmentRule(addShipmentRuleRequest);
-            if (null == baseOperationResponse) {
-                throw new CommonException("400", "新增/修改发货规则失败");
-            }
-            if (null == baseOperationResponse.getSuccess()) {
-                baseOperationResponse.setSuccess(false);
-            }
-            if (!baseOperationResponse.getSuccess()) {
-                String msg = baseOperationResponse.getMessage();
-                if (StringUtils.isEmpty(msg)) {
-                    msg = baseOperationResponse.getErrors();
-                }
-                String message = Utils.defaultValue(msg, "新增/修改发货规则失败");
-                throw new CommonException("400", message);
-            }
+            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+            delOutboundBringVerifyService.shipmentRule(delOutbound, delOutboundWrapperContext.getShipmentRule());
         }
 
         @Override

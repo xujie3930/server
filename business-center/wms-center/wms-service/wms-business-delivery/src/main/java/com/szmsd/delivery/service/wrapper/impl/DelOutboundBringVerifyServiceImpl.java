@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
+import cn.hutool.crypto.digest.MD5;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
@@ -14,16 +15,14 @@ import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.FileStream;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
-import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
-import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
@@ -35,18 +34,22 @@ import com.szmsd.delivery.vo.DelOutboundCombinationVO;
 import com.szmsd.delivery.vo.DelOutboundPackingDetailVO;
 import com.szmsd.delivery.vo.DelOutboundPackingVO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
+import com.szmsd.http.api.service.IHtpIBasClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.Package;
 import com.szmsd.http.dto.*;
+import com.szmsd.http.vo.BaseOperationResponse;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import com.szmsd.http.vo.ResponseVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -91,6 +94,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private RemoteAttachmentService remoteAttachmentService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -508,6 +513,59 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     @Override
+    public void shipmentRule(DelOutbound delOutbound, String shipmentRule) {
+        String logMessage;
+        out:
+        if (StringUtils.isEmpty(shipmentRule)) {
+            logMessage = "发货规则为空";
+        } else {
+            // 发货规则唯一MD5值
+            String shipmentRuleMd5 = MD5.create().digestHex(shipmentRule);
+            String key = "Delivery:ShipmentRule:" + shipmentRuleMd5;
+            Object o = this.redisTemplate.opsForValue().get(key);
+            if (Objects.nonNull(o)) {
+                logMessage = "发货规则已存在不更新WMS";
+                break out;
+            }
+            logMessage = "发货规则不存在，更新WMS";
+            // 调用新增/修改发货规则
+            AddShipmentRuleRequest addShipmentRuleRequest = new AddShipmentRuleRequest();
+            addShipmentRuleRequest.setWarehouseCode(delOutbound.getWarehouseCode());
+            addShipmentRuleRequest.setOrderNo(delOutbound.getOrderNo());
+            String orderType = com.szmsd.common.core.utils.StringUtils.nvl(delOutbound.getOrderType(), "");
+            String shipmentChannel = com.szmsd.common.core.utils.StringUtils.nvl(delOutbound.getShipmentChannel(), "");
+            if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(shipmentChannel)) {
+                addShipmentRuleRequest.setShipmentRule(delOutbound.getDeliveryAgent());
+                addShipmentRuleRequest.setGetLabelType(DelOutboundTrackingAcquireTypeEnum.NONE.getCode());
+            } else {
+                // 获取PRC计费之后返回的发货规则
+                addShipmentRuleRequest.setShipmentRule(shipmentRule);
+                addShipmentRuleRequest.setGetLabelType(delOutbound.getTrackingAcquireType());
+            }
+            IHtpIBasClientService htpIBasClientService = SpringUtils.getBean(IHtpIBasClientService.class);
+            BaseOperationResponse baseOperationResponse = htpIBasClientService.shipmentRule(addShipmentRuleRequest);
+            if (null == baseOperationResponse) {
+                throw new CommonException("400", "新增/修改发货规则失败");
+            }
+            if (null == baseOperationResponse.getSuccess()) {
+                baseOperationResponse.setSuccess(false);
+            }
+            if (!baseOperationResponse.getSuccess()) {
+                String msg = baseOperationResponse.getMessage();
+                if (com.szmsd.common.core.utils.StringUtils.isEmpty(msg)) {
+                    msg = baseOperationResponse.getErrors();
+                }
+                String message = Utils.defaultValue(msg, "新增/修改发货规则失败");
+                throw new CommonException("400", message);
+            }
+            // 请求成功，添加到redis中，下次判断redis里面存在就不推送给WMS
+            this.redisTemplate.opsForValue().set(key, shipmentRuleMd5);
+        }
+        Object[] params = new Object[]{delOutbound, logMessage};
+        DelOutboundOperationLogEnum.BRV_SHIPMENT_RULE.listener(params);
+    }
+
+    @Override
     public boolean getShipmentLabel(DelOutbound delOutbound) {
         if (null == delOutbound) {
             throw new CommonException("出库单信息不能为空");
@@ -536,6 +594,14 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 byte[] inputStream;
                 if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
                     File labelFile = new File(file.getPath() + "/" + orderNumber);
+                    if (labelFile.exists()) {
+                        File destFile = new File(file.getPath() + "/" + orderNumber + "_" + DateFormatUtils.format(new Date(), "yyyyMMdd_HHmmss"));
+                        try {
+                            FileUtils.copyFile(labelFile, destFile);
+                        } catch (IOException e) {
+                            logger.error("复制文件失败，" + e.getMessage(), e);
+                        }
+                    }
                     try {
                         FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
                         return true;
