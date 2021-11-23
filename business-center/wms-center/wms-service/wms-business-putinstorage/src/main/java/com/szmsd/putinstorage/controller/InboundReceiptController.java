@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -120,7 +121,7 @@ public class InboundReceiptController extends BaseController {
             } else {
                 return R.failed("请求超时，请稍候重试!");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
             log.error("创建修改失败：", e);
             return R.failed("创建/修改入库单失败!");
@@ -161,7 +162,7 @@ public class InboundReceiptController extends BaseController {
             } else {
                 return R.failed("请求超时，请稍候重试!");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return R.failed("批量创建/修改入库单失败!");
         } finally {
@@ -185,7 +186,7 @@ public class InboundReceiptController extends BaseController {
             } else {
                 return R.failed("请求超时，请稍候重试!");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return R.failed("取消入库单失败!");
         } finally {
@@ -245,7 +246,7 @@ public class InboundReceiptController extends BaseController {
         boolean isXlsx = "xlsx".equals(suffix);
         AssertUtil.isTrue(isXls || isXlsx, "请上传xls或xlsx文件");
         List<String> error = new ArrayList<>();
-        List<InboundReceiptDetailVO> inboundReceiptDetailVOS;
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = new ArrayList<>();
         try {
             ExcelUtil<InboundReceiptDetailVO> excelUtil = new ExcelUtil<>(InboundReceiptDetailVO.class);
             inboundReceiptDetailVOS = excelUtil.importExcel(file.getInputStream());
@@ -285,7 +286,7 @@ public class InboundReceiptController extends BaseController {
             } else {
                 return R.failed("请求超时，请稍候重试!");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return R.failed("接收入库上架失败!");
         } finally {
@@ -303,13 +304,13 @@ public class InboundReceiptController extends BaseController {
         String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
         RLock lock = redissonClient.getLock("InboundReceiptController#completed" + localKey);
         try {
-            if (lock.tryLock()) {
+            if (lock.tryLock(LOCK_TIME,TimeUnit.SECONDS)) {
                 iInboundReceiptService.completed(receivingCompletedRequest);
                 return R.ok();
             } else {
                 return R.failed("请求超时，请稍候重试!");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return R.failed("接收完成入库异常!");
         } finally {
@@ -381,7 +382,7 @@ public class InboundReceiptController extends BaseController {
             } else {
                 return R.failed("物流到货接收确认等待超时,请稍候重试!");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return R.failed("物流到货接收确认处理异常!");
         } finally {

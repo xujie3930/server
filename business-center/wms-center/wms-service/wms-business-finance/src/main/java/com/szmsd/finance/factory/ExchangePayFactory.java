@@ -82,7 +82,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 log.error("汇率转换,请稍候重试{}", JSONObject.toJSONString(dto));
                 throw new RuntimeException("汇率转换操作超时,请稍候重试");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("ExchangePayFactory异常:", e);

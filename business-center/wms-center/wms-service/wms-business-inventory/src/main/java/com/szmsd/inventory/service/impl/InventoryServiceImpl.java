@@ -162,7 +162,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             } else {
                 throw new RuntimeException("请求超时,请稍后重试");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
             log.error("上架入库异常：", e);
             throw new RuntimeException("上架入库异常,请稍后重试");
