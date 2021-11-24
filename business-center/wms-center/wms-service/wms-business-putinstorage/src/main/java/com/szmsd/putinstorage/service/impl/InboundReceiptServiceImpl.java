@@ -226,6 +226,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             List<InboundReceipt> inboundReceipts = baseMapper.selectList(in);
             String errorMsg = inboundReceipts.stream().map(x -> x.getWarehouseNo() + ":" + x.getDeliveryNo()).collect(Collectors.joining("\n", "快递单号重复：", ""));
             AssertUtil.isTrue(CollectionUtils.isEmpty(inboundReceipts), errorMsg);
+            List<InboundTracking> inboundTrackings = iInboundTrackingService.getBaseMapper().selectList(Wrappers.<InboundTracking>lambdaQuery().ne(InboundTracking::getOrderNo, warehouseNo)
+                    .in(InboundTracking::getTrackingNumber, deliveryNoList).select(InboundTracking::getTrackingNumber, InboundTracking::getOrderNo));
+            String errorMsg2 = inboundTrackings.stream().map(x -> x.getOrderNo() + ":" + x.getTrackingNumber()).collect(Collectors.joining("\n", "快递单号已收货：", ""));
+            AssertUtil.isTrue(CollectionUtils.isEmpty(inboundTrackings), errorMsg2);
         }
     }
 
