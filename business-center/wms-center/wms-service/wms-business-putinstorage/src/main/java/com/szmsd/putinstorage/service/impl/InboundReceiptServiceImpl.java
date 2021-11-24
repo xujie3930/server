@@ -225,7 +225,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         AssertUtil.notNull(loginUser, "获取用户信息失败");
         String sellerCode = loginUser.getSellerCode();
         InboundReceipt inboundReceipt = baseMapper.selectOne(Wrappers.<InboundReceipt>lambdaQuery()
-                .eq(InboundReceipt::getOrderNo, updateTrackingNoRequest.getWarehouseNo())
+                .eq(InboundReceipt::getWarehouseNo, updateTrackingNoRequest.getWarehouseNo())
                 .eq(InboundReceipt::getCusCode, sellerCode));
         AssertUtil.isTrue(inboundReceipt != null, "入库单不存在!");
         AssertUtil.isTrue(inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()), "入库单已取消!");
