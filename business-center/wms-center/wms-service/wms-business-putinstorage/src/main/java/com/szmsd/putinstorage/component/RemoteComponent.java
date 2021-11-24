@@ -337,7 +337,9 @@ public class RemoteComponent {
         log.info("创建入库单物流信息列表 {}", createTrackRequest);
         R<ResponseVO> tracking = htpInboundFeignService.createTracking(createTrackRequest);
         AssertUtil.isTrue(tracking.getCode() == HttpStatus.SUCCESS, tracking.getMsg());
-
+        if (tracking.getCode() == HttpStatus.SUCCESS && tracking.getData() != null && !tracking.getData().getSuccess()) {
+            throw new RuntimeException("创建入库单物流信息失败Remote:【" + tracking.getData().getMessage() + "】");
+        }
     }
 
     public void createTracking(UpdateTrackingNoRequest updateTrackingNoRequest, InboundReceipt inboundReceipt) {
@@ -349,5 +351,8 @@ public class RemoteComponent {
         log.info("更新入库单物流信息列表 {}", createTrackRequest);
         R<ResponseVO> tracking = htpInboundFeignService.createTracking(createTrackRequest);
         AssertUtil.isTrue(tracking.getCode() == HttpStatus.SUCCESS, tracking.getMsg());
+        if (tracking.getCode() == HttpStatus.SUCCESS && tracking.getData() != null && !tracking.getData().getSuccess()) {
+            throw new RuntimeException("创建入库单物流信息失败Remote:【" + tracking.getData().getMessage() + "】");
+        }
     }
 }
