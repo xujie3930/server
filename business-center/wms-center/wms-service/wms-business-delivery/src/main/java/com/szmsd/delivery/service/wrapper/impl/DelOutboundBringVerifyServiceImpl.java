@@ -579,6 +579,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
         command.setWarehouseCode(delOutbound.getWarehouseCode());
         command.setOrderNumber(orderNumber);
+        command.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
         DelOutboundOperationLogEnum.SMT_LABEL.listener(delOutbound);
         logger.info("正在获取标签文件，单号：{}，承运商订单号：{}", delOutbound.getOrderNo(), orderNumber);
         ResponseObject<FileStream, ProblemDetails> responseObject = this.htpCarrierClientService.label(command);
