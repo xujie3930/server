@@ -228,8 +228,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 .eq(InboundReceipt::getWarehouseNo, updateTrackingNoRequest.getWarehouseNo())
                 .eq(InboundReceipt::getCusCode, sellerCode));
         AssertUtil.isTrue(inboundReceipt != null, "入库单不存在!");
-        AssertUtil.isTrue(inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()), "入库单已取消!");
-        AssertUtil.isTrue(inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.COMPLETED.getValue()), "入库单已完成!");
+        AssertUtil.isTrue(!inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()), "入库单已取消!");
+        AssertUtil.isTrue(!inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.COMPLETED.getValue()), "入库单已完成!");
         int update = baseMapper.update(new InboundReceipt(), Wrappers.<InboundReceipt>lambdaUpdate().set(InboundReceipt::getDeliveryNo, updateTrackingNoRequest.getDeliveryNo()));
         log.info("更新运单信息-{} -{}条", updateTrackingNoRequest, update);
         remoteComponent.createTracking(updateTrackingNoRequest, inboundReceipt);
