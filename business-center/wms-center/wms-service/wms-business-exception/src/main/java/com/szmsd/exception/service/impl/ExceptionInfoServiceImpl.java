@@ -1,5 +1,6 @@
 package com.szmsd.exception.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -249,6 +250,28 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         lambdaUpdateWrapper.set(ExceptionInfo::getState, "085002");
         lambdaUpdateWrapper.eq(ExceptionInfo::getId, dto.getExceptionId());
         return super.baseMapper.update(null, lambdaUpdateWrapper);
+    }
+
+    @Transactional
+    @Override
+    public int ignore(ExceptionInfoDto exceptionInfo) {
+        // 根据订单号查询异常信息
+        String orderNo = exceptionInfo.getOrderNo();
+        if (StringUtils.isEmpty(orderNo)) {
+            return 0;
+        }
+        LambdaQueryWrapper<ExceptionInfo> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(ExceptionInfo::getOrderNo, orderNo);
+        queryWrapper.eq(ExceptionInfo::getState, "085001");
+        if (super.count(queryWrapper) > 0) {
+            LambdaUpdateWrapper<ExceptionInfo> updateWrapper = Wrappers.lambdaUpdate();
+            updateWrapper.set(ExceptionInfo::getState, "085002");
+            updateWrapper.set(ExceptionInfo::getProcessRemark, "系统自动处理");
+            updateWrapper.eq(ExceptionInfo::getOrderNo, orderNo);
+            updateWrapper.eq(ExceptionInfo::getState, "085001");
+            return this.baseMapper.update(null, updateWrapper);
+        }
+        return 0;
     }
 
     private Date dealUTZTime(String time) {

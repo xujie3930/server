@@ -33,6 +33,7 @@ import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.delivery.vo.DelOutboundCombinationVO;
 import com.szmsd.delivery.vo.DelOutboundPackingDetailVO;
 import com.szmsd.delivery.vo.DelOutboundPackingVO;
+import com.szmsd.exception.api.service.ExceptionInfoClientService;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpIBasClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
@@ -50,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -96,6 +98,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private IDelOutboundCompletedService delOutboundCompletedService;
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
+    @Autowired
+    private ExceptionInfoClientService exceptionInfoClientService;
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -762,6 +766,17 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(exRemark, "操作失败"));
         shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
         htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+    }
+
+    @Async
+    @Override
+    public void ignoreExceptionInfo(String orderNo) {
+        try {
+            int ignore = this.exceptionInfoClientService.ignore(orderNo);
+            logger.info("出库单[{}]调用忽略异常信息成功，ignore:{}", orderNo, ignore);
+        } catch (Exception e) {
+            logger.error("出库单[" + orderNo + "]调用忽略异常信息接口失败，" + e.getMessage(), e);
+        }
     }
 
     @Override

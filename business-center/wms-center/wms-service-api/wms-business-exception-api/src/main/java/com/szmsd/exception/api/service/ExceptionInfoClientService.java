@@ -25,4 +25,11 @@ public interface ExceptionInfoClientService {
      * @return
      */
     Integer countprocessException(String sellerCode);
+
+    /**
+     * 忽略异常
+     * @param orderNo orderNo
+     * @return int
+     */
+    int ignore(String orderNo);
 }

@@ -85,5 +85,12 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
          * @return int
          */
         int againTrackingNo(ExceptionDelOutboundAgainTrackingNoDto dto);
+
+        /**
+         * 忽略异常
+         * @param exceptionInfo exceptionInfo
+         * @return int
+         */
+        int ignore(ExceptionInfoDto exceptionInfo);
 }
 

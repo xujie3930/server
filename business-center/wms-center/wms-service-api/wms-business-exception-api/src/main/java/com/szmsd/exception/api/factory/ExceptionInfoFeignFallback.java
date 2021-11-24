@@ -3,6 +3,7 @@ package com.szmsd.exception.api.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.exception.api.feign.ExceptionInfoFeignService;
+import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.NewExceptionRequest;
 import com.szmsd.exception.dto.ProcessExceptionRequest;
 import feign.hystrix.FallbackFactory;
@@ -26,6 +27,11 @@ public class ExceptionInfoFeignFallback implements FallbackFactory<ExceptionInfo
             }
             @Override
             public R<Integer> countException(@RequestBody String sellerCode){
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<Integer> ignore(ExceptionInfoDto exceptionInfo) {
                 return R.convertResultJson(throwable);
             }
         };

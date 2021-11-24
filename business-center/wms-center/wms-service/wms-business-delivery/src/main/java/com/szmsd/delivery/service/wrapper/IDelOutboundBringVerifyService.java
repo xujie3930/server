@@ -97,6 +97,13 @@ public interface IDelOutboundBringVerifyService {
     void shipmentShippingEx(DelOutbound delOutbound, String exRemark);
 
     /**
+     * 忽略异常信息
+     *
+     * @param orderNo orderNo
+     */
+    void ignoreExceptionInfo(String orderNo);
+
+    /**
      * 取消承运商物流订单（客户端）
      *
      * @param warehouseCode       warehouseCode

@@ -147,4 +147,12 @@ public class ExceptionInfoController extends BaseController{
     public R againTrackingNo(@RequestBody ExceptionDelOutboundAgainTrackingNoDto dto) {
         return R.ok(this.exceptionInfoService.againTrackingNo(dto));
     }
+
+    @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:ignore')")
+    @Log(title = "模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/ignore")
+    @ApiOperation(value = "忽略异常",notes = "根据出库单号忽略异常")
+    public R<Integer> ignore(@RequestBody ExceptionInfoDto exceptionInfo) {
+        return R.ok(this.exceptionInfoService.ignore(exceptionInfo));
+    }
 }

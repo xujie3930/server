@@ -4,6 +4,7 @@ package com.szmsd.exception.api.feign;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.exception.api.BusinessExceptionInterface;
 import com.szmsd.exception.api.factory.ExceptionInfoFeignFallback;
+import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.NewExceptionRequest;
 import com.szmsd.exception.dto.ProcessExceptionRequest;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -21,4 +22,7 @@ public interface ExceptionInfoFeignService {
 
     @PostMapping(value = "/exception/info/count")
     R<Integer> countException(@RequestBody String sellerCode);
+
+    @PostMapping(value = "/exception/info/ignore")
+    R<Integer> ignore(@RequestBody ExceptionInfoDto exceptionInfo);
 }
