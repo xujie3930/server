@@ -212,4 +212,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "COD")
     private BigDecimal codAmount;
+
+    @ApiModelProperty(value = "承运商标签路径")
+    private String shipmentOrderLabelUrl;
 }

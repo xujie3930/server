@@ -34,6 +34,8 @@ public class SaaSCarrierServiceAdminApiConfig implements ApiConfig {
         private String labelsMerging;
         // 根据订单号返回标签文件流（客户端）
         private String label;
+        // 根据标签文件路径去获取文件流
+        private String labelUrl;
 
         public String getServices() {
             return services;
@@ -89,6 +91,14 @@ public class SaaSCarrierServiceAdminApiConfig implements ApiConfig {
 
         public void setLabel(String label) {
             this.label = label;
+        }
+
+        public String getLabelUrl() {
+            return labelUrl;
+        }
+
+        public void setLabelUrl(String labelUrl) {
+            this.labelUrl = labelUrl;
         }
     }
 }

@@ -207,6 +207,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
+            updateDelOutbound.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
             // 推单WMS
             updateDelOutbound.setRefOrderNo(delOutbound.getRefOrderNo());
             delOutboundService.bringVerifyFail(updateDelOutbound);
@@ -337,6 +338,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo("");
             updateDelOutbound.setShipmentOrderNumber("");
+            updateDelOutbound.setShipmentOrderLabelUrl("");
             // 推单WMS
             updateDelOutbound.setRefOrderNo("");
             delOutboundService.updateById(updateDelOutbound);
@@ -534,6 +536,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
                 delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
                 delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
                 DelOutboundOperationLogEnum.BRV_SHIPMENT_ORDER.listener(delOutbound);
             }
         }
@@ -552,6 +555,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 delOutboundBringVerifyService.cancellation(delOutbound.getWarehouseCode(), referenceNumber, shipmentOrderNumber, trackingNo);
                 delOutbound.setTrackingNo("");
                 delOutbound.setShipmentOrderNumber("");
+                delOutbound.setShipmentOrderLabelUrl("");
             }
             super.rollback(context);
         }
@@ -790,6 +794,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
+            updateDelOutbound.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
             // 推单WMS
             updateDelOutbound.setRefOrderNo(refOrderNo);
             delOutboundService.bringVerifySuccess(updateDelOutbound);

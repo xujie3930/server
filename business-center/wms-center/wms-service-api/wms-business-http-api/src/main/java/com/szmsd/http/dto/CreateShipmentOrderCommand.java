@@ -47,4 +47,7 @@ public class CreateShipmentOrderCommand implements Serializable {
 
     @ApiModelProperty(value = "COD")
     private BigDecimal codAmount;
+
+    @ApiModelProperty(value = "承运商标签路径")
+    private String shipmentOrderLabelUrl;
 }
