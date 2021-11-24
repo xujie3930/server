@@ -183,14 +183,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         createInboundReceiptDTO.setWarehouseNo(warehouseNo);
         //校验快递单号唯一
         List<String> deliveryNoList = createInboundReceiptDTO.getDeliveryNoList();
-        if (CollectionUtils.isNotEmpty(deliveryNoList)) {
-            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().ne(createInboundReceiptDTO.getId() != null, InboundReceipt::getId, createInboundReceiptDTO.getId()).ne(InboundReceipt::getWarehouseNo, warehouseNo).ne(InboundReceipt::getStatus, InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue());
-            String join = String.join(",", deliveryNoList);
-            in.and(x -> x.apply("CONCAT(',',delivery_no,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))", join));
-            List<InboundReceipt> inboundReceipts = baseMapper.selectList(in);
-            String errorMsg = inboundReceipts.stream().map(x -> x.getWarehouseNo() + ":" + x.getDeliveryNo()).collect(Collectors.joining("\n", "快递单号重复：", ""));
-            AssertUtil.isTrue(CollectionUtils.isEmpty(inboundReceipts), errorMsg);
-        }
+        checkDeliveryNoRepeat(createInboundReceiptDTO.getId(), warehouseNo, deliveryNoList);
         // 保存入库单明细
         List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetails();
         inboundReceiptDetailDTOS.forEach(item -> item.setWarehouseNo(warehouseNo));
@@ -218,19 +211,47 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         return this.queryInfo(warehouseNo, false);
     }
 
+    /**
+     * 校验快递单号重复
+     *
+     * @param
+     * @param warehouseNo
+     * @param deliveryNoList
+     */
+    private void checkDeliveryNoRepeat(Long id, String warehouseNo, List<String> deliveryNoList) {
+        if (CollectionUtils.isNotEmpty(deliveryNoList)) {
+            LambdaQueryWrapper<InboundReceipt> in = Wrappers.<InboundReceipt>lambdaQuery().ne(id != null, InboundReceipt::getId, id).ne(InboundReceipt::getWarehouseNo, warehouseNo).ne(InboundReceipt::getStatus, InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue());
+            String join = String.join(",", deliveryNoList);
+            in.and(x -> x.apply("CONCAT(',',delivery_no,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))", join));
+            List<InboundReceipt> inboundReceipts = baseMapper.selectList(in);
+            String errorMsg = inboundReceipts.stream().map(x -> x.getWarehouseNo() + ":" + x.getDeliveryNo()).collect(Collectors.joining("\n", "快递单号重复：", ""));
+            AssertUtil.isTrue(CollectionUtils.isEmpty(inboundReceipts), errorMsg);
+            List<InboundTracking> inboundTrackings = iInboundTrackingService.getBaseMapper().selectList(Wrappers.<InboundTracking>lambdaQuery().ne(InboundTracking::getOrderNo, warehouseNo)
+                    .in(InboundTracking::getTrackingNumber, deliveryNoList).select(InboundTracking::getTrackingNumber, InboundTracking::getOrderNo));
+            String errorMsg2 = inboundTrackings.stream().map(x -> x.getOrderNo() + ":" + x.getTrackingNumber()).collect(Collectors.joining("\n", "快递单号已收货：", ""));
+            AssertUtil.isTrue(CollectionUtils.isEmpty(inboundTrackings), errorMsg2);
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int updateTrackingNo(UpdateTrackingNoRequest updateTrackingNoRequest) {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         AssertUtil.notNull(loginUser, "获取用户信息失败");
         String sellerCode = loginUser.getSellerCode();
+        String warehouseNo = updateTrackingNoRequest.getWarehouseNo();
+        List<String> deliveryNoList = updateTrackingNoRequest.getDeliveryNoList();
         InboundReceipt inboundReceipt = baseMapper.selectOne(Wrappers.<InboundReceipt>lambdaQuery()
-                .eq(InboundReceipt::getWarehouseNo, updateTrackingNoRequest.getWarehouseNo())
+                .eq(InboundReceipt::getWarehouseNo, warehouseNo)
                 .eq(InboundReceipt::getCusCode, sellerCode));
         AssertUtil.isTrue(inboundReceipt != null, "入库单不存在!");
+        this.checkDeliveryNoRepeat(inboundReceipt.getId(), warehouseNo, deliveryNoList);
         AssertUtil.isTrue(!inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()), "入库单已取消!");
         AssertUtil.isTrue(!inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.COMPLETED.getValue()), "入库单已完成!");
-        int update = baseMapper.update(new InboundReceipt(), Wrappers.<InboundReceipt>lambdaUpdate().set(InboundReceipt::getDeliveryNo, updateTrackingNoRequest.getDeliveryNo()));
+        int update = baseMapper.update(new InboundReceipt(), Wrappers.<InboundReceipt>lambdaUpdate()
+                .eq(InboundReceipt::getWarehouseNo, warehouseNo)
+                .set(InboundReceipt::getDeliveryNo, updateTrackingNoRequest.getDeliveryNo()));
+        AssertUtil.isTrue(update == 1, "更新异常");
         log.info("更新运单信息-{} -{}条", updateTrackingNoRequest, update);
         remoteComponent.createTracking(updateTrackingNoRequest, inboundReceipt);
         return update;

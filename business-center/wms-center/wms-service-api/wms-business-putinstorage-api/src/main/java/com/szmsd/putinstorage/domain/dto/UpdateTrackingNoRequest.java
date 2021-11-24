@@ -2,15 +2,14 @@ package com.szmsd.putinstorage.domain.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.utils.StringToolkit;
+import com.szmsd.common.core.utils.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,18 +27,21 @@ public class UpdateTrackingNoRequest {
     @ApiModelProperty(value = "入库单号 (0-30]", required = true)
     private String warehouseNo;
 
-    @NotBlank(message = "送货单号不能为空")
+//    @NotBlank(message = "送货单号不能为空")
     @ApiModelProperty(value = "送货单号 可支持多个[,]拼接", required = true)
     private String deliveryNo;
 
     public UpdateTrackingNoRequest setDeliveryNo(String deliveryNo) {
-        this.deliveryNo = deliveryNo;
+        if (StringUtils.isBlank(deliveryNo)) {
+            return this;
+        }
         this.deliveryNoList = Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>()).stream().distinct().collect(Collectors.toList());
+        this.deliveryNo = String.join(",", deliveryNoList);
         return this;
     }
 
     @ApiModelProperty(value = "送货单号-多个", hidden = true)
-    private List<String> deliveryNoList;
+    private List<String> deliveryNoList = new ArrayList<>();
 
     @Override
     public String toString() {

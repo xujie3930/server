@@ -135,7 +135,6 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:receipt:create')")
     @PostMapping("/updateTrackingNo")
     @ApiOperation(value = "修改快递单号信息", notes = "修改快递单号信息 已完成/已取消的订单不能处理")
-    @InboundReceiptLog(record = InboundReceiptRecordEnum.CREATE)
     public R<Integer> updateTrackingNo(@Validated @RequestBody UpdateTrackingNoRequest updateTrackingNoRequest) {
         return R.ok(iInboundReceiptService.updateTrackingNo(updateTrackingNoRequest));
     }

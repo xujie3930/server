@@ -332,22 +332,27 @@ public class RemoteComponent {
         if (CollectionUtils.isEmpty(createInboundReceiptDTO.getInboundReceiptDetails())) return;
         CreateTrackRequest createTrackRequest = new CreateTrackRequest();
         createTrackRequest.setWarehouseCode(createInboundReceiptDTO.getWarehouseCode())
-                .setRefOrderNo(createInboundReceiptDTO.getOrderNo())
+                .setRefOrderNo(createInboundReceiptDTO.getWarehouseNo())
                 .setTrackingNumberList(createInboundReceiptDTO.getDeliveryNoList());
         log.info("创建入库单物流信息列表 {}", createTrackRequest);
         R<ResponseVO> tracking = htpInboundFeignService.createTracking(createTrackRequest);
         AssertUtil.isTrue(tracking.getCode() == HttpStatus.SUCCESS, tracking.getMsg());
-
+        if (tracking.getCode() == HttpStatus.SUCCESS && tracking.getData() != null && !tracking.getData().getSuccess()) {
+            throw new RuntimeException("创建入库单物流信息失败Remote:【" + tracking.getData().getMessage() + "】");
+        }
     }
 
     public void createTracking(UpdateTrackingNoRequest updateTrackingNoRequest, InboundReceipt inboundReceipt) {
         // 创建入库单物流信息列表
         CreateTrackRequest createTrackRequest = new CreateTrackRequest();
         createTrackRequest.setWarehouseCode(inboundReceipt.getWarehouseCode())
-                .setRefOrderNo(inboundReceipt.getOrderNo())
+                .setRefOrderNo(inboundReceipt.getWarehouseNo())
                 .setTrackingNumberList(updateTrackingNoRequest.getDeliveryNoList());
         log.info("更新入库单物流信息列表 {}", createTrackRequest);
         R<ResponseVO> tracking = htpInboundFeignService.createTracking(createTrackRequest);
         AssertUtil.isTrue(tracking.getCode() == HttpStatus.SUCCESS, tracking.getMsg());
+        if (tracking.getCode() == HttpStatus.SUCCESS && tracking.getData() != null && !tracking.getData().getSuccess()) {
+            throw new RuntimeException("创建入库单物流信息失败Remote:【" + tracking.getData().getMessage() + "】");
+        }
     }
 }
