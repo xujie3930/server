@@ -147,8 +147,8 @@ public class BasSeller extends BaseEntity {
     @Excel(name = "实名状态")
     private String realState;
 
-
-
-
+    @ApiModelProperty(value = "折扣用户类型-编码", notes = "主子类别")
+    @Excel(name = "折扣用户类型-编码")
+    private String discountUserType;
 
 }
