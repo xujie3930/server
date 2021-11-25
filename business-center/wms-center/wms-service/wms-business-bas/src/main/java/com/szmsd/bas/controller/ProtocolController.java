@@ -180,6 +180,9 @@ public class ProtocolController {
                 long max = 0;
                 File maxFile = null;
                 for (File listFile : listFiles) {
+                    if (listFile.isDirectory()) {
+                        continue;
+                    }
                     if (max < listFile.lastModified()) {
                         max = listFile.lastModified();
                         maxFile = listFile;
