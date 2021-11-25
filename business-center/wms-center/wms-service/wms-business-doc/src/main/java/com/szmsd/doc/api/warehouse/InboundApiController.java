@@ -316,6 +316,7 @@ public class InboundApiController {
     @Resource
     private DelOutboundFeignService delOutboundFeignService;
 
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping(value = "transport/warehousing")
     @ApiOperation(value = "转运入库-提交")
     public R transportWarehousingSubmit(@Validated @RequestBody TransportWarehousingAddRep transportWarehousingAddRep) {
@@ -390,7 +391,7 @@ public class InboundApiController {
         boolean containsDeliveryWayCode = deliveryWayCodeList.contains(deliveryWayCode);
         AssertUtil400.isTrue(containsDeliveryWayCode, "送货方式不存在");
     }
-
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/page")
     @ApiOperation(value = "入库单管理-列表查询", notes = "入库管理 - 分页查询")
     public TableDataInfo<InboundReceiptResp> postPage(@RequestBody InboundReceiptQueryReq queryDTO) {
@@ -412,7 +413,7 @@ public class InboundApiController {
         return inboundReceiptRespTableDataInfo;
     }
 
-    @PreAuthorize("@ss.hasPermi('inbound:receipt:updateTrackingNo')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/updateTrackingNo")
     @ApiOperation(value = "修改快递单号信息", notes = "修改快递单号信息 已完成/已取消的订单不能处理")
     public R<Integer> updateTrackingNo(@Validated @RequestBody UpdateTrackingNoRequest updateTrackingNoRequest) {
