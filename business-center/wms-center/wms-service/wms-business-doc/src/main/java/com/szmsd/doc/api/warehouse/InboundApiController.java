@@ -417,6 +417,8 @@ public class InboundApiController {
     @PostMapping("/updateTrackingNo")
     @ApiOperation(value = "修改快递单号信息", notes = "修改快递单号信息 已完成/已取消的订单不能处理")
     public R<Integer> updateTrackingNo(@Validated @RequestBody UpdateTrackingNoRequest updateTrackingNoRequest) {
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        AssertUtil400.isTrue(StringUtils.isNotBlank(sellerCode),"用户编码不能为空");
         return inboundReceiptFeignService.updateTracking(updateTrackingNoRequest);
     }
 }
