@@ -70,6 +70,12 @@ public class QueryChargeVO implements Serializable {
 
     @ApiModelProperty(value = "支付类型")
     private String payMethod;
+
+     public void setPayMethod(String payMethod) {
+         this.payMethod = payMethod;
+         this.payMethodName = this.payMethod != null ? BillEnum.PayMethod.valueOf(this.payMethod).getPaymentName() : null;
+     }
+
     @AutoFieldI18n
 //    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "095", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "支付类型名称")
@@ -77,9 +83,5 @@ public class QueryChargeVO implements Serializable {
 
     @ApiModelProperty(value = "费用币别")
     private String currencyCode;
-
-    public String getPayMethodName() {
-        return this.payMethod != null ? BillEnum.PayMethod.valueOf(this.payMethod).getPaymentName() : null;
-    }
 
 }
