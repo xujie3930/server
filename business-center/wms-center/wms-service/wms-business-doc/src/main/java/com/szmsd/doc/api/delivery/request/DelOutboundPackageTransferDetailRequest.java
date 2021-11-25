@@ -45,7 +45,7 @@ public class DelOutboundPackageTransferDetailRequest implements Serializable {
 
     @NotBlank(message = "产品属性不能为空", groups = {DelOutboundGroup.PackageTransfer.class})
     @Size(max = 50, message = "产品属性不能超过50个字符", groups = {DelOutboundGroup.Default.class})
-    @ApiModelProperty(value = "产品属性", dataType = "String")
+    @ApiModelProperty(value = "产品属性", required = true, dataType = "String", example = "GeneralCargo")
     private String productAttribute;
 
     @Size(max = 50, message = "带电信息不能超过50个字符", groups = {DelOutboundGroup.Default.class})
