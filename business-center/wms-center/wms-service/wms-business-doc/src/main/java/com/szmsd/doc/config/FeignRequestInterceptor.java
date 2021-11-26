@@ -47,6 +47,7 @@ public class FeignRequestInterceptor implements RequestInterceptor {
                         break;
                     }
                     template.header(name, value);
+                    log.info("feign转发：{}===={}",name,value);
                 }
             }
         }
