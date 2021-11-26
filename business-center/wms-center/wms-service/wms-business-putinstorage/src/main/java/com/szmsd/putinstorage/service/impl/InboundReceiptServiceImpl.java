@@ -47,8 +47,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -233,9 +235,23 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         }
     }
 
+    @Resource
+    private HttpServletRequest httpServletRequest;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int updateTrackingNo(UpdateTrackingNoRequest updateTrackingNoRequest) {
+
+        Enumeration<String> headerNames = httpServletRequest.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String name = headerNames.nextElement();
+            Enumeration<String> values = httpServletRequest.getHeaders(name);
+            while (values.hasMoreElements()) {
+                String value = values.nextElement();
+                log.info(name + "--" + value);
+            }
+        }
+
         LoginUser loginUser = SecurityUtils.getLoginUser();
         AssertUtil.notNull(loginUser, "获取用户信息失败");
         String sellerCode = loginUser.getSellerCode();

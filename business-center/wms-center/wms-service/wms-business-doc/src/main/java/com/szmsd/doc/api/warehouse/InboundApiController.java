@@ -44,6 +44,7 @@ import com.szmsd.putinstorage.enums.SourceTypeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.BeanUtils;
@@ -52,6 +53,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -62,6 +64,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Validated
 @Api(tags = {"入库信息"})
 @RestController
@@ -391,6 +394,7 @@ public class InboundApiController {
         boolean containsDeliveryWayCode = deliveryWayCodeList.contains(deliveryWayCode);
         AssertUtil400.isTrue(containsDeliveryWayCode, "送货方式不存在");
     }
+
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/page")
     @ApiOperation(value = "入库单管理-列表查询", notes = "入库管理 - 分页查询")
@@ -413,12 +417,24 @@ public class InboundApiController {
         return inboundReceiptRespTableDataInfo;
     }
 
+    @Resource
+    private HttpServletRequest httpServletRequest;
+
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/updateTrackingNo")
     @ApiOperation(value = "修改快递单号信息", notes = "修改快递单号信息 已完成/已取消的订单不能处理")
     public R<Integer> updateTrackingNo(@Validated @RequestBody UpdateTrackingNoRequest updateTrackingNoRequest) {
+        Enumeration<String> headerNames = httpServletRequest.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String name = headerNames.nextElement();
+            Enumeration<String> values = httpServletRequest.getHeaders(name);
+            while (values.hasMoreElements()) {
+                String value = values.nextElement();
+                log.info(name + "---" + value);
+            }
+        }
         String sellerCode = AuthenticationUtil.getSellerCode();
-        AssertUtil400.isTrue(StringUtils.isNotBlank(sellerCode),"用户编码不能为空");
+        AssertUtil400.isTrue(StringUtils.isNotBlank(sellerCode), "用户编码不能为空");
         return inboundReceiptFeignService.updateTracking(updateTrackingNoRequest);
     }
 }
