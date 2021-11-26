@@ -31,6 +31,9 @@ public class UpdateTrackingNoRequest {
     @ApiModelProperty(value = "送货单号 可支持多个[,]拼接", required = true)
     private String deliveryNo;
 
+    @ApiModelProperty(value = "sellerCode", hidden = true)
+    private String sellerCode;
+
     public UpdateTrackingNoRequest setDeliveryNo(String deliveryNo) {
         if (StringUtils.isBlank(deliveryNo)) {
             return this;
