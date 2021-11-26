@@ -435,6 +435,7 @@ public class InboundApiController {
         }
         String sellerCode = AuthenticationUtil.getSellerCode();
         AssertUtil400.isTrue(StringUtils.isNotBlank(sellerCode), "用户编码不能为空");
+        updateTrackingNoRequest.setSellerCode(sellerCode);
         return inboundReceiptFeignService.updateTracking(updateTrackingNoRequest);
     }
 }

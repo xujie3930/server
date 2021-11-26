@@ -252,14 +252,15 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             }
         }
 
-        LoginUser loginUser = SecurityUtils.getLoginUser();
-        AssertUtil.notNull(loginUser, "获取用户信息失败");
-        String sellerCode = loginUser.getSellerCode();
+        String sellerCode = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse(null);
+        String sellerCode1 = updateTrackingNoRequest.getSellerCode();
+        if (StringUtils.isNotBlank(sellerCode1)) sellerCode = sellerCode1;
+
         String warehouseNo = updateTrackingNoRequest.getWarehouseNo();
         List<String> deliveryNoList = updateTrackingNoRequest.getDeliveryNoList();
         InboundReceipt inboundReceipt = baseMapper.selectOne(Wrappers.<InboundReceipt>lambdaQuery()
                 .eq(InboundReceipt::getWarehouseNo, warehouseNo)
-                .eq(InboundReceipt::getCusCode, sellerCode));
+                .eq(StringUtils.isNotBlank(sellerCode), InboundReceipt::getCusCode, sellerCode));
         AssertUtil.isTrue(inboundReceipt != null, "入库单不存在!");
         this.checkDeliveryNoRepeat(inboundReceipt.getId(), warehouseNo, deliveryNoList);
         AssertUtil.isTrue(!inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()), "入库单已取消!");
