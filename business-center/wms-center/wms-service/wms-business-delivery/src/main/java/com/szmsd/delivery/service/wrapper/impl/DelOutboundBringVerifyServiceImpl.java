@@ -519,6 +519,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     @Override
     public void shipmentRule(DelOutbound delOutbound, String shipmentRule) {
         String logMessage;
+        // 判断PRC算费返回的发货规则是否为空，如果是空就那承运商物流编码赋值
+        if (StringUtils.isEmpty(shipmentRule)) {
+            shipmentRule = delOutbound.getShipmentRule();
+        }
         out:
         if (StringUtils.isEmpty(shipmentRule)) {
             logMessage = "发货规则为空";
@@ -816,7 +820,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setOrderType(delOutbound.getOrderType());
         createShipmentRequestDto.setSellerCode(delOutbound.getSellerCode());
         createShipmentRequestDto.setTrackingNo(trackingNo);
-        createShipmentRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+        // 获取从prc返回的发货规则
+        String shipmentRule = delOutboundWrapperContext.getShipmentRule();
+        if (StringUtils.isNotEmpty(shipmentRule)) {
+            createShipmentRequestDto.setShipmentRule(shipmentRule);
+        } else {
+            createShipmentRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+        }
         createShipmentRequestDto.setPackingRule(delOutbound.getPackingRule());
         boolean isBatchSelfPick = false;
         if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
