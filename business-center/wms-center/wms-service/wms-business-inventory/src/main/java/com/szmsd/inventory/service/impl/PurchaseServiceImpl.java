@@ -191,7 +191,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
             String customCode = loginUserInfo.getSellerCode();
             //生成规则 CG + customCode+ yyyyMMdd+6
-            purchaseNo = "CG"+customCode+purchaseNo;
+            purchaseNo = "CG" + customCode + purchaseNo;
             purchaseAddDTO.setCustomCode(customCode);
             purchaseAddDTO.setPurchaseNo(purchaseNo);
         }
@@ -204,7 +204,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
         //插入采购单数据
         List<PurchaseDetailsAddDTO> purchaseDetailsAddList = purchaseAddDTO.getPurchaseDetailsAddList();
-        if (CollectionUtils.isNotEmpty(purchaseDetailsAddList)){
+        if (CollectionUtils.isNotEmpty(purchaseDetailsAddList)) {
             Optional.of(purchaseDetailsAddList).filter(CollectionUtils::isNotEmpty).ifPresent(
                     purchaseDetailList -> {
                         List<PurchaseDetails> entityList = IBOConvert.copyListProperties(purchaseDetailList, PurchaseDetails::new);
@@ -274,7 +274,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                         // 前端没有这个值
                         .setSkuName(addSku.getProductName())
                 ;
-                Optional.ofNullable(collect1.get(addSku.getSku())).filter(CollectionUtils::isNotEmpty).ifPresent(x-> inboundReceiptDetailDTO.setSkuName(x.get(0).getProductName()));
+                Optional.ofNullable(collect1.get(addSku.getSku())).filter(CollectionUtils::isNotEmpty).ifPresent(x -> inboundReceiptDetailDTO.setSkuName(x.get(0).getProductName()));
                 inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
             });
             createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
@@ -370,10 +370,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailDTOS);
         Integer integer = inboundReceiptDetailDTOS.stream().map(InboundReceiptDetailDTO::getDeclareQty).reduce(Integer::sum).orElse(0);
         createInboundReceiptDTO.setTotalDeclareQty(integer);
+        createInboundReceiptDTO.setTransferNoList(transferNoList);
         InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
-
-        //创建WMS入库单
-        remoteRequest.createPackage(inboundReceiptInfoVO, transferNoList);
         return 0;
     }
 }

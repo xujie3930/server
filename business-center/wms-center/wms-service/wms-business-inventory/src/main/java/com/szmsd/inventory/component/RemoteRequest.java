@@ -29,40 +29,6 @@ public class RemoteRequest {
     private HtpInventoryFeignService htpInventoryFeignService;
 
     /**
-     * 调用WMS创建单
-     *
-     * @param inboundReceiptInfoVO
-     */
-    public void createPackage(InboundReceiptInfoVO inboundReceiptInfoVO, List<String> transferNoList) {
-        CreatePackageReceiptRequest createPackageReceiptRequest = new CreatePackageReceiptRequest();
-        ArrayList<ReceiptDetailPackageInfo> receiptDetailPackageInfos = new ArrayList<>();
-
-        String warehouseNo = inboundReceiptInfoVO.getWarehouseNo();
-
-
-        transferNoList.forEach(x->{
-            ReceiptDetailPackageInfo receiptDetailPackageInfo = new ReceiptDetailPackageInfo();
-            //统一传出库单号
-            receiptDetailPackageInfo.setPackageOrderNo(x);
-            receiptDetailPackageInfo.setScanCode(x);
-            receiptDetailPackageInfos.add(receiptDetailPackageInfo);
-        });
-
-
-        createPackageReceiptRequest
-                .setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode())
-                .setRemark(inboundReceiptInfoVO.getRemark())
-                .setOrderType("PackageTransfer")
-                .setSellerCode(inboundReceiptInfoVO.getCusCode())
-                .setRefOrderNo(inboundReceiptInfoVO.getWarehouseNo())
-                .setDetailPackages(receiptDetailPackageInfos)
-        ;
-        log.info("调用WMS创建入库单{}",createPackageReceiptRequest);
-        R<ResponseVO> aPackage = htpInboundFeignService.createPackage(createPackageReceiptRequest);
-        ResponseVO.resultAssert(aPackage, "创建转运入库单");
-    }
-
-    /**
      * 查询WMS库存
      * @return
      */

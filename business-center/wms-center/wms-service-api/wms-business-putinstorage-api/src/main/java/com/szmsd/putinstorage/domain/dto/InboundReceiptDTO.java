@@ -52,7 +52,7 @@ public class InboundReceiptDTO {
     private String warehouseMethodCode;
     @NotBlank(message = "类别编码不能为空")
     @Size(max = 30, message = "类别编码仅支持0-30字符")
-    @ApiModelProperty(value = "类别编码 (0-30]",allowableValues = "SKU,包材",required = true)
+    @ApiModelProperty(value = "类别编码 (0-30]", allowableValues = "SKU,包材", required = true)
     private String warehouseCategoryCode;
     @Size(max = 30, message = "VAT 仅支持 0-30 字符")
     @ApiModelProperty(value = "VAT")
@@ -61,17 +61,17 @@ public class InboundReceiptDTO {
     @Size(max = 30, message = "送货方式编码仅支持0-30字符")
     @ApiModelProperty(value = "送货方式编码 (0-30]", required = true)
     private String deliveryWayCode;
-//    @Size(max = 200, message = "送货单号仅支持0-30字符")
+    //    @Size(max = 200, message = "送货单号仅支持0-30字符")
     @ApiModelProperty(value = "送货单号 可支持多个 送货方式为快递到仓时,送货单号必填")
     private String deliveryNo;
 
     public InboundReceiptDTO setDeliveryNo(String deliveryNo) {
         this.deliveryNo = deliveryNo;
-        this.deliveryNoList =  Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>()).stream().distinct().collect(Collectors.toList());
+        this.deliveryNoList = Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>()).stream().distinct().collect(Collectors.toList());
         return this;
     }
 
-    @ApiModelProperty(value = "送货单号-多个",hidden = true)
+    @ApiModelProperty(value = "送货单号-多个", hidden = true)
     private List<String> deliveryNoList;
     @NotNull(message = "合计申报数量不能为空")
     @Min(value = 0, message = "合计申报数量不能小于0")
@@ -97,6 +97,9 @@ public class InboundReceiptDTO {
     private String status;
     @ApiModelProperty(value = "数据来源")
     private String sourceType;
+    @ApiModelProperty(value = "转运单列表 - 出库单号", required = true, hidden = true)
+    private List<String> transferNoList;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

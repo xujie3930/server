@@ -3,9 +3,7 @@ package com.szmsd.putinstorage.component;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.http.api.feign.HtpInboundFeignService;
-import com.szmsd.http.dto.CancelReceiptRequest;
-import com.szmsd.http.dto.CreateReceiptRequest;
-import com.szmsd.http.dto.ReceiptDetailInfo;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
@@ -14,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +65,40 @@ public class RemoteRequest {
         cancelReceiptRequest.setWarehouseCode(warehouseCode);
         R<ResponseVO> cancel = htpInboundFeignService.cancel(cancelReceiptRequest);
         ResponseVO.resultAssert(cancel, "取消入库单");
+    }
+
+    /**
+     * 调用WMS创建单
+     *
+     * @param inboundReceiptInfoVO
+     */
+    public void createPackage(InboundReceiptInfoVO inboundReceiptInfoVO, List<String> transferNoList) {
+        CreatePackageReceiptRequest createPackageReceiptRequest = new CreatePackageReceiptRequest();
+        ArrayList<ReceiptDetailPackageInfo> receiptDetailPackageInfos = new ArrayList<>();
+
+        String warehouseNo = inboundReceiptInfoVO.getWarehouseNo();
+
+
+        transferNoList.forEach(x->{
+            ReceiptDetailPackageInfo receiptDetailPackageInfo = new ReceiptDetailPackageInfo();
+            //统一传出库单号
+            receiptDetailPackageInfo.setPackageOrderNo(x);
+            receiptDetailPackageInfo.setScanCode(x);
+            receiptDetailPackageInfos.add(receiptDetailPackageInfo);
+        });
+
+
+        createPackageReceiptRequest
+                .setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode())
+                .setRemark(inboundReceiptInfoVO.getRemark())
+                .setOrderType("PackageTransfer")
+                .setSellerCode(inboundReceiptInfoVO.getCusCode())
+                .setRefOrderNo(inboundReceiptInfoVO.getWarehouseNo())
+                .setDetailPackages(receiptDetailPackageInfos)
+        ;
+        log.info("调用WMS创建入库单{}",createPackageReceiptRequest);
+        R<ResponseVO> aPackage = htpInboundFeignService.createPackage(createPackageReceiptRequest);
+        ResponseVO.resultAssert(aPackage, "创建转运入库单");
     }
 
 }
