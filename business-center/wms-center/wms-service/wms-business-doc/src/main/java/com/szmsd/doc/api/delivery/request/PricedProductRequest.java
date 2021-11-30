@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Data
 @ApiModel(value = "PricedProductRequest", description = "PricedProductRequest对象")
-@NotAnyNull(fields = {"skus", "productAttributes"}, message = "SKU，产品属性信息必须其中一个有值")
+// @NotAnyNull(fields = {"skus", "productAttributes"}, message = "SKU，产品属性信息必须其中一个有值")
 public class PricedProductRequest implements Serializable {
 
     /*@NotBlank(message = "客户代码不能为空")
