@@ -2,24 +2,41 @@ package com.szmsd.chargerules.controller;
 
 import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
+import com.szmsd.chargerules.dto.OperationQueryDTO;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
+import com.szmsd.chargerules.enums.OperationConstant;
+import com.szmsd.chargerules.service.IChaOperationService;
 import com.szmsd.chargerules.service.IOperationService;
+import com.szmsd.chargerules.vo.ChaOperationListVO;
+import com.szmsd.chargerules.vo.ChaOperationVO;
+import com.szmsd.chargerules.vo.OperationVo;
 import com.szmsd.chargerules.vo.OrderTypeLabelVo;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.models.auth.In;
+import jdk.jfr.StackTrace;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.Stack;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Api(tags = {"业务计费规则"})
@@ -29,49 +46,80 @@ public class OperationController extends BaseController {
 
     @Resource
     private IOperationService operationService;
+    @Resource
+    private IChaOperationService iChaOperationService;
+    @Resource
+    private RedissonClient redissonClient;
+
+    private String genKey() {
+        String lockKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        String className = Thread.currentThread().getStackTrace()[2].getClassName();
+        String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
+        return className + methodName + "#" + lockKey;
+    }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:add')")
     @ApiOperation(value = "业务计费逻辑 - 保存")
     @PostMapping("/save")
-    public R save(@RequestBody OperationDTO dto) {
-        int save = 0;
+    public R<Integer> save(@Valid @RequestBody OperationDTO dto) {
+        RLock lock = redissonClient.getLock(genKey());
         try {
-            save = operationService.save(dto);
-        } catch (DuplicateKeyException e) {
-            log.error(e.getMessage(), e);
-            return R.failed("操作类型+仓库+是否多SKU不能重复");
+            if (lock.tryLock(OperationConstant.LOCK_TIME, OperationConstant.LOCK_TIME_UNIT)) {
+                return R.ok(iChaOperationService.save(dto));
+            } else {
+                return R.failed("请求超时");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("请求失败");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
-        return toOk(save);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:edit')")
     @ApiOperation(value = "业务计费逻辑 - 修改")
     @PutMapping("/update")
-    public R update(@RequestBody Operation dto) {
-        return toOk(operationService.update(dto));
+    public R<Integer> update(@RequestBody OperationDTO dto) {
+        RLock lock = redissonClient.getLock(genKey());
+        try {
+            if (lock.tryLock(OperationConstant.LOCK_TIME, OperationConstant.LOCK_TIME_UNIT)) {
+                return R.ok(iChaOperationService.update(dto));
+            } else {
+                return R.failed("请求超时");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("请求失败");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:edit')")
     @ApiOperation(value = "业务计费逻辑 - 删除")
     @DeleteMapping("/deleteById/{id}")
-    public R deleteById(@PathVariable("id") Integer id) {
-        return toOk(operationService.deleteById(id));
+    public R<Integer> deleteById(@PathVariable("id") Integer id) {
+        return R.ok(iChaOperationService.deleteById(id));
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:list')")
     @ApiOperation(value = "业务计费逻辑 - 分页查询")
-    @GetMapping("/list")
-    public TableDataInfo<Operation> listPage(OperationDTO dto) throws InvocationTargetException, IllegalAccessException {
+    @PostMapping("/list")
+    public TableDataInfo<ChaOperationListVO> listPage(@RequestBody OperationQueryDTO dto) {
         startPage();
-        List<Operation> list = operationService.listPage(dto);
-        return getDataTable(list);
+        return getDataTable(iChaOperationService.queryOperationList(dto));
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:details')")
     @ApiOperation(value = "业务计费逻辑 - 详情")
     @GetMapping("/details/{id}")
-    public R<Operation> details(@PathVariable int id) {
-        return R.ok(operationService.details(id));
+    public R<ChaOperationVO> details(@PathVariable("id") Long id) {
+        return R.ok(iChaOperationService.queryDetails(id));
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:queryDetails')")
@@ -94,7 +142,7 @@ public class OperationController extends BaseController {
     @ApiOperation(value = "业务计费 - 出库冻结余额")
     @PostMapping("/delOutboundFreeze")
     public R delOutboundFreeze(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        log.info("请求---------------------------- {}",delOutboundVO);
+        log.info("请求---------------------------- {}", delOutboundVO);
         return operationService.delOutboundFreeze(delOutboundVO);
     }
 
