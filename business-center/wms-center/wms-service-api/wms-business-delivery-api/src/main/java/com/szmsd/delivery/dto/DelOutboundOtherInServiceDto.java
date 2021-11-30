@@ -16,7 +16,7 @@ import java.util.List;
 @ApiModel(value = "DelOutboundOtherInServiceDto", description = "DelOutboundOtherInServiceDto对象")
 public class DelOutboundOtherInServiceDto implements Serializable {
 
-    @NotBlank(message = "客户代码不能为空")
+    // @NotBlank(message = "客户代码不能为空")
     @ApiModelProperty(value = "客户代码")
     private String clientCode;
 
