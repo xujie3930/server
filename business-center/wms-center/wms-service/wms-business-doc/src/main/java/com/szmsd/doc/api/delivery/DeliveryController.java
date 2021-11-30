@@ -84,16 +84,16 @@ public class DeliveryController {
     @ApiOperation(value = "#1.1 出库管理 - 物流服务列表", position = 100, notes = "接口描述")
     @ApiImplicitParam(name = "request", value = "请求参数", dataType = "PricedProductRequest", required = true)
     public R<List<PricedProductResponse>> pricedProduct(@RequestBody @Validated PricedProductRequest request) {
-        if (CollectionUtils.isEmpty(request.getSkus()) && CollectionUtils.isEmpty(request.getProductAttributes())) {
+        /*if (CollectionUtils.isEmpty(request.getSkus()) && CollectionUtils.isEmpty(request.getProductAttributes())) {
             throw new CommonException("400", "SKU，产品属性信息不能全部为空");
         }
         // 验证国家是否存在
         if (StringUtils.isNotEmpty(request.getCountryCode()) && null == CountryCache.getCountry(request.getCountryCode())) {
             throw new CommonException("400", "国家编码不存在");
-        }
-        String sellerCode = AuthenticationUtil.getSellerCode();
+        }*/
+        // String sellerCode = AuthenticationUtil.getSellerCode();
         DelOutboundOtherInServiceDto dto = BeanMapperUtil.map(request, DelOutboundOtherInServiceDto.class);
-        dto.setClientCode(sellerCode);
+        // dto.setClientCode(sellerCode);
         List<PricedProduct> productList = this.delOutboundClientService.inService(dto);
         if (CollectionUtils.isEmpty(productList)) {
             return R.ok();
