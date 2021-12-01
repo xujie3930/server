@@ -98,16 +98,12 @@ public class OperationDTO implements Serializable {
                 int indexThis = index2.getAndIncrement();
                 BigDecimal minimumWeight = x.getMinimumWeight();
                 BigDecimal maximumWeight = x.getMaximumWeight();
-                AssertUtil.isTrue(minimumWeight.compareTo(maximumWeight) <= 0, String.format("第%s条规则中%s不能大于%s", indexThis, maximumWeight, minimumWeight));
+                AssertUtil.isTrue(minimumWeight.compareTo(maximumWeight) <= 0, String.format("第%s条规则中%s不能小于%s", indexThis, "最大重量", "最小重量"));
             }).sorted(Comparator.comparing(ChaOperationDetailsDTO::getFirstPrice)).reduce((x1, x2) -> {
                 int indexThis = index.getAndIncrement();
-                BigDecimal minimumWeight = x1.getMinimumWeight();
-                BigDecimal maximumWeight = x1.getMaximumWeight();
-                // 最大值不能小于最小值 且与下一个值不能相交
-                AssertUtil.isTrue(maximumWeight.compareTo(minimumWeight) > 0, String.format("第%s条规则中%s不能小于或等于第%s条中的%s", indexThis, maximumWeight, indexThis + 1, minimumWeight));
                 //判断是否相交
-                BigDecimal maximumWeight2 = x2.getMaximumWeight();
-                AssertUtil.isTrue(maximumWeight2.compareTo(x1.getMaximumWeight()) >= 0, String.format("第%s条规则中%s不能小于第%s条中的%s", indexThis + 1, maximumWeight2, indexThis + 1, maximumWeight));
+                //  max(A.left,B.left)<=min(A.right,B.right)
+                AssertUtil.isTrue(x1.getMaximumWeight().min(x2.getMaximumWeight()).compareTo(x1.getMinimumWeight().max(x2.getMinimumWeight())) <= 0, String.format("第%s条规则与第%s条规则冲突", indexThis, indexThis + 1));
                 return x2;
             }).isPresent();
             // 转运/批量出库单-装箱费/批量出库单-贴标费 同一个仓库 只能存在一条配置

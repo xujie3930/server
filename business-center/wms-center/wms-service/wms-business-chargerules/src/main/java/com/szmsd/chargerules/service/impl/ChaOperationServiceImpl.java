@@ -2,35 +2,26 @@ package com.szmsd.chargerules.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.chargerules.domain.ChaOperation;
-import com.szmsd.chargerules.domain.ChaOperationDetails;
-import com.szmsd.chargerules.domain.Operation;
-import com.szmsd.chargerules.dto.ChaOperationDetailsDTO;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.dto.OperationQueryDTO;
-import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.mapper.ChaOperationMapper;
 import com.szmsd.chargerules.service.IChaOperationDetailsService;
 import com.szmsd.chargerules.service.IChaOperationService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.chargerules.vo.ChaOperationDetailsVO;
 import com.szmsd.chargerules.vo.ChaOperationListVO;
 import com.szmsd.chargerules.vo.ChaOperationVO;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import org.apache.commons.beanutils.BeanUtilsBean;
+import com.szmsd.common.core.utils.StringUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -125,7 +116,16 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
 
     @Override
     public List<ChaOperationListVO> queryOperationList(OperationQueryDTO queryDTO) {
-        LambdaQueryWrapper<Object> queryWrapper = Wrappers.lambdaQuery();
+        LambdaQueryWrapper<ChaOperation> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper
+                .le(queryDTO.getEffectiveTime() != null && queryDTO.getExpirationTime() != null, ChaOperation::getExpirationTime, queryDTO.getExpirationTime())
+                .ge(queryDTO.getEffectiveTime() != null && queryDTO.getExpirationTime() != null, ChaOperation::getEffectiveTime, queryDTO.getEffectiveTime())
+                .eq(StringUtils.isNotBlank(queryDTO.getCurrencyCode()), ChaOperation::getCurrencyCode, queryDTO.getCurrencyCode())
+                .eq(StringUtils.isNotBlank(queryDTO.getOperationType()), ChaOperation::getOperationType, queryDTO.getOperationType())
+                .eq(StringUtils.isNotBlank(queryDTO.getOrderType()), ChaOperation::getOrderType, queryDTO.getOrderType())
+                .eq(StringUtils.isNotBlank(queryDTO.getWarehouseCode()), ChaOperation::getWarehouseCode, queryDTO.getWarehouseCode())
+                .eq(StringUtils.isNotBlank(queryDTO.getCusTypeCode()), ChaOperation::getCusTypeCode, queryDTO.getCusTypeCode())
+                .apply(StringUtils.isNotBlank(queryDTO.getCusCode()), "CONCAT(',',cus_code_list,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))", queryDTO.getCusCode());
         return baseMapper.queryOperationList(queryWrapper);
     }
 

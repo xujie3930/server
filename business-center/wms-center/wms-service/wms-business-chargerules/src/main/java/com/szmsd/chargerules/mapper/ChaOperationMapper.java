@@ -1,6 +1,8 @@
 package com.szmsd.chargerules.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.szmsd.chargerules.domain.ChaOperation;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.chargerules.vo.ChaOperationListVO;
@@ -18,5 +20,5 @@ import java.util.List;
  */
 public interface ChaOperationMapper extends BaseMapper<ChaOperation> {
 
-    List<ChaOperationListVO> queryOperationList(@Param("ew") LambdaQueryWrapper<Object> queryWrapper);
+    List<ChaOperationListVO> queryOperationList(@Param(Constants.WRAPPER) LambdaQueryWrapper<ChaOperation> queryWrapper);
 }
