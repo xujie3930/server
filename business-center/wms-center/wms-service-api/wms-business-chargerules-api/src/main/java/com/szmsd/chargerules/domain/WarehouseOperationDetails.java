@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -43,5 +44,8 @@ public class WarehouseOperationDetails extends BaseEntity {
     @ApiModelProperty(value = "修改人")
     private String updateBy;
 
+    @ApiModelProperty(value = "折扣率")
+    @Excel(name = "折扣率")
+    private BigDecimal discountRate;
 
 }
