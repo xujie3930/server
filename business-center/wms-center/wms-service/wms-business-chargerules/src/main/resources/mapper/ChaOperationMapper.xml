@@ -32,7 +32,7 @@
             id, create_by, update_by, operation_type, operation_type_name, warehouse_code, order_type, cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time
     </sql>
     <sql id="ChaOperationListVO">
-        remark,id,operation_type, operation_type_name, warehouse_code, order_type, cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time
+        remark,id,operation_type, operation_type_name, warehouse_code, order_type, cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time,currency_code
     </sql>
     <select id="queryOperationList" resultType="com.szmsd.chargerules.vo.ChaOperationListVO">
         SELECT

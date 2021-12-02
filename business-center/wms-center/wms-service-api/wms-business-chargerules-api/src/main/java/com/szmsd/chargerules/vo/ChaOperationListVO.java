@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.szmsd.bas.plugin.BasSubCodeCommonParameter;
 import com.szmsd.bas.plugin.BasSubCommonPlugin;
 import com.szmsd.bas.plugin.BasSubValueCommonParameter;
 import com.szmsd.chargerules.enums.OrderTypeEnum;
@@ -45,7 +46,6 @@ public class ChaOperationListVO implements Serializable {
     @ApiModelProperty(value = "操作类型名称")
     private String operationTypeName;
 
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.HOME_DOCUMENT_TYPE)
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
@@ -60,14 +60,14 @@ public class ChaOperationListVO implements Serializable {
     @ApiModelProperty(value = "订单类型")
     private String orderTypeName;
 
-    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "096", cp = BasSubValueCommonParameter.class)
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, nameField = "currencyName", code = "008", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "币种编码")
     private String currencyCode;
 
     @ApiModelProperty(value = "币种名称")
     private String currencyName;
 
-    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "098", nameField = "cusTypeCodeName", cp = BasSubValueCommonParameter.class)
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "098", nameField = "cusTypeCodeName", cp = BasSubCodeCommonParameter.class)
     @ApiModelProperty(value = "客户类型编码")
     @Excel(name = "客户类型编码")
     private String cusTypeCode;

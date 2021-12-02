@@ -6,6 +6,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.plugin.interfaces.CacheContext;
 import com.szmsd.common.plugin.interfaces.CommonPlugin;
 import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.util.Map;
  * @author zhangyuyuan
  * @date 2021-03-29 11:26
  */
+@Slf4j
 @Component
 public class BasSubCommonPlugin implements CommonPlugin {
     public static final String SUPPORTS = "BasSub";
@@ -54,6 +56,8 @@ public class BasSubCommonPlugin implements CommonPlugin {
                         }
                     }
                 }
+            } else {
+                log.info("加载语言失败：{}", r.getMsg());
             }
         }
         return map;
