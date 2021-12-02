@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(description = "OperationQueryDTO")
-public class OperationQueryDTO implements Serializable {
+public class OperationQueryDTO extends QueryDto implements Serializable {
 
     @ApiModelProperty(value = "仓库")
     private String warehouseCode;
@@ -39,7 +40,7 @@ public class OperationQueryDTO implements Serializable {
     private String cusTypeCode;
 
     @ApiModelProperty(value = "客户编码")
-    private String cusCode;
+    private String cusCodeList;
 
     @ApiModelProperty(value = "生效时间")
     private LocalDateTime effectiveTime;

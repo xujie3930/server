@@ -15,6 +15,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,8 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
     @Override
     public int save(WarehouseOperationDTO dto) {
         if (!checkWarehouse(dto)) {
-            WarehouseOperation domain = BeanMapperUtil.map(dto, WarehouseOperation.class);
+            WarehouseOperation domain = new WarehouseOperation();
+            BeanUtils.copyProperties(dto,domain);
             AssertUtil.notEmpty(dto.getDetails(), "详情必填");
             warehouseOperationMapper.insert(domain);
             long count = dto.getDetails().stream().map(value -> value.setWarehouseOperationId(domain.getId())).filter(value -> !Pattern.matches(REGEX, value.getChargeDays())).count();

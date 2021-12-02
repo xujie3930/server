@@ -88,11 +88,16 @@ public class OperationDTO implements Serializable {
     private List<ChaOperationDetailsDTO> chaOperationDetailList;
 
     public boolean verifyData() {
+        AssertUtil.isTrue(effectiveTime.compareTo(expirationTime) <= 0, "生效时间不能大于等于失效时间");
         if (CollectionUtils.isNotEmpty(chaOperationDetailList)) {
-            AssertUtil.isTrue(effectiveTime.compareTo(expirationTime) <= 0, "生效时间不能大于等于失效时间");
+            // 转运/批量出库单-装箱费/批量出库单-贴标费 同一个仓库 只能存在一条配置
+            if (DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode().equals(operationType)
+                    || DelOutboundOrderEnum.BATCH_PACKING.getCode().equals(operationType)
+                    || DelOutboundOrderEnum.BATCH_LABEL.getCode().equals(operationType)) {
+                AssertUtil.isTrue(chaOperationDetailList.size() == 0, operationTypeName + "只能配置一条规则数据");
+            }
             AtomicInteger index = new AtomicInteger(1);
             AtomicInteger index2 = new AtomicInteger(1);
-
             //校验区间是否冲突
             boolean present = chaOperationDetailList.stream().peek(x -> {
                 int indexThis = index2.getAndIncrement();
@@ -103,15 +108,10 @@ public class OperationDTO implements Serializable {
                 int indexThis = index.getAndIncrement();
                 //判断是否相交
                 //  max(A.left,B.left)<=min(A.right,B.right)
-                AssertUtil.isTrue(x1.getMaximumWeight().min(x2.getMaximumWeight()).compareTo(x1.getMinimumWeight().max(x2.getMinimumWeight())) <= 0, String.format("第%s条规则与第%s条规则冲突", indexThis, indexThis + 1));
+                AssertUtil.isTrue(x1.getMaximumWeight().min(x2.getMaximumWeight()).compareTo(x1.getMinimumWeight().max(x2.getMinimumWeight())) < 0, String.format("第%s条规则与第%s条规则冲突", indexThis, indexThis + 1));
                 return x2;
             }).isPresent();
-            // 转运/批量出库单-装箱费/批量出库单-贴标费 同一个仓库 只能存在一条配置
-            if (DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode().equals(operationType)
-                    || DelOutboundOrderEnum.BATCH_PACKING.getCode().equals(operationType)
-                    || DelOutboundOrderEnum.BATCH_LABEL.getCode().equals(operationType)) {
-                AssertUtil.isTrue(chaOperationDetailList.size() == 0, operationTypeName + "只能配置一条规则数据");
-            }
+
         }
         return true;
     }

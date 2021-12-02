@@ -72,21 +72,21 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
         if (Objects.nonNull(id)) {
             operations = operations.stream().filter(x -> x.getId().compareTo(id) != 0).collect(Collectors.toList());
         }
-        //A.right< B.left|| A.left> B.right
         // max(A.left,B.left)<=min(A.right,B.right) 重复
         // 判断生效时间是否冲突 既相交
         LocalDateTime effectiveTime = dto.getEffectiveTime();
         LocalDateTime expirationTime = dto.getExpirationTime();
-        boolean present = false;
+
         if (CollectionUtils.isNotEmpty(operations)) {
-            present = operations.parallelStream()
+            boolean   present = operations.parallelStream()
                     .anyMatch(x -> {
                         LocalDateTime max = effectiveTime.compareTo(x.getEffectiveTime()) >= 0 ? effectiveTime : x.getEffectiveTime();
                         LocalDateTime min = expirationTime.compareTo(x.getExpirationTime()) >= 0 ? expirationTime : x.getExpirationTime();
-                        return max.compareTo(min) >= 0;
+                        return max.compareTo(min) <= 0;
                     });
+            AssertUtil.isTrue(!present, "已存在相同配置的费用规则");
         }
-        AssertUtil.isTrue(!present, "已存在相同配置的费用规则");
+
     }
 
     @Override
@@ -125,7 +125,7 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
                 .eq(StringUtils.isNotBlank(queryDTO.getOrderType()), ChaOperation::getOrderType, queryDTO.getOrderType())
                 .eq(StringUtils.isNotBlank(queryDTO.getWarehouseCode()), ChaOperation::getWarehouseCode, queryDTO.getWarehouseCode())
                 .eq(StringUtils.isNotBlank(queryDTO.getCusTypeCode()), ChaOperation::getCusTypeCode, queryDTO.getCusTypeCode())
-                .apply(StringUtils.isNotBlank(queryDTO.getCusCode()), "CONCAT(',',cus_code_list,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))", queryDTO.getCusCode());
+                .apply(StringUtils.isNotBlank(queryDTO.getCusCodeList()), "CONCAT(',',cus_code_list,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))", queryDTO.getCusCodeList());
         return baseMapper.queryOperationList(queryWrapper);
     }
 

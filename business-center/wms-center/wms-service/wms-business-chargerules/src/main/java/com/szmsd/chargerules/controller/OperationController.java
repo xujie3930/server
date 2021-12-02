@@ -104,7 +104,7 @@ public class OperationController extends BaseController {
     @PostMapping("/list")
     @AutoValue
     public TableDataInfo<ChaOperationListVO> listPage(@RequestBody OperationQueryDTO dto) {
-        startPage();
+        startPage(dto);
         return getDataTable(iChaOperationService.queryOperationList(dto));
     }
 

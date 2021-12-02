@@ -39,7 +39,7 @@ public class ChaOperationDetailsServiceImpl extends ServiceImpl<ChaOperationDeta
             baseMapper.delete(Wrappers.<ChaOperationDetails>lambdaUpdate().eq(ChaOperationDetails::getOperationId, operationId));
         } else {
             List<Long> deleteIdList = chaOperationDetailList.stream().map(ChaOperationDetailsDTO::getId).collect(Collectors.toList());
-            baseMapper.delete(Wrappers.<ChaOperationDetails>lambdaUpdate().eq(ChaOperationDetails::getOperationId, operationId).notIn(ChaOperationDetails::getId, deleteIdList));
+            baseMapper.delete(Wrappers.<ChaOperationDetails>lambdaUpdate().eq(ChaOperationDetails::getOperationId, operationId).notIn(CollectionUtils.isNotEmpty(deleteIdList),ChaOperationDetails::getId, deleteIdList));
             List<ChaOperationDetails> detailsList = chaOperationDetailList.stream().map(x -> {
                 ChaOperationDetails chaOperationDetails = new ChaOperationDetails();
                 BeanUtils.copyProperties(x, chaOperationDetails);
