@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.chargerules.domain.WarehouseOperationDetails;
 import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModel;
@@ -41,11 +42,11 @@ public class WarehouseOperationDTO implements Serializable {
     @ApiModelProperty(value = "客户编码 CNI1,CNI2")
     @Excel(name = "客户编码 CNI1,CNI2")
     private String cusCodeList;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "生效时间")
     @Excel(name = "生效时间")
     private LocalDateTime effectiveTime;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "失效时间")
     @Excel(name = "失效时间")
     private LocalDateTime expirationTime;

@@ -13,6 +13,7 @@ import com.szmsd.chargerules.vo.OrderTypeLabelVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
@@ -101,6 +102,7 @@ public class OperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('Operation:Operation:list')")
     @ApiOperation(value = "业务计费逻辑 - 分页查询")
     @PostMapping("/list")
+    @AutoValue
     public TableDataInfo<ChaOperationListVO> listPage(@RequestBody OperationQueryDTO dto) {
         startPage();
         return getDataTable(iChaOperationService.queryOperationList(dto));
@@ -109,6 +111,7 @@ public class OperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('Operation:Operation:details')")
     @ApiOperation(value = "业务计费逻辑 - 详情")
     @GetMapping("/details/{id}")
+    @AutoValue
     public R<ChaOperationVO> details(@PathVariable("id") Long id) {
         return R.ok(iChaOperationService.queryDetails(id));
     }

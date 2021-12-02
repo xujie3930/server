@@ -1,9 +1,13 @@
 package com.szmsd.chargerules.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -24,10 +28,10 @@ public class ChaOperationVO implements Serializable {
 
     @ApiModelProperty(value = "ID")
     private Long id;
-    @NotBlank
+    @AutoFieldValue(supports=BasSubCommonPlugin.SUPPORTS, code = "096", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "仓库", required = true)
     private String warehouseCode;
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+
     @ApiModelProperty(value = "仓库名称")
     private String warehouseName;
     @NotBlank

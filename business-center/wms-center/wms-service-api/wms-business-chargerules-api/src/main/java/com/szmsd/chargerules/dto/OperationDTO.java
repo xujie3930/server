@@ -47,7 +47,7 @@ public class OperationDTO implements Serializable {
     @NotBlank
     @ApiModelProperty(value = "币种名称", required = true)
     private String currencyName;
-    @NotBlank
+
     @ApiModelProperty(value = "客户类型编码", required = true)
     @Excel(name = "客户类型编码")
     private String cusTypeCode;

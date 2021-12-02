@@ -15,7 +15,7 @@
 
     <select id="listPage" resultMap="WarehouseOperationMap"
             parameterType="com.szmsd.chargerules.dto.WarehouseOperationDTO">
-        SELECT id,create_time,warehouse_code,remark,currency_code,currency_name FROM `cha_warehouse_operation`
+        SELECT id,create_time,warehouse_code,remark,currency_code,currency_name,cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time FROM `cha_warehouse_operation`
         <where>
             <if test="warehouseCode != null and warehouseCode != ''">
                 AND warehouse_code = #{warehouseCode}
@@ -36,7 +36,7 @@
     </select>
 
     <select id="selectDetailsById" resultMap="WarehouseOperationMap" parameterType="Integer">
-        SELECT id,create_time,warehouse_code,remark,currency_code,currency_name FROM `cha_warehouse_operation`
+        SELECT id,create_time,warehouse_code,remark,currency_code,currency_name,cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time FROM `cha_warehouse_operation`
         <where>
             id = #{id}
         </where>

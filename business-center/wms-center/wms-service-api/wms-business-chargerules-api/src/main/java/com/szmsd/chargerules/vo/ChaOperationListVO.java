@@ -1,9 +1,17 @@
 package com.szmsd.chargerules.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
+import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
+import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
+import com.szmsd.common.plugin.interfaces.DefaultCommonParameter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -23,31 +31,50 @@ public class ChaOperationListVO implements Serializable {
 
     @ApiModelProperty(value = "ID")
     private Long id;
-    @NotBlank
-    @ApiModelProperty(value = "仓库", required = true)
+
+    @AutoFieldValue(supports = "BasWarehouse", cp = DefaultCommonParameter.class, nameField = "warehouseName")
+    @ApiModelProperty(value = "仓库")
     private String warehouseCode;
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+
     @ApiModelProperty(value = "仓库名称")
     private String warehouseName;
-    @NotBlank
-    @ApiModelProperty(value = "操作类型", required = true)
+
+    @ApiModelProperty(value = "操作类型")
     private String operationType;
-    @NotBlank
-    @ApiModelProperty(value = "操作类型名称", required = true)
+
+    @ApiModelProperty(value = "操作类型名称")
     private String operationTypeName;
-    @NotBlank
-    @ApiModelProperty(value = "订单类型", required = true)
+
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.HOME_DOCUMENT_TYPE)
+    @ApiModelProperty(value = "订单类型")
     private String orderType;
-    @NotBlank
-    @ApiModelProperty(value = "币种编码", required = true)
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
+        if (StringUtils.isNotBlank(orderType)) {
+            this.orderTypeName = OrderTypeEnum.get(orderType);
+        }
+    }
+
+    @AutoFieldI18n
+    @ApiModelProperty(value = "订单类型")
+    private String orderTypeName;
+
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "096", cp = BasSubValueCommonParameter.class)
+    @ApiModelProperty(value = "币种编码")
     private String currencyCode;
-    @NotBlank
-    @ApiModelProperty(value = "币种名称", required = true)
+
+    @ApiModelProperty(value = "币种名称")
     private String currencyName;
-    @NotBlank
-    @ApiModelProperty(value = "客户类型编码", required = true)
+
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "098", nameField = "cusTypeCodeName", cp = BasSubValueCommonParameter.class)
+    @ApiModelProperty(value = "客户类型编码")
     @Excel(name = "客户类型编码")
     private String cusTypeCode;
+
+    @ApiModelProperty(value = "客户类型编码")
+    @Excel(name = "客户类型编码")
+    private String cusTypeCodeName;
 
     @ApiModelProperty(value = "客户名称 A,B")
     @Excel(name = "客户名称 A,B")
