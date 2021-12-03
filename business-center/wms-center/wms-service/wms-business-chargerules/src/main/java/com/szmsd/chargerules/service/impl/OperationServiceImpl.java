@@ -260,7 +260,7 @@ public class OperationServiceImpl implements IOperationService {
         LocalDateTime now = LocalDateTime.now();
         operationQueryDTO.setCusCodeList(dto.getCustomCode())
                 .setWarehouseCode(dto.getWarehouseCode())
-                .setOperationType(orderTypeEnum.name()).setOrderType(dto.getOrderType())
+                .setOperationType(dto.getOrderType()).setOrderType(orderTypeEnum.name())
                 .setEffectiveTime(now);
         ChaOperationVO chaOperationVO = iChaOperationService.queryOperationDetailByRule(operationQueryDTO);
         AssertUtil.notNull(chaOperationVO, message);
