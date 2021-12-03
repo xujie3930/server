@@ -1,6 +1,7 @@
 package com.szmsd.doc.api.sku.request;
 
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.doc.api.SwaggerDictionary;
 import com.szmsd.putinstorage.enums.SourceTypeEnum;
 import io.swagger.annotations.ApiModel;
@@ -33,8 +34,19 @@ public class BaseProductRequest {
     private String productName;
     @ApiModelProperty(value = "产品编码")
     @Size(max = 50)
+    @Pattern(regexp = "^[0-9a-zA-Z/+%$-.\\s?]*$", message = "只允许数字和大小写字母及特殊字符(/+%$-.)及中间空格")
 //    @NotBlank(message = "产品编码不能为空")
     private String code;
+
+    public void setCode(String code) {
+        if (StringUtils.isNotBlank(code)) {
+            this.code = code.trim();
+        } else {
+            this.code = code;
+        }
+
+    }
+
     @DecimalMax(value = "999999", message = "初始重量最大仅支持999999 g")
     @DecimalMin(value = "0.01", message = "初始重量最小仅支持0.01 g")
     @ApiModelProperty(value = "初始重量g", example = "1", required = true)
@@ -138,7 +150,7 @@ public class BaseProductRequest {
     private String bindCodeName;
 
     @NotBlank(message = "物流包装要求不能为空")
-    @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋",required = true)
+    @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋", required = true)
     @Excel(name = "物流包装要求")
     @Size(max = 50, message = "物流包装要求仅支持50字符")
     private String suggestPackingMaterial;
@@ -253,6 +265,6 @@ public class BaseProductRequest {
     private String purpose;
 
     @Size(max = 50)
-    @ApiModelProperty(value = "来源 默认:084001", allowableValues = "084001:正常录入,084002:集运录入",hidden = true)
+    @ApiModelProperty(value = "来源 默认:084001", allowableValues = "084001:正常录入,084002:集运录入", hidden = true)
     private String source = "084001";
 }
