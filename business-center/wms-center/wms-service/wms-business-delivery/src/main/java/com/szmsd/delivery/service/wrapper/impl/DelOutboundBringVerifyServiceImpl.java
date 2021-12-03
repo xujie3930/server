@@ -740,7 +740,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
             shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
         } else {
-            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            String shipmentRule;
+            if (StringUtils.isNotEmpty(delOutbound.getProductShipmentRule())) {
+                shipmentRule = delOutbound.getProductShipmentRule();
+            } else {
+                shipmentRule = delOutbound.getShipmentRule();
+            }
+            shipmentUpdateRequestDto.setShipmentRule(shipmentRule);
         }
         shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
         shipmentUpdateRequestDto.setIsEx(false);
