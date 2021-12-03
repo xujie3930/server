@@ -58,8 +58,7 @@ public class ChaOperationDetailsServiceImpl extends ServiceImpl<ChaOperationDeta
 
     @Override
     public List<ChaOperationDetailsVO> queryDetailByOpeId(Long id) {
-        LambdaQueryWrapper<ChaOperationDetails> queryWrapper = Wrappers.<ChaOperationDetails>lambdaQuery().eq(ChaOperationDetails::getOperationId, id);
-        return baseMapper.queryDetailByOpeId(queryWrapper);
+        return baseMapper.queryDetailByOpeId(id);
     }
 }
 

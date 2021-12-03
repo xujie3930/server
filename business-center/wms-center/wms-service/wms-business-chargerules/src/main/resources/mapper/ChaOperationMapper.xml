@@ -31,6 +31,9 @@
                 remark,
             id, create_by, update_by, operation_type, operation_type_name, warehouse_code, order_type, cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time
     </sql>
+    <sql id="ChaOperationVO">
+        id,remark, operation_type, operation_type_name, warehouse_code, order_type, cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time
+    </sql>
     <sql id="ChaOperationListVO">
         remark,id,operation_type, operation_type_name, warehouse_code, order_type, cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time,currency_code
     </sql>
@@ -38,5 +41,18 @@
         SELECT
         <include refid="ChaOperationListVO"/>
         FROM cha_operation ${ew.customSqlSegment}
+    </select>
+    <resultMap id="chaOptVO" type="com.szmsd.chargerules.vo.ChaOperationVO">
+        <id column="id" property="id"/>
+        <collection column="id" property="chaOperationDetailList"
+                    ofType="com.szmsd.chargerules.vo.ChaOperationDetailsVO"/>
+    </resultMap>
+    <select id="queryOperationDetailByRule" resultType="com.szmsd.chargerules.vo.ChaOperationVO">
+        SELECT
+        <include refid="ChaOperationVO"/>
+        FROM cha_operation
+        Left Join
+        <where>
+        </where>
     </select>
 </mapper>

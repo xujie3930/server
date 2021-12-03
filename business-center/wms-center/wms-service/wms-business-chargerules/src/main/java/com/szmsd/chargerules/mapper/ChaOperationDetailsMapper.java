@@ -18,5 +18,5 @@ import java.util.List;
  */
 public interface ChaOperationDetailsMapper extends BaseMapper<ChaOperationDetails> {
 
-    List<ChaOperationDetailsVO> queryDetailByOpeId(@Param("ew") LambdaQueryWrapper<ChaOperationDetails> queryWrapper);
+    List<ChaOperationDetailsVO> queryDetailByOpeId(Long operationId);
 }

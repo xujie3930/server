@@ -1,6 +1,5 @@
 package com.szmsd.chargerules.controller;
 
-import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.dto.OperationQueryDTO;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
@@ -116,20 +115,14 @@ public class OperationController extends BaseController {
         return R.ok(iChaOperationService.queryDetails(id));
     }
 
-    @PreAuthorize("@ss.hasPermi('Operation:Operation:queryDetails')")
-    @ApiOperation(value = "业务计费逻辑 - 详情")
-    @PostMapping("/queryDetails")
-    public R<Operation> queryDetails(@RequestBody OperationDTO operationDTO) {
-        return R.ok(operationService.queryDetails(operationDTO));
-    }
+    List<OrderTypeLabelVo> orderTypeLabelVoList = Arrays.stream(DelOutboundOrderEnum.values()).map(value ->
+            new OrderTypeLabelVo(value.getCode(), value.getName())).collect(Collectors.toList());
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:getOrderTypeList')")
     @ApiOperation(value = "业务计费逻辑 - 查询订单类型")
     @GetMapping("/getOrderTypeList")
     public R<List<OrderTypeLabelVo>> getOrderTypeList() {
-        List<OrderTypeLabelVo> collect = Arrays.stream(DelOutboundOrderEnum.values()).map(value ->
-                new OrderTypeLabelVo(value.getCode(), value.getName())).collect(Collectors.toList());
-        return R.ok(collect);
+        return R.ok(orderTypeLabelVoList);
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundFreeze')")

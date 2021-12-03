@@ -1,26 +1,23 @@
 package com.szmsd.chargerules.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import cn.hutool.core.bean.BeanUtil;
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.dto.BaseProductBatchQueryDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.chargerules.domain.ChargeLog;
-import com.szmsd.chargerules.domain.Operation;
 import com.szmsd.chargerules.dto.ChargeLogDto;
-import com.szmsd.chargerules.dto.OperationDTO;
+import com.szmsd.chargerules.dto.OperationQueryDTO;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.enums.OrderTypeEnum;
-import com.szmsd.chargerules.mapper.OperationMapper;
+import com.szmsd.chargerules.service.IChaOperationService;
 import com.szmsd.chargerules.service.IChargeLogService;
 import com.szmsd.chargerules.service.IOperationService;
 import com.szmsd.chargerules.service.IPayService;
+import com.szmsd.chargerules.vo.ChaOperationDetailsVO;
+import com.szmsd.chargerules.vo.ChaOperationVO;
+import com.szmsd.chargerules.vo.OperationRuleVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -29,121 +26,31 @@ import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation> implements IOperationService {
+public class OperationServiceImpl implements IOperationService {
 
     @Resource
     private IPayService payService;
-
     @Resource
-    private OperationMapper operationMapper;
-
+    private IChaOperationService iChaOperationService;
     @Resource
     private IChargeLogService chargeLogService;
 
-    @Override
-    public int save(OperationDTO dto) {
-        Operation domain = BeanMapperUtil.map(dto, Operation.class);
-        List<Operation> list = selectList(domain);
-        saveCheck(domain, list);
-        // 为空直接新增
-        return operationMapper.insert(domain);
-    }
-
-    private void saveCheck(Operation domain, List<Operation> list) {
-        if (CollectionUtils.isNotEmpty(list)) {
-            // 转运/批量出库单-装箱费/批量出库单-贴标费 同一个仓库 只能存在一条配置
-            if (DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode().equals(domain.getOperationType())
-                    || DelOutboundOrderEnum.BATCH_PACKING.getCode().equals(domain.getOperationType())
-                    || DelOutboundOrderEnum.BATCH_LABEL.getCode().equals(domain.getOperationType())) {
-                throw new CommonException("999", Objects.requireNonNull(DelOutboundOrderEnum.get(domain.getOperationType())).getName().concat("+仓库+订单类型只能配置一条"));
-            }
-            // 同一个仓库只能配置同一个币种
-            if (!domain.getCurrencyCode().equals(list.get(0).getCurrencyCode())) {
-                throw new CommonException("999", "同一个订单类型的仓库只能配置一种币种");
-            }
-            for (Operation operation : list) {
-                Double minimumWeight = domain.getMinimumWeight();
-                Double maximumWeight = domain.getMaximumWeight();
-                if (Math.max(minimumWeight, operation.getMinimumWeight()) < Math.min(maximumWeight, operation.getMaximumWeight())) {
-                    throw new CommonException("999", "区间存在重叠交叉！");
-                }
-            }
-        }
-    }
-
-    private List<Operation> selectList(Operation domain) {
-        LambdaQueryWrapper<Operation> query = Wrappers.lambdaQuery();
-        query.eq(Operation::getWarehouseCode, domain.getWarehouseCode());
-        query.eq(Operation::getOperationType, domain.getOperationType());
-        query.eq(Operation::getOrderType, domain.getOrderType());
-        if (domain.getId() != null) {
-            query.ne(Operation::getId, domain.getId());
-        }
-        return operationMapper.selectList(query);
-    }
-
-    @Override
-    public int update(Operation dto) {
-        List<Operation> list = selectList(dto);
-        saveCheck(dto, list);
-        return operationMapper.updateById(dto);
-    }
-
-    @Override
-    public List<Operation> listPage(OperationDTO dto) {
-        LambdaQueryWrapper<Operation> where = Wrappers.lambdaQuery();
-        if (StringUtils.isNotEmpty(dto.getOperationType())) {
-            where.eq(Operation::getOperationType, dto.getOperationType());
-        }
-        if (StringUtils.isNotEmpty(dto.getOrderType())) {
-            where.eq(Operation::getOrderType, dto.getOrderType());
-        }
-        if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
-            where.eq(Operation::getWarehouseCode, dto.getWarehouseCode());
-        }
-        where.orderByDesc(Operation::getCreateTime);
-        return operationMapper.selectList(where);
-    }
-
-    @Override
-    public Operation details(int id) {
-        return operationMapper.selectById(id);
-    }
-
-    @Override
-    public Operation queryDetails(OperationDTO dto) {
-        LambdaQueryWrapper<Operation> query = Wrappers.lambdaQuery();
-        if (StringUtils.isNotBlank(dto.getOrderType())) {
-            query.eq(Operation::getOrderType, dto.getOrderType());
-        }
-        if (StringUtils.isNotBlank(dto.getOperationType())) {
-            query.eq(Operation::getOperationType, dto.getOperationType());
-        }
-        if (StringUtils.isNotBlank(dto.getWarehouseCode())) {
-            query.eq(Operation::getWarehouseCode, dto.getWarehouseCode());
-        }
-        if (dto.getWeight() != null) {
-            query.lt(Operation::getMinimumWeight, dto.getWeight());
-            query.ge(Operation::getMaximumWeight, dto.getWeight());
-        }
-        try {
-            return operationMapper.selectOne(query);
-        } catch (Exception e) {
-            log.error("queryDetails() : {}", dto.toString());
-            throw e;
-        }
-    }
 
     @Transactional
     @Override
@@ -169,7 +76,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     @Override
     public R<?> delOutboundFreeze(DelOutboundOperationVO dto) {
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
-        if (CollectionUtils.isEmpty(details) && !dto.getOrderType().equals("Freight")) {
+        if (CollectionUtils.isEmpty(details) && !"Freight".equals(dto.getOrderType())) {
             log.error("calculate() 出库单的详情信息为空");
             return R.failed("出库单的详情信息为空");
         }
@@ -203,12 +110,13 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R<?> packageTransfer(DelOutboundOperationVO dto, BigDecimal amount) {
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
-        Operation operation = getOperationDetails(dto, null, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
+        OperationRuleVO operation = getOperationDetails(dto, null, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
         for (DelOutboundOperationDetailVO vo : details) {
             amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
-        return this.freezeBalance(dto, count, operation.getFirstPrice(), operation);
+        amount = amount.multiply(operation.getDiscountRate()).setScale(2,RoundingMode.HALF_UP);
+        return this.freezeBalance(dto, count, operation.getFirstPrice().multiply(operation.getDiscountRate()).setScale(2,RoundingMode.HALF_UP), operation);
     }
 
     @Resource
@@ -225,7 +133,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R<?> frozenFeesForWarehousing(DelOutboundOperationVO dto, BigDecimal amount) {
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
-        Operation operation = new Operation();
+        OperationRuleVO operation = new OperationRuleVO();
         List<String> skuList = details.stream().map(DelOutboundOperationDetailVO::getSku).collect(Collectors.toList());
         BaseProductBatchQueryDto baseProductBatchQueryDto = new BaseProductBatchQueryDto();
         baseProductBatchQueryDto.setSellerCode(dto.getCustomCode());
@@ -242,6 +150,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
             } else {
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             }
+            amount = amount.multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
         return this.freezeBalance(dto, count, amount, operation);
@@ -259,7 +168,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
     private R calculateFreeze(DelOutboundOperationVO dto, List<DelOutboundOperationDetailVO> details, BigDecimal amount) {
         Long qty;
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
-        Operation operation = new Operation();
+        OperationRuleVO operation = new OperationRuleVO();
         List<String> skuList = details.stream().map(DelOutboundOperationDetailVO::getSku).collect(Collectors.toList());
         BaseProductBatchQueryDto baseProductBatchQueryDto = new BaseProductBatchQueryDto();
         baseProductBatchQueryDto.setSellerCode(dto.getCustomCode());
@@ -277,6 +186,7 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
             } else {
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             }
+            amount =  amount.multiply(operation.getDiscountRate()).setScale(2,RoundingMode.HALF_UP);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
         return this.freezeBalance(dto, count, amount, operation);
@@ -324,14 +234,15 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     private BigDecimal getBatchAmount(DelOutboundOperationVO dto, BigDecimal amount, Integer count, String type) {
         if (count != null && count > 0) {
-            Operation labelOperation = getOperationDetails(dto, null, "未找到" + DelOutboundOrderEnum.getName(type) + "业务费用规则，请联系管理员");
+            OperationRuleVO labelOperation = getOperationDetails(dto, null, "未找到" + DelOutboundOrderEnum.getName(type) + "业务费用规则，请联系管理员");
             BigDecimal calculate = payService.calculate(labelOperation.getFirstPrice(), labelOperation.getNextPrice(), count.longValue());
             amount = amount.add(calculate);
+            amount =  amount.multiply(labelOperation.getDiscountRate()).setScale(2,RoundingMode.HALF_UP);
         }
         return amount;
     }
 
-    private Operation getOperationDetails(DelOutboundOperationVO dto, Double weight, String message) {
+    private OperationRuleVO getOperationDetails(DelOutboundOperationVO dto, Double weight, String message) {
         return this.getOperationDetails(dto, OrderTypeEnum.Shipment, weight, message);
     }
 
@@ -344,29 +255,32 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
      * @param message
      * @return
      */
-    private Operation getOperationDetails(DelOutboundOperationVO dto, OrderTypeEnum orderTypeEnum, Double weight, String message) {
-        OperationDTO operationDTO = new OperationDTO(dto.getOrderType(), orderTypeEnum.name(), dto.getWarehouseCode(), weight);
-        Operation operation = this.queryDetails(operationDTO);
-        AssertUtil.notNull(operation, message);
+    private OperationRuleVO getOperationDetails(DelOutboundOperationVO dto, OrderTypeEnum orderTypeEnum, Double weight, String message) {
+        OperationQueryDTO operationQueryDTO = new OperationQueryDTO();
+        LocalDateTime now = LocalDateTime.now();
+        operationQueryDTO.setCusCodeList(dto.getCustomCode())
+                .setWarehouseCode(dto.getWarehouseCode())
+                .setOperationType(orderTypeEnum.name()).setOrderType(dto.getOrderType())
+                .setExpirationTime(now).setEffectiveTime(now);
+        ChaOperationVO chaOperationVO = iChaOperationService.queryOperationDetailByRule(operationQueryDTO);
+        AssertUtil.notNull(chaOperationVO, message);
+        // 找出符合的重量区间
+        OperationRuleVO operation = new OperationRuleVO();
+        BeanUtil.copyProperties(chaOperationVO, operation);
+        List<ChaOperationDetailsVO> chaOperationDetailList = chaOperationVO.getChaOperationDetailList();
+        BigDecimal weightD = BigDecimal.valueOf(weight);
+        ChaOperationDetailsVO chaOperationDetailsVO = chaOperationDetailList.stream().filter(x -> {
+            BigDecimal minimumWeight = x.getMinimumWeight();
+            BigDecimal maximumWeight = x.getMaximumWeight();
+            return weightD.compareTo(minimumWeight) >= 0 && weightD.compareTo(maximumWeight) < 0;
+        }).findAny().orElse(null);
+        AssertUtil.notNull(chaOperationDetailsVO, message);
+        BeanUtils.copyProperties(chaOperationDetailsVO, operation);
+        //  multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
         return operation;
     }
 
-    /**
-     * 查询配置的规则
-     *
-     * @param outboundOrderEnum
-     * @param orderTypeEnum
-     * @param warehouseCode     仓库编码
-     * @param weight            件数/重量
-     * @return null?自行处理错误信息
-     */
-    @Override
-    public Operation getOperationDetails(DelOutboundOrderEnum outboundOrderEnum, OrderTypeEnum orderTypeEnum, String warehouseCode, Double weight) {
-        OperationDTO operationDTO = new OperationDTO(outboundOrderEnum.getCode(), orderTypeEnum.name(), warehouseCode, weight);
-        return this.queryDetails(operationDTO);
-    }
-
-    private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount, Operation operation) {
+    private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount, OperationRuleVO operation) {
         ChargeLog chargeLog = setChargeLog(dto, count);
         chargeLog.setHasFreeze(true);
         CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), operation.getCurrencyCode(), dto.getOrderNo(), dto.getOrderType(), amount);
@@ -396,10 +310,6 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
         return payService.thawBalance(cusFreezeBalanceDTO, chargeLog);
     }
 
-    @Override
-    public int deleteById(Integer id) {
-        return baseMapper.deleteById(id);
-    }
 
     private CustPayDTO setCustPayDto(ChargeLog chargeLog) {
         CustPayDTO custPayDTO = new CustPayDTO();

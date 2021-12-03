@@ -64,6 +64,13 @@ public interface IChaOperationService extends IService<ChaOperation> {
      * @return
      */
     Integer deleteById(Integer id);
-
+    /**
+     * 查询用户的匹配规则 查询不校验
+     * 用户类型.客户id二选一
+     *
+     * @param queryDTO 查询条件
+     * @return 唯一生效的结果
+     */
+    ChaOperationVO queryOperationDetailByRule(OperationQueryDTO queryDTO);
 }
 

@@ -76,7 +76,9 @@ public interface IBasSellerService extends IService<BasSeller> {
          */
         BasSellerInfoVO selectBasSeller(String userName);
 
-        /**
+    BasSellerInfoVO selectBasSellerBySellerCode(String sellerCode);
+
+    /**
          * 获取验证码
          * @return
          */

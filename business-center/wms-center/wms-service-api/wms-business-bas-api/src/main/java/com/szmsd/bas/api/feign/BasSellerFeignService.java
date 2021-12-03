@@ -10,10 +10,13 @@ import com.szmsd.bas.dto.BasSellerEmailDto;
 import com.szmsd.bas.dto.BasSellerQueryDto;
 import com.szmsd.bas.dto.ServiceConditionDto;
 import com.szmsd.bas.dto.VatQueryDto;
+import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -28,8 +31,9 @@ public interface BasSellerFeignService {
     R<String> getLoginSellerCode();
 
     @PostMapping("/bas/seller/list")
-    @ApiOperation(value = "分页查询模块列表",notes = "分页查询模块列表")
+    @ApiOperation(value = "分页查询模块列表", notes = "分页查询模块列表")
     TableDataInfo<BasSellerCertificate> list(@RequestBody BasSellerQueryDto basSeller);
+
     /**
      * 查询客户验货要求
      *
@@ -56,4 +60,12 @@ public interface BasSellerFeignService {
     @PostMapping("/bas/sellerCertificate/listVAT")
     @ApiOperation(value = "查询VAT模块列表", notes = "查询VAT模块列表")
     R<List<BasSellerCertificate>> listVAT(@RequestBody VatQueryDto vatQueryDto);
+
+    @GetMapping(value = "/bas/seller/getInfo/{userName}")
+    @ApiOperation(value = "获取模块详细信息", notes = "获取模块详细信息userName:sellerCode")
+    R<BasSellerInfoVO> getInfo(@PathVariable("userName") String userName);
+
+    @GetMapping(value = "/bas/seller/getInfoBySellerCode/{sellerCode}")
+    @ApiOperation(value = "获取模块详细信息",notes = "获取模块详细信息")
+    R<BasSellerInfoVO> getInfoBySellerCode(@PathVariable("sellerCode") String sellerCode);
 }

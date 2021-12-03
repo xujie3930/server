@@ -3,6 +3,8 @@ package com.szmsd.chargerules.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.feign.BasSellerFeignService;
+import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.chargerules.domain.WarehouseOperation;
 import com.szmsd.chargerules.domain.WarehouseOperationDetails;
 import com.szmsd.chargerules.dto.WarehouseOperationDTO;
@@ -10,8 +12,10 @@ import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IWarehouseOperationDetailsService;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.chargerules.vo.WarehouseOperationVo;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,6 +42,8 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
 
     @Resource
     private IWarehouseOperationDetailsService warehouseOperationDetailsService;
+    @Resource
+    private BasSellerFeignService basSellerFeignService;
 
     private final String REGEX = "\\d+D\\d+";
 
@@ -45,7 +52,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
     public int save(WarehouseOperationDTO dto) {
         if (!checkWarehouse(dto)) {
             WarehouseOperation domain = new WarehouseOperation();
-            BeanUtils.copyProperties(dto,domain);
+            BeanUtils.copyProperties(dto, domain);
             AssertUtil.notEmpty(dto.getDetails(), "详情必填");
             warehouseOperationMapper.insert(domain);
             long count = dto.getDetails().stream().map(value -> value.setWarehouseOperationId(domain.getId())).filter(value -> !Pattern.matches(REGEX, value.getChargeDays())).count();
@@ -127,6 +134,33 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
         return warehouseOperationMapper.listPage(dto);
     }
 
+    @Override
+    public List<WarehouseOperationVo> selectOperationByRule(WarehouseOperationDTO queryDTO) {
+        log.info("查询用户仓租规则信息：{}", queryDTO);
+        String cusTypeCode = queryDTO.getCusTypeCode();
+        String cusCodeList = queryDTO.getCusCodeList();
+        boolean queryByCusCode = StringUtils.isNotBlank(cusCodeList);
+        if (queryByCusCode) {
+            queryDTO.setCusTypeCode(null);
+        }
+        //（生效+仓库）先查到对应的规则，是先按个人匹配，个人没有就按照用户类型 然后再折扣信息列表里面匹配对应的范围区间
+        List<WarehouseOperationVo> warehouseOperationVos = warehouseOperationMapper.listPage(queryDTO);
+        if (CollectionUtils.isEmpty(warehouseOperationVos)) {
+            //查询用户的类型
+            if (queryByCusCode) {
+                R<BasSellerInfoVO> info = basSellerFeignService.getInfoBySellerCode(cusCodeList);
+                BasSellerInfoVO userInfo = R.getDataAndException(info);
+                String discountUserType = userInfo.getDiscountUserType();
+                if (StringUtils.isBlank(discountUserType)) return null;
+                cusTypeCode = discountUserType;
+            }
+            queryDTO.setCusCodeList(null);
+            queryDTO.setCusTypeCode(cusTypeCode);
+            warehouseOperationVos = warehouseOperationMapper.listPage(queryDTO);
+        }
+        return warehouseOperationVos;
+    }
+
     private boolean isInTheInterval(long current, long min, long max) {
         return Math.max(min, current) == Math.min(current, max);
     }
@@ -140,7 +174,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
             int start = Integer.parseInt(ds[0]);
             int end = Integer.parseInt(ds[1]);
             if (isInTheInterval(days, start, end)) {
-                return cbm.multiply(detail.getPrice());
+                return cbm.multiply(detail.getPrice()).multiply(detail.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
             }
         }
         log.error("未找到该储存仓租的计费配置 days：{},warehouseCode {}", days, warehouseCode);

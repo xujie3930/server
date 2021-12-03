@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -64,7 +65,7 @@ public class ThreadRunnable {
      * 定时任务：储存仓租计价扣费；每周日晚上8点执行
      */
 //    @Scheduled(cron = "0/60 * * * * *")
-    @Scheduled(cron = "0 0 20 * * 7")
+    @Scheduled(cron = "0 0 20 * * ?")
     public void executeWarehouse() {
         log.info("executeWarehouse() start...");
         RLock lock = redissonClient.getLock("executeOperation");
@@ -111,7 +112,12 @@ public class ThreadRunnable {
     private void getSkuDetails(String warehouseCode, List<SkuVolumeVO> skuVolumes) {
         for (SkuVolumeVO skuVolume : skuVolumes) {
             if(skuVolume.getSku().equals("12")){
-                List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationMapper.listPage(new WarehouseOperationDTO().setWarehouseCode(warehouseCode));
+                LocalDateTime now = LocalDateTime.now();
+                List<WarehouseOperationVo> warehouseOperationConfig =   warehouseOperationService.selectOperationByRule(new WarehouseOperationDTO().setWarehouseCode(warehouseCode)
+                        .setEffectiveTime(now).setExpirationTime(now).setCusCodeList(skuVolume.getCusCode()));
+              /*  List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationMapper.listPage(new WarehouseOperationDTO().setWarehouseCode(warehouseCode)
+                        .setEffectiveTime(now).setExpirationTime(now).setCusCodeList(skuVolume.getCusCode())
+                );*/
                 if (CollectionUtils.isEmpty(warehouseOperationConfig)) {
                     log.error("getSkuDetails() 未找到收费配置 warehouseCode: {}", warehouseCode);
                     continue;
@@ -122,6 +128,7 @@ public class ThreadRunnable {
                     log.error("getSkuDetails() 计算费用为0 仓库：{}, SKU:{}, 数量：{} 体积：{}立方厘米",warehouseCode,skuVolume.getSku(),skuVolume.getQty(),skuVolume.getVolume());
                     continue;
                 }
+
                 pay(warehouseCode, skuVolume, warehouseOperationVo, amount);
             }
         }

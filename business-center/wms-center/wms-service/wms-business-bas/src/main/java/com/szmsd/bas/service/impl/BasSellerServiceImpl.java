@@ -302,44 +302,54 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         public BasSellerInfoVO selectBasSeller(String userName){
             QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("user_name",userName);
-            BasSeller basSeller = super.getOne(queryWrapper);
-           //查询用户证件信息
-            QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
-            BasSellerCertificateQueryWrapper.eq("seller_code",basSeller.getSellerCode());
-            List<BasSellerCertificate> basSellerCertificateList = basSellerCertificateService.list(BasSellerCertificateQueryWrapper);
-            List<BasSellerCertificateVO> basSellerCertificateVOS = BeanMapperUtil.mapList(basSellerCertificateList,BasSellerCertificateVO.class);
-            basSellerCertificateVOS.forEach(b -> {
-                if(b.getAttachment()!=null){
-                    List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
-                            .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SELLER_CERTIFICATE_DOCUMENT.getAttachmentType()).setBusinessNo(b.getAttachment()).setBusinessItemNo(null)).getData());
-                    if (CollectionUtils.isNotEmpty(attachment)) {
-                        List<AttachmentFileDTO> documentsFiles = new ArrayList();
-                        for(BasAttachment a:attachment){
-                            documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
-                        }
-                        b.setDocumentsFiles(documentsFiles);
-                    }
-                }
-                });
-            BasSellerInfoVO basSellerInfoVO = BeanMapperUtil.map(basSeller,BasSellerInfoVO.class);
-            //实名认证图片
-            List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
-                    .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SELLER_IMAGE.getAttachmentType()).setBusinessNo(basSeller.getId().toString()).setBusinessItemNo(null)).getData());
-            if (CollectionUtils.isNotEmpty(attachment)) {
-                List<AttachmentFileDTO> documentsFiles = new ArrayList();
-                for(BasAttachment a:attachment){
-                    documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
-                }
-                basSellerInfoVO.setDocumentsFiles(documentsFiles);
-            }
-            basSellerInfoVO.setBasSellerCertificateList(basSellerCertificateVOS);
-
-            R<List<UserCreditInfoVO>> listR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
-            List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
-            List<UserCreditInfoVO> collect = dataAndException.stream().filter(x -> (x.getCreditStatus() != null) && (CreditConstant.CreditStatusEnum.ACTIVE.getValue()).equals(x.getCreditStatus())).collect(Collectors.toList());
-            basSellerInfoVO.setUserCreditList(collect);
-            return basSellerInfoVO;
+            return getBasSellerInfoVO(queryWrapper);
         }
+
+    @Override
+    public BasSellerInfoVO selectBasSellerBySellerCode(String sellerCode) {
+        QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("seller_code", sellerCode);
+        return getBasSellerInfoVO(queryWrapper);
+    }
+    private BasSellerInfoVO getBasSellerInfoVO(QueryWrapper<BasSeller> queryWrapper) {
+        BasSeller basSeller = super.getOne(queryWrapper);
+        //查询用户证件信息
+        QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
+        BasSellerCertificateQueryWrapper.eq("seller_code", basSeller.getSellerCode());
+        List<BasSellerCertificate> basSellerCertificateList = basSellerCertificateService.list(BasSellerCertificateQueryWrapper);
+        List<BasSellerCertificateVO> basSellerCertificateVOS = BeanMapperUtil.mapList(basSellerCertificateList, BasSellerCertificateVO.class);
+        basSellerCertificateVOS.forEach(b -> {
+            if (b.getAttachment() != null) {
+                List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
+                        .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SELLER_CERTIFICATE_DOCUMENT.getAttachmentType()).setBusinessNo(b.getAttachment()).setBusinessItemNo(null)).getData());
+                if (CollectionUtils.isNotEmpty(attachment)) {
+                    List<AttachmentFileDTO> documentsFiles = new ArrayList();
+                    for (BasAttachment a : attachment) {
+                        documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
+                    }
+                    b.setDocumentsFiles(documentsFiles);
+                }
+            }
+        });
+        BasSellerInfoVO basSellerInfoVO = BeanMapperUtil.map(basSeller, BasSellerInfoVO.class);
+        //实名认证图片
+        List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
+                .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SELLER_IMAGE.getAttachmentType()).setBusinessNo(basSeller.getId().toString()).setBusinessItemNo(null)).getData());
+        if (CollectionUtils.isNotEmpty(attachment)) {
+            List<AttachmentFileDTO> documentsFiles = new ArrayList();
+            for (BasAttachment a : attachment) {
+                documentsFiles.add(new AttachmentFileDTO().setId(a.getId()).setAttachmentName(a.getAttachmentName()).setAttachmentUrl(a.getAttachmentUrl()));
+            }
+            basSellerInfoVO.setDocumentsFiles(documentsFiles);
+        }
+        basSellerInfoVO.setBasSellerCertificateList(basSellerCertificateVOS);
+
+        R<List<UserCreditInfoVO>> listR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
+        List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
+        List<UserCreditInfoVO> collect = dataAndException.stream().filter(x -> (x.getCreditStatus() != null) && (CreditConstant.CreditStatusEnum.ACTIVE.getValue()).equals(x.getCreditStatus())).collect(Collectors.toList());
+        basSellerInfoVO.setUserCreditList(collect);
+        return basSellerInfoVO;
+    }
 
     /**
      * 获取验证码
