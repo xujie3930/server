@@ -65,7 +65,7 @@ public class ThreadRunnable {
      * 定时任务：储存仓租计价扣费；每周日晚上8点执行
      */
 //    @Scheduled(cron = "0/60 * * * * *")
-    @Scheduled(cron = "0 0 20 ? * 1 *")
+    @Scheduled(cron = "0 0 20 ? * 1")
     public void executeWarehouse() {
         log.info("executeWarehouse() start...");
         RLock lock = redissonClient.getLock("executeOperation");
