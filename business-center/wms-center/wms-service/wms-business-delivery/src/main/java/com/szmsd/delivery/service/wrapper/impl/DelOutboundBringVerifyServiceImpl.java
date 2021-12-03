@@ -517,9 +517,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     @Override
-    public void shipmentRule(DelOutbound delOutbound, String shipmentRule) {
+    public void shipmentRule(DelOutbound delOutbound) {
         String logMessage;
         // 判断PRC算费返回的发货规则是否为空，如果是空就那承运商物流编码赋值
+        String shipmentRule = delOutbound.getProductShipmentRule();
         if (StringUtils.isEmpty(shipmentRule)) {
             shipmentRule = delOutbound.getShipmentRule();
         }
@@ -821,7 +822,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setSellerCode(delOutbound.getSellerCode());
         createShipmentRequestDto.setTrackingNo(trackingNo);
         // 获取从prc返回的发货规则
-        String shipmentRule = delOutboundWrapperContext.getShipmentRule();
+        String shipmentRule = delOutbound.getProductShipmentRule();
         if (StringUtils.isNotEmpty(shipmentRule)) {
             createShipmentRequestDto.setShipmentRule(shipmentRule);
         } else {
