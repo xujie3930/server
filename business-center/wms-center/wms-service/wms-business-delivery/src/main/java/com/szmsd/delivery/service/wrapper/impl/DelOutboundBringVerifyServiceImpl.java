@@ -764,7 +764,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
             shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
         } else {
-            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            String shipmentRule;
+            if (StringUtils.isNotEmpty(delOutbound.getProductShipmentRule())) {
+                shipmentRule = delOutbound.getProductShipmentRule();
+            } else {
+                shipmentRule = delOutbound.getShipmentRule();
+            }
+            shipmentUpdateRequestDto.setShipmentRule(shipmentRule);
         }
         shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
         shipmentUpdateRequestDto.setIsEx(true);
@@ -822,12 +828,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setSellerCode(delOutbound.getSellerCode());
         createShipmentRequestDto.setTrackingNo(trackingNo);
         // 获取从prc返回的发货规则
-        String shipmentRule = delOutbound.getProductShipmentRule();
-        if (StringUtils.isNotEmpty(shipmentRule)) {
-            createShipmentRequestDto.setShipmentRule(shipmentRule);
+        String shipmentRule;
+        if (StringUtils.isNotEmpty(delOutbound.getProductShipmentRule())) {
+            shipmentRule = delOutbound.getProductShipmentRule();
         } else {
-            createShipmentRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+            shipmentRule = delOutbound.getShipmentRule();
         }
+        createShipmentRequestDto.setShipmentRule(shipmentRule);
         createShipmentRequestDto.setPackingRule(delOutbound.getPackingRule());
         boolean isBatchSelfPick = false;
         if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
