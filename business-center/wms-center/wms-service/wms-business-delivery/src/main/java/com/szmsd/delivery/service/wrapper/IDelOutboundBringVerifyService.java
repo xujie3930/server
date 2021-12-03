@@ -61,10 +61,9 @@ public interface IDelOutboundBringVerifyService {
     /**
      * 更新发货规则
      *
-     * @param delOutbound  delOutbound
-     * @param shipmentRule shipmentRule
+     * @param delOutbound delOutbound
      */
-    void shipmentRule(DelOutbound delOutbound, String shipmentRule);
+    void shipmentRule(DelOutbound delOutbound);
 
     /**
      * 获取承运商标签文件

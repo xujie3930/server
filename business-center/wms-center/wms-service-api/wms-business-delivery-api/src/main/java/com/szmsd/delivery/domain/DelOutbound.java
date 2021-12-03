@@ -215,4 +215,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "承运商标签路径")
     private String shipmentOrderLabelUrl;
+
+    @ApiModelProperty(value = "产品详情返回的发货规则")
+    private String productShipmentRule;
 }

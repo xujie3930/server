@@ -204,6 +204,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 产品信息
             updateDelOutbound.setTrackingAcquireType(delOutbound.getTrackingAcquireType());
             updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+            updateDelOutbound.setProductShipmentRule(delOutbound.getProductShipmentRule());
+            updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
@@ -335,6 +337,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 产品信息
             updateDelOutbound.setTrackingAcquireType("");
             updateDelOutbound.setShipmentService("");
+            updateDelOutbound.setProductShipmentRule("");
+            updateDelOutbound.setPackingRule("");
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo("");
             updateDelOutbound.setShipmentOrderNumber("");
@@ -452,7 +456,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if (null != pricedProductInfo) {
                 delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
                 delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
-                delOutboundWrapperContext.setShipmentRule(pricedProductInfo.getShipmentRule());
+                delOutbound.setProductShipmentRule(pricedProductInfo.getShipmentRule());
+                delOutbound.setPackingRule(pricedProductInfo.getPackingRule());
                 DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
             } else {
                 // 异常信息
@@ -498,7 +503,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
-            delOutboundBringVerifyService.shipmentRule(delOutbound, delOutboundWrapperContext.getShipmentRule());
+            delOutboundBringVerifyService.shipmentRule(delOutbound);
         }
 
         @Override
@@ -791,6 +796,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 产品信息
             updateDelOutbound.setTrackingAcquireType(delOutbound.getTrackingAcquireType());
             updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+            updateDelOutbound.setProductShipmentRule(delOutbound.getProductShipmentRule());
+            updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
