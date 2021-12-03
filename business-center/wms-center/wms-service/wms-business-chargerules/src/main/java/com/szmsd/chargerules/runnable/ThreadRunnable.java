@@ -115,7 +115,7 @@ public class ThreadRunnable {
         for (SkuVolumeVO skuVolume : skuVolumes) {
             LocalDateTime now = LocalDateTime.now();
             List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService.selectOperationByRule(new WarehouseOperationDTO().setWarehouseCode(warehouseCode)
-                    .setEffectiveTime(now).setExpirationTime(now).setCusCodeList(skuVolume.getCusCode()));
+                    .setEffectiveTime(now).setCusCodeList(skuVolume.getCusCode()));
               /*  List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationMapper.listPage(new WarehouseOperationDTO().setWarehouseCode(warehouseCode)
                         .setEffectiveTime(now).setExpirationTime(now).setCusCodeList(skuVolume.getCusCode())
                 );*/
