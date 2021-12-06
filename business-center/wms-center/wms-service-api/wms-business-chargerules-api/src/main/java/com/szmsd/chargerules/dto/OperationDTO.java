@@ -1,8 +1,9 @@
 package com.szmsd.chargerules.dto;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
-import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,63 +26,67 @@ import java.util.concurrent.atomic.AtomicInteger;
 @NoArgsConstructor
 @ApiModel(value = "OperationDTO", description = "OperationDTO对象")
 public class OperationDTO implements Serializable {
-
+    @ExcelIgnore
     @ApiModelProperty(value = "ID")
     private Long id;
+    @ApiModelProperty(value = "ID", hidden = true)
+    @ExcelProperty(value = "业务费用顺序",index = 0)
+    private Long rowId;
 
-    @NotBlank
+    @NotBlank(message = "仓库不能为空")
+    @ExcelProperty(value = "仓库",index = 3)
     @ApiModelProperty(value = "仓库", required = true)
     private String warehouseCode;
-    @NotBlank
+    @NotBlank(message = "操作类型不能为空")
     @ApiModelProperty(value = "操作类型", required = true)
     private String operationType;
-    @NotBlank
+    @NotBlank(message = "操作类型不能为空")
+    @ExcelProperty(value = "操作类型",index = 5)
     @ApiModelProperty(value = "操作类型名称", required = true)
     private String operationTypeName;
-    @NotBlank
+
+    @NotBlank(message = "订单类型不能为空")
     @ApiModelProperty(value = "订单类型", required = true)
     private String orderType;
-    @NotBlank
+
+    @ExcelProperty(value = "订单类型",index = 6)
+    @ApiModelProperty(value = "订单类型", hidden = true)
+    private String orderTypeName;
+
+    @NotBlank(message = "币别不能为空")
+    @ExcelProperty(value = "币别",index = 4)
     @ApiModelProperty(value = "币种编码", required = true)
     private String currencyCode;
-    @NotBlank
-    @ApiModelProperty(value = "币种名称", required = true)
+
+    @ApiModelProperty(value = "币种名称")
     private String currencyName;
 
+    @ApiModelProperty(value = "客户类型", hidden = true)
+    @ExcelProperty(value = "客户类型")
+    private String cusTypeName;
+
     @ApiModelProperty(value = "客户类型编码", required = true)
-    @Excel(name = "客户类型编码")
     private String cusTypeCode;
 
     @ApiModelProperty(value = "客户名称 A,B")
-    @Excel(name = "客户名称 A,B")
     private String cusNameList;
 
     @ApiModelProperty(value = "客户编码 CNI1,CNI2")
-    @Excel(name = "客户编码 CNI1,CNI2")
+    @ExcelProperty(value = "客户编号",index = 2)
     private String cusCodeList;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "生效时间")
-    @Excel(name = "生效时间")
+    @ExcelProperty(value = "生效时间",index = 7)
     private LocalDateTime effectiveTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "失效时间")
-    @Excel(name = "失效时间")
+    @ExcelProperty(value = "失效时间",index =8)
     private LocalDateTime expirationTime;
-
+    @ExcelProperty(value = "备注",index = 9)
     @ApiModelProperty(value = "备注")
     private String remark;
-
-    @ApiModelProperty(value = "重量", hidden = true)
-    private Double weight;
-
-    public OperationDTO(String operationType, String orderType, String warehouseCode, Double weight) {
-        this.operationType = operationType;
-        this.orderType = orderType;
-        this.warehouseCode = warehouseCode;
-        this.weight = weight;
-    }
 
     @Valid
     @ApiModelProperty(value = "规则列表")

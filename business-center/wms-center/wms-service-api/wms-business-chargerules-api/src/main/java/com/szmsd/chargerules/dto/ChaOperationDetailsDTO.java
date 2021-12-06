@@ -1,9 +1,6 @@
 package com.szmsd.chargerules.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.common.core.web.domain.BaseEntity;
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,6 +9,7 @@ import lombok.experimental.Accessors;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 
@@ -25,41 +23,48 @@ import java.math.BigDecimal;
  */
 @Data
 @EqualsAndHashCode
-@Accessors(chain = true)
 @ApiModel(description = "ChaOperationDetails对象")
-public class ChaOperationDetailsDTO {
-
-    private static final long serialVersionUID = 1L;
+public class ChaOperationDetailsDTO implements Serializable {
 
     @ApiModelProperty(value = "id")
-    @Excel(name = "id")
     private Long id;
+
+    @ExcelProperty(index = 0, value = "业务费用顺序")
+    private Long rowId;
+
     @DecimalMin("0")
-    @NotNull
+    @NotNull(message = "最小重量不能为空")
+    @ExcelProperty(index = 1, value = "最小重量(g)")
     @ApiModelProperty(value = "最小重量 - 开始 单位: g", required = true)
-    @Excel(name = "最小重量 - 开始 单位: g")
     private BigDecimal minimumWeight;
+
     @DecimalMin("0")
     @NotNull
+    @NotNull(message = "最大重量不能为空")
+    @ExcelProperty(index = 2, value = "最大重量(g)")
     @ApiModelProperty(value = "最大重量 - 结束 单位: g", required = true)
-    @Excel(name = "最大重量 - 结束 单位: g")
     private BigDecimal maximumWeight;
-    @DecimalMin("0")
-    @NotNull
-    @ApiModelProperty(value = "首件价格", required = true)
-    @Excel(name = "首件价格")
-    private BigDecimal firstPrice;
-    @DecimalMin("0")
-    @ApiModelProperty(value = "续件价格")
-    @Excel(name = "续件价格")
-    private BigDecimal nextPrice;
-    @NotNull
+
+    @NotNull(message = "计费单位不能为空")
+    @ExcelProperty(index = 3, value = "计件单位")
     @ApiModelProperty(value = "计费单位", required = true)
-    @Excel(name = "计费单位")
     private String unit;
+
     @DecimalMin("0")
+    @NotNull(message = "首件价格不能为空")
+    @ExcelProperty(index = 4, value = "首件价格")
+    @ApiModelProperty(value = "首件价格", required = true)
+    private BigDecimal firstPrice;
+
+    @DecimalMin("0")
+    @ExcelProperty(index = 5, value = "续件价格")
+    @ApiModelProperty(value = "续件价格")
+    private BigDecimal nextPrice;
+
+    @DecimalMin("0")
+    @NotNull(message = "折扣率不能为空")
+    @ExcelProperty(index = 6, value = "折扣率")
     @ApiModelProperty(value = "折扣率")
-    @Excel(name = "折扣率")
     private BigDecimal discountRate;
 
 

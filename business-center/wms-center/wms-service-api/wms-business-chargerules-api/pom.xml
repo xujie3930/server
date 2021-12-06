@@ -35,7 +35,11 @@
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-finance-api</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 

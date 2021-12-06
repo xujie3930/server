@@ -1,15 +1,36 @@
 package com.szmsd.chargerules.controller;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelReader;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.cache.Ehcache;
+import com.alibaba.excel.cache.MapCache;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.event.AnalysisEventListener;
+import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
+import com.alibaba.excel.read.metadata.ReadSheet;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.fastjson.JSONObject;
+import com.szmsd.chargerules.config.AnalysisListenerAbstract;
+import com.szmsd.chargerules.config.DownloadTemplateUtil;
+import com.szmsd.chargerules.config.IRemoteApi;
+import com.szmsd.chargerules.config.LocalDateTimeConvert;
+import com.szmsd.chargerules.dto.ChaOperationDetailsDTO;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.dto.OperationQueryDTO;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.enums.OperationConstant;
+import com.szmsd.chargerules.enums.OrderTypeEnum;
 import com.szmsd.chargerules.service.IChaOperationService;
 import com.szmsd.chargerules.service.IOperationService;
 import com.szmsd.chargerules.vo.ChaOperationListVO;
 import com.szmsd.chargerules.vo.ChaOperationVO;
 import com.szmsd.chargerules.vo.OrderTypeLabelVo;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.ExcelUtils;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.plugin.annotation.AutoValue;
@@ -18,16 +39,27 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.validation.Valid;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.*;
+import javax.validation.groups.Default;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Api(tags = {"业务计费规则"})
@@ -130,21 +162,165 @@ public class OperationController extends BaseController {
     @PostMapping("/delOutboundFreeze")
     public R delOutboundFreeze(@RequestBody DelOutboundOperationVO delOutboundVO) {
         log.info("请求---------------------------- {}", delOutboundVO);
-        return operationService.delOutboundFreeze(delOutboundVO);
+        RLock lock = redissonClient.getLock(genKey());
+        try {
+            if (lock.tryLock(OperationConstant.LOCK_TIME, OperationConstant.LOCK_TIME_UNIT)) {
+                return operationService.delOutboundFreeze(delOutboundVO);
+            } else {
+                return R.failed("请求超时");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("请求失败");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundThaw')")
     @ApiOperation(value = "业务计费 - 出库解冻余额")
     @PostMapping("/delOutboundThaw")
     public R delOutboundThaw(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        return operationService.delOutboundThaw(delOutboundVO);
+        log.info("请求---------------------------- {}", delOutboundVO);
+        RLock lock = redissonClient.getLock(genKey());
+        try {
+            if (lock.tryLock(OperationConstant.LOCK_TIME, OperationConstant.LOCK_TIME_UNIT)) {
+                return operationService.delOutboundThaw(delOutboundVO);
+            } else {
+                return R.failed("请求超时");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("请求失败");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
     @ApiOperation(value = "业务计费 - 出库扣款")
     @PostMapping("/delOutboundCharge")
     public R delOutboundDeductions(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        return operationService.delOutboundDeductions(delOutboundVO);
+        log.info("请求---------------------------- {}", delOutboundVO);
+        RLock lock = redissonClient.getLock(genKey());
+        try {
+            if (lock.tryLock(OperationConstant.LOCK_TIME, OperationConstant.LOCK_TIME_UNIT)) {
+                return operationService.delOutboundDeductions(delOutboundVO);
+            } else {
+                return R.failed("请求超时");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("请求失败");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
+    @ApiOperation(value = "业务计费 - 下载模版")
+    @PostMapping("/downloadTemplate")
+    public void downloadTemplate(HttpServletResponse httpServletResponse) {
+        DownloadTemplateUtil downloadTemplateUtil = DownloadTemplateUtil.getInstance();
+        downloadTemplateUtil.getResourceByName(httpServletResponse, "ChargeOperation");
+    }
+
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
+    @ApiOperation(value = "业务计费 - 下载")
+    @PostMapping("/download")
+    public void download(HttpServletResponse httpServletResponse,  OperationQueryDTO operationQueryDTO) {
+        ExcelWriter excelWriter = null;
+        try (ServletOutputStream outputStream = httpServletResponse.getOutputStream()) {
+            String fileName = "ChargeOperation" + System.currentTimeMillis();
+            String efn = URLEncoder.encode(fileName, "utf-8");
+            httpServletResponse.setContentType("application/vnd.ms-excel");
+            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xlsx");
+            excelWriter = EasyExcel.write(/*outputStream*/new File("C:\\Users\\11\\Downloads\\ChargeOperation001.xlsx")).build();
+            WriteSheet build1 = EasyExcel.writerSheet(0, "基础信息").head(OperationDTO.class).registerConverter(new LocalDateTimeConvert()).build();
+//            WriteSheet build2 = EasyExcel.writerSheet(1,"详细信息").head(ChaOperationDetailsDTO.class).build();
+//            excelWriter.write(new ArrayList(),0)
+            List<ChaOperationListVO> chaOperationListVOS = iChaOperationService.queryOperationList(operationQueryDTO);
+            List<OperationDTO> collect = chaOperationListVOS.stream().map(x -> {
+                OperationDTO chaOperationVO = new OperationDTO();
+                BeanUtil.copyProperties(x, chaOperationVO);
+                return chaOperationVO;
+            }).collect(Collectors.toList());
+            excelWriter.write(collect, build1);
+//            excelWriter.write(new ArrayList(), build2);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (null != excelWriter)
+                excelWriter.finish();
+        }
+
+    }
+
+    @Resource
+    private IRemoteApi iRemoteApi;
+
+    @SneakyThrows
+    @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
+    @ApiOperation(value = "业务计费 - 导入")
+    @PostMapping("/upload")
+    public R upload(@RequestPart("file") MultipartFile multipartFile) {
+        ExcelReader excelReader = null;
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            excelReader = EasyExcel.read(inputStream).readCache(new Ehcache(5)).build();
+
+            AnalysisListenerAbstract<OperationDTO> listener0 = new AnalysisListenerAbstract<>();
+            ReadSheet readSheet = EasyExcel.readSheet(0).head(OperationDTO.class)
+                    .registerConverter(new LocalDateTimeConvert()).registerReadListener(listener0).build();
+            AnalysisListenerAbstract<ChaOperationDetailsDTO> listener1 = new AnalysisListenerAbstract<>();
+
+            ReadSheet readSheet1 = EasyExcel.readSheet(1).head(ChaOperationDetailsDTO.class).registerReadListener(listener1).build();
+
+            excelReader.read(readSheet, readSheet1);
+            excelReader.finish();
+            List<OperationDTO> operationDTOList = listener0.getResultList();
+            List<ChaOperationDetailsDTO> chaOperationDetailsDTOList = listener1.getResultList();
+            Map<Long, List<ChaOperationDetailsDTO>> detailMap = chaOperationDetailsDTOList.stream().collect(Collectors.groupingBy(ChaOperationDetailsDTO::getRowId));
+            Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+            StringBuilder errorMsg = new StringBuilder();
+            AtomicInteger index = new AtomicInteger(1);
+
+            operationDTOList.forEach(x -> {
+                x.setCusTypeCode(iRemoteApi.getSubCodeObjSubCode("098", x.getCusTypeName()));
+                x.setOperationType(DelOutboundOrderEnum.getCode(x.getOperationTypeName()));
+                x.setOrderType(OrderTypeEnum.getEn(x.getOrderTypeName()));
+                // 设置替换参数
+                int indexThis = index.getAndIncrement();
+                x.setChaOperationDetailList(detailMap.get(x.getRowId()));
+                Set<ConstraintViolation<OperationDTO>> validate = validator.validate(x, Default.class);
+                String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));
+                if (StringUtils.isNotBlank(error)) {
+                    errorMsg.append(String.format("请检查第%s条数据:%s\r", indexThis, error));
+                    return;
+                }
+                try {
+                    this.save(x);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    String message = e.getMessage();
+                    errorMsg.append(String.format("第%s条数据业务异常:%s\r", indexThis, message));
+                }
+            });
+            AssertUtil.isTrue(StringUtils.isBlank(errorMsg.toString()), errorMsg.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (null != excelReader)
+                excelReader.finish();
+        }
+
+
+        return R.ok();
     }
 
 }
