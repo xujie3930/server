@@ -39,4 +39,9 @@
         <include refid="ChaOperationDetailsVO"/>
         FROM cha_operation_details WHERE operation_id = #{operationId}
     </select>
+    <select id="queryDetailByOpeIdList" resultType="com.szmsd.chargerules.vo.ChaOperationDetailsVO">
+        SELECT
+        <include refid="ChaOperationDetailsVO"/>
+        FROM cha_operation_details WHERE operation_id IN <foreach collection="list" open="(" separator="," close=")" item="item">#{item}</foreach>
+    </select>
 </mapper>

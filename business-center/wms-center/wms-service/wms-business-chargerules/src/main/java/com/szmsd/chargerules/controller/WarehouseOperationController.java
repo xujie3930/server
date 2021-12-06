@@ -29,7 +29,9 @@ import com.szmsd.common.plugin.annotation.AutoValue;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.SneakyThrows;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -100,33 +102,45 @@ public class WarehouseOperationController extends BaseController {
     @PostMapping("/downloadTemplate")
     public void downloadTemplate(HttpServletResponse httpServletResponse) {
         DownloadTemplateUtil downloadTemplateUtil = DownloadTemplateUtil.getInstance();
-        downloadTemplateUtil.getResourceByName(httpServletResponse, "ChargeOperation");
+        downloadTemplateUtil.getResourceByName(httpServletResponse, "WarehouseOperation");
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
     @ApiOperation(value = "仓储业务计费规则 - 下载")
     @PostMapping("/download")
-    public void download(HttpServletResponse httpServletResponse,  OperationQueryDTO operationQueryDTO) {
+    public void download(HttpServletResponse httpServletResponse, WarehouseOperationDTO dto) {
         ExcelWriter excelWriter = null;
         try (ServletOutputStream outputStream = httpServletResponse.getOutputStream()) {
-            String fileName = "ChargeOperation" + System.currentTimeMillis();
+            String fileName = "WarehouseOperation" + System.currentTimeMillis();
             String efn = URLEncoder.encode(fileName, "utf-8");
             httpServletResponse.setContentType("application/vnd.ms-excel");
             httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xlsx");
-            excelWriter = EasyExcel.write(/*outputStream*/new File("C:\\Users\\11\\Downloads\\ChargeOperation001.xlsx")).build();
-            WriteSheet build1 = EasyExcel.writerSheet(0, "基础信息").head(OperationDTO.class).registerConverter(new LocalDateTimeConvert()).build();
-//            WriteSheet build2 = EasyExcel.writerSheet(1,"详细信息").head(ChaOperationDetailsDTO.class).build();
-//            excelWriter.write(new ArrayList(),0)
-            List<ChaOperationListVO> chaOperationListVOS = new ArrayList<>();
-            List<OperationDTO> collect = chaOperationListVOS.stream().map(x -> {
-                OperationDTO chaOperationVO = new OperationDTO();
-                BeanUtil.copyProperties(x, chaOperationVO);
-                return chaOperationVO;
+            excelWriter = EasyExcel.write(outputStream).build();
+            WriteSheet build1 = EasyExcel.writerSheet(0, "基础信息").head(WarehouseOperationDTO.class).registerConverter(new LocalDateTimeConvert()).build();
+            WriteSheet build2 = EasyExcel.writerSheet(1, "详细信息").head(WarehouseOperationDetails.class).build();
+
+            List<WarehouseOperationDetails> warehouseOperationDetailsList = new ArrayList<>();
+            List<WarehouseOperationVo> warehouseOperationVos = this.warehouseOperationService.listPage(dto);
+
+            List<WarehouseOperationDTO> warehouseOperationDTOList = warehouseOperationVos.stream().map(x -> {
+                WarehouseOperationDTO warehouseOperationDTO = new WarehouseOperationDTO();
+                BeanUtils.copyProperties(x, warehouseOperationDTO);
+                warehouseOperationDTO.setCusTypeName(iRemoteApi.getSubNameBySubCode("098", x.getCusTypeCode()));
+                List<WarehouseOperationDetails> details = x.getDetails();
+                Integer id = x.getId();
+                warehouseOperationDTO.setRowId(id);
+                details.forEach(z -> z.setRowId(id));
+                warehouseOperationDetailsList.addAll(details);
+                return warehouseOperationDTO;
             }).collect(Collectors.toList());
-            excelWriter.write(collect, build1);
-//            excelWriter.write(new ArrayList(), build2);
+
+            excelWriter.write(warehouseOperationDTOList, build1);
+            excelWriter.write(warehouseOperationDetailsList, build2);
+            excelWriter.finish();
+            outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         } finally {
             if (null != excelWriter)
                 excelWriter.finish();
@@ -153,7 +167,7 @@ public class WarehouseOperationController extends BaseController {
             excelReader.finish();
             List<WarehouseOperationDTO> warehouseOperationDTOList = listener0.getResultList();
             List<WarehouseOperationDetails> chaOperationDetailsDTOList = listener1.getResultList();
-            Map<Integer, List<WarehouseOperationDetails>> detailMap = chaOperationDetailsDTOList.stream().collect(Collectors.groupingBy(WarehouseOperationDetails::getWarehouseOperationId));
+            Map<Integer, List<WarehouseOperationDetails>> detailMap = chaOperationDetailsDTOList.stream().collect(Collectors.groupingBy(WarehouseOperationDetails::getRowId));
             Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
             StringBuilder errorMsg = new StringBuilder();
             AtomicInteger index = new AtomicInteger(1);
@@ -161,6 +175,8 @@ public class WarehouseOperationController extends BaseController {
             warehouseOperationDTOList.forEach(x -> {
                 // 设置替换参数
                 int indexThis = index.getAndIncrement();
+                x.setDetails(detailMap.get(x.getRowId()));
+                x.setCusTypeCode(iRemoteApi.getSubCode("098", x.getCusTypeName()));
                 Set<ConstraintViolation<WarehouseOperationDTO>> validate = validator.validate(x, Default.class);
                 String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));
                 if (StringUtils.isNotBlank(error)) {
@@ -178,6 +194,7 @@ public class WarehouseOperationController extends BaseController {
             AssertUtil.isTrue(StringUtils.isBlank(errorMsg.toString()), errorMsg.toString());
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         } finally {
             if (null != excelReader)
                 excelReader.finish();

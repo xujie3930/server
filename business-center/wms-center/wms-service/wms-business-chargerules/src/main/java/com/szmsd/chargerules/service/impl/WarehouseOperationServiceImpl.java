@@ -55,7 +55,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
             BeanUtils.copyProperties(dto, domain);
             AssertUtil.notEmpty(dto.getDetails(), "详情必填");
             warehouseOperationMapper.insert(domain);
-            long count = dto.getDetails().stream().map(value -> value.setWarehouseOperationId(domain.getId())).filter(value -> !Pattern.matches(REGEX, value.getChargeDays())).count();
+            long count = dto.getDetails().stream().peek(value -> value.setWarehouseOperationId(domain.getId())).filter(value -> !Pattern.matches(REGEX, value.getChargeDays())).count();
             if (count > 0) throw new CommonException("999", "计费天数格式错误");
             List<WarehouseOperationVo> warehouseOperationDb = this.listPage(dto);
             if (isIntersection(dto.getDetails(), warehouseOperationDb.get(0).getDetails()))
@@ -77,7 +77,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
         if (CollectionUtils.isNotEmpty(list)) { //仓库已存在 添加到该仓库下面的详情
             if (isIntersection(dto.getDetails(), list.get(0).getDetails()))
                 throw new CommonException("999", "仓库+区间存在重合");
-            List<WarehouseOperationDetails> collect = dto.getDetails().stream().map(value -> value.setWarehouseOperationId(list.get(0).getId())).collect(Collectors.toList());
+            List<WarehouseOperationDetails> collect = dto.getDetails().stream().peek(value -> value.setWarehouseOperationId(list.get(0).getId())).collect(Collectors.toList());
             return warehouseOperationDetailsService.saveBatch(collect);
         }
         return false;
@@ -114,7 +114,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
     @Transactional
     @Override
     public int update(WarehouseOperationDTO dto) {
-        long count = dto.getDetails().stream().map(value -> value.setWarehouseOperationId(dto.getId())).filter(value -> !Pattern.matches(REGEX, value.getChargeDays())).count();
+        long count = dto.getDetails().stream().peek(value -> value.setWarehouseOperationId(dto.getId())).filter(value -> !Pattern.matches(REGEX, value.getChargeDays())).count();
         if (count > 0) throw new CommonException("999", "计费天数格式错误");
         WarehouseOperation map = BeanMapperUtil.map(dto, WarehouseOperation.class);
         this.updateDetails(dto);

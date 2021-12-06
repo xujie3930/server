@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.dto;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,6 +27,7 @@ import java.math.BigDecimal;
 @ApiModel(description = "ChaOperationDetails对象")
 public class ChaOperationDetailsDTO implements Serializable {
 
+    @ExcelIgnore
     @ApiModelProperty(value = "id")
     private Long id;
 

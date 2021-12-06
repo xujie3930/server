@@ -27,5 +27,6 @@ public interface IChaOperationDetailsService extends IService<ChaOperationDetail
     Integer deleteByOperationId(Integer id);
 
     List<ChaOperationDetailsVO> queryDetailByOpeId(Long id);
+    List<ChaOperationDetailsVO> queryDetailByOpeIdList(List<Long> idList);
 }
 

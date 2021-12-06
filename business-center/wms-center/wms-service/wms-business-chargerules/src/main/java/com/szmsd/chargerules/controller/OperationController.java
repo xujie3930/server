@@ -5,13 +5,8 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.cache.Ehcache;
-import com.alibaba.excel.cache.MapCache;
-import com.alibaba.excel.context.AnalysisContext;
-import com.alibaba.excel.event.AnalysisEventListener;
-import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.alibaba.fastjson.JSONObject;
 import com.szmsd.chargerules.config.AnalysisListenerAbstract;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
 import com.szmsd.chargerules.config.IRemoteApi;
@@ -22,15 +17,15 @@ import com.szmsd.chargerules.dto.OperationQueryDTO;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.enums.OperationConstant;
 import com.szmsd.chargerules.enums.OrderTypeEnum;
+import com.szmsd.chargerules.service.IChaOperationDetailsService;
 import com.szmsd.chargerules.service.IChaOperationService;
 import com.szmsd.chargerules.service.IOperationService;
+import com.szmsd.chargerules.vo.ChaOperationDetailsVO;
 import com.szmsd.chargerules.vo.ChaOperationListVO;
 import com.szmsd.chargerules.vo.ChaOperationVO;
 import com.szmsd.chargerules.vo.OrderTypeLabelVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.utils.ExcelUtils;
-import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.plugin.annotation.AutoValue;
@@ -40,10 +35,10 @@ import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.SneakyThrows;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,8 +48,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.*;
 import javax.validation.groups.Default;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -71,6 +64,8 @@ public class OperationController extends BaseController {
     private IOperationService operationService;
     @Resource
     private IChaOperationService iChaOperationService;
+    @Resource
+    private IChaOperationDetailsService iChaOperationDetailsService;
     @Resource
     private RedissonClient redissonClient;
 
@@ -234,32 +229,48 @@ public class OperationController extends BaseController {
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
     @ApiOperation(value = "业务计费 - 下载")
     @PostMapping("/download")
-    public void download(HttpServletResponse httpServletResponse,  OperationQueryDTO operationQueryDTO) {
+    public void download(HttpServletResponse httpServletResponse, OperationQueryDTO operationQueryDTO) {
         ExcelWriter excelWriter = null;
         try (ServletOutputStream outputStream = httpServletResponse.getOutputStream()) {
             String fileName = "ChargeOperation" + System.currentTimeMillis();
             String efn = URLEncoder.encode(fileName, "utf-8");
             httpServletResponse.setContentType("application/vnd.ms-excel");
             httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xlsx");
-            excelWriter = EasyExcel.write(/*outputStream*/new File("C:\\Users\\11\\Downloads\\ChargeOperation001.xlsx")).build();
+            excelWriter = EasyExcel.write(outputStream).build();
             WriteSheet build1 = EasyExcel.writerSheet(0, "基础信息").head(OperationDTO.class).registerConverter(new LocalDateTimeConvert()).build();
-//            WriteSheet build2 = EasyExcel.writerSheet(1,"详细信息").head(ChaOperationDetailsDTO.class).build();
-//            excelWriter.write(new ArrayList(),0)
+            WriteSheet build2 = EasyExcel.writerSheet(1, "详细信息").head(ChaOperationDetailsDTO.class).build();
+
             List<ChaOperationListVO> chaOperationListVOS = iChaOperationService.queryOperationList(operationQueryDTO);
             List<OperationDTO> collect = chaOperationListVOS.stream().map(x -> {
-                OperationDTO chaOperationVO = new OperationDTO();
-                BeanUtil.copyProperties(x, chaOperationVO);
-                return chaOperationVO;
+                String subCode = iRemoteApi.getSubNameBySubCode("098", x.getCusTypeCode());
+                OperationDTO operationDTO = new OperationDTO();
+                BeanUtil.copyProperties(x, operationDTO);
+                operationDTO.setRowId(x.getId());
+                operationDTO.setCusTypeName(subCode);
+                return operationDTO;
             }).collect(Collectors.toList());
             excelWriter.write(collect, build1);
-//            excelWriter.write(new ArrayList(), build2);
+
+
+            List<Long> idList = chaOperationListVOS.stream().map(ChaOperationListVO::getId).collect(Collectors.toList());
+            List<ChaOperationDetailsVO> chaOperationDetailsVOList = iChaOperationDetailsService.queryDetailByOpeIdList(idList);
+            List<ChaOperationDetailsDTO> chaOperationDetailsDTOList = chaOperationDetailsVOList.stream().map(x -> {
+                ChaOperationDetailsDTO chaOperationDetailsDTO = new ChaOperationDetailsDTO();
+                BeanUtils.copyProperties(x, chaOperationDetailsDTO);
+                chaOperationDetailsDTO.setRowId(x.getOperationId());
+                return chaOperationDetailsDTO;
+            }).collect(Collectors.toList());
+            excelWriter.write(chaOperationDetailsDTOList, build2);
+
+            excelWriter.finish();
+            outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         } finally {
             if (null != excelWriter)
                 excelWriter.finish();
         }
-
     }
 
     @Resource
@@ -291,7 +302,7 @@ public class OperationController extends BaseController {
             AtomicInteger index = new AtomicInteger(1);
 
             operationDTOList.forEach(x -> {
-                x.setCusTypeCode(iRemoteApi.getSubCodeObjSubCode("098", x.getCusTypeName()));
+                x.setCusTypeCode(iRemoteApi.getSubNameBySubCode("098", x.getCusTypeCode()));
                 x.setOperationType(DelOutboundOrderEnum.getCode(x.getOperationTypeName()));
                 x.setOrderType(OrderTypeEnum.getEn(x.getOrderTypeName()));
                 // 设置替换参数
@@ -314,12 +325,11 @@ public class OperationController extends BaseController {
             AssertUtil.isTrue(StringUtils.isBlank(errorMsg.toString()), errorMsg.toString());
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         } finally {
             if (null != excelReader)
                 excelReader.finish();
         }
-
-
         return R.ok();
     }
 

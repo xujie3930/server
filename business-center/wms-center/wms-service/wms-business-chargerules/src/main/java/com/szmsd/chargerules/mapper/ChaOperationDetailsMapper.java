@@ -19,4 +19,6 @@ import java.util.List;
 public interface ChaOperationDetailsMapper extends BaseMapper<ChaOperationDetails> {
 
     List<ChaOperationDetailsVO> queryDetailByOpeId(Long operationId);
+
+    List<ChaOperationDetailsVO> queryDetailByOpeIdList(@Param("list") List<Long> idList);
 }

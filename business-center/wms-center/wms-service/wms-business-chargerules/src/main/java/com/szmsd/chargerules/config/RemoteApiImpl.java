@@ -65,12 +65,17 @@ public class RemoteApiImpl implements IRemoteApi {
      * @return 主子类别信息
      */
     @Override
-    public BasSub getSubCodeObj(String mainCode, String subName) {
+    public BasSub getSubObjByName(String mainCode, String subName) {
         if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subName)) return new BasSub();
         List<BasSub> basSubs = getBasSubByMainCode(mainCode);
         return basSubs.stream().filter(x -> x.getSubName().equals(subName.trim())).findAny().orElse(new BasSub());
     }
-
+    @Override
+    public BasSub getSubObjByCode(String mainCode, String subCode) {
+        if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subCode)) return new BasSub();
+        List<BasSub> basSubs = getBasSubByMainCode(mainCode);
+        return basSubs.stream().filter(x -> x.getSubCode().equals(subCode.trim())).findAny().orElse(new BasSub());
+    }
     /**
      * 查询主类别下的数据
      *
@@ -104,8 +109,15 @@ public class RemoteApiImpl implements IRemoteApi {
     }
 
     @Override
-    public String getSubCodeObjSubCode(String mainCode, String subName) {
-        BasSub subCodeObj = getSubCodeObj(mainCode, subName);
+    public String getSubNameBySubCode(String mainCode, String subCode) {
+        BasSub subCodeObj = getSubObjByCode(mainCode, subCode);
+        return Optional.ofNullable(subCodeObj.getSubName()).orElse("");
+
+    }
+
+    @Override
+    public String getSubCodeBySubName(String mainCode, String subName) {
+        BasSub subCodeObj = getSubObjByName(mainCode, subName);
         return Optional.ofNullable(subCodeObj.getSubCode()).orElseThrow(() -> new RuntimeException("请检查" + subName + "是否存在"));
     }
 
@@ -137,7 +149,7 @@ public class RemoteApiImpl implements IRemoteApi {
     @Override
     public String getSubCode(String mainCode, String subName) {
         if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subName)) return "";
-        BasSub subCodeObj = getSubCodeObj(mainCode, subName);
+        BasSub subCodeObj = getSubObjByName(mainCode, subName);
         AssertUtil.isTrue(StringUtils.isNotBlank(subCodeObj.getSubCode()), String.format("未找到%s该类别", subName));
         return subCodeObj.getSubCode();
     }
@@ -152,7 +164,7 @@ public class RemoteApiImpl implements IRemoteApi {
     @Override
     public String getSubCodeOrElseBlack(String mainCode, String subName) {
         if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subName)) return "";
-        BasSub subCodeObj = getSubCodeObj(mainCode, subName);
+        BasSub subCodeObj = getSubObjByName(mainCode, subName);
         return subCodeObj.getSubCode();
     }
 

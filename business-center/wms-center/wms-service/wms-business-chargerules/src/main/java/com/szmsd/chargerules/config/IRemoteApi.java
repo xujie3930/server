@@ -11,11 +11,34 @@ import java.util.List;
  * @Date: 2021-09-09 13:39
  */
 public interface IRemoteApi {
-    BasSub getSubCodeObj(String mainCode, String subName);
 
+    /**
+     * 通过子类别名称获取子类别基础信息
+     * @param mainCode 主类别code
+     * @param subName 子类别名
+     * @return 子类别基础信息
+     */
+    BasSub getSubObjByName(String mainCode, String subName);
+
+    BasSub getSubObjByCode(String mainCode, String subCode);
+
+    /**
+     * 通过子类别值获取子类别名
+     * @param mainCode 主类别code
+     * @param subValue 子类别值
+     * @return  子类别名
+     */
     String getSubNameByValue(String mainCode, String subValue);
 
-    String getSubCodeObjSubCode(String mainCode, String subName);
+    /**
+     *
+     * @param mainCode
+     * @param subName
+     * @return
+     */
+    String getSubNameBySubCode(String mainCode, String subName);
+
+    String getSubCodeBySubName(String mainCode, String subName);
 
     List<String> genNo(Integer count);
 

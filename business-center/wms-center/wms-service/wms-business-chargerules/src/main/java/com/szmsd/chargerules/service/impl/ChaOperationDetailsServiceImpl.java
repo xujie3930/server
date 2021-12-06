@@ -60,5 +60,10 @@ public class ChaOperationDetailsServiceImpl extends ServiceImpl<ChaOperationDeta
     public List<ChaOperationDetailsVO> queryDetailByOpeId(Long id) {
         return baseMapper.queryDetailByOpeId(id);
     }
+
+    @Override
+    public List<ChaOperationDetailsVO> queryDetailByOpeIdList(List<Long> idList) {
+        return baseMapper.queryDetailByOpeIdList(idList);
+    }
 }
 

@@ -37,14 +37,16 @@ public class OperationDTO implements Serializable {
     @ExcelProperty(value = "仓库",index = 3)
     @ApiModelProperty(value = "仓库", required = true)
     private String warehouseCode;
+    @ExcelIgnore
     @NotBlank(message = "操作类型不能为空")
     @ApiModelProperty(value = "操作类型", required = true)
     private String operationType;
+
     @NotBlank(message = "操作类型不能为空")
     @ExcelProperty(value = "操作类型",index = 5)
     @ApiModelProperty(value = "操作类型名称", required = true)
     private String operationTypeName;
-
+    @ExcelIgnore
     @NotBlank(message = "订单类型不能为空")
     @ApiModelProperty(value = "订单类型", required = true)
     private String orderType;
@@ -58,6 +60,7 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "币种编码", required = true)
     private String currencyCode;
 
+    @ExcelIgnore
     @ApiModelProperty(value = "币种名称")
     private String currencyName;
 
@@ -65,9 +68,11 @@ public class OperationDTO implements Serializable {
     @ExcelProperty(value = "客户类型")
     private String cusTypeName;
 
+    @ExcelIgnore
     @ApiModelProperty(value = "客户类型编码", required = true)
     private String cusTypeCode;
 
+    @ExcelIgnore
     @ApiModelProperty(value = "客户名称 A,B")
     private String cusNameList;
 
@@ -84,11 +89,13 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "失效时间")
     @ExcelProperty(value = "失效时间",index =8)
     private LocalDateTime expirationTime;
+
     @ExcelProperty(value = "备注",index = 9)
     @ApiModelProperty(value = "备注")
     private String remark;
 
     @Valid
+    @ExcelIgnore
     @ApiModelProperty(value = "规则列表")
     private List<ChaOperationDetailsDTO> chaOperationDetailList;
 

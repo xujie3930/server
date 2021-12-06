@@ -114,8 +114,12 @@ public class ThreadRunnable {
     private void getSkuDetails(String warehouseCode, List<SkuVolumeVO> skuVolumes) {
         for (SkuVolumeVO skuVolume : skuVolumes) {
             LocalDateTime now = LocalDateTime.now();
-            List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService.selectOperationByRule(new WarehouseOperationDTO().setWarehouseCode(warehouseCode)
-                    .setEffectiveTime(now).setCusCodeList(skuVolume.getCusCode()));
+            WarehouseOperationDTO warehouseOperationDTO = new WarehouseOperationDTO();
+            warehouseOperationDTO.setWarehouseCode(warehouseCode);
+            warehouseOperationDTO.setEffectiveTime(now);
+            warehouseOperationDTO.setCusCodeList(skuVolume.getCusCode());
+            List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService
+                    .selectOperationByRule(warehouseOperationDTO);
               /*  List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationMapper.listPage(new WarehouseOperationDTO().setWarehouseCode(warehouseCode)
                         .setEffectiveTime(now).setExpirationTime(now).setCusCodeList(skuVolume.getCusCode())
                 );*/

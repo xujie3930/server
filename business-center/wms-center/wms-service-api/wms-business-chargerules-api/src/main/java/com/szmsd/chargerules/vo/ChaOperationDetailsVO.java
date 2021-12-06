@@ -31,6 +31,9 @@ public class ChaOperationDetailsVO {
     @ApiModelProperty(value = "id")
     @Excel(name = "id")
     private Integer id;
+    @ApiModelProperty(value = "规则id")
+    @Excel(name = "规则id")
+    private Long operationId;
     @DecimalMin("0")
     @NotNull
     @ApiModelProperty(value = "最小重量 - 开始 单位: g", required = true)
