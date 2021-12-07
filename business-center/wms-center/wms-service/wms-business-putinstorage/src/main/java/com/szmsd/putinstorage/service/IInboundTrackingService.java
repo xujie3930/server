@@ -1,7 +1,8 @@
 package com.szmsd.putinstorage.service;
 
-import com.szmsd.putinstorage.domain.InboundTracking;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.putinstorage.domain.InboundTracking;
+import com.szmsd.putinstorage.domain.vo.InboundTrackingExportVO;
 
 import java.util.List;
 
@@ -30,6 +31,14 @@ public interface IInboundTrackingService extends IService<InboundTracking> {
      * @return 入库物流到货记录模块集合
      */
     List<InboundTracking> selectInboundTrackingList(InboundTracking inboundTracking);
+
+    /**
+     * 导出揽收记录
+     *
+     * @param batchIdList
+     * @return
+     */
+    List<InboundTrackingExportVO> selectInboundTrackingList(List<String> orderNoList);
 
     /**
      * 新增入库物流到货记录模块

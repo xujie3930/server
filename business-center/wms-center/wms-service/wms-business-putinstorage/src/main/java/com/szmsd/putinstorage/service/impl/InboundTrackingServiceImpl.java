@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.putinstorage.domain.InboundTracking;
+import com.szmsd.putinstorage.domain.vo.InboundTrackingExportVO;
+import com.szmsd.putinstorage.domain.vo.InboundTrackingVO;
 import com.szmsd.putinstorage.mapper.InboundTrackingMapper;
 import com.szmsd.putinstorage.service.IInboundTrackingService;
 import org.springframework.stereotype.Service;
@@ -51,6 +53,11 @@ public class InboundTrackingServiceImpl extends ServiceImpl<InboundTrackingMappe
                 .eq(StringUtils.isNotBlank(orderNo), InboundTracking::getOrderNo, orderNo)
                 .in(CollectionUtils.isNotEmpty(trackingNumberList), InboundTracking::getTrackingNumber, trackingNumberList)
                 .in(CollectionUtils.isNotEmpty(orderNoList), InboundTracking::getOrderNo, orderNoList));
+    }
+
+    @Override
+    public List<InboundTrackingExportVO> selectInboundTrackingList(List<String> orderNoList) {
+        return baseMapper.selectInboundTrackingList(orderNoList);
     }
 
     /**

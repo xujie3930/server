@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -26,22 +27,26 @@ public class BaseEntity implements Serializable
 //    private String searchValue;
 
     /** 创建者 */
+    @ExcelIgnore
     @ApiModelProperty(value = "创建者")
     @TableField(fill = FieldFill.INSERT)
     private String createByName;
 
     /** 创建时间 */
+    @ExcelIgnore
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "创建时间")
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 
     /** 更新者 */
+    @ExcelIgnore
     @ApiModelProperty(value = "更新者")
     @TableField(fill = FieldFill.UPDATE)
     private String updateByName;
 
     /** 更新时间 */
+    @ExcelIgnore
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "更新时间")
     @TableField(fill = FieldFill.UPDATE)
@@ -52,23 +57,27 @@ public class BaseEntity implements Serializable
     private String remark;
 
     /** 数据权限 */
+    @ExcelIgnore
     @ApiModelProperty(value = "数据权限")
     @TableField(exist = false)
     private String dataScope;
 
     /** 开始时间 */
+    @ExcelIgnore
     @JsonIgnore
     @ApiModelProperty(value = "开始时间")
     @TableField(exist = false)
     private String beginTime;
 
     /** 结束时间 */
+    @ExcelIgnore
     @JsonIgnore
     @ApiModelProperty(value = "结束时间")
     @TableField(exist = false)
     private String endTime;
 
     /** 请求参数 */
+    @ExcelIgnore
     @ApiModelProperty(value = "请求参数",hidden = true)
     @TableField(exist = false)
     private Map<String, Object> params=new HashMap<>();

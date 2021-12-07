@@ -358,7 +358,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 codeByArray = codeByArray.stream().distinct().collect(Collectors.toList());
                 List<InboundTrackingVO> collect = codeByArray.stream()
                         .map(x -> {
-                            InboundTrackingVO inboundTrackingVO = new InboundTrackingVO().setTrackingNumber(x).setOrderNo(warehouseNo);
+                            InboundTrackingVO inboundTrackingVO = new InboundTrackingVO();
+                            inboundTrackingVO.setTrackingNumber(x);
+                            inboundTrackingVO.setOrderNo(warehouseNo);
                             InboundTracking inboundTracking = collect1.get(x);
                             if (null != inboundTracking) {
                                 inboundTrackingVO.setArrivalStatus("1");
