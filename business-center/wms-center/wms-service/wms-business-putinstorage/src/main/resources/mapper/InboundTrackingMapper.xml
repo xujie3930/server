@@ -1,35 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.putinstorage.mapper.InboundTrackingMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.putinstorage.domain.InboundTracking">
+        <id column="id" property="id"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="version" property="version"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="cus_code" property="cusCode"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="tracking_number" property="trackingNumber"/>
+        <result column="operator" property="operator"/>
+        <result column="operate_on" property="operateOn"/>
+    </resultMap>
 
-        <!-- 通用查询映射结果 -->
-        <resultMap id="BaseResultMap" type="com.szmsd.putinstorage.domain.InboundTracking">
-                    <id column="id" property="id"/>
-                    <result column="create_by_name" property="createByName"/>
-                    <result column="create_time" property="createTime"/>
-                    <result column="update_by_name" property="updateByName"/>
-                    <result column="update_time" property="updateTime"/>
-                    <result column="remark" property="remark"/>
-                    <result column="create_by" property="createBy"/>
-                    <result column="update_by" property="updateBy"/>
-                    <result column="version" property="version"/>
-                    <result column="order_no" property="orderNo"/>
-                    <result column="cus_code" property="cusCode"/>
-                    <result column="warehouse_code" property="warehouseCode"/>
-                    <result column="tracking_number" property="trackingNumber"/>
-                    <result column="operator" property="operator"/>
-                    <result column="operate_on" property="operateOn"/>
-        </resultMap>
-
-        <!-- 通用查询结果列 -->
-        <sql id="Base_Column_List">
-                create_by_name,
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by_name,
                 create_time,
                 update_by_name,
                 update_time,
                 remark,
             id, create_by, update_by, version, order_no, cus_code, warehouse_code, tracking_number, operator, operate_on
-        </sql>
+    </sql>
 
-
+    <select id="selectInboundTrackingList" resultType="com.szmsd.putinstorage.domain.vo.InboundTrackingExportVO">
+        SELECT operate_on,tracking_number,order_no FROM `inbound_tracking` WHERE order_no IN
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        ORDER BY order_no
+    </select>
 </mapper>

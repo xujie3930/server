@@ -210,7 +210,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
         if (isPackageTransfer) {
             List<String> transferNoList = createInboundReceiptDTO.getTransferNoList();
-            //调用第三方
+            // 调用第三方
             remoteRequest.createPackage(inboundReceiptInfoVO, transferNoList);
         }
         // 创建入库单物流信息列表
@@ -358,7 +358,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 codeByArray = codeByArray.stream().distinct().collect(Collectors.toList());
                 List<InboundTrackingVO> collect = codeByArray.stream()
                         .map(x -> {
-                            InboundTrackingVO inboundTrackingVO = new InboundTrackingVO().setTrackingNumber(x).setOrderNo(warehouseNo);
+                            InboundTrackingVO inboundTrackingVO = new InboundTrackingVO();
+                            inboundTrackingVO.setTrackingNumber(x);
+                            inboundTrackingVO.setOrderNo(warehouseNo);
                             InboundTracking inboundTracking = collect1.get(x);
                             if (null != inboundTracking) {
                                 inboundTrackingVO.setArrivalStatus("1");

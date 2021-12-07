@@ -140,7 +140,7 @@
         IFNULL(t2.origin_code, '') origin_code,
         IFNULL(t2.create_time, '') create_time,
         IFNULL(t2.update_time, '') update_time,
-        IFNULL(t.review_remark, '') eview_remark,
+        IFNULL(t.review_remark, '') review_remark,
         IFNULL(t2.remark, '') remark,
         IFNULL(t.vat, '') vat
     </sql>

@@ -2,17 +2,18 @@ package com.szmsd.putinstorage.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.putinstorage.domain.dto.InventoryStockByRangeDTO;
-import com.szmsd.putinstorage.domain.vo.SkuInventoryStockRangeVo;
 import com.szmsd.putinstorage.annotation.InboundReceiptLog;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
@@ -22,6 +23,7 @@ import com.szmsd.putinstorage.domain.vo.*;
 import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
 import com.szmsd.putinstorage.service.IInboundReceiptRecordService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
+import com.szmsd.putinstorage.service.IInboundTrackingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,14 +38,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -71,7 +71,8 @@ public class InboundReceiptController extends BaseController {
 
     @Resource
     private IInboundReceiptRecordService iInboundReceiptRecordService;
-
+    @Resource
+    private IInboundTrackingService iInboundTrackingService;
     @Resource
     private RemoteComponent remoteComponent;
     @Resource
@@ -303,7 +304,7 @@ public class InboundReceiptController extends BaseController {
         String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
         RLock lock = redissonClient.getLock("InboundReceiptController#completed" + localKey);
         try {
-            if (lock.tryLock(LOCK_TIME,TimeUnit.SECONDS)) {
+            if (lock.tryLock(LOCK_TIME, TimeUnit.SECONDS)) {
                 iInboundReceiptService.completed(receivingCompletedRequest);
                 return R.ok();
             } else {
@@ -348,10 +349,54 @@ public class InboundReceiptController extends BaseController {
     @PreAuthorize("@ss.hasPermi('inbound:export')")
     @PostMapping("/export")
     @ApiOperation(value = "导出入库单", notes = "入库管理 - 导出")
-    public void export(@RequestBody InboundReceiptQueryDTO queryDTO, HttpServletResponse response) {
+    public void export(@RequestBody InboundReceiptQueryDTO queryDTO, HttpServletResponse httpServletResponse) {
         List<InboundReceiptExportVO> list = iInboundReceiptService.selectExport(queryDTO);
-        ExcelUtil<InboundReceiptExportVO> util = new ExcelUtil<>(InboundReceiptExportVO.class);
-        util.exportExcel(response, list, "入库单导出_" + DateUtils.dateTimeNow());
+       /* ExcelUtil<InboundReceiptExportVO> util = new ExcelUtil<>(InboundReceiptExportVO.class);
+        util.exportExcel(response, list, "入库单导出_" + DateUtils.dateTimeNow());*/
+        List<String> orderNoList = list.stream().map(InboundReceiptExportVO::getWarehouseNo).collect(Collectors.toList());
+        List<InboundTrackingExportVO> inboundTrackingVOS = iInboundTrackingService.selectInboundTrackingList(orderNoList);
+        Map<String, List<InboundTrackingExportVO>> trackingNumberMap = inboundTrackingVOS.stream().collect(Collectors.groupingBy(InboundTrackingExportVO::getOrderNo));
+        List<InboundTrackingExportVO> finalInboundTrackingVOS = inboundTrackingVOS;
+        list.forEach(x -> {
+            List<String> thisTrackingNumList = StringToolkit.getCodeByArray(x.getDeliveryNo());
+            if (CollectionUtils.isEmpty(thisTrackingNumList)) thisTrackingNumList = new ArrayList<>();
+            List<InboundTrackingExportVO> inboundTrackingVOS1 = trackingNumberMap.get(x.getWarehouseNo());
+            if (CollectionUtils.isEmpty(inboundTrackingVOS1)) inboundTrackingVOS1 = new ArrayList<>();
+            List<String> collect = inboundTrackingVOS1.stream().map(InboundTrackingExportVO::getTrackingNumber).collect(Collectors.toList());
+            // 去除已完成的单 把未完成的拼接上去
+            thisTrackingNumList.removeAll(collect);
+            List<InboundTrackingExportVO> notArrivedList = thisTrackingNumList.stream().map(tr -> {
+                InboundTrackingExportVO inboundTrackingVO = new InboundTrackingExportVO();
+                inboundTrackingVO.setOrderNo(x.getWarehouseNo());
+                inboundTrackingVO.setTrackingNumber(tr);
+                inboundTrackingVO.setReceiptStatus("未到货");
+                return inboundTrackingVO;
+            }).collect(Collectors.toList());
+            finalInboundTrackingVOS.addAll(notArrivedList);
+        });
+        inboundTrackingVOS = inboundTrackingVOS.parallelStream().sorted(Comparator.comparing(InboundTrackingExportVO::getOrderNo)).collect(Collectors.toList());
+        ExcelWriter excelWriter = null;
+        try (ServletOutputStream outputStream = httpServletResponse.getOutputStream()) {
+            String fileName = "入库单导出_" + System.currentTimeMillis();
+            String efn = URLEncoder.encode(fileName, "utf-8");
+            httpServletResponse.setContentType("application/vnd.ms-excel");
+            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xlsx");
+            excelWriter = EasyExcel.write(outputStream).build();
+            WriteSheet build1 = EasyExcel.writerSheet(0, "入库单信息").head(InboundReceiptExportVO.class).build();
+            excelWriter.write(list, build1);
+
+            WriteSheet build2 = EasyExcel.writerSheet(1, "入库到货情况").head(InboundTrackingExportVO.class).build();
+            excelWriter.write(inboundTrackingVOS, build2);
+
+            excelWriter.finish();
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            if (null != excelWriter)
+                excelWriter.finish();
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:statistics')")
