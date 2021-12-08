@@ -154,10 +154,10 @@ public class LanguageUtil {
             return languageEnum.name();
         }
         String len = ServletUtils.getHeaders("Langr");
-        if (StringUtils.isEmpty(len)) {
+        if (StringUtils.isBlank(len)) {
             len = "zh";
         }
-        return len.trim().toLowerCase().concat("Name");
+        return len.trim().toLowerCase().replaceAll("name","").concat("Name");
     }
 
 }
