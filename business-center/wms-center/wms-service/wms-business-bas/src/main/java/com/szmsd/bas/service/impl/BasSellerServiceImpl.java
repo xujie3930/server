@@ -130,10 +130,10 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
         QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"o.user_name",basSeller.getUserName());
-            LoginUser loginUser = SecurityUtils.getLoginUser();
-            if (!loginUser.isAllDataScope()) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+            if (null != loginUser && !loginUser.isAllDataScope()) {
                 String username = loginUser.getUsername();
-                where.and(x -> x.eq("o.service_manager_name", username).or().eq("o.service_staff_name",username));
+                where.and(x -> x.eq("o.service_manager_name", username).or().eq("o.service_staff_name", username));
             }
         int count = baseMapper.countBasSeller(where,basSeller.getReviewState());
        /* where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());*/
