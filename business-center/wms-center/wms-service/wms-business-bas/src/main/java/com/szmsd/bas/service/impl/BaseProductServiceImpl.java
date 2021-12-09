@@ -26,6 +26,7 @@ import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
@@ -42,15 +43,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static java.math.BigDecimal.ROUND_HALF_UP;
@@ -82,6 +88,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     private BasSubFeignService basSubFeignService;
     @Autowired
     private IBasePackingService basePackingService;
+    @Resource
+    private ThreadPoolTaskExecutor asyncTaskExecutor;
 
     /**
      * 查询模块
@@ -371,9 +379,51 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         return baseMapper.insert(baseProduct);
     }
 
+    public Tuple2<List<BaseProduct>, String> syncToWms(List<Tuple2<BaseProduct, ProductRequest>> requestTupleList) {
+        CountDownLatch countDownLatch = new CountDownLatch(requestTupleList.size());
+        List<Future<BaseProduct>> futures = new ArrayList<>();
+
+        requestTupleList.forEach(tuple -> {
+            try {
+                BaseProduct baseProduct = tuple.getT1();
+                ProductRequest productRequest = tuple.getT2();
+                Future<BaseProduct> submit = asyncTaskExecutor.submit(() -> {
+                    R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+                    //验证wms
+                    toWms(r);
+                    return baseProduct;
+                });
+                //TODO 调用推送wms
+                futures.add(submit);
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+        List<BaseProduct> canAddList = new ArrayList<>();
+        StringBuilder hasError = new StringBuilder();
+        futures.forEach(x -> {
+            BaseProduct baseProduct = null;
+            try {
+                baseProduct = x.get();
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("【SKU新增】异常：", e);
+                hasError.append(e.getMessage());
+            }
+            if (Objects.nonNull(baseProduct))
+                canAddList.add(baseProduct);
+        });
+        return Tuples.of(canAddList, hasError.toString());
+    }
+
     @Override
     public List<BaseProduct> BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos) {
-        baseProductDtos.stream().forEach(o -> {
+        baseProductDtos.forEach(o -> {
             if (StringUtils.isEmpty(o.getCode())) {
                 if (ProductConstant.SKU_NAME.equals(o.getCategory())) {
                     String skuCode = "S" + o.getSellerCode() + baseSerialNumberService.generateNumber(ProductConstant.SKU_NAME);
@@ -385,7 +435,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 }
             } else {
                 if (o.getCode().length() < 2) {
-                    throw new BaseException(o.getCategory() + "编码长度不能小于两个字符");
+                    throw new CommonException("400", o.getCategory() + "编码长度不能小于两个字符");
                 }
             }
             //验证 填写信息
@@ -403,8 +453,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             o.setWarehouseAcceptance(false);
         });
         List<BaseProduct> baseProducts = BeanMapperUtil.mapList(baseProductDtos, BaseProduct.class);
-
-        baseProducts.stream().forEach(o -> {
+        List<Tuple2<BaseProduct, ProductRequest>> waitSyncList = new ArrayList<>();
+        baseProducts.forEach(o -> {
             //包材不需要仓库测量尺寸
             o.setWarehouseAcceptance(true);
             //SKU需要仓库测量尺寸
@@ -416,11 +466,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             o.setVolume(o.getInitVolume());
             ProductRequest productRequest = BeanMapperUtil.map(o, ProductRequest.class);
             productRequest.setProductDesc(o.getProductDescription());
-            R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-            //验证wms
-            toWms(r);
+            waitSyncList.add(Tuples.of(o, productRequest));
         });
-        super.saveBatch(baseProducts);
+        Tuple2<List<BaseProduct>, String> result = syncToWms(waitSyncList);
+        super.saveBatch(result.getT1());
+        AssertUtil.isTrue(StringUtils.isBlank(result.getT2()), result.getT2());
         return baseProducts;
     }
 
