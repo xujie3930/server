@@ -161,6 +161,18 @@
         </foreach>
     </select>
 
+    <select id="exceptionMessageExportList" resultType="com.szmsd.delivery.vo.DelOutboundListExceptionMessageExportVO">
+        SELECT
+            o.id, o.order_no, o.exception_message, o.shipment_rule,
+            a.consignee, a.street1, a.street2, a.city, a.state_or_province, a.country, a.post_code
+        FROM del_outbound o
+        INNER JOIN del_outbound_address a ON a.order_no = o.order_no
+        where o.order_no in
+        <foreach  collection="orderNos" item="orderNo" open="(" separator="," close=")">
+            #{orderNo}
+        </foreach>
+    </select>
+
     <select id="queryFinishList" resultType="com.szmsd.inventory.domain.vo.QueryFinishListVO">
         SELECT order_no as no,create_time FROM `del_outbound` WHERE state = 'COMPLETED'
         <if test = "noList !=null and noList.size() > 0">

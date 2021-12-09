@@ -41,5 +41,9 @@
             id, create_by, update_by, del_flag, version, warehouse_code, operator, operate_on, order_no, exception_no, order_type, order_type_name, exception_type, exception_type_name, is_auto_created, process_remark, process_type, process_type_name, solve_remark, state
         </sql>
 
+    <select id="exportList" resultType="com.szmsd.exception.dto.ExceptionInfoExportDto">
+        select exception_no, state, exception_type_name, order_type_name, remark, order_no from exception_info
+        ${ew.customSqlSegment}
+    </select>
 
 </mapper>

@@ -128,6 +128,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             }
 
             @Override
+            public R<List<DelOutboundListExceptionMessageExportVO>> exceptionMessageExportList(List<String> orderNos) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R<List<DelOutboundBringVerifyVO>> bringVerify(DelOutboundBringVerifyDto dto) {
                 return R.convertResultJson(throwable);
             }

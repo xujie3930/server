@@ -18,7 +18,10 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
+import com.szmsd.delivery.dto.DelOutboundAddressDto;
+import com.szmsd.delivery.dto.DelOutboundAgainTrackingNoDto;
 import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
+import com.szmsd.delivery.vo.DelOutboundListExceptionMessageExportVO;
 import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
 import com.szmsd.exception.domain.ExceptionInfo;
 import com.szmsd.exception.dto.*;
@@ -96,16 +99,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
     @DataScope("seller_code")
     public List<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto) {
         QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
-        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "exception_type", dto.getExceptionType());
-        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "seller_code", dto.getSellerCode());
-        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "state", dto.getState());
-        QueryWrapperUtil.filterDate(where, "create_time", dto.getCreateTimes());
-        if (CollectionUtils.isNotEmpty(dto.getExceptionNos())) {
-            where.in("exception_no", dto.getExceptionNos());
-        }
-        if (CollectionUtils.isNotEmpty(dto.getOrderNos())) {
-            where.in("order_no", dto.getOrderNos());
-        }
+        this.handlerQueryCondition(where, dto);
         where.orderByDesc("create_time");
         List<ExceptionInfo> exceptionInfoList = baseMapper.selectList(where);
         if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
@@ -120,6 +114,52 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             }
         }
         return exceptionInfoList;
+    }
+
+    private void handlerQueryCondition(QueryWrapper<ExceptionInfo> where, ExceptionInfoQueryDto dto) {
+        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "exception_type", dto.getExceptionType());
+        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "seller_code", dto.getSellerCode());
+        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "state", dto.getState());
+        QueryWrapperUtil.filterDate(where, "create_time", dto.getCreateTimes());
+        if (CollectionUtils.isNotEmpty(dto.getExceptionNos())) {
+            where.in("exception_no", dto.getExceptionNos());
+        }
+        if (CollectionUtils.isNotEmpty(dto.getOrderNos())) {
+            where.in("order_no", dto.getOrderNos());
+        }
+    }
+
+    @Override
+    @DataScope("seller_code")
+    public List<ExceptionInfoExportDto> exportList(ExceptionInfoQueryDto dto) {
+        QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
+        this.handlerQueryCondition(where, dto);
+        where.orderByDesc("create_time");
+        List<ExceptionInfoExportDto> exportDtoList = baseMapper.exportList(where);
+        if (CollectionUtils.isNotEmpty(exportDtoList)) {
+            List<String> orderNos = exportDtoList.stream().map(ExceptionInfoExportDto::getOrderNo).collect(Collectors.toList());
+            // 查询异常描述信息
+            List<DelOutboundListExceptionMessageExportVO> exceptionMessageList = this.delOutboundClientService.exceptionMessageExportList(orderNos);
+            if (CollectionUtils.isNotEmpty(exportDtoList)) {
+                Map<String, DelOutboundListExceptionMessageExportVO> map = exceptionMessageList.stream().collect(Collectors.toMap(DelOutboundListExceptionMessageExportVO::getOrderNo, v -> v, (a, b) -> a));
+                for (ExceptionInfoExportDto exportDto : exportDtoList) {
+                    DelOutboundListExceptionMessageExportVO exportVO = map.get(exportDto.getOrderNo());
+                    if (null == exportVO) {
+                        continue;
+                    }
+                    exportDto.setExceptionMessage(exportVO.getExceptionMessage());
+                    exportDto.setShipmentRule(exportVO.getShipmentRule());
+                    exportDto.setConsignee(exportVO.getConsignee());
+                    exportDto.setStreet1(exportVO.getStreet1());
+                    exportDto.setStreet2(exportVO.getStreet2());
+                    exportDto.setCity(exportVO.getCity());
+                    exportDto.setStateOrProvince(exportVO.getStateOrProvince());
+                    exportDto.setCountry(exportVO.getCountry());
+                    exportDto.setPostCode(exportVO.getPostCode());
+                }
+            }
+        }
+        return exportDtoList;
     }
 
     /**
@@ -250,6 +290,46 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         lambdaUpdateWrapper.set(ExceptionInfo::getState, "085002");
         lambdaUpdateWrapper.eq(ExceptionInfo::getId, dto.getExceptionId());
         return super.baseMapper.update(null, lambdaUpdateWrapper);
+    }
+
+    @Transactional
+    @Override
+    public boolean importAgainTrackingNo(ExceptionInfoExportDto dto, String countryCode) {
+        String exceptionNo = dto.getExceptionNo();
+        LambdaQueryWrapper<ExceptionInfo> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(ExceptionInfo::getExceptionNo, exceptionNo);
+        ExceptionInfo exceptionInfo = super.getOne(queryWrapper);
+        if (null == exceptionInfo) {
+            throw new CommonException("999", "异常单据不存在");
+        }
+        if ("085001".equals(exceptionInfo.getState())
+                && "Shipment".equals(exceptionInfo.getOrderType())
+                && ("OutboundGetTrackingFailed".equals(exceptionInfo.getExceptionType())
+                || "OutboundOverWeight".equals(exceptionInfo.getExceptionType())
+                || "OutboundOverSize".equals(exceptionInfo.getExceptionType()))) {
+            DelOutboundAgainTrackingNoDto trackingNoDto = new DelOutboundAgainTrackingNoDto();
+            trackingNoDto.setOrderNo(exceptionInfo.getOrderNo());
+            trackingNoDto.setShipmentRule(dto.getShipmentRule());
+            DelOutboundAddressDto addressDto = new DelOutboundAddressDto();
+            addressDto.setConsignee(dto.getConsignee());
+            addressDto.setStreet1(dto.getStreet1());
+            addressDto.setStreet2(dto.getStreet2());
+            addressDto.setCity(dto.getCity());
+            addressDto.setStateOrProvince(dto.getStateOrProvince());
+            addressDto.setCountryCode(countryCode);
+            addressDto.setCountry(dto.getCountry());
+            addressDto.setPostCode(dto.getPostCode());
+            trackingNoDto.setAddress(addressDto);
+            int i = this.delOutboundClientService.againTrackingNo(trackingNoDto);
+            if (i != 1) {
+                throw new CommonException("999", "重新获取挂号失败");
+            }
+            LambdaUpdateWrapper<ExceptionInfo> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+            lambdaUpdateWrapper.set(ExceptionInfo::getState, "085002");
+            lambdaUpdateWrapper.eq(ExceptionInfo::getId, exceptionInfo.getId());
+            return super.update(null, lambdaUpdateWrapper);
+        }
+        return false;
     }
 
     @Transactional

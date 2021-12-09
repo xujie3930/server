@@ -160,6 +160,10 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述")
     R<List<DelOutboundListExceptionMessageVO>> exceptionMessageList(@RequestBody List<String> orderNos);
 
+    @PostMapping("/api/outbound/exceptionMessageExportList")
+    @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述(导出)")
+    R<List<DelOutboundListExceptionMessageExportVO>> exceptionMessageExportList(@RequestBody List<String> orderNos);
+
     @PostMapping("/api/outbound/bringVerify")
     @ApiOperation(value = "出库管理 - 提审", position = 600)
     R<List<DelOutboundBringVerifyVO>> bringVerify(@RequestBody @Validated DelOutboundBringVerifyDto dto);

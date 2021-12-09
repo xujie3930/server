@@ -372,6 +372,15 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return DelOutboundListExceptionMessageVO
      */
     List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos);
+
+    /**
+     * 获取异常描述
+     *
+     * @param orderNos orderNos
+     * @return DelOutboundListExceptionMessageExportVO
+     */
+    List<DelOutboundListExceptionMessageExportVO> exceptionMessageExportList(List<String> orderNos);
+
     @DataScope("cus_code")
     List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
 }
