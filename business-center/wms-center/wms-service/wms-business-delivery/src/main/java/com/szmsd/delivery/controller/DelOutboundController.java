@@ -602,4 +602,12 @@ public class DelOutboundController extends BaseController {
     public R<List<DelOutboundListExceptionMessageVO>> exceptionMessageList(@RequestBody List<String> orderNos) {
         return R.ok(this.delOutboundService.exceptionMessageList(orderNos));
     }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:exceptionMessageExportList')")
+    @PostMapping("/exceptionMessageExportList")
+    @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述(导出)", position = 10402)
+    @ApiImplicitParam(name = "orderNos", value = "单号", dataType = "String")
+    public R<List<DelOutboundListExceptionMessageExportVO>> exceptionMessageExportList(@RequestBody List<String> orderNos) {
+        return R.ok(this.delOutboundService.exceptionMessageExportList(orderNos));
+    }
 }

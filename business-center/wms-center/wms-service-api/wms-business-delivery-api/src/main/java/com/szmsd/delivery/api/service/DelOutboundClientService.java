@@ -120,6 +120,14 @@ public interface DelOutboundClientService {
     List<DelOutboundListExceptionMessageVO> exceptionMessageList(List<String> orderNos);
 
     /**
+     * 获取异常描述
+     *
+     * @param orderNos orderNos
+     * @return DelOutboundListExceptionMessageExportVO
+     */
+    List<DelOutboundListExceptionMessageExportVO> exceptionMessageExportList(List<String> orderNos);
+
+    /**
      * 提审
      *
      * @param dto

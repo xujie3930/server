@@ -93,6 +93,14 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     }
 
     @Override
+    public List<DelOutboundListExceptionMessageExportVO> exceptionMessageExportList(List<String> orderNos) {
+        if (CollectionUtils.isEmpty(orderNos)) {
+            return Collections.emptyList();
+        }
+        return R.getDataAndException(this.delOutboundFeignService.exceptionMessageExportList(orderNos));
+    }
+
+    @Override
     public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.bringVerify(dto));
     }

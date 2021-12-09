@@ -25,7 +25,6 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundCharge;
@@ -1607,7 +1606,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 3.增加操作日志
         // 4.异常状态变更[call]
         Long id = dto.getId();
-        DelOutbound delOutbound = this.getById(id);
+        String orderNo = dto.getOrderNo();
+        if (null == id && StringUtils.isEmpty(orderNo)) {
+            throw new CommonException("400", "ID或单号不能为空");
+        }
+        DelOutbound delOutbound;
+        if (null != id) {
+            delOutbound = super.getById(id);
+        } else {
+            delOutbound = this.getByOrderNo(orderNo);
+        }
         if (null == delOutbound) {
             throw new CommonException("400", "单据不存在");
         }
@@ -1629,6 +1637,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return Collections.emptyList();
         }
         return super.baseMapper.exceptionMessageList(orderNos);
+    }
+
+    @Override
+    public List<DelOutboundListExceptionMessageExportVO> exceptionMessageExportList(List<String> orderNos) {
+        if (CollectionUtils.isEmpty(orderNos)) {
+            return Collections.emptyList();
+        }
+        return super.baseMapper.exceptionMessageExportList(orderNos);
     }
 
     @Override

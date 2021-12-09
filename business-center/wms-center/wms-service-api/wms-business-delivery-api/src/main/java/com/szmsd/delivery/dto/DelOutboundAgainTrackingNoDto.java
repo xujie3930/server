@@ -16,9 +16,11 @@ import java.io.Serializable;
 @ApiModel(value = "DelOutboundAgainTrackingNoDto", description = "DelOutboundAgainTrackingNoDto对象")
 public class DelOutboundAgainTrackingNoDto implements Serializable {
 
-    @NotNull(message = "ID不能为空")
     @ApiModelProperty(value = "ID")
     private Long id;
+
+    @ApiModelProperty(value = "出库单号")
+    private String orderNo;
 
     @NotBlank(message = "发货规则不能为空")
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")

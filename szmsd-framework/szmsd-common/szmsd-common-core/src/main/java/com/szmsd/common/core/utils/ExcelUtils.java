@@ -8,6 +8,7 @@ import com.github.pagehelper.Page;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -103,12 +104,31 @@ public class ExcelUtils {
      * @throws Exception e
      */
     public static void export(HttpServletResponse response, Object condition, ExportExcel exportExcel) throws Exception {
+        export(response, null, condition, exportExcel);
+    }
+
+    /**
+     * 导出
+     *
+     * @param response    response
+     * @param inputStream inputStream
+     * @param condition   condition
+     * @param exportExcel exportExcel
+     * @throws Exception e
+     */
+    public static void export(HttpServletResponse response, InputStream inputStream, Object condition, ExportExcel exportExcel) throws Exception {
         setHeaderInformation(response, exportExcel.excelName(), exportExcel.headerInformation());
         ExportContext exportContext = () -> condition;
         ExportSheet<?>[] sheets = exportExcel.sheets();
-        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).build();
+        ExcelWriter excelWriter;
+        if (null != inputStream) {
+            excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(inputStream).build();
+        } else {
+            excelWriter = EasyExcel.write(response.getOutputStream()).build();
+        }
+        int sheetNo = 0;
         for (ExportSheet<?> sheet : sheets) {
-            WriteSheet writeSheet = EasyExcel.writerSheet(sheet.sheetName()).head(sheet.classType()).build();
+            WriteSheet writeSheet = EasyExcel.writerSheet(sheetNo).head(sheet.classType()).build();
             QueryPage<?> queryPage = sheet.query(exportContext);
             boolean isWrite = false;
             for (; ; ) {
@@ -118,7 +138,11 @@ public class ExcelUtils {
                 if (total > 0) {
                     // 批量处理数据
                     // 这里做一层数据的转换，导出另外写一个dto，分页的dto字段太多了，避免个性化处理
-                    excelWriter.write(BeanMapperUtil.mapList(pageInfo, sheet.classType()), writeSheet);
+                    if (null != inputStream) {
+                        excelWriter.fill(pageInfo, writeSheet);
+                    } else {
+                        excelWriter.write(BeanMapperUtil.mapList(pageInfo, sheet.classType()), writeSheet);
+                    }
                     // 标记写过数据
                     isWrite = true;
                 }
@@ -133,8 +157,13 @@ public class ExcelUtils {
             // 处理空excel的问题
             if (!isWrite) {
                 // 写一个空行
-                excelWriter.write(new ArrayList<>(), writeSheet);
+                if (null != inputStream) {
+                    excelWriter.fill(new ArrayList<>(), writeSheet);
+                } else {
+                    excelWriter.write(new ArrayList<>(), writeSheet);
+                }
             }
+            sheetNo++;
         }
         excelWriter.finish();
     }
