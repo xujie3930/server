@@ -41,9 +41,6 @@ public class ContextServletOutputStream extends ServletOutputStream {
     @Override
     public void write(byte[] b) throws IOException {
         super.write(b);
-        if (b.length > 0) {
-            buffer.append(new String(b));
-        }
     }
 
     public String getContent() {

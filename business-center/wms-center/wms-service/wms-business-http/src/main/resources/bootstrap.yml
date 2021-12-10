@@ -10,3 +10,9 @@ spring:
   profiles:
     # 环境配置
     active: test
+
+# rmi config
+com:
+  szmsd:
+    rmi:
+      enabled: true

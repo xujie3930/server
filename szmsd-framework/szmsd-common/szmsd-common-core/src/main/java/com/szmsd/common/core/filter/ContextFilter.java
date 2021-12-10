@@ -2,7 +2,6 @@ package com.szmsd.common.core.filter;
 
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.util.StringUtil;
-import com.szmsd.common.core.language.enums.LanguageEnum;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,7 @@ public class ContextFilter implements Filter {
         }
         String langr = request.getHeader("Langr");
         if (StringUtils.isBlank(langr)) {
-            langr = LanguageEnum.zhName.name();
+            langr = "zh";
         }
         MDC.put("Langr", langr);
         MDC.put("TID", requestId);
