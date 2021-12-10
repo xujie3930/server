@@ -4,7 +4,6 @@ import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;

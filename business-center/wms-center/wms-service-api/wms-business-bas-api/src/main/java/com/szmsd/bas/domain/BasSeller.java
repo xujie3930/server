@@ -11,17 +11,17 @@ import com.szmsd.common.core.annotation.Excel;
 
 
 /**
-* <p>
-    * 
-    * </p>
-*
-* @author l
-* @since 2021-03-09
-*/
+ * <p>
+ *
+ * </p>
+ *
+ * @author l
+ * @since 2021-03-09
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value="", description="BasSeller对象")
+@ApiModel(value = "", description = "BasSeller对象")
 public class BasSeller extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -150,5 +150,8 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "折扣用户类型-编码", notes = "主子类别")
     @Excel(name = "折扣用户类型-编码")
     private String discountUserType;
+
+    @ApiModelProperty(value = "第三方系统信息", notes = "第三方系统信息", hidden = true)
+    private String thirdPartSystemInfo;
 
 }

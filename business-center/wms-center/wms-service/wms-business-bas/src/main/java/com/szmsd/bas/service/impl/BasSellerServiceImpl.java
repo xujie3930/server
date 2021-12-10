@@ -1,5 +1,6 @@
 package com.szmsd.bas.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -17,6 +18,7 @@ import com.szmsd.bas.config.DefaultBasConfig;
 import com.szmsd.bas.config.StateConfig;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
+import com.szmsd.bas.domain.ThirdPartSystemInfo;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
@@ -27,7 +29,6 @@ import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -35,7 +36,6 @@ import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
@@ -53,7 +53,6 @@ import com.szmsd.system.api.feign.RemoteUserService;
 import com.szmsd.system.api.model.UserInfo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -62,7 +61,6 @@ import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
-import javax.print.attribute.standard.SheetCollate;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -311,8 +309,10 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         queryWrapper.eq("seller_code", sellerCode);
         return getBasSellerInfoVO(queryWrapper);
     }
+
     private BasSellerInfoVO getBasSellerInfoVO(QueryWrapper<BasSeller> queryWrapper) {
         BasSeller basSeller = super.getOne(queryWrapper);
+        String thirdPartSystemInfo = basSeller.getThirdPartSystemInfo();
         //查询用户证件信息
         QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
         BasSellerCertificateQueryWrapper.eq("seller_code", basSeller.getSellerCode());
@@ -348,6 +348,10 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
         List<UserCreditInfoVO> collect = dataAndException.stream().filter(x -> (x.getCreditStatus() != null) && (CreditConstant.CreditStatusEnum.ACTIVE.getValue()).equals(x.getCreditStatus())).collect(Collectors.toList());
         basSellerInfoVO.setUserCreditList(collect);
+        if (StringUtils.isNotBlank(thirdPartSystemInfo)) {
+            List<ThirdPartSystemInfo> thirdPartSystemInfos = JSONObject.parseArray(thirdPartSystemInfo, ThirdPartSystemInfo.class);
+            basSellerInfoVO.setSystemInfoList(thirdPartSystemInfos);
+        }
         return basSellerInfoVO;
     }
 
@@ -400,6 +404,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             //验证wms
             toWms(r);
             BasSeller basSeller = BeanMapperUtil.map(basSellerInfoDto,BasSeller.class);
+            basSeller.setThirdPartSystemInfo(JSONObject.toJSONString(basSellerInfoDto.getSystemInfoList()));
             basSellerCertificateService.delBasSellerCertificateByPhysics(basSeller.getSellerCode());
             if(CollectionUtils.isNotEmpty(basSellerInfoDto.getBasSellerCertificateList())) {
                 basSellerCertificateService.insertBasSellerCertificateList(basSellerInfoDto.getBasSellerCertificateList());
