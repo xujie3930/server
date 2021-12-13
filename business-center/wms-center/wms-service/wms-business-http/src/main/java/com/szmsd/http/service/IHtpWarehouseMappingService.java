@@ -67,5 +67,7 @@ public interface IHtpWarehouseMappingService extends IService<HtpWarehouseMappin
     int deleteHtpWarehouseMappingById(String id);
 
     HtpWarehouseMappingVO changeStatus(Integer id, Integer status);
+
+    List<HtpWarehouseMappingVO> ckList(HtpWarehouseMappingQueryDTO htpWarehouseMapping);
 }
 

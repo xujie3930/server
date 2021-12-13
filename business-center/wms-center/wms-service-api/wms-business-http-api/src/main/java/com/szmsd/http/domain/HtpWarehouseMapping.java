@@ -60,6 +60,10 @@ public class HtpWarehouseMapping extends BaseEntity {
     @Excel(name = "仓库名称")
     private String warehouseName;
 
+    @ApiModelProperty(value = "仓库国家")
+    @Excel(name = "仓库国家")
+    private String warehouseCountry;
+
     @ApiModelProperty(value = "目标系统")
     @Excel(name = "目标系统")
     private String mappingSystem;
@@ -71,6 +75,10 @@ public class HtpWarehouseMapping extends BaseEntity {
     @ApiModelProperty(value = "目标仓库编码")
     @Excel(name = "目标仓库编码")
     private String mappingWarehouseCode;
+
+    @ApiModelProperty(value = "目标仓库国家")
+    @Excel(name = "目标仓库国家")
+    private String mappingWarehouseCountry;
 
     @ApiModelProperty(value = "启用状态(0:禁用,1:启用)")
     @Excel(name = "启用状态(0:禁用,1:启用)")

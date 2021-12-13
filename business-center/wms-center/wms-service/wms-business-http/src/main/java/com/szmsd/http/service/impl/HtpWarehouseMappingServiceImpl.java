@@ -1,24 +1,44 @@
 package com.szmsd.http.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.web.page.PageDomain;
+import com.szmsd.common.core.web.page.PageHelperUtil;
+import com.szmsd.http.controller.RemoteInterfaceController;
 import com.szmsd.http.domain.HtpWarehouseMapping;
+import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.mapping.HtpWarehouseMappingDTO;
 import com.szmsd.http.dto.mapping.HtpWarehouseMappingQueryDTO;
 import com.szmsd.http.mapper.HtpWarehouseMappingMapper;
 import com.szmsd.http.service.IHtpWarehouseMappingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.http.vo.HttpResponseVO;
+import com.szmsd.http.vo.mapping.CkWarehouseMappingVO;
 import com.szmsd.http.vo.mapping.HtpWarehouseMappingVO;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.domain.R;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import javax.annotation.Resource;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -31,6 +51,10 @@ import java.util.Objects;
 @Service
 public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMappingMapper, HtpWarehouseMapping> implements IHtpWarehouseMappingService {
 
+    @Resource
+    private RemoteInterfaceController remoteInterfaceController;
+
+    private final static String CACHE_KEY = "http:WarMapping:";
 
     /**
      * 查询仓库与仓库关联映射模块
@@ -39,8 +63,64 @@ public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMapp
      * @return 仓库与仓库关联映射模块
      */
     @Override
+    @Cacheable(value = CACHE_KEY + "getInfo", key = "#id")
     public HtpWarehouseMappingVO selectHtpWarehouseMappingById(Integer id) {
         return baseMapper.selectOneById(id);
+    }
+
+    @Cacheable(value = CACHE_KEY + "ckWarList")
+    public List<HtpWarehouseMappingVO> getCkWarList() {
+        HttpRequestDto dto = new HttpRequestDto();
+        dto.setMethod(HttpMethod.GET);
+        Map<String, String> head = new LinkedHashMap<>();
+        head.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        // 设置用户head
+        head.put(HttpHeaders.AUTHORIZATION, "Bearer OGE0M2UzNmItMzVhMy00MDY5LWJkMjgtMWIwYjQ4ZmQ3YmM0");
+        dto.setHeaders(head);
+        dto.setUri("http://openapi.ck1info.com/v1/warehouses");
+        R<HttpResponseVO> rmi = remoteInterfaceController.rmi(dto);
+        HttpResponseVO data = rmi.getData();
+        byte[] body = data.getBody();
+        String responseStr = new String(body, StandardCharsets.UTF_8);
+        List<CkWarehouseMappingVO> htpWarehouseMappings = JSONObject.parseArray(responseStr, CkWarehouseMappingVO.class);
+        return htpWarehouseMappings.stream().map(HtpWarehouseMappingVO::new).collect(Collectors.toList());
+    }
+
+    /**
+     * 查询条件
+     *
+     * @param htpWarehouseMapping 仅查询code 和 name
+     * @return
+     */
+    @Override
+    @Cacheable(value = CACHE_KEY + "ckList", key = "#htpWarehouseMapping")
+    public List<HtpWarehouseMappingVO> ckList(HtpWarehouseMappingQueryDTO htpWarehouseMapping) {
+
+        List<HtpWarehouseMappingVO> result = getCkWarList();
+
+        String mappingWarehouseCode = htpWarehouseMapping.getMappingWarehouseCode();
+        String mappingWarehouseName = htpWarehouseMapping.getMappingWarehouseName();
+        boolean queryCode = StringUtils.isNotBlank(mappingWarehouseCode);
+        boolean queryName = StringUtils.isNotBlank(mappingWarehouseName);
+        result = result.stream().filter(x -> {
+            boolean isTrue = true;
+            if (queryCode) {
+                isTrue = isTrue && x.getMappingWarehouseCode().equals(mappingWarehouseCode);
+            }
+            if (queryName) {
+                isTrue = isTrue && x.getMappingWarehouseName().equals(mappingWarehouseName);
+            }
+            return isTrue;
+        }).collect(Collectors.toList());
+        // 封装分页
+        int pageNum = htpWarehouseMapping.getPageNum();
+        int pageSize = htpWarehouseMapping.getPageSize();
+        Page<HtpWarehouseMappingVO> localPage = new Page<>(pageNum, pageSize);
+        localPage.setTotal(result.size());
+        int startRow = Integer.min(localPage.getStartRow(), result.size());
+        int endRow = Integer.min(localPage.getEndRow(), result.size());
+        localPage.addAll(result.subList(startRow, endRow));
+        return localPage;
     }
 
     /**
@@ -50,6 +130,7 @@ public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMapp
      * @return 仓库与仓库关联映射模块
      */
     @Override
+    @Cacheable(value = CACHE_KEY + "list", key = "#htpWarehouseMapping")
     public List<HtpWarehouseMappingVO> selectHtpWarehouseMappingList(HtpWarehouseMappingQueryDTO htpWarehouseMapping) {
 
         String originSystem = htpWarehouseMapping.getOriginSystem();
@@ -82,6 +163,7 @@ public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMapp
      * @return 结果
      */
     @Override
+    @CacheEvict(value = CACHE_KEY + "*", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public int insertHtpWarehouseMapping(HtpWarehouseMappingDTO htpWarehouseMappingDTO) {
         HtpWarehouseMapping htpWarehouseMapping = new HtpWarehouseMapping();
@@ -106,6 +188,7 @@ public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMapp
      * @return 结果
      */
     @Override
+    @CacheEvict(value = CACHE_KEY + "*", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public int updateHtpWarehouseMapping(HtpWarehouseMappingDTO htpWarehouseMappingDTO) {
         Assert.notNull(htpWarehouseMappingDTO.getId(), "id is require");
@@ -122,6 +205,7 @@ public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMapp
      * @return 结果
      */
     @Override
+    @CacheEvict(value = CACHE_KEY + "*", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public int deleteHtpWarehouseMappingByIds(List<String> ids) {
         return baseMapper.deleteBatchIds(ids);
@@ -134,19 +218,22 @@ public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMapp
      * @return 结果
      */
     @Override
+    @CacheEvict(value = CACHE_KEY + "*", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public int deleteHtpWarehouseMappingById(String id) {
         return baseMapper.deleteById(id);
     }
 
     @Override
+    @CacheEvict(value = CACHE_KEY + "*", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public HtpWarehouseMappingVO changeStatus(Integer id, Integer status) {
-        HtpWarehouseMappingVO htpWarehouseMappingVO = baseMapper.selectOneById(id);
+        HtpWarehouseMappingVO htpWarehouseMappingVO = this.selectHtpWarehouseMappingById(id);
         int update = baseMapper.update(new HtpWarehouseMapping(), Wrappers.<HtpWarehouseMapping>lambdaUpdate()
                 .eq(HtpWarehouseMapping::getId, id)
                 .set(HtpWarehouseMapping::getStatus, status));
         return htpWarehouseMappingVO;
     }
+
 }
 

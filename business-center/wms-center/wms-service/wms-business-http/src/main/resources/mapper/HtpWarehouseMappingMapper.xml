@@ -16,15 +16,19 @@
         <result column="origin_system" property="originSystem"/>
         <result column="warehouse_code" property="warehouseCode"/>
         <result column="warehouse_name" property="warehouseName"/>
+        <result column="warehouse_country" property="warehouseCountry"/>
         <result column="mapping_system" property="mappingSystem"/>
         <result column="mapping_warehouse_name" property="mappingWarehouseName"/>
         <result column="mapping_warehouse_code" property="mappingWarehouseCode"/>
+        <result column="mapping_warehouse_country" property="mappingWarehouseCountry"/>
         <result column="status" property="status"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         create_by_name,
+        mapping_warehouse_country,
+        warehouse_country,
                 create_time,
                 update_by_name,
                 update_time,

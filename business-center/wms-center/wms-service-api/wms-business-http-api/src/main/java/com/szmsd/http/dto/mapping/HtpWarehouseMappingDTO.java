@@ -43,6 +43,10 @@ public class HtpWarehouseMappingDTO {
     @Excel(name = "仓库名称")
     private String warehouseName;
 
+    @ApiModelProperty(value = "仓库国家")
+    @Excel(name = "仓库国家")
+    private String warehouseCountry;
+
     @ApiModelProperty(value = "目标系统", hidden = true)
     @Excel(name = "目标系统")
     private String mappingSystem;
@@ -56,6 +60,10 @@ public class HtpWarehouseMappingDTO {
     @ApiModelProperty(value = "目标仓库编码", required = true)
     @Excel(name = "目标仓库编码")
     private String mappingWarehouseCode;
+
+    @ApiModelProperty(value = "目标仓库国家")
+    @Excel(name = "目标仓库国家")
+    private String mappingWarehouseCountry;
 
     @NotNull(message = "启用状态不能为空")
     @ApiModelProperty(value = "启用状态(0:禁用,1:启用)", required = true)

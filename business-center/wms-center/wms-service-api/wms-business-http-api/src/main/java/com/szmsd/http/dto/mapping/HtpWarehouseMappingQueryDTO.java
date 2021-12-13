@@ -12,6 +12,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
+
 
 /**
  * <p>
@@ -25,7 +27,7 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode
 @Accessors(chain = true)
 @ApiModel(description = "HtpWarehouseMappingQueryDTO对象")
-public class HtpWarehouseMappingQueryDTO extends QueryDto {
+public class HtpWarehouseMappingQueryDTO extends QueryDto implements Serializable {
 
     @ApiModelProperty(value = "源系统")
     @Excel(name = "源系统")

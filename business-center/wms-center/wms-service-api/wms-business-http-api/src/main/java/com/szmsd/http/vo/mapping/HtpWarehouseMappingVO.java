@@ -12,6 +12,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
+
 
 /**
  * <p>
@@ -27,7 +29,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "HtpWarehouseMappingVO对象")
-public class HtpWarehouseMappingVO {
+public class HtpWarehouseMappingVO implements Serializable {
 
     @ApiModelProperty(value = "id")
     @Excel(name = "id")
@@ -44,6 +46,10 @@ public class HtpWarehouseMappingVO {
     @ApiModelProperty(value = "仓库名称")
     @Excel(name = "仓库名称")
     private String warehouseName;
+
+    @ApiModelProperty(value = "仓库国家")
+    @Excel(name = "仓库国家")
+    private String warehouseCountry;
 
     @ApiModelProperty(value = "目标系统")
     @Excel(name = "目标系统")
