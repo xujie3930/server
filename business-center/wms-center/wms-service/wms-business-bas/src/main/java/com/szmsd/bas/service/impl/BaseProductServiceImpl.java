@@ -36,6 +36,8 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
+import com.szmsd.http.api.feign.HtpRmiFeignService;
+import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
@@ -43,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,6 +93,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     private IBasePackingService basePackingService;
     @Resource
     private ThreadPoolTaskExecutor asyncTaskExecutor;
+    @Resource
+    private HtpRmiFeignService htpRmiFeignService;
 
     /**
      * 查询模块
@@ -394,6 +399,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                     return baseProduct;
                 });
                 //TODO 调用推送wms
+                asyncTaskExecutor.execute(() -> {
+                    // 推送sku给wms
+                    HttpRequestDto httpRequestDto = new HttpRequestDto();
+                    httpRequestDto.setMethod(HttpMethod.POST);
+
+                    htpRmiFeignService.rmi(httpRequestDto);
+                });
+
                 futures.add(submit);
             } finally {
                 countDownLatch.countDown();

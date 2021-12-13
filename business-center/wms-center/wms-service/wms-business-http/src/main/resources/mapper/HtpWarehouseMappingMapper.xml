@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.http.mapper.HtpWarehouseMappingMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.szmsd.http.domain.HtpWarehouseMapping">
+        <id column="id" property="id"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by_name" property="updateByName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="group_id" property="groupId"/>
+        <result column="origin_system" property="originSystem"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="warehouse_name" property="warehouseName"/>
+        <result column="mapping_system" property="mappingSystem"/>
+        <result column="mapping_warehouse_name" property="mappingWarehouseName"/>
+        <result column="mapping_warehouse_code" property="mappingWarehouseCode"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, create_by, update_by, del_flag, group_id, origin_system, warehouse_code, warehouse_name, mapping_system, mapping_warehouse_name, mapping_warehouse_code, `status`
+    </sql>
+    <!-- 通用查询结果列 -->
+    <sql id="HtpWarehouseMappingVO">
+        id, origin_system, warehouse_code, warehouse_name, mapping_system, mapping_warehouse_name, mapping_warehouse_code, `status`
+    </sql>
+    <select id="selectHtpWarehouseMappingList" resultType="com.szmsd.http.vo.mapping.HtpWarehouseMappingVO">
+        SELECT
+        <include refid="HtpWarehouseMappingVO"/>
+        FROM htp_warehouse_mapping ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectOneById" resultType="com.szmsd.http.vo.mapping.HtpWarehouseMappingVO">
+        SELECT
+        <include refid="HtpWarehouseMappingVO"/>
+        FROM htp_warehouse_mapping WHERE id = #{id}
+    </select>
+</mapper>
