@@ -27,7 +27,13 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @Accessors(chain = true)
 @ApiModel(description = "HtpWarehouseMappingQueryDTO对象")
-public class HtpWarehouseMappingQueryDTO extends QueryDto implements Serializable {
+public class HtpWarehouseMappingQueryDTO implements Serializable {
+
+    @ApiModelProperty("当前页，从1开始，默认为1")
+    private int pageNum = 1;
+
+    @ApiModelProperty("每页的数量，默认为10")
+    private int pageSize = 10;
 
     @ApiModelProperty(value = "源系统")
     @Excel(name = "源系统")
