@@ -9,6 +9,7 @@ import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.page.PageDomain;
 import com.szmsd.common.core.web.page.PageHelperUtil;
+import com.szmsd.http.config.DomainEnum;
 import com.szmsd.http.controller.RemoteInterfaceController;
 import com.szmsd.http.domain.HtpWarehouseMapping;
 import com.szmsd.http.dto.HttpRequestDto;
@@ -17,6 +18,7 @@ import com.szmsd.http.dto.mapping.HtpWarehouseMappingQueryDTO;
 import com.szmsd.http.mapper.HtpWarehouseMappingMapper;
 import com.szmsd.http.service.IHtpWarehouseMappingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.mapping.CkWarehouseMappingVO;
 import com.szmsd.http.vo.mapping.HtpWarehouseMappingVO;
@@ -52,7 +54,7 @@ import java.util.stream.Collectors;
 public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMappingMapper, HtpWarehouseMapping> implements IHtpWarehouseMappingService {
 
     @Resource
-    private RemoteInterfaceController remoteInterfaceController;
+    private RemoteInterfaceService remoteInterfaceService;
 
     private final static String CACHE_KEY = "http:WarMapping:";
 
@@ -72,16 +74,10 @@ public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMapp
     public List<HtpWarehouseMappingVO> getCkWarList() {
         HttpRequestDto dto = new HttpRequestDto();
         dto.setMethod(HttpMethod.GET);
-        Map<String, String> head = new LinkedHashMap<>();
-        head.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        // 设置用户head
-        head.put(HttpHeaders.AUTHORIZATION, "Bearer OGE0M2UzNmItMzVhMy00MDY5LWJkMjgtMWIwYjQ4ZmQ3YmM0");
-        dto.setHeaders(head);
-        dto.setUri("http://openapi.ck1info.com/v1/warehouses");
-        R<HttpResponseVO> rmi = remoteInterfaceController.rmi(dto);
-        HttpResponseVO data = rmi.getData();
-        byte[] body = data.getBody();
-        String responseStr = new String(body, StandardCharsets.UTF_8);
+        dto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}/v1/warehouses");
+        dto.setBinary(false);
+        HttpResponseVO data = remoteInterfaceService.rmi(dto);
+        String responseStr = (String) data.getBody();
         List<CkWarehouseMappingVO> htpWarehouseMappings = JSONObject.parseArray(responseStr, CkWarehouseMappingVO.class);
         return htpWarehouseMappings.stream().map(HtpWarehouseMappingVO::new).collect(Collectors.toList());
     }

@@ -19,7 +19,12 @@ public class HttpResponseVO implements Serializable {
     private Map<String, String> headers;
 
     /**
-     * 响应内容（二进制根据需求自己转成对象）
+     * 响应内容
      */
-    private byte[] body;
+    private Object body;
+
+    /**
+     * 是否为二进制，true为二进制，false为字符串
+     */
+    private boolean binary;
 }

@@ -16,3 +16,13 @@ com:
   szmsd:
     rmi:
       enabled: true
+    # domain
+    domain:
+      values:
+        "Ck1OpenAPIDomain": "http://openapi.ck1info.com"
+    # domain header
+    domain-header:
+      values:
+        "[http://openapi.ck1info.com]":
+          "Content-Type": "application/json"
+          "Authorization": "Bearer OGE0M2UzNmItMzVhMy00MDY5LWJkMjgtMWIwYjQ4ZmQ3YmM0"

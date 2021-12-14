@@ -36,4 +36,9 @@ public class HttpRequestDto implements Serializable {
      */
     private Object body;
 
+    /**
+     * 是否返回二进制，true返回二进制，false返回字符串，默认false
+     */
+    private Boolean binary;
+
 }
