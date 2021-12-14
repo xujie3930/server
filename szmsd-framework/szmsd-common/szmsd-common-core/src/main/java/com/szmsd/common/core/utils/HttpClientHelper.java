@@ -319,8 +319,8 @@ public class HttpClientHelper {
                 log.error(e.getMessage(), e1);
             }
             log.error(e.getMessage(), e);
+            return new HttpResponseBody.HttpResponseBodyEmpty(e.getMessage());
         }
-        return new HttpResponseBody.HttpResponseBodyEmpty();
     }
 
     public static HttpResponseBody httpPostStream(String url, Map<String, String> headerMap, String requestBody) {

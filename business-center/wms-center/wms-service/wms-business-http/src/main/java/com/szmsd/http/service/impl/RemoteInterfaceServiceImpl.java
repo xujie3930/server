@@ -113,8 +113,14 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                     responseVO.setBinary(false);
                 }
             } else if (httpResponseBody instanceof HttpResponseBody.HttpResponseBodyEmpty) {
+                HttpResponseBody.HttpResponseBodyEmpty responseBodyEmpty = (HttpResponseBody.HttpResponseBodyEmpty) httpResponseBody;
                 responseVO.setStatus(0);
-                responseVO.setBody("请求失败".getBytes(StandardCharsets.UTF_8));
+                String body = responseBodyEmpty.getBody();
+                if (null == body) {
+                    body = "";
+                }
+                String responseBody = "请求失败，" + body;
+                responseVO.setBody(responseBody.getBytes(StandardCharsets.UTF_8));
                 responseVO.setBinary(false);
             }
         } catch (Exception e) {
