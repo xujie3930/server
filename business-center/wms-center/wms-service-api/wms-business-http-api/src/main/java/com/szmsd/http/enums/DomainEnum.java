@@ -1,4 +1,4 @@
-package com.szmsd.http.config;
+package com.szmsd.http.enums;
 
 public enum DomainEnum {
     /**

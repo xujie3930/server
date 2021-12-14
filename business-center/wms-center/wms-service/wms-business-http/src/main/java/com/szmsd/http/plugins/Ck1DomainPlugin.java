@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 @Component(value = "Ck1DomainPlugin")
 public class Ck1DomainPlugin extends AbstractDomainPlugin {
-
+    private final Pattern p = Pattern.compile("\\$\\{(.*?)}");
     @Autowired
     private IHtpWarehouseMappingService warehouseMappingService;
 
@@ -18,7 +18,6 @@ public class Ck1DomainPlugin extends AbstractDomainPlugin {
         // {\"WarehouseId\":\"${WarCode:NJ}\"}
         // ${WarCode:NJ}
         // {\"WarehouseId\":\"15\"}
-        Pattern p = Pattern.compile("\\$\\{(.*?)}");
         Matcher matcher = p.matcher(requestBody);
         while (matcher.find()) {
             // ${WarCode:NJ}
