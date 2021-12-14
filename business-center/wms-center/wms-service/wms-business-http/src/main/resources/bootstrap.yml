@@ -20,6 +20,11 @@ com:
     domain:
       values:
         "Ck1OpenAPIDomain": "http://openapi.ck1info.com"
+    # domain plugin
+    domain-plugin:
+      values:
+        "[http://openapi.ck1info.com]":
+          - "Ck1DomainPlugin"
     # domain header
     domain-header:
       values:

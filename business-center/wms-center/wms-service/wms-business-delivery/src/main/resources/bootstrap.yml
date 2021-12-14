@@ -10,3 +10,13 @@ spring:
   profiles:
     # 环境配置
     active: dev
+
+com:
+  szmsd:
+    ck1:
+      values:
+        create: "/v1/outboundOrders"
+        finished: "/v1/outboundOrders/{packageId}/finished"
+        cancel: "/v1/outboundOrders/{packageId}/cancelState"
+        "a": "/v1/ladingOrders"
+        "b": "/v1/ladingOrders/{shipmentId}/cancelState"

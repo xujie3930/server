@@ -6,12 +6,17 @@ import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.http.config.DomainConfig;
 import com.szmsd.http.config.DomainHeaderConfig;
+import com.szmsd.http.config.DomainPluginConfig;
+import com.szmsd.http.config.DomainUtil;
 import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.event.EventUtil;
 import com.szmsd.http.event.RequestLogEvent;
+import com.szmsd.http.plugins.Domain;
+import com.szmsd.http.plugins.DomainPlugin;
 import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.vo.HttpResponseVO;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -22,14 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
@@ -38,13 +41,18 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
     @Autowired
     private DomainConfig domainConfig;
     @Autowired
+    private DomainPluginConfig domainPluginConfig;
+    @Autowired
     private DomainHeaderConfig domainHeaderConfig;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Override
     public HttpResponseVO rmi(HttpRequestDto dto) {
         HttpResponseVO responseVO = new HttpResponseVO();
         Date requestTime = new Date();
         String uri = dto.getUri();
+        String domain;
         // 处理uri
         if (uri.startsWith("${")) {
             int i = uri.indexOf("}");
@@ -55,18 +63,27 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             if (StringUtils.isEmpty(domainKey)) {
                 throw new CommonException("500", "域名key配置错误，不能为空");
             }
-            String domain = this.domainConfig.getDomain(domainKey);
+            domain = this.domainConfig.getDomain(domainKey);
             String api = uri.substring(i + 1);
             uri = domain + api;
+        } else {
+            domain = DomainUtil.getDomain(uri);
         }
-        // 处理header配置问题，优先级别：domainHeaderConfig < dto.getHeaders
-        Map<String, String> requestHeaders = this.domainHeaderConfig.getHeader(uri);
-        if (null == requestHeaders) {
-            requestHeaders = new LinkedHashMap<>();
+        // 处理插件逻辑
+        List<String> handlerPlugins = new ArrayList<>();
+        handlerPlugins.add("DefaultDomainPlugin");
+        List<String> plugins = this.domainPluginConfig.getPlugins(domain);
+        if (CollectionUtils.isNotEmpty(plugins)) {
+            handlerPlugins.addAll(plugins);
         }
-        Map<String, String> headers = dto.getHeaders();
-        if (null != headers) {
-            requestHeaders.putAll(headers);
+        Map<String, String> requestHeaders = dto.getHeaders();
+        // 请求body
+        String requestBody = JSON.toJSONString(dto.getBody());
+        for (String plugin : handlerPlugins) {
+            DomainPlugin domainPlugin = getDomainPlugin(plugin, domain);
+            requestHeaders = domainPlugin.headers(requestHeaders);
+            uri = domainPlugin.uri(uri);
+            requestBody = domainPlugin.requestBody(requestBody);
         }
         // 二进制
         Boolean binary = dto.getBinary();
@@ -74,8 +91,6 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             // default value
             binary = false;
         }
-        // 请求body
-        String requestBody = JSON.toJSONString(dto.getBody());
         try {
             // 处理请求体
             HttpEntityEnclosingRequestBase request = null;
@@ -135,7 +150,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             requestLog.setTraceId(MDC.get("TID"));
             requestLog.setRequestUri(uri);
             requestLog.setRequestMethod(dto.getMethod().name());
-            requestLog.setRequestHeader(JSON.toJSONString(headers));
+            requestLog.setRequestHeader(JSON.toJSONString(requestHeaders));
             requestLog.setRequestBody(requestBody);
             requestLog.setRequestTime(requestTime);
             requestLog.setResponseHeader(JSON.toJSONString(responseVO.getHeaders()));
@@ -150,6 +165,14 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             EventUtil.publishEvent(new RequestLogEvent(requestLog));
         }
         return responseVO;
+    }
+
+    private DomainPlugin getDomainPlugin(String plugin, String domain) {
+        DomainPlugin domainPlugin = this.applicationContext.getBean(plugin, DomainPlugin.class);
+        if (domainPlugin instanceof Domain) {
+            ((Domain) domainPlugin).setDomain(domain);
+        }
+        return domainPlugin;
     }
 
     private Map<String, String> headerToMap(Header[] headers) {

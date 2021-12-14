@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 
 @Data
@@ -19,18 +17,11 @@ public class DomainHeaderConfig {
 
     private Map<String, Map<String, String>> values;
 
-    public Map<String, String> getHeader(String uri) {
+    public Map<String, String> getHeaders(String uri) {
         if (null == values) {
             return null;
         }
-        try {
-            URI uri1 = new URI(uri);
-            String key = uri1.getScheme() + "://" + uri1.getHost();
-            return values.get(key);
-        } catch (URISyntaxException e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
+        return values.get(DomainUtil.getDomain(uri));
     }
 
 }
