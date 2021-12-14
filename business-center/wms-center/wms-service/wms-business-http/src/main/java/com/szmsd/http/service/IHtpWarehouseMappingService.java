@@ -69,5 +69,8 @@ public interface IHtpWarehouseMappingService extends IService<HtpWarehouseMappin
     HtpWarehouseMappingVO changeStatus(Integer id, Integer status);
 
     List<HtpWarehouseMappingVO> ckList(HtpWarehouseMappingQueryDTO htpWarehouseMapping);
+
+
+    String getMappingWarCode(String warehouseCode);
 }
 

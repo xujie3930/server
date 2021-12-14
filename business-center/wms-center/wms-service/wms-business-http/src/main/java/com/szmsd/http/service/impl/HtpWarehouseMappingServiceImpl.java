@@ -7,6 +7,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.web.page.PageDomain;
 import com.szmsd.common.core.web.page.PageHelperUtil;
 import com.szmsd.http.config.DomainEnum;
@@ -80,6 +81,16 @@ public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMapp
         String responseStr = (String) data.getBody();
         List<CkWarehouseMappingVO> htpWarehouseMappings = JSONObject.parseArray(responseStr, CkWarehouseMappingVO.class);
         return htpWarehouseMappings.stream().map(HtpWarehouseMappingVO::new).collect(Collectors.toList());
+    }
+
+    @Override
+    @Cacheable(value = CACHE_KEY + "mappingWarCode", key = "#warehouseCode")
+    public String getMappingWarCode(String warehouseCode) {
+        HtpWarehouseMapping htpWarehouseMapping = baseMapper.selectOne(Wrappers.<HtpWarehouseMapping>lambdaQuery()
+                .eq(HtpWarehouseMapping::getWarehouseCode, warehouseCode)
+                .select(HtpWarehouseMapping::getMappingWarehouseCode));
+        AssertUtil.notNull(htpWarehouseMapping, "未配置" + warehouseCode + "的仓库映射配置");
+        return htpWarehouseMapping.getMappingWarehouseCode();
     }
 
     /**

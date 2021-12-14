@@ -17,6 +17,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 
@@ -62,6 +64,16 @@ public class HtpWarehouseMappingController extends BaseController {
         startPage(queryDto);
         List<HtpWarehouseMappingVO> list = htpWarehouseMappingService.selectHtpWarehouseMappingList(htpWarehouseMapping);
         return getDataTable(list);
+    }
+
+    /**
+     * 查询仓库与仓库关联映射模块列表
+     */
+    @PreAuthorize("@ss.hasPermi('HtpWarehouseMapping:HtpWarehouseMapping:list')")
+    @GetMapping("/getMappingWarCode/{warehouseCode}")
+    @ApiOperation(value = "查询映射的仓库编码", notes = "查询映射的仓库编码")
+    public R<String> getMappingWarCode(@PathVariable("warehouseCode") @Valid @NotBlank String warehouseCode) {
+         return R.ok(htpWarehouseMappingService.getMappingWarCode(warehouseCode));
     }
 
     /**
