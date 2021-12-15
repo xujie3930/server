@@ -10,9 +10,9 @@ import java.util.function.Function;
 @Getter
 @AllArgsConstructor
 public enum EmailEnum {
-
-    VAR_CODE("验证码",
-            "【DM FULFILLMENT】验证码：{0}。此验证码用于设置你的帐户邮箱，请在DM OMS注册页面中输入并完成验证。验证码有效时间：30分钟",
+    //"【DM FULFILLMENT】验证码：{0}。此验证码用于设置你的帐户邮箱，请在DM OMS注册页面中输入并完成验证。验证码有效时间：30分钟",
+    VAR_CODE("Confirmation Code",
+            "【DM FULFILLMENT】{0} is your DM Fulfillment confirmation code. Please enter and complete the confirmation on the registration page. The effective time of confirmation code is 30 minutes",
             (param) -> MessageFormat.format(EmailEnum.valueOf("VAR_CODE").getContent(), param), 30, TimeUnit.MINUTES),
     ;
     /** 标题 **/

@@ -141,7 +141,7 @@
         IFNULL(t2.create_time, '') create_time,
         IFNULL(t2.update_time, '') update_time,
         IFNULL(t.review_remark, '') review_remark,
-        IFNULL(t2.remark, '') remark,
+        IFNULL(t.remark, '') remark,
         IFNULL(t.vat, '') vat
     </sql>
     <select id="selectListByCondiction" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultType="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
