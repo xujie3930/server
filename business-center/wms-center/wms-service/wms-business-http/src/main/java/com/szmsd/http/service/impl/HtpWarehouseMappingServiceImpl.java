@@ -3,6 +3,7 @@ package com.szmsd.http.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.Page;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.http.domain.HtpWarehouseMapping;
@@ -12,7 +13,6 @@ import com.szmsd.http.dto.mapping.HtpWarehouseMappingQueryDTO;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.mapper.HtpWarehouseMappingMapper;
 import com.szmsd.http.service.IHtpWarehouseMappingService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.mapping.CkWarehouseMappingVO;
@@ -75,6 +75,7 @@ public class HtpWarehouseMappingServiceImpl extends ServiceImpl<HtpWarehouseMapp
     public String getMappingWarCode(String warehouseCode) {
         HtpWarehouseMapping htpWarehouseMapping = baseMapper.selectOne(Wrappers.<HtpWarehouseMapping>lambdaQuery()
                 .eq(HtpWarehouseMapping::getWarehouseCode, warehouseCode)
+                .eq(HtpWarehouseMapping::getStatus, 1)
                 .select(HtpWarehouseMapping::getMappingWarehouseCode));
         AssertUtil.notNull(htpWarehouseMapping, "未配置" + warehouseCode + "的仓库映射配置");
         return htpWarehouseMapping.getMappingWarehouseCode();

@@ -1,5 +1,11 @@
 package com.szmsd.bas.service.impl;
 
+import cn.hutool.core.date.StopWatch;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.http.Method;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -39,11 +45,16 @@ import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.api.feign.HtpRmiFeignService;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.ProductRequest;
+import com.szmsd.http.dto.sku.CkSkuCreateDTO;
+import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.http.client.methods.HttpPost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -57,9 +68,8 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.math.BigDecimal.ROUND_HALF_UP;
@@ -374,9 +384,12 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
         productRequest.setProductDesc(baseProductDto.getProductDescription());
-        R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+        /*R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         //验证wms
-        toWms(r);
+        toWms(r);*/
+
+        Tuple2<List<BaseProduct>, String> result = syncToWms(Collections.singletonList(Tuples.of(baseProduct, productRequest)));
+        AssertUtil.isTrue(StringUtils.isBlank(result.getT2()), result.getT2());
         if (CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())) {
             AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProductDto.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
@@ -385,48 +398,44 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     public Tuple2<List<BaseProduct>, String> syncToWms(List<Tuple2<BaseProduct, ProductRequest>> requestTupleList) {
-        CountDownLatch countDownLatch = new CountDownLatch(requestTupleList.size());
-        List<Future<BaseProduct>> futures = new ArrayList<>();
+        List<CompletableFuture<BaseProduct>> futures = new ArrayList<>();
 
         requestTupleList.forEach(tuple -> {
-            try {
-                BaseProduct baseProduct = tuple.getT1();
-                ProductRequest productRequest = tuple.getT2();
-                Future<BaseProduct> submit = asyncTaskExecutor.submit(() -> {
-                    R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-                    //验证wms
-                    toWms(r);
-                    return baseProduct;
-                });
+
+            BaseProduct baseProduct = tuple.getT1();
+            ProductRequest productRequest = tuple.getT2();
+            CkSkuCreateDTO ckSkuCreateDTO = baseProduct.createCkSkuCreateDTO();
+            CompletableFuture<BaseProduct> future = CompletableFuture.supplyAsync(() -> {
+                R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+                //验证wms
+                toWms(r);
+                return baseProduct;
+            }, asyncTaskExecutor).thenApply(x -> {
+                //封装转换对象
                 //TODO 调用推送wms
-                asyncTaskExecutor.execute(() -> {
-                    // 推送sku给wms
-                    HttpRequestDto httpRequestDto = new HttpRequestDto();
-                    httpRequestDto.setMethod(HttpMethod.POST);
+                HttpRequestDto httpRequestDto = new HttpRequestDto();
+                httpRequestDto.setMethod(HttpMethod.POST);
+                httpRequestDto.setBinary(false);
+                httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}/v1/merchantSkus");
+                httpRequestDto.setBody(ckSkuCreateDTO);
 
-                    htpRmiFeignService.rmi(httpRequestDto);
-                });
-
-                futures.add(submit);
-            } finally {
-                countDownLatch.countDown();
-            }
+                R<HttpResponseVO> rmiR = htpRmiFeignService.rmi(httpRequestDto);
+                HttpResponseVO dataAndException = R.getDataAndException(rmiR);
+                return baseProduct;
+            }/*, asyncTaskExecutor*/);
+            futures.add(future);
         });
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
         List<BaseProduct> canAddList = new ArrayList<>();
         StringBuilder hasError = new StringBuilder();
+        AtomicInteger index = new AtomicInteger(1);
         futures.forEach(x -> {
             BaseProduct baseProduct = null;
+            int indexThis = index.getAndIncrement();
             try {
                 baseProduct = x.get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (Exception e) {
                 log.error("【SKU新增】异常：", e);
-                hasError.append(e.getMessage());
+                hasError.append("第").append(indexThis).append("数据处理异常:").append(e.getMessage()).append("\n");
             }
             if (Objects.nonNull(baseProduct))
                 canAddList.add(baseProduct);
