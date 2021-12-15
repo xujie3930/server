@@ -7,7 +7,7 @@ import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.plugin.annotation.AutoFieldI18n;
-import com.szmsd.http.dto.sku.CkSkuCreateDTO;
+import com.szmsd.bas.api.dto.CkSkuCreateDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -275,7 +275,7 @@ public class BaseProduct extends BaseEntity {
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<CkSkuCreateDTO>> validate = validator.validate(ckSkuCreateDTO, Default.class);
         String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));
-        AssertUtil.isTrue(StringUtils.isBlank(error), "推送CK1请求参数异常：" + error);
+        AssertUtil.isTrue(StringUtils.isBlank(error), "推送CK1-创建SKU请求参数异常：" + error);
         return ckSkuCreateDTO;
     }
 }

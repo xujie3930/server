@@ -1,4 +1,4 @@
-package com.szmsd.http.dto.sku;
+package com.szmsd.bas.api.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModel;
@@ -32,8 +32,9 @@ public class CkSkuCreateDTO implements Serializable {
     @ApiModelProperty(value = "自定义库存编码")
     private String CustomStorageNo;
 
+    @Size(max = 100, message = "产品名称长度: 0 ~ 100")
     @NotBlank(message = "产品名称不能为空")
-    @ApiModelProperty(value = "产品名称", required = true)
+    @ApiModelProperty(value = "产品名称", notes = "长度: 0 ~ 100", required = true)
     private String ProductName;
 
     @Size(max = 2000, message = "产品描述长度不能大于2000")
@@ -66,6 +67,7 @@ public class CkSkuCreateDTO implements Serializable {
     private String DeclareName;
 
     @NotNull(message = "申报价值不能为空")
+//    @DecimalMin(value = "0", message = "申报价值异常")
     @Digits(integer = 16, fraction = 2, message = "申报价值不符合格式")
     @ApiModelProperty(value = "申报价值(USD)", notes = "浮点数格式: 18,2", required = true)
     private BigDecimal DeclareValue;
@@ -75,11 +77,11 @@ public class CkSkuCreateDTO implements Serializable {
 
     @ApiModelProperty(value = "库存警报", notes = "范围: 0 ~ 2147483647")
     private Integer ProductAmountWarn;
-
-    @ApiModelProperty(value = "产品品类", notes = "长度: 0 ~ 50")
+    @Size(max = 50, message = "产品品类长度:0 ~ 50")
+    @ApiModelProperty(value = "产品品类", notes = "长度:0 ~ 50")
     private String ProductCategory;
-
-    @ApiModelProperty(value = "产品备注", notes = "长度: 0 ~ 255")
+    @Size(max = 255, message = "产品备注长度: 0 ~ 255")
+    @ApiModelProperty(value = "产品备注", notes = "长度:0 ~ 255")
     private String ProductRemark;
 
     @Override

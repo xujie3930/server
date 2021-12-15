@@ -21,8 +21,15 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.http.api.feign.HtpRmiFeignService;
+import com.szmsd.http.config.CkConfig;
+import com.szmsd.http.config.CkThreadPool;
+import com.szmsd.http.dto.HttpRequestDto;
+import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
+import com.szmsd.putinstorage.api.dto.CkPutawayDTO;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
@@ -45,6 +52,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -57,6 +65,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,6 +99,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     @Resource
     private RechargesFeignService rechargesFeignService;
+    @Resource
+    private HtpRmiFeignService htpRmiFeignService;
+    @Resource
+    private CkThreadPool ckThreadPool;
+    @Resource
+    private CkConfig ckConfig;
 
     /**
      * 入库单查询
@@ -166,6 +181,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 创建入库单
+     * 推送出口易： OMS中完成入库单后，当是第一次上架（状态调整为处理中时）向业务系统创建入库单
      *
      * @param createInboundReceiptDTO
      */
@@ -416,6 +432,25 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         // 第一次入库上架 把状态修改为 3处理中
         if (beforeTotalPutQty == 0) {
             inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue());
+            // OMS中完成入库单后，当是第一次上架（状态调整为处理中时）向业务系统创建入库单
+            CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
+
+                HttpRequestDto httpRequestDto = new HttpRequestDto();
+                httpRequestDto.setMethod(HttpMethod.POST);
+                httpRequestDto.setBinary(false);
+                httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getCreatePutawayOrderUrl());
+                httpRequestDto.setBody(receivingRequest.createCkPutawayDTO());
+                R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+                HttpResponseVO dataAndException = R.getDataAndException(rmi);
+                dataAndException.checkStatus();
+                return httpRequestDto;
+            }, ckThreadPool);
+            try {
+                HttpRequestDto httpRequestDto = httpRequestDtoCompletableFuture.get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e.getMessage());
+            }
         }
         this.updateById(inboundReceipt);
 
@@ -426,6 +461,25 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         remoteComponent.inboundInventory(receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseName()));
 
         log.info("#B1 接收入库上架：操作完成");
+        // 通知ck1 入库信息
+        CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            HttpRequestDto httpRequestDto = new HttpRequestDto();
+            httpRequestDto.setMethod(HttpMethod.POST);
+            httpRequestDto.setBinary(false);
+            httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getPutawayUrl());
+            httpRequestDto.setBody(receivingRequest.createCkPutawayDTO());
+            R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+            HttpResponseVO dataAndException = R.getDataAndException(rmi);
+            dataAndException.checkStatus();
+            return httpRequestDto;
+        }, ckThreadPool);
+        try {
+            HttpRequestDto httpRequestDto = httpRequestDtoCompletableFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 
     @Resource

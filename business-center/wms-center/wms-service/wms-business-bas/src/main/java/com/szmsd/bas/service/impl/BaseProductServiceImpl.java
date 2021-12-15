@@ -1,11 +1,5 @@
 package com.szmsd.bas.service.impl;
 
-import cn.hutool.core.date.StopWatch;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.http.Method;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -43,21 +37,19 @@ import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.api.feign.HtpRmiFeignService;
+import com.szmsd.http.config.CkThreadPool;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.ProductRequest;
-import com.szmsd.http.dto.sku.CkSkuCreateDTO;
+import com.szmsd.bas.api.dto.CkSkuCreateDTO;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.apache.http.client.methods.HttpPost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.util.function.Tuple2;
@@ -102,7 +94,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     @Autowired
     private IBasePackingService basePackingService;
     @Resource
-    private ThreadPoolTaskExecutor asyncTaskExecutor;
+    private CkThreadPool ckThreadPool;
     @Resource
     private HtpRmiFeignService htpRmiFeignService;
 
@@ -410,7 +402,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 //验证wms
                 toWms(r);
                 return baseProduct;
-            }, asyncTaskExecutor).thenApply(x -> {
+            }, ckThreadPool).thenApplyAsync(x -> {
                 //封装转换对象
                 //TODO 调用推送wms
                 HttpRequestDto httpRequestDto = new HttpRequestDto();
@@ -421,8 +413,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
                 R<HttpResponseVO> rmiR = htpRmiFeignService.rmi(httpRequestDto);
                 HttpResponseVO dataAndException = R.getDataAndException(rmiR);
+                dataAndException.checkStatus();
                 return baseProduct;
-            }/*, asyncTaskExecutor*/);
+            }, ckThreadPool);
             futures.add(future);
         });
         List<BaseProduct> canAddList = new ArrayList<>();
