@@ -5,9 +5,8 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.http.config.DomainConfig;
-import com.szmsd.http.config.DomainHeaderConfig;
 import com.szmsd.http.config.DomainPluginConfig;
-import com.szmsd.http.config.DomainUtil;
+import com.szmsd.http.config.DomainURIUtil;
 import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.event.EventUtil;
@@ -15,6 +14,7 @@ import com.szmsd.http.event.RequestLogEvent;
 import com.szmsd.http.plugins.Domain;
 import com.szmsd.http.plugins.DomainPlugin;
 import com.szmsd.http.service.RemoteInterfaceService;
+import com.szmsd.http.util.DomainUtil;
 import com.szmsd.http.vo.HttpResponseVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -43,8 +43,6 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
     @Autowired
     private DomainPluginConfig domainPluginConfig;
     @Autowired
-    private DomainHeaderConfig domainHeaderConfig;
-    @Autowired
     private ApplicationContext applicationContext;
 
     @Override
@@ -54,8 +52,9 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
         String uri = dto.getUri();
         String domain;
         // 处理uri
-        if (uri.startsWith("${")) {
-            int i = uri.indexOf("}");
+        // uri格式${xxx}/api/user
+        if (uri.startsWith(DomainUtil.PREFIX)) {
+            int i = uri.indexOf(DomainUtil.SUFFIX);
             if (i < 0) {
                 throw new CommonException("500", "环境变量配置错误，没有'}'");
             }
@@ -67,7 +66,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             String api = uri.substring(i + 1);
             uri = domain + api;
         } else {
-            domain = DomainUtil.getDomain(uri);
+            domain = DomainURIUtil.getDomain(uri);
         }
         // 处理插件逻辑
         List<String> handlerPlugins = new ArrayList<>();

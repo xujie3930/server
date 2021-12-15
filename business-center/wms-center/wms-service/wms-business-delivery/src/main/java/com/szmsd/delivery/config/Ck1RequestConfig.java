@@ -16,4 +16,14 @@ public class Ck1RequestConfig {
     static final String CONFIG_PREFIX = "com.szmsd.ck1";
 
     private Map<String, String> values;
+
+    /**
+     * 获取api
+     *
+     * @param key key
+     * @return String
+     */
+    public String getApi(String key) {
+        return values.get(key);
+    }
 }

@@ -21,7 +21,7 @@ public class DomainHeaderConfig {
         if (null == values) {
             return null;
         }
-        return values.get(DomainUtil.getDomain(uri));
+        return values.get(DomainURIUtil.getDomain(uri));
     }
 
 }

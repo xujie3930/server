@@ -242,57 +242,74 @@ public class DelOutboundTimer {
     }
 
     private void handleProcessing(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleProcessing(orderNo, id));
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleProcessing(orderNo, id), 200, true);
     }
 
     private void handleCompleted(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleCompleted(orderNo, id));
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleCompleted(orderNo, id), 150, true);
     }
 
     public void handleCancelled(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleCancelled(orderNo, id));
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleCancelled(orderNo, id), 200, true);
     }
 
     public void handleBringVerify(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncBringVerify(orderNo, id), 100);
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncBringVerify(orderNo, id), 150);
     }
 
     public void handleShipmentPacking(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncShipmentPacking(orderNo, id), 100);
-    }
-
-    private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer) {
-        // 默认100
-        this.handle(queryWrapper, consumer, 100);
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncShipmentPacking(orderNo, id), 350, true);
     }
 
     private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer, int limit) {
+        // 默认100
+        this.handle(queryWrapper, consumer, limit, false);
+    }
+
+    private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer, int limit, boolean needLock) {
         // 一次处理200
         queryWrapper.last("limit " + limit);
         List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
         if (CollectionUtils.isNotEmpty(delOutboundCompletedList)) {
             for (DelOutboundCompleted delOutboundCompleted : delOutboundCompletedList) {
-                // 增加守护锁，同一条记录如果被多次扫描到，只允许有一个在执行，其它的忽略掉
-                String key = applicationName + ":DelOutboundTimer:handle:" + delOutboundCompleted.getId();
-                RLock lock = redissonClient.getLock(key);
-                try {
-                    if (lock.tryLock(0, TimeUnit.SECONDS)) {
+                if (needLock) {
+                    // 增加守护锁，同一条记录如果被多次扫描到，只允许有一个在执行，其它的忽略掉
+                    String key = applicationName + ":DelOutboundTimer:handle:" + delOutboundCompleted.getId();
+                    RLock lock = redissonClient.getLock(key);
+                    try {
+                        if (lock.tryLock(0, TimeUnit.SECONDS)) {
+                            consumer.accept(delOutboundCompleted.getOrderNo(), delOutboundCompleted.getId());
+                        }
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        // 处理失败
+                        this.delOutboundCompletedService.fail(delOutboundCompleted.getId(), e.getMessage());
+                        // 线程池任务满了，停止执行
+                        if (e instanceof RejectedExecutionException) {
+                            logger.error("=============================================");
+                            logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>线程池队列任务溢出");
+                            logger.error("=============================================");
+                            break;
+                        }
+                    } finally {
+                        if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                            lock.unlock();
+                        }
+                    }
+                } else {
+                    try {
                         consumer.accept(delOutboundCompleted.getOrderNo(), delOutboundCompleted.getId());
-                    }
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                    // 处理失败
-                    this.delOutboundCompletedService.fail(delOutboundCompleted.getId(), e.getMessage());
-                    // 线程池任务满了，停止执行
-                    if (e instanceof RejectedExecutionException) {
-                        logger.error("=============================================");
-                        logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>线程池队列任务溢出");
-                        logger.error("=============================================");
-                        break;
-                    }
-                } finally {
-                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                        lock.unlock();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        // 处理失败
+                        this.delOutboundCompletedService.fail(delOutboundCompleted.getId(), e.getMessage());
+                        // 线程池任务满了，停止执行
+                        if (e instanceof RejectedExecutionException) {
+                            logger.error("=============================================");
+                            logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>线程池队列任务溢出");
+                            logger.error("=============================================");
+                            break;
+                        }
                     }
                 }
             }

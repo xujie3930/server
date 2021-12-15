@@ -64,7 +64,7 @@ public class ThreadPoolExecutorConfiguration {
     public static final String THREADPOOLEXECUTOR_CK1_SAVE = "ThreadPoolExecutor-Ck1-Save";
 
     /**
-     * CK!发送请求信息
+     * CK1发送请求信息
      */
     public static final String THREADPOOLEXECUTOR_CK1_REQUEST = "ThreadPoolExecutor-Ck1-Request";
 

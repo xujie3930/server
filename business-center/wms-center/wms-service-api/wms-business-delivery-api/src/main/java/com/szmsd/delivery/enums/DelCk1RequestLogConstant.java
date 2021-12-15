@@ -1,12 +1,25 @@
 package com.szmsd.delivery.enums;
 
-public class DelCk1RequestLogConstant {
+public final class DelCk1RequestLogConstant {
 
+    /**
+     * 状态
+     */
     public enum State {
         WAIT,
         FAIL_CONTINUE,
         FAIL,
         SUCCESS,
+        ;
+    }
+
+    /**
+     * 类型
+     */
+    public enum Type {
+        create,
+        finished,
+        cancel,
         ;
     }
 }

@@ -1,14 +1,18 @@
 package com.szmsd.delivery.dto;
 
 import io.swagger.annotations.ApiModel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @ApiModel(value = "DelCk1OutboundDto", description = "DelCk1OutboundDto对象")
 public class DelCk1OutboundDto implements Serializable {
@@ -25,6 +29,8 @@ public class DelCk1OutboundDto implements Serializable {
     private Boolean SubmitLater;
 
     @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Data
     public static class PackageDTO {
         // 包裹Id(第三方系统自定义Id，客户+包裹Id 具有唯一性)
@@ -57,6 +63,8 @@ public class DelCk1OutboundDto implements Serializable {
         private Boolean IsCreateNewOrder;
 
         @Builder
+        @AllArgsConstructor
+        @NoArgsConstructor
         @Data
         public static class ShipToAddressDTO {
             // 收件人税号或者VAT税号
@@ -84,6 +92,8 @@ public class DelCk1OutboundDto implements Serializable {
         }
 
         @Builder
+        @AllArgsConstructor
+        @NoArgsConstructor
         @Data
         public static class ExportsInfoDTO {
             private String EoriCode;
@@ -100,6 +110,8 @@ public class DelCk1OutboundDto implements Serializable {
         }
 
         @Builder
+        @AllArgsConstructor
+        @NoArgsConstructor
         @Data
         public static class ImportsInfoDTO {
             private String EoriCode;
@@ -116,16 +128,18 @@ public class DelCk1OutboundDto implements Serializable {
         }
 
         @Builder
+        @AllArgsConstructor
+        @NoArgsConstructor
         @Data
         public static class SkusDTO {
             // 商家SKU
             private String Sku;
             // 数量
-            private Integer Quantity;
+            private Long Quantity;
             // 商品名称
             private String ProductName;
             //商品单价
-            private BigDecimal Price;
+            private Double Price;
             // 物品ID
             private String PlatformItemId;
             // 平台交易号
