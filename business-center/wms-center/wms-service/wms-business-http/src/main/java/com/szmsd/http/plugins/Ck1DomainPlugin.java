@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 @Component(value = "Ck1DomainPlugin")
 public class Ck1DomainPlugin extends AbstractDomainPlugin {
-    private final Pattern p = Pattern.compile("\\$\\{(.*?)}");
+    private final Pattern p = Pattern.compile(Ck1DomainPluginUtil.REG_EX);
     @Autowired
     private IHtpWarehouseMappingService warehouseMappingService;
 
