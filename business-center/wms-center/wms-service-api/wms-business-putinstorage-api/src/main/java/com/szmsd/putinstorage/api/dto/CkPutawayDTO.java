@@ -1,17 +1,27 @@
 package com.szmsd.putinstorage.api.dto;
 
 import com.alibaba.fastjson.JSONObject;
+import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.http.util.Ck1DomainPluginUtil;
+import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName: CkPutawayDTO
@@ -46,6 +56,31 @@ public class CkPutawayDTO {
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
+    }
+
+    /**
+     * CK1-sku入库上架推送
+     * @return
+     */
+    public static CkPutawayDTO createCkPutawayDTO(ReceivingRequest receivingRequest) {
+        CkPutawayDTO ckPutawayDTO = new CkPutawayDTO();
+        ckPutawayDTO.setCustomerOrderNo(receivingRequest.getOrderNo());
+        ckPutawayDTO.setWarehouseCode(Ck1DomainPluginUtil.wrapper(receivingRequest.getWarehouseCode()));
+
+        ArrayList<PutawayListDTO> putawayList = new ArrayList<>();
+
+        PutawayListDTO putawayListDTO = new PutawayListDTO();
+        putawayListDTO.setQty(receivingRequest.getQty());
+        putawayListDTO.setSku(receivingRequest.getSku());
+
+        putawayList.add(putawayListDTO);
+
+        ckPutawayDTO.setPutawayList(putawayList);
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        Set<ConstraintViolation<CkPutawayDTO>> validate = validator.validate(ckPutawayDTO);
+        String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));
+        AssertUtil.isTrue(StringUtils.isBlank(error), "推送CK1-SKU入库上架 请求参数异常：" + error);
+        return ckPutawayDTO;
     }
 
 }

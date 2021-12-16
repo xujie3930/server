@@ -27,13 +27,19 @@ public class CkConfig {
      */
     String warHouseListUrl = "http://openapi.ck1info.com/v1/warehouses";
     /**
-     * 推送CK1 入库上架接口
+     * 推送CK1 sku入库上架接口 推送sku的上架明细信息
      */
-    String putawayUrl= "/v1/InventoryPutawayOrder/Putaway";
+    String putawayUrl = "/v1/InventoryPutawayOrder/Putaway";
     /**
      * 推送CK1 创建入库单接口
      */
-    String createPutawayOrderUrl= "/v1/InventoryPutawayOrder/Create";
+    String createPutawayOrderUrl = "/v1/InventoryPutawayOrder/Create";
+    /**
+     * 推送CK1 入库单完成时 调用 来货单完成
+     */
+    String incomingOrderCompletedUrl = "/v1/InventoryPutawayOrder/{customerOrderNo}/finished";
 
-
+    public String getIncomingOrderCompletedUrl(String customerOrderNo) {
+        return incomingOrderCompletedUrl.replace("{customerOrderNo}", customerOrderNo);
+    }
 }

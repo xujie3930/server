@@ -1,5 +1,6 @@
 package com.szmsd.http.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import org.springframework.http.HttpMethod;
 
@@ -41,4 +42,8 @@ public class HttpRequestDto implements Serializable {
      */
     private Boolean binary;
 
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }

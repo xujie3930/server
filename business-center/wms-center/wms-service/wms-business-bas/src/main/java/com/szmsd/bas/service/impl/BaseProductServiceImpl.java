@@ -1,5 +1,6 @@
 package com.szmsd.bas.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -412,6 +413,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 httpRequestDto.setBody(ckSkuCreateDTO);
 
                 R<HttpResponseVO> rmiR = htpRmiFeignService.rmi(httpRequestDto);
+                log.info("【推送CK1】SKU创建推送 {} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmiR));
                 HttpResponseVO dataAndException = R.getDataAndException(rmiR);
                 dataAndException.checkStatus();
                 return baseProduct;

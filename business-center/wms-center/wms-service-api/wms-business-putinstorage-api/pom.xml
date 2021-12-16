@@ -27,6 +27,10 @@
             <groupId>com.szmsd</groupId>
             <artifactId>szmsd-common-plugin-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-http-api</artifactId>
+        </dependency>
 
     </dependencies>
 

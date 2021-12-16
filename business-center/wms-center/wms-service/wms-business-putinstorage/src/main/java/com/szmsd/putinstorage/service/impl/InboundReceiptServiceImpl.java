@@ -29,6 +29,7 @@ import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
+import com.szmsd.putinstorage.api.dto.CkCreateIncomingOrderDTO;
 import com.szmsd.putinstorage.api.dto.CkPutawayDTO;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
@@ -55,7 +56,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -366,7 +366,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         if (inboundReceiptInfoVO != null) {
             String deliveryNo = inboundReceiptInfoVO.getDeliveryNo();
             List<String> codeByArray = Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>());
-            // 查询收货信息
+            // 查询收货信息 物流到货明细
             List<InboundTracking> inboundTrackings = iInboundTrackingService.selectInboundTrackingList(new InboundTracking().setOrderNo(warehouseNo));
             Map<String, InboundTracking> collect1 = inboundTrackings.stream().filter(x -> StringUtils.isNotBlank(x.getTrackingNumber())).collect(Collectors.toMap(InboundTracking::getTrackingNumber, x -> x));
             codeByArray.addAll(collect1.keySet());
@@ -426,27 +426,33 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         InboundReceiptVO inboundReceiptVO = selectByWarehouseNo(refOrderNo);
         AssertUtil.notNull(inboundReceiptVO, "入库单号[" + refOrderNo + "]不存在，请核对");
         // 之前总上架数量
+        receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseCode());
         Integer beforeTotalPutQty = inboundReceiptVO.getTotalPutQty();
         InboundReceipt inboundReceipt = new InboundReceipt().setId(inboundReceiptVO.getId());
         inboundReceipt.setTotalPutQty(beforeTotalPutQty + qty);
         // 第一次入库上架 把状态修改为 3处理中
         if (beforeTotalPutQty == 0) {
             inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue());
-            // OMS中完成入库单后，当是第一次上架（状态调整为处理中时）向业务系统创建入库单
-            CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
 
-                HttpRequestDto httpRequestDto = new HttpRequestDto();
-                httpRequestDto.setMethod(HttpMethod.POST);
-                httpRequestDto.setBinary(false);
-                httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getCreatePutawayOrderUrl());
-                httpRequestDto.setBody(receivingRequest.createCkPutawayDTO());
-                R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
-                HttpResponseVO dataAndException = R.getDataAndException(rmi);
-                dataAndException.checkStatus();
-                return httpRequestDto;
-            }, ckThreadPool);
+            // 查询入库单明细
+            // OMS中完成入库单后，当是第一次上架（状态调整为处理中时）向业务系统创建入库单
+            CompletableFuture<HttpResponseVO> future = CompletableFuture
+                    .supplyAsync(() -> queryInfo(refOrderNo, false))
+                    .thenApplyAsync(inboundReceiptInfoDetailVO -> {
+
+                        HttpRequestDto httpRequestDto = new HttpRequestDto();
+                        httpRequestDto.setMethod(HttpMethod.POST);
+                        httpRequestDto.setBinary(false);
+                        httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getCreatePutawayOrderUrl());
+                        httpRequestDto.setBody(CkCreateIncomingOrderDTO.createIncomingOrderDTO(inboundReceiptInfoDetailVO));
+                        R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+                        log.info("【推送CK1】首次接收入库上架,创建入库单{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+                        HttpResponseVO dataAndException = R.getDataAndException(rmi);
+                        dataAndException.checkStatus();
+                        return dataAndException;
+                    }, ckThreadPool);
             try {
-                HttpRequestDto httpRequestDto = httpRequestDtoCompletableFuture.get();
+                HttpResponseVO httpRequestDto = future.get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
@@ -467,8 +473,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             httpRequestDto.setMethod(HttpMethod.POST);
             httpRequestDto.setBinary(false);
             httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getPutawayUrl());
-            httpRequestDto.setBody(receivingRequest.createCkPutawayDTO());
+            httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest));
             R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+            log.info("【推送CK1】首次接收入库上架,推送上架SKU信息 {} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
             HttpResponseVO dataAndException = R.getDataAndException(rmi);
             dataAndException.checkStatus();
             return httpRequestDto;
@@ -497,6 +504,23 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         String orderNo = receivingCompletedRequest.getOrderNo();
         updateStatus(orderNo, InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
         log.info("#B3 接收完成入库：操作完成");
+        CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            HttpRequestDto httpRequestDto = new HttpRequestDto();
+            httpRequestDto.setMethod(HttpMethod.PUT);
+            httpRequestDto.setBinary(false);
+            httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getIncomingOrderCompletedUrl(orderNo));
+            R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+            log.info("【推送CK1】接收入库完成{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+            HttpResponseVO dataAndException = R.getDataAndException(rmi);
+            dataAndException.checkStatus();
+            return httpRequestDto;
+        }, ckThreadPool);
+        try {
+            HttpRequestDto httpRequestDto = httpRequestDtoCompletableFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
         //接收入库完成重新计算扣除入库费用
         //解冻之前的冻结费
         /*DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
