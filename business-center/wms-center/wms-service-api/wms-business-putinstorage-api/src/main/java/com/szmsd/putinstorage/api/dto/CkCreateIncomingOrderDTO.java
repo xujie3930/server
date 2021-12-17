@@ -80,18 +80,18 @@ public class CkCreateIncomingOrderDTO {
         ckCreateIncomingOrderDTO.setCarrier("Carrier");
         ckCreateIncomingOrderDTO.setGoodsIncomingCode(strings);
         String warehouseMethodCode = detailVO.getWarehouseMethodCode();
-        if (PutinstorageConstant.RE_LABEL_ON_SELL.equals(warehouseMethodCode)) {
-            //重新贴标上架 055002=CK1LabelingAndPutaway
-            ckCreateIncomingOrderDTO.setGoodsHandleWay(GoodsHandleWayEnum.CK1LabelingAndPutaway);
-        } else {
-            //按点数上架 055001=CountingAndPutaway
-            ckCreateIncomingOrderDTO.setGoodsHandleWay(GoodsHandleWayEnum.CountingAndPutaway);
-//           if (PutinstorageConstant.SKU_ON_SELL_BY_POINT.equals(warehouseMethodCode)){
-//               //按点数上架 055001=CountingAndPutaway
-//               ckCreateIncomingOrderDTO.setGoodsHandleWay(GoodsHandleWayEnum.CountingAndPutaway);
-//           }
-        }
-
+//        if (PutinstorageConstant.RE_LABEL_ON_SELL.equals(warehouseMethodCode)) {
+//            //重新贴标上架 055002=CK1LabelingAndPutaway
+//            ckCreateIncomingOrderDTO.setGoodsHandleWay(GoodsHandleWayEnum.CK1LabelingAndPutaway);
+//        } else {
+//            //按点数上架 055001=CountingAndPutaway
+//
+////           if (PutinstorageConstant.SKU_ON_SELL_BY_POINT.equals(warehouseMethodCode)){
+////               //按点数上架 055001=CountingAndPutaway
+////               ckCreateIncomingOrderDTO.setGoodsHandleWay(GoodsHandleWayEnum.CountingAndPutaway);
+////           }
+//        }
+        ckCreateIncomingOrderDTO.setGoodsHandleWay(GoodsHandleWayEnum.CountingAndPutaway);
         ckCreateIncomingOrderDTO.setHandleWarehouseCode(Ck1DomainPluginUtil.wrapper(detailVO.getWarehouseCode()));
         ckCreateIncomingOrderDTO.setSaleVAT(detailVO.getVat());
         ckCreateIncomingOrderDTO.setRemark(detailVO.getRemark());

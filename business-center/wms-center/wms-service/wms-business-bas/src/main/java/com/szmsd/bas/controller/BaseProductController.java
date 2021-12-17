@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.bas.constant.BaseConstant;
 import com.szmsd.bas.constant.ProductConstant;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
@@ -19,10 +20,13 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -56,6 +61,15 @@ public class BaseProductController extends BaseController {
 
     @Autowired
     private IBasSellerService basSellerService;
+    @Resource
+    private RedissonClient redissonClient;
+
+    private String genKey() {
+        String lockKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        String className = Thread.currentThread().getStackTrace()[2].getClassName();
+        String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
+        return className + methodName + "#" + lockKey;
+    }
 
     /**
      * 查询模块列表
@@ -85,11 +99,11 @@ public class BaseProductController extends BaseController {
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @GetMapping("/listByCode")
     @ApiOperation(value = "通过code查询列表", notes = "通过code查询列表")
-    public TableDataInfo listByCode(String code,String category,int current,int size) {
+    public TableDataInfo listByCode(String code, String category, int current, int size) {
         QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
         basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
         BasSeller basSeller = basSellerService.getOne(basSellerQueryWrapper);
-        TableDataInfo<BaseProductVO> list = baseProductService.selectBaseProductByCode(code,basSeller.getSellerCode(),category,current,size);
+        TableDataInfo<BaseProductVO> list = baseProductService.selectBaseProductByCode(code, basSeller.getSellerCode(), category, current, size);
         return list;
     }
 
@@ -100,7 +114,7 @@ public class BaseProductController extends BaseController {
     public R importData(MultipartFile file) throws Exception {
         ExcelUtil<BaseProductImportDto> util = new ExcelUtil<BaseProductImportDto>(BaseProductImportDto.class);
         List<BaseProductImportDto> userList = util.importExcel(file.getInputStream());
-        if(CollectionUtils.isEmpty(userList)){
+        if (CollectionUtils.isEmpty(userList)) {
             throw new BaseException("导入内容为空");
         }
         baseProductService.importBaseProduct(userList);
@@ -189,7 +203,22 @@ public class BaseProductController extends BaseController {
     @PostMapping("add")
     @ApiOperation(value = "新增产品模块", notes = "新增产品模块")
     public R add(@RequestBody BaseProductDto baseProductDto) {
-        return toOk(baseProductService.insertBaseProduct(baseProductDto));
+        RLock lock = redissonClient.getLock(genKey());
+        try {
+            if (lock.tryLock(BaseConstant.LOCK_TIME, BaseConstant.LOCK_TIME_UNIT)) {
+                return toOk(baseProductService.insertBaseProduct(baseProductDto));
+            } else {
+                return R.failed(BaseConstant.genErrorMsg("新增SKU"));
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            log.error(BaseConstant.genErrorMsg("新增SKU"), e);
+            return R.failed(BaseConstant.genErrorMsg("新增SKU"));
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:add')")
@@ -197,7 +226,23 @@ public class BaseProductController extends BaseController {
     @PostMapping("addBatch")
     @ApiOperation(value = "新增产品模块", notes = "新增产品模块")
     public R<List<BaseProduct>> addBatch(@RequestBody List<BaseProductDto> baseProductDtos) {
-        return R.ok(baseProductService.BatchInsertBaseProduct(baseProductDtos));
+        RLock lock = redissonClient.getLock(genKey());
+        try {
+            if (lock.tryLock(BaseConstant.LOCK_TIME, BaseConstant.LOCK_TIME_UNIT)) {
+                return R.ok(baseProductService.BatchInsertBaseProduct(baseProductDtos));
+            } else {
+                return R.failed(BaseConstant.genErrorMsg("新增SKU"));
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            log.error(BaseConstant.genErrorMsg("新增SKU"), e);
+            return R.failed(BaseConstant.genErrorMsg("新增SKU"));
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+
     }
 
     /**
