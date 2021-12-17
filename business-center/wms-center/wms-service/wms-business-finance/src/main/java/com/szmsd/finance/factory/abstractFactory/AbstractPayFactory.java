@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class AbstractPayFactory {
 
-    public static final TimeUnit unit = TimeUnit.MILLISECONDS;
+    public static final TimeUnit unit = TimeUnit.SECONDS;
 
-    public static final long time = 10000L;
+    public static final long time = 30L;
 
     @Autowired
     private IAccountBalanceService iAccountBalanceService;
