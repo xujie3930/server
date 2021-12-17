@@ -397,7 +397,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
             BaseProduct baseProduct = tuple.getT1();
             ProductRequest productRequest = tuple.getT2();
-            CkSkuCreateDTO ckSkuCreateDTO = baseProduct.createCkSkuCreateDTO();
+            CkSkuCreateDTO ckSkuCreateDTO = CkSkuCreateDTO.createCkSkuCreateDTO(baseProduct);
             CompletableFuture<BaseProduct> future = CompletableFuture.supplyAsync(() -> {
                 R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
                 //验证wms

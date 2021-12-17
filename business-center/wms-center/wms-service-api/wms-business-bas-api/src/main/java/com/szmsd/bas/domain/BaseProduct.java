@@ -258,24 +258,4 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "用途")
     private String purpose;
 
-    public CkSkuCreateDTO createCkSkuCreateDTO() {
-        CkSkuCreateDTO ckSkuCreateDTO = new CkSkuCreateDTO();
-        ckSkuCreateDTO.setSku(code).setProductName(productName)
-                .setCustomStorageNo(code)
-                .setProductDescription(productDescription)
-                .setWeight(weight.intValue())
-                .setLength(new BigDecimal(Double.toString(length)))
-                .setWidth(new BigDecimal(Double.toString(width)))
-                .setHeight(new BigDecimal(Double.toString(length)))
-                .setDeclareName(productName)
-                .setDeclareValue(new BigDecimal(Double.toString(declaredValue)))
-                .setProductCategory(category)
-                .setProductRemark(getRemark())
-        ;
-        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        Set<ConstraintViolation<CkSkuCreateDTO>> validate = validator.validate(ckSkuCreateDTO, Default.class);
-        String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));
-        AssertUtil.isTrue(StringUtils.isBlank(error), "推送CK1-创建SKU请求参数异常：" + error);
-        return ckSkuCreateDTO;
-    }
 }

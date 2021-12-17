@@ -1,14 +1,23 @@
 package com.szmsd.bas.api.dto;
 
 import com.alibaba.fastjson.JSONObject;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import javax.validation.constraints.*;
+import javax.validation.groups.Default;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName: CkSkuCreateDTO
@@ -87,6 +96,27 @@ public class CkSkuCreateDTO implements Serializable {
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
+    }
+
+    public static CkSkuCreateDTO createCkSkuCreateDTO(BaseProduct baseProduct) {
+        CkSkuCreateDTO ckSkuCreateDTO = new CkSkuCreateDTO();
+        ckSkuCreateDTO.setSku(baseProduct.getCode())
+                .setCustomStorageNo(null)
+                .setProductDescription(baseProduct.getProductDescription())
+                .setWeight(baseProduct.getWeight().intValue())
+                .setLength(new BigDecimal(Double.toString(baseProduct.getLength())))
+                .setWidth(new BigDecimal(Double.toString(baseProduct.getWidth())))
+                .setHeight(new BigDecimal(Double.toString(baseProduct.getLength())))
+                .setDeclareName(baseProduct.getProductName())
+                .setProductName(baseProduct.getProductName())
+                .setDeclareValue(new BigDecimal(Double.toString(baseProduct.getDeclaredValue())))
+                .setProductCategory(baseProduct.getCategory())
+                .setProductRemark(baseProduct.getRemark());
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        Set<ConstraintViolation<CkSkuCreateDTO>> validate = validator.validate(ckSkuCreateDTO, Default.class);
+        String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));
+        AssertUtil.isTrue(StringUtils.isBlank(error), "推送CK1-创建SKU请求参数异常：" + error);
+        return ckSkuCreateDTO;
     }
 }
 
