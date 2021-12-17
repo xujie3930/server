@@ -397,13 +397,20 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
             BaseProduct baseProduct = tuple.getT1();
             ProductRequest productRequest = tuple.getT2();
-            CkSkuCreateDTO ckSkuCreateDTO = CkSkuCreateDTO.createCkSkuCreateDTO(baseProduct);
             CompletableFuture<BaseProduct> future = CompletableFuture.supplyAsync(() -> {
                 R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
                 //验证wms
                 toWms(r);
+                log.info("【推送CK1】SKU创建推送 {} 返回 {}", productRequest, JSONObject.toJSONString(r));
                 return baseProduct;
             }, ckThreadPool).thenApplyAsync(x -> {
+                // 只推送sku
+                if (StringUtils.isBlank(x.getCategory())||ProductConstant.SKU_NAME.equals(x.getCategory())){
+                    log.info("【推送CK1】非SKU创建推送不推送 {}", x);
+                    return x;
+                }
+
+                CkSkuCreateDTO ckSkuCreateDTO = CkSkuCreateDTO.createCkSkuCreateDTO(x);
                 //封装转换对象
                 //TODO 调用推送wms
                 HttpRequestDto httpRequestDto = new HttpRequestDto();
@@ -430,7 +437,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 baseProduct = x.get();
             } catch (Exception e) {
                 log.error("【SKU新增】异常：", e);
-                hasError.append("第").append(indexThis).append("数据处理异常:").append(e.getMessage()).append("\n");
+                hasError.append("第").append(indexThis).append("条数据处理异常:").append(e.getMessage()).append("\n");
             }
             if (Objects.nonNull(baseProduct))
                 canAddList.add(baseProduct);
@@ -809,18 +816,18 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
     private void toWms(R<ResponseVO> r) {
         if (r == null) {
-            throw new BaseException("wms服务调用失败");
+            throw new RuntimeException("wms服务调用失败");
         }
         if (r.getData() == null) {
             //throw new BaseException("wms服务调用失败");
         } else {
             if (r.getData().getSuccess() == null) {
                 if (r.getData().getErrors() != null) {
-                    throw new BaseException("传wms失败" + r.getData().getErrors());
+                    throw new RuntimeException("传wms失败" + r.getData().getErrors());
                 }
             } else {
                 if (!r.getData().getSuccess()) {
-                    throw new BaseException("传wms失败" + r.getData().getMessage());
+                    throw new RuntimeException("传wms失败" + r.getData().getMessage());
                 }
             }
         }
