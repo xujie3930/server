@@ -99,9 +99,9 @@ public class CkCreateIncomingOrderDTO {
 
         List<CustomerManifestItemsDTO> ckdetailList = inboundReceiptDetails.stream().map(x -> {
             CustomerManifestItemsDTO detail = new CustomerManifestItemsDTO();
-            //
+            // 不需要传 StorageNo
             detail.setNo(x.getSku());
-            detail.setStorageNo(x.getSku());
+            detail.setStorageNo(null);
             detail.setCustomerQuantity(x.getDeclareQty());
             detail.setGoodsDescription(x.getSkuName());
             detail.setDeclareName(x.getSkuName());

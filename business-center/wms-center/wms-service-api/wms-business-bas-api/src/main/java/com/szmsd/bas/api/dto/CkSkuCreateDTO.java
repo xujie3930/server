@@ -101,7 +101,7 @@ public class CkSkuCreateDTO implements Serializable {
     public static CkSkuCreateDTO createCkSkuCreateDTO(BaseProduct baseProduct) {
         CkSkuCreateDTO ckSkuCreateDTO = new CkSkuCreateDTO();
         ckSkuCreateDTO.setSku(baseProduct.getCode())
-                .setCustomStorageNo(null)
+                .setCustomStorageNo(baseProduct.getCode())
                 .setProductDescription(baseProduct.getProductDescription())
                 .setWeight(baseProduct.getWeight().intValue())
                 .setLength(new BigDecimal(Double.toString(baseProduct.getLength())))
