@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,6 +12,7 @@ import com.szmsd.delivery.service.IDelCk1RequestLogService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.vo.HttpResponseVO;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -65,7 +67,18 @@ public class DelCk1RequestLogServiceImpl extends ServiceImpl<DelCk1RequestLogMap
                     }
                     httpRequestDto.setMethod(method);
                     httpRequestDto.setUri(ck1RequestLog.getUrl());
-                    httpRequestDto.setBody(ck1RequestLog.getRequestBody());
+                    String requestBody = ck1RequestLog.getRequestBody();
+                    if (StringUtils.isNotEmpty(requestBody)) {
+                        Object body;
+                        try {
+                            body = JSON.parse(requestBody);
+                        } catch (Exception e) {
+                            body = requestBody;
+                        }
+                        httpRequestDto.setBody(body);
+                    } else {
+                        httpRequestDto.setBody(requestBody);
+                    }
                     HttpResponseVO httpResponseVO = htpRmiClientService.rmi(httpRequestDto);
                     if (200 == httpResponseVO.getStatus() ||
                             201 == httpResponseVO.getStatus()) {
