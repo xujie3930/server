@@ -462,10 +462,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         this.updateById(inboundReceipt);
 
         // 修改明细上架数量
-//        iInboundReceiptDetailService.receiving(receivingRequest.getOrderNo(), receivingRequest.getSku(), receivingRequest.getQty());
+        iInboundReceiptDetailService.receiving(receivingRequest.getOrderNo(), receivingRequest.getSku(), receivingRequest.getQty());
 
 //        // 库存 上架入库
-//        remoteComponent.inboundInventory(receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseName()));
+        remoteComponent.inboundInventory(receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseName()));
 
         log.info("#B1 接收入库上架：操作完成");
         // 通知ck1 入库信息
