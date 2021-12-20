@@ -347,14 +347,6 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
         basSellerInfoVO.setBasSellerCertificateList(basSellerCertificateVOS);
 
-        R<List<UserCreditInfoVO>> listR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
-        List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
-        List<UserCreditInfoVO> collect = dataAndException.stream().filter(x -> (x.getCreditStatus() != null) && (CreditConstant.CreditStatusEnum.ACTIVE.getValue()).equals(x.getCreditStatus())).collect(Collectors.toList());
-        basSellerInfoVO.setUserCreditList(collect);
-        if (StringUtils.isNotBlank(thirdPartSystemInfo)) {
-            List<ThirdPartSystemInfo> thirdPartSystemInfos = JSONObject.parseArray(thirdPartSystemInfo, ThirdPartSystemInfo.class);
-            basSellerInfoVO.setSystemInfoList(thirdPartSystemInfos);
-        }
         String serviceStaff = basSeller.getServiceStaff();
         String serviceManager = basSeller.getServiceManager();
         // 查询客服名称
