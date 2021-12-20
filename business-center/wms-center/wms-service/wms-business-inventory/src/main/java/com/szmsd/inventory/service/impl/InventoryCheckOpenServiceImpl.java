@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -50,6 +51,8 @@ public class InventoryCheckOpenServiceImpl implements IInventoryCheckOpenService
 
     @Resource
     private RedissonClient redissonClient;
+    private final static long LOCK_TIME = 30;
+    private final static TimeUnit LOCK_TIME_UNIT = TimeUnit.SECONDS;
 
     @Transactional
     @Override
@@ -58,7 +61,7 @@ public class InventoryCheckOpenServiceImpl implements IInventoryCheckOpenService
         RLock lock = redissonClient.getLock(key);
         boolean result = false;
         try {
-            if (lock.tryLock()) {
+            if (lock.tryLock(LOCK_TIME, LOCK_TIME_UNIT)) {
                 LambdaQueryWrapper<Inventory> query = Wrappers.lambdaQuery();
                 query.eq(Inventory::getSku, adjustRequestDto.getSku()).eq(Inventory::getWarehouseCode, adjustRequestDto.getWarehouseCode());
                 Inventory beforeInventory = inventoryMapper.selectOne(query);
@@ -69,9 +72,9 @@ public class InventoryCheckOpenServiceImpl implements IInventoryCheckOpenService
                     afterInventory.setCusCode(sku.getSellerCode());
                 }
                 // after inventory
-                int afterTotalInventory = beforeInventory.getAvailableInventory() + adjustRequestDto.getQty();
+                int afterTotalInventory = beforeInventory.getTotalInventory() + adjustRequestDto.getQty();
                 int afterAvailableInventory = beforeInventory.getAvailableInventory() + adjustRequestDto.getQty();
-                afterInventory.setId(beforeInventory.getId()).setSku(adjustRequestDto.getSku()).setWarehouseCode(adjustRequestDto.getWarehouseCode()).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory).setTotalInbound(afterInventory.getTotalInbound());
+                afterInventory.setId(beforeInventory.getId()).setSku(adjustRequestDto.getSku()).setWarehouseCode(adjustRequestDto.getWarehouseCode()).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory);
                 result = inventoryService.saveOrUpdate(afterInventory);
 
                 // 记录库存日志
@@ -79,12 +82,14 @@ public class InventoryCheckOpenServiceImpl implements IInventoryCheckOpenService
                         LocalLanguageEnum.INVENTORY_RECORD_TYPE_4.getKey(), beforeInventory, afterInventory, adjustRequestDto.getOrderNo(), adjustRequestDto.getOperator(), adjustRequestDto.getOperateOn(), adjustRequestDto.getQty(),
                         adjustRequestDto.getOperator(), adjustRequestDto.getOperateOn(), adjustRequestDto.getOrderNo(), adjustRequestDto.getSku(), adjustRequestDto.getWarehouseCode(), (adjustRequestDto.getQty() + "")
                 );
+            } else {
+                throw new RuntimeException("请求超时,请稍后重试!");
             }
         } catch (Exception e) {
-            log.error("", e);
-            throw e;
+            log.error("库存调整异常：", e);
+            throw new RuntimeException(e.getMessage());
         } finally {
-            if (lock.isLocked()) lock.unlock();
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) lock.unlock();
         }
         return result;
     }
