@@ -83,8 +83,10 @@ public class InboundReceiptDTO {
     @Size(max = 30, message = "产品货源地编码仅支持0-30字符")
     @ApiModelProperty(value = "产品货源地编码 (0-30]")
     private String goodsSourceCode;
+
+    @Deprecated
     @Size(max = 200, message = "挂号长度仅支持0-200字符")
-    @ApiModelProperty(value = "挂号 (0-200]")
+    @ApiModelProperty(value = "挂号 (0-200]",notes = "没用")
     private String trackingNumber;
     @Size(max = 500, message = "备注长度仅支持0-500字符")
     @ApiModelProperty(value = "备注 (0-500]")
