@@ -63,13 +63,18 @@ public class BasSeller extends BaseEntity {
     @Excel(name = "用户状态 生效 失效")
     private Boolean isActive;
 
-    @ApiModelProperty(value = "业务经理")
+    @ApiModelProperty(value = "业务经理-id")
     @Excel(name = "业务经理")
     private String serviceManager;
 
-    @ApiModelProperty(value = "业务经理")
+    @ApiModelProperty(value = "业务经理-编码")
     @Excel(name = "业务经理")
     private String serviceManagerName;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "业务经理-名称")
+    @Excel(name = "业务经理")
+    private String serviceManagerNickName;
 
     @ApiModelProperty(value = "国家")
     @Excel(name = "国家")
@@ -79,13 +84,18 @@ public class BasSeller extends BaseEntity {
     @Excel(name = "国家")
     private String countryCode;
 
-    @ApiModelProperty(value = "客服")
+    @ApiModelProperty(value = "客服-id")
     @Excel(name = "客服")
     private String serviceStaff;
 
-    @ApiModelProperty(value = "客服姓名")
+    @ApiModelProperty(value = "客服姓名-编码")
     @Excel(name = "客服姓名")
     private String serviceStaffName;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "客服姓名")
+    @Excel(name = "客服姓名")
+    private String serviceStaffNickName;
 
     @ApiModelProperty(value = "姓名")
     @Excel(name = "姓名")
