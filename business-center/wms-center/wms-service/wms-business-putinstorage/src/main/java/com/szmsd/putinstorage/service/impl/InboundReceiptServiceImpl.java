@@ -655,7 +655,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                     BeanUtils.copyProperties(inboundReceiptInfoVO,createInboundReceiptDTO);
                     createInboundReceiptDTO.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
                     createInboundReceiptDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
-                    createInboundReceiptDTO.setDeliveryNo(inboundReceiptInfoVO.getTrackingNumber());
+                    createInboundReceiptDTO.setDeliveryNo(inboundReceiptInfoVO.getDeliveryNo());
 
                     remoteComponent.createTracking(createInboundReceiptDTO);
                 }
