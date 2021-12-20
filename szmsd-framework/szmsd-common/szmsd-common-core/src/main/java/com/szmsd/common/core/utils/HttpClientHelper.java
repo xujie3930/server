@@ -50,6 +50,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -241,6 +242,25 @@ public class HttpClientHelper {
         return execute(new HttpGet(url), requestBody, headerMap);
     }
 
+    public static String builderGetParams(String requestBody) {
+        // get参数兼容
+        if (null != requestBody) {
+            StringJoiner joiner = new StringJoiner("&");
+            JSONObject jsonObject = JSON.parseObject(requestBody);
+            if (null != jsonObject) {
+                for (String key : jsonObject.keySet()) {
+                    try {
+                        joiner.add(key + "=" + URLEncoder.encode(jsonObject.getString(key), "utf-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            }
+            return joiner.toString();
+        }
+        return "";
+    }
+
     public static HttpResponseBody execute(HttpEntityEnclosingRequestBase request, String requestBody, Map<String, String> headerMap) {
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
@@ -273,6 +293,34 @@ public class HttpClientHelper {
             log.error(e.getMessage(), e);
         }
         return new HttpResponseBody.HttpResponseBodyEmpty();
+    }
+
+    public static HttpResponseBody executeOnByteArray(HttpEntityEnclosingRequestBase request, String requestBody, Map<String, String> headerMap) {
+        CloseableHttpClient httpClient = getHttpClient();
+        CloseableHttpResponse response = null;
+        try {
+            byte[] result = null;
+            //添加http头信息
+            setHeader(request, headerMap);
+            setRaw(request, requestBody);
+            response = httpClient.execute(request);
+            int status = response.getStatusLine().getStatusCode();
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                result = EntityUtils.toByteArray(entity);
+            }
+            Header[] headers = response.getAllHeaders();
+            return new HttpResponseBody.HttpResponseByteArrayWrapper(status, headers, result);
+        } catch (Exception e) {
+            try {
+                if (null != response)
+                    EntityUtils.consume(response.getEntity());
+            } catch (IOException e1) {
+                log.error(e.getMessage(), e1);
+            }
+            log.error(e.getMessage(), e);
+            return new HttpResponseBody.HttpResponseBodyEmpty(e.getMessage());
+        }
     }
 
     public static HttpResponseBody httpPostStream(String url, Map<String, String> headerMap, String requestBody) {
@@ -404,7 +452,7 @@ public class HttpClientHelper {
         private static final HttpClientHelper INSTANCE = new HttpClientHelper();
     }
 
-    static class HttpDelete extends HttpEntityEnclosingRequestBase {
+    public static class HttpDelete extends HttpEntityEnclosingRequestBase {
         public static final String METHOD_NAME = "DELETE";
 
         public HttpDelete() {
@@ -424,7 +472,7 @@ public class HttpClientHelper {
         }
     }
 
-    static class HttpGet extends HttpEntityEnclosingRequestBase {
+    public static class HttpGet extends HttpEntityEnclosingRequestBase {
         public static final String METHOD_NAME = "GET";
 
         public HttpGet() {

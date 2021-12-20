@@ -26,7 +26,16 @@ public class OutboundServiceImpl extends WmsRequest implements IOutboundService 
     @Override
     public CreateShipmentResponseVO shipmentCreate(CreateShipmentRequestDto dto) {
         log.info("shipmentCreate：{}", JSONObject.toJSONString(dto));
-        return JSON.parseObject(httpPost(dto.getWarehouseCode(), "outbound.create", dto), CreateShipmentResponseVO.class);
+        String text = httpPost(dto.getWarehouseCode(), "outbound.create", dto);
+        try {
+            return JSON.parseObject(text, CreateShipmentResponseVO.class);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            CreateShipmentResponseVO createShipmentResponseVO = new CreateShipmentResponseVO();
+            createShipmentResponseVO.setSuccess(false);
+            createShipmentResponseVO.setMessage(text);
+            return createShipmentResponseVO;
+        }
     }
 
     @Override

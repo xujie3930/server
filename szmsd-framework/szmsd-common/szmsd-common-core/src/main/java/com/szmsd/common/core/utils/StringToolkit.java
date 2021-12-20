@@ -5,6 +5,7 @@ import org.springframework.util.CollectionUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 
@@ -92,7 +93,14 @@ public final class StringToolkit {
         }
         return null;
     }
-
+    /**
+     * 请求单号转换成list
+     * @param code
+     * @return
+     */
+    public static List<String> convertToListFromStr(String code) {
+        return Optional.ofNullable(getCodeByArray(code)).orElse(new ArrayList<>());
+    }
     public static void main(String[] args) {
         System.out.println(System.getProperty("file.separator"));
         Properties p = System.getProperties();

@@ -1,9 +1,20 @@
 package com.szmsd.putinstorage.domain.dto;
 
+import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.putinstorage.api.dto.CkPutawayDTO;
+import com.szmsd.putinstorage.api.dto.PutawayListDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @Accessors(chain = true)

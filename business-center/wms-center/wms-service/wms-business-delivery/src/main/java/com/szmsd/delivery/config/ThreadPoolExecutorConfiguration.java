@@ -58,6 +58,16 @@ public class ThreadPoolExecutorConfiguration {
      */
     public static final String THREADPOOLEXECUTOR_DELOUTBOUND_CANCELED = "ThreadPoolExecutor-DelOutbound-Canceled";
 
+    /**
+     * CK1保存请求信息
+     */
+    public static final String THREADPOOLEXECUTOR_CK1_SAVE = "ThreadPoolExecutor-Ck1-Save";
+
+    /**
+     * CK1发送请求信息
+     */
+    public static final String THREADPOOLEXECUTOR_CK1_REQUEST = "ThreadPoolExecutor-Ck1-Request";
+
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundReviewed() {
         // 核心线程数量
@@ -70,7 +80,7 @@ public class ThreadPoolExecutorConfiguration {
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Reviewed", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
-        // 拒绝策略由主线程执行
+        // 丢弃任务并抛出RejectedExecutionException异常
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
@@ -87,7 +97,7 @@ public class ThreadPoolExecutorConfiguration {
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentPackingEvent", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
-        // 拒绝策略由主线程执行
+        // 丢弃任务并抛出RejectedExecutionException异常
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
@@ -121,7 +131,7 @@ public class ThreadPoolExecutorConfiguration {
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Processing", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
-        // 拒绝策略由主线程执行
+        // 丢弃任务并抛出RejectedExecutionException异常
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
@@ -138,7 +148,7 @@ public class ThreadPoolExecutorConfiguration {
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Shipped", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
-        // 拒绝策略由主线程执行
+        // 丢弃任务并抛出RejectedExecutionException异常
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
@@ -155,7 +165,41 @@ public class ThreadPoolExecutorConfiguration {
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Canceled", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
-        // 拒绝策略由主线程执行
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
+    @Bean(THREADPOOLEXECUTOR_CK1_SAVE)
+    public ThreadPoolExecutor threadPoolExecutorCk1Save() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 2;
+        int maximumPoolSize = availableProcessors * 4;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(20480);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("Ck1-Save", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
+    @Bean(THREADPOOLEXECUTOR_CK1_REQUEST)
+    public ThreadPoolExecutor threadPoolExecutorCk1Request() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 4;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(20480);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("Ck1-Request", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }

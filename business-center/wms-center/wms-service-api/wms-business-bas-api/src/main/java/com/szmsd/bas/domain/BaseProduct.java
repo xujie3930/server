@@ -4,34 +4,41 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.plugin.annotation.AutoFieldI18n;
+import com.szmsd.bas.api.dto.CkSkuCreateDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 
-import javax.validation.constraints.DecimalMax;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import javax.validation.constraints.Digits;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Size;
+import javax.validation.groups.Default;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
-* <p>
-    * 
-    * </p>
-*
-* @author jr
-* @since 2021-03-04
-*/
+ * <p>
+ *
+ * </p>
+ *
+ * @author jr
+ * @since 2021-03-04
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value="", description="BaseProduct产品(sku/包材)对象")
+@ApiModel(value = "", description = "BaseProduct产品(sku/包材)对象")
 public class BaseProduct extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -61,19 +68,19 @@ public class BaseProduct extends BaseEntity {
     private String code;
 
     @ApiModelProperty(value = "初始重量g")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double initWeight;
 
     @ApiModelProperty(value = "初始长 cm")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double initLength;
 
     @ApiModelProperty(value = "初始宽 cm")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double initWidth;
 
     @ApiModelProperty(value = "初始高 cm")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double initHeight;
 
     @ApiModelProperty(value = "是否激活")
@@ -88,7 +95,7 @@ public class BaseProduct extends BaseEntity {
     private String suffix;
 
     @ApiModelProperty(value = "初始体积 cm3")
-    @Digits(integer = 14,fraction = 2)
+    @Digits(integer = 14, fraction = 2)
     private BigDecimal initVolume;
 
     @ApiModelProperty(value = "客户（卖家）编码")
@@ -103,7 +110,7 @@ public class BaseProduct extends BaseEntity {
 
     @ApiModelProperty(value = "申报价值")
     @Excel(name = "申报价值")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double declaredValue;
 
     @ApiModelProperty(value = "产品属性编号")
@@ -201,23 +208,23 @@ public class BaseProduct extends BaseEntity {
     private String attribute5;
 
     @ApiModelProperty(value = "仓库测量重量g")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double weight;
 
     @ApiModelProperty(value = "仓库测量长 cm")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double length;
 
     @ApiModelProperty(value = "仓库测量宽 cm")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double width;
 
     @ApiModelProperty(value = "仓库测量高 cm")
-    @Digits(integer = 8,fraction = 2)
+    @Digits(integer = 8, fraction = 2)
     private Double height;
 
     @ApiModelProperty(value = "仓库测量体积 cm3")
-    @Digits(integer = 14,fraction = 2)
+    @Digits(integer = 14, fraction = 2)
     private BigDecimal volume;
 
     @ApiModelProperty(value = "操作员")

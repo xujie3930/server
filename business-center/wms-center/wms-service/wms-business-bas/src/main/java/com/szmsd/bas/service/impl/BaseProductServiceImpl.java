@@ -1,5 +1,6 @@
 package com.szmsd.bas.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -26,6 +27,7 @@ import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
@@ -35,22 +37,32 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
+import com.szmsd.http.api.feign.HtpRmiFeignService;
+import com.szmsd.http.config.CkThreadPool;
+import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.ProductRequest;
+import com.szmsd.bas.api.dto.CkSkuCreateDTO;
+import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.math.BigDecimal.ROUND_HALF_UP;
@@ -82,6 +94,10 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     private BasSubFeignService basSubFeignService;
     @Autowired
     private IBasePackingService basePackingService;
+    @Resource
+    private CkThreadPool ckThreadPool;
+    @Resource
+    private HtpRmiFeignService htpRmiFeignService;
 
     /**
      * 查询模块
@@ -361,9 +377,12 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         ProductRequest productRequest = BeanMapperUtil.map(baseProductDto, ProductRequest.class);
         productRequest.setProductImage(baseProductDto.getProductImageBase64());
         productRequest.setProductDesc(baseProductDto.getProductDescription());
-        R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+        /*R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         //验证wms
-        toWms(r);
+        toWms(r);*/
+
+        Tuple2<List<BaseProduct>, String> result = syncToWms(Collections.singletonList(Tuples.of(baseProduct, productRequest)));
+        AssertUtil.isTrue(StringUtils.isBlank(result.getT2()), result.getT2());
         if (CollectionUtils.isNotEmpty(baseProductDto.getDocumentsFiles())) {
             AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(baseProductDto.getCode()).businessItemNo(null).fileList(baseProductDto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.SKU_IMAGE).build();
             this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
@@ -371,9 +390,64 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         return baseMapper.insert(baseProduct);
     }
 
+    public Tuple2<List<BaseProduct>, String> syncToWms(List<Tuple2<BaseProduct, ProductRequest>> requestTupleList) {
+        List<CompletableFuture<BaseProduct>> futures = new ArrayList<>();
+
+        requestTupleList.forEach(tuple -> {
+
+            BaseProduct baseProduct = tuple.getT1();
+            ProductRequest productRequest = tuple.getT2();
+            CompletableFuture<BaseProduct> future = CompletableFuture.supplyAsync(() -> {
+                R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+                //验证wms
+                toWms(r);
+                log.info("【推送CK1】SKU创建推送 {} 返回 {}", productRequest, JSONObject.toJSONString(r));
+                return baseProduct;
+            }, ckThreadPool).thenApplyAsync(x -> {
+                // 只推送sku
+                if (StringUtils.isBlank(x.getCategory())||ProductConstant.SKU_NAME.equals(x.getCategory())){
+                    log.info("【推送CK1】非SKU创建推送不推送 {}", x);
+                    return x;
+                }
+
+                CkSkuCreateDTO ckSkuCreateDTO = CkSkuCreateDTO.createCkSkuCreateDTO(x);
+                //封装转换对象
+                //TODO 调用推送wms
+                HttpRequestDto httpRequestDto = new HttpRequestDto();
+                httpRequestDto.setMethod(HttpMethod.POST);
+                httpRequestDto.setBinary(false);
+                httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}/v1/merchantSkus");
+                httpRequestDto.setBody(ckSkuCreateDTO);
+
+                R<HttpResponseVO> rmiR = htpRmiFeignService.rmi(httpRequestDto);
+                log.info("【推送CK1】SKU创建推送 {} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmiR));
+                HttpResponseVO dataAndException = R.getDataAndException(rmiR);
+                dataAndException.checkStatus();
+                return baseProduct;
+            }, ckThreadPool);
+            futures.add(future);
+        });
+        List<BaseProduct> canAddList = new ArrayList<>();
+        StringBuilder hasError = new StringBuilder();
+        AtomicInteger index = new AtomicInteger(1);
+        futures.forEach(x -> {
+            BaseProduct baseProduct = null;
+            int indexThis = index.getAndIncrement();
+            try {
+                baseProduct = x.get();
+            } catch (Exception e) {
+                log.error("【SKU新增】异常：", e);
+                hasError.append("第").append(indexThis).append("条数据处理异常:").append(e.getMessage()).append("\n");
+            }
+            if (Objects.nonNull(baseProduct))
+                canAddList.add(baseProduct);
+        });
+        return Tuples.of(canAddList, hasError.toString());
+    }
+
     @Override
     public List<BaseProduct> BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos) {
-        baseProductDtos.stream().forEach(o -> {
+        baseProductDtos.forEach(o -> {
             if (StringUtils.isEmpty(o.getCode())) {
                 if (ProductConstant.SKU_NAME.equals(o.getCategory())) {
                     String skuCode = "S" + o.getSellerCode() + baseSerialNumberService.generateNumber(ProductConstant.SKU_NAME);
@@ -385,7 +459,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 }
             } else {
                 if (o.getCode().length() < 2) {
-                    throw new BaseException(o.getCategory() + "编码长度不能小于两个字符");
+                    throw new CommonException("400", o.getCategory() + "编码长度不能小于两个字符");
                 }
             }
             //验证 填写信息
@@ -403,8 +477,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             o.setWarehouseAcceptance(false);
         });
         List<BaseProduct> baseProducts = BeanMapperUtil.mapList(baseProductDtos, BaseProduct.class);
-
-        baseProducts.stream().forEach(o -> {
+        List<Tuple2<BaseProduct, ProductRequest>> waitSyncList = new ArrayList<>();
+        baseProducts.forEach(o -> {
             //包材不需要仓库测量尺寸
             o.setWarehouseAcceptance(true);
             //SKU需要仓库测量尺寸
@@ -416,11 +490,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             o.setVolume(o.getInitVolume());
             ProductRequest productRequest = BeanMapperUtil.map(o, ProductRequest.class);
             productRequest.setProductDesc(o.getProductDescription());
-            R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-            //验证wms
-            toWms(r);
+            waitSyncList.add(Tuples.of(o, productRequest));
         });
-        super.saveBatch(baseProducts);
+        Tuple2<List<BaseProduct>, String> result = syncToWms(waitSyncList);
+        super.saveBatch(result.getT1());
+        AssertUtil.isTrue(StringUtils.isBlank(result.getT2()), result.getT2());
         return baseProducts;
     }
 
@@ -742,18 +816,18 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
     private void toWms(R<ResponseVO> r) {
         if (r == null) {
-            throw new BaseException("wms服务调用失败");
+            throw new RuntimeException("wms服务调用失败");
         }
         if (r.getData() == null) {
             //throw new BaseException("wms服务调用失败");
         } else {
             if (r.getData().getSuccess() == null) {
                 if (r.getData().getErrors() != null) {
-                    throw new BaseException("传wms失败" + r.getData().getErrors());
+                    throw new RuntimeException("传wms失败" + r.getData().getErrors());
                 }
             } else {
                 if (!r.getData().getSuccess()) {
-                    throw new BaseException("传wms失败" + r.getData().getMessage());
+                    throw new RuntimeException("传wms失败" + r.getData().getMessage());
                 }
             }
         }

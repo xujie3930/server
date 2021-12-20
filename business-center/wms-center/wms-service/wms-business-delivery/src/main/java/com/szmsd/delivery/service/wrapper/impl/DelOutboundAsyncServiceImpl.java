@@ -18,13 +18,17 @@ import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.delivery.domain.DelCk1RequestLog;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.enums.DelCk1RequestLogConstant;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.event.DelCk1RequestLogEvent;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
+import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -341,78 +345,90 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     }
                     completedState = "END";
                 }
-                // 如果是组合SKU，拆分SKU，需要创建入库单
-                if ("END".equals(completedState) && (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
-                        || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType()))) {
-                    // 查询明细
-                    int totalDeclareQty = 0;
-                    //设置SKU列表数据
-                    ArrayList<InboundReceiptDetailDTO> inboundReceiptDetailAddList = new ArrayList<>();
-                    if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
-                        // 查询sku信息
-                        BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
-                        ArrayList<String> skus = new ArrayList<>();
-                        skus.add(delOutbound.getNewSku());
-                        conditionQueryDto.setSkus(skus);
-                        List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
-                        String skuName = "";
-                        if (CollectionUtils.isNotEmpty(productList)) {
-                            skuName = getSkuName(productList.get(0));
-                        }
-                        totalDeclareQty = Math.toIntExact(delOutbound.getBoxNumber());
-                        InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
-                        inboundReceiptDetailDTO
-                                .setDeclareQty(totalDeclareQty)
-                                .setSku(delOutbound.getNewSku())
-                                .setDeliveryNo(delOutbound.getOrderNo())
-                                .setSkuName(skuName);
-                        inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
+                // END
+                if ("END".equals(completedState)) {
+                    // 推送给CK1
+                    if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
+                            || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                        DelCk1RequestLog ck1RequestLog = new DelCk1RequestLog();
+                        ck1RequestLog.setOrderNo(delOutbound.getOrderNo());
+                        ck1RequestLog.setType(DelCk1RequestLogConstant.Type.finished.name());
+                        EventUtil.publishEvent(new DelCk1RequestLogEvent(ck1RequestLog));
                     }
-                    if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
-                        // 查询
-                        List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(delOutbound.getOrderNo());
-                        List<String> skus = new ArrayList<>();
-                        for (DelOutboundDetail detail : detailList) {
-                            skus.add(detail.getSku());
-                        }
-                        BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
-                        conditionQueryDto.setSkus(skus);
-                        List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
-                        Map<String, BaseProduct> productMap;
-                        if (CollectionUtils.isNotEmpty(productList)) {
-                            productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v, v2) -> v));
-                        } else {
-                            productMap = new HashMap<>();
-                        }
-                        for (DelOutboundDetail detail : detailList) {
+                    // 如果是组合SKU，拆分SKU，需要创建入库单
+                    if ((DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
+                            || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType()))) {
+
+                        // 查询明细
+                        int totalDeclareQty = 0;
+                        //设置SKU列表数据
+                        ArrayList<InboundReceiptDetailDTO> inboundReceiptDetailAddList = new ArrayList<>();
+                        if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+                            // 查询sku信息
+                            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+                            ArrayList<String> skus = new ArrayList<>();
+                            skus.add(delOutbound.getNewSku());
+                            conditionQueryDto.setSkus(skus);
+                            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                            String skuName = "";
+                            if (CollectionUtils.isNotEmpty(productList)) {
+                                skuName = getSkuName(productList.get(0));
+                            }
+                            totalDeclareQty = Math.toIntExact(delOutbound.getBoxNumber());
                             InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
-                            int declareQty = Math.toIntExact(detail.getQty());
                             inboundReceiptDetailDTO
-                                    .setDeclareQty(declareQty)
-                                    .setSku(detail.getSku())
+                                    .setDeclareQty(totalDeclareQty)
+                                    .setSku(delOutbound.getNewSku())
                                     .setDeliveryNo(delOutbound.getOrderNo())
-                                    .setSkuName(getSkuName(productMap.get(detail.getSku())));
+                                    .setSkuName(skuName);
                             inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
-                            totalDeclareQty += declareQty;
                         }
+                        if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+                            // 查询
+                            List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(delOutbound.getOrderNo());
+                            List<String> skus = new ArrayList<>();
+                            for (DelOutboundDetail detail : detailList) {
+                                skus.add(detail.getSku());
+                            }
+                            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+                            conditionQueryDto.setSkus(skus);
+                            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                            Map<String, BaseProduct> productMap;
+                            if (CollectionUtils.isNotEmpty(productList)) {
+                                productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v, v2) -> v));
+                            } else {
+                                productMap = new HashMap<>();
+                            }
+                            for (DelOutboundDetail detail : detailList) {
+                                InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
+                                int declareQty = Math.toIntExact(detail.getQty());
+                                inboundReceiptDetailDTO
+                                        .setDeclareQty(declareQty)
+                                        .setSku(detail.getSku())
+                                        .setDeliveryNo(delOutbound.getOrderNo())
+                                        .setSkuName(getSkuName(productMap.get(detail.getSku())));
+                                inboundReceiptDetailAddList.add(inboundReceiptDetailDTO);
+                                totalDeclareQty += declareQty;
+                            }
+                        }
+                        // 封装请求参数 送货方式：自送货到仓，入库方式：新产品入库，类别：SKU
+                        CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+                        createInboundReceiptDTO
+                                .setDeliveryNo("")
+                                .setWarehouseMethodCode("055006")
+                                .setOrderNo("")
+                                .setCusCode(delOutbound.getSellerCode())
+                                .setVat("")
+                                .setWarehouseCode(delOutbound.getWarehouseCode())
+                                .setOrderType(InboundReceiptEnum.OrderType.NEW_SKU.getValue())
+                                .setWarehouseCategoryCode("056001")
+                                .setDeliveryWayCode("053002")
+                                .setTotalDeclareQty(totalDeclareQty)
+                                .setTotalPutQty(0)
+                                .setRemark(delOutbound.getRemark());
+                        createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
+                        this.inboundReceiptFeignService.saveOrUpdate(createInboundReceiptDTO);
                     }
-                    // 封装请求参数 送货方式：自送货到仓，入库方式：新产品入库，类别：SKU
-                    CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
-                    createInboundReceiptDTO
-                            .setDeliveryNo("")
-                            .setWarehouseMethodCode("055006")
-                            .setOrderNo("")
-                            .setCusCode(delOutbound.getSellerCode())
-                            .setVat("")
-                            .setWarehouseCode(delOutbound.getWarehouseCode())
-                            .setOrderType(InboundReceiptEnum.OrderType.NEW_SKU.getValue())
-                            .setWarehouseCategoryCode("056001")
-                            .setDeliveryWayCode("053002")
-                            .setTotalDeclareQty(totalDeclareQty)
-                            .setTotalPutQty(0)
-                            .setRemark(delOutbound.getRemark());
-                    createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
-                    this.inboundReceiptFeignService.saveOrUpdate(createInboundReceiptDTO);
                 }
             }
         } catch (Exception e) {
@@ -599,6 +615,15 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         this.delOutboundService.exceptionFix(delOutbound.getId());
                     }
                     cancelledState = "END";
+                }
+                if ("END".equals(cancelledState)) {
+                    if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
+                            || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                        DelCk1RequestLog ck1RequestLog = new DelCk1RequestLog();
+                        ck1RequestLog.setOrderNo(delOutbound.getOrderNo());
+                        ck1RequestLog.setType(DelCk1RequestLogConstant.Type.cancel.name());
+                        EventUtil.publishEvent(new DelCk1RequestLogEvent(ck1RequestLog));
+                    }
                 }
             }
         } catch (Exception e) {

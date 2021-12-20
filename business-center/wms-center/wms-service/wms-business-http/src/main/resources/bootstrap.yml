@@ -10,3 +10,24 @@ spring:
   profiles:
     # 环境配置
     active: test
+
+# rmi config
+com:
+  szmsd:
+    rmi:
+      enabled: true
+    # domain
+    domain:
+      values:
+        "Ck1OpenAPIDomain": "http://openapi.ck1info.com"
+    # domain plugin
+    domain-plugin:
+      values:
+        "[http://openapi.ck1info.com]":
+          - "Ck1DomainPlugin"
+    # domain header
+    domain-header:
+      values:
+        "[http://openapi.ck1info.com]":
+          "Content-Type": "application/json"
+          "Authorization": "Bearer OGE0M2UzNmItMzVhMy00MDY5LWJkMjgtMWIwYjQ4ZmQ3YmM0"

@@ -21,8 +21,16 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.http.api.feign.HtpRmiFeignService;
+import com.szmsd.http.config.CkConfig;
+import com.szmsd.http.config.CkThreadPool;
+import com.szmsd.http.dto.HttpRequestDto;
+import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
+import com.szmsd.putinstorage.api.dto.CkCreateIncomingOrderDTO;
+import com.szmsd.putinstorage.api.dto.CkPutawayDTO;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
@@ -45,9 +53,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -57,6 +65,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,6 +99,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     @Resource
     private RechargesFeignService rechargesFeignService;
+    @Resource
+    private HtpRmiFeignService htpRmiFeignService;
+    @Resource
+    private CkThreadPool ckThreadPool;
+    @Resource
+    private CkConfig ckConfig;
 
     /**
      * 入库单查询
@@ -166,6 +181,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
     /**
      * 创建入库单
+     * 推送出口易： OMS中完成入库单后，当是第一次上架（状态调整为处理中时）向业务系统创建入库单
      *
      * @param createInboundReceiptDTO
      */
@@ -212,9 +228,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             List<String> transferNoList = createInboundReceiptDTO.getTransferNoList();
             // 调用第三方
             remoteRequest.createPackage(inboundReceiptInfoVO, transferNoList);
+            // 转运 创建入库单物流信息列表
+            remoteComponent.createTracking(createInboundReceiptDTO);
         }
-        // 创建入库单物流信息列表
-        remoteComponent.createTracking(createInboundReceiptDTO);
+
         log.info("创建入库单：操作完成");
         return inboundReceiptInfoVO;
     }
@@ -350,7 +367,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         if (inboundReceiptInfoVO != null) {
             String deliveryNo = inboundReceiptInfoVO.getDeliveryNo();
             List<String> codeByArray = Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>());
-            // 查询收货信息
+            // 查询收货信息 物流到货明细
             List<InboundTracking> inboundTrackings = iInboundTrackingService.selectInboundTrackingList(new InboundTracking().setOrderNo(warehouseNo));
             Map<String, InboundTracking> collect1 = inboundTrackings.stream().filter(x -> StringUtils.isNotBlank(x.getTrackingNumber())).collect(Collectors.toMap(InboundTracking::getTrackingNumber, x -> x));
             codeByArray.addAll(collect1.keySet());
@@ -410,22 +427,67 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         InboundReceiptVO inboundReceiptVO = selectByWarehouseNo(refOrderNo);
         AssertUtil.notNull(inboundReceiptVO, "入库单号[" + refOrderNo + "]不存在，请核对");
         // 之前总上架数量
+        receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseCode());
         Integer beforeTotalPutQty = inboundReceiptVO.getTotalPutQty();
         InboundReceipt inboundReceipt = new InboundReceipt().setId(inboundReceiptVO.getId());
         inboundReceipt.setTotalPutQty(beforeTotalPutQty + qty);
         // 第一次入库上架 把状态修改为 3处理中
         if (beforeTotalPutQty == 0) {
             inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue());
+
+            // 查询入库单明细
+            // OMS中完成入库单后，当是第一次上架（状态调整为处理中时）向业务系统创建入库单
+            CompletableFuture<HttpResponseVO> future = CompletableFuture
+                    .supplyAsync(() -> queryInfo(refOrderNo, false))
+                    .thenApplyAsync(inboundReceiptInfoDetailVO -> {
+
+                        HttpRequestDto httpRequestDto = new HttpRequestDto();
+                        httpRequestDto.setMethod(HttpMethod.POST);
+                        httpRequestDto.setBinary(false);
+                        httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getCreatePutawayOrderUrl());
+                        httpRequestDto.setBody(CkCreateIncomingOrderDTO.createIncomingOrderDTO(inboundReceiptInfoDetailVO));
+                        R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+                        log.info("【推送CK1】首次接收入库上架,创建入库单{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+                        HttpResponseVO dataAndException = R.getDataAndException(rmi);
+                        dataAndException.checkStatus();
+                        return dataAndException;
+                    }, ckThreadPool);
+            try {
+                HttpResponseVO httpRequestDto = future.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e.getMessage());
+            }
         }
         this.updateById(inboundReceipt);
 
         // 修改明细上架数量
         iInboundReceiptDetailService.receiving(receivingRequest.getOrderNo(), receivingRequest.getSku(), receivingRequest.getQty());
 
-        // 库存 上架入库
+//        // 库存 上架入库
         remoteComponent.inboundInventory(receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseName()));
 
         log.info("#B1 接收入库上架：操作完成");
+        // 通知ck1 入库信息
+        CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            HttpRequestDto httpRequestDto = new HttpRequestDto();
+            httpRequestDto.setMethod(HttpMethod.POST);
+            httpRequestDto.setBinary(false);
+            httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getPutawayUrl());
+            httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest));
+            R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+            log.info("【推送CK1】首次接收入库上架,推送上架SKU信息 {} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+            HttpResponseVO dataAndException = R.getDataAndException(rmi);
+            dataAndException.checkStatus();
+            return httpRequestDto;
+        }, ckThreadPool);
+        try {
+            HttpRequestDto httpRequestDto = httpRequestDtoCompletableFuture.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 
     @Resource
@@ -443,6 +505,23 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         String orderNo = receivingCompletedRequest.getOrderNo();
         updateStatus(orderNo, InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
         log.info("#B3 接收完成入库：操作完成");
+        CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            HttpRequestDto httpRequestDto = new HttpRequestDto();
+            httpRequestDto.setMethod(HttpMethod.PUT);
+            httpRequestDto.setBinary(false);
+            httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getIncomingOrderCompletedUrl(orderNo));
+            R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+            log.info("【推送CK1】接收入库完成{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+            HttpResponseVO dataAndException = R.getDataAndException(rmi);
+            dataAndException.checkStatus();
+            return httpRequestDto;
+        }, ckThreadPool);
+        try {
+            HttpRequestDto httpRequestDto = httpRequestDtoCompletableFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
         //接收入库完成重新计算扣除入库费用
         //解冻之前的冻结费
         /*DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
@@ -570,6 +649,15 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                     log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
                 } else {
                     remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+                    // 创建入库单物流信息列表
+
+                    CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+                    BeanUtils.copyProperties(inboundReceiptInfoVO,createInboundReceiptDTO);
+                    createInboundReceiptDTO.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
+                    createInboundReceiptDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
+                    createInboundReceiptDTO.setDeliveryNo(inboundReceiptInfoVO.getTrackingNumber());
+
+                    remoteComponent.createTracking(createInboundReceiptDTO);
                 }
                 this.updateByWarehouseNo(inboundReceipt);
                 this.inbound(inboundReceiptInfoVO);

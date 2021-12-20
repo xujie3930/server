@@ -100,7 +100,7 @@ public class DelOutboundRetryLabelListener {
                         if (lastFailMessage.length() > 500)
                             lastFailMessage = lastFailMessage.substring(0, 500);
                         failCount++;
-                        if (failCount > retryCount) {
+                        if (failCount >= retryCount) {
                             state = DelOutboundRetryLabelStateEnum.FAIL.name();
                             // 发货指令
                             this.delOutboundBringVerifyService.shipmentShippingEx(delOutbound, lastFailMessage);
@@ -132,7 +132,9 @@ public class DelOutboundRetryLabelListener {
         } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
         } finally {
-            lock.unlock();
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 }

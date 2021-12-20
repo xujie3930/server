@@ -10,3 +10,12 @@ spring:
   profiles:
     # 环境配置
     active: dev
+
+com:
+  szmsd:
+    # ck1接口api配置
+    ck1:
+      values:
+        create: "/v1/outboundOrders"
+        finished: "/v1/outboundOrders/{0}/finished"
+        cancel: "/v1/outboundOrders/{0}/cancelState"

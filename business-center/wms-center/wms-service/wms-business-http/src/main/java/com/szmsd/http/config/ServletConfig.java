@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * @author zhangyuyuan
  * @date 2021-04-30 11:32
  */
-@ConditionalOnExpression("${com.szmsd.rfs.enabled:false}")
+@ConditionalOnExpression("${com.szmsd.rmi.enabled:false}")
 @Configuration
 public class ServletConfig {
 
@@ -25,7 +25,7 @@ public class ServletConfig {
     public ServletRegistrationBean<RequestForwardServlet> registerRequestForwardServlet() {
         ServletRegistrationBean<RequestForwardServlet> requestForwardServlet = new ServletRegistrationBean<>();
         requestForwardServlet.setServlet(new RequestForwardServlet(requestForwardMatcher));
-        requestForwardServlet.addUrlMappings("/rf");
+        requestForwardServlet.addUrlMappings("/rmi");
         return requestForwardServlet;
     }
 
