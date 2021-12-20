@@ -351,7 +351,6 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 String nickName = dataAndException1.getNickName();
                 basSellerInfoVO.setServiceManagerNickName(nickName);
             });
-            CompletableFuture.allOf(voidCompletableFuture1,voidCompletableFuture).join();
             CompletableFuture<Void> voidCompletableFuture2 = CompletableFuture.runAsync(() -> {
                 R<List<UserCreditInfoVO>> listR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
                 List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
