@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -371,7 +372,6 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             String nickName = dataAndException1.getNickName();
             basSellerInfoVO.setServiceManagerNickName(nickName);
         });
-        CompletableFuture.allOf(voidCompletableFuture1,voidCompletableFuture).join();
         CompletableFuture<Void> voidCompletableFuture2 = CompletableFuture.runAsync(() -> {
             R<List<UserCreditInfoVO>> listR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
             List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
