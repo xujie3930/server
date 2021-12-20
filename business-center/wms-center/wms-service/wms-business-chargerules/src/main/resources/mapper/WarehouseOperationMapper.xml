@@ -27,7 +27,7 @@
                 AND currency_code = #{currencyCode}
             </if>
             <if test="effectiveTime != null and expirationTime != null">
-                AND effective_time >= #{effectiveTime} AND expiration_time &lt;= #{expirationTime}
+                AND effective_time &lt;= #{effectiveTime} AND expiration_time >= #{expirationTime}
             </if>
             <if test="cusCodeList != null and cusCodeList != ''">
                 AND (CONCAT(',',cus_code_list,',') REGEXP(SELECT CONCAT(',',REPLACE(#{cusCodeList}, ',', ',|,'),',')))
