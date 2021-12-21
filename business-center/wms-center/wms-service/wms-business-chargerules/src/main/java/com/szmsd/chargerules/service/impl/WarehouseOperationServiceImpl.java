@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -158,6 +159,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
             queryDTO.setCusTypeCode(cusTypeCode);
             warehouseOperationVos = warehouseOperationMapper.listPage(queryDTO);
         }
+        log.info("使用仓租规则：{}", JSONObject.toJSONString(warehouseOperationVos));
         return warehouseOperationVos;
     }
 
