@@ -25,7 +25,9 @@ import com.szmsd.http.api.feign.HtpRmiFeignService;
 import com.szmsd.http.config.CkConfig;
 import com.szmsd.http.config.CkThreadPool;
 import com.szmsd.http.dto.HttpRequestDto;
+import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.enums.RemoteConstant;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
@@ -441,15 +443,17 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                     .supplyAsync(() -> queryInfo(refOrderNo, false))
                     .thenApplyAsync(inboundReceiptInfoDetailVO -> {
 
-                        HttpRequestDto httpRequestDto = new HttpRequestDto();
+                        HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
                         httpRequestDto.setMethod(HttpMethod.POST);
                         httpRequestDto.setBinary(false);
                         httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getCreatePutawayOrderUrl());
                         httpRequestDto.setBody(CkCreateIncomingOrderDTO.createIncomingOrderDTO(inboundReceiptInfoDetailVO));
-                        R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+                        // 使用相同的sku创建,不然后面的sku创建会没有单号
+                        httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
+                        R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
                         log.info("【推送CK1】首次接收入库上架,创建入库单{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
                         HttpResponseVO dataAndException = R.getDataAndException(rmi);
-                        dataAndException.checkStatus();
+                        //dataAndException.checkStatus();
                         return dataAndException;
                     }, ckThreadPool);
             try {
@@ -462,23 +466,24 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         this.updateById(inboundReceipt);
 
         // 修改明细上架数量
-        iInboundReceiptDetailService.receiving(receivingRequest.getOrderNo(), receivingRequest.getSku(), receivingRequest.getQty());
-
-//        // 库存 上架入库
-        remoteComponent.inboundInventory(receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseName()));
+//        iInboundReceiptDetailService.receiving(receivingRequest.getOrderNo(), receivingRequest.getSku(), receivingRequest.getQty());
+//
+////        // 库存 上架入库
+//        remoteComponent.inboundInventory(receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseName()));
 
         log.info("#B1 接收入库上架：操作完成");
         // 通知ck1 入库信息
         CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
-            HttpRequestDto httpRequestDto = new HttpRequestDto();
+            HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.POST);
             httpRequestDto.setBinary(false);
             httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getPutawayUrl());
             httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest));
-            R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+            httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
+            R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
             log.info("【推送CK1】首次接收入库上架,推送上架SKU信息 {} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
             HttpResponseVO dataAndException = R.getDataAndException(rmi);
-            dataAndException.checkStatus();
+            //dataAndException.checkStatus();
             return httpRequestDto;
         }, ckThreadPool);
         try {
@@ -506,14 +511,15 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         updateStatus(orderNo, InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
         log.info("#B3 接收完成入库：操作完成");
         CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
-            HttpRequestDto httpRequestDto = new HttpRequestDto();
+            HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.PUT);
             httpRequestDto.setBinary(false);
             httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getIncomingOrderCompletedUrl(orderNo));
-            R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+            httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.WAREHOUSE_ORDER_COMPLETED);
+            R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
             log.info("【推送CK1】接收入库完成{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
             HttpResponseVO dataAndException = R.getDataAndException(rmi);
-            dataAndException.checkStatus();
+            // dataAndException.checkStatus();
             return httpRequestDto;
         }, ckThreadPool);
         try {
@@ -652,7 +658,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                     // 创建入库单物流信息列表
 
                     CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
-                    BeanUtils.copyProperties(inboundReceiptInfoVO,createInboundReceiptDTO);
+                    BeanUtils.copyProperties(inboundReceiptInfoVO, createInboundReceiptDTO);
                     createInboundReceiptDTO.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
                     createInboundReceiptDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
                     createInboundReceiptDTO.setDeliveryNo(inboundReceiptInfoVO.getDeliveryNo());

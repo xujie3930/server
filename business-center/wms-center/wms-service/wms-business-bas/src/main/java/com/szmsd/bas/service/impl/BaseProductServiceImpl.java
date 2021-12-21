@@ -40,9 +40,11 @@ import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.api.feign.HtpRmiFeignService;
 import com.szmsd.http.config.CkThreadPool;
 import com.szmsd.http.dto.HttpRequestDto;
+import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.bas.api.dto.CkSkuCreateDTO;
 import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.enums.RemoteConstant;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
@@ -212,7 +214,6 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    @Transactional
     public void importBaseProduct(List<BaseProductImportDto> list) {
 
         //判断是否必填
@@ -224,7 +225,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             b.setHavePackingMaterial(b.getHavePackingMaterialName().equals("是") ? true : false);
         }
         List<BaseProduct> baseProductList = BeanMapperUtil.mapList(list, BaseProduct.class);
-
+        List<Tuple2<BaseProduct, ProductRequest>> waitSyncList = new ArrayList<>();
         for (BaseProduct b : baseProductList) {
             b.setCategory(ProductConstant.SKU_NAME);
             b.setCategoryCode(ProductConstant.SKU);
@@ -244,12 +245,15 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             b.setWarehouseAcceptance(false);
             ProductRequest productRequest = BeanMapperUtil.map(b, ProductRequest.class);
             productRequest.setProductDesc(b.getProductDescription());
-            R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
-            if (!r.getData().getSuccess()) {
-                throw new BaseException("传wms失败:" + r.getData().getMessage());
-            }
+            waitSyncList.add(Tuples.of(b, productRequest));
+//            R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+//            if (!r.getData().getSuccess()) {
+//                throw new BaseException("传wms失败:" + r.getData().getMessage());
+//            }
         }
-        super.saveBatch(baseProductList);
+        Tuple2<List<BaseProduct>, String> result = syncToWms(waitSyncList);
+        super.saveBatch(result.getT1());
+        AssertUtil.isTrue(StringUtils.isBlank(result.getT2()), result.getT2());
 
     }
 
@@ -401,11 +405,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
                 //验证wms
                 toWms(r);
-                log.info("【推送CK1】SKU创建推送 {} 返回 {}", productRequest, JSONObject.toJSONString(r));
+                log.info("【推送WMS】SKU创建推送 {} 返回 {}", productRequest, JSONObject.toJSONString(r));
                 return baseProduct;
             }, ckThreadPool).thenApplyAsync(x -> {
                 // 只推送sku
-                if (StringUtils.isBlank(x.getCategory())||ProductConstant.SKU_NAME.equals(x.getCategory())){
+                if (StringUtils.isBlank(x.getCategory()) || !ProductConstant.SKU_NAME.equals(x.getCategory())) {
                     log.info("【推送CK1】非SKU创建推送不推送 {}", x);
                     return x;
                 }
@@ -413,22 +417,24 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 CkSkuCreateDTO ckSkuCreateDTO = CkSkuCreateDTO.createCkSkuCreateDTO(x);
                 //封装转换对象
                 //TODO 调用推送wms
-                HttpRequestDto httpRequestDto = new HttpRequestDto();
+                HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
+                httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_CREATE);
                 httpRequestDto.setMethod(HttpMethod.POST);
                 httpRequestDto.setBinary(false);
                 httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}/v1/merchantSkus");
                 httpRequestDto.setBody(ckSkuCreateDTO);
-
-                R<HttpResponseVO> rmiR = htpRmiFeignService.rmi(httpRequestDto);
+                R<HttpResponseVO> httpResponseVOR = htpRmiFeignService.rmiSync(httpRequestDto);
+                R.getDataAndException(httpResponseVOR);
+               /* R<HttpResponseVO> rmiR = htpRmiFeignService.rmi(httpRequestDto);
                 log.info("【推送CK1】SKU创建推送 {} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmiR));
                 HttpResponseVO dataAndException = R.getDataAndException(rmiR);
-                dataAndException.checkStatus();
+                dataAndException.checkStatus();*/
                 return baseProduct;
             }, ckThreadPool);
             futures.add(future);
         });
         List<BaseProduct> canAddList = new ArrayList<>();
-        StringBuilder hasError = new StringBuilder();
+        StringBuilder hasError = new StringBuilder("");
         AtomicInteger index = new AtomicInteger(1);
         futures.forEach(x -> {
             BaseProduct baseProduct = null;

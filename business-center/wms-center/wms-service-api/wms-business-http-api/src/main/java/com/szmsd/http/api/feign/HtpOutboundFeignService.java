@@ -26,7 +26,7 @@ public interface HtpOutboundFeignService {
     R<ResponseVO> shipmentDelete(@RequestBody ShipmentCancelRequestDto dto);
 
     @PutMapping("/api/outbound/http/shipment/tracking")
-    R<ResponseVO> shipmentTracking(@RequestBody ShipmentTrackingChangeRequestDto dto);
+    R<ResponseVO>   shipmentTracking(@RequestBody ShipmentTrackingChangeRequestDto dto);
 
     @PutMapping("/api/outbound/http/shipment/label")
     R<ResponseVO> shipmentLabel(@RequestBody ShipmentLabelChangeRequestDto dto);
