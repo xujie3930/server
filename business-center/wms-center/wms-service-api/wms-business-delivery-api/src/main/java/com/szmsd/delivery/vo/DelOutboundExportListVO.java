@@ -88,6 +88,12 @@ public class DelOutboundExportListVO implements Serializable {
     @ExcelProperty(value = "异常状态")
     private String exceptionStateName;
 
+    @ExcelProperty(value = "异常描述")
+    private String exceptionMessage;
+
+    @ExcelProperty(value = "COD")
+    private BigDecimal codAmount;
+
     @ExcelProperty(value = "备注")
     private String remark;
 

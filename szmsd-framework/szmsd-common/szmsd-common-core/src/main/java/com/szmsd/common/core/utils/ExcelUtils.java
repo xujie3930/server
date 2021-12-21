@@ -129,6 +129,7 @@ public class ExcelUtils {
         int sheetNo = 0;
         for (ExportSheet<?> sheet : sheets) {
             WriteSheet writeSheet = EasyExcel.writerSheet(sheetNo).head(sheet.classType()).build();
+            writeSheet.setSheetName(sheet.sheetName());
             QueryPage<?> queryPage = sheet.query(exportContext);
             boolean isWrite = false;
             for (; ; ) {
