@@ -665,7 +665,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
             Inventory before = this.getOne(new QueryWrapper<Inventory>().lambda().eq(Inventory::getSku, sku).eq(Inventory::getWarehouseCode, warehouseCode));
             //AssertUtil.notNull(before, warehouseCode + "仓没有[" + sku + "]库存记录");
-            if (null == before && increase) {
+            if (increase && null == before) {
                 //String loginSellerCode = Optional.ofNullable(remoteComponent.getLoginUserInfo()).map(SysUser::getSellerCode).orElseThrow(() -> new BaseException("获取用户信息失败!"));
                 String loginSellerCode = inventoryAdjustmentDTO.getSellerCode();
                 Integer addQut = inventoryAdjustmentDTO.getQuantity();
@@ -690,7 +690,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             }
             int afterTotalInventory = before.getTotalInventory() + quantity;
             int afterAvailableInventory = before.getAvailableInventory() + quantity;
-            AssertUtil.isTrue(afterTotalInventory > 0 && afterAvailableInventory > 0, warehouseCode + "仓[" + sku + "]可用库存调减数量不足[" + before.getAvailableInventory() + "]");
+            AssertUtil.isTrue(afterTotalInventory >= 0 && afterAvailableInventory >= 0, warehouseCode + "仓[" + sku + "]可用库存调减数量不足[" + before.getAvailableInventory() + "]");
 
             Inventory after = new Inventory();
             after.setId(before.getId()).setCusCode(before.getCusCode()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory);

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.http.mapper.CommonScanMapper">
+
+    <sql id="field">
+        id
+    </sql>
+    <sql id="query">
+        <where>
+            <if test="createByName != null and createByName != ''">
+                AND create_by_name = #{createByName}
+            </if>
+            <if test="warehouseCode != null and warehouseCode != ''">
+                AND warehouse_code = #{warehouseCode}
+            </if>
+            <if test="scanType != null ">
+                AND scan_type = #{scanType}
+            </if>
+            <if test="createTimeStart != null and createTimeEnd != null ">
+                AND create_time >= #{createTimeStart} and create_time &lt;= #{createTimeEnd}
+            </if>
+        </where>
+    </sql>
+    <select id="queryWarnList" resultType="com.szmsd.http.vo.CommonScanListVO">
+
+    </select>
+</mapper>

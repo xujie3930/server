@@ -68,7 +68,7 @@ public class InboundReceipt extends BaseEntity {
 
     @ApiModelProperty(value = "产品货源地编码")
     private String goodsSourceCode;
-
+    @Deprecated
     @ApiModelProperty(value = "挂号")
     private String trackingNumber;
 

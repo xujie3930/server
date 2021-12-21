@@ -1,6 +1,5 @@
 package com.szmsd.delivery.dto;
 
-import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -77,14 +76,20 @@ public class DelOutboundExportListDto implements Serializable {
     @ApiModelProperty(value = "规格")
     private String specifications;
 
-    @ExcelProperty(value = "提审时间")
+    @ApiModelProperty(value = "提审时间")
     private Date bringVerifyTime;
 
-    @ExcelProperty(value = "发货时间")
+    @ApiModelProperty(value = "发货时间")
     private Date shipmentsTime;
 
     @ApiModelProperty(value = "异常状态")
     private String exceptionState;
+
+    @ApiModelProperty(value = "异常描述")
+    private String exceptionMessage;
+
+    @ApiModelProperty(value = "COD")
+    private BigDecimal codAmount;
 
     @ApiModelProperty(value = "备注")
     private String remark;
