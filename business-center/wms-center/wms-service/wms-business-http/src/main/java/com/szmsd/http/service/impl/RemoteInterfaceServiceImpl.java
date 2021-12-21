@@ -9,10 +9,12 @@ import com.szmsd.http.config.DomainPluginConfig;
 import com.szmsd.http.config.DomainURIUtil;
 import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.dto.HttpRequestDto;
+import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.event.EventUtil;
 import com.szmsd.http.event.RequestLogEvent;
 import com.szmsd.http.plugins.Domain;
 import com.szmsd.http.plugins.DomainPlugin;
+import com.szmsd.http.service.ICommonRemoteService;
 import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.util.DomainUtil;
 import com.szmsd.http.vo.HttpResponseVO;
@@ -31,6 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -182,5 +185,13 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             }
         }
         return map;
+    }
+
+    @Resource
+    private ICommonRemoteService iCommonRemoteService;
+
+    @Override
+    public void rmiSync(HttpRequestSyncDTO dto) {
+        iCommonRemoteService.insertRmiOne(dto);
     }
 }

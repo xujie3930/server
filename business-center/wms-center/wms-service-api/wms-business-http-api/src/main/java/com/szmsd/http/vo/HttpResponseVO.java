@@ -3,6 +3,7 @@ package com.szmsd.http.vo;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.utils.StringUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -36,31 +37,38 @@ public class HttpResponseVO implements Serializable {
     private boolean binary;
 
     public void checkStatus() {
-        if (!(status == HttpStatus.SUCCESS || status == HttpStatus.CREATED)) {
-            String errorMsg = "";
-
-            /**
-             * {
-             *     "Errors": [
-             *         {
-             *             "Code": "request.DeclareName",
-             *             "Message": "字段 DeclareName 必须与正则表达式“(?![\\d\\s]+$)^[a-zA-Z_\\s0-9\\-\\(\\)\\'&,\\|]+$”匹配。"
-             *         }
-             *     ],
-             *     "TicketId": "54a161ac-dd3f-4206-8bf0-c3926ce1d8d7",
-             *     "UtcDateTime": "2021-12-15T03:40:43Z",
-             *     "RequestUri": "/v1/merchantSkus"
-             * }
-             */
-            try {
-                ErrorInfo errorInfo = JSONObject.parseObject(body.toString(), ErrorInfo.class);
-                errorMsg = errorInfo.getErrors().stream().map(ErrorMsg::getMessage).collect(Collectors.joining(","));
-            } catch (Exception e) {
-                throw new RuntimeException("CKRemote【" + JSONObject.toJSONString(body) + "】");
-            }
+        String errorMsg = getErrorMsg();
+        if (StringUtils.isNotBlank(errorMsg)) {
             throw new RuntimeException("CKRemote【" + errorMsg + "】");
         }
+    }
 
+    /**
+     * {
+     * "Errors": [
+     * {
+     * "Code": "request.DeclareName",
+     * "Message": "字段 DeclareName 必须与正则表达式“(?![\\d\\s]+$)^[a-zA-Z_\\s0-9\\-\\(\\)\\'&,\\|]+$”匹配。"
+     * }
+     * ],
+     * "TicketId": "54a161ac-dd3f-4206-8bf0-c3926ce1d8d7",
+     * "UtcDateTime": "2021-12-15T03:40:43Z",
+     * "RequestUri": "/v1/merchantSkus"
+     * }
+     * 获取错误信息
+     *
+     * @return ""|| errorMsg
+     */
+    public String getErrorMsg() {
+        if (!(status == HttpStatus.SUCCESS || status == HttpStatus.CREATED)) {
+            try {
+                ErrorInfo errorInfo = JSONObject.parseObject(body.toString(), ErrorInfo.class);
+                return errorInfo.getErrors().stream().map(ErrorMsg::getMessage).collect(Collectors.joining(","));
+            } catch (Exception e) {
+                return JSONObject.toJSONString(body);
+            }
+        }
+        return "";
     }
 }
 

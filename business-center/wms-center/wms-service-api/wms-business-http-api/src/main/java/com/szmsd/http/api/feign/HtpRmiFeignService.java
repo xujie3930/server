@@ -14,4 +14,7 @@ public interface HtpRmiFeignService {
 
     @PostMapping("/api/rmi")
     R<HttpResponseVO> rmi(@RequestBody HttpRequestDto dto);
+
+    @PostMapping("/api/rmi/sync")
+    R<HttpResponseVO> rmiSync(@RequestBody HttpRequestDto dto);
 }
