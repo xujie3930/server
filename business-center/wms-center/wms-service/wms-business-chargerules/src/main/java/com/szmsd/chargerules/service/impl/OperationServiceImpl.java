@@ -262,7 +262,7 @@ public class OperationServiceImpl implements IOperationService {
         operationQueryDTO.setCusCodeList(dto.getCustomCode())
                 .setWarehouseCode(dto.getWarehouseCode())
                 .setOperationType(dto.getOrderType()).setOrderType(orderTypeEnum.name())
-                .setEffectiveTime(now);
+                .setEffectiveTime(now).setExpirationTime(now);
         ChaOperationVO chaOperationVO = iChaOperationService.queryOperationDetailByRule(operationQueryDTO);
         AssertUtil.notNull(chaOperationVO, message);
         // 找出符合的重量区间
