@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.DelCk1RequestLog;
 import com.szmsd.delivery.enums.DelCk1RequestLogConstant;
+import com.szmsd.delivery.event.listener.DelCk1RequestLogCallback;
 import com.szmsd.delivery.mapper.DelCk1RequestLogMapper;
 import com.szmsd.delivery.service.IDelCk1RequestLogService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
@@ -20,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -55,17 +56,10 @@ public class DelCk1RequestLogServiceImpl extends ServiceImpl<DelCk1RequestLogMap
                 long st = System.currentTimeMillis();
                 Date nextRetryTime = null;
                 boolean success = false;
+                DelCk1RequestLogConstant.Type type = DelCk1RequestLogConstant.Type.valueOf(ck1RequestLog.getType());
                 try {
                     HttpRequestDto httpRequestDto = new HttpRequestDto();
-                    String type = ck1RequestLog.getType();
-                    HttpMethod method;
-                    if (DelCk1RequestLogConstant.Type.cancel.name().equals(type)
-                            || DelCk1RequestLogConstant.Type.finished.name().equals(type)) {
-                        method = HttpMethod.PUT;
-                    } else {
-                        method = HttpMethod.POST;
-                    }
-                    httpRequestDto.setMethod(method);
+                    httpRequestDto.setMethod(type.getHttpMethod());
                     httpRequestDto.setUri(ck1RequestLog.getUrl());
                     String requestBody = ck1RequestLog.getRequestBody();
                     if (StringUtils.isNotEmpty(requestBody)) {
@@ -94,6 +88,17 @@ public class DelCk1RequestLogServiceImpl extends ServiceImpl<DelCk1RequestLogMap
                 }
                 if (success) {
                     state = DelCk1RequestLogConstant.State.SUCCESS.name();
+                    // enumA 执行完成后，继续调用callbackService业务
+                    // 回调Service
+                    String callbackService = type.getCallbackService();
+                    if (StringUtils.isNotEmpty(callbackService)) {
+                        try {
+                            DelCk1RequestLogCallback delCk1RequestLogCallback = SpringUtils.getBean(callbackService, DelCk1RequestLogCallback.class);
+                            delCk1RequestLogCallback.callback(ck1RequestLog, responseBody);
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                        }
+                    }
                 } else {
                     failCount++;
                     if (failCount >= retryCount) {
