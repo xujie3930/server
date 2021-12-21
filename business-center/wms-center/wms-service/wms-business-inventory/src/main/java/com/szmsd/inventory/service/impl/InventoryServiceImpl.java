@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
@@ -17,6 +18,14 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.http.api.feign.HtpRmiFeignService;
+import com.szmsd.http.config.CkConfig;
+import com.szmsd.http.config.CkThreadPool;
+import com.szmsd.http.dto.HttpRequestDto;
+import com.szmsd.http.dto.HttpRequestSyncDTO;
+import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.enums.RemoteConstant;
+import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.InventoryOccupy;
@@ -35,11 +44,14 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -67,6 +79,12 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     private InventoryOccupyService inventoryOccupyService;
     @Resource
     private RedissonClient redissonClient;
+    @Resource
+    private CkConfig ckConfig;
+    @Resource
+    private CkThreadPool ckThreadPool;
+    @Resource
+    private HtpRmiFeignService htpRmiFeignService;
     private final static long WAIT_TIME = 10L;
 
     /**
@@ -695,11 +713,36 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             Inventory after = new Inventory();
             after.setId(before.getId()).setCusCode(before.getCusCode()).setSku(sku).setWarehouseCode(warehouseCode).setTotalInventory(afterTotalInventory).setAvailableInventory(afterAvailableInventory);
             this.updateById(after);
-
             // 记录库存日志
             iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, after, quantity, inventoryAdjustmentDTO.getReceiptNo());
+            adjustInventoryCK1(inventoryAdjustmentDTO);
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * 调整库存 推送CK1
+     */
+    private void adjustInventoryCK1(InventoryAdjustmentDTO inventoryAdjustmentDTO) {
+        CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
+            httpRequestDto.setMethod(HttpMethod.POST);
+            httpRequestDto.setBinary(false);
+            httpRequestDto.setBody(CkAdjustInventoryDTO.createCkAdjustInventoryDTO(inventoryAdjustmentDTO));
+            httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getAdjustInventoryUrl());
+            httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.ADJUST_INVENTORY);
+            R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
+            log.info("【推送CK1】调整库存{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+            HttpResponseVO dataAndException = R.getDataAndException(rmi);
+            // dataAndException.checkStatus();
+            return httpRequestDto;
+        }, ckThreadPool);
+        try {
+            HttpRequestDto httpRequestDto = httpRequestDtoCompletableFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
     }
 
