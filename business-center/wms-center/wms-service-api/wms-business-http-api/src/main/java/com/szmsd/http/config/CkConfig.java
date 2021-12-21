@@ -39,6 +39,11 @@ public class CkConfig {
      */
     String incomingOrderCompletedUrl = "/v1/InventoryPutawayOrder/{customerOrderNo}/finished";
 
+    /**
+     * 手动调整库存
+     */
+    String adjustInventoryUrl = "http://openapi.ck1info.com/v1/ManuallyAdjustSKUInventory";
+
     public String getIncomingOrderCompletedUrl(String customerOrderNo) {
         return incomingOrderCompletedUrl.replace("{customerOrderNo}", customerOrderNo);
     }

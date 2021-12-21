@@ -41,6 +41,10 @@ public class RemoteConstant {
          * 入库完成
          */
         WAREHOUSE_ORDER_COMPLETED(4, "CK1", Object.class),
+        /**
+         * 手动调整库存
+         */
+        ADJUST_INVENTORY(5, "CK1", Object.class),
         ;
         private Integer typeCode;
         private String typeName;

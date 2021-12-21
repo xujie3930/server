@@ -117,6 +117,7 @@ public class ThreadRunnable {
             WarehouseOperationDTO warehouseOperationDTO = new WarehouseOperationDTO();
             warehouseOperationDTO.setWarehouseCode(warehouseCode);
             warehouseOperationDTO.setEffectiveTime(now);
+            warehouseOperationDTO.setExpirationTime(now);
             warehouseOperationDTO.setCusCodeList(skuVolume.getCusCode());
             List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService
                     .selectOperationByRule(warehouseOperationDTO);
