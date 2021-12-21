@@ -80,6 +80,9 @@ public class HandlerContext<T> {
     }
 
     private boolean getCacheData(Iterable<?> iterable) {
+        if (null == iterable) {
+            return false;
+        }
         boolean hasAuto = false;
         boolean hasI18n = false;
         Object next = iterable.iterator().next();

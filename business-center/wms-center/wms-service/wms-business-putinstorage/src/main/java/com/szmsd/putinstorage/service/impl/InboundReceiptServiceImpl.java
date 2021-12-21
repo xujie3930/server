@@ -47,7 +47,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -212,9 +211,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             List<String> transferNoList = createInboundReceiptDTO.getTransferNoList();
             // 调用第三方
             remoteRequest.createPackage(inboundReceiptInfoVO, transferNoList);
+            // 转运 创建入库单物流信息列表
+            remoteComponent.createTracking(createInboundReceiptDTO);
         }
-        // 创建入库单物流信息列表
-        remoteComponent.createTracking(createInboundReceiptDTO);
+
         log.info("创建入库单：操作完成");
         return inboundReceiptInfoVO;
     }
@@ -570,6 +570,15 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                     log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
                 } else {
                     remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+                    // 创建入库单物流信息列表
+
+                    CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+                    BeanUtils.copyProperties(inboundReceiptInfoVO,createInboundReceiptDTO);
+                    createInboundReceiptDTO.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
+                    createInboundReceiptDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
+                    createInboundReceiptDTO.setDeliveryNo(inboundReceiptInfoVO.getDeliveryNo());
+
+                    remoteComponent.createTracking(createInboundReceiptDTO);
                 }
                 this.updateByWarehouseNo(inboundReceipt);
                 this.inbound(inboundReceiptInfoVO);

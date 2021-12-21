@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -344,10 +345,30 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
         basSellerInfoVO.setBasSellerCertificateList(basSellerCertificateVOS);
 
-        R<List<UserCreditInfoVO>> listR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
-        List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
-        List<UserCreditInfoVO> collect = dataAndException.stream().filter(x -> (x.getCreditStatus() != null) && (CreditConstant.CreditStatusEnum.ACTIVE.getValue()).equals(x.getCreditStatus())).collect(Collectors.toList());
-        basSellerInfoVO.setUserCreditList(collect);
+        String serviceStaff = basSeller.getServiceStaff();
+        String serviceManager = basSeller.getServiceManager();
+        // 查询客服名称
+        CompletableFuture<Void> voidCompletableFuture = CompletableFuture.runAsync(() -> {
+            if (StringUtils.isBlank(serviceStaff))return;
+            R<SysUser> sysUserR = remoteUserService.queryGetInfoByUserId(Long.parseLong(serviceStaff));
+            SysUser dataAndException1 = R.getDataAndException(sysUserR);
+            String nickName = dataAndException1.getNickName();
+            basSellerInfoVO.setServiceStaffNickName(nickName);
+        });
+        CompletableFuture<Void> voidCompletableFuture1 = CompletableFuture.runAsync(() -> {
+            if (StringUtils.isBlank(serviceManager))return;
+            R<SysUser> sysUserR = remoteUserService.queryGetInfoByUserId(Long.parseLong(serviceManager));
+            SysUser dataAndException1 = R.getDataAndException(sysUserR);
+            String nickName = dataAndException1.getNickName();
+            basSellerInfoVO.setServiceManagerNickName(nickName);
+        });
+        CompletableFuture<Void> voidCompletableFuture2 = CompletableFuture.runAsync(() -> {
+            R<List<UserCreditInfoVO>> listR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
+            List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
+            List<UserCreditInfoVO> collect = dataAndException.stream().filter(x -> (x.getCreditStatus() != null) && (CreditConstant.CreditStatusEnum.ACTIVE.getValue()).equals(x.getCreditStatus())).collect(Collectors.toList());
+            basSellerInfoVO.setUserCreditList(collect);
+        });
+        CompletableFuture.allOf(voidCompletableFuture1,voidCompletableFuture,voidCompletableFuture2).join();
         return basSellerInfoVO;
     }
 
