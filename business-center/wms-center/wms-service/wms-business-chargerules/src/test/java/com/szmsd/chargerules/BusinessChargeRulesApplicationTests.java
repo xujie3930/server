@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = BusinessChargeRulesApplication.class)
 public class BusinessChargeRulesApplicationTests {
 
     @Test
@@ -45,7 +45,7 @@ public class BusinessChargeRulesApplicationTests {
 
     @Test
     public void get() {
-        OperationQueryDTO operationQueryDTO = JSONObject.parseObject("{\"cusCodeList\":\"CNN272\",\"effectiveTime\":\"2021-12-03T17:09:00.867\",\"expirationTime\":\"2021-12-03T17:09:00.867\",\"operationType\":\"Normal\",\"orderType\":\"Shipment\",\"pageNum\":1,\"pageSize\":10,\"warehouseCode\":\"UA\"}", OperationQueryDTO.class);
+        OperationQueryDTO operationQueryDTO = JSONObject.parseObject("{\"cusCodeList\":\"CNBF87\",\"effectiveTime\":\"2021-12-21T16:48:01.681\",\"operationType\":\"Normal\",\"orderType\":\"Shipment\",\"pageNum\":1,\"pageSize\":10,\"warehouseCode\":\"UA\"} ", OperationQueryDTO.class);
 //        ChaOperationVO chaOperationVO = iChaOperationService.queryOperationDetailByRule(operationQueryDTO);
 
         List<ChaOperationListVO> chaOperationListVOS = iChaOperationService.queryOperationList(operationQueryDTO);

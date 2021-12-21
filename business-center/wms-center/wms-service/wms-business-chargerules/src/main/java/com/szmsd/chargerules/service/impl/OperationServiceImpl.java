@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.dto.BaseProductBatchQueryDto;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
@@ -115,8 +116,8 @@ public class OperationServiceImpl implements IOperationService {
             amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
-        amount = amount.multiply(operation.getDiscountRate()).setScale(2,RoundingMode.HALF_UP);
-        return this.freezeBalance(dto, count, operation.getFirstPrice().multiply(operation.getDiscountRate()).setScale(2,RoundingMode.HALF_UP), operation);
+        amount = amount.multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
+        return this.freezeBalance(dto, count, operation.getFirstPrice().multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP), operation);
     }
 
     @Resource
@@ -151,7 +152,7 @@ public class OperationServiceImpl implements IOperationService {
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             }
             amount = amount.multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
-            log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
+            log.info("orderNo: {} orderType: {} amount: {} getDiscountRate{}", dto.getOrderNo(), dto.getOrderType(), amount, operation.getDiscountRate());
         }
         return this.freezeBalance(dto, count, amount, operation);
     }
@@ -186,7 +187,7 @@ public class OperationServiceImpl implements IOperationService {
             } else {
                 amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             }
-            amount =  amount.multiply(operation.getDiscountRate()).setScale(2,RoundingMode.HALF_UP);
+            amount = amount.multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
         return this.freezeBalance(dto, count, amount, operation);
@@ -237,7 +238,7 @@ public class OperationServiceImpl implements IOperationService {
             OperationRuleVO labelOperation = getOperationDetails(dto, null, "未找到" + DelOutboundOrderEnum.getName(type) + "业务费用规则，请联系管理员");
             BigDecimal calculate = payService.calculate(labelOperation.getFirstPrice(), labelOperation.getNextPrice(), count.longValue());
             amount = amount.add(calculate);
-            amount =  amount.multiply(labelOperation.getDiscountRate()).setScale(2,RoundingMode.HALF_UP);
+            amount = amount.multiply(labelOperation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
         }
         return amount;
     }
@@ -276,6 +277,7 @@ public class OperationServiceImpl implements IOperationService {
         }).findAny().orElse(null);
         AssertUtil.notNull(chaOperationDetailsVO, message);
         BeanUtils.copyProperties(chaOperationDetailsVO, operation);
+        log.info("使用规则：{}", JSONObject.toJSONString(operation));
         //  multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
         return operation;
     }
