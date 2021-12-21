@@ -63,8 +63,8 @@ public class InboundReceiptInfoVO {
 
     @ApiModelProperty(value = "产品货源地编码")
     private String goodsSourceCode;
-
-    @ApiModelProperty(value = "挂号")
+    @Deprecated
+    @ApiModelProperty(value = "挂号",notes = "没用")
     private String trackingNumber;
 
     @ApiModelProperty(value = "状态")

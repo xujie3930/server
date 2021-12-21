@@ -17,5 +17,6 @@ com:
     ck1:
       values:
         create: "/v1/outboundOrders"
+        create_status: "/v1/outboundOrders/{0}/status"
         finished: "/v1/outboundOrders/{0}/finished"
         cancel: "/v1/outboundOrders/{0}/cancelState"

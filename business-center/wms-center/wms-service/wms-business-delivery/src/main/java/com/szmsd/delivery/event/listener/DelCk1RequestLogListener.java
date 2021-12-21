@@ -32,7 +32,8 @@ public class DelCk1RequestLogListener {
         String type = ck1RequestLog.getType();
         String api = ck1RequestConfig.getApi(type);
         if (DelCk1RequestLogConstant.Type.cancel.name().equals(type)
-                || DelCk1RequestLogConstant.Type.finished.name().equals(type)) {
+                || DelCk1RequestLogConstant.Type.finished.name().equals(type)
+                || DelCk1RequestLogConstant.Type.create_status.name().equals(type)) {
             api = MessageFormat.format(api, ck1RequestLog.getOrderNo());
         }
         String url = DomainEnum.Ck1OpenAPIDomain.wrapper(api);
