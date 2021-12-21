@@ -128,10 +128,11 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
 
     @Override
     public List<ChaOperationListVO> queryOperationList(OperationQueryDTO queryDTO) {
+        log.info("queryOperation查询条件-- {} ",queryDTO);
         LambdaQueryWrapper<ChaOperation> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper
-                .le(queryDTO.getEffectiveTime() != null && queryDTO.getExpirationTime() != null, ChaOperation::getExpirationTime, queryDTO.getExpirationTime())
-                .ge(queryDTO.getEffectiveTime() != null && queryDTO.getExpirationTime() != null, ChaOperation::getEffectiveTime, queryDTO.getEffectiveTime())
+                .ge(queryDTO.getEffectiveTime() != null && queryDTO.getExpirationTime() != null, ChaOperation::getExpirationTime, queryDTO.getExpirationTime())
+                .le(queryDTO.getEffectiveTime() != null && queryDTO.getExpirationTime() != null, ChaOperation::getEffectiveTime, queryDTO.getEffectiveTime())
                 .eq(StringUtils.isNotBlank(queryDTO.getCurrencyCode()), ChaOperation::getCurrencyCode, queryDTO.getCurrencyCode())
                 .eq(StringUtils.isNotBlank(queryDTO.getOperationType()), ChaOperation::getOperationType, queryDTO.getOperationType())
                 .eq(StringUtils.isNotBlank(queryDTO.getOrderType()), ChaOperation::getOrderType, queryDTO.getOrderType())
