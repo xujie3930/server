@@ -11,6 +11,6 @@ public class TestDelCk1RequestLogConstant {
 
         System.out.println(create.ordinal());
 
-        System.out.println(create.getTypeByIndex());
+        System.out.println(create.getCallbackService());
     }
 }
