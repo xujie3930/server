@@ -53,7 +53,7 @@ public class FeignRequestInterceptor implements RequestInterceptor {
                     if ("content-type".equalsIgnoreCase(name) && value.contains("multipart/form-data")) {
                         break;
                     }
-                    //log.info("core-转发:{}====={}", name, value);
+                    log.info("core-转发:{}====={}", name, value);
                     template.header(name, value);
                 }
             }
