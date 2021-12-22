@@ -1,5 +1,9 @@
 package com.szmsd.finance.service.impl;
 
+import cn.hutool.core.thread.NamedThreadFactory;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.event.SyncReadListener;
+import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -31,6 +35,7 @@ import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,9 +43,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.validation.groups.Default;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -121,9 +132,14 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int importByTemplate(MultipartFile file) {
-        List<RefundRequestDTO> basPackingAddList = FileVerifyUtil.importExcel(file, RefundRequestDTO.class);
-        handleInsertData(basPackingAddList, true);
-        return this.insertBatchRefundRequest(basPackingAddList);
+        try (InputStream inputStream = file.getInputStream()) {
+            List<RefundRequestDTO>  basPackingAddList = EasyExcel.read(inputStream, RefundRequestDTO.class, new SyncReadListener()).sheet().doReadSync();
+            handleInsertData(basPackingAddList, true);
+            return this.insertBatchRefundRequest(basPackingAddList);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     @Resource
@@ -187,7 +203,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             collect.forEach((cusCode, processNoList) -> {
                 processNoList = processNoList.stream().distinct().collect(Collectors.toList());
                 Map<Integer, List<String>> ck = processNoList.stream().collect(Collectors.groupingBy(x -> x.startsWith("CK") ? 1 : 0));
-                
+
                 List<String> finalProcessNoList = processNoList;
                 ck.forEach((type, list) -> {
                     QueryFinishListDTO queryFinishListDTO = new QueryFinishListDTO();
@@ -196,9 +212,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     queryFinishListDTO.setType(type);
                     queryFinishListDTO.setPageNum(1);
                     queryFinishListDTO.setPageSize(999);
-                    log.info("校验单号：{}",JSONObject.toJSONString(queryFinishListDTO));
+                    log.info("校验单号：{}", JSONObject.toJSONString(queryFinishListDTO));
                     TableDataInfo<QueryFinishListVO> queryFinishListVOTableDataInfo = this.queryFinishList(queryFinishListDTO);
-                    log.info("校验单号返回：{}",JSONObject.toJSONString(queryFinishListVOTableDataInfo));
+                    log.info("校验单号返回：{}", JSONObject.toJSONString(queryFinishListVOTableDataInfo));
                     AssertUtil.isTrue(queryFinishListVOTableDataInfo.getCode() == HttpStatus.SUCCESS, "校验单号失败");
                     if (queryFinishListVOTableDataInfo.getTotal() != finalProcessNoList.size()) {
                         List<String> collect1 = queryFinishListVOTableDataInfo.getRows().stream().map(QueryFinishListVO::getNo).collect(Collectors.toList());

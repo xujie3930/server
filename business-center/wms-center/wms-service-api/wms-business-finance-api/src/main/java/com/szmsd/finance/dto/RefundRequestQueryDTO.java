@@ -83,7 +83,9 @@ public class RefundRequestQueryDTO {
 
     @ApiModelProperty(value = "处理性质编码")
     private String treatmentPropertiesCode;
-
+    @ApiModelProperty(value = "状态[0=初始,1=提审,2=异常,3=完成]")
+    @Excel(name = "状态", readConverterExp = "0=初始,1=提审,2=异常,3=完成")
+    private Integer auditStatus;
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
