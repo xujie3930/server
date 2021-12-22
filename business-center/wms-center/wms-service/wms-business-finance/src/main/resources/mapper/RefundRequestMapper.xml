@@ -71,6 +71,9 @@
             <if test="createTimeStart != null and createTimeEnd != null">
                 AND create_time BETWEEN #{createTimeStart} AND #{createTimeEnd}
             </if>
+            <if test="auditStatus != null">
+                AND audit_status = #{auditStatus}
+            </if>
             <if test="processNoList != null and processNoList.size() > 0">
                 AND process_no IN
                 <foreach collection="processNoList" item="item" open="(" separator="," close=")">
@@ -120,6 +123,6 @@
                 AND treatment_properties_code = #{treatmentPropertiesCode}
             </if>
         </where>
-        ORDER BY id DESC
+        ORDER BY audit_status ASC, id DESC
     </select>
 </mapper>
