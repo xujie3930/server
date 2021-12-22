@@ -37,8 +37,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -48,10 +52,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -130,16 +131,72 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+//    @Transactional(rollbackFor = Exception.class)
     public int importByTemplate(MultipartFile file) {
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8, 16, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1000), new NamedThreadFactory("【RefundImport】==", false), new ThreadPoolExecutor.CallerRunsPolicy());
         try (InputStream inputStream = file.getInputStream()) {
-            List<RefundRequestDTO>  basPackingAddList = EasyExcel.read(inputStream, RefundRequestDTO.class, new SyncReadListener()).sheet().doReadSync();
-            handleInsertData(basPackingAddList, true);
-            return this.insertBatchRefundRequest(basPackingAddList);
+            List<RefundRequestDTO> basPackingAddList = EasyExcel.read(inputStream, RefundRequestDTO.class, new SyncReadListener()).sheet().doReadSync();
+            int count = 500;
+            int size = basPackingAddList.size();
+            int segments = size / count;
+            segments = size % count == 0 ? segments : segments + 1;
+            CountDownLatch countDownLatch = new CountDownLatch(segments);
+            List<Future<String>> futures = new ArrayList<>();
+
+            for (int i = 0; i < segments; i++) {
+                List<RefundRequestDTO> refundRequestDTOS;
+                if (i == segments - 1) {
+                    refundRequestDTOS = basPackingAddList.subList(count * i, size);
+                } else {
+                    refundRequestDTOS = basPackingAddList.subList(count * i, count * (i + 1));
+                }
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                Future<String> submit = threadPoolExecutor.submit(() -> {
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    LoginUser loginUser = SecurityUtils.getLoginUser();
+                    String errorMsg = "";
+                    try {
+                        handleInsertData(refundRequestDTOS, true);
+                        this.insertBatchRefundRequest(refundRequestDTOS);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        errorMsg = e.getMessage();
+                        log.error("=================导入失败=================：\n{} \n", JSONObject.toJSONString(refundRequestDTOS), e);
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                    return errorMsg;
+                });
+                futures.add(submit);
+            }
+
+
+            countDownLatch.await();
+            StringBuilder stringBuilder = new StringBuilder();
+            futures.forEach(errorMsg -> {
+                String s = "";
+                try {
+                    s = errorMsg.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                    log.error("执行等待异常：", e);
+                    s = e.getMessage();
+                }
+                stringBuilder.append(s);
+            });
+            AssertUtil.isTrue(StringUtils.isBlank(stringBuilder.toString()), stringBuilder.toString());
+            return 1;
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            log.error("执行等待异常22：", e);
+        } finally {
+            threadPoolExecutor.shutdown();
         }
+        return 1;
+
     }
 
     @Resource
