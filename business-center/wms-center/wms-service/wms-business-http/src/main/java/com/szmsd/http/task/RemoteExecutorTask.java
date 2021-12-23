@@ -118,11 +118,11 @@ public class RemoteExecutorTask implements IRemoteExecutorTask {
     }
 
     /**
-     * 每1分钟激活一种类型
+     * 每3分钟激活一种类型
      */
 //    @Scheduled(cron = "0 0/1 * * * ?")
 //    @Scheduled(fixedDelay = 1000 * 60)
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 3000 * 10)
     @Override
     public void executeTask() {
         // 取出一个类型
@@ -133,7 +133,7 @@ public class RemoteExecutorTask implements IRemoteExecutorTask {
             ckThreadPool.execute(() -> {
                 CommonRemote oneTask = null;
                 try {
-                    log.info("扫描执行-开始扫描执行任务类型 - {}", finalTypeCode);
+//                    log.info("扫描执行-开始扫描执行任务类型 - {}", finalTypeCode);
                     RemoteTypeEnum scanEnumByType = RemoteTypeEnum.getScanEnumByType(Integer.parseInt(finalTypeCode));
                     Object typeKeyObj = null;
                     if (Objects.nonNull(typeKeyObj = redisTemplate.boundHashOps(SCAN_TYPE_ID_KEY).get(finalTypeCode))) {

@@ -446,7 +446,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                         HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
                         httpRequestDto.setMethod(HttpMethod.POST);
                         httpRequestDto.setBinary(false);
-                        httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getCreatePutawayOrderUrl());
+                        httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getCreatePutawayOrderUrl()));
                         httpRequestDto.setBody(CkCreateIncomingOrderDTO.createIncomingOrderDTO(inboundReceiptInfoDetailVO));
                         // 使用相同的sku创建,不然后面的sku创建会没有单号
                         httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
@@ -477,7 +477,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.POST);
             httpRequestDto.setBinary(false);
-            httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getPutawayUrl());
+            httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper( ckConfig.getPutawayUrl()));
             httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
             R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
@@ -514,7 +514,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.PUT);
             httpRequestDto.setBinary(false);
-            httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getIncomingOrderCompletedUrl(orderNo));
+            httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getIncomingOrderCompletedUrl(orderNo)));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.WAREHOUSE_ORDER_COMPLETED);
             R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
             log.info("【推送CK1】接收入库完成{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));

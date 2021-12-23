@@ -1,9 +1,10 @@
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.inventory.BusinessInventoryApplication;
 import com.szmsd.inventory.domain.InventoryRecord;
+import com.szmsd.inventory.job.InventoryJobService;
 import com.szmsd.inventory.mapper.InventoryRecordMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -13,20 +14,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @ClassName: Test
+ * @ClassName: TestUnit
  * @Description:
  * @Author: 11
  * @Date: 2021-07-30 15:47
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = BusinessInventoryApplication.class)
-public class Test {
+public class TestUnit {
     @Resource
     private IInventoryRecordService iInventoryRecordService;
     @Resource
     private InventoryRecordMapper inventoryRecordMapper;
-    @org.junit.Test
-    public void  run(){
+
+    @Test
+    public void run() {
         System.out.println(1);
         List<String> warehouseNoList = new ArrayList<>();
         warehouseNoList.add("");
@@ -36,5 +38,15 @@ public class Test {
         List<InventoryRecord> inventoryRecordVOS = inventoryRecordMapper
                 .selectList(sku1);
 
+    }
+    @Resource
+    InventoryJobService inventoryJobService;
+
+    /**
+     * 库存对比
+     */
+    @Test
+    public void asyncInventoryWarning(){
+        inventoryJobService.asyncInventoryWarning();
     }
 }
