@@ -44,6 +44,13 @@ public class HttpResponseVO implements Serializable {
     }
 
     /**
+     * 判断状态
+     * @return
+     */
+    public boolean checkStatusFlag() {
+        return StringUtils.isBlank(getErrorMsg());
+    }
+    /**
      * {
      * "Errors": [
      * {

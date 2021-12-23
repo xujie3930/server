@@ -1,15 +1,26 @@
 package com.szmsd.inventory.job;
 
 import cn.hutool.core.util.RandomUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.dto.BasSellerEmailDto;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.http.api.feign.HtpRmiFeignService;
+import com.szmsd.http.config.CkConfig;
+import com.szmsd.http.dto.HttpRequestDto;
+import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.util.Ck1DomainPluginUtil;
+import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.InventoryInfo;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.component.RemoteRequest;
 import com.szmsd.inventory.domain.InventoryWarning;
+import com.szmsd.inventory.domain.dto.CkSkuInventoryQueryDTO;
 import com.szmsd.inventory.domain.dto.InventorySkuQueryDTO;
+import com.szmsd.inventory.domain.vo.CkSkuInventoryVO;
 import com.szmsd.inventory.domain.vo.InventorySkuVO;
 import com.szmsd.inventory.service.IInventoryService;
 import com.szmsd.inventory.service.IInventoryWarningService;
@@ -21,16 +32,15 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -57,16 +67,25 @@ public class InventoryJobService {
     @Resource
     private Executor inventoryTaskExecutor;
 
+    @Resource
+    private HtpRmiFeignService htpRmiFeignService;
+
+    @Resource
+    private CkConfig ckConfig;
+
     @Scheduled(cron = "0 0 2 * * ?")
     public void inventoryWarning() {
         InventoryJobService inventoryJobService = SpringUtils.getBean("inventoryJobService");
         inventoryJobService.asyncInventoryWarning();
     }
 
-    @Async
+    //    @Async
     public void asyncInventoryWarning() {
         log.info("OMS <-> WMS 库存对比开始");
-        List<BasSellerEmailDto> customerList = remoteComponent.queryCusAll();
+//        List<BasSellerEmailDto> customerList = remoteComponent.queryCusAll();
+        BasSellerEmailDto basSellerEmailDto = new BasSellerEmailDto();
+        basSellerEmailDto.setSellerCode("CNID73");
+        List<BasSellerEmailDto> customerList = Arrays.asList(basSellerEmailDto);
         if (CollectionUtils.isEmpty(customerList)) {
             log.info("未查询到相关客户信息：库存对比结束");
             return;
@@ -88,36 +107,101 @@ public class InventoryJobService {
     public List<WarehouseSkuCompare> inventoryWarning(String cusCode) {
         RLock lock = redissonClient.getLock("InventoryJobService:inventoryWarning:" + cusCode);
         try {
-        if (lock.tryLock()) {
-            // OMS 库存
-            List<InventorySkuVO> inventoryListOms = iInventoryService.selectList(new InventorySkuQueryDTO().setCusCode(cusCode));
-            if (CollectionUtils.isEmpty(inventoryListOms)) {
-                log.info("客户[{}]没有库存", cusCode);
-                return null;
-            }
-            List<SkuQty> inventories = inventoryListOms.stream().map(SkuQty::new).collect(Collectors.toList());
-            log.info("客户[{}], 库存[{}]", cusCode, inventories);
-            Map<String, List<SkuQty>> inventoryMapOms = inventories.stream().collect(Collectors.groupingBy(SkuQty::getWarehouse));
-
-            // WMS 库存
-            List<WarehouseSkuCompare> compareList = ListUtils.synchronizedList(new ArrayList<>());
-            inventoryMapOms.forEach((key, value) -> value.forEach(item -> {
-                WarehouseSkuCompare compare = compare(item, (warehouseCode, sku) -> {
-                    List<InventoryInfo> listing = remoteRequest.listing(warehouseCode, sku);
-                    if (CollectionUtils.isEmpty(listing)) {
-                        return null;
-                    }
-                    return listing.get(0);
-                });
-                if (compare == null) {
-                    log.info("客户[{}], 仓库[{}], SKU[{}], 没有产生差异", cusCode, key, item.getSku());
-                    return;
+            if (lock.tryLock()) {
+                // OMS 库存
+                List<InventorySkuVO> inventoryListOms = iInventoryService.selectList(new InventorySkuQueryDTO().setCusCode(cusCode));
+                if (CollectionUtils.isEmpty(inventoryListOms)) {
+                    log.info("客户[{}]没有库存", cusCode);
+                    return null;
                 }
-                log.info("客户[{}], 仓库[{}], SKU[{}], 产生差异", cusCode, key, item.getSku());
-                compareList.add(compare);
-            }));
-            return compareList;
-        }
+                List<SkuQty> inventories = inventoryListOms.stream().map(SkuQty::new).collect(Collectors.toList());
+                log.info("客户[{}], 库存[{}]", cusCode, inventories);
+                Map<String, List<SkuQty>> inventoryMapOms = inventories.stream().collect(Collectors.groupingBy(SkuQty::getWarehouse));
+
+                // WMS 库存
+                List<WarehouseSkuCompare> compareList = ListUtils.synchronizedList(new ArrayList<>());
+                // key: 仓库   ;  value: List<SkuQty>
+                inventoryMapOms.forEach((key, value) -> {
+                    List<String> skuList = value.stream().map(SkuQty::getSku).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
+                    int size = skuList.size();
+                    int count = 30;
+                    int segment = size % count == 0 ? size / count : size / count + 1;
+                    ArrayList<CompletableFuture<List<CkSkuInventoryVO>>> completableFutures = new ArrayList<>();
+                    for (int i = 0; i < segment; i++) {
+                        List<String> skus;
+                        if (i == segment - 1) {
+                            skus = skuList.subList(count * i, size);
+                        } else {
+                            skus = skuList.subList(count * i, count * (i + 1));
+                        }
+                        CompletableFuture<List<CkSkuInventoryVO>> voidCompletableFuture = CompletableFuture.supplyAsync(() -> {
+                            List<CkSkuInventoryVO> ckSkuInventoryRespList = new ArrayList<>();
+                            // 每30个sku调用一次
+                            HttpRequestDto httpRequestDto = new HttpRequestDto();
+                            httpRequestDto.setMethod(HttpMethod.POST);
+                            httpRequestDto.setBinary(false);
+                            CkSkuInventoryQueryDTO ckSkuInventoryQueryDTO = new CkSkuInventoryQueryDTO();
+                            ckSkuInventoryQueryDTO.setSkus(skus);
+                            ckSkuInventoryQueryDTO.setWarehouseId(Ck1DomainPluginUtil.wrapper(key));
+                            httpRequestDto.setBody(ckSkuInventoryQueryDTO);
+                            httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getCheckInventoryUrl()));
+                            try {
+                                R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
+                                log.info("-----req-----:\n{}\n-----rmi-----:\n{}\n", JSONObject.toJSONString(httpRequestDto), JSONObject.toJSONString(rmi.getData().getBody()));
+                                HttpResponseVO dataAndException = R.getDataAndException(rmi);
+                                if (dataAndException.checkStatusFlag()) {
+                                    String body = (String) dataAndException.getBody();
+                                    ckSkuInventoryRespList = JSONObject.parseArray(body, CkSkuInventoryVO.class);
+                                    return ckSkuInventoryRespList;
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            return ckSkuInventoryRespList;
+                        });
+                        completableFutures.add(voidCompletableFuture);
+                    }
+
+                    CompletableFuture.runAsync(() ->
+                            value.forEach(item -> {
+                                WarehouseSkuCompare compare = compare(item, (warehouseCode, sku) -> {
+                                    List<InventoryInfo> listing = remoteRequest.listing(warehouseCode, sku);
+                                    if (CollectionUtils.isEmpty(listing)) {
+                                        return null;
+                                    }
+                                    return listing.get(0);
+                                });
+                                if (compare == null) {
+                                    log.info("客户[{}], 仓库[{}], SKU[{}], 没有产生差异", cusCode, key, item.getSku());
+                                    return;
+                                }
+                                log.info("客户[{}], 仓库[{}], SKU[{}], 产生差异", cusCode, key, item.getSku());
+                                // 查询CK1 的库存记录
+                                compareList.add(compare);
+                            }));
+
+                    // 拼装数据
+                    CompletableFuture<Void> voidCompletableFuture = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
+                    try {
+                        ArrayList<CkSkuInventoryVO> ckSkuInventoryResultList = new ArrayList<>();
+                        Void unused = voidCompletableFuture.get();
+                        completableFutures.forEach(x -> {
+                            try {
+                                ckSkuInventoryResultList.addAll(x.get());
+                            } catch (InterruptedException | ExecutionException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        Map<String, Integer> collect = ckSkuInventoryResultList.stream().collect(Collectors.toMap(CkSkuInventoryVO::getSku, CkSkuInventoryVO::getTotalStockQty, (x1, x2) -> x2));
+                        // 设置出口易库存数量
+                        compareList.forEach(warehouseSkuCompare -> warehouseSkuCompare.setCkQty(Optional.ofNullable(collect.get(warehouseSkuCompare.getSku())).orElse(0)));
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+
+                });
+                return compareList;
+            }
         } finally {
             lock.unlock();
         }
@@ -139,8 +223,14 @@ public class InventoryJobService {
     @EqualsAndHashCode(callSuper = true)
     @Accessors(chain = true)
     public static class WarehouseSkuCompare extends SkuQty {
-        /** WMS库存 **/
+        /**
+         * WMS库存
+         **/
         private Integer existQty;
+        /**
+         * 出口易库存
+         */
+        private Integer ckQty;
 
         public WarehouseSkuCompare(SkuQty skuQty, Integer existQty) {
             super(skuQty.getWarehouse(), skuQty.getSku(), skuQty.getQty());
@@ -152,13 +242,19 @@ public class InventoryJobService {
     @Data
     @Accessors(chain = true)
     public static class SkuQty {
-        /** 仓库 **/
+        /**
+         * 仓库
+         **/
         private String warehouse;
 
-        /** 总库存 **/
+        /**
+         * 总库存
+         **/
         private String sku;
 
-        /** 总库存 **/
+        /**
+         * 总库存
+         **/
         private Integer qty;
 
         public SkuQty() {

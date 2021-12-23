@@ -7,6 +7,7 @@ import com.szmsd.inventory.domain.InventoryCheck;
 import com.szmsd.inventory.domain.dto.InventoryCheckDetailsDTO;
 import com.szmsd.inventory.domain.dto.InventoryCheckQueryDTO;
 import com.szmsd.inventory.domain.vo.InventoryCheckVo;
+import com.szmsd.inventory.job.InventoryJobService;
 import com.szmsd.inventory.service.IInventoryCheckService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -54,4 +55,13 @@ public class InventoryCheckController extends BaseController {
         return R.ok(this.iInventoryCheckService.update(inventoryCheck));
     }
 
+    @Resource
+    private InventoryJobService inventoryJobService;
+
+    @GetMapping("/asyncInventoryWarning")
+    @ApiOperation(value = "asyncInventoryWarning")
+    public R<Integer> asyncInventoryWarning() {
+        inventoryJobService.asyncInventoryWarning();
+        return R.ok();
+    }
 }

@@ -54,6 +54,9 @@ public class InventoryWarning implements Serializable {
     @ApiModelProperty(value = "WMS实际库存数量")
     private Integer existQty;
 
+    @ApiModelProperty(value = "CK1实际库存数量")
+    private Integer ckQty;
+
     @ApiModelProperty(value = "邮箱")
     private String email;
 
