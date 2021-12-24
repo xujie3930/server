@@ -378,7 +378,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public BalanceDTO getBalance(String cusCode, String currencyCode) {
-
+        log.info("查询用户币别余额{}-{}",cusCode,currencyCode);
         QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cus_code", cusCode);
         queryWrapper.eq("currency_code", currencyCode);
@@ -417,12 +417,14 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
         BigDecimal creditUseAmount = Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
         balanceDTO.getCreditInfoBO().setCreditUseAmount(creditUseAmount);
+        log.info("查询用户币别余额完成：{}",JSONObject.toJSONString(creditUse));
         return balanceDTO;
     }
 
     @Override
     @Transactional
     public void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit) {
+        log.info("更新余额：{}，{}，{}，{}",cusCode,currencyCode,JSONObject.toJSONString(result),needUpdateCredit);
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(AccountBalance::getCusCode, cusCode);
         lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode, currencyCode);
