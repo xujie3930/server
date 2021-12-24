@@ -65,7 +65,7 @@ public class DelOutboundExportListVO implements Serializable {
     private String phoneNo;
 
     @ExcelProperty(value = "收件人税号")
-    private String consigneeTaxNo;
+    private String ioss;
 
     @ExcelProperty(value = "重量")
     private Double weight;

@@ -144,7 +144,10 @@
             o.bring_verify_time,
             o.shipments_time,
             o.exception_state,
-            o.remark
+            o.exception_message,
+            o.cod_amount,
+            o.remark,
+            o.ioss
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
