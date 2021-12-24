@@ -143,11 +143,12 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addForCreditBill(BigDecimal addMoney, String cusCode, String currencyCode) {
+        log.info("addForCreditBill {} - {} - {}", addMoney, cusCode, currencyCode);
         List<FssDeductionRecord> fssDeductionRecords = baseMapper.selectList(Wrappers.<FssDeductionRecord>lambdaQuery()
                 .eq(FssDeductionRecord::getCurrencyCode, currencyCode)
                 .eq(FssDeductionRecord::getCusCode, cusCode)
-                .in(FssDeductionRecord::getPayMethod, BillEnum.PayMethod.BALANCE_DEDUCTIONS.name(),BillEnum.PayMethod.BUSINESS_OPERATE.name())
-                .in(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT.getValue(),CreditConstant.CreditBillStatusEnum.CHECKED.getValue())
+                .in(FssDeductionRecord::getPayMethod, BillEnum.PayMethod.BALANCE_DEDUCTIONS.name(), BillEnum.PayMethod.BUSINESS_OPERATE.name())
+                .in(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT.getValue(), CreditConstant.CreditBillStatusEnum.CHECKED.getValue())
                 .orderByAsc(FssDeductionRecord::getId)
         );
         for (FssDeductionRecord x : fssDeductionRecords) {

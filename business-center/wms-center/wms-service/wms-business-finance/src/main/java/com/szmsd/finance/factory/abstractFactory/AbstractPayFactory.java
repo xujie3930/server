@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -49,6 +51,8 @@ public abstract class AbstractPayFactory {
 
     @Resource
     private IDeductionRecordService iDeductionRecordService;
+    @Resource
+    protected ThreadPoolTaskExecutor financeThreadTaskPool;
 
     /**
      * 返回null 则不处理 接口幂等
@@ -57,17 +61,20 @@ public abstract class AbstractPayFactory {
 
     public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
         AccountBalanceChange accountBalanceChange = new AccountBalanceChange();
-        BeanUtils.copyProperties(dto, accountBalanceChange);
-        if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
-            String currencyName = sysDictDataService.getCurrencyNameByCode(accountBalanceChange.getCurrencyCode());
-            accountBalanceChange.setCurrencyName(currencyName);
-            dto.setCurrencyName(currencyName);
-        }
+        log.info("recordOpLog{}-{}", JSONObject.toJSONString(dto), result);
+        financeThreadTaskPool.submit(() -> {
+            BeanUtils.copyProperties(dto, accountBalanceChange);
+            if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
+                String currencyName = sysDictDataService.getCurrencyNameByCode(accountBalanceChange.getCurrencyCode());
+                accountBalanceChange.setCurrencyName(currencyName);
+                dto.setCurrencyName(currencyName);
+            }
 
-        accountBalanceChange.setSerialNum(SnowflakeId.getNextId12());
-        setOpLogAmount(accountBalanceChange, dto.getAmount());
-        accountBalanceChange.setCurrentBalance(result);
-        accountBalanceChangeMapper.insert(accountBalanceChange);
+            accountBalanceChange.setSerialNum(SnowflakeId.getNextId12());
+            setOpLogAmount(accountBalanceChange, dto.getAmount());
+            accountBalanceChange.setCurrentBalance(result);
+            accountBalanceChangeMapper.insert(accountBalanceChange);
+        });
         return accountBalanceChange;
     }
 
@@ -78,23 +85,24 @@ public abstract class AbstractPayFactory {
      * @param balanceDTO
      */
     public void recordDetailLog(CustPayDTO custPayDTO, BalanceDTO balanceDTO) {
-        log.info("添加详细使用记录传参custPayDTO: {}", JSONObject.toJSONString(custPayDTO));
-        log.info("添加详细使用记录传参balanceDTO: {}", JSONObject.toJSONString(balanceDTO));
-        FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
-        CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
-        int creditType = Integer.parseInt(creditInfoBO.getCreditType());
-        fssDeductionRecord.setPayMethod(custPayDTO.getPayMethod().name())
-                .setAmount(custPayDTO.getAmount())
-                .setCreditType(creditType)
-                .setStatus(creditType == CreditConstant.CreditTypeEnum.QUOTA.getValue() ?
-                        CreditConstant.CreditBillStatusEnum.CHECKED.getValue() : CreditConstant.CreditBillStatusEnum.DEFAULT.getValue())
-                .setOrderNo(custPayDTO.getNo())
-                .setCusCode(custPayDTO.getCusCode()).setCurrencyCode(custPayDTO.getCurrencyCode())
-                .setActualDeduction(balanceDTO.getActualDeduction()).setCreditUseAmount(balanceDTO.getCreditUseAmount())
-                .setRemainingRepaymentAmount(balanceDTO.getCreditUseAmount()).setRepaymentAmount(BigDecimal.ZERO)
-                .setCreditBeginTime(creditInfoBO.getCreditBeginTime()).setCreditEndTime(creditInfoBO.getCreditEndTime())
-        ;
-        iDeductionRecordService.save(fssDeductionRecord);
+        financeThreadTaskPool.submit(() -> {
+            log.info("添加详细使用记录传参custPayDTO: {} {}", JSONObject.toJSONString(custPayDTO), JSONObject.toJSONString(balanceDTO));
+            FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
+            CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
+            int creditType = Integer.parseInt(creditInfoBO.getCreditType());
+            fssDeductionRecord.setPayMethod(custPayDTO.getPayMethod().name())
+                    .setAmount(custPayDTO.getAmount())
+                    .setCreditType(creditType)
+                    .setStatus(creditType == CreditConstant.CreditTypeEnum.QUOTA.getValue() ?
+                            CreditConstant.CreditBillStatusEnum.CHECKED.getValue() : CreditConstant.CreditBillStatusEnum.DEFAULT.getValue())
+                    .setOrderNo(custPayDTO.getNo())
+                    .setCusCode(custPayDTO.getCusCode()).setCurrencyCode(custPayDTO.getCurrencyCode())
+                    .setActualDeduction(balanceDTO.getActualDeduction()).setCreditUseAmount(balanceDTO.getCreditUseAmount())
+                    .setRemainingRepaymentAmount(balanceDTO.getCreditUseAmount()).setRepaymentAmount(BigDecimal.ZERO)
+                    .setCreditBeginTime(creditInfoBO.getCreditBeginTime()).setCreditEndTime(creditInfoBO.getCreditEndTime())
+            ;
+            iDeductionRecordService.save(fssDeductionRecord);
+        });
     }
 
     protected abstract void setOpLogAmount(AccountBalanceChange accountBalanceChange, BigDecimal amount);
