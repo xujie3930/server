@@ -2,10 +2,7 @@ package com.szmsd.putinstorage.api.dto;
 
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringToolkit;
-import com.google.common.collect.Lists;
-
 import com.szmsd.http.util.Ck1DomainPluginUtil;
-import com.szmsd.putinstorage.constant.PutinstorageConstant;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import io.swagger.annotations.ApiModel;
@@ -14,7 +11,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.ConstraintViolation;
@@ -22,7 +18,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.*;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 

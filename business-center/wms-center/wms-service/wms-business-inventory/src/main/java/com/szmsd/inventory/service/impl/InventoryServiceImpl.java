@@ -730,7 +730,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             httpRequestDto.setMethod(HttpMethod.POST);
             httpRequestDto.setBinary(false);
             httpRequestDto.setBody(CkAdjustInventoryDTO.createCkAdjustInventoryDTO(inventoryAdjustmentDTO));
-            httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}" + ckConfig.getAdjustInventoryUrl());
+            httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getAdjustInventoryUrl()));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.ADJUST_INVENTORY);
             R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
             log.info("【推送CK1】调整库存{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));

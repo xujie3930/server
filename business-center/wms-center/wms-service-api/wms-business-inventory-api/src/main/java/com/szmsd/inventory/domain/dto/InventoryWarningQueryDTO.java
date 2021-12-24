@@ -27,4 +27,10 @@ public class InventoryWarningQueryDTO {
 
     @ApiModelProperty(value = "结束时间 - 由接口调用方定义")
     private String endTime;
+
+    @ApiModelProperty(value = "与CK1差异-开始")
+    private Integer differenceWithCkStart;
+
+    @ApiModelProperty(value = "与CK1差异-结束")
+    private Integer differenceWithCkEnd;
 }

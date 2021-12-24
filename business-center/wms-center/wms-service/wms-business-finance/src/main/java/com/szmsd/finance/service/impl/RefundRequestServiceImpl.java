@@ -1,5 +1,6 @@
 package com.szmsd.finance.service.impl;
 
+import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.thread.NamedThreadFactory;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.event.SyncReadListener;
@@ -208,6 +209,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             //检验规则
             AtomicInteger importNo = new AtomicInteger(1);
             List<String> errorMsg = new LinkedList<>();
+            StopWatch stopWatch = new StopWatch("校验");
+            stopWatch.start("参数必填校验");
             basPackingAddList.forEach(basSellAccountPeriodAddDTO -> {
                 if (StringUtils.isNotBlank(basSellAccountPeriodAddDTO.getTreatmentProperties()) && "赔偿".equals(basSellAccountPeriodAddDTO.getTreatmentProperties())) {
                     FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo, errorMsg, ICompensateCheck.class);
@@ -215,6 +218,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     FileVerifyUtil.validate(basSellAccountPeriodAddDTO, importNo, errorMsg, Default.class);
                 }
             });
+            stopWatch.stop();
+            stopWatch.start("内容填充");
             AssertUtil.isTrue(CollectionUtils.isEmpty(errorMsg), String.join("\n", errorMsg));
             basPackingAddList.forEach(x -> {
                 AssertUtil.isTrue(remoteApi.checkCusCode(x.getCusCode()), "用户" + x.getCusCode() + "不存在");
@@ -254,6 +259,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     if (StringUtils.isBlank(compensationPaymentCurrency)) x.setCompensationPaymentCurrency(null);
                 }
             });
+            stopWatch.stop();
+            stopWatch.start("校验单号");
             StringBuilder errorMsgBuilder = new StringBuilder();
             //客户号-客户预处理号 校验预处理号是否是已完成的订单
             Map<String, List<String>> collect = basPackingAddList.stream().filter(x -> StringUtils.isNotBlank(x.getOrderNo())).collect(Collectors.groupingBy(RefundRequestDTO::getCusCode, Collectors.mapping(RefundRequestDTO::getOrderNo, Collectors.toList())));
@@ -280,6 +287,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     }
                 });
             });
+            stopWatch.stop();
+            log.info(stopWatch.prettyPrint());
             if (StringUtils.isNotBlank(errorMsgBuilder.toString())) {
                 throw new RuntimeException(errorMsgBuilder.toString());
             }

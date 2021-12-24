@@ -42,7 +42,12 @@ public class CkConfig {
     /**
      * 手动调整库存
      */
-    String adjustInventoryUrl = "http://openapi.ck1info.com/v1/ManuallyAdjustSKUInventory";
+    String adjustInventoryUrl = "/v1/ManuallyAdjustSKUInventory";
+    /**
+     * 查询Sku在某个仓库的库存情况 核对库存
+     */
+    String checkInventoryUrl="/v1/inventories";
+
 
     public String getIncomingOrderCompletedUrl(String customerOrderNo) {
         return incomingOrderCompletedUrl.replace("{customerOrderNo}", customerOrderNo);

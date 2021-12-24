@@ -36,4 +36,6 @@ public interface IInventoryCheckService {
      * @return result
      */
     int update(InventoryCheck inventoryCheck);
+
+
 }
