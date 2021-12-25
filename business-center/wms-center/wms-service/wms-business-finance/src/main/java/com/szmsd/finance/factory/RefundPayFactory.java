@@ -76,7 +76,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                 recordOpLog(dto, result.getCurrentBalance());
                 recordDetailLog(dto, oldBalance);
                 setSerialBillLog(dto);
-                iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
+                //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 log.info("处理退费完成:{}", stopWatch.prettyPrint());
                 return true;
             } else {
