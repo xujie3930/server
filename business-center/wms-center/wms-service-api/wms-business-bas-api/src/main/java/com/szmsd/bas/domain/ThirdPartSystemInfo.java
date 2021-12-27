@@ -25,6 +25,9 @@ public class ThirdPartSystemInfo {
     @ApiModelProperty(value = "业务系统token")
     private String token;
 
+    @ApiModelProperty(value = "是否需要推送")
+    private Boolean pushFlag;
+
     @ApiModelProperty(value = "过期时间")
     private LocalDateTime expirationTime;
 

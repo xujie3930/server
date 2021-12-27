@@ -17,6 +17,7 @@ import com.szmsd.bas.config.DefaultBasConfig;
 import com.szmsd.bas.config.StateConfig;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
+import com.szmsd.bas.domain.ThirdPartEnum;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
@@ -66,10 +67,7 @@ import javax.print.attribute.standard.SheetCollate;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -580,6 +578,19 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             return "";
         }
         return basSeller.getRealState();
+    }
+
+    @Override
+    public Boolean queryCkPushFlag(String sellerCode) {
+
+        BasSeller basSeller = super.getOne(Wrappers.<BasSeller>lambdaQuery()
+                .eq(BasSeller::getSellerCode, sellerCode)
+                .select(BasSeller::getThirdPartSystemInfo, BasSeller::getId, BasSeller::getSellerCode)
+        );
+        if (Objects.nonNull(basSeller)) {
+            String thirdPartSystemInfo = basSeller.getThirdPartSystemInfo();
+         }
+        return true;
     }
 
     private String sellerCode(){
