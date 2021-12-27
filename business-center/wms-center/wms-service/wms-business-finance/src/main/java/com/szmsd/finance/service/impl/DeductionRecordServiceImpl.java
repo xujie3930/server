@@ -1,5 +1,6 @@
 package com.szmsd.finance.service.impl;
 
+import cn.hutool.core.date.StopWatch;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.FssDeductionRecord;
@@ -21,6 +22,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -143,26 +145,41 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addForCreditBill(BigDecimal addMoney, String cusCode, String currencyCode) {
-        List<FssDeductionRecord> fssDeductionRecords = baseMapper.selectList(Wrappers.<FssDeductionRecord>lambdaQuery()
+        StopWatch stopWatch = new StopWatch("还款销账");
+        stopWatch.start();
+        log.info("addForCreditBill {} - {} - {}", addMoney, cusCode, currencyCode);
+        List<FssDeductionRecord> fssDeductionRecords = new ArrayList<>();
+        while (addMoney.compareTo(BigDecimal.ZERO) > 0 && (fssDeductionRecords = baseMapper.selectList(Wrappers.<FssDeductionRecord>lambdaQuery()
                 .eq(FssDeductionRecord::getCurrencyCode, currencyCode)
                 .eq(FssDeductionRecord::getCusCode, cusCode)
-                .in(FssDeductionRecord::getPayMethod, BillEnum.PayMethod.BALANCE_DEDUCTIONS.name(),BillEnum.PayMethod.BUSINESS_OPERATE.name())
-                .in(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT.getValue(),CreditConstant.CreditBillStatusEnum.CHECKED.getValue())
-                .orderByAsc(FssDeductionRecord::getId)
-        );
-        for (FssDeductionRecord x : fssDeductionRecords) {
-            if (addMoney.compareTo(x.getRemainingRepaymentAmount()) >= 0) {
-                x.setRemainingRepaymentAmount(BigDecimal.ZERO);
-                x.setRepaymentAmount(x.getCreditUseAmount());
-                x.setStatus(CreditConstant.CreditBillStatusEnum.REPAID.getValue());
-                addMoney = addMoney.subtract(x.getRemainingRepaymentAmount());
-            } else {
-                x.setRepaymentAmount(x.getRepaymentAmount().add(addMoney));
-                x.setRemainingRepaymentAmount(x.getRemainingRepaymentAmount().subtract(addMoney));
-                addMoney = BigDecimal.ZERO;
+                .in(FssDeductionRecord::getPayMethod, BillEnum.PayMethod.BALANCE_DEDUCTIONS.name(), BillEnum.PayMethod.BUSINESS_OPERATE.name())
+                .in(FssDeductionRecord::getStatus, CreditConstant.CreditBillStatusEnum.DEFAULT.getValue(), CreditConstant.CreditBillStatusEnum.CHECKED.getValue())
+                .orderByAsc(FssDeductionRecord::getId).last("LIMIT 10").select(
+                        FssDeductionRecord::getId,
+                        FssDeductionRecord::getStatus,
+                        FssDeductionRecord::getAmount,
+                        FssDeductionRecord::getActualDeduction,
+                        FssDeductionRecord::getRemainingRepaymentAmount,
+                        FssDeductionRecord::getCreditUseAmount,
+                        FssDeductionRecord::getRepaymentAmount))).size() > 0) {
+            log.info("inner==addForCreditBill {} - {} - {}", addMoney, cusCode, currencyCode);
+
+            for (FssDeductionRecord x : fssDeductionRecords) {
+                if (addMoney.compareTo(x.getRemainingRepaymentAmount()) >= 0) {
+                    x.setRemainingRepaymentAmount(BigDecimal.ZERO);
+                    x.setRepaymentAmount(x.getCreditUseAmount());
+                    x.setStatus(CreditConstant.CreditBillStatusEnum.REPAID.getValue());
+                    addMoney = addMoney.subtract(x.getRemainingRepaymentAmount());
+                } else {
+                    x.setRepaymentAmount(x.getRepaymentAmount().add(addMoney));
+                    x.setRemainingRepaymentAmount(x.getRemainingRepaymentAmount().subtract(addMoney));
+                    addMoney = BigDecimal.ZERO;
+                }
             }
+            this.updateBatchById(fssDeductionRecords);
         }
-        this.saveOrUpdateBatch(fssDeductionRecords);
+        stopWatch.stop();
+        log.info("addForCreditBill {} - {} - {}\n{}", addMoney, cusCode, currencyCode, stopWatch.prettyPrint());
         // 多余的钱充值道钱包里面
     }
 }

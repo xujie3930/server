@@ -69,6 +69,11 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
             public R<BasSellerInfoVO> getInfoBySellerCode(String sellerCode) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<Boolean> queryCkPushFlag(String sellerCode) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

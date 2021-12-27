@@ -76,7 +76,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 dto.setCurrencyName(accountBalanceChange.getCurrencyName());
                 setSerialBillLog(dto, afterBalanceChange);
                 recordDetailLog(dto, beforeSubtract);
-                iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
+                //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
             } else {
                 log.error("汇率转换,请稍候重试{}", JSONObject.toJSONString(dto));

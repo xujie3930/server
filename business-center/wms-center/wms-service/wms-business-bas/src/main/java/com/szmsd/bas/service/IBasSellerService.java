@@ -125,5 +125,13 @@ public interface IBasSellerService extends IService<BasSeller> {
      * @return String
      */
     String getRealState(String sellerCode);
+
+    /**
+     * 查询是否需要推送CK1 判断
+     * @param sellerCode 用户code
+     * @return false 不推送
+     */
+    Boolean queryCkPushFlag(String sellerCode);
+
 }
 

@@ -20,6 +20,11 @@ com:
     domain:
       values:
         "Ck1OpenAPIDomain": "http://openapi.ck1info.com"
+    # domain-interceptor
+    domain-interceptor:
+      values:
+        "[http://openapi.ck1info.com]":
+          - "Ck1DomainInterceptor"
     # domain plugin
     domain-plugin:
       values:

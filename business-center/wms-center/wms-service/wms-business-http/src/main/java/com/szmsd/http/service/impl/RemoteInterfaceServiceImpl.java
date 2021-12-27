@@ -5,6 +5,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.http.config.DomainConfig;
+import com.szmsd.http.config.DomainInterceptorConfig;
 import com.szmsd.http.config.DomainPluginConfig;
 import com.szmsd.http.config.DomainURIUtil;
 import com.szmsd.http.domain.HtpRequestLog;
@@ -13,6 +14,7 @@ import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.event.EventUtil;
 import com.szmsd.http.event.RequestLogEvent;
 import com.szmsd.http.plugins.Domain;
+import com.szmsd.http.plugins.DomainInterceptor;
 import com.szmsd.http.plugins.DomainPlugin;
 import com.szmsd.http.service.ICommonRemoteService;
 import com.szmsd.http.service.RemoteInterfaceService;
@@ -44,6 +46,8 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
     @Autowired
     private DomainConfig domainConfig;
     @Autowired
+    private DomainInterceptorConfig domainInterceptorConfig;
+    @Autowired
     private DomainPluginConfig domainPluginConfig;
     @Autowired
     private ApplicationContext applicationContext;
@@ -71,29 +75,50 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
         } else {
             domain = DomainURIUtil.getDomain(uri);
         }
-        // 处理插件逻辑
-        List<String> handlerPlugins = new ArrayList<>();
-        handlerPlugins.add("DefaultDomainPlugin");
-        List<String> plugins = this.domainPluginConfig.getPlugins(domain);
-        if (CollectionUtils.isNotEmpty(plugins)) {
-            handlerPlugins.addAll(plugins);
-        }
         Map<String, String> requestHeaders = dto.getHeaders();
         // 请求body
         String requestBody = JSON.toJSONString(dto.getBody());
-        for (String plugin : handlerPlugins) {
-            DomainPlugin domainPlugin = getDomainPlugin(plugin, domain);
-            requestHeaders = domainPlugin.headers(requestHeaders);
-            uri = domainPlugin.uri(uri);
-            requestBody = domainPlugin.requestBody(requestBody);
-        }
-        // 二进制
-        Boolean binary = dto.getBinary();
-        if (null == binary) {
-            // default value
-            binary = false;
-        }
+        List<DomainInterceptor> domainInterceptorList = null;
         try {
+            // 处理拦截器逻辑
+            List<String> interceptors = this.domainInterceptorConfig.getInterceptors(domain);
+            if (CollectionUtils.isNotEmpty(interceptors)) {
+                domainInterceptorList = new ArrayList<>();
+                boolean isBreak = false;
+                for (String interceptor : interceptors) {
+                    DomainInterceptor domainInterceptor = getDomainInterceptor(interceptor);
+                    // 处理之前的拦截器，返回false不执行
+                    if (!domainInterceptor.preHandle(uri, requestHeaders, requestBody)) {
+                        isBreak = true;
+                    }
+                    domainInterceptorList.add(domainInterceptor);
+                }
+                if (isBreak) {
+                    HttpResponseVO httpResponseVO = new HttpResponseVO();
+                    httpResponseVO.setStatus(200);
+                    httpResponseVO.setBody("拦截返回");
+                    return httpResponseVO;
+                }
+            }
+            // 处理插件逻辑
+            List<String> handlerPlugins = new ArrayList<>();
+            handlerPlugins.add("DefaultDomainPlugin");
+            List<String> plugins = this.domainPluginConfig.getPlugins(domain);
+            if (CollectionUtils.isNotEmpty(plugins)) {
+                handlerPlugins.addAll(plugins);
+            }
+            for (String plugin : handlerPlugins) {
+                DomainPlugin domainPlugin = getDomainPlugin(plugin, domain);
+                requestHeaders = domainPlugin.headers(requestHeaders);
+                uri = domainPlugin.uri(uri);
+                requestBody = domainPlugin.requestBody(requestBody);
+            }
+            // 二进制
+            Boolean binary = dto.getBinary();
+            if (null == binary) {
+                // default value
+                binary = false;
+            }
             // 处理请求体
             HttpEntityEnclosingRequestBase request = null;
             if (HttpMethod.GET.equals(dto.getMethod())) {
@@ -140,11 +165,21 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                 responseVO.setBody(responseBody.getBytes(StandardCharsets.UTF_8));
                 responseVO.setBinary(false);
             }
+            if (CollectionUtils.isNotEmpty(domainInterceptorList)) {
+                for (DomainInterceptor domainInterceptor : domainInterceptorList) {
+                    domainInterceptor.postHandle(uri, responseVO.getBody());
+                }
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             responseVO.setStatus(0);
             responseVO.setBody(("请求失败，" + e.getMessage()).getBytes(StandardCharsets.UTF_8));
         } finally {
+            if (CollectionUtils.isNotEmpty(domainInterceptorList)) {
+                for (DomainInterceptor domainInterceptor : domainInterceptorList) {
+                    domainInterceptor.afterCompletion(uri, responseVO.getBody());
+                }
+            }
             // 记录日志
             Date responseTime = new Date();
             HtpRequestLog requestLog = new HtpRequestLog();
@@ -175,6 +210,10 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             ((Domain) domainPlugin).setDomain(domain);
         }
         return domainPlugin;
+    }
+
+    private DomainInterceptor getDomainInterceptor(String interceptor) {
+        return this.applicationContext.getBean(interceptor, DomainInterceptor.class);
     }
 
     private Map<String, String> headerToMap(Header[] headers) {

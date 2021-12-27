@@ -161,7 +161,11 @@ public class BasSeller extends BaseEntity {
     @Excel(name = "折扣用户类型-编码")
     private String discountUserType;
 
-    @ApiModelProperty(value = "第三方系统信息", notes = "第三方系统信息", hidden = true)
-    private String thirdPartSystemInfo;
+    /**----------------CK1 INFO----------------*/
+    /**
+     * 把push set到 thirdPartSystemInfo中
+     */
+    @ApiModelProperty(value = "是否需要推送CK1")
+    private Boolean pushFlag;
 
 }

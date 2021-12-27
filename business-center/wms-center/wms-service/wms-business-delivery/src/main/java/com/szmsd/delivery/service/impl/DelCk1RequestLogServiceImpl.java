@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -26,6 +27,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -72,6 +74,16 @@ public class DelCk1RequestLogServiceImpl extends ServiceImpl<DelCk1RequestLogMap
                         httpRequestDto.setBody(body);
                     } else {
                         httpRequestDto.setBody(requestBody);
+                    }
+                    String remark = ck1RequestLog.getRemark();
+                    if (StringUtils.isNotEmpty(remark)) {
+                        try {
+                            Map<String, String> headers = JSON.parseObject(remark, new TypeReference<Map<String, String>>() {
+                            });
+                            httpRequestDto.setHeaders(headers);
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                        }
                     }
                     HttpResponseVO httpResponseVO = htpRmiClientService.rmi(httpRequestDto);
                     if (200 == httpResponseVO.getStatus() ||
