@@ -60,7 +60,7 @@ public class IncomePayFactory extends AbstractPayFactory {
                 recordOpLog(dto, oldBalance.getCurrentBalance());
                 setSerialBillLog(dto);
                 recordDetailLog(dto, oldBalance);
-                iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
+                //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
             } else {
                 log.error("充值操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
