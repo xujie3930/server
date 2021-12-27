@@ -21,6 +21,7 @@ import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.http.util.Ck1DomainPluginUtil;
+import com.szmsd.http.util.DomainInterceptorUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -146,6 +148,9 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 packageDTO.setSkus(skusDTOList);
                 ck1OutboundDto.setPackage(packageDTO);
                 DelCk1RequestLog ck1RequestLog = new DelCk1RequestLog();
+                Map<String, String> headers = new HashMap<>();
+                headers.put(DomainInterceptorUtil.KEYWORD, delOutbound.getSellerCode());
+                ck1RequestLog.setRemark(JSON.toJSONString(headers));
                 ck1RequestLog.setOrderNo(delOutbound.getOrderNo());
                 ck1RequestLog.setRequestBody(JSON.toJSONString(ck1OutboundDto));
                 ck1RequestLog.setType(DelCk1RequestLogConstant.Type.create.name());

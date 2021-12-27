@@ -42,6 +42,7 @@ import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.http.enums.HttpRechargeConstants;
+import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
@@ -352,6 +353,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
                         DelCk1RequestLog ck1RequestLog = new DelCk1RequestLog();
                         ck1RequestLog.setOrderNo(delOutbound.getOrderNo());
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put(DomainInterceptorUtil.KEYWORD, delOutbound.getSellerCode());
+                        ck1RequestLog.setRemark(JSON.toJSONString(headers));
                         ck1RequestLog.setType(DelCk1RequestLogConstant.Type.finished.name());
                         EventUtil.publishEvent(new DelCk1RequestLogEvent(ck1RequestLog));
                     }
@@ -621,6 +625,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
                         DelCk1RequestLog ck1RequestLog = new DelCk1RequestLog();
                         ck1RequestLog.setOrderNo(delOutbound.getOrderNo());
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put(DomainInterceptorUtil.KEYWORD, delOutbound.getSellerCode());
+                        ck1RequestLog.setRemark(JSON.toJSONString(headers));
                         ck1RequestLog.setType(DelCk1RequestLogConstant.Type.cancel.name());
                         EventUtil.publishEvent(new DelCk1RequestLogEvent(ck1RequestLog));
                     }

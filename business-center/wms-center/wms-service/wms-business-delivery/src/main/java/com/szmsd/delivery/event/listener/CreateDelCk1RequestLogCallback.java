@@ -14,6 +14,7 @@ public class CreateDelCk1RequestLogCallback implements DelCk1RequestLogCallback 
         // 获取状态
         DelCk1RequestLog delCk1RequestLog = new DelCk1RequestLog();
         delCk1RequestLog.setOrderNo(ck1RequestLog.getOrderNo());
+        delCk1RequestLog.setRemark(ck1RequestLog.getRemark());
         delCk1RequestLog.setType(DelCk1RequestLogConstant.Type.create_status.name());
         EventUtil.publishEvent(new DelCk1RequestLogEvent(delCk1RequestLog));
     }
