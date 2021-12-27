@@ -329,7 +329,7 @@ public class RemoteComponent {
      */
     public void createTracking(CreateInboundReceiptDTO createInboundReceiptDTO) {
         log.info("创建入库单： {}", createInboundReceiptDTO);
-        // if (CollectionUtils.isEmpty(createInboundReceiptDTO.getDeliveryNoList())) return;
+        if (CollectionUtils.isEmpty(createInboundReceiptDTO.getDeliveryNoList())) return;
         CreateTrackRequest createTrackRequest = new CreateTrackRequest();
         createTrackRequest.setWarehouseCode(createInboundReceiptDTO.getWarehouseCode())
                 .setRefOrderNo(createInboundReceiptDTO.getWarehouseNo())
@@ -344,6 +344,7 @@ public class RemoteComponent {
 
     public void createTracking(UpdateTrackingNoRequest updateTrackingNoRequest, InboundReceipt inboundReceipt) {
         // 创建入库单物流信息列表
+        if (CollectionUtils.isEmpty(updateTrackingNoRequest.getDeliveryNoList())) return;
         CreateTrackRequest createTrackRequest = new CreateTrackRequest();
         createTrackRequest.setWarehouseCode(inboundReceipt.getWarehouseCode())
                 .setRefOrderNo(inboundReceipt.getWarehouseNo())
