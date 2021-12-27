@@ -17,7 +17,6 @@ import com.szmsd.bas.config.DefaultBasConfig;
 import com.szmsd.bas.config.StateConfig;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
-import com.szmsd.bas.domain.ThirdPartEnum;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
@@ -28,7 +27,6 @@ import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -36,7 +34,6 @@ import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.core.utils.ip.IpUtils;
 import com.szmsd.common.core.utils.sign.Base64;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
@@ -54,7 +51,6 @@ import com.szmsd.system.api.feign.RemoteUserService;
 import com.szmsd.system.api.model.UserInfo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -63,7 +59,6 @@ import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
-import javax.print.attribute.standard.SheetCollate;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -313,7 +308,6 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
 
     private BasSellerInfoVO getBasSellerInfoVO(QueryWrapper<BasSeller> queryWrapper) {
         BasSeller basSeller = super.getOne(queryWrapper);
-        String thirdPartSystemInfo = basSeller.getThirdPartSystemInfo();
         //查询用户证件信息
         QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
         BasSellerCertificateQueryWrapper.eq("seller_code", basSeller.getSellerCode());
@@ -582,14 +576,15 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
 
     @Override
     public Boolean queryCkPushFlag(String sellerCode) {
-
         BasSeller basSeller = super.getOne(Wrappers.<BasSeller>lambdaQuery()
                 .eq(BasSeller::getSellerCode, sellerCode)
-                .select(BasSeller::getThirdPartSystemInfo, BasSeller::getId, BasSeller::getSellerCode)
+                .select(BasSeller::getPushFlag, BasSeller::getId, BasSeller::getSellerCode)
         );
         if (Objects.nonNull(basSeller)) {
-            String thirdPartSystemInfo = basSeller.getThirdPartSystemInfo();
-         }
+            Boolean pushFlag = basSeller.getPushFlag();
+            // 配置不推送才不推，其余情况默认推送
+            return (pushFlag == null || pushFlag);
+        }
         return true;
     }
 
