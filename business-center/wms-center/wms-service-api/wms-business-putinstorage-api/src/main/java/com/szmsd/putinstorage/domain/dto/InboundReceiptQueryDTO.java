@@ -1,5 +1,7 @@
 package com.szmsd.putinstorage.domain.dto;
 
+import com.szmsd.common.core.utils.StringToolkit;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -7,8 +9,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import org.ehcache.xml.model.TimeType;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @Accessors(chain = true)
@@ -17,6 +22,19 @@ public class InboundReceiptQueryDTO extends QueryDto {
 
     @ApiModelProperty(value = "入库单号")
     private String warehouseNo;
+
+    @ApiModelProperty(value = "送货单号")
+    private String deliveryNo;
+
+    public void setDeliveryNo(String deliveryNo) {
+        if (StringUtils.isBlank(deliveryNo))
+            deliveryNo = "";
+        this.deliveryNoList = Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>());
+        this.deliveryNo = String.join(",", deliveryNoList);
+    }
+
+    @ApiModelProperty(value = "送货单号-Arr")
+    private List<String> deliveryNoList;
 
     @ApiModelProperty(value = "入库单号")
     private List<String> warehouseNoList;
@@ -65,7 +83,9 @@ public class InboundReceiptQueryDTO extends QueryDto {
     @Getter
     @AllArgsConstructor
     public enum TimeType {
-        /** 入库单创建时间 **/
+        /**
+         * 入库单创建时间
+         **/
         CR("t.create_time"),
         ;
         private String field;
