@@ -179,6 +179,9 @@
                 #{warehouseNo}
             </foreach>
         </if>
+        <if test="deliveryNoList != null and deliveryNoList.size() > 0">
+            AND  CONCAT( ',', t.delivery_no, ',' ) REGEXP ( SELECT CONCAT( ',', REPLACE (#{deliveryNo}, ',', ',|,' ), ',' ))
+        </if>
         <if test="orderNoList != null and orderNoList.size() > 0">
             AND t.order_no IN
             <foreach collection="orderNoList" open="(" separator="," close=")" item="orderNo">
