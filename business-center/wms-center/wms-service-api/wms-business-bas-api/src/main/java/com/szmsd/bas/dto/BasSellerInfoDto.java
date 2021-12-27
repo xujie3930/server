@@ -2,7 +2,6 @@ package com.szmsd.bas.dto;
 
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.domain.BasSeller;
-import com.szmsd.bas.domain.ThirdPartSystemInfo;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.finance.dto.UserCreditDetailDTO;
 import io.swagger.annotations.ApiModelProperty;
@@ -24,9 +23,5 @@ public class BasSellerInfoDto extends BasSeller {
 
     @ApiModelProperty(value = "文件信息")
     private List<AttachmentDataDTO> documentsFiles;
-
-    @Valid
-    @ApiModelProperty(value = "系统信息（对应系统Token）")
-    private List<ThirdPartSystemInfo> systemInfoList;
 
 }
