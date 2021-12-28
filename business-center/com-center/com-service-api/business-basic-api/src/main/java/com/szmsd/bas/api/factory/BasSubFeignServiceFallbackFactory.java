@@ -28,7 +28,7 @@ public class BasSubFeignServiceFallbackFactory implements FallbackFactory<BasSub
 
             @Override
             public R<List<BasSub>> listByMain(String mainCode, String mainName) {
-                return null;
+                return  R.convertResultJson(throwable);
             }
 
             @Override

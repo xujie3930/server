@@ -74,10 +74,10 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
         Long id = dto.getId();
         // 同一个 订单类型+仓库+币别+客户名称+操作类型+币别 唯一 且生效时间不冲突 //TODO 一个用户不能在多个规则里面
         List<ChaOperation> operations = baseMapper.selectList(Wrappers.<ChaOperation>lambdaQuery()
-                .eq(ChaOperation::getOrderType, orderType)
+                .eq(StringUtils.isNotBlank(orderType), ChaOperation::getOrderType, orderType)
                 .eq(ChaOperation::getOperationType, operationType)
                 .eq(ChaOperation::getWarehouseCode, warehouseCode)
-                .eq(ChaOperation::getCusTypeCode, cusTypeCode)
+                .eq(StringUtils.isNotBlank(cusTypeCode), ChaOperation::getCusTypeCode, cusTypeCode)
                 .eq(ChaOperation::getCurrencyCode, currencyCode)
                 .select(ChaOperation::getId, ChaOperation::getCurrencyCode, ChaOperation::getEffectiveTime, ChaOperation::getExpirationTime));
         if (Objects.nonNull(id)) {
@@ -92,12 +92,11 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
             boolean present = operations.parallelStream()
                     .anyMatch(x -> {
                         LocalDateTime max = effectiveTime.compareTo(x.getEffectiveTime()) >= 0 ? effectiveTime : x.getEffectiveTime();
-                        LocalDateTime min = expirationTime.compareTo(x.getExpirationTime()) >= 0 ? expirationTime : x.getExpirationTime();
+                        LocalDateTime min = expirationTime.compareTo(x.getExpirationTime()) <= 0 ? expirationTime : x.getExpirationTime();
                         return max.compareTo(min) <= 0;
                     });
             AssertUtil.isTrue(!present, "已存在相同配置的费用规则");
         }
-
     }
 
     @Override

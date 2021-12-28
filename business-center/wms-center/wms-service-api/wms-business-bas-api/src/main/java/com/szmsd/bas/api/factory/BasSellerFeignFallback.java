@@ -3,10 +3,7 @@ package com.szmsd.bas.api.factory;
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
-import com.szmsd.bas.dto.BasSellerEmailDto;
-import com.szmsd.bas.dto.BasSellerQueryDto;
-import com.szmsd.bas.dto.ServiceConditionDto;
-import com.szmsd.bas.dto.VatQueryDto;
+import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -22,21 +19,22 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
     public BasSellerFeignService create(Throwable throwable) {
         return new BasSellerFeignService() {
             @Override
-            public  R<String> getSellerCode(@RequestBody BasSeller basSeller){
-                return R.convertResultJson(throwable);
-            }
-            @Override
-            public R<String> getLoginSellerCode(){
+            public R<String> getSellerCode(@RequestBody BasSeller basSeller) {
                 return R.convertResultJson(throwable);
             }
 
             @Override
-            public TableDataInfo list(BasSellerQueryDto basSeller) {
-                throw new RuntimeException("获取用户列表失败");
+            public R<String> getLoginSellerCode() {
+                return R.convertResultJson(throwable);
             }
 
             @Override
-            public R<String> getInspection(@RequestBody String sellerCode){
+            public TableDataInfo<BasSellerSysDto> list(BasSellerQueryDto basSeller) {
+                throw new RuntimeException("获取用户列表失败" + throwable.getMessage());
+            }
+
+            @Override
+            public R<String> getInspection(@RequestBody String sellerCode) {
                 return R.convertResultJson(throwable);
             }
 
