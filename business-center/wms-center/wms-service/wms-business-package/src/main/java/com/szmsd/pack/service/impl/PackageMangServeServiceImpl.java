@@ -9,7 +9,8 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.datascope.service.AwaitUserService;
-import com.szmsd.pack.api.feign.client.IBasFeignClientService;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.pack.constant.PackageConstant;
 import com.szmsd.pack.domain.PackageManagement;
 import com.szmsd.pack.dto.PackageMangAddDTO;
@@ -46,19 +47,13 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
     @Resource
     private AwaitUserService awaitUserService;
 
-    @Resource
-    private IBasFeignClientService iBasFeignClientService;
-
-
     /**
      * 获取用户sellerCode
      *
      * @return
      */
     private String getSellCode() {
-        //UserInfo info = awaitUserService.info();
-        String loginSellerCode = iBasFeignClientService.getLoginSellerCode();
-        return Optional.ofNullable(loginSellerCode).orElse("");
+        return Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
     }
 
 

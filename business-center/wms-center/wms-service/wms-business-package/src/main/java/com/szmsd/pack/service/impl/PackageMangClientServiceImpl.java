@@ -7,7 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.datascope.service.AwaitUserService;
-import com.szmsd.pack.api.feign.client.IBasFeignClientService;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.pack.domain.PackageAddress;
 import com.szmsd.pack.dto.PackageAddressAddDTO;
 import com.szmsd.pack.dto.PackageMangAddDTO;
@@ -42,19 +43,13 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     @Resource
     private IPackageMangServeService packageManagementService;
 
-    @Resource
-    private IBasFeignClientService iBasFeignClientService;
-
-
     /**
      * 获取用户sellerCode
      *
      * @return
      */
     private String getSellCode() {
-        //UserInfo info = awaitUserService.info();
-        String loginSellerCode = iBasFeignClientService.getLoginSellerCode();
-        return Optional.ofNullable(loginSellerCode).orElse("");
+        return Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
     }
 
     /**

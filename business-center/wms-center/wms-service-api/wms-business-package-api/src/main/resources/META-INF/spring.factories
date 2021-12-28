@@ -1,3 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.szmsd.pack.api.feign.client.impl.IBasFeignClientServiceImpl,\
-  com.szmsd.pack.api.feign.serve.factory.BasFeignServiceFallback
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=
