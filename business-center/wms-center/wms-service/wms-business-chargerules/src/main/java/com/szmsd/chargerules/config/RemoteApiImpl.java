@@ -12,10 +12,12 @@ import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.BasSellerQueryDto;
+import com.szmsd.bas.dto.BasSellerSysDto;
 import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
@@ -25,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -48,7 +52,7 @@ public class RemoteApiImpl implements IRemoteApi {
      */
     TimedCache<String, List<BasSub>> codeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
     TimedCache<Long, List<WarehouseKvDTO>> wareHouseCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
-    WeakCache<String, Map<String, BasSellerCertificate>> cusCodeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
+    TimedCache<String, String> cusCodeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
 
     @Resource
     private BasFeignService basFeignService;
@@ -65,17 +69,19 @@ public class RemoteApiImpl implements IRemoteApi {
      * @return 主子类别信息
      */
     @Override
-    public BasSub getSubObjByName(String mainCode, String subName) {
+    public BasSub getSubObjBySubName(String mainCode, String subName) {
         if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subName)) return new BasSub();
         List<BasSub> basSubs = getBasSubByMainCode(mainCode);
         return basSubs.stream().filter(x -> x.getSubName().equals(subName.trim())).findAny().orElse(new BasSub());
     }
+
     @Override
-    public BasSub getSubObjByCode(String mainCode, String subCode) {
+    public BasSub getSubObjBySubCode(String mainCode, String subCode) {
         if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subCode)) return new BasSub();
         List<BasSub> basSubs = getBasSubByMainCode(mainCode);
         return basSubs.stream().filter(x -> x.getSubCode().equals(subCode.trim())).findAny().orElse(new BasSub());
     }
+
     /**
      * 查询主类别下的数据
      *
@@ -110,15 +116,16 @@ public class RemoteApiImpl implements IRemoteApi {
 
     @Override
     public String getSubNameBySubCode(String mainCode, String subCode) {
-        BasSub subCodeObj = getSubObjByCode(mainCode, subCode);
+        BasSub subCodeObj = getSubObjBySubCode(mainCode, subCode);
         return Optional.ofNullable(subCodeObj.getSubName()).orElse("");
 
     }
 
     @Override
     public String getSubCodeBySubName(String mainCode, String subName) {
-        BasSub subCodeObj = getSubObjByName(mainCode, subName);
-        return Optional.ofNullable(subCodeObj.getSubCode()).orElseThrow(() -> new RuntimeException("请检查" + subName + "是否存在"));
+        if (StringUtils.isBlank(subName) || StringUtils.isBlank(mainCode)) return "";
+        List<BasSub> basSubByMainCode = getBasSubByMainCode(mainCode);
+        return basSubByMainCode.stream().filter(x -> x.getSubName().equals(subName)).findAny().map(BasSub::getSubCode).orElseThrow(() -> new RuntimeException("请检查是否存在:" + subName));
     }
 
     /**
@@ -140,21 +147,6 @@ public class RemoteApiImpl implements IRemoteApi {
     }
 
     /**
-     * 获取子类别名，不存在则报错
-     *
-     * @param mainCode 主类别
-     * @param subName  子类别名
-     * @return 返回值
-     */
-    @Override
-    public String getSubCode(String mainCode, String subName) {
-        if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subName)) return "";
-        BasSub subCodeObj = getSubObjByName(mainCode, subName);
-        AssertUtil.isTrue(StringUtils.isNotBlank(subCodeObj.getSubCode()), String.format("未找到%s该类别", subName));
-        return subCodeObj.getSubCode();
-    }
-
-    /**
      * 获取子类别名，不存在则返回空字符串
      *
      * @param mainCode 主类别
@@ -164,7 +156,7 @@ public class RemoteApiImpl implements IRemoteApi {
     @Override
     public String getSubCodeOrElseBlack(String mainCode, String subName) {
         if (StringUtils.isBlank(mainCode) || StringUtils.isBlank(subName)) return "";
-        BasSub subCodeObj = getSubObjByName(mainCode, subName);
+        BasSub subCodeObj = getSubObjBySubName(mainCode, subName);
         return subCodeObj.getSubCode();
     }
 
@@ -194,19 +186,40 @@ public class RemoteApiImpl implements IRemoteApi {
 
     @Override
     public boolean checkCusCode(String cusCode) {
-        if (StringUtils.isBlank(cusCode)) return false;
-        Map<String, BasSellerCertificate> cusCodeCacheMap = cusCodeCache.get("");
-        if (MapUtils.isEmpty(cusCodeCacheMap)) {
+        return StringUtils.isNotBlank(getCusCodeAndCusName(cusCode).getT1());
+    }
+
+    /**
+     * 返回存在的客户号 客户名称
+     *
+     * @param cusCodeList
+     * @return
+     */
+    @Override
+    public Tuple2<String, String> getCusCodeAndCusName(String cusCodeList) {
+        if (StringUtils.isBlank(cusCodeList)) return Tuples.of("", "");
+        if (cusCodeCache.isEmpty()) {
             BasSellerQueryDto basSellerQueryDto = new BasSellerQueryDto();
             basSellerQueryDto.setPageNum(1);
             basSellerQueryDto.setPageSize(999);
-            TableDataInfo<BasSellerCertificate> list = basSellerFeignService.list(basSellerQueryDto);
+            TableDataInfo<BasSellerSysDto> list = basSellerFeignService.list(basSellerQueryDto);
             AssertUtil.isTrue(list != null && list.getCode() == HttpStatus.SUCCESS, "获取用户列表失败");
-            List<BasSellerCertificate> resultList = list.getRows();
-            Map<String, BasSellerCertificate> resultMap = resultList.stream().collect(Collectors.toMap(BasSellerCertificate::getSellerCode, x -> x, (x1, x2) -> x2));
-            cusCodeCacheMap = resultMap;
-            cusCodeCache.put("", resultMap);
+            List<BasSellerSysDto> rows = list.getRows();
+            rows.forEach(x -> cusCodeCache.put(x.getSellerCode(), x.getUserName()));
         }
-        return null != cusCodeCacheMap.get(cusCode);
+
+
+        List<String> cusCodeArr = Optional.ofNullable(StringToolkit.getCodeByArray(cusCodeList)).orElse(new ArrayList<>());
+        List<String> cusNameList = new ArrayList<>(cusCodeArr.size());
+        List<String> cusCodeNewList = new ArrayList<>(cusCodeArr.size());
+        cusCodeArr.forEach(x -> {
+            String s = cusCodeCache.get(x);
+            if (StringUtils.isNotBlank(s)) {
+                cusNameList.add(s);
+                cusCodeNewList.add(x);
+            }
+        });
+        return Tuples.of(String.join(",", cusCodeNewList), String.join(",", cusNameList));
     }
+
 }

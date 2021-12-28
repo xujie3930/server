@@ -176,7 +176,9 @@ public class WarehouseOperationController extends BaseController {
                 // 设置替换参数
                 int indexThis = index.getAndIncrement();
                 x.setDetails(detailMap.get(x.getRowId()));
-                x.setCusTypeCode(iRemoteApi.getSubCode("098", x.getCusTypeName()));
+                x.setCusTypeCode(iRemoteApi.getSubCodeBySubName("098", x.getCusTypeName()));
+                // 获取用户
+                x.setCusNameList(iRemoteApi.getCusCodeAndCusName(x.getCusCodeList()).getT2());
                 Set<ConstraintViolation<WarehouseOperationDTO>> validate = validator.validate(x, Default.class);
                 String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));
                 if (StringUtils.isNotBlank(error)) {

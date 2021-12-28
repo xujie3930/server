@@ -108,7 +108,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 ck1OutboundDto.setWarehouseId(Ck1DomainPluginUtil.wrapper(delOutbound.getWarehouseCode()));
                 DelCk1OutboundDto.PackageDTO packageDTO = new DelCk1OutboundDto.PackageDTO();
                 packageDTO.setPackageId(delOutbound.getOrderNo());
-                packageDTO.setServiceCode(delOutbound.getShipmentRule());
+                // packageDTO.setServiceCode(delOutbound.getShipmentRule());
+                packageDTO.setServiceCode("DMTCK");
                 DelCk1OutboundDto.PackageDTO.ShipToAddressDTO shipToAddressDTO = new DelCk1OutboundDto.PackageDTO.ShipToAddressDTO();
                 DelOutboundAddress outboundAddress = context.getAddress();
                 shipToAddressDTO.setCountry(outboundAddress.getCountry());

@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.config;
 
 import com.szmsd.bas.api.domain.BasSub;
+import reactor.util.function.Tuple2;
 
 import java.util.List;
 
@@ -18,9 +19,9 @@ public interface IRemoteApi {
      * @param subName 子类别名
      * @return 子类别基础信息
      */
-    BasSub getSubObjByName(String mainCode, String subName);
+    BasSub getSubObjBySubName(String mainCode, String subName);
 
-    BasSub getSubObjByCode(String mainCode, String subCode);
+    BasSub getSubObjBySubCode(String mainCode, String subCode);
 
     /**
      * 通过子类别值获取子类别名
@@ -33,16 +34,14 @@ public interface IRemoteApi {
     /**
      *
      * @param mainCode
-     * @param subName
+     * @param subCode
      * @return
      */
-    String getSubNameBySubCode(String mainCode, String subName);
+    String getSubNameBySubCode(String mainCode, String subCode);
 
     String getSubCodeBySubName(String mainCode, String subName);
 
     List<String> genNo(Integer count);
-
-    String getSubCode(String mainCode, String subName);
 
     String getSubCodeOrElseBlack(String mainCode, String subName);
 
@@ -58,4 +57,6 @@ public interface IRemoteApi {
      * @param cusCode
      */
     boolean checkCusCode(String cusCode);
+
+    Tuple2<String, String> getCusCodeAndCusName(String cusCodeList);
 }
