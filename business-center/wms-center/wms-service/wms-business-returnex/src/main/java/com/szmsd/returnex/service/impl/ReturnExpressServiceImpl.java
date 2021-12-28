@@ -26,14 +26,15 @@ import com.szmsd.http.dto.returnex.ReturnDetail;
 import com.szmsd.http.dto.returnex.ReturnDetailWMS;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
-import com.szmsd.inventory.domain.vo.InventorySkuVO;
-import com.szmsd.returnex.api.feign.client.IBasFeignClientService;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
 import com.szmsd.returnex.config.BeanCopyUtil;
 import com.szmsd.returnex.config.ConfigStatus;
 import com.szmsd.returnex.constant.ReturnExpressConstant;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
-import com.szmsd.returnex.dto.*;
+import com.szmsd.returnex.dto.ReturnExpressAddDTO;
+import com.szmsd.returnex.dto.ReturnExpressAssignDTO;
+import com.szmsd.returnex.dto.ReturnExpressGoodAddDTO;
+import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
 import com.szmsd.returnex.dto.wms.ReturnArrivalReqDTO;
 import com.szmsd.returnex.dto.wms.ReturnProcessingFinishReqDTO;
 import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
@@ -47,7 +48,6 @@ import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,9 +87,6 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     private BaseProductFeignService baseProductFeignService;
 
     @Resource
-    private IBasFeignClientService iBasFeignClientService;
-
-    @Resource
     private ConfigStatus configStatus;
 
     @Resource
@@ -105,8 +102,6 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     private String getSellCode() {
         return Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
-       /* String loginSellerCode = iBasFeignClientService.getLoginSellerCode();
-        return Optional.ofNullable(loginSellerCode).orElse("");*/
     }
 
     /**
@@ -253,7 +248,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     private void handleExpectedCreate(ReturnExpressAddDTO returnExpressAddDTO) {
         //判断如果是待提审状态的订单则不能提交 外部渠道退件，不用校验
-        if (!"070003".equals(returnExpressAddDTO.getReturnType())){
+        if (!"070003".equals(returnExpressAddDTO.getReturnType())) {
             DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
             delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
             TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);
@@ -511,7 +506,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
 
-                .set(ReturnExpressDetail::getSku,expressUpdateDTO.getSku())
+                .set(ReturnExpressDetail::getSku, expressUpdateDTO.getSku())
                 .set(ReturnExpressDetail::getDealStatus, dealStatus)
                 .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
