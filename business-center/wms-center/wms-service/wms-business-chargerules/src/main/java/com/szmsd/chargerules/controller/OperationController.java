@@ -302,9 +302,11 @@ public class OperationController extends BaseController {
             AtomicInteger index = new AtomicInteger(1);
 
             operationDTOList.forEach(x -> {
-                x.setCusTypeCode(iRemoteApi.getSubNameBySubCode("098", x.getCusTypeCode()));
+                x.setCusTypeCode(iRemoteApi.getSubCodeBySubName("098", x.getCusTypeName()));
                 x.setOperationType(DelOutboundOrderEnum.getCode(x.getOperationTypeName()));
                 x.setOrderType(OrderTypeEnum.getEn(x.getOrderTypeName()));
+                // 获取用户
+                x.setCusNameList(iRemoteApi.getCusCodeAndCusName(x.getCusCodeList()).getT2());
                 // 设置替换参数
                 int indexThis = index.getAndIncrement();
                 x.setChaOperationDetailList(detailMap.get(x.getRowId()));
