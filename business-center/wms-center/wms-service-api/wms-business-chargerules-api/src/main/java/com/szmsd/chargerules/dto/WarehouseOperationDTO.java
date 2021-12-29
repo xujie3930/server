@@ -50,12 +50,12 @@ public class WarehouseOperationDTO implements Serializable {
     @ApiModelProperty(value = "客户类型编码")
     private String cusTypeName;
 
-    @ExcelIgnore
+    @ExcelProperty(value = "客户名称", index = 2)
     @ApiModelProperty(value = "客户名称 A,B")
     @Excel(name = "客户名称 A,B")
     private String cusNameList;
 
-    @ExcelProperty(value = "客户编号", index = 2)
+    @ExcelIgnore
     @ApiModelProperty(value = "客户编码 CNI1,CNI2")
     @Excel(name = "客户编码 CNI1,CNI2")
     private String cusCodeList;

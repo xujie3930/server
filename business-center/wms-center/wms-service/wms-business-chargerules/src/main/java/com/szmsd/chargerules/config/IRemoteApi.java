@@ -58,5 +58,27 @@ public interface IRemoteApi {
      */
     boolean checkCusCode(String cusCode);
 
-    Tuple2<String, String> getCusCodeAndCusName(String cusCodeList);
+
+    /**
+     * 返回存在的客户号
+     * @param cusNameList
+     * @return
+     */
+    String getCusCodeByCusName(String cusNameList);
+
+    /**
+     * 返回存在的客户名称
+     * @param cusCodeList
+     * @return
+     */
+    String getCusNameByCusCode(String cusCodeList);
+
+    /**
+     * 返回存在的客户号 客户名称
+     *
+     * @param cusList cusList
+     * @param type    true code find name ; false name find code
+     * @return code  , name
+     */
+    Tuple2<String, String> getCusCodeAndCusName(String cusList, boolean type);
 }
