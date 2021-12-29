@@ -2,7 +2,6 @@ package com.szmsd.chargerules.config;
 
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.cache.impl.WeakCache;
 import cn.hutool.core.date.DateUnit;
 import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.domain.BasSub;
@@ -10,7 +9,6 @@ import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
-import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.BasSellerQueryDto;
 import com.szmsd.bas.dto.BasSellerSysDto;
 import com.szmsd.bas.dto.WarehouseKvDTO;
@@ -25,17 +23,12 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.enums.FssRefundConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @ClassName: RemoteApiImpl
@@ -52,7 +45,8 @@ public class RemoteApiImpl implements IRemoteApi {
      */
     TimedCache<String, List<BasSub>> codeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
     TimedCache<Long, List<WarehouseKvDTO>> wareHouseCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
-    TimedCache<String, String> cusCodeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
+    TimedCache<String, String> cusNameCodeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
+    TimedCache<String, String> cusCodeNameCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
 
     @Resource
     private BasFeignService basFeignService;
@@ -186,40 +180,66 @@ public class RemoteApiImpl implements IRemoteApi {
 
     @Override
     public boolean checkCusCode(String cusCode) {
-        return StringUtils.isNotBlank(getCusCodeAndCusName(cusCode).getT1());
+        return StringUtils.isNotBlank(getCusCodeAndCusName(cusCode,true).getT1());
+    }
+
+    @Override
+    public String getCusCodeByCusName(String cusNameList) {
+        return getCusCodeAndCusName(cusNameList, false).getT2();
+    }
+
+    @Override
+    public String getCusNameByCusCode(String cusCodeList) {
+        return getCusCodeAndCusName(cusCodeList, true).getT1();
     }
 
     /**
      * 返回存在的客户号 客户名称
      *
-     * @param cusCodeList
-     * @return
+     * @param cusList cusList
+     * @param type    true code find name ; false name find code
+     * @return code  , name
      */
     @Override
-    public Tuple2<String, String> getCusCodeAndCusName(String cusCodeList) {
-        if (StringUtils.isBlank(cusCodeList)) return Tuples.of("", "");
-        if (cusCodeCache.isEmpty()) {
+    public Tuple2<String, String> getCusCodeAndCusName(String cusList, boolean type) {
+        if (StringUtils.isBlank(cusList)) return Tuples.of("", "");
+        if (cusNameCodeCache.isEmpty() || cusCodeNameCache.isEmpty()) {
             BasSellerQueryDto basSellerQueryDto = new BasSellerQueryDto();
             basSellerQueryDto.setPageNum(1);
             basSellerQueryDto.setPageSize(999);
             TableDataInfo<BasSellerSysDto> list = basSellerFeignService.list(basSellerQueryDto);
             AssertUtil.isTrue(list != null && list.getCode() == HttpStatus.SUCCESS, "获取用户列表失败");
             List<BasSellerSysDto> rows = list.getRows();
-            rows.forEach(x -> cusCodeCache.put(x.getSellerCode(), x.getUserName()));
+            rows.forEach(x -> {
+                cusNameCodeCache.put(x.getUserName(), x.getSellerCode());
+                cusCodeNameCache.put(x.getSellerCode(), x.getUserName());
+            });
+        }
+        List<String> cusNewArr = Optional.ofNullable(StringToolkit.getCodeByArray(cusList)).orElse(new ArrayList<>());
+
+        Set<String> cusNameNewList = new LinkedHashSet<>(cusNewArr.size());
+        Set<String> cusCodeNewList = new LinkedHashSet<>(cusNewArr.size());
+        if (type) {
+            // code find name
+            cusNewArr.forEach(cusCode -> {
+                String cusName = cusCodeNameCache.get(cusCode);
+                if (StringUtils.isNotBlank(cusName)) {
+                    cusNameNewList.add(cusName);
+                    cusCodeNewList.add(cusCode);
+                }
+            });
+        } else {
+            // name find code
+            cusNewArr.forEach(cusName -> {
+                String cusCode = cusNameCodeCache.get(cusName);
+                if (StringUtils.isNotBlank(cusCode)) {
+                    cusNameNewList.add(cusName);
+                    cusCodeNewList.add(cusCode);
+                }
+            });
         }
 
-
-        List<String> cusCodeArr = Optional.ofNullable(StringToolkit.getCodeByArray(cusCodeList)).orElse(new ArrayList<>());
-        List<String> cusNameList = new ArrayList<>(cusCodeArr.size());
-        List<String> cusCodeNewList = new ArrayList<>(cusCodeArr.size());
-        cusCodeArr.forEach(x -> {
-            String s = cusCodeCache.get(x);
-            if (StringUtils.isNotBlank(s)) {
-                cusNameList.add(s);
-                cusCodeNewList.add(x);
-            }
-        });
-        return Tuples.of(String.join(",", cusCodeNewList), String.join(",", cusNameList));
+        return Tuples.of(String.join(",", cusCodeNewList), String.join(",", cusNameNewList));
     }
 
 }

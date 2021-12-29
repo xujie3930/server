@@ -42,6 +42,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.util.function.Tuple2;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -306,7 +307,9 @@ public class OperationController extends BaseController {
                 x.setOperationType(DelOutboundOrderEnum.getCode(x.getOperationTypeName()));
                 x.setOrderType(OrderTypeEnum.getEn(x.getOrderTypeName()));
                 // 获取用户
-                x.setCusNameList(iRemoteApi.getCusCodeAndCusName(x.getCusCodeList()).getT2());
+                Tuple2<String, String> cusCodeAndCusName = iRemoteApi.getCusCodeAndCusName(x.getCusNameList(), false);
+                x.setCusCodeList(cusCodeAndCusName.getT1());
+                x.setCusNameList(cusCodeAndCusName.getT2());
                 // 设置替换参数
                 int indexThis = index.getAndIncrement();
                 x.setChaOperationDetailList(detailMap.get(x.getRowId()));

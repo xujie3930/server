@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -30,11 +31,11 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "ID")
     private Long id;
     @ApiModelProperty(value = "ID", hidden = true)
-    @ExcelProperty(value = "业务费用顺序",index = 0)
+    @ExcelProperty(index = 0)
     private Long rowId;
 
     @NotBlank(message = "仓库不能为空")
-    @ExcelProperty(value = "仓库",index = 3)
+    @ExcelProperty(index = 3)
     @ApiModelProperty(value = "仓库", required = true)
     private String warehouseCode;
     @ExcelIgnore
@@ -43,7 +44,7 @@ public class OperationDTO implements Serializable {
     private String operationType;
 
     @NotBlank(message = "操作类型不能为空")
-    @ExcelProperty(value = "操作类型",index = 5)
+    @ExcelProperty(index = 5)
     @ApiModelProperty(value = "操作类型名称", required = true)
     private String operationTypeName;
     @ExcelIgnore
@@ -51,12 +52,12 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "订单类型", required = true)
     private String orderType;
 
-    @ExcelProperty(value = "订单类型",index = 6)
+    @ExcelProperty(index = 6)
     @ApiModelProperty(value = "订单类型", hidden = true)
     private String orderTypeName;
 
     @NotBlank(message = "币别不能为空")
-    @ExcelProperty(value = "币别",index = 4)
+    @ExcelProperty(index = 4)
     @ApiModelProperty(value = "币种编码", required = true)
     private String currencyCode;
 
@@ -72,25 +73,25 @@ public class OperationDTO implements Serializable {
     @ApiModelProperty(value = "客户类型编码", required = true)
     private String cusTypeCode;
 
-    @ExcelIgnore
+    @ExcelProperty(index = 2)
     @ApiModelProperty(value = "客户名称 A,B")
     private String cusNameList;
 
+    @ExcelIgnore
     @ApiModelProperty(value = "客户编码 CNI1,CNI2")
-    @ExcelProperty(value = "客户编号",index = 2)
     private String cusCodeList;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "生效时间")
-    @ExcelProperty(value = "生效时间",index = 7)
+    @ExcelProperty(index = 7)
     private LocalDateTime effectiveTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "失效时间")
-    @ExcelProperty(value = "失效时间",index =8)
+    @ExcelProperty(index = 8)
     private LocalDateTime expirationTime;
 
-    @ExcelProperty(value = "备注",index = 9)
+    @ExcelProperty(index = 9)
     @ApiModelProperty(value = "备注")
     private String remark;
 
@@ -100,6 +101,7 @@ public class OperationDTO implements Serializable {
     private List<ChaOperationDetailsDTO> chaOperationDetailList;
 
     public boolean verifyData() {
+        AssertUtil.isTrue(StringUtils.isNotBlank(operationType) || StringUtils.isNotBlank(cusCodeList), "用户类型/用户必填");
         AssertUtil.isTrue(effectiveTime.compareTo(expirationTime) <= 0, "生效时间不能大于等于失效时间");
         if (CollectionUtils.isNotEmpty(chaOperationDetailList)) {
             // 转运/批量出库单-装箱费/批量出库单-贴标费 同一个仓库 只能存在一条配置

@@ -35,6 +35,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.util.function.Tuple2;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -178,7 +179,9 @@ public class WarehouseOperationController extends BaseController {
                 x.setDetails(detailMap.get(x.getRowId()));
                 x.setCusTypeCode(iRemoteApi.getSubCodeBySubName("098", x.getCusTypeName()));
                 // 获取用户
-                x.setCusNameList(iRemoteApi.getCusCodeAndCusName(x.getCusCodeList()).getT2());
+                Tuple2<String, String> cusCodeAndCusName = iRemoteApi.getCusCodeAndCusName(x.getCusNameList(), false);
+                x.setCusCodeList(cusCodeAndCusName.getT1());
+                x.setCusNameList(cusCodeAndCusName.getT2());
                 Set<ConstraintViolation<WarehouseOperationDTO>> validate = validator.validate(x, Default.class);
                 String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));
                 if (StringUtils.isNotBlank(error)) {
