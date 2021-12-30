@@ -1,8 +1,7 @@
 package com.szmsd.bas.controller;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.poi.excel.ExcelWriter;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.event.SyncReadListener;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.bas.constant.BaseConstant;
 import com.szmsd.bas.constant.ProductConstant;
@@ -27,7 +26,11 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.apache.commons.io.IOUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +41,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 /**
@@ -112,8 +114,11 @@ public class BaseProductController extends BaseController {
     @PostMapping("import")
     @ApiOperation(value = "导入产品", notes = "导入产品")
     public R importData(MultipartFile file) throws Exception {
-        ExcelUtil<BaseProductImportDto> util = new ExcelUtil<BaseProductImportDto>(BaseProductImportDto.class);
-        List<BaseProductImportDto> userList = util.importExcel(file.getInputStream());
+
+        /*ExcelUtil<BaseProductImportDto> util = new ExcelUtil<BaseProductImportDto>(BaseProductImportDto.class);
+        List<BaseProductImportDto> userList = util.importExcel(file.getInputStream());*/
+
+        List<BaseProductImportDto> userList = EasyExcel.read(file.getInputStream(), BaseProductImportDto.class, new SyncReadListener()).sheet().doReadSync();
         if (CollectionUtils.isEmpty(userList)) {
             throw new BaseException("导入内容为空");
         }
@@ -126,9 +131,43 @@ public class BaseProductController extends BaseController {
     @GetMapping("importTemplate")
     @ApiOperation(value = "导入模板下载", notes = "导入模板下载")
     public void importTemplate(HttpServletResponse response) throws Exception {
-        ExcelUtil<BaseProductImportTemplateDto> util = new ExcelUtil<BaseProductImportTemplateDto>(BaseProductImportTemplateDto.class);
-        List<BaseProductImportTemplateDto> list = new ArrayList<>();
-        util.exportExcel(response, list, "sku导入模板");
+        commonExport(response, "sku_import_template");
+    }
+
+    /**
+     * 导出模块列表
+     */
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:export')")
+    @Log(title = "模块", businessType = BusinessType.EXPORT)
+    @GetMapping("/export")
+    @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
+    public void export(HttpServletResponse response, BaseProductQueryDto queryDto) throws IOException {
+        queryDto.setCategory(ProductConstant.SKU_NAME);
+        List<BaseProductExportDto> list = baseProductService.exportProduceList(queryDto);
+        ExcelUtil<BaseProductExportDto> util = new ExcelUtil<BaseProductExportDto>(BaseProductExportDto.class);
+        util.exportExcel(response, list, "sku导出");
+//        EasyExcel.write(response.getOutputStream()).withTemplate(new ClassPathResource(getFileName("sku_export_template")).getInputStream()).sheet().doWrite(list);
+    }
+
+    private String getFileName(String fileName) {
+        return String.format("/template/%s_%s.xlsx", fileName, getLen().toLowerCase(Locale.ROOT));
+    }
+
+    private void commonExport(HttpServletResponse response, String fileName) {
+        //"/template/退费申请模板.xls"
+        ClassPathResource classPathResource = new ClassPathResource(getFileName(fileName));
+        try (InputStream inputStream = classPathResource.getInputStream();
+             ServletOutputStream outputStream = response.getOutputStream()) {
+
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setCharacterEncoding("UTF-8");
+            String excelName = URLEncoder.encode(fileName, "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + excelName + ".xls");
+            IOUtils.copy(inputStream, outputStream);
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
@@ -168,21 +207,6 @@ public class BaseProductController extends BaseController {
     @ApiOperation(value = "查询列表", notes = "查询列表")
     public R<BaseProduct> getSku(@RequestBody BaseProduct baseProduct) {
         return baseProductService.getSku(baseProduct);
-    }
-
-    /**
-     * 导出模块列表
-     */
-    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:export')")
-    @Log(title = "模块", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")
-    @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
-    public void export(HttpServletResponse response, BaseProductQueryDto queryDto) throws IOException {
-        queryDto.setCategory(ProductConstant.SKU_NAME);
-        List<BaseProductExportDto> list = baseProductService.exportProduceList(queryDto);
-        ExcelUtil<BaseProductExportDto> util = new ExcelUtil<BaseProductExportDto>(BaseProductExportDto.class);
-        util.exportExcel(response, list, "sku导出");
-
     }
 
     /**
