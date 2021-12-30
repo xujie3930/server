@@ -4,12 +4,12 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringToolkit;
-import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
@@ -208,8 +208,17 @@ public class InboundReceiptController extends BaseController {
     @GetMapping("/receipt/exportTemplate")
     @ApiOperation(value = "导出sku模板", notes = "入库管理 - 新增 - 下载模板")
     public void exportTemplate(HttpServletResponse response) {
-        List<String> rows = CollUtil.newArrayList("SKU", "申报数量", "原产品编码", "备注");
-        super.excelExportTitle(response, rows, "入库单SKU导入");
+        String len = getLen().toLowerCase(Locale.ROOT);
+        List<String> rows;
+        String fileName;
+        if ("en".equals(len)) {
+            fileName = "inbound_order_sku_import";
+            rows = CollUtil.newArrayList("inbound order no", "SKU", "QTY", "Original product code", "Note");
+        } else {
+            fileName = "入库单SKU导入";
+            rows = CollUtil.newArrayList("入库单号", "SKU", "申报数量", "原产品编码", "备注");
+        }
+        super.excelExportTitle(response, rows, fileName);
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:exportsku')")
@@ -248,8 +257,9 @@ public class InboundReceiptController extends BaseController {
         List<String> error = new ArrayList<>();
         List<InboundReceiptDetailVO> inboundReceiptDetailVOS = new ArrayList<>();
         try {
-            ExcelUtil<InboundReceiptDetailVO> excelUtil = new ExcelUtil<>(InboundReceiptDetailVO.class);
-            inboundReceiptDetailVOS = excelUtil.importExcel(file.getInputStream());
+            inboundReceiptDetailVOS = EasyExcel.read(file.getInputStream(), InboundReceiptDetailVO.class, new SyncReadListener()).sheet().doReadSync();
+//            ExcelUtil<InboundReceiptDetailVO> excelUtil = new ExcelUtil<>(InboundReceiptDetailVO.class);
+//            inboundReceiptDetailVOS = excelUtil.importExcel(file.getInputStream());
             Map<String, Long> collect = inboundReceiptDetailVOS.stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
             collect.forEach((key, value) -> AssertUtil.isTrue(!(value > 1L), "Excel存在重复SKU[" + key + "]"));
 
@@ -382,10 +392,16 @@ public class InboundReceiptController extends BaseController {
             httpServletResponse.setContentType("application/vnd.ms-excel");
             httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xlsx");
             excelWriter = EasyExcel.write(outputStream).build();
-            WriteSheet build1 = EasyExcel.writerSheet(0, "入库单信息").head(InboundReceiptExportVO.class).build();
+            String sheetName1 = "入库单信息";
+            String sheetName2 = "入库到货情况";
+            if ("en".equals(getLen().toLowerCase(Locale.ROOT))) {
+                sheetName1 = "Inbound Order Information";
+                sheetName2 = "Inbound Arrival Situation";
+            }
+            WriteSheet build1 = EasyExcel.writerSheet(0, sheetName1).head(inboundReceiptExportHead()).build();
             excelWriter.write(list, build1);
 
-            WriteSheet build2 = EasyExcel.writerSheet(1, "入库到货情况").head(InboundTrackingExportVO.class).build();
+            WriteSheet build2 = EasyExcel.writerSheet(1, sheetName2).head(inboundTrackingExportHead()).build();
             excelWriter.write(inboundTrackingVOS, build2);
 
             excelWriter.finish();
@@ -397,6 +413,48 @@ public class InboundReceiptController extends BaseController {
             if (null != excelWriter)
                 excelWriter.finish();
         }
+    }
+
+    private static final List<String> INBOUND_RECEIPT_EXPORT_HEAD_ZH;
+    private static final List<String> INBOUND_RECEIPT_EXPORT_HEAD_EN;
+
+    private static final List<String> INBOUND_TRACKING_EXPORT_HEAD_ZH;
+    private static final List<String> INBOUND_TRACKING_EXPORT_HEAD_EN;
+
+    static {
+        INBOUND_RECEIPT_EXPORT_HEAD_ZH = Arrays.asList("入库单号", "采购单号", "送货方式", "快递单号/揽收单号", "状态", "目的仓库", "入库方式", "SKU", "初始数量", "到仓数量", "原产品编码", "下单时间", "到仓时间", "审核备注", "客户备注", "销售VAT");
+        INBOUND_RECEIPT_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Purchase Orders", "Delivery Method", "Tracking Nu of pickup", "Status", "Destinatuon Warehouse", "Inbound Method", "SKU", "Order Qty", "Put on sale Qty", "Original product Number", "Order Create Time", "Arriving time", "System Note", "Note", "VAT Nu");
+
+        INBOUND_TRACKING_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Tracking Nu of pickup", "Receipt Status", "Operating Time");
+        INBOUND_TRACKING_EXPORT_HEAD_ZH = Arrays.asList("入库单号", "快递单号/揽收单号", "收货状态", "操作时间");
+    }
+
+    private List<List<String>> inboundReceiptExportHead() {
+        String len = getLen().toLowerCase(Locale.ROOT);
+        if ("en".equals(len)) {
+            return head(INBOUND_RECEIPT_EXPORT_HEAD_EN);
+        } else {
+            return head(INBOUND_RECEIPT_EXPORT_HEAD_ZH);
+        }
+    }
+
+    private List<List<String>> inboundTrackingExportHead() {
+        String len = getLen().toLowerCase(Locale.ROOT);
+        if ("en".equals(len)) {
+            return head(INBOUND_TRACKING_EXPORT_HEAD_EN);
+        } else {
+            return head(INBOUND_TRACKING_EXPORT_HEAD_ZH);
+        }
+    }
+
+    private static List<List<String>> head(List<String> excelTitleNameList) {
+        List<List<String>> headList = new ArrayList<>(excelTitleNameList.size());
+        excelTitleNameList.forEach(x -> {
+            List<String> head = new ArrayList<>();
+            head.add(x);
+            headList.add(head);
+        });
+        return headList;
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:statistics')")
