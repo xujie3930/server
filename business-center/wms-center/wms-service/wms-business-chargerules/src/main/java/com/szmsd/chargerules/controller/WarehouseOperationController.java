@@ -127,6 +127,8 @@ public class WarehouseOperationController extends BaseController {
                 WarehouseOperationDTO warehouseOperationDTO = new WarehouseOperationDTO();
                 BeanUtils.copyProperties(x, warehouseOperationDTO);
                 warehouseOperationDTO.setCusTypeName(iRemoteApi.getSubNameBySubCode("098", x.getCusTypeCode()));
+                warehouseOperationDTO.setCurrencyName(iRemoteApi.getSubNameByValue("008", x.getCurrencyCode()));
+
                 List<WarehouseOperationDetails> details = x.getDetails();
                 Integer id = x.getId();
                 warehouseOperationDTO.setRowId(id);
