@@ -35,6 +35,11 @@ public class CkConfig {
      */
     String createPutawayOrderUrl = "/v1/InventoryPutawayOrder/Create";
     /**
+     * 获取Sku库存编码
+     * 推送CK1 创建入库单接口后生成对应CK1仓库的编码 ： 客户id+仓库+sku编码
+     */
+    String genSkuCustomStorageNo = "/v1/merchantSkus/storageno";
+    /**
      * 推送CK1 入库单完成时 调用 来货单完成
      */
     String incomingOrderCompletedUrl = "/v1/InventoryPutawayOrder/{customerOrderNo}/finished";
@@ -46,7 +51,7 @@ public class CkConfig {
     /**
      * 查询Sku在某个仓库的库存情况 核对库存
      */
-    String checkInventoryUrl="/v1/inventories";
+    String checkInventoryUrl = "/v1/inventories";
 
 
     public String getIncomingOrderCompletedUrl(String customerOrderNo) {
