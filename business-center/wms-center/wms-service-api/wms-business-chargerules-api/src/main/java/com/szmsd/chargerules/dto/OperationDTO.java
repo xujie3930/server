@@ -106,11 +106,11 @@ public class OperationDTO implements Serializable {
         AssertUtil.isTrue(effectiveTime.compareTo(expirationTime) <= 0, "生效时间不能大于等于失效时间");
         if (CollectionUtils.isNotEmpty(chaOperationDetailList)) {
             // 转运/批量出库单-装箱费/批量出库单-贴标费 同一个仓库 只能存在一条配置
-            if (DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode().equals(operationType)
+            /*if (DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode().equals(operationType)
                     || DelOutboundOrderEnum.BATCH_PACKING.getCode().equals(operationType)
                     || DelOutboundOrderEnum.BATCH_LABEL.getCode().equals(operationType)) {
                 AssertUtil.isTrue(chaOperationDetailList.size() == 0, operationTypeName + "只能配置一条规则数据");
-            }
+            }*/
             AtomicInteger index = new AtomicInteger(1);
             AtomicInteger index2 = new AtomicInteger(1);
             //校验区间是否冲突

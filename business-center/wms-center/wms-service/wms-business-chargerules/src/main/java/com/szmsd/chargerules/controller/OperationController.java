@@ -306,6 +306,7 @@ public class OperationController extends BaseController {
                 x.setCusTypeCode(iRemoteApi.getSubCodeBySubName("098", x.getCusTypeName()));
                 x.setOperationType(DelOutboundOrderEnum.getCode(x.getOperationTypeName()));
                 x.setOrderType(OrderTypeEnum.getEn(x.getOrderTypeName()));
+                x.setCurrencyName(iRemoteApi.getSubNameByValue("008", x.getCurrencyCode()));
                 // 获取用户
                 Tuple2<String, String> cusCodeAndCusName = iRemoteApi.getCusCodeAndCusName(x.getCusNameList(), false);
                 x.setCusCodeList(cusCodeAndCusName.getT1());

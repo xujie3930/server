@@ -8,8 +8,8 @@ import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.chargerules.domain.ChaOperation;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.dto.OperationQueryDTO;
+import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.chargerules.mapper.ChaOperationMapper;
-import com.szmsd.chargerules.service.IBaseInfoService;
 import com.szmsd.chargerules.service.IChaOperationDetailsService;
 import com.szmsd.chargerules.service.IChaOperationService;
 import com.szmsd.chargerules.vo.ChaOperationDetailsVO;
@@ -18,10 +18,7 @@ import com.szmsd.chargerules.vo.ChaOperationVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.security.domain.LoginUser;
-import com.szmsd.common.security.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -83,6 +80,12 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
                 .select(ChaOperation::getId, ChaOperation::getCurrencyCode, ChaOperation::getEffectiveTime, ChaOperation::getExpirationTime));
         if (Objects.nonNull(id)) {
             operations = operations.stream().filter(x -> x.getId().compareTo(id) != 0).collect(Collectors.toList());
+        }
+        // 转运/批量出库单-装箱费/批量出库单-贴标费 同一个仓库 只能存在一条配置
+        if (DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode().equals(operationType)
+                || DelOutboundOrderEnum.BATCH_PACKING.getCode().equals(operationType)
+                || DelOutboundOrderEnum.BATCH_LABEL.getCode().equals(operationType)) {
+            AssertUtil.isTrue(operations.size() == 0, dto.getOperationTypeName() + "只能配置一条规则数据");
         }
         // max(A.left,B.left)<=min(A.right,B.right) 重复
         // 判断生效时间是否冲突 既相交
