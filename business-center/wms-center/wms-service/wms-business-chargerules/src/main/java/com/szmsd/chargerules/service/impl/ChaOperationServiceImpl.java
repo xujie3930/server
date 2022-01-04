@@ -72,13 +72,13 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
         String orderType = dto.getOrderType();
         String cusTypeCode = dto.getCusTypeCode();
         Long id = dto.getId();
-        // 同一个 订单类型+仓库+币别+客户名称+操作类型+币别 + 一个用户可以在多个规则里面 生效时间不冲突
+        // 同一个 订单类型+仓库+客户名称+操作类型 + 一个用户可以在多个规则里面 生效时间不冲突
         List<ChaOperation> operations = baseMapper.selectList(Wrappers.<ChaOperation>lambdaQuery()
                 .eq(StringUtils.isNotBlank(orderType), ChaOperation::getOrderType, orderType)
                 .eq(ChaOperation::getOperationType, operationType)
                 .eq(ChaOperation::getWarehouseCode, warehouseCode)
                 .eq(StringUtils.isNotBlank(cusTypeCode), ChaOperation::getCusTypeCode, cusTypeCode)
-                .eq(ChaOperation::getCurrencyCode, currencyCode)
+//                .eq(ChaOperation::getCurrencyCode, currencyCode)
                 .and(StringUtils.isNotBlank(dto.getCusCodeList()), x -> x.apply("CONCAT(',',cus_code_list,',') REGEXP(SELECT CONCAT(',',REPLACE({0}, ',', ',|,'),','))", dto.getCusCodeList()))
                 .select(ChaOperation::getId, ChaOperation::getCurrencyCode, ChaOperation::getEffectiveTime, ChaOperation::getExpirationTime));
         if (Objects.nonNull(id)) {
