@@ -122,7 +122,7 @@ public class RemoteExecutorTask implements IRemoteExecutorTask {
      */
 //    @Scheduled(cron = "0 0/1 * * * ?")
 //    @Scheduled(fixedDelay = 1000 * 60)
-    @Scheduled(fixedDelay = 3000 * 10)
+    @Scheduled(fixedDelay = 1000 * 1)
     @Override
     public void executeTask() {
         // 取出一个类型
