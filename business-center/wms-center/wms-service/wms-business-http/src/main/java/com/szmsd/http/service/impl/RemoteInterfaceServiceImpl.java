@@ -21,6 +21,7 @@ import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.util.DomainUtil;
 import com.szmsd.http.vo.HttpResponseVO;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -76,6 +77,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             domain = DomainURIUtil.getDomain(uri);
         }
         Map<String, String> requestHeaders = dto.getHeaders();
+        if (MapUtils.isEmpty(requestHeaders)) requestHeaders = new HashMap<>();
         // 请求body
         String requestBody = JSON.toJSONString(dto.getBody());
         List<DomainInterceptor> domainInterceptorList = null;

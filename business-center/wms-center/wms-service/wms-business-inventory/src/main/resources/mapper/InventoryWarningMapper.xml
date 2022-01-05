@@ -31,6 +31,7 @@
        t.cus_code,
        t.qty,
        t.exist_qty,
+       t.ck_qty,
        t.email,
        t.send_email_flag
     </sql>

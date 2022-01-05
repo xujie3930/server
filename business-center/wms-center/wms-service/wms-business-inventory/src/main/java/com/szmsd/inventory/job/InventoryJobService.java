@@ -82,10 +82,10 @@ public class InventoryJobService {
     //    @Async
     public void asyncInventoryWarning() {
         log.info("OMS <-> WMS 库存对比开始");
-//        List<BasSellerEmailDto> customerList = remoteComponent.queryCusAll();
-        BasSellerEmailDto basSellerEmailDto = new BasSellerEmailDto();
-        basSellerEmailDto.setSellerCode("CNID73");
-        List<BasSellerEmailDto> customerList = Arrays.asList(basSellerEmailDto);
+        List<BasSellerEmailDto> customerList = remoteComponent.queryCusAll();
+        /*BasSellerEmailDto basSellerEmailDto = new BasSellerEmailDto();
+        basSellerEmailDto.setSellerCode("TESTID73");
+        List<BasSellerEmailDto> customerList = Arrays.asList(basSellerEmailDto);*/
         if (CollectionUtils.isEmpty(customerList)) {
             log.info("未查询到相关客户信息：库存对比结束");
             return;
@@ -98,6 +98,7 @@ public class InventoryJobService {
             List<InventoryWarning> inventoryWarning = BeanMapperUtil.mapList(data, InventoryWarning.class);
             inventoryWarning.forEach(item -> item.setCusCode(customer.getSellerCode()).setBatchNo(batchNo));
             iInventoryWarningService.createAndSendEmail(null, inventoryWarning);
+            log.info("对比完成---发送对比信息");
         }, inventoryTaskExecutor).exceptionally(e -> {
             e.printStackTrace();
             return null;
@@ -185,24 +186,27 @@ public class InventoryJobService {
                     CompletableFuture<Void> voidCompletableFuture = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
 
                     ArrayList<CkSkuInventoryVO> ckSkuInventoryResultList = new ArrayList<>();
+                    try {
+                        Void unused = voidCompletableFuture.get();
+                        if (voidCompletableFuture.isDone()) {
+                            log.info("DM <--> CK 执行完成----");
+                            completableFutures.forEach(x -> {
+                                try {
+                                    ckSkuInventoryResultList.addAll(x.get());
 
-                    if (voidCompletableFuture.isDone()) {
-                        log.info("执行完成----");
-                        completableFutures.forEach(x -> {
-                            try {
-                                ckSkuInventoryResultList.addAll(x.get());
+                                } catch (InterruptedException | ExecutionException e) {
+                                    e.printStackTrace();
+                                    log.error("执行异常----");
+                                }
+                            });
+                            Map<String, Integer> collect = ckSkuInventoryResultList.stream().collect(Collectors.toMap(CkSkuInventoryVO::getSku, CkSkuInventoryVO::getTotalStockQty, (x1, x2) -> x1));
+                            // 设置出口易库存数量
+                            compareList.forEach(warehouseSkuCompare -> warehouseSkuCompare.setCkQty(Optional.ofNullable(collect.get(warehouseSkuCompare.getSku())).orElse(0)));
 
-                            } catch (InterruptedException | ExecutionException e) {
-                                e.printStackTrace();
-                                log.error("执行异常----");
-                            }
-                        });
-                        Map<String, Integer> collect = ckSkuInventoryResultList.stream().collect(Collectors.toMap(CkSkuInventoryVO::getSku, CkSkuInventoryVO::getTotalStockQty, (x1, x2) -> x2));
-                        // 设置出口易库存数量
-                        compareList.forEach(warehouseSkuCompare -> warehouseSkuCompare.setCkQty(Optional.ofNullable(collect.get(warehouseSkuCompare.getSku())).orElse(0)));
-
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
                     }
-
                 });
                 return compareList;
             }

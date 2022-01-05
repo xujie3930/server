@@ -108,6 +108,7 @@
                 <th>WMS库存</th>
                 <th>CK1库存</th>
                 <th>对比(OMS-WMS)</th>
+                <th>对比(OMS-CK1)</th>
             </tr>
             <#list data as item>
                 <tr onmouseover="this.style.backgroundColor='#ffff66';" onmouseout="this.style.backgroundColor='#d4e3e5';">
@@ -115,8 +116,9 @@
                     <th>${item.sku}</th>
                     <th>${item.qty}</th>
                     <th>${item.existQty}</th>
+                    <th>${item.ckQty}</th>
                     <th style="color: red">${item.qty - item.existQty}</th>
-                    <th style="color: red">${item.qty - item.existQty}</th>
+                    <th style="color: red">${item.qty - item.ckQty}</th>
                 </tr>
             </#list>
         </table>
