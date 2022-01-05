@@ -47,6 +47,7 @@ public class CkGenCustomSkuNoDTO {
         String warehouseCode = inboundReceiptInfoVO.getWarehouseCode();
         String cusCode = inboundReceiptInfoVO.getCusCode();
         ckGenCustomSkuNoDTO.setSku(sku);
+        ckGenCustomSkuNoDTO.setWarehouseCode(Ck1DomainPluginUtil.wrapper(warehouseCode));
         ckGenCustomSkuNoDTO.setCustomerStorageNo(CkConfig.genCk1SkuInventoryCode(cusCode,warehouseCode,sku));
         return ckGenCustomSkuNoDTO;
 
