@@ -1,5 +1,6 @@
 package com.szmsd.http.config;
 
+import com.szmsd.http.util.Ck1DomainPluginUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -36,7 +37,7 @@ public class CkConfig {
     String createPutawayOrderUrl = "/v1/InventoryPutawayOrder/Create";
     /**
      * 获取Sku库存编码
-     * 推送CK1 创建入库单接口后生成对应CK1仓库的编码 ： 客户id+仓库+sku编码
+     * 推送CK1 创建入库单接口后生成对应CK1仓库的编码 ： 客户Code+仓库+sku编码
      */
     String genSkuCustomStorageNo = "/v1/merchantSkus/storageno";
     /**
@@ -56,5 +57,17 @@ public class CkConfig {
 
     public String getIncomingOrderCompletedUrl(String customerOrderNo) {
         return incomingOrderCompletedUrl.replace("{customerOrderNo}", customerOrderNo);
+    }
+
+    /**
+     * 生成库存编码 客户id+仓库+sku编码
+     *
+     * @param cusCode
+     * @param warehouseCode
+     * @param sku
+     * @return
+     */
+    public static String genCk1SkuInventoryCode(String cusCode, String warehouseCode, String sku) {
+        return cusCode + Ck1DomainPluginUtil.wrapper(warehouseCode) + sku;
     }
 }

@@ -3,6 +3,7 @@ package com.szmsd.inventory.domain.dto;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
 import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
+import com.szmsd.http.config.CkConfig;
 import com.szmsd.http.util.Ck1DomainPluginUtil;
 import com.szmsd.putinstorage.api.dto.CkCreateIncomingOrderDTO;
 import io.swagger.annotations.ApiModel;
@@ -59,13 +60,19 @@ public class CkAdjustInventoryDTO {
         Integer quantity = inventoryAdjustmentDTO.getQuantity();
         AssertUtil.isTrue(increase || reduce, "调整类型有误");
         quantity = increase ? quantity : -quantity;
+
+        String sku = inventoryAdjustmentDTO.getSku();
+        String warehouseCode = inventoryAdjustmentDTO.getWarehouseCode();
+        String sellerCode = inventoryAdjustmentDTO.getSellerCode();
+
         CkAdjustInventoryDTO ckAdjustInventoryDTO = new CkAdjustInventoryDTO();
-        ckAdjustInventoryDTO.setSerialNo(inventoryAdjustmentDTO.getSku());
-        ckAdjustInventoryDTO.setWarehouseCode(Ck1DomainPluginUtil.wrapper(inventoryAdjustmentDTO.getWarehouseCode()));
-        ckAdjustInventoryDTO.setStorageNo(inventoryAdjustmentDTO.getSku());
+        ckAdjustInventoryDTO.setSerialNo(sku);
+        ckAdjustInventoryDTO.setWarehouseCode(Ck1DomainPluginUtil.wrapper(warehouseCode));
+        ckAdjustInventoryDTO.setStorageNo(CkConfig.genCk1SkuInventoryCode(sellerCode,warehouseCode,sku));
 
         ckAdjustInventoryDTO.setQuantity(quantity);
         ckAdjustInventoryDTO.setRemark("");
+
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<CkAdjustInventoryDTO>> validate = validator.validate(ckAdjustInventoryDTO);
         String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));

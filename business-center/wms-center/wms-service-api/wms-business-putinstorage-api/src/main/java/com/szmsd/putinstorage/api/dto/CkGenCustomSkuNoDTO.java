@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.api.dto;
 
+import com.szmsd.http.config.CkConfig;
 import com.szmsd.http.util.Ck1DomainPluginUtil;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
@@ -46,7 +47,7 @@ public class CkGenCustomSkuNoDTO {
         String warehouseCode = inboundReceiptInfoVO.getWarehouseCode();
         String cusCode = inboundReceiptInfoVO.getCusCode();
         ckGenCustomSkuNoDTO.setSku(sku);
-        ckGenCustomSkuNoDTO.setCustomerStorageNo(cusCode + Ck1DomainPluginUtil.wrapper(warehouseCode) + sku);
+        ckGenCustomSkuNoDTO.setCustomerStorageNo(CkConfig.genCk1SkuInventoryCode(cusCode,warehouseCode,sku));
         return ckGenCustomSkuNoDTO;
 
     }

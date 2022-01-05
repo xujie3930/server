@@ -121,8 +121,8 @@ public class InventoryJobService {
                 // WMS 库存
                 List<WarehouseSkuCompare> compareList = ListUtils.synchronizedList(new ArrayList<>());
                 // key: 仓库   ;  value: List<SkuQty>
-                inventoryMapOms.forEach((key, value) -> {
-                    List<String> skuList = value.stream().map(SkuQty::getSku).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
+                inventoryMapOms.forEach((warehouseCode, skuQtyList) -> {
+                    List<String> skuList = skuQtyList.stream().map(SkuQty::getSku).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
                     int size = skuList.size();
                     int count = 30;
                     int segment = size % count == 0 ? size / count : size / count + 1;
@@ -135,6 +135,7 @@ public class InventoryJobService {
                             skus = skuList.subList(count * i, count * (i + 1));
                         }
                         CompletableFuture<List<CkSkuInventoryVO>> voidCompletableFuture = CompletableFuture.supplyAsync(() -> {
+                            log.info("查询sku:{}", JSONObject.toJSONString(skus));
                             List<CkSkuInventoryVO> ckSkuInventoryRespList = new ArrayList<>();
                             // 每30个sku调用一次
                             HttpRequestDto httpRequestDto = new HttpRequestDto();
@@ -142,7 +143,7 @@ public class InventoryJobService {
                             httpRequestDto.setBinary(false);
                             CkSkuInventoryQueryDTO ckSkuInventoryQueryDTO = new CkSkuInventoryQueryDTO();
                             ckSkuInventoryQueryDTO.setSkus(skus);
-                            ckSkuInventoryQueryDTO.setWarehouseId(Ck1DomainPluginUtil.wrapper(key));
+                            ckSkuInventoryQueryDTO.setWarehouseId(Ck1DomainPluginUtil.wrapper(warehouseCode));
                             httpRequestDto.setBody(ckSkuInventoryQueryDTO);
                             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getCheckInventoryUrl()));
                             try {
@@ -163,40 +164,43 @@ public class InventoryJobService {
                     }
 
                     CompletableFuture.runAsync(() ->
-                            value.forEach(item -> {
-                                WarehouseSkuCompare compare = compare(item, (warehouseCode, sku) -> {
-                                    List<InventoryInfo> listing = remoteRequest.listing(warehouseCode, sku);
+                            skuQtyList.forEach(item -> {
+                                WarehouseSkuCompare compare = compare(item, (warehouseCode2, sku) -> {
+                                    List<InventoryInfo> listing = remoteRequest.listing(warehouseCode2, sku);
                                     if (CollectionUtils.isEmpty(listing)) {
                                         return null;
                                     }
                                     return listing.get(0);
                                 });
                                 if (compare == null) {
-                                    log.info("客户[{}], 仓库[{}], SKU[{}], 没有产生差异", cusCode, key, item.getSku());
+                                    log.info("客户[{}], 仓库[{}], SKU[{}], 没有产生差异", cusCode, warehouseCode, item.getSku());
                                     return;
                                 }
-                                log.info("客户[{}], 仓库[{}], SKU[{}], 产生差异", cusCode, key, item.getSku());
+                                log.info("客户[{}], 仓库[{}], SKU[{}], 产生差异", cusCode, warehouseCode, item.getSku());
                                 // 查询CK1 的库存记录
                                 compareList.add(compare);
                             }));
 
                     // 拼装数据
                     CompletableFuture<Void> voidCompletableFuture = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
-                    try {
-                        ArrayList<CkSkuInventoryVO> ckSkuInventoryResultList = new ArrayList<>();
-                        Void unused = voidCompletableFuture.get();
+
+                    ArrayList<CkSkuInventoryVO> ckSkuInventoryResultList = new ArrayList<>();
+
+                    if (voidCompletableFuture.isDone()) {
+                        log.info("执行完成----");
                         completableFutures.forEach(x -> {
                             try {
                                 ckSkuInventoryResultList.addAll(x.get());
+
                             } catch (InterruptedException | ExecutionException e) {
                                 e.printStackTrace();
+                                log.error("执行异常----");
                             }
                         });
                         Map<String, Integer> collect = ckSkuInventoryResultList.stream().collect(Collectors.toMap(CkSkuInventoryVO::getSku, CkSkuInventoryVO::getTotalStockQty, (x1, x2) -> x2));
                         // 设置出口易库存数量
                         compareList.forEach(warehouseSkuCompare -> warehouseSkuCompare.setCkQty(Optional.ofNullable(collect.get(warehouseSkuCompare.getSku())).orElse(0)));
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
+
                     }
 
                 });
