@@ -101,8 +101,8 @@ public class OperationDTO implements Serializable {
     private List<ChaOperationDetailsDTO> chaOperationDetailList;
 
     public boolean verifyData() {
-        AssertUtil.isTrue(StringUtils.isNotBlank(cusTypeName) || StringUtils.isNotBlank(cusCodeList), "用户类型/用户必填");
-        AssertUtil.isTrue(!(StringUtils.isNotBlank(cusTypeName) && StringUtils.isNotBlank(cusCodeList)), "用户类型/用户只允许一种规则");
+        AssertUtil.isTrue(StringUtils.isNotBlank(cusTypeCode) || StringUtils.isNotBlank(cusCodeList), "用户类型/用户必填");
+        AssertUtil.isTrue(!(StringUtils.isNotBlank(cusTypeCode) && StringUtils.isNotBlank(cusCodeList)), "用户类型/用户只允许一种规则");
         AssertUtil.isTrue(effectiveTime.compareTo(expirationTime) <= 0, "生效时间不能大于等于失效时间");
         if (CollectionUtils.isNotEmpty(chaOperationDetailList)) {
             // 转运/批量出库单-装箱费/批量出库单-贴标费 同一个仓库 只能存在一条配置
