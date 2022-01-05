@@ -1,9 +1,11 @@
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.http.config.CkConfig;
 import com.szmsd.inventory.BusinessInventoryApplication;
 import com.szmsd.inventory.domain.InventoryRecord;
 import com.szmsd.inventory.job.InventoryJobService;
 import com.szmsd.inventory.mapper.InventoryRecordMapper;
 import com.szmsd.inventory.service.IInventoryRecordService;
+import lombok.SneakyThrows;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,14 +41,17 @@ public class TestUnit {
                 .selectList(sku1);
 
     }
+
     @Resource
     InventoryJobService inventoryJobService;
 
     /**
      * 库存对比
      */
+    @SneakyThrows
     @Test
-    public void asyncInventoryWarning(){
+    public void asyncInventoryWarning() {
         inventoryJobService.asyncInventoryWarning();
+        Thread.sleep(10 * 1000 * 60);
     }
 }

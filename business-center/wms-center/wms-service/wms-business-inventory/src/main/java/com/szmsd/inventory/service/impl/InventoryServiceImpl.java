@@ -25,6 +25,7 @@ import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.enums.RemoteConstant;
+import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.domain.Inventory;
@@ -730,6 +731,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             httpRequestDto.setMethod(HttpMethod.POST);
             httpRequestDto.setBinary(false);
             httpRequestDto.setBody(CkAdjustInventoryDTO.createCkAdjustInventoryDTO(inventoryAdjustmentDTO));
+            httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inventoryAdjustmentDTO.getSellerCode()));
             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getAdjustInventoryUrl()));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.ADJUST_INVENTORY);
             R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);

@@ -33,7 +33,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpMethod;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -144,6 +143,7 @@ public class InventoryJobService {
                             httpRequestDto.setBinary(false);
                             CkSkuInventoryQueryDTO ckSkuInventoryQueryDTO = new CkSkuInventoryQueryDTO();
                             ckSkuInventoryQueryDTO.setSkus(skus);
+                            // httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inventoryAdjustmentDTO.getSellerCode()));
                             ckSkuInventoryQueryDTO.setWarehouseId(Ck1DomainPluginUtil.wrapper(warehouseCode));
                             httpRequestDto.setBody(ckSkuInventoryQueryDTO);
                             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getCheckInventoryUrl()));

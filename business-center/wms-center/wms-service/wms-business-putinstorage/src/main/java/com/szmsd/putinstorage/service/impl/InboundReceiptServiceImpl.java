@@ -28,6 +28,7 @@ import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.enums.RemoteConstant;
+import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
@@ -430,6 +431,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         InboundReceiptVO inboundReceiptVO = selectByWarehouseNo(refOrderNo);
         AssertUtil.notNull(inboundReceiptVO, "入库单号[" + refOrderNo + "]不存在，请核对");
         // 之前总上架数量
+        String cusCode = inboundReceiptVO.getCusCode();
         receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseCode());
         Integer beforeTotalPutQty = inboundReceiptVO.getTotalPutQty();
         InboundReceipt inboundReceipt = new InboundReceipt().setId(inboundReceiptVO.getId());
@@ -447,6 +449,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                         HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
                         httpRequestDto.setMethod(HttpMethod.POST);
                         httpRequestDto.setBinary(false);
+                        httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
                         httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getCreatePutawayOrderUrl()));
                         httpRequestDto.setBody(CkCreateIncomingOrderDTO.createIncomingOrderDTO(inboundReceiptInfoDetailVO));
                         // 使用相同的sku创建,不然后面的sku创建会没有单号
@@ -463,6 +466,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
                             httpRequestDto.setMethod(HttpMethod.GET);
                             httpRequestDto.setBinary(false);
+                            httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
                             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getGenSkuCustomStorageNo()));
                             httpRequestDto.setBody(CkGenCustomSkuNoDTO.createGenCustomSkuNoDTO(inboundReceiptInfoDetailVO, inboundReceiptDetail));
                             // 使用相同的sku创建,不然后面的sku创建会没有单号
@@ -494,6 +498,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.POST);
             httpRequestDto.setBinary(false);
+            httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(cusCode));
             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getPutawayUrl()));
             httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
@@ -528,9 +533,12 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         updateStatus(orderNo, InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
         log.info("#B3 接收完成入库：操作完成");
         CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            //查询入库单号的创建客户code
+            InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(orderNo);
             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.PUT);
             httpRequestDto.setBinary(false);
+            httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoVO.getCusCode()));
             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getIncomingOrderCompletedUrl(orderNo)));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.WAREHOUSE_ORDER_COMPLETED);
             R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
