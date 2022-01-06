@@ -31,4 +31,12 @@ public interface IWarehouseOperationService {
      * @return WarehouseOperationVo
      */
     WarehouseOperationVo details(int id);
+
+    /**
+     * 查询用户仓租规则，用户没查询到则查询用户类型
+     *  用户类型.客户id二选一
+     * @param setCusCodeList
+     * @return
+     */
+    List<WarehouseOperationVo> selectOperationByRule(WarehouseOperationDTO queryDto);
 }

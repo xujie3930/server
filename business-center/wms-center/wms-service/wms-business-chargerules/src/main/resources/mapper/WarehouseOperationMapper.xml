@@ -1,31 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.chargerules.mapper.WarehouseOperationMapper">
-
     <resultMap id="WarehouseOperationMap" type="com.szmsd.chargerules.vo.WarehouseOperationVo">
-        <result column="id" property="id" />
-        <result column="create_time" property="createTime" />
-        <result column="warehouse_code" property="warehouseCode" />
-        <result column="remark" property="remark" />
-        <result column="currency_code" property="currencyCode" />
-        <result column="currency_name" property="currencyName" />
-        <collection property="details" javaType="java.util.List" select="com.szmsd.chargerules.mapper.WarehouseOperationDetailsMapper.selectWarehouseOperationDetails" column="id" />
+        <result column="id" property="id"/>
+        <result column="create_time" property="createTime"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="remark" property="remark"/>
+        <result column="currency_code" property="currencyCode"/>
+        <result column="currency_name" property="currencyName"/>
+        <collection property="details" javaType="java.util.List"
+                    select="com.szmsd.chargerules.mapper.WarehouseOperationDetailsMapper.selectWarehouseOperationDetails"
+                    column="id"/>
     </resultMap>
 
-    <select id="listPage" resultMap="WarehouseOperationMap" parameterType="com.szmsd.chargerules.dto.WarehouseOperationDTO">
-        SELECT id,create_time,warehouse_code,remark,currency_code,currency_name FROM `cha_warehouse_operation`
+    <select id="listPage" resultMap="WarehouseOperationMap"
+            parameterType="com.szmsd.chargerules.dto.WarehouseOperationDTO">
+        SELECT id,create_time,warehouse_code,remark,currency_code,currency_name,cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time FROM `cha_warehouse_operation`
         <where>
             <if test="warehouseCode != null and warehouseCode != ''">
                 AND warehouse_code = #{warehouseCode}
+            </if>
+            <if test="cusTypeCode != null and cusTypeCode != ''">
+                AND cus_type_code = #{cusTypeCode}
+            </if>
+            <if test="currencyCode != null and currencyCode != ''">
+                AND currency_code = #{currencyCode}
+            </if>
+            <if test="effectiveTime != null and expirationTime != null">
+                AND effective_time &lt;= #{effectiveTime} AND expiration_time >= #{expirationTime}
+            </if>
+            <if test="cusCodeList != null and cusCodeList != ''">
+                AND (CONCAT(',',cus_code_list,',') REGEXP(SELECT CONCAT(',',REPLACE(#{cusCodeList}, ',', ',|,'),',')))
             </if>
         </where>
     </select>
 
     <select id="selectDetailsById" resultMap="WarehouseOperationMap" parameterType="Integer">
-        SELECT id,create_time,warehouse_code,remark,currency_code,currency_name FROM `cha_warehouse_operation`
+        SELECT id,create_time,warehouse_code,remark,currency_code,currency_name,cus_type_code, cus_name_list, cus_code_list, effective_time, expiration_time FROM `cha_warehouse_operation`
         <where>
             id = #{id}
         </where>
     </select>
-
 </mapper>

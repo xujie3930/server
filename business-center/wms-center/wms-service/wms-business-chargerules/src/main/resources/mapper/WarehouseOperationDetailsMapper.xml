@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.chargerules.mapper.WarehouseOperationDetailsMapper">
 
     <select id="selectWarehouseOperationDetails" resultType="com.szmsd.chargerules.domain.WarehouseOperationDetails" parameterType="Integer">
-        SELECT charge_days,price,unit,remark FROM `cha_warehouse_operation_details` WHERE warehouse_operation_id = #{id}
+        SELECT charge_days,price,unit,remark,discount_rate FROM `cha_warehouse_operation_details` WHERE warehouse_operation_id = #{id}
     </select>
 
 </mapper>

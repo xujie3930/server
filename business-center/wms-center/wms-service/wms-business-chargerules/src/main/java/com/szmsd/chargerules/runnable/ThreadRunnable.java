@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -64,7 +65,7 @@ public class ThreadRunnable {
      * 定时任务：储存仓租计价扣费；每周日晚上8点执行
      */
 //    @Scheduled(cron = "0/60 * * * * *")
-    @Scheduled(cron = "0 0 20 * * 7")
+    @Scheduled(cron = "0 0 20 ? * 1")
     public void executeWarehouse() {
         log.info("executeWarehouse() start...");
         RLock lock = redissonClient.getLock("executeOperation");
@@ -90,12 +91,13 @@ public class ThreadRunnable {
 
     /**
      * 遍历SKU详情
+     *
      * @param warehouseCode warehouseCode
-     * @param value List
+     * @param value         List
      */
     private void getSkuByWarehouse(String warehouseCode, List<Inventory> value) {
         for (Inventory inventory : value) {
-            List<InventorySkuVolumeVO> skuVolumeVo = getSkuVolume(new InventorySkuVolumeQueryDTO(inventory.getSku(),warehouseCode));
+            List<InventorySkuVolumeVO> skuVolumeVo = getSkuVolume(new InventorySkuVolumeQueryDTO(inventory.getSku(), warehouseCode));
             for (InventorySkuVolumeVO inventorySkuVolumeVO : skuVolumeVo) {
                 List<SkuVolumeVO> skuVolumes = inventorySkuVolumeVO.getSkuVolumes();
                 getSkuDetails(warehouseCode, skuVolumes);
@@ -105,32 +107,43 @@ public class ThreadRunnable {
 
     /**
      * 获取收费配置
+     *
      * @param warehouseCode warehouseCode
-     * @param skuVolumes skuVolumes
+     * @param skuVolumes    skuVolumes
      */
     private void getSkuDetails(String warehouseCode, List<SkuVolumeVO> skuVolumes) {
         for (SkuVolumeVO skuVolume : skuVolumes) {
-            if(skuVolume.getSku().equals("12")){
-                List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationMapper.listPage(new WarehouseOperationDTO().setWarehouseCode(warehouseCode));
-                if (CollectionUtils.isEmpty(warehouseOperationConfig)) {
-                    log.error("getSkuDetails() 未找到收费配置 warehouseCode: {}", warehouseCode);
-                    continue;
-                }
-                WarehouseOperationVo warehouseOperationVo = warehouseOperationConfig.get(0);
-                BigDecimal amount = charge(warehouseCode, skuVolume, warehouseOperationVo);
-                if(amount.compareTo(BigDecimal.ZERO) < 0) {
-                    log.error("getSkuDetails() 计算费用为0 仓库：{}, SKU:{}, 数量：{} 体积：{}立方厘米",warehouseCode,skuVolume.getSku(),skuVolume.getQty(),skuVolume.getVolume());
-                    continue;
-                }
-                pay(warehouseCode, skuVolume, warehouseOperationVo, amount);
+            LocalDateTime now = LocalDateTime.now();
+            WarehouseOperationDTO warehouseOperationDTO = new WarehouseOperationDTO();
+            warehouseOperationDTO.setWarehouseCode(warehouseCode);
+            warehouseOperationDTO.setEffectiveTime(now);
+            warehouseOperationDTO.setExpirationTime(now);
+            warehouseOperationDTO.setCusCodeList(skuVolume.getCusCode());
+            List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService
+                    .selectOperationByRule(warehouseOperationDTO);
+              /*  List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationMapper.listPage(new WarehouseOperationDTO().setWarehouseCode(warehouseCode)
+                        .setEffectiveTime(now).setExpirationTime(now).setCusCodeList(skuVolume.getCusCode())
+                );*/
+            if (CollectionUtils.isEmpty(warehouseOperationConfig)) {
+                log.error("getSkuDetails() 未找到收费配置 warehouseCode: {}", warehouseCode);
+                continue;
             }
+            WarehouseOperationVo warehouseOperationVo = warehouseOperationConfig.get(0);
+            BigDecimal amount = charge(warehouseCode, skuVolume, warehouseOperationVo);
+            if (amount.compareTo(BigDecimal.ZERO) < 0) {
+                log.error("getSkuDetails() 计算费用为0 仓库：{}, SKU:{}, 数量：{} 体积：{}立方厘米", warehouseCode, skuVolume.getSku(), skuVolume.getQty(), skuVolume.getVolume());
+                continue;
+            }
+
+            pay(warehouseCode, skuVolume, warehouseOperationVo, amount);
         }
     }
 
     /**
      * 计算费用
-     * @param warehouseCode warehouseCode
-     * @param skuVolume skuVolume
+     *
+     * @param warehouseCode        warehouseCode
+     * @param skuVolume            skuVolume
      * @param warehouseOperationVo warehouseOperationVo
      * @return amount
      */
@@ -138,16 +151,17 @@ public class ThreadRunnable {
         String datePoor = DateUtils.getDatePoor(new Date(), DateUtils.parseDate(skuVolume.getOperateOn()));
         int days = Integer.parseInt(datePoor.substring(0, datePoor.indexOf("天")));
         //立方厘米转为立方米
-        BigDecimal volume = skuVolume.getVolume().divide(new BigDecimal(1000000),4,BigDecimal.ROUND_HALF_UP);
+        BigDecimal volume = skuVolume.getVolume().divide(new BigDecimal(1000000), 4, BigDecimal.ROUND_HALF_UP);
         return warehouseOperationService.charge(days, volume, warehouseCode, warehouseOperationVo);
     }
 
     /**
      * 支付
-     * @param warehouseCode warehouseCode
-     * @param skuVolume skuVolume
+     *
+     * @param warehouseCode        warehouseCode
+     * @param skuVolume            skuVolume
      * @param warehouseOperationVo warehouseOperationVo
-     * @param amount amount
+     * @param amount               amount
      */
     private void pay(String warehouseCode, SkuVolumeVO skuVolume, WarehouseOperationVo warehouseOperationVo, BigDecimal amount) {
         ChargeLog chargeLog = new ChargeLog();
@@ -161,6 +175,7 @@ public class ThreadRunnable {
 
     /**
      * 获取SKU的详细信息
+     *
      * @param dto dto
      * @return list
      */

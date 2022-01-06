@@ -1,6 +1,7 @@
 package com.szmsd.chargerules.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -9,6 +10,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.time.LocalDateTime;
 
 
 @Data
@@ -46,6 +49,26 @@ public class WarehouseOperation extends BaseEntity {
     @TableField(fill = FieldFill.UPDATE)
     @ApiModelProperty(value = "修改人")
     private String updateBy;
+
+    @ApiModelProperty(value = "客户类型编码")
+    @Excel(name = "客户类型编码")
+    private String cusTypeCode;
+
+    @ApiModelProperty(value = "客户名称 A,B")
+    @Excel(name = "客户名称 A,B")
+    private String cusNameList;
+
+    @ApiModelProperty(value = "客户编码 CNI1,CNI2")
+    @Excel(name = "客户编码 CNI1,CNI2")
+    private String cusCodeList;
+
+    @ApiModelProperty(value = "生效时间")
+    @Excel(name = "生效时间")
+    private LocalDateTime effectiveTime;
+
+    @ApiModelProperty(value = "失效时间")
+    @Excel(name = "失效时间")
+    private LocalDateTime expirationTime;
 
     public String getWarehouseName() {
         return warehouseCode;
