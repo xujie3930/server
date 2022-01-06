@@ -208,7 +208,7 @@ public class ThreadRunnable {
         CustPayDTO custPayDTO = new CustPayDTO();
         List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>();
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
-        accountSerialBillDTO.setChargeCategory("仓租费");
+        accountSerialBillDTO.setChargeCategory(BillEnum.CostCategoryEnum.WAREHOUSE_RENTAL.getName());
         accountSerialBillDTO.setChargeType(chargeLog.getOperationType());
         accountSerialBillDTO.setAmount(amount);
         accountSerialBillDTO.setCurrencyCode(chargeLog.getCurrencyCode());

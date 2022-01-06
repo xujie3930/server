@@ -120,7 +120,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
         serialBill.setChargeCategory(dto.getCurrencyName().concat("转").concat(dto.getCurrencyName2()));
         serialBill.setChargeType(dto.getPayMethod().getPaymentName());
         serialBill.setBusinessCategory(BillEnum.PayMethod.BALANCE_EXCHANGE.getPaymentName());
-        serialBill.setProductCategory(serialBill.getBusinessCategory());
+        serialBill.setProductCategory(serialBill.getProductCategory());
         serialBill.setRemark("汇率为: ".concat(dto.getRate().toString()));
         serialBill.setNo(accountBalanceChange.getSerialNum());
         accountSerialBillService.add(serialBill);
