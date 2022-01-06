@@ -12,6 +12,7 @@ import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.BasSellerQueryDto;
+import com.szmsd.bas.dto.BasSellerSysDto;
 import com.szmsd.bas.dto.WarehouseKvDTO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
@@ -48,7 +49,7 @@ public class RemoteApiImpl implements IRemoteApi {
      */
     TimedCache<String, List<BasSub>> codeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
     TimedCache<Long, List<WarehouseKvDTO>> wareHouseCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
-    WeakCache<String, Map<String, BasSellerCertificate>> cusCodeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
+    WeakCache<String, Map<String, BasSellerSysDto>> cusCodeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
 
     @Resource
     private BasFeignService basFeignService;
@@ -185,15 +186,16 @@ public class RemoteApiImpl implements IRemoteApi {
     @Override
     public boolean checkCusCode(String cusCode) {
         if (StringUtils.isBlank(cusCode)) return false;
-        Map<String, BasSellerCertificate> cusCodeCacheMap = cusCodeCache.get("");
+        Map<String, BasSellerSysDto> cusCodeCacheMap = cusCodeCache.get("");
         if (MapUtils.isEmpty(cusCodeCacheMap)) {
             BasSellerQueryDto basSellerQueryDto = new BasSellerQueryDto();
             basSellerQueryDto.setPageNum(1);
             basSellerQueryDto.setPageSize(999);
-            TableDataInfo<BasSellerCertificate> list = basSellerFeignService.list(basSellerQueryDto);
+            TableDataInfo<BasSellerSysDto> list = basSellerFeignService.list(basSellerQueryDto);
+
             AssertUtil.isTrue(list != null && list.getCode() == HttpStatus.SUCCESS, "获取用户列表失败");
-            List<BasSellerCertificate> resultList = list.getRows();
-            Map<String, BasSellerCertificate> resultMap = resultList.stream().collect(Collectors.toMap(BasSellerCertificate::getSellerCode, x -> x, (x1, x2) -> x2));
+            List<BasSellerSysDto> resultList = list.getRows();
+            Map<String, BasSellerSysDto> resultMap = resultList.stream().collect(Collectors.toMap(BasSellerSysDto::getSellerCode, x -> x, (x1, x2) -> x2));
             cusCodeCacheMap = resultMap;
             cusCodeCache.put("", resultMap);
         }
