@@ -194,11 +194,13 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             requestLog.setRequestTime(requestTime);
             requestLog.setResponseHeader(JSON.toJSONString(responseVO.getHeaders()));
             Object body = responseVO.getBody();
-            if (body instanceof String) {
-                requestLog.setResponseBody((String) body);
-            } else {
-                String responseBody = new String((byte[]) body, StandardCharsets.UTF_8);
-                requestLog.setResponseBody(responseBody);
+            if (Objects.nonNull(body)) {
+                if (body instanceof String) {
+                    requestLog.setResponseBody((String) body);
+                } else {
+                    String responseBody = new String((byte[]) body, StandardCharsets.UTF_8);
+                    requestLog.setResponseBody(responseBody);
+                }
             }
             requestLog.setResponseTime(responseTime);
             EventUtil.publishEvent(new RequestLogEvent(requestLog));
