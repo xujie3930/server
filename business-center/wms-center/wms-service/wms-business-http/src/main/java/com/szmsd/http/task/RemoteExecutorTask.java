@@ -179,11 +179,11 @@ public class RemoteExecutorTask implements IRemoteExecutorTask {
                     log.error("扫描执行-扫描任务执行异常：{}", finalTypeCode, e);
                 } finally {
                     if (StringUtils.isNotBlank(finalTypeCode)) {
-                        log.info("扫描执行-finally 执行完成--{}", finalTypeCode);
+//                        log.info("扫描执行-finally 执行完成--{}", finalTypeCode);
                         redisTemplate.boundListOps(SCAN_TYPE_KEY).leftPush(finalTypeCode);
                     }
                     if (Objects.nonNull(oneTask)) {
-                        log.info("扫描执行-finally 执行完成--{}", oneTask.getId());
+//                        log.info("扫描执行-finally 执行完成--{}", oneTask.getId());
                         redisTemplate.boundHashOps(SCAN_TYPE_ID_KEY).put(finalTypeCode, oneTask.getId() + "");
                     }
                 }
