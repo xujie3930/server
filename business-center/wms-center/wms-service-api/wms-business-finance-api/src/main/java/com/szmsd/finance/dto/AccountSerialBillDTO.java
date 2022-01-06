@@ -1,5 +1,6 @@
 package com.szmsd.finance.dto;
 
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.enums.BillEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -7,7 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 
 @Data
@@ -50,13 +54,28 @@ public class AccountSerialBillDTO {
 
     @ApiModelProperty(value = "交易类型")
     private BillEnum.PayMethod payMethod;
-
+    /**
+     * #{@link BillEnum.NatureEnum}
+     */
     @ApiModelProperty(value = "业务类别（性质）")
     private String businessCategory;
 
+    public void setBusinessCategory(String businessCategory) {
+        this.businessCategory = businessCategory;
+        if (StringUtils.isNotBlank(businessCategory)) {
+            // 这些需要转换成 费用扣除
+            List<String> category = Arrays.asList("物料费", "操作费", "物流基础费", "处理费", "其他费");
+            if (category.contains(businessCategory)) {
+                this.businessCategory = BillEnum.NatureEnum.EXPENSE_DEDUCTION.getName();
+            }
+        }
+    }
+
     @ApiModelProperty(value = "产品代码")
     private String productCode;
-
+    /**
+     * #{@link BillEnum.ProductCategoryEnum}
+     */
     @ApiModelProperty(value = "产品类别")
     private String productCategory;
 

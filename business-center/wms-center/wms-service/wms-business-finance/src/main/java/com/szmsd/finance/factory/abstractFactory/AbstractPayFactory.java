@@ -166,7 +166,7 @@ public abstract class AbstractPayFactory {
             AccountSerialBillDTO accountSerialBillDTO = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
             String paymentName = accountSerialBillDTO.getPayMethod().getPaymentName();
             accountSerialBillDTO.setBusinessCategory(paymentName);
-            accountSerialBillDTO.setProductCategory(paymentName);
+            accountSerialBillDTO.setProductCategory(accountSerialBillDTO.getProductCategory());
             String currencyName = accountSerialBillDTO.getCurrencyName();
             currencyName = currencyName == null ? "" : currencyName;
             accountSerialBillDTO.setChargeCategory(paymentName.concat(currencyName));

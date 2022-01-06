@@ -317,7 +317,7 @@ public class OperationServiceImpl implements IOperationService {
         CustPayDTO custPayDTO = new CustPayDTO();
         List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>();
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
-        accountSerialBillDTO.setChargeCategory("操作费");
+        accountSerialBillDTO.setChargeCategory(BillEnum.CostCategoryEnum.OPERATING_FEE.getName());
         accountSerialBillDTO.setChargeType(chargeLog.getOperationType());
         accountSerialBillDTO.setAmount(chargeLog.getAmount());
         accountSerialBillDTO.setCurrencyCode(chargeLog.getCurrencyCode());

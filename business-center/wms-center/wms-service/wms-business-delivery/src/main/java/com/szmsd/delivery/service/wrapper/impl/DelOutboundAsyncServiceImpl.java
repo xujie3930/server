@@ -312,7 +312,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             dto.setCurrencyCode(custPayDTO.getCurrencyCode());
                             dto.setAmount(custPayDTO.getAmount());
                             dto.setProductCategory(BillEnum.PayMethod.BALANCE_DEDUCTIONS.getPaymentName());
-                            dto.setChargeCategory("物料费");
+                            dto.setChargeCategory(BillEnum.CostCategoryEnum.MATERIAL_COST.getName());
                             dto.setWarehouseCode(basePacking.getWarehouseCode());
                             R<List<BasWarehouse>> listR = basWarehouseFeignService.queryByWarehouseCodes(Collections.singletonList(basePacking.getWarehouseCode()));
                             if (listR.getCode() == HttpStatus.SUCCESS) {
@@ -321,7 +321,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                                 String warehouseName = Optional.ofNullable(basWarehouse).map(BasWarehouse::getWarehouseNameCn).orElse("");
                                 dto.setWarehouseName(warehouseName);
                             }
-                            dto.setChargeType(BillEnum.PayMethod.BALANCE_DEDUCTIONS.getPaymentName());
+                            dto.setChargeType(BillEnum.FeeTypeEnum.BALANCE_DEDUCTIONS.getName());
                             list.add(dto);
                             custPayDTO.setSerialBillInfoList(list);
                             R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);

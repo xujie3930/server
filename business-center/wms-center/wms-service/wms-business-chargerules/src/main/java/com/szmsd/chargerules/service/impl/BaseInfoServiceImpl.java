@@ -192,7 +192,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         CustPayDTO custPayDTO = new CustPayDTO();
         List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>();
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
-        accountSerialBillDTO.setChargeCategory("特殊操作费");
+        accountSerialBillDTO.setChargeCategory(BillEnum.CostCategoryEnum.SPECIAL_OPERATING_FEE.getName());
         accountSerialBillDTO.setChargeType(basSpecialOperation.getOperationType());
         accountSerialBillDTO.setRemark(basSpecialOperation.getRemark());
         accountSerialBillDTO.setAmount(amount);
