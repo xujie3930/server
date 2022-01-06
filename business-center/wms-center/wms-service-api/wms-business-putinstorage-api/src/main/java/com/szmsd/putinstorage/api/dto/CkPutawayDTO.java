@@ -2,6 +2,7 @@ package com.szmsd.putinstorage.api.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.http.config.CkConfig;
 import com.szmsd.http.util.Ck1DomainPluginUtil;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import io.swagger.annotations.ApiModel;
@@ -62,16 +63,17 @@ public class CkPutawayDTO {
      * CK1-sku入库上架推送
      * @return
      */
-    public static CkPutawayDTO createCkPutawayDTO(ReceivingRequest receivingRequest) {
+    public static CkPutawayDTO createCkPutawayDTO(ReceivingRequest receivingRequest,String cusCode) {
         CkPutawayDTO ckPutawayDTO = new CkPutawayDTO();
+        String warehouseCode = receivingRequest.getWarehouseCode();
         ckPutawayDTO.setCustomerOrderNo(receivingRequest.getOrderNo());
-        ckPutawayDTO.setWarehouseCode(Ck1DomainPluginUtil.wrapper(receivingRequest.getWarehouseCode()));
+        ckPutawayDTO.setWarehouseCode(Ck1DomainPluginUtil.wrapper(warehouseCode));
 
         ArrayList<PutawayListDTO> putawayList = new ArrayList<>();
 
         PutawayListDTO putawayListDTO = new PutawayListDTO();
         putawayListDTO.setQty(receivingRequest.getQty());
-        putawayListDTO.setSku(receivingRequest.getSku());
+        putawayListDTO.setSku(CkConfig.genCk1SkuInventoryCode(cusCode,warehouseCode,receivingRequest.getSku()));
 
         putawayList.add(putawayListDTO);
 

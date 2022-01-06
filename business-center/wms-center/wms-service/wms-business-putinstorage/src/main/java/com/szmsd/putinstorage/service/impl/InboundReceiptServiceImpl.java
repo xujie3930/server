@@ -442,10 +442,25 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
             // 查询入库单明细
             // OMS中完成入库单后，当是第一次上架（状态调整为处理中时）向业务系统创建入库单
-            CompletableFuture<HttpResponseVO> future = CompletableFuture
+            CompletableFuture<InboundReceiptVO> future = CompletableFuture
                     .supplyAsync(() -> queryInfo(refOrderNo, false))
                     .thenApplyAsync(inboundReceiptInfoDetailVO -> {
-
+                        List<InboundReceiptDetailVO> inboundReceiptDetails = inboundReceiptInfoDetailVO.getInboundReceiptDetails();
+                        for (InboundReceiptDetailVO inboundReceiptDetail : inboundReceiptDetails) {
+                            HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
+                            httpRequestDto.setMethod(HttpMethod.GET);
+                            httpRequestDto.setBinary(false);
+                            httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
+                            httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getGenSkuCustomStorageNo()));
+                            httpRequestDto.setBody(CkGenCustomSkuNoDTO.createGenCustomSkuNoDTO(inboundReceiptInfoDetailVO, inboundReceiptDetail));
+                            // 使用相同的sku创建,不然后面的sku创建会没有单号
+                            httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
+                            R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
+                            log.info("【推送CK1】首次接收入库上架,创建入库单后生成自定义编码{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+                            HttpResponseVO dataAndException = R.getDataAndException(rmi);
+                        }
+                        return inboundReceiptInfoDetailVO;
+                    }, ckThreadPool).thenApplyAsync(inboundReceiptInfoDetailVO -> {
                         HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
                         httpRequestDto.setMethod(HttpMethod.POST);
                         httpRequestDto.setBinary(false);
@@ -458,27 +473,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                         log.info("【推送CK1】首次接收入库上架,创建入库单{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
                         HttpResponseVO dataAndException = R.getDataAndException(rmi);
                         //dataAndException.checkStatus();
-                        return inboundReceiptInfoDetailVO;
-                    }, ckThreadPool).thenApplyAsync(inboundReceiptInfoDetailVO -> {
-                        List<InboundReceiptDetailVO> inboundReceiptDetails = inboundReceiptInfoDetailVO.getInboundReceiptDetails();
-                        R<HttpResponseVO> rmi = R.ok();
-                        for (InboundReceiptDetailVO inboundReceiptDetail : inboundReceiptDetails) {
-                            HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
-                            httpRequestDto.setMethod(HttpMethod.GET);
-                            httpRequestDto.setBinary(false);
-                            httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
-                            httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getGenSkuCustomStorageNo()));
-                            httpRequestDto.setBody(CkGenCustomSkuNoDTO.createGenCustomSkuNoDTO(inboundReceiptInfoDetailVO, inboundReceiptDetail));
-                            // 使用相同的sku创建,不然后面的sku创建会没有单号
-                            httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
-                            rmi = htpRmiFeignService.rmiSync(httpRequestDto);
-                            log.info("【推送CK1】首次接收入库上架,创建入库单后生成自定义编码{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
-                            HttpResponseVO dataAndException = R.getDataAndException(rmi);
-                        }
-                        return rmi.getData();
+                        return null;
                     }, ckThreadPool);
             try {
-                HttpResponseVO httpRequestDto = future.get();
+                future.get();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
@@ -500,7 +498,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             httpRequestDto.setBinary(false);
             httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(cusCode));
             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getPutawayUrl()));
-            httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest));
+            httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest, cusCode));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
             R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
             log.info("【推送CK1】首次接收入库上架,推送上架SKU信息 {} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
