@@ -132,6 +132,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                     uri = uri + params;
                 }
                 request = new HttpClientHelper.HttpGet(uri);
+                logger.info("uri {} ",uri);
             } else if (HttpMethod.POST.equals(dto.getMethod())) {
                 request = new HttpPost(uri);
             } else if (HttpMethod.PUT.equals(dto.getMethod())) {
