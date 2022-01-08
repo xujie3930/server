@@ -133,8 +133,9 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 for (DelOutboundDetail outboundDetail : detailList) {
                     DelCk1OutboundDto.PackageDTO.SkusDTO skusDTO = new DelCk1OutboundDto.PackageDTO.SkusDTO();
                     String sku = outboundDetail.getSku();
-                    String inventoryCode = CkConfig.genCk1SkuInventoryCode(delOutbound.getSellerCode(), delOutbound.getWarehouseCode(), sku);
-                    skusDTO.setSku(inventoryCode);
+                    // String inventoryCode = CkConfig.genCk1SkuInventoryCode(delOutbound.getSellerCode(), delOutbound.getWarehouseCode(), sku);
+                    // skusDTO.setSku(inventoryCode);
+                    skusDTO.setSku(sku);
                     skusDTO.setQuantity(outboundDetail.getQty());
                     if (null != productMap && null != productMap.get(sku)) {
                         BaseProduct baseProduct = productMap.get(sku);
