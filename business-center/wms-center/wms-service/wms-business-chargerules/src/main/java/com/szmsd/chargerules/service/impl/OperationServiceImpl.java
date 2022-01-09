@@ -257,6 +257,7 @@ public class OperationServiceImpl implements IOperationService {
      * @return
      */
     private OperationRuleVO getOperationDetails(DelOutboundOperationVO dto, OrderTypeEnum orderTypeEnum, Double weight, String message) {
+        weight = Optional.ofNullable(weight).orElse(Double.valueOf("1.00"));
         OperationQueryDTO operationQueryDTO = new OperationQueryDTO();
         LocalDateTime now = LocalDateTime.now();
         operationQueryDTO.setCusCodeList(dto.getCustomCode())
