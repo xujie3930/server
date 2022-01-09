@@ -25,6 +25,7 @@ import com.szmsd.delivery.util.ITextPdfFontUtil;
 import com.szmsd.delivery.util.ITextPdfUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.awt.image.BufferedImage;
@@ -37,6 +38,7 @@ import java.util.Map;
  * @author zhangyuyuan
  * @date 2021-04-08 16:56
  */
+@Slf4j
 public final class DelOutboundServiceImplUtil {
 
     private DelOutboundServiceImplUtil() {
@@ -193,6 +195,7 @@ public final class DelOutboundServiceImplUtil {
     }
 
     private static void throwCommonException(String code, String msg) {
+        log.error("【throwCommonException】{},{}",code,msg);
         throw new CommonException(code, msg);
     }
 
