@@ -132,6 +132,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                     uri = uri + params;
                 }
                 request = new HttpClientHelper.HttpGet(uri);
+                logger.info("-----------uri {} ",uri);
             } else if (HttpMethod.POST.equals(dto.getMethod())) {
                 request = new HttpPost(uri);
             } else if (HttpMethod.PUT.equals(dto.getMethod())) {
@@ -194,11 +195,13 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             requestLog.setRequestTime(requestTime);
             requestLog.setResponseHeader(JSON.toJSONString(responseVO.getHeaders()));
             Object body = responseVO.getBody();
-            if (body instanceof String) {
-                requestLog.setResponseBody((String) body);
-            } else {
-                String responseBody = new String((byte[]) body, StandardCharsets.UTF_8);
-                requestLog.setResponseBody(responseBody);
+            if (Objects.nonNull(body)) {
+                if (body instanceof String) {
+                    requestLog.setResponseBody((String) body);
+                } else {
+                    String responseBody = new String((byte[]) body, StandardCharsets.UTF_8);
+                    requestLog.setResponseBody(responseBody);
+                }
             }
             requestLog.setResponseTime(responseTime);
             EventUtil.publishEvent(new RequestLogEvent(requestLog));

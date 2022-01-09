@@ -235,14 +235,15 @@ public class ExceptionInfoController extends BaseController {
                     int availableProcessors = Runtime.getRuntime().availableProcessors();
                     CountDownLatch downLatch = new CountDownLatch(size);
                     ExecutorService fixedThreadPool = Executors.newFixedThreadPool(availableProcessors + 1);
-                    for (ExceptionInfoExportDto dto : list) {
+                    for (int i = 0; i < list.size(); i++) {
+                        ExceptionInfoExportDto dto = list.get(i);
                         if (StringUtils.isEmpty(dto.getCountry())) {
-                            errorList.add("异常号不能为空");
+                            errorList.add("第" + (i + 1) + "行，异常号不能为空");
                             failSize.incrementAndGet();
                             continue;
                         }
                         if (StringUtils.isEmpty(dto.getCountry())) {
-                            errorList.add(dto.getExceptionNo() + "国家不能为空");
+                            errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "国家不能为空");
                             failSize.incrementAndGet();
                             continue;
                         }
@@ -254,10 +255,11 @@ public class ExceptionInfoController extends BaseController {
                             countryMap.put(dto.getCountry(), countryCode);
                         }
                         if (null == countryCode) {
-                            errorList.add(dto.getExceptionNo() + "国家[" + dto.getCountry() + "]不存在");
+                            errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "国家[" + dto.getCountry() + "]不存在");
                             failSize.incrementAndGet();
                             continue;
                         }
+                        int finalI = i;
                         fixedThreadPool.execute(() -> {
                             try {
                                 if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
@@ -267,7 +269,7 @@ public class ExceptionInfoController extends BaseController {
                                 }
                             } catch (Exception e) {
                                 log.error(e.getMessage(), e);
-                                errorList.add(dto.getExceptionNo() + "操作失败，" + e.getMessage());
+                                errorList.add("第" + (finalI + 1) + "行，" + dto.getExceptionNo() + "操作失败，" + e.getMessage());
                                 failSize.incrementAndGet();
                             } finally {
                                 downLatch.countDown();
@@ -282,14 +284,15 @@ public class ExceptionInfoController extends BaseController {
                         fixedThreadPool.shutdown();
                     }
                 } else {
-                    for (ExceptionInfoExportDto dto : list) {
+                    for (int i = 0; i < list.size(); i++) {
+                        ExceptionInfoExportDto dto = list.get(i);
                         if (StringUtils.isEmpty(dto.getCountry())) {
-                            errorList.add("异常号不能为空");
+                            errorList.add("第" + (i + 1) + "行，异常号不能为空");
                             failSize.incrementAndGet();
                             continue;
                         }
                         if (StringUtils.isEmpty(dto.getCountry())) {
-                            errorList.add(dto.getExceptionNo() + "国家不能为空");
+                            errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "国家不能为空");
                             failSize.incrementAndGet();
                             continue;
                         }
@@ -301,7 +304,7 @@ public class ExceptionInfoController extends BaseController {
                             countryMap.put(dto.getCountry(), countryCode);
                         }
                         if (null == countryCode) {
-                            errorList.add(dto.getExceptionNo() + "国家[" + dto.getCountry() + "]不存在");
+                            errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "国家[" + dto.getCountry() + "]不存在");
                             failSize.incrementAndGet();
                             continue;
                         }
@@ -313,7 +316,7 @@ public class ExceptionInfoController extends BaseController {
                             }
                         } catch (Exception e) {
                             log.error(e.getMessage(), e);
-                            errorList.add(dto.getExceptionNo() + "操作失败，" + e.getMessage());
+                            errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "操作失败，" + e.getMessage());
                             failSize.incrementAndGet();
                         }
                     }

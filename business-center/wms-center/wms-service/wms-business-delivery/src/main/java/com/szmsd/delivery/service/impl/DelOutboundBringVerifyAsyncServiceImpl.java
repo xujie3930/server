@@ -20,6 +20,7 @@ import com.szmsd.delivery.service.wrapper.ApplicationContainer;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
+import com.szmsd.http.config.CkConfig;
 import com.szmsd.http.util.Ck1DomainPluginUtil;
 import com.szmsd.http.util.DomainInterceptorUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -132,6 +133,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 for (DelOutboundDetail outboundDetail : detailList) {
                     DelCk1OutboundDto.PackageDTO.SkusDTO skusDTO = new DelCk1OutboundDto.PackageDTO.SkusDTO();
                     String sku = outboundDetail.getSku();
+                    // String inventoryCode = CkConfig.genCk1SkuInventoryCode(delOutbound.getSellerCode(), delOutbound.getWarehouseCode(), sku);
+                    // skusDTO.setSku(inventoryCode);
                     skusDTO.setSku(sku);
                     skusDTO.setQuantity(outboundDetail.getQty());
                     if (null != productMap && null != productMap.get(sku)) {

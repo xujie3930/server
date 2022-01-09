@@ -257,6 +257,7 @@ public class OperationServiceImpl implements IOperationService {
      * @return
      */
     private OperationRuleVO getOperationDetails(DelOutboundOperationVO dto, OrderTypeEnum orderTypeEnum, Double weight, String message) {
+        weight = Optional.ofNullable(weight).orElse(Double.valueOf("1.00"));
         OperationQueryDTO operationQueryDTO = new OperationQueryDTO();
         LocalDateTime now = LocalDateTime.now();
         operationQueryDTO.setCusCodeList(dto.getCustomCode())
@@ -317,7 +318,7 @@ public class OperationServiceImpl implements IOperationService {
         CustPayDTO custPayDTO = new CustPayDTO();
         List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>();
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
-        accountSerialBillDTO.setChargeCategory("操作费");
+        accountSerialBillDTO.setChargeCategory(BillEnum.CostCategoryEnum.OPERATING_FEE.getName());
         accountSerialBillDTO.setChargeType(chargeLog.getOperationType());
         accountSerialBillDTO.setAmount(chargeLog.getAmount());
         accountSerialBillDTO.setCurrencyCode(chargeLog.getCurrencyCode());
