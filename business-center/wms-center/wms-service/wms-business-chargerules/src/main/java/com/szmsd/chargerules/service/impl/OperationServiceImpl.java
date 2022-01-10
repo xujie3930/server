@@ -111,7 +111,7 @@ public class OperationServiceImpl implements IOperationService {
     private R<?> packageTransfer(DelOutboundOperationVO dto, BigDecimal amount) {
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
-        OperationRuleVO operation = getOperationDetails(dto, null, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
+        OperationRuleVO operation = getOperationDetails(dto, Double.valueOf(count), "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
         for (DelOutboundOperationDetailVO vo : details) {
             amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
@@ -235,7 +235,7 @@ public class OperationServiceImpl implements IOperationService {
 
     private BigDecimal getBatchAmount(DelOutboundOperationVO dto, BigDecimal amount, Integer count, String type) {
         if (count != null && count > 0) {
-            OperationRuleVO labelOperation = getOperationDetails(dto, null, "未找到" + DelOutboundOrderEnum.getName(type) + "业务费用规则，请联系管理员");
+            OperationRuleVO labelOperation = getOperationDetails(dto, Double.valueOf(count), "未找到" + DelOutboundOrderEnum.getName(type) + "业务费用规则，请联系管理员");
             BigDecimal calculate = payService.calculate(labelOperation.getFirstPrice(), labelOperation.getNextPrice(), count.longValue());
             amount = amount.add(calculate);
             amount = amount.multiply(labelOperation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
@@ -277,7 +277,12 @@ public class OperationServiceImpl implements IOperationService {
             return weightD.compareTo(minimumWeight) >= 0 && weightD.compareTo(maximumWeight) < 0;
         }).findAny().orElse(null);
         AssertUtil.notNull(chaOperationDetailsVO, message);
-        BeanUtils.copyProperties(chaOperationDetailsVO, operation);
+        operation.setDiscountRate(chaOperationDetailsVO.getDiscountRate());
+        operation.setMaximumWeight(chaOperationDetailsVO.getMaximumWeight().doubleValue());
+        operation.setMinimumWeight(chaOperationDetailsVO.getMinimumWeight().doubleValue());
+        operation.setFirstPrice(chaOperationDetailsVO.getFirstPrice());
+        operation.setNextPrice(chaOperationDetailsVO.getNextPrice());
+        operation.setUnit(chaOperationDetailsVO.getUnit());
         log.info("使用规则：{}", JSONObject.toJSONString(operation));
         //  multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
         return operation;
