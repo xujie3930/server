@@ -280,8 +280,8 @@ public class OperationServiceImpl implements IOperationService {
         operation.setDiscountRate(chaOperationDetailsVO.getDiscountRate());
         operation.setMaximumWeight(chaOperationDetailsVO.getMaximumWeight().doubleValue());
         operation.setMinimumWeight(chaOperationDetailsVO.getMinimumWeight().doubleValue());
-        operation.setFirstPrice(chaOperationDetailsVO.getFirstPrice());
-        operation.setNextPrice(chaOperationDetailsVO.getNextPrice());
+        operation.setFirstPrice(Optional.ofNullable(chaOperationDetailsVO.getFirstPrice()).orElse(BigDecimal.ZERO));
+        operation.setNextPrice(Optional.ofNullable(chaOperationDetailsVO.getNextPrice()).orElse(BigDecimal.ZERO));
         operation.setUnit(chaOperationDetailsVO.getUnit());
         log.info("使用规则：{}", JSONObject.toJSONString(operation));
         //  multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
