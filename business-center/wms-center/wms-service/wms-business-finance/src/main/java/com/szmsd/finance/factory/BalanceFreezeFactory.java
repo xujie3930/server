@@ -128,6 +128,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 if (!balance.checkAndSetAmountAndCreditAnd(changeAmount, false, BalanceDTO::freeze)) {
                     throw new RuntimeException("可用余额不足以冻结，费用：" + changeAmount);
                 }
+                return true;
             }
 
         }
