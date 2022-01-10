@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
@@ -94,6 +95,9 @@ public class InventoryJobService {
             if (CollectionUtils.isEmpty(data)) {
                 return;
             }
+            System.out.println("==================================================================");
+            System.out.println(JSONObject.toJSONString(data));
+            System.out.println("==================================================================");
             List<InventoryWarning> inventoryWarning = BeanMapperUtil.mapList(data, InventoryWarning.class);
             inventoryWarning.forEach(item -> item.setCusCode(customer.getSellerCode()).setBatchNo(batchNo));
             iInventoryWarningService.createAndSendEmail(null, inventoryWarning);
@@ -110,6 +114,7 @@ public class InventoryJobService {
             if (lock.tryLock()) {
                 // OMS 库存
                 List<InventorySkuVO> inventoryListOms = iInventoryService.selectList(new InventorySkuQueryDTO().setCusCode(cusCode));
+
                 if (CollectionUtils.isEmpty(inventoryListOms)) {
                     log.info("客户[{}]没有库存", cusCode);
                     return null;
@@ -121,9 +126,34 @@ public class InventoryJobService {
                 inventoryMapOms.clear();
                 inventoryMapOms.put("NJ",nj);*/
                 // WMS 库存
-                List<WarehouseSkuCompare> compareList = ListUtils.synchronizedList(new ArrayList<>());
+                List<WarehouseSkuCompare> compareList = new CopyOnWriteArrayList<>();
                 // key: 仓库   ;  value: List<SkuQty>
                 inventoryMapOms.forEach((warehouseCode, skuQtyList) -> {
+                    System.out.println("【RUNNER】==================================================================" + cusCode + "warehouseCode" + warehouseCode);
+                    // 查询 OMS - WMS 库存
+                    CompletableFuture<Void> wmsCompletableFuture = CompletableFuture.runAsync(() ->
+                            skuQtyList.forEach(item -> {
+                                WarehouseSkuCompare compare = compare(item, (warehouseCode2, sku) -> {
+                                    List<InventoryInfo> listing = remoteRequest.listing(warehouseCode2, sku);
+                                    if (CollectionUtils.isEmpty(listing)) {
+                                        return null;
+                                    }
+                                    return listing.get(0);
+                                });
+                                if (compare == null) {
+                                    log.info("客户[{}], 仓库[{}], SKU[{}], 没有产生差异", cusCode, warehouseCode, item.getSku());
+                                    WarehouseSkuCompare warehouseSkuCompare = new WarehouseSkuCompare(item, 0);
+                                    compareList.add(warehouseSkuCompare);
+                                    return;
+                                }
+                                log.info("客户[{}], 仓库[{}], SKU[{}], 产生差异", cusCode, warehouseCode, item.getSku());
+                                // 查询CK1 的库存记录
+                                compareList.add(compare);
+                            }));
+                    wmsCompletableFuture.join();
+
+                    // CK1 库存
+                    System.out.println("【RUNNER】==================================================================" + cusCode + "warehouseCode" + warehouseCode);
                     List<String> skuList = skuQtyList.stream().map(SkuQty::getSku).filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
                     int size = skuList.size();
                     int count = 30;
@@ -137,7 +167,7 @@ public class InventoryJobService {
                             skus = skuList.subList(count * i, count * (i + 1));
                         }
                         CompletableFuture<List<CkSkuInventoryVO>> voidCompletableFuture = CompletableFuture.supplyAsync(() -> {
-                            log.info("查询sku:{}", JSONObject.toJSONString(skus));
+                            log.info("【CK1】查询sku:{} :{}", warehouseCode, JSONObject.toJSONString(skus));
                             List<CkSkuInventoryVO> ckSkuInventoryRespList = new ArrayList<>();
                             // 每30个sku调用一次
                             HttpRequestDto httpRequestDto = new HttpRequestDto();
@@ -153,9 +183,10 @@ public class InventoryJobService {
                                 R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
                                 HttpResponseVO dataAndException = R.getDataAndException(rmi);
                                 if (dataAndException.checkStatusFlag()) {
-                                    log.info("-----req-----:\n{}\n-----rmi-----:\n{}\n", JSONObject.toJSONString(httpRequestDto), JSONObject.toJSONString(rmi.getData().getBody()));
+                                    log.info("【CK1】 req：{}:{}", warehouseCode, JSONObject.toJSONString(httpRequestDto));
                                     String body = (String) dataAndException.getBody();
                                     ckSkuInventoryRespList = JSONObject.parseArray(body, CkSkuInventoryVO.class);
+                                    log.info("【CK1】 res：{}:{}", warehouseCode, JSONObject.toJSONString(ckSkuInventoryRespList));
                                     return ckSkuInventoryRespList;
                                 }
                             } catch (Exception e) {
@@ -165,54 +196,26 @@ public class InventoryJobService {
                         });
                         completableFutures.add(voidCompletableFuture);
                     }
-
-                    CompletableFuture<Void> voidCompletableFuture1 = CompletableFuture.runAsync(() ->
-                            skuQtyList.forEach(item -> {
-                                WarehouseSkuCompare compare = compare(item, (warehouseCode2, sku) -> {
-                                    List<InventoryInfo> listing = remoteRequest.listing(warehouseCode2, sku);
-                                    if (CollectionUtils.isEmpty(listing)) {
-                                        return null;
-                                    }
-                                    return listing.get(0);
-                                });
-                                if (compare == null) {
-                                    log.info("客户[{}], 仓库[{}], SKU[{}], 没有产生差异", cusCode, warehouseCode, item.getSku());
-                                    WarehouseSkuCompare warehouseSkuCompare = new WarehouseSkuCompare(item,0);
-                                    compareList.add(warehouseSkuCompare);
-                                    return;
-                                }
-                                log.info("客户[{}], 仓库[{}], SKU[{}], 产生差异", cusCode, warehouseCode, item.getSku());
-                                // 查询CK1 的库存记录
-                                compareList.add(compare);
-                            }));
-
                     // 拼装数据
                     CompletableFuture<Void> voidCompletableFuture = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
-
+                    voidCompletableFuture.join();
                     ArrayList<CkSkuInventoryVO> ckSkuInventoryResultList = new ArrayList<>();
-                    try {
-                        Void unused = voidCompletableFuture.get();
-                        voidCompletableFuture1.get();
-                        if (voidCompletableFuture.isDone()) {
-                            log.info("DM <--> CK 执行完成----");
-                            completableFutures.forEach(x -> {
-                                try {
-                                    ckSkuInventoryResultList.addAll(x.get());
-
-                                } catch (InterruptedException | ExecutionException e) {
-                                    e.printStackTrace();
-                                    log.error("执行异常----");
-                                }
-                            });
-                            Map<String, Integer> collect = ckSkuInventoryResultList.stream().collect(Collectors.toMap(CkSkuInventoryVO::getSku, CkSkuInventoryVO::getTotalStockQty, (x1, x2) -> x1));
-                            // 设置出口易库存数量
-                            compareList.forEach(warehouseSkuCompare -> warehouseSkuCompare.setCkQty(Optional.ofNullable(collect.get(warehouseSkuCompare.getSku())).orElse(0)));
-
+                    completableFutures.forEach(x -> {
+                        try {
+                            ckSkuInventoryResultList.addAll(x.get());
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                            log.error("执行异常----");
                         }
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
+                    });
+                    Map<String, Integer> collect = ckSkuInventoryResultList.stream().collect(Collectors.toMap(CkSkuInventoryVO::getSku, CkSkuInventoryVO::getTotalStockQty, (x1, x2) -> x1));
+                    System.out.println("》》》》》" + JSONObject.toJSONString(collect));
+                    // 设置出口易库存数量
+                    compareList.stream().filter(x -> x.getWarehouse().equals(warehouseCode)).forEach(warehouseSkuCompare -> warehouseSkuCompare.setCkQty(Optional.ofNullable(collect.get(warehouseSkuCompare.getSku())).orElse(0)));
+                    System.out.println("》》》》》" + JSONObject.toJSONString(compareList));
+                    System.out.println("【FINISH】==================================================================" + cusCode + "warehouseCode" + warehouseCode);
                 });
+
                 return compareList;
             }
         } finally {
