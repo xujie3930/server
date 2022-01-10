@@ -1,3 +1,4 @@
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.http.config.CkConfig;
 import com.szmsd.inventory.BusinessInventoryApplication;
@@ -52,6 +53,14 @@ public class TestUnit {
     @Test
     public void asyncInventoryWarning() {
         inventoryJobService.asyncInventoryWarning();
+        Thread.sleep(10 * 1000 * 60);
+    }
+
+    @SneakyThrows
+    @Test
+    public void asyncInventoryWarning2() {
+        List<InventoryJobService.WarehouseSkuCompare> cnid73 = inventoryJobService.inventoryWarning("CNID73");
+        System.out.println(JSONObject.toJSONString(cnid73));
         Thread.sleep(10 * 1000 * 60);
     }
 }
