@@ -117,7 +117,9 @@ public class InventoryJobService {
                 List<SkuQty> inventories = inventoryListOms.stream().map(SkuQty::new).collect(Collectors.toList());
                 log.info("客户[{}], 库存[{}]", cusCode, inventories);
                 Map<String, List<SkuQty>> inventoryMapOms = inventories.stream().collect(Collectors.groupingBy(SkuQty::getWarehouse));
-
+                /*List<SkuQty> nj = inventoryMapOms.get("NJ");
+                inventoryMapOms.clear();
+                inventoryMapOms.put("NJ",nj);*/
                 // WMS 库存
                 List<WarehouseSkuCompare> compareList = ListUtils.synchronizedList(new ArrayList<>());
                 // key: 仓库   ;  value: List<SkuQty>
@@ -149,9 +151,9 @@ public class InventoryJobService {
                             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getCheckInventoryUrl()));
                             try {
                                 R<HttpResponseVO> rmi = htpRmiFeignService.rmi(httpRequestDto);
-                                log.info("-----req-----:\n{}\n-----rmi-----:\n{}\n", JSONObject.toJSONString(httpRequestDto), JSONObject.toJSONString(rmi.getData().getBody()));
                                 HttpResponseVO dataAndException = R.getDataAndException(rmi);
                                 if (dataAndException.checkStatusFlag()) {
+                                    log.info("-----req-----:\n{}\n-----rmi-----:\n{}\n", JSONObject.toJSONString(httpRequestDto), JSONObject.toJSONString(rmi.getData().getBody()));
                                     String body = (String) dataAndException.getBody();
                                     ckSkuInventoryRespList = JSONObject.parseArray(body, CkSkuInventoryVO.class);
                                     return ckSkuInventoryRespList;
@@ -164,7 +166,7 @@ public class InventoryJobService {
                         completableFutures.add(voidCompletableFuture);
                     }
 
-                    CompletableFuture.runAsync(() ->
+                    CompletableFuture<Void> voidCompletableFuture1 = CompletableFuture.runAsync(() ->
                             skuQtyList.forEach(item -> {
                                 WarehouseSkuCompare compare = compare(item, (warehouseCode2, sku) -> {
                                     List<InventoryInfo> listing = remoteRequest.listing(warehouseCode2, sku);
@@ -175,6 +177,8 @@ public class InventoryJobService {
                                 });
                                 if (compare == null) {
                                     log.info("客户[{}], 仓库[{}], SKU[{}], 没有产生差异", cusCode, warehouseCode, item.getSku());
+                                    WarehouseSkuCompare warehouseSkuCompare = new WarehouseSkuCompare(item,0);
+                                    compareList.add(warehouseSkuCompare);
                                     return;
                                 }
                                 log.info("客户[{}], 仓库[{}], SKU[{}], 产生差异", cusCode, warehouseCode, item.getSku());
@@ -188,6 +192,7 @@ public class InventoryJobService {
                     ArrayList<CkSkuInventoryVO> ckSkuInventoryResultList = new ArrayList<>();
                     try {
                         Void unused = voidCompletableFuture.get();
+                        voidCompletableFuture1.get();
                         if (voidCompletableFuture.isDone()) {
                             log.info("DM <--> CK 执行完成----");
                             completableFutures.forEach(x -> {
