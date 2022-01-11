@@ -44,12 +44,12 @@ public class ReturnExpressServiceAddDTO extends ReturnExpressAddDTO {
     @Excel(name = "客户备注")
     private String customerRemark;
 
-    @ApiModelProperty(value = "新出库单号")
+    @ApiModelProperty(value = "新出库单号-改发原处理号")
     @Excel(name = "新出库单号")
     private String fromOrderNoNew;
 
-    @ApiModelProperty(value = "新物流跟踪号")
-    @Excel(name = "新物流跟踪号")
+    @ApiModelProperty(value = "新物流跟踪号-改发跟踪号")
+    @Excel(name = "新物流跟踪号-改发跟踪号")
     private String scanCodeNew;
 
 

@@ -279,8 +279,6 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             //需要转换 处理方式
             createExpectedReqDTO.setProcessType(configStatus.getPrCode(returnExpressAddDTO.getProcessType()));
             httpFeignClient.expectedCreate(createExpectedReqDTO);
-        } else {
-            makeNewOutboundOrder((ReturnExpressServiceAddDTO) returnExpressAddDTO);
         }
     }
 
