@@ -50,13 +50,13 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]", example = "外部渠道退件")
     private String returnTypeStr;
     @StringLength(maxLength = 50, message = "原出库单号错误")
-    @ApiModelProperty(value = "退件原始单号 原出库单号", example = "SF123456")
+    @ApiModelProperty(value = "退件原始单号 原出库单号 原处理号", example = "SF123456")
     private String fromOrderNo;
 
     @ApiModelProperty(value = "预报单号 系统生成", required = true)
     private String expectedNo;
 
-    @ApiModelProperty(value = "VMS处理单号", required = true)
+    @ApiModelProperty(value = "WMS处理单号 退件单号", required = true)
     private String returnNo;
 
     @ApiModelProperty(value = "退件目标仓库编码", example = "SZ")
@@ -65,8 +65,8 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     private String warehouseCodeStr;
     @ApiModelProperty(value = "退货渠道", example = "客户自选")
     private String returnChannel;
-    @NotBlank(message = "退货Tracking号不能为空")
-    @ApiModelProperty(value = "退货Tracking 号", example = "TID123456", required = true)
+    @NotBlank(message = "退货Tracking号(原跟踪号)不能为空")
+    @ApiModelProperty(value = "退货Tracking号 原跟踪号", example = "TID123456", required = true)
     private String scanCode;
     /**
      * 销毁 包裹上架 拆包检查
@@ -81,7 +81,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "处理方式 编码", example = "Destroy", hidden = true)
     private String applyProcessMethodStr;
 
-    @ApiModelProperty(value = "备注")
+    @ApiModelProperty(value = "备注(退回原因)")
     private String processRemark;
 
     @Valid
