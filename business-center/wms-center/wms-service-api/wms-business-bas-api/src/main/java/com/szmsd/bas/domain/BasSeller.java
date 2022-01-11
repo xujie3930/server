@@ -1,6 +1,7 @@
 package com.szmsd.bas.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,6 +9,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.szmsd.common.core.annotation.Excel;
+
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -54,6 +58,16 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
     private String sellerCode;
+
+    public void setSellerCode(String sellerCode) {
+        this.sellerCode = sellerCode;
+        Optional.ofNullable(sellerCode).ifPresent(x -> this.sellerCodeList = StringToolkit.getCodeByArray(sellerCode));
+    }
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "客户代码")
+    @Excel(name = "客户代码")
+    private List<String> sellerCodeList;
 
     @ApiModelProperty(value = "认证状态 ")
     @Excel(name = "认证状态 ")
