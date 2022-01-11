@@ -1,6 +1,7 @@
 package com.szmsd.returnex.vo;
 
 import com.alibaba.fastjson.JSONObject;
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
@@ -12,6 +13,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * @ClassName: ReturnExpressVO
@@ -148,6 +150,27 @@ public class ReturnExpressListVO implements Serializable {
     public void setWarehouseCodeStr(String warehouseCodeStr) {
         //empty
     }
+
+    /**---ADD----*/
+    @ApiModelProperty(value = "过期时间")
+    @Excel(name = "过期时间")
+    private Date expireTime;
+
+    @ApiModelProperty(value = "处理时间")
+    @Excel(name = "处理时间")
+    private String processTime;
+
+    @ApiModelProperty(value = "客户备注")
+    @Excel(name = "客户备注")
+    private String customerRemark;
+
+    @ApiModelProperty(value = "新出库单号")
+    @Excel(name = "新出库单号")
+    private String fromOrderNoNew;
+
+    @ApiModelProperty(value = "新物流跟踪号")
+    @Excel(name = "新物流跟踪号")
+    private String scanCodeNew;
 
     @Override
     public String toString() {

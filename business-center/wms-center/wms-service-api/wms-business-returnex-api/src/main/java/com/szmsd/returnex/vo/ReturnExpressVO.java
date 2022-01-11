@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -159,6 +160,27 @@ public class ReturnExpressVO {
 
     @ApiModelProperty(value = "商品列表")
     List<ReturnExpressGoodVO> goodList;
+
+    /**---ADD----*/
+    @ApiModelProperty(value = "过期时间")
+    @Excel(name = "过期时间")
+    private Date expireTime;
+
+    @ApiModelProperty(value = "处理时间")
+    @Excel(name = "处理时间")
+    private String processTime;
+
+    @ApiModelProperty(value = "客户备注")
+    @Excel(name = "客户备注")
+    private String customerRemark;
+
+    @ApiModelProperty(value = "新出库单号")
+    @Excel(name = "新出库单号")
+    private String fromOrderNoNew;
+
+    @ApiModelProperty(value = "新物流跟踪号")
+    @Excel(name = "新物流跟踪号")
+    private String scanCodeNew;
 
     @Override
     public String toString() {

@@ -14,6 +14,7 @@ import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * @ClassName: ReturnExpressDetail
@@ -135,6 +136,26 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     @ApiModelProperty(value = "逻辑删除")
     @TableLogic(delval = "2", value = "0")
     private Integer delFlag;
+    /**---ADD----*/
+    @ApiModelProperty(value = "过期时间")
+    @Excel(name = "过期时间")
+    private Date expireTime;
+
+    @ApiModelProperty(value = "处理时间")
+    @Excel(name = "处理时间")
+    private String processTime;
+
+    @ApiModelProperty(value = "客户备注")
+    @Excel(name = "客户备注")
+    private String customerRemark;
+
+    @ApiModelProperty(value = "新出库单号")
+    @Excel(name = "新出库单号")
+    private String fromOrderNoNew;
+
+    @ApiModelProperty(value = "新物流跟踪号")
+    @Excel(name = "新物流跟踪号")
+    private String scanCodeNew;
 
     @Override
     public String toString() {

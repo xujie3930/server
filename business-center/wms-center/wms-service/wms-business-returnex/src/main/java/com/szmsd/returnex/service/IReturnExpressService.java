@@ -9,6 +9,7 @@ import com.szmsd.returnex.dto.wms.ReturnProcessingFinishReqDTO;
 import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @param returnExpressAddDTO 新增
      * @return 返回结果
      */
-    int insertReturnExpressDetail(ReturnExpressAddDTO returnExpressAddDTO);
+    <T extends ReturnExpressAddDTO> int insertReturnExpressDetail(T returnExpressAddDTO);
 
     /**
      * 接收VMS仓库到件信息
@@ -76,7 +77,7 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @param expressUpdateDTO 更新条件
      * @return 返回结果
      */
-    int updateExpressInfo(ReturnExpressAddDTO expressUpdateDTO);
+    <T extends ReturnExpressAddDTO> int updateExpressInfo(T expressUpdateDTO);
 
     /**
      * 新增退件单-生成预报单号
@@ -94,6 +95,7 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
 
     /**
      * 获取退件单信息详情
+     *
      * @param id
      * @return
      */

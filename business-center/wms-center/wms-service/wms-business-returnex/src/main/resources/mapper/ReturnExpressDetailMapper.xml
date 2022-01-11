@@ -40,12 +40,11 @@
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         create_by_name,
-                sku,
                 create_time,
                 update_by_name,
                 update_time,
                 remark,
-            id, create_by, update_by, del_flag, version, seller_code, from_order_no, scan_code, expected_no, return_no, process_type, process_type_str, return_type, return_type_str, return_channel, warehouse_code, warehouse_code_str, apply_process_method, apply_process_method_str, arrival_time, finish_time, overdue, process_remark, return_source, return_source_str, deal_status, deal_status_str
+            id, create_by, update_by, del_flag, version, sku, seller_code, from_order_no, scan_code, expected_no, return_no, process_type, process_type_str, return_type, return_type_str, return_channel, warehouse_code, warehouse_code_str, apply_process_method, apply_process_method_str, arrival_time, finish_time, expire_time, process_time, customer_remark, from_order_no_new, scan_code_new, overdue, process_remark, return_source, return_source_str, deal_status, deal_status_str
     </sql>
 
     <select id="selectPageList" resultType="com.szmsd.returnex.vo.ReturnExpressListVO">
@@ -63,13 +62,17 @@
                 and return_type = #{cm.returnType}
             </if>
             <if test="cm.createTimeStart != null and cm.createTimeEnd != null ">
-                and create_time between CONCAT(#{cm.createTimeStart},' 00:00:00') and CONCAT(#{cm.createTimeEnd},' 23:59:59')
+                and create_time between CONCAT(#{cm.createTimeStart},' 00:00:00') and CONCAT(#{cm.createTimeEnd},'
+                23:59:59')
             </if>
             <if test="cm.warehouseCode != null and cm.warehouseCode != '' ">
                 and warehouse_code = #{cm.warehouseCode}
             </if>
-            <if test="cm.sellerCode != null and cm.sellerCode != '' ">
-                and seller_code = #{cm.sellerCode}
+            <if test="cm.sellerCodeList != null and cm.sellerCodeList.size() > 0 ">
+                and seller_code in
+                <foreach collection="cm.sellerCodeList" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
             </if>
             <if test="cm.noUserQuery != null and cm.noUserQuery == true ">
                 and seller_code is Null
@@ -77,6 +80,12 @@
             <if test="cm.forecastNumberList != null and cm.forecastNumberList.size() >0 ">
                 and expected_no in
                 <foreach collection="cm.forecastNumberList" open="(" close=")" separator="," item="fno">
+                    #{fno}
+                </foreach>
+            </if>
+            <if test="cm.scanCodeList != null and cm.scanCodeList.size() >0 ">
+                and scan_code in
+                <foreach collection="cm.scanCodeList" open="(" close=")" separator="," item="fno">
                     #{fno}
                 </foreach>
             </if>
