@@ -129,7 +129,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         if(basSeller.getIsActive()!=null){
             where.eq("o.is_active",basSeller.getIsActive());
         }
-        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
+//        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
+        where.in(CollectionUtils.isNotEmpty( basSeller.getSellerCodeList()),"o.seller_code", basSeller.getSellerCodeList());
         QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"o.user_name",basSeller.getUserName());
         LoginUser loginUser = SecurityUtils.getLoginUser();
             if (null != loginUser && !loginUser.isAllDataScope()) {

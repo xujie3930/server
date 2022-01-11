@@ -1,6 +1,7 @@
 package com.szmsd.bas.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,19 +10,22 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.szmsd.common.core.annotation.Excel;
 
+import java.util.List;
+import java.util.Optional;
+
 
 /**
-* <p>
-    * 
-    * </p>
-*
-* @author l
-* @since 2021-03-09
-*/
+ * <p>
+ *
+ * </p>
+ *
+ * @author l
+ * @since 2021-03-09
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value="", description="BasSeller对象")
+@ApiModel(value = "", description = "BasSeller对象")
 public class BasSeller extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -54,6 +58,16 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
     private String sellerCode;
+
+    public void setSellerCode(String sellerCode) {
+        this.sellerCode = sellerCode;
+        Optional.ofNullable(sellerCode).ifPresent(x -> this.sellerCodeList = StringToolkit.getCodeByArray(sellerCode));
+    }
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "客户代码")
+    @Excel(name = "客户代码")
+    private List<String> sellerCodeList;
 
     @ApiModelProperty(value = "认证状态 ")
     @Excel(name = "认证状态 ")
