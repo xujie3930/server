@@ -31,10 +31,7 @@ import com.szmsd.returnex.config.BeanCopyUtil;
 import com.szmsd.returnex.config.ConfigStatus;
 import com.szmsd.returnex.constant.ReturnExpressConstant;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
-import com.szmsd.returnex.dto.ReturnExpressAddDTO;
-import com.szmsd.returnex.dto.ReturnExpressAssignDTO;
-import com.szmsd.returnex.dto.ReturnExpressGoodAddDTO;
-import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
+import com.szmsd.returnex.dto.*;
 import com.szmsd.returnex.dto.wms.ReturnArrivalReqDTO;
 import com.szmsd.returnex.dto.wms.ReturnProcessingFinishReqDTO;
 import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
@@ -54,10 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -228,17 +222,29 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertReturnExpressDetail(ReturnExpressAddDTO returnExpressAddDTO) {
+    public <T extends ReturnExpressAddDTO> int insertReturnExpressDetail(T returnExpressAddDTO) {
         returnExpressAddDTO.setSellerCode(getSellCode());
         checkSubmit(returnExpressAddDTO);
-
         if (StringUtils.isBlank(returnExpressAddDTO.getExpectedNo())) {
             String expectedNo = createExpectedNo();
             returnExpressAddDTO.setExpectedNo(expectedNo);
         }
         handleExpectedCreate(returnExpressAddDTO);
-        // 本地保存
         return saveReturnExpressDetail(returnExpressAddDTO.convertThis(ReturnExpressDetail.class));
+    }
+
+    /**
+     * 重派则创建新的出库单 生成新的出库单，跑PRC，供应商系统，获取挂号，物流标签，费用直接扣除，不处理库存，不传WMS
+     *
+     * @param returnExpressAddDTO
+     */
+    public void makeNewOutboundOrder(ReturnExpressServiceAddDTO returnExpressAddDTO) {
+        //TODO
+        boolean reassign = returnExpressAddDTO.getReturnType().equals(configStatus.getReassign());
+        if (reassign) {
+            log.info("【重新派件】：{}", returnExpressAddDTO);
+            String returnNo = returnExpressAddDTO.getReturnNo();
+        }
     }
 
     /**
@@ -246,7 +252,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      *
      * @param returnExpressAddDTO
      */
-    private void handleExpectedCreate(ReturnExpressAddDTO returnExpressAddDTO) {
+    private <T extends ReturnExpressAddDTO> void handleExpectedCreate(T returnExpressAddDTO) {
         //判断如果是待提审状态的订单则不能提交 外部渠道退件，不用校验
         if (!"070003".equals(returnExpressAddDTO.getReturnType())) {
             DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
@@ -265,12 +271,17 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 throw new BaseException("获取原出库单信息失败,请重试!");
             }
         }
-        // 创建退报单 推给VMS仓库
-        CreateExpectedReqDTO createExpectedReqDTO = returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class);
-        createExpectedReqDTO.setRefOrderNo(returnExpressAddDTO.getFromOrderNo());
-        //需要转换 处理方式
-        createExpectedReqDTO.setProcessType(configStatus.getPrCode(returnExpressAddDTO.getProcessType()));
-        httpFeignClient.expectedCreate(createExpectedReqDTO);
+        String returnSource = returnExpressAddDTO.getReturnSource();
+        if (!configStatus.getReturnSource().getOmsReturn().equals(returnSource)) {
+            // 创建退报单 推给WMS仓库
+            CreateExpectedReqDTO createExpectedReqDTO = returnExpressAddDTO.convertThis(CreateExpectedReqDTO.class);
+            createExpectedReqDTO.setRefOrderNo(returnExpressAddDTO.getFromOrderNo());
+            //需要转换 处理方式
+            createExpectedReqDTO.setProcessType(configStatus.getPrCode(returnExpressAddDTO.getProcessType()));
+            httpFeignClient.expectedCreate(createExpectedReqDTO);
+        } else {
+            makeNewOutboundOrder((ReturnExpressServiceAddDTO) returnExpressAddDTO);
+        }
     }
 
     private void checkSubmit(ReturnExpressAddDTO returnExpressAddDTO) {
@@ -281,6 +292,18 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 AssertUtil.isTrue(StringUtils.isNotBlank(returnExpressAddDTO.getSku()), "整包上架，sku必填");
             }
         });
+
+        // OMS 创建只能销毁 069001，重派 069005
+        String returnSource = returnExpressAddDTO.getReturnSource();
+        String processType = returnExpressAddDTO.getProcessType();
+        String omsReturn = configStatus.getReturnSource().getOmsReturn();
+        if (returnSource.equals(omsReturn)) {
+            List<String> allProcessType = Arrays.asList(configStatus.getReassign(), configStatus.getDestroy());
+            AssertUtil.isTrue(allProcessType.contains(processType), "OMS退件预报只支持,销毁/重派");
+        } else {
+            List<String> allProcessType = Collections.singletonList(configStatus.getReassign());
+            AssertUtil.isTrue(!allProcessType.contains(processType), "退件预报暂不支持重派");
+        }
 
         // 校验重复条件
         String fromOrderNo = returnExpressAddDTO.getFromOrderNo();
@@ -488,7 +511,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int updateExpressInfo(ReturnExpressAddDTO expressUpdateDTO) {
+    public <T extends ReturnExpressAddDTO> int updateExpressInfo(T expressUpdateDTO) {
         //如果之前是销毁，已经结束了，到这都是要么销毁，要么拆包上架 还有WMS通知退件等待
         checkBeforeUpdate(expressUpdateDTO);
         String dealStatus;

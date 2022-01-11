@@ -5,8 +5,10 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.returnex.dto.ReturnExpressAddDTO;
 import com.szmsd.returnex.dto.ReturnExpressAssignDTO;
 import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
+import com.szmsd.returnex.dto.ReturnExpressServiceAddDTO;
 import com.szmsd.returnex.service.IReturnExpressService;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
@@ -83,5 +85,20 @@ public class ReturnExpressServerController extends BaseController {
     @ApiOperation(value = "获取退件单信息详情")
     public R<ReturnExpressVO> getInfo(@PathVariable(value = "id") Long id) {
         return R.ok(returnExpressService.getInfo(id));
+    }
+
+    /**
+     * 新建退件单
+     * 用户新增退件单，本地化数据，并推送给WMS
+     *
+     * @param returnExpressAddDTO 新增
+     * @return 返回结果
+     */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:add')")
+    @PostMapping("/add")
+    @Log(title = "退货服务模块", businessType = BusinessType.INSERT)
+    @ApiOperation(value = "新增退件单-创建退报单")
+    public R add(@Validated @RequestBody ReturnExpressServiceAddDTO returnExpressAddDTO) {
+        return toOk(returnExpressService.insertReturnExpressDetail(returnExpressAddDTO));
     }
 }

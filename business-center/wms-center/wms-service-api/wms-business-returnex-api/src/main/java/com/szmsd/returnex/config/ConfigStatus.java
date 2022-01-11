@@ -60,6 +60,10 @@ public class ConfigStatus {
      * 销毁
      */
     private String destroy;
+    /**
+     * 重派
+     */
+    private String reassign;
 
     /**
      * 通过OMS中的主子类别的code 获取相对应的WMS操作类型
@@ -102,6 +106,9 @@ public class ConfigStatus {
          */
         private String wmsReturn;
         private String wmsReturnStr = "WMS通知退件";
+
+        private String omsReturn = "068003";
+        private String omsReturnStr = "OMS退件预报";
     }
 
 
