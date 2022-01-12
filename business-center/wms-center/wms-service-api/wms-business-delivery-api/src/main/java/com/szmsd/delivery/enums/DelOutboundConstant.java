@@ -30,4 +30,11 @@ public class DelOutboundConstant {
      * DOC接口
      */
     public static final String SOURCE_TYPE_DOC = "DOC";
+
+    /**
+     * Y        是重派
+     * 空字符串 不是重派
+     * 默认值空字符串
+     */
+    public static final String REASSIGN_TYPE_Y = "Y";
 }

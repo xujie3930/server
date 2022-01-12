@@ -7,6 +7,7 @@ import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
@@ -303,6 +304,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                return;
+            }
             DelOutboundOperationLogEnum.SMT_SHIPMENT_TRACKING.listener(delOutbound);
             // 更新WMS挂号
             ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto = new ShipmentTrackingChangeRequestDto();
@@ -710,6 +714,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             String orderType = delOutbound.getOrderType();
             // 只有转运出库，集运出库业务才可以处理
             if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
+                return;
+            }
+            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                 return;
             }
             List<DelOutboundDetail> details = delOutboundWrapperContext.getDetailList();

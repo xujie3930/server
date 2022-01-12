@@ -383,5 +383,13 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
     @DataScope("cus_code")
     List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
+
+    /**
+     * 重派
+     *
+     * @param dto 出库单模块
+     * @return 结果
+     */
+    DelOutboundAddResponse reassign(DelOutboundDto dto);
 }
 

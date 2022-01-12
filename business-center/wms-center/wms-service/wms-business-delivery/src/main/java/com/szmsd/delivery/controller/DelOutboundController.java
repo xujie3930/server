@@ -471,7 +471,7 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/getDelOutboundDetailsList")
-    @ApiOperation(value = "出库管理 - 按条件查询出库单及详情", position = 10000)
+    @ApiOperation(value = "出库管理 - 按条件查询出库单及详情", position = 1500)
     public R<List<DelOutboundDetailListVO>> getDelOutboundDetailsList(@RequestBody DelOutboundListQueryDto queryDto) {
         return R.ok(delOutboundService.getDelOutboundDetailsList(queryDto));
     }
@@ -479,7 +479,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:export')")
     @Log(title = "出库管理 - 导出", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    @ApiOperation(value = "出库管理 - 导出")
+    @ApiOperation(value = "出库管理 - 导出", position = 1600)
     public void export(HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
         try {
             // 查询出库类型数据
@@ -536,7 +536,7 @@ public class DelOutboundController extends BaseController {
     @AutoValue
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundCharge')")
     @PostMapping("/delOutboundCharge/page")
-    @ApiOperation(value = "出库管理 - 按条件查询出库单及费用详情", position = 10100)
+    @ApiOperation(value = "出库管理 - 按条件查询出库单及费用详情", position = 1700)
     public R<TableDataInfo<QueryChargeVO>> getDelOutboundCharge(@RequestBody QueryChargeDto queryDto) {
         QueryDto page = new QueryDto();
         page.setPageNum(queryDto.getPageNum());
@@ -547,7 +547,7 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:toPrint')")
     @PutMapping("/toPrint")
-    @ApiOperation(value = "出库管理 - 打印", position = 10200)
+    @ApiOperation(value = "出库管理 - 打印", position = 1800)
     @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundToPrintDto")
     public R<Boolean> toPrint(@RequestBody DelOutboundToPrintDto dto) {
         return R.ok(delOutboundService.toPrint(dto));
@@ -555,7 +555,7 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchUpdateTrackingNoTemplate')")
     @GetMapping("/batchUpdateTrackingNoTemplate")
-    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号模板", position = 10300)
+    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号模板", position = 1900)
     public void batchUpdateTrackingNoTemplate(HttpServletResponse response) {
         String filePath = "/template/DM_UpdateTracking.xlsx";
         String fileName = "更新挂号";
@@ -564,7 +564,7 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchUpdateTrackingNo')")
     @PostMapping("/batchUpdateTrackingNo")
-    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号", position = 10301)
+    @ApiOperation(value = "出库管理 - 列表 - 批量更新挂号", position = 1901)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
@@ -589,7 +589,7 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:againTrackingNo')")
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
     @PostMapping("/againTrackingNo")
-    @ApiOperation(value = "出库管理 - 异常列表 - 重新获取挂号", position = 10400)
+    @ApiOperation(value = "出库管理 - 异常列表 - 重新获取挂号", position = 2000)
     @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundAgainTrackingNoDto")
     public R<Integer> againTrackingNo(@RequestBody @Validated DelOutboundAgainTrackingNoDto dto) {
         return R.ok(this.delOutboundService.againTrackingNo(dto));
@@ -597,7 +597,7 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:exceptionMessageList')")
     @PostMapping("/exceptionMessageList")
-    @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述", position = 10401)
+    @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述", position = 2100)
     @ApiImplicitParam(name = "orderNos", value = "单号", dataType = "String")
     public R<List<DelOutboundListExceptionMessageVO>> exceptionMessageList(@RequestBody List<String> orderNos) {
         return R.ok(this.delOutboundService.exceptionMessageList(orderNos));
@@ -605,9 +605,19 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:exceptionMessageExportList')")
     @PostMapping("/exceptionMessageExportList")
-    @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述(导出)", position = 10402)
+    @ApiOperation(value = "出库管理 - 异常列表 - 获取异常描述(导出)", position = 2101)
     @ApiImplicitParam(name = "orderNos", value = "单号", dataType = "String")
     public R<List<DelOutboundListExceptionMessageExportVO>> exceptionMessageExportList(@RequestBody List<String> orderNos) {
         return R.ok(this.delOutboundService.exceptionMessageExportList(orderNos));
     }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:reassign')")
+    @Log(title = "出库单模块", businessType = BusinessType.INSERT)
+    @PostMapping("/reassign")
+    @ApiOperation(value = "出库管理 - 重派", position = 2200)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
+    public R<DelOutboundAddResponse> reassign(@RequestBody DelOutboundDto dto) {
+        return R.ok(delOutboundService.reassign(dto));
+    }
+
 }
