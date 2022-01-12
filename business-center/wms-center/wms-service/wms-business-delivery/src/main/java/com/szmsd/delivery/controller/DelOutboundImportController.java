@@ -247,7 +247,7 @@ public class DelOutboundImportController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:packageTransferImport')")
     @PostMapping("/packageTransferImport")
-    @ApiOperation(value = "出库管理 - 导入 - 转运出库导入", position = 600)
+    @ApiOperation(value = "出库管理 - 导入 - 转运出库导入", position = 501)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "String", name = "sellerCode", value = "客户编码", required = true),
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
@@ -307,6 +307,85 @@ public class DelOutboundImportController extends BaseController {
             }
             // 获取导入的数据
             List<DelOutboundDto> dtoList = new DelOutboundPackageTransferImportContainer(dataList, countryList, packageConfirmList, detailList, sellerCode).get();
+            // 批量新增
+            this.delOutboundService.insertDelOutbounds(dtoList);
+            // 返回成功的结果
+            return R.ok(ImportResult.buildSuccess());
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            // 返回失败的结果
+            return R.ok(ImportResult.buildFail(ImportMessage.build(e.getMessage())));
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:batchImportTemplate')")
+    @GetMapping("/batchImportTemplate")
+    @ApiOperation(value = "出库管理 - 导入 - 批量出库导入模板", position = 600)
+    public void batchImportTemplate(HttpServletResponse response) {
+        String filePath = "/template/DM_packageTransfer.xls";
+        String fileName = "批量出库模板";
+        this.downloadTemplate(response, filePath, fileName);
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:batchImport')")
+    @PostMapping("/batchImport")
+    @ApiOperation(value = "出库管理 - 导入 - 批量出库导入", position = 601)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "form", dataType = "String", name = "sellerCode", value = "客户编码", required = true),
+            @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
+    })
+    public R<ImportResult> batchImport(@RequestParam("sellerCode") String sellerCode, HttpServletRequest request) {
+        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
+        MultipartFile file = multipartHttpServletRequest.getFile("file");
+        AssertUtil.notNull(file, "上传文件不存在");
+        AssertUtil.isTrue(StringUtils.isNotEmpty(sellerCode), "客户编码不能为空");
+        try {
+            // copy文件流
+            byte[] byteArray = IOUtils.toByteArray(file.getInputStream());
+            // 初始化读取第一个sheet页的数据
+            DefaultAnalysisEventListener<DelOutboundBatchImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundBatchImportDto.class, 0, 1);
+            if (defaultAnalysisEventListener.isError()) {
+                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
+            }
+            List<DelOutboundBatchImportDto> dataList = defaultAnalysisEventListener.getList();
+            if (CollectionUtils.isEmpty(dataList)) {
+                return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
+            }
+            // 初始化读取第二个sheet页的数据
+            DefaultAnalysisEventListener<DelOutboundBatchDetailImportDto> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundBatchDetailImportDto.class, 1, 1);
+            if (defaultAnalysisEventListener1.isError()) {
+                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
+            }
+            List<DelOutboundBatchDetailImportDto> detailList = defaultAnalysisEventListener1.getList();
+            if (CollectionUtils.isEmpty(detailList)) {
+                return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据明细不能为空")));
+            }
+            // 出货渠道
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("079");
+            List<BasSubWrapperVO> shipmentChannelList = listMap.get("079");
+            // 查询国家数据
+            R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
+            List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
+            // 初始化导入上下文
+            DelOutboundBatchImportContext importContext = new DelOutboundBatchImportContext(dataList, countryList, shipmentChannelList);
+            // 初始化外联导入上下文
+            DelOutboundOuterContext outerContext = new DelOutboundOuterContext();
+            // 初始化导入验证容器
+            ImportResult importResult = new ImportValidationContainer<>(importContext, ImportValidation.build(new DelOutboundBatchImportValidation(outerContext, importContext))).valid();
+            // 验证导入验证结果
+            if (!importResult.isStatus()) {
+                return R.ok(importResult);
+            }
+            // 初始化SKU导入上下文
+            DelOutboundBatchDetailImportContext importContext1 = new DelOutboundBatchDetailImportContext(detailList);
+            // 初始化SKU导入验证容器
+            ImportResult importResult1 = new ImportValidationContainer<>(importContext1, ImportValidation.build(new DelOutboundBatchDetailImportValidation(outerContext, importContext1))).valid();
+            // 验证SKU导入验证结果
+            if (!importResult1.isStatus()) {
+                return R.ok(importResult1);
+            }
+            // 获取导入的数据
+            List<DelOutboundDto> dtoList = new DelOutboundBatchImportContainer(dataList, countryList, shipmentChannelList, detailList, sellerCode).get();
             // 批量新增
             this.delOutboundService.insertDelOutbounds(dtoList);
             // 返回成功的结果
