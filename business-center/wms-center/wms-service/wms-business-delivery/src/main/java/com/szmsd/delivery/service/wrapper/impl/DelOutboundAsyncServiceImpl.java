@@ -21,6 +21,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
@@ -211,6 +212,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         }
         // 订单完成
         if (DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())) {
+            return;
+        }
+        // 重派
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
             return;
         }
         // 获取到处理状态
@@ -529,6 +534,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         }
         // 订单取消
         if (DelOutboundStateEnum.CANCELLED.getCode().equals(delOutbound.getState())) {
+            return;
+        }
+        // 重派
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
             return;
         }
         // 获取到处理状态

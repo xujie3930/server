@@ -218,4 +218,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "产品详情返回的发货规则")
     private String productShipmentRule;
+
+    @ApiModelProperty(value = "重派")
+    private String reassignType;
 }

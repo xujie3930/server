@@ -1635,5 +1635,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO) {
         return baseMapper.queryFinishList(queryFinishListDTO);
     }
+
+    @Override
+    public DelOutboundAddResponse reassign(DelOutboundDto dto) {
+        if (!DelOutboundOrderTypeEnum.has(dto.getOrderType())) {
+            throw new CommonException("400", "订单类型不存在");
+        }
+        // 来源为新增
+        dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_ADD);
+        dto.setReassignType(DelOutboundConstant.REASSIGN_TYPE_Y);
+        return this.createDelOutbound(dto);
+    }
 }
 

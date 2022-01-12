@@ -121,6 +121,9 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "COD")
     private BigDecimal codAmount;
 
+    @ApiModelProperty(value = "重派")
+    private String reassignType;
+
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;

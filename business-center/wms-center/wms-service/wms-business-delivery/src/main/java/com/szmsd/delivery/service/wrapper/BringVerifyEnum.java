@@ -17,6 +17,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
@@ -591,6 +592,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if (DelOutboundServiceImplUtil.noOperationInventory(orderType)) {
                 return;
             }
+            // 重派出库单不扣库存
+            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                return;
+            }
             List<DelOutboundDetail> details = delOutboundWrapperContext.getDetailList();
             if (CollectionUtils.isEmpty(details)) {
                 return;
@@ -774,10 +779,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             // 推单到WMS
-            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
-            String refOrderNo = delOutboundBringVerifyService.shipmentCreate(delOutboundWrapperContext, delOutbound.getTrackingNo());
-            delOutbound.setRefOrderNo(refOrderNo);
-            DelOutboundOperationLogEnum.BRV_SHIPMENT_CREATE.listener(delOutbound);
+            // 重派出库单不扣库存
+            String refOrderNo = "";
+            if (!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+                refOrderNo = delOutboundBringVerifyService.shipmentCreate(delOutboundWrapperContext, delOutbound.getTrackingNo());
+                delOutbound.setRefOrderNo(refOrderNo);
+                DelOutboundOperationLogEnum.BRV_SHIPMENT_CREATE.listener(delOutbound);
+            }
             // 保存信息
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
