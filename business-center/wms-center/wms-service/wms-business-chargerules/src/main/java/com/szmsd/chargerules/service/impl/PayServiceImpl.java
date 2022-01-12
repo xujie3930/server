@@ -64,6 +64,7 @@ public class PayServiceImpl implements IPayService {
 
     @Override
     public R freezeBalance(CusFreezeBalanceDTO dto, ChargeLog chargeLog) {
+        log.info("【执行】 - 5 freezeBalance ---------------------------- {}", dto);
         // 如果该单有冻结额则直接返回
         ChargeLogDto chargeLogDto = new ChargeLogDto();
         chargeLogDto.setOrderNo(dto.getNo());

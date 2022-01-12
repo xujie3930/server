@@ -76,6 +76,7 @@ public class OperationServiceImpl implements IOperationService {
     @Transactional
     @Override
     public R<?> delOutboundFreeze(DelOutboundOperationVO dto) {
+        log.info("【执行】 - 1 delOutboundFreeze---------------------------- {}", dto);
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
         if (CollectionUtils.isEmpty(details) && !"Freight".equals(dto.getOrderType())) {
             log.error("calculate() 出库单的详情信息为空");
@@ -83,21 +84,26 @@ public class OperationServiceImpl implements IOperationService {
         }
         BigDecimal amount = BigDecimal.ZERO;
         if (dto.getOrderType().equals(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode())) {
+            log.info("【执行】 - 2 frozenFeesForWarehousing---------------------------- {}", dto);
             return frozenFeesForWarehousing(dto, amount);
         }
 
         if (dto.getOrderType().equals(DelOutboundOrderEnum.COLLECTION.getCode())) {
+            log.info("【执行】 - 2 chargeCollection---------------------------- {}", dto);
             return chargeCollection(dto, details);
         }
 
         if (dto.getOrderType().equals(DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode())) {
+            log.info("【执行】 - 2 packageTransfer---------------------------- {}", dto);
             return packageTransfer(dto, amount);
         }
 
         if (dto.getOrderType().equals(DelOutboundOrderEnum.BATCH.getCode())) {
+            log.info("【执行】 - 2 chargeBatch---------------------------- {}", dto);
             return chargeBatch(dto, details);
         }
 
+        log.info("【执行】 - 2 calculateFreeze---------------------------- {}", dto);
         return this.calculateFreeze(dto, details, amount);
 
     }
@@ -139,6 +145,7 @@ public class OperationServiceImpl implements IOperationService {
         BaseProductBatchQueryDto baseProductBatchQueryDto = new BaseProductBatchQueryDto();
         baseProductBatchQueryDto.setSellerCode(dto.getCustomCode());
         baseProductBatchQueryDto.setCodes(skuList);
+        log.info("【执行】 - 3 frozenFeesForWarehousing - batchSKU ---------------------------- {}", dto);
         R<List<BaseProductMeasureDto>> listR = baseProductFeignService.batchSKU(baseProductBatchQueryDto);
         List<BaseProductMeasureDto> dataAndException = R.getDataAndException(listR);
         Map<String, Double> skuWeightMap = dataAndException.stream().collect(Collectors.toMap(BaseProductMeasureDto::getCode, BaseProductMeasureDto::getWeight));
@@ -167,6 +174,7 @@ public class OperationServiceImpl implements IOperationService {
      * @return result
      */
     private R calculateFreeze(DelOutboundOperationVO dto, List<DelOutboundOperationDetailVO> details, BigDecimal amount) {
+        log.info("【执行】 - 3 calculateFreeze---------------------------- {}", dto);
         Long qty;
         Long count = details.stream().mapToLong(DelOutboundOperationDetailVO::getQty).sum();
         OperationRuleVO operation = new OperationRuleVO();
@@ -174,10 +182,11 @@ public class OperationServiceImpl implements IOperationService {
         BaseProductBatchQueryDto baseProductBatchQueryDto = new BaseProductBatchQueryDto();
         baseProductBatchQueryDto.setSellerCode(dto.getCustomCode());
         baseProductBatchQueryDto.setCodes(skuList);
+        log.info("【执行】 - 3 calculateFreeze - 查sku ---------------------------- {}", dto);
         R<List<BaseProductMeasureDto>> listR = baseProductFeignService.batchSKU(baseProductBatchQueryDto);
         List<BaseProductMeasureDto> dataAndException = R.getDataAndException(listR);
         Map<String, Double> skuWeightMap = dataAndException.stream().collect(Collectors.toMap(BaseProductMeasureDto::getCode, BaseProductMeasureDto::getWeight));
-
+        log.info("【执行】 - 3 calculateFreeze - 找规则 ---------------------------- {}", dto);
         for (DelOutboundOperationDetailVO vo : details) {
             double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00);
             operation = getOperationDetails(dto, weight, "未找到" + DelOutboundOrderEnum.getName(dto.getOrderType()) + "业务费用规则，请联系管理员");
@@ -190,6 +199,7 @@ public class OperationServiceImpl implements IOperationService {
             amount = amount.multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
+        log.info("【执行】 - 3 calculateFreeze - 计算扣费 ---------------------------- {}", dto);
         return this.freezeBalance(dto, count, amount, operation);
     }
 
@@ -289,6 +299,7 @@ public class OperationServiceImpl implements IOperationService {
     }
 
     private R freezeBalance(DelOutboundOperationVO dto, Long count, BigDecimal amount, OperationRuleVO operation) {
+        log.info("【执行】 - 4 freezeBalance ---------------------------- {}", dto);
         ChargeLog chargeLog = setChargeLog(dto, count);
         chargeLog.setHasFreeze(true);
         CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO(dto.getCustomCode(), operation.getCurrencyCode(), dto.getOrderNo(), dto.getOrderType(), amount);
