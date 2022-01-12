@@ -265,6 +265,7 @@ public class ExceptionInfoController extends BaseController {
                                 if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
                                     successSize.incrementAndGet();
                                 } else {
+                                    errorList.add("第" + (finalI + 1) + "行，" + dto.getExceptionNo() + "操作失败，不符合条件");
                                     failSize.incrementAndGet();
                                 }
                             } catch (Exception e) {
@@ -312,6 +313,7 @@ public class ExceptionInfoController extends BaseController {
                             if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
                                 successSize.incrementAndGet();
                             } else {
+                                errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "操作失败，不符合条件");
                                 failSize.incrementAndGet();
                             }
                         } catch (Exception e) {
