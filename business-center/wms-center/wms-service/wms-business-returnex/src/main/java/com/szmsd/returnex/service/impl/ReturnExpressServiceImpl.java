@@ -54,6 +54,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -274,7 +277,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 if (CollectionUtils.isNotEmpty(rows)) {
                     DelOutboundListVO delOutboundListVO = rows.get(0);
                     boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.COMPLETED.getCode());
-                    AssertUtil.isTrue(equals, "该原出库单号未完成/不存在!");
+                    AssertUtil.isTrue(equals, "该原出库单号" + returnExpressAddDTO.getFromOrderNo() + "未完成/不存在!");
                     if (StringUtils.isBlank(returnExpressAddDTO.getSellerCode()))
                         returnExpressAddDTO.setSellerCode(delOutboundListVO.getCustomCode());
                     if (StringUtils.isBlank(returnExpressAddDTO.getScanCode()))
@@ -707,6 +710,22 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
             AtomicInteger index = new AtomicInteger(1);
             List<CompletableFuture<String>> futureList = new ArrayList<>();
+            Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+            List<String> errorMsgList = new ArrayList<>();
+
+            for (int i = 0; i < basPackingAddList.size(); i++) {
+                Set<ConstraintViolation<ReturnExpressServiceAddDTO>> set = validator.validate(basPackingAddList.get(i));
+                StringBuilder errorMsg = new StringBuilder();
+                for (ConstraintViolation<ReturnExpressServiceAddDTO> constraintViolation : set) {
+                    errorMsg.append(constraintViolation.getMessage());
+                }
+                if (StringUtils.isNotBlank(errorMsg.toString())) {
+                    errorMsgList.add(String.format("请检查第%s条数据:参数校验异常：%s", i, errorMsg.toString()));
+                }
+            }
+            if (CollectionUtils.isNotEmpty(errorMsgList)) {
+                throw new RuntimeException(String.join("\n", errorMsgList));
+            }
             basPackingAddList.forEach(x -> {
                 int indexThis = index.getAndIncrement();
 
@@ -735,4 +754,5 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             e.printStackTrace();
         }
     }
+
 }

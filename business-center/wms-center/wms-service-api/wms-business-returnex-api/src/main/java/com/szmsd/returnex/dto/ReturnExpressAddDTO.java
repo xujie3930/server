@@ -76,7 +76,7 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "退货渠道", example = "客户自选")
     private String returnChannel;
     @ExcelIgnore
-    @NotBlank(message = "退货Tracking号(原跟踪号)不能为空")
+//    @NotBlank(message = "退货Tracking号(原跟踪号)不能为空")
     @ApiModelProperty(value = "退货Tracking号 原跟踪号", example = "TID123456", required = true)
     private String scanCode;
 
