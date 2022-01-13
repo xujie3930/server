@@ -19,7 +19,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Arrays;
 
 /**
  * 汇率转换
@@ -61,21 +60,20 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
                 // 计算还款额，并销账（还账单）
                 beforeAdd.rechargeAndSetAmount(addAmount);
-                super.addForCreditBill(beforeAdd.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode2());
+                super.addForCreditBillAsync(beforeAdd.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode2());
 
-                BalanceDTO afterAdd = beforeAdd;
-                setBalance(dto.getCusCode(), dto.getCurrencyCode2(), afterAdd);
-                setSerialBillLog(dto, accountBalanceChange);
+                setBalance(dto.getCusCode(), dto.getCurrencyCode2(), beforeAdd);
+                setSerialBillLogAsync(dto, accountBalanceChange);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
                 dto.setAmount(addAmount);
                 dto.setCurrencyCode(dto.getCurrencyCode2());
                 dto.setCurrencyName(dto.getCurrencyName2());
-                AccountBalanceChange afterBalanceChange = recordOpLog(dto, afterAdd.getCurrentBalance());
+                AccountBalanceChange afterBalanceChange = recordOpLog(dto, beforeAdd.getCurrentBalance());
                 //设置流水账单
                 dto.setCurrencyCode(accountBalanceChange.getCurrencyCode());
                 dto.setCurrencyName(accountBalanceChange.getCurrencyName());
-                setSerialBillLog(dto, afterBalanceChange);
-                recordDetailLog(dto, beforeSubtract);
+                setSerialBillLogAsync(dto, afterBalanceChange);
+                recordDetailLogAsync(dto, beforeSubtract);
                 //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
             } else {
@@ -112,18 +110,20 @@ public class ExchangePayFactory extends AbstractPayFactory {
         return oldBalance;
     }
 
-    public void setSerialBillLog(CustPayDTO dto, AccountBalanceChange accountBalanceChange) {
-        AccountSerialBillDTO serialBill = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
-        serialBill.setCurrencyCode(accountBalanceChange.getCurrencyCode());
-        serialBill.setCurrencyName(accountBalanceChange.getCurrencyName());
-        serialBill.setAmount(accountBalanceChange.getAmountChange());
-        serialBill.setChargeCategory(dto.getCurrencyName().concat("转").concat(dto.getCurrencyName2()));
-        serialBill.setChargeType(dto.getPayMethod().getPaymentName());
-        serialBill.setBusinessCategory(BillEnum.PayMethod.BALANCE_EXCHANGE.getPaymentName());
-        serialBill.setProductCategory(serialBill.getProductCategory());
-        serialBill.setRemark("汇率为: ".concat(dto.getRate().toString()));
-        serialBill.setNo(accountBalanceChange.getSerialNum());
-        accountSerialBillService.add(serialBill);
+    public void setSerialBillLogAsync(CustPayDTO dto, AccountBalanceChange accountBalanceChange) {
+        financeThreadTaskPool.execute(() -> {
+            AccountSerialBillDTO serialBill = BeanMapperUtil.map(dto, AccountSerialBillDTO.class);
+            serialBill.setCurrencyCode(accountBalanceChange.getCurrencyCode());
+            serialBill.setCurrencyName(accountBalanceChange.getCurrencyName());
+            serialBill.setAmount(accountBalanceChange.getAmountChange());
+            serialBill.setChargeCategory(dto.getCurrencyName().concat("转").concat(dto.getCurrencyName2()));
+            serialBill.setChargeType(dto.getPayMethod().getPaymentName());
+            serialBill.setBusinessCategory(BillEnum.PayMethod.BALANCE_EXCHANGE.getPaymentName());
+            serialBill.setProductCategory(serialBill.getProductCategory());
+            serialBill.setRemark("汇率为: ".concat(dto.getRate().toString()));
+            serialBill.setNo(accountBalanceChange.getSerialNum());
+            accountSerialBillService.add(serialBill);
+        });
     }
 
 }
