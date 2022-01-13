@@ -1,7 +1,6 @@
 package com.szmsd.finance.factory;
 
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -11,7 +10,6 @@ import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
-import com.szmsd.finance.service.IDeductionRecordService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -21,7 +19,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -55,11 +52,11 @@ public class IncomePayFactory extends AbstractPayFactory {
                 }
                 // BalanceDTO result = calculateBalance(oldBalance, changeAmount);
                 oldBalance.rechargeAndSetAmount(changeAmount);
-                super.addForCreditBill(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
+                super.addForCreditBillAsync(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
-                recordOpLog(dto, oldBalance.getCurrentBalance());
+                recordOpLogAsync(dto, oldBalance.getCurrentBalance());
                 setSerialBillLog(dto);
-                recordDetailLog(dto, oldBalance);
+                recordDetailLogAsync(dto, oldBalance);
                 //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
             } else {

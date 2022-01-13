@@ -74,7 +74,9 @@ public class OperationController extends BaseController {
         String lockKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
         String className = Thread.currentThread().getStackTrace()[2].getClassName();
         String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
-        return className + methodName + "#" + lockKey;
+        String redisKey = className + methodName + "#" + lockKey;
+        log.info("【请求 genKey】() {}", redisKey);
+        return redisKey;
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:add')")
@@ -161,6 +163,7 @@ public class OperationController extends BaseController {
         RLock lock = redissonClient.getLock(genKey());
         try {
             if (lock.tryLock(OperationConstant.LOCK_TIME, OperationConstant.LOCK_TIME_UNIT)) {
+                log.info("【执行】delOutboundFreeze---------------------------- {}", delOutboundVO);
                 return operationService.delOutboundFreeze(delOutboundVO);
             } else {
                 return R.failed("请求超时");
@@ -183,6 +186,7 @@ public class OperationController extends BaseController {
         RLock lock = redissonClient.getLock(genKey());
         try {
             if (lock.tryLock(OperationConstant.LOCK_TIME, OperationConstant.LOCK_TIME_UNIT)) {
+                log.info("【执行】delOutboundThaw---------------------------- {}", delOutboundVO);
                 return operationService.delOutboundThaw(delOutboundVO);
             } else {
                 return R.failed("请求超时");
@@ -205,6 +209,7 @@ public class OperationController extends BaseController {
         RLock lock = redissonClient.getLock(genKey());
         try {
             if (lock.tryLock(OperationConstant.LOCK_TIME, OperationConstant.LOCK_TIME_UNIT)) {
+                log.info("【执行】delOutboundDeductions---------------------------- {}", delOutboundVO);
                 return operationService.delOutboundDeductions(delOutboundVO);
             } else {
                 return R.failed("请求超时");

@@ -195,6 +195,7 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
         Long id = chaOperationVO.getId();
         List<ChaOperationDetailsVO> chaOperationDetailsVOList = iChaOperationDetailsService.queryDetailByOpeId(id);
         chaOperationVO.setChaOperationDetailList(chaOperationDetailsVOList);
+        log.info("查询用户规则信息：{}", queryDTO);
         return chaOperationVO;
     }
 

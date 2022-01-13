@@ -51,8 +51,8 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
                 }
 
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
-                recordOpLog(dto, oldBalance.getCurrentBalance());
-                recordDetailLog(dto, oldBalance);
+                recordOpLogAsync(dto, oldBalance.getCurrentBalance());
+                recordDetailLogAsync(dto, oldBalance);
                 setSerialBillLog(dto);
                 return true;
             } else {

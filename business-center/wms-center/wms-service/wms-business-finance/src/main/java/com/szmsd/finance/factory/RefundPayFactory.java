@@ -2,13 +2,11 @@ package com.szmsd.finance.factory;
 
 import cn.hutool.core.date.StopWatch;
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
@@ -16,14 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -61,7 +57,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                 if (changeAmount.compareTo(BigDecimal.ZERO) >= 0) {
                     // 充值
                     success = oldBalance.rechargeAndSetAmount(changeAmount);
-                    super.addForCreditBill(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
+                    super.addForCreditBillAsync(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
                 } else {
                     // 退费强制扣钱
                     success = oldBalance.payAnyWay(changeAmount.negate());
@@ -73,8 +69,8 @@ public class RefundPayFactory extends AbstractPayFactory {
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result, true);
                 stopWatch.stop();
                 stopWatch.start("记录日志");
-                recordOpLog(dto, result.getCurrentBalance());
-                recordDetailLog(dto, oldBalance);
+                recordOpLogAsync(dto, result.getCurrentBalance());
+                recordDetailLogAsync(dto, oldBalance);
                 setSerialBillLog(dto);
                 //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 log.info("处理退费完成:{}", stopWatch.prettyPrint());
@@ -113,7 +109,7 @@ public class RefundPayFactory extends AbstractPayFactory {
 
     @Override
     public void setSerialBillLog(CustPayDTO dto) {
-        financeThreadTaskPool.submit(() -> {
+        financeThreadTaskPool.execute(() -> {
             log.info("setSerialBillLog {}", JSONObject.toJSONString(dto));
             List<AccountSerialBillDTO> serialBillInfoList = dto.getSerialBillInfoList();
             AccountSerialBillDTO serialBill = serialBillInfoList.get(0);
