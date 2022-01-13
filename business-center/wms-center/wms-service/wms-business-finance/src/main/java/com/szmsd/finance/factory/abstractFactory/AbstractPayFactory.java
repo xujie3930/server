@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Resource;
@@ -59,22 +58,25 @@ public abstract class AbstractPayFactory {
      */
     public abstract Boolean updateBalance(CustPayDTO dto);
 
+
+    public void recordOpLogAsync(CustPayDTO dto, BigDecimal result) {
+        financeThreadTaskPool.execute(()-> this.recordOpLog(dto, result));
+    }
+
     public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
         AccountBalanceChange accountBalanceChange = new AccountBalanceChange();
         log.info("recordOpLog{}-{}", JSONObject.toJSONString(dto), result);
-        financeThreadTaskPool.submit(() -> {
-            BeanUtils.copyProperties(dto, accountBalanceChange);
-            if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
-                String currencyName = sysDictDataService.getCurrencyNameByCode(accountBalanceChange.getCurrencyCode());
-                accountBalanceChange.setCurrencyName(currencyName);
-                dto.setCurrencyName(currencyName);
-            }
+        BeanUtils.copyProperties(dto, accountBalanceChange);
+        if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
+            String currencyName = sysDictDataService.getCurrencyNameByCode(accountBalanceChange.getCurrencyCode());
+            accountBalanceChange.setCurrencyName(currencyName);
+            dto.setCurrencyName(currencyName);
+        }
 
-            accountBalanceChange.setSerialNum(SnowflakeId.getNextId12());
-            setOpLogAmount(accountBalanceChange, dto.getAmount());
-            accountBalanceChange.setCurrentBalance(result);
-            accountBalanceChangeMapper.insert(accountBalanceChange);
-        });
+        accountBalanceChange.setSerialNum(SnowflakeId.getNextId12());
+        setOpLogAmount(accountBalanceChange, dto.getAmount());
+        accountBalanceChange.setCurrentBalance(result);
+        accountBalanceChangeMapper.insert(accountBalanceChange);
         return accountBalanceChange;
     }
 
@@ -84,8 +86,8 @@ public abstract class AbstractPayFactory {
      * @param custPayDTO
      * @param balanceDTO
      */
-    public void recordDetailLog(CustPayDTO custPayDTO, BalanceDTO balanceDTO) {
-        financeThreadTaskPool.submit(() -> {
+    public void recordDetailLogAsync(CustPayDTO custPayDTO, BalanceDTO balanceDTO) {
+        financeThreadTaskPool.execute(() -> {
             log.info("添加详细使用记录传参custPayDTO: {} {}", JSONObject.toJSONString(custPayDTO), JSONObject.toJSONString(balanceDTO));
             FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
             CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
@@ -186,7 +188,7 @@ public abstract class AbstractPayFactory {
         accountSerialBillService.saveBatch(collect);
     }
 
-    protected void addForCreditBill(BigDecimal addMoney, String cusCode, String currencyCode) {
+    protected void addForCreditBillAsync(BigDecimal addMoney, String cusCode, String currencyCode) {
         if (addMoney.compareTo(BigDecimal.ZERO) <= 0) return;
         financeThreadTaskPool.submit(() -> iDeductionRecordService.addForCreditBill(addMoney, cusCode, currencyCode));
 

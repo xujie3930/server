@@ -58,8 +58,8 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                     return false;
                 }
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), balance);
-                recordOpLog(dto, balance.getCurrentBalance());
-                recordDetailLog(dto, balance);
+                recordOpLogAsync(dto, balance.getCurrentBalance());
+                recordDetailLogAsync(dto, balance);
                 return true;
             } else {
                 log.error("冻结/解冻操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
