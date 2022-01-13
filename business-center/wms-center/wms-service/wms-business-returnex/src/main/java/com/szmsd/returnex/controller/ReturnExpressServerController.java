@@ -101,4 +101,18 @@ public class ReturnExpressServerController extends BaseController {
     public R add(@Validated @RequestBody ReturnExpressServiceAddDTO returnExpressAddDTO) {
         return toOk(returnExpressService.insertReturnExpressDetail(returnExpressAddDTO));
     }
+
+    /**
+     * 更新退件单信息
+     *
+     * @param expressUpdateDTO 更新条件
+     * @return 返回结果
+     */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @PostMapping("/update")
+    @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "更新退件单信息 指定sku的处理方式")
+    public R update(@Validated @RequestBody ReturnExpressServiceAddDTO expressUpdateDTO) {
+        return toOk(returnExpressService.updateExpressInfo(expressUpdateDTO));
+    }
 }

@@ -321,8 +321,14 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Transactional(rollbackFor = Exception.class)
     public int saveReturnExpressDetail(ReturnExpressDetail returnExpressDetail) {
-        returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWmsWaitReceive());
-        returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWmsWaitReceiveStr());
+        //OMS 创建客户待处理
+        if (configStatus.getReturnSource().getOmsReturn().equals(returnExpressDetail.getReturnSource())) {
+            returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWaitCustomerDeal());
+            returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWaitCustomerDealStr());
+        } else {
+            returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWmsWaitReceive());
+            returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWmsWaitReceiveStr());
+        }
         return returnExpressMapper.insert(returnExpressDetail);
     }
 
@@ -514,13 +520,18 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         checkBeforeUpdate(expressUpdateDTO);
         String dealStatus;
         String dealStatusStr;
-        if (expressUpdateDTO.getProcessType().equals(configStatus.getUnpackingInspection())) {
-            dealStatus = configStatus.getDealStatus().getWmsWaitReceive();
-            dealStatusStr = configStatus.getDealStatus().getWmsWaitReceiveStr();
+        if (!expressUpdateDTO.getReturnSource().equals(configStatus.getReturnSource().getOmsReturn())) {
+            dealStatus = configStatus.getDealStatus().getWmsFinish();
+            dealStatusStr = configStatus.getDealStatus().getWmsFinishStr();
         } else {
-            // 处理完后状态
-            dealStatus = configStatus.getDealStatus().getWmsReceivedDealWay();
-            dealStatusStr = configStatus.getDealStatus().getWmsReceivedDealWayStr();
+            if (expressUpdateDTO.getProcessType().equals(configStatus.getUnpackingInspection())) {
+                dealStatus = configStatus.getDealStatus().getWmsWaitReceive();
+                dealStatusStr = configStatus.getDealStatus().getWmsWaitReceiveStr();
+            } else {
+                // 处理完后状态
+                dealStatus = configStatus.getDealStatus().getWmsReceivedDealWay();
+                dealStatusStr = configStatus.getDealStatus().getWmsReceivedDealWayStr();
+            }
         }
 
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
@@ -536,13 +547,14 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .last("LIMIT 1")
         );
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
-        List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
-        returnExpressGoodService.addOrUpdateGoodInfoBatch(details, expressUpdateDTO.getId());
-        //上架处理校验是否属于该用户的sku
-        checkSku(expressUpdateDTO);
-        //处理结果推送WMS
-        pushSkuDetailsToWMS(expressUpdateDTO, details);
-
+        if (!expressUpdateDTO.getReturnSource().equals(configStatus.getReturnSource().getOmsReturn())) {
+            List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
+            returnExpressGoodService.addOrUpdateGoodInfoBatch(details, expressUpdateDTO.getId());
+            //上架处理校验是否属于该用户的sku
+            checkSku(expressUpdateDTO);
+            //处理结果推送WMS
+            pushSkuDetailsToWMS(expressUpdateDTO, details);
+        }
         return update;
     }
 
