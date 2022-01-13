@@ -1,10 +1,24 @@
 package com.szmsd.returnex.controller;
 
+import cn.hutool.core.thread.NamedThreadFactory;
+import cn.hutool.http.server.HttpServerRequest;
+import cn.hutool.http.server.HttpServerResponse;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.event.SyncReadListener;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.common.plugin.HandlerContext;
+import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.finance.dto.RefundRequestDTO;
+import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.returnex.dto.ReturnExpressAddDTO;
 import com.szmsd.returnex.dto.ReturnExpressAssignDTO;
 import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
@@ -14,11 +28,26 @@ import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * @ClassName: ReturnExpressServerController
@@ -41,6 +70,7 @@ public class ReturnExpressServerController extends BaseController {
      * @return 返回结果
      */
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
+    @AutoValue
     @GetMapping("/page")
     @ApiOperation(value = "退件单列表 - 分页")
     public TableDataInfo<ReturnExpressListVO> page(@Validated ReturnExpressListQueryDTO queryDto) {
@@ -54,6 +84,7 @@ public class ReturnExpressServerController extends BaseController {
      * @param queryDto 查询条件
      * @return 返回结果
      */
+    @AutoValue
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
     @GetMapping("/noUserBind/page")
     @ApiOperation(value = "无名件管理列表 - 分页")
@@ -78,6 +109,7 @@ public class ReturnExpressServerController extends BaseController {
 
     /**
      * 获取退件单信息详情
+     *
      * @param id
      * @return
      */
@@ -114,5 +146,69 @@ public class ReturnExpressServerController extends BaseController {
     @ApiOperation(value = "更新退件单信息 指定sku的处理方式")
     public R update(@Validated @RequestBody ReturnExpressServiceAddDTO expressUpdateDTO) {
         return toOk(returnExpressService.updateExpressInfo(expressUpdateDTO));
+    }
+
+
+    /**
+     * 更新退件单信息
+     *
+     * @param expressUpdateDTO 更新条件
+     * @return 返回结果
+     */
+    @AutoValue
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @PostMapping("/export")
+    @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "导出")
+    public void export(HttpServletResponse httpServerResponse, @Validated ReturnExpressListQueryDTO queryDto) {
+        List<ReturnExpressListVO> list = returnExpressService.selectReturnOrderList(queryDto);
+        HandlerContext<List<ReturnExpressListVO>> objectHandlerContext = new HandlerContext<>(list);
+        objectHandlerContext.handlerValue();
+        ExcelUtil<ReturnExpressListVO> util = new ExcelUtil<>(ReturnExpressListVO.class);
+        util.exportExcel(httpServerResponse, list, "退货记录-" + LocalDate.now());
+    }
+
+    /**
+     * 更新退件单信息
+     *
+     * @param expressUpdateDTO 更新条件
+     * @return 返回结果
+     */
+    @AutoValue
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @PostMapping("/exportTemplate")
+    @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "导出模板")
+    public void exportTemplate(HttpServletResponse response) {
+        ClassPathResource classPathResource = new ClassPathResource("/template/退货申请模板.xlsx");
+        try (InputStream inputStream = classPathResource.getInputStream();
+             ServletOutputStream outputStream = response.getOutputStream()) {
+
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setCharacterEncoding("UTF-8");
+            String excelName = URLEncoder.encode("退货申请模板", "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + excelName + ".xls");
+            IOUtils.copy(inputStream, outputStream);
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ExcelUtil<ReturnExpressServiceAddDTO> util = new ExcelUtil<>(ReturnExpressServiceAddDTO.class);
+        util.exportExcel(response, new ArrayList<>(), "退货记录-" + LocalDate.now());
+    }
+
+    /**
+     * 更新退件单信息
+     *
+     * @param expressUpdateDTO 更新条件
+     * @return 返回结果
+     */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @PostMapping("/importByTemplate")
+    @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "导入")
+    public R<String> importByTemplate(MultipartFile multipartFile) {
+        returnExpressService.importByTemplate(multipartFile);
+        return R.ok();
     }
 }

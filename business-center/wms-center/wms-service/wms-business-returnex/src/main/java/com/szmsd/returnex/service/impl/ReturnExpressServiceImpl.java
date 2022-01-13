@@ -1,5 +1,7 @@
 package com.szmsd.returnex.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -45,14 +47,22 @@ import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -223,7 +233,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Override
     @Transactional(rollbackFor = Exception.class)
     public <T extends ReturnExpressAddDTO> int insertReturnExpressDetail(T returnExpressAddDTO) {
-        returnExpressAddDTO.setSellerCode(getSellCode());
+        if (StringUtils.isBlank(returnExpressAddDTO.getSellerCode()))
+            returnExpressAddDTO.setSellerCode(getSellCode());
         checkSubmit(returnExpressAddDTO);
         if (StringUtils.isBlank(returnExpressAddDTO.getExpectedNo())) {
             String expectedNo = createExpectedNo();
@@ -264,6 +275,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     DelOutboundListVO delOutboundListVO = rows.get(0);
                     boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.COMPLETED.getCode());
                     AssertUtil.isTrue(equals, "该原出库单号未完成/不存在!");
+                    if (StringUtils.isBlank(returnExpressAddDTO.getSellerCode()))
+                        returnExpressAddDTO.setSellerCode(delOutboundListVO.getCustomCode());
+                    if (StringUtils.isBlank(returnExpressAddDTO.getScanCode()))
+                        returnExpressAddDTO.setScanCode(delOutboundListVO.getTrackingNo());
                 } else {
                     throw new BaseException("该原出库单号不存在!");
                 }
@@ -520,7 +535,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         checkBeforeUpdate(expressUpdateDTO);
         String dealStatus;
         String dealStatusStr;
-        if (!expressUpdateDTO.getReturnSource().equals(configStatus.getReturnSource().getOmsReturn())) {
+        if (expressUpdateDTO.getReturnSource().equals(configStatus.getReturnSource().getOmsReturn())) {
             dealStatus = configStatus.getDealStatus().getWmsFinish();
             dealStatusStr = configStatus.getDealStatus().getWmsFinishStr();
         } else {
@@ -680,5 +695,44 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         ReturnExpressVO returnExpressVO = returnExpressDetail.convertThis(ReturnExpressVO.class);
         returnExpressVO.setGoodList(returnExpressGoodService.queryGoodListByExId(returnExpressVO.getId()));
         return returnExpressVO;
+    }
+
+    @Override
+    public void importByTemplate(MultipartFile multipartFile) {
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            List<ReturnExpressServiceAddDTO> basPackingAddList = EasyExcel.read(inputStream, ReturnExpressServiceAddDTO.class, new SyncReadListener()).sheet().doReadSync();
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            AtomicInteger index = new AtomicInteger(1);
+            List<CompletableFuture<String>> futureList = new ArrayList<>();
+            basPackingAddList.forEach(x -> {
+                int indexThis = index.getAndIncrement();
+
+                CompletableFuture<String> errorMsgCompletable = CompletableFuture.supplyAsync(() -> {
+                    StringBuilder errorMsg = new StringBuilder();
+                    try {
+                        x.setReturnSource(configStatus.getReturnSource().getOmsReturn());
+                        x.setReturnSourceStr(configStatus.getReturnSource().getOmsReturnStr());
+                        // 补充参数
+                        this.insertReturnExpressDetail(x);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        errorMsg.append("第").append(indexThis).append("行业务异常：").append(e.getMessage()).append(";\n");
+                    }
+                    return errorMsg.toString();
+                });
+                futureList.add(errorMsgCompletable);
+            });
+            CompletableFuture<Void> voidCompletableFuture = CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
+            Void unused = voidCompletableFuture.get();
+            String errorMsg = futureList.stream().map(CompletableFuture::join).collect(Collectors.joining());
+            AssertUtil.isTrue(StringUtils.isBlank(errorMsg), errorMsg);
+        } catch (IOException e) {
+            throw new RuntimeException("文件读取异常");
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 }

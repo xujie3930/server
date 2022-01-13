@@ -5,6 +5,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.returnex.dto.ReturnExpressAddDTO;
 import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
 import com.szmsd.returnex.service.IReturnExpressService;
@@ -68,6 +69,7 @@ public class ReturnExpressClientController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
     @GetMapping("/page")
+    @AutoValue
     @ApiOperation(value = "退件单列表 - 分页")
     public TableDataInfo<ReturnExpressListVO> page(@Validated ReturnExpressListQueryDTO queryDto) {
         startPage();
