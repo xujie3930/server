@@ -29,6 +29,14 @@
             <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>szmsd-common-plugin-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.szmsd</groupId>
+            <artifactId>business-basic-plugin</artifactId>
+        </dependency>
 
     </dependencies>
 </project>
