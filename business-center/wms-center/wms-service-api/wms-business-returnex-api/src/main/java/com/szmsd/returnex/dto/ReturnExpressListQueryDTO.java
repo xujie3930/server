@@ -107,6 +107,10 @@ public class ReturnExpressListQueryDTO extends PageDomain {
     @Excel(name = "退件单号")
     private String fromOrderNo;
 
+    @ApiModelProperty(value = "状态")
+    @Excel(name = "状态")
+    private String dealStatus;
+
     public void setFromOrderNo(String fromOrderNo) {
         this.fromOrderNo = fromOrderNo;
         Optional.ofNullable(fromOrderNo).filter(StringUtil::isNotBlank)
