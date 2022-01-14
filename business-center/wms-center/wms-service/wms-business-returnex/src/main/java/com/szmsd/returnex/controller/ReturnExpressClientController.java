@@ -8,6 +8,7 @@ import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.returnex.dto.ReturnExpressAddDTO;
 import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
+import com.szmsd.returnex.dto.ReturnExpressServiceAddDTO;
 import com.szmsd.returnex.service.IReturnExpressService;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
@@ -87,7 +88,7 @@ public class ReturnExpressClientController extends BaseController {
     @PostMapping("/update")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "更新退件单信息 指定sku的处理方式")
-    public R update(@Validated @RequestBody ReturnExpressAddDTO expressUpdateDTO) {
+    public R update(@Validated @RequestBody ReturnExpressServiceAddDTO expressUpdateDTO) {
         return toOk(returnExpressService.updateExpressInfo(expressUpdateDTO));
     }
 
