@@ -48,7 +48,7 @@ public class ReturnExpressServiceAddDTO extends ReturnExpressAddDTO {
     @ApiModelProperty(value = "处理时间")
     @ExcelIgnore
     @Excel(name = "处理时间")
-    private String processTime;
+    private Date processTime;
     @ExcelProperty(value = "仓库备注", index = 3)
     @ApiModelProperty(value = "仓库备注")
     private String remark;
