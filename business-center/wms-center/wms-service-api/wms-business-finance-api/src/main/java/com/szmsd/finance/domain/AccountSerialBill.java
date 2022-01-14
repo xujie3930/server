@@ -50,7 +50,7 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "发生额")
     @Excel(name = "发生额")
     private BigDecimal amount;
-//    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
+    //    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "仓库代码")
     private String warehouseCode;
     @AutoFieldI18n
@@ -83,12 +83,12 @@ public class AccountSerialBill extends FssBaseEntity {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "下单时间")
-    @Excel(name = "下单时间")
+    @Excel(name = "下单时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date orderTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "结算时间")
-    @Excel(name = "结算时间")
+    @Excel(name = "结算时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
 
 }
