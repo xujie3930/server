@@ -254,7 +254,7 @@ public class DelOutboundTimer {
     }
 
     public void handleBringVerify(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncBringVerify(orderNo, id), 150);
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncBringVerify(orderNo, id), 100);
     }
 
     public void handleShipmentPacking(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
