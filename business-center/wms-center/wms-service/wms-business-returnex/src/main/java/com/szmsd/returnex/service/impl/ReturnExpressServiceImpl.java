@@ -720,7 +720,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     errorMsg.append(constraintViolation.getMessage());
                 }
                 if (StringUtils.isNotBlank(errorMsg.toString())) {
-                    errorMsgList.add(String.format("请检查第%s条数据:参数校验异常：%s", i, errorMsg.toString()));
+                    errorMsgList.add(String.format("请检查第%s条数据:参数校验异常：%s", i+1, errorMsg.toString()));
                 }
             }
             if (CollectionUtils.isNotEmpty(errorMsgList)) {

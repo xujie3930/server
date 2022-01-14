@@ -55,6 +55,9 @@
             <if test="cm.returnSource != null and cm.returnSource != '' ">
                 and return_source = #{cm.returnSource}
             </if>
+            <if test="cm.dealStatus != null and cm.dealStatus != '' ">
+                and deal_status = #{cm.dealStatus}
+            </if>
             <if test="cm.processType != null and cm.processType != '' ">
                 and process_type = #{cm.processType}
             </if>
@@ -92,6 +95,12 @@
             <if test="cm.returnNoList != null and cm.returnNoList.size() >0 ">
                 and return_no in
                 <foreach collection="cm.returnNoList" open="(" close=")" separator="," item="rno">
+                    #{rno}
+                </foreach>
+            </if>
+            <if test="cm.fromOrderNoList != null and cm.fromOrderNoList.size() >0 ">
+                and from_order_no in
+                <foreach collection="cm.fromOrderNoList" open="(" close=")" separator="," item="rno">
                     #{rno}
                 </foreach>
             </if>
