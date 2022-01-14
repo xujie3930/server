@@ -1,5 +1,7 @@
 package com.szmsd.returnex.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -45,14 +47,25 @@ import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -223,7 +236,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Override
     @Transactional(rollbackFor = Exception.class)
     public <T extends ReturnExpressAddDTO> int insertReturnExpressDetail(T returnExpressAddDTO) {
-        returnExpressAddDTO.setSellerCode(getSellCode());
+        if (StringUtils.isBlank(returnExpressAddDTO.getSellerCode()))
+            returnExpressAddDTO.setSellerCode(getSellCode());
         checkSubmit(returnExpressAddDTO);
         if (StringUtils.isBlank(returnExpressAddDTO.getExpectedNo())) {
             String expectedNo = createExpectedNo();
@@ -263,7 +277,11 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 if (CollectionUtils.isNotEmpty(rows)) {
                     DelOutboundListVO delOutboundListVO = rows.get(0);
                     boolean equals = delOutboundListVO.getState().equals(DelOutboundStateEnum.COMPLETED.getCode());
-                    AssertUtil.isTrue(equals, "该原出库单号未完成/不存在!");
+                    AssertUtil.isTrue(equals, "该原出库单号" + returnExpressAddDTO.getFromOrderNo() + "未完成/不存在!");
+                    if (StringUtils.isBlank(returnExpressAddDTO.getSellerCode()))
+                        returnExpressAddDTO.setSellerCode(delOutboundListVO.getCustomCode());
+                    if (StringUtils.isBlank(returnExpressAddDTO.getScanCode()))
+                        returnExpressAddDTO.setScanCode(delOutboundListVO.getTrackingNo());
                 } else {
                     throw new BaseException("该原出库单号不存在!");
                 }
@@ -321,8 +339,14 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Transactional(rollbackFor = Exception.class)
     public int saveReturnExpressDetail(ReturnExpressDetail returnExpressDetail) {
-        returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWmsWaitReceive());
-        returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWmsWaitReceiveStr());
+        //OMS 创建客户待处理
+        if (configStatus.getReturnSource().getOmsReturn().equals(returnExpressDetail.getReturnSource())) {
+            returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWaitCustomerDeal());
+            returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWaitCustomerDealStr());
+        } else {
+            returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWmsWaitReceive());
+            returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWmsWaitReceiveStr());
+        }
         return returnExpressMapper.insert(returnExpressDetail);
     }
 
@@ -514,13 +538,18 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         checkBeforeUpdate(expressUpdateDTO);
         String dealStatus;
         String dealStatusStr;
-        if (expressUpdateDTO.getProcessType().equals(configStatus.getUnpackingInspection())) {
-            dealStatus = configStatus.getDealStatus().getWmsWaitReceive();
-            dealStatusStr = configStatus.getDealStatus().getWmsWaitReceiveStr();
+        if (expressUpdateDTO.getReturnSource().equals(configStatus.getReturnSource().getOmsReturn())) {
+            dealStatus = configStatus.getDealStatus().getWmsFinish();
+            dealStatusStr = configStatus.getDealStatus().getWmsFinishStr();
         } else {
-            // 处理完后状态
-            dealStatus = configStatus.getDealStatus().getWmsReceivedDealWay();
-            dealStatusStr = configStatus.getDealStatus().getWmsReceivedDealWayStr();
+            if (expressUpdateDTO.getProcessType().equals(configStatus.getUnpackingInspection())) {
+                dealStatus = configStatus.getDealStatus().getWmsWaitReceive();
+                dealStatusStr = configStatus.getDealStatus().getWmsWaitReceiveStr();
+            } else {
+                // 处理完后状态
+                dealStatus = configStatus.getDealStatus().getWmsReceivedDealWay();
+                dealStatusStr = configStatus.getDealStatus().getWmsReceivedDealWayStr();
+            }
         }
 
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
@@ -536,13 +565,14 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .last("LIMIT 1")
         );
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
-        List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
-        returnExpressGoodService.addOrUpdateGoodInfoBatch(details, expressUpdateDTO.getId());
-        //上架处理校验是否属于该用户的sku
-        checkSku(expressUpdateDTO);
-        //处理结果推送WMS
-        pushSkuDetailsToWMS(expressUpdateDTO, details);
-
+        if (!expressUpdateDTO.getReturnSource().equals(configStatus.getReturnSource().getOmsReturn())) {
+            List<ReturnExpressGoodAddDTO> details = expressUpdateDTO.getGoodList();
+            returnExpressGoodService.addOrUpdateGoodInfoBatch(details, expressUpdateDTO.getId());
+            //上架处理校验是否属于该用户的sku
+            checkSku(expressUpdateDTO);
+            //处理结果推送WMS
+            pushSkuDetailsToWMS(expressUpdateDTO, details);
+        }
         return update;
     }
 
@@ -669,4 +699,60 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         returnExpressVO.setGoodList(returnExpressGoodService.queryGoodListByExId(returnExpressVO.getId()));
         return returnExpressVO;
     }
+
+    @Override
+    public void importByTemplate(MultipartFile multipartFile) {
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            List<ReturnExpressServiceAddDTO> basPackingAddList = EasyExcel.read(inputStream, ReturnExpressServiceAddDTO.class, new SyncReadListener()).sheet().doReadSync();
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            AtomicInteger index = new AtomicInteger(1);
+            List<CompletableFuture<String>> futureList = new ArrayList<>();
+            Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+            List<String> errorMsgList = new ArrayList<>();
+
+            for (int i = 0; i < basPackingAddList.size(); i++) {
+                Set<ConstraintViolation<ReturnExpressServiceAddDTO>> set = validator.validate(basPackingAddList.get(i));
+                StringBuilder errorMsg = new StringBuilder();
+                for (ConstraintViolation<ReturnExpressServiceAddDTO> constraintViolation : set) {
+                    errorMsg.append(constraintViolation.getMessage());
+                }
+                if (StringUtils.isNotBlank(errorMsg.toString())) {
+                    errorMsgList.add(String.format("请检查第%s条数据:参数校验异常：%s", i, errorMsg.toString()));
+                }
+            }
+            if (CollectionUtils.isNotEmpty(errorMsgList)) {
+                throw new RuntimeException(String.join("\n", errorMsgList));
+            }
+            basPackingAddList.forEach(x -> {
+                int indexThis = index.getAndIncrement();
+
+                CompletableFuture<String> errorMsgCompletable = CompletableFuture.supplyAsync(() -> {
+                    StringBuilder errorMsg = new StringBuilder();
+                    try {
+                        x.setReturnSource(configStatus.getReturnSource().getOmsReturn());
+                        x.setReturnSourceStr(configStatus.getReturnSource().getOmsReturnStr());
+                        // 补充参数
+                        this.insertReturnExpressDetail(x);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        errorMsg.append("第").append(indexThis).append("行业务异常：").append(e.getMessage()).append(";\n");
+                    }
+                    return errorMsg.toString();
+                });
+                futureList.add(errorMsgCompletable);
+            });
+            CompletableFuture<Void> voidCompletableFuture = CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
+            Void unused = voidCompletableFuture.get();
+            String errorMsg = futureList.stream().map(CompletableFuture::join).collect(Collectors.joining());
+            AssertUtil.isTrue(StringUtils.isBlank(errorMsg), errorMsg);
+        } catch (IOException e) {
+            throw new RuntimeException("文件读取异常");
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

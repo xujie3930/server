@@ -10,6 +10,7 @@ import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -104,4 +105,6 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
     List<ReturnExpressListVO> selectClientReturnOrderList(ReturnExpressListQueryDTO queryDto);
 
     int saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO);
+
+    void importByTemplate(MultipartFile multipartFile);
 }
