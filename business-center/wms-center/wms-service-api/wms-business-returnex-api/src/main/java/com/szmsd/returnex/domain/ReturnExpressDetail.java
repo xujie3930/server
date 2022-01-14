@@ -143,7 +143,7 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
 
     @ApiModelProperty(value = "处理时间")
     @Excel(name = "处理时间")
-    private String processTime;
+    private Date processTime;
 
     @ApiModelProperty(value = "客户备注")
     @Excel(name = "客户备注")

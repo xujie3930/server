@@ -556,6 +556,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
 
+                .set(ReturnExpressDetail::getProcessTime,new Date())
                 .set(ReturnExpressDetail::getSku, expressUpdateDTO.getSku())
                 .set(ReturnExpressDetail::getDealStatus, dealStatus)
                 .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
@@ -720,7 +721,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     errorMsg.append(constraintViolation.getMessage());
                 }
                 if (StringUtils.isNotBlank(errorMsg.toString())) {
-                    errorMsgList.add(String.format("请检查第%s条数据:参数校验异常：%s", i, errorMsg.toString()));
+                    errorMsgList.add(String.format("请检查第%s条数据:参数校验异常：%s", i+1, errorMsg.toString()));
                 }
             }
             if (CollectionUtils.isNotEmpty(errorMsgList)) {
