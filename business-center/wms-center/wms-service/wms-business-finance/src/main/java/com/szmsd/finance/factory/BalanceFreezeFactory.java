@@ -51,15 +51,21 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         RLock lock = redissonClient.getLock(key);
         try {
             if (lock.tryLock(time, unit)) {
+                log.info("【updateBalance】 1");
                 BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
+                log.info("【updateBalance】 2");
                 Boolean checkFlag = checkAndSetBalance(balance, dto);
+                log.info("【updateBalance】 3");
                 if (checkFlag == null) return null;
                 if (!checkFlag) {
                     return false;
                 }
+                log.info("【updateBalance】 4");
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), balance);
+                log.info("【updateBalance】 5");
                 recordOpLogAsync(dto, balance.getCurrentBalance());
                 recordDetailLogAsync(dto, balance);
+                log.info("【updateBalance】 6");
                 return true;
             } else {
                 log.error("冻结/解冻操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
