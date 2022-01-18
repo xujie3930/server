@@ -1,4 +1,5 @@
 package com.szmsd.bas.controller;
+
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasSellerService;
@@ -190,5 +191,13 @@ public class BasSellerController extends BaseController{
     @ApiOperation(value = "查询实名状态")
     public R<Boolean> queryCkPushFlag(@PathVariable("sellerCode") String sellerCode) {
         return R.ok(this.basSellerService.queryCkPushFlag(sellerCode));
+    }
+
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:getRealState')")
+    @GetMapping("/updateUserInfoForMan")
+    @ApiOperation(value = "查询实名状态-更新用")
+    public R<String> updateUserInfoForMan() {
+        this.basSellerService.updateUserInfoForMan();
+        return R.ok();
     }
 }

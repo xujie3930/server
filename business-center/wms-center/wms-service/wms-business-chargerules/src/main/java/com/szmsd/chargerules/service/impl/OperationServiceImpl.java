@@ -76,7 +76,6 @@ public class OperationServiceImpl implements IOperationService {
     @Transactional
     @Override
     public R<?> delOutboundFreeze(DelOutboundOperationVO dto) {
-        log.info("【执行】 - 1 delOutboundFreeze---------------------------- {}", dto);
         List<DelOutboundOperationDetailVO> details = dto.getDetails();
         if (CollectionUtils.isEmpty(details) && !"Freight".equals(dto.getOrderType())) {
             log.error("calculate() 出库单的详情信息为空");
@@ -84,26 +83,25 @@ public class OperationServiceImpl implements IOperationService {
         }
         BigDecimal amount = BigDecimal.ZERO;
         if (dto.getOrderType().equals(DelOutboundOrderEnum.FREEZE_IN_STORAGE.getCode())) {
-            log.info("【执行】 - 2 frozenFeesForWarehousing---------------------------- {}", dto);
+            log.info("【执行】 - 1 frozenFeesForWarehousing---------------------------- {}", dto);
             return frozenFeesForWarehousing(dto, amount);
         }
 
         if (dto.getOrderType().equals(DelOutboundOrderEnum.COLLECTION.getCode())) {
-            log.info("【执行】 - 2 chargeCollection---------------------------- {}", dto);
+            log.info("【执行】 - 1 chargeCollection---------------------------- {}", dto);
             return chargeCollection(dto, details);
         }
 
         if (dto.getOrderType().equals(DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode())) {
-            log.info("【执行】 - 2 packageTransfer---------------------------- {}", dto);
+            log.info("【执行】 - 1 packageTransfer---------------------------- {}", dto);
             return packageTransfer(dto, amount);
         }
 
         if (dto.getOrderType().equals(DelOutboundOrderEnum.BATCH.getCode())) {
-            log.info("【执行】 - 2 chargeBatch---------------------------- {}", dto);
+            log.info("【执行】 - 1 chargeBatch---------------------------- {}", dto);
             return chargeBatch(dto, details);
         }
 
-        log.info("【执行】 - 2 calculateFreeze---------------------------- {}", dto);
         return this.calculateFreeze(dto, details, amount);
 
     }

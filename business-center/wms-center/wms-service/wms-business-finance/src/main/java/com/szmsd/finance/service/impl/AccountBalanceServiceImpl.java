@@ -44,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +54,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -82,12 +85,18 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Resource
     private WebSocketServer webSocketServer;
-
     @Resource
     private IAccountSerialBillService accountSerialBillService;
-
     @Resource
     private IDeductionRecordService iDeductionRecordService;
+    @Resource
+    private ThreadPoolTaskExecutor financeThreadTaskPool;
+    @Resource
+    private ChargeFeignService chargeFeignService;
+    @Resource
+    private DelOutboundFeignService delOutboundFeignService;
+    @Resource
+    private InboundReceiptFeignService inboundReceiptFeignService;
 
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
@@ -215,7 +224,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (Objects.isNull(flag)) return R.ok();
         if (flag) {
             log.info(LogUtil.format(dto, "仓储费扣除", "添加操作费用表"));
-            this.addOptLog(dto);
+            this.addOptLogAsync(dto);
         }
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
     }
@@ -236,72 +245,67 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (Objects.isNull(flag)) return R.ok();
         if (flag) {
             log.info(LogUtil.format(dto, "费用扣除", "添加操作费用表"));
-            this.addOptLog(dto);
+            this.addOptLogAsync(dto);
         }
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
     }
-
-    @Resource
-    private ChargeFeignService chargeFeignService;
-    @Resource
-    private DelOutboundFeignService delOutboundFeignService;
-    @Resource
-    private InboundReceiptFeignService inboundReceiptFeignService;
 
     /**
      * 冻结 解冻 需要把费用扣减加到 操作费用表
      *
      * @param dto
      */
-    private void addOptLog(CustPayDTO dto) {
-        log.info(LogUtil.format(dto, "冻结/解冻日志"));
-        BillEnum.PayMethod payMethod = dto.getPayMethod();
-        ChargeLog chargeLog = new ChargeLog();
-        BeanUtils.copyProperties(dto, chargeLog);
-        chargeLog
-                .setCustomCode(dto.getCusCode()).setPayMethod(payMethod.name())
-                .setOrderNo(dto.getNo()).setOperationPayMethod("业务操作").setSuccess(true)
-                .setOperationType("").setCurrencyCode(dto.getCurrencyCode())
-        ;
+    private void addOptLogAsync(CustPayDTO dto) {
+        financeThreadTaskPool.execute(() -> {
+            log.info(LogUtil.format(dto, "冻结/解冻日志"));
+            BillEnum.PayMethod payMethod = dto.getPayMethod();
+            ChargeLog chargeLog = new ChargeLog();
+            BeanUtils.copyProperties(dto, chargeLog);
+            chargeLog
+                    .setCustomCode(dto.getCusCode()).setPayMethod(payMethod.name())
+                    .setOrderNo(dto.getNo()).setOperationPayMethod("业务操作").setSuccess(true)
+                    .setOperationType("").setCurrencyCode(dto.getCurrencyCode())
+            ;
 
-        chargeLog.setRemark("-----------------------------------------");
-        log.info(LogUtil.format(chargeLog, "扣减操作费",payMethod.name()));
-        if (null == chargeLog.getQty() || 0 >= chargeLog.getQty()) {
-            //现在只有出库单需要补，入库单没有这些数据
-            if (StringUtils.isNotBlank(chargeLog.getOrderNo()) && chargeLog.getOrderNo().startsWith("CK")) {
-                R<DelOutboundVO> infoByOrderNo = delOutboundFeignService.getInfoByOrderNo(chargeLog.getOrderNo());
-                if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
-                    DelOutboundVO data = infoByOrderNo.getData();
-                    //String trackingNo = data.getTrackingNo();
-                    List<DelOutboundDetailVO> details = data.getDetails();
-                    if (CollectionUtils.isNotEmpty(details)) {
-                        Long qty = details.stream().map(DelOutboundDetailVO::getQty).reduce(Long::sum).orElse(0L);
-                        chargeLog.setQty(qty);
-                    }
-                    chargeLog.setWarehouseCode(Optional.of(data).map(DelOutboundVO::getWarehouseCode).orElse(""));
-                }
-            } else if (StringUtils.isNotBlank(chargeLog.getOrderNo()) && chargeLog.getOrderNo().startsWith("RK")) {
-                R<InboundReceiptInfoVO> infoByOrderNo = inboundReceiptFeignService.info(chargeLog.getOrderNo());
-                if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
-                    InboundReceiptInfoVO data = infoByOrderNo.getData();
-                    //String trackingNo = data.getTrackingNo();
-                    List<InboundReceiptDetailVO> details = data.getInboundReceiptDetails();
-                    if (CollectionUtils.isNotEmpty(details)) {
-                        int qty = 0;
-                        if (payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW) {
-                            qty = details.stream().map(InboundReceiptDetailVO::getDeclareQty).reduce(Integer::sum).orElse(0);
-                        } else if (payMethod == BillEnum.PayMethod.BALANCE_DEDUCTIONS) {
-                            qty = details.stream().map(InboundReceiptDetailVO::getPutQty).reduce(Integer::sum).orElse(0);
+            chargeLog.setRemark("-----------------------------------------");
+            log.info(LogUtil.format(chargeLog, "扣减操作费", payMethod.name()));
+            if (null == chargeLog.getQty() || 0 >= chargeLog.getQty()) {
+                //现在只有出库单需要补，入库单没有这些数据
+                if (StringUtils.isNotBlank(chargeLog.getOrderNo()) && chargeLog.getOrderNo().startsWith("CK")) {
+                    R<DelOutboundVO> infoByOrderNo = delOutboundFeignService.getInfoByOrderNo(chargeLog.getOrderNo());
+                    if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
+                        DelOutboundVO data = infoByOrderNo.getData();
+                        //String trackingNo = data.getTrackingNo();
+                        List<DelOutboundDetailVO> details = data.getDetails();
+                        if (CollectionUtils.isNotEmpty(details)) {
+                            Long qty = details.stream().map(DelOutboundDetailVO::getQty).reduce(Long::sum).orElse(0L);
+                            chargeLog.setQty(qty);
                         }
-                        chargeLog.setQty((long) qty);
+                        chargeLog.setWarehouseCode(Optional.of(data).map(DelOutboundVO::getWarehouseCode).orElse(""));
                     }
-                    Optional<InboundReceiptInfoVO> resultDateOpt = Optional.of(data);
-                    String warehouseNo = resultDateOpt.map(InboundReceiptInfoVO::getWarehouseNo).orElse("");
-                    chargeLog.setWarehouseCode(warehouseNo);
+                } else if (StringUtils.isNotBlank(chargeLog.getOrderNo()) && chargeLog.getOrderNo().startsWith("RK")) {
+                    R<InboundReceiptInfoVO> infoByOrderNo = inboundReceiptFeignService.info(chargeLog.getOrderNo());
+                    if (null != infoByOrderNo && null != infoByOrderNo.getData()) {
+                        InboundReceiptInfoVO data = infoByOrderNo.getData();
+                        //String trackingNo = data.getTrackingNo();
+                        List<InboundReceiptDetailVO> details = data.getInboundReceiptDetails();
+                        if (CollectionUtils.isNotEmpty(details)) {
+                            int qty = 0;
+                            if (payMethod == BillEnum.PayMethod.BALANCE_FREEZE || payMethod == BillEnum.PayMethod.BALANCE_THAW) {
+                                qty = details.stream().map(InboundReceiptDetailVO::getDeclareQty).reduce(Integer::sum).orElse(0);
+                            } else if (payMethod == BillEnum.PayMethod.BALANCE_DEDUCTIONS) {
+                                qty = details.stream().map(InboundReceiptDetailVO::getPutQty).reduce(Integer::sum).orElse(0);
+                            }
+                            chargeLog.setQty((long) qty);
+                        }
+                        Optional<InboundReceiptInfoVO> resultDateOpt = Optional.of(data);
+                        String warehouseNo = resultDateOpt.map(InboundReceiptInfoVO::getWarehouseNo).orElse("");
+                        chargeLog.setWarehouseCode(warehouseNo);
+                    }
                 }
             }
-        }
-        chargeFeignService.add(chargeLog);
+            chargeFeignService.add(chargeLog);
+        });
     }
 
     @Transactional
@@ -324,7 +328,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         // 冻结 解冻 需要把费用扣减加到 操作费用表
         {
             log.info(LogUtil.format(cfbDTO, "费用冻结", "操作费用表"));
-            this.addOptLog(dto);
+            this.addOptLogAsync(dto);
         }
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户可用余额不足以冻结");
     }
@@ -364,7 +368,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 //            log.info("删除物流基础费 {}条", delete);
             //}
             log.info(LogUtil.format(cfbDTO, "解冻金额", "操作费用表"));
-            this.addOptLog(dto);
+            this.addOptLogAsync(dto);
         }
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getNo()) + "账户冻结金额不足以解冻");
     }
@@ -378,53 +382,69 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      */
     @Override
     public BalanceDTO getBalance(String cusCode, String currencyCode) {
-        log.info("查询用户币别余额{}-{}",cusCode,currencyCode);
-        QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("cus_code", cusCode);
-        queryWrapper.eq("currency_code", currencyCode);
-        AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
-        // 账户不存在 则为该用户开通相对应的币别账户
-        if (accountBalance == null) {
-            log.info("getBalance() cusCode: {} currencyCode: {}", cusCode, currencyCode);
-            String currencyName = getCurrencyName(currencyCode);
-            accountBalance = new AccountBalance(cusCode, currencyCode, currencyName);
-            //判断是否有启用中的授信信息，有的话需要设置
-            List<AccountBalance> accountBalances = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
-                    .eq(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
-                    .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
-                    .eq(AccountBalance::getCusCode, cusCode));
-            if (CollectionUtils.isNotEmpty(accountBalances)) {
-                log.info("查询到客户 {} 启用中的授信信息：{}", cusCode, JSON.toJSONString(accountBalances));
-                AccountBalance accountBalanceCredit = accountBalances.get(0);
-                BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
-                accountBalance.setId(null);
-                accountBalance.setCurrencyCode(currencyCode).setCurrencyName(currencyName)
-                        .setCreditUseAmount(BigDecimal.ZERO).setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue().toString())
-                        .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
-                        .setCreateTime(new Date());
-            }
-            // 如果没有CreditType 则设置默认值，防止后续操作空指针
-            if (StringUtils.isBlank(accountBalance.getCreditType())) {
-                accountBalance.setCreditType(CreditConstant.CreditTypeEnum.QUOTA.getValue().toString());
-            }
-            accountBalanceMapper.insert(accountBalance);
-        }
-        BalanceDTO balanceDTO = new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
-        CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
-        BeanUtils.copyProperties(accountBalance, creditInfoBO);
-        balanceDTO.setCreditInfoBO(creditInfoBO);
+        log.info("查询用户币别余额{}-{}", cusCode, currencyCode);
         // 查询授信额使用数
-        Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
-        BigDecimal creditUseAmount = Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
-        balanceDTO.getCreditInfoBO().setCreditUseAmount(creditUseAmount);
-        log.info("查询用户币别余额完成：{}",JSONObject.toJSONString(creditUse));
-        return balanceDTO;
+        BigDecimal creditUseAmount;
+
+        CompletableFuture<BigDecimal> creditUseAmountFuture = CompletableFuture.supplyAsync(() -> {
+            Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+            log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
+            return Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+        }, financeThreadTaskPool);
+
+        CompletableFuture<AccountBalance> accountBalanceCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("cus_code", cusCode);
+            queryWrapper.eq("currency_code", currencyCode);
+            AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
+            // 账户不存在 则为该用户开通相对应的币别账户
+            if (accountBalance == null) {
+                log.info("getBalance() cusCode: {} currencyCode: {}", cusCode, currencyCode);
+                String currencyName = getCurrencyName(currencyCode);
+                accountBalance = new AccountBalance(cusCode, currencyCode, currencyName);
+                //判断是否有启用中的授信信息，有的话需要设置
+                List<AccountBalance> accountBalances = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
+                        .eq(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
+                        .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
+                        .eq(AccountBalance::getCusCode, cusCode));
+                if (CollectionUtils.isNotEmpty(accountBalances)) {
+                    log.info("查询到客户 {} 启用中的授信信息：{}", cusCode, JSON.toJSONString(accountBalances));
+                    AccountBalance accountBalanceCredit = accountBalances.get(0);
+                    BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
+                    accountBalance.setId(null);
+                    accountBalance.setCurrencyCode(currencyCode).setCurrencyName(currencyName)
+                            .setCreditUseAmount(BigDecimal.ZERO).setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue().toString())
+                            .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
+                            .setCreateTime(new Date());
+                }
+                // 如果没有CreditType 则设置默认值，防止后续操作空指针
+                if (StringUtils.isBlank(accountBalance.getCreditType())) {
+                    accountBalance.setCreditType(CreditConstant.CreditTypeEnum.QUOTA.getValue().toString());
+                }
+                accountBalanceMapper.insert(accountBalance);
+            }
+            return accountBalance;
+        }, financeThreadTaskPool);
+        try {
+            AccountBalance accountBalance = accountBalanceCompletableFuture.get();
+            creditUseAmount = creditUseAmountFuture.get();
+            BalanceDTO balanceDTO = new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
+            CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
+            BeanUtils.copyProperties(accountBalance, creditInfoBO);
+            balanceDTO.setCreditInfoBO(creditInfoBO);
+            balanceDTO.getCreditInfoBO().setCreditUseAmount(creditUseAmount);
+            return balanceDTO;
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            log.info("查询用户信息异常：", e);
+            throw new RuntimeException("查询用户信息异常: " + e.getMessage());
+        }
     }
 
     @Override
     @Transactional
     public void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit) {
-        log.info("更新余额：{}，{}，{}，{}",cusCode,currencyCode,JSONObject.toJSONString(result),needUpdateCredit);
+        log.info("更新余额：{}，{}，{}，{}", cusCode, currencyCode, JSONObject.toJSONString(result), needUpdateCredit);
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(AccountBalance::getCusCode, cusCode);
         lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode, currencyCode);

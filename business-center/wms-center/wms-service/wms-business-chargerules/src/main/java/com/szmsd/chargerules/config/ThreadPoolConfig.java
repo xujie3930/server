@@ -12,11 +12,11 @@ public class ThreadPoolConfig {
     //参数初始化
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     //核心线程数量大小
-    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));
+    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 8));
     //线程池最大容纳线程数
     private static final int MAX_POOL_SIZE = CPU_COUNT * 2 + 1;
     //阻塞队列
-    private static final int WORK_QUEUE = 20;
+    private static final int WORK_QUEUE = 200;
     //线程空闲后的存活时长
     private static final int KEEP_ALIVE_TIME = 30;
 
