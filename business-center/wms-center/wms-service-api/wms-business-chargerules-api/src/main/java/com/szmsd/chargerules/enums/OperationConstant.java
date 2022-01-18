@@ -9,6 +9,6 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2021-11-29 14:41
  */
 public class OperationConstant {
-    public static final Long LOCK_TIME = 30L;
+    public static final Long LOCK_TIME = 90L;
     public static final TimeUnit LOCK_TIME_UNIT = TimeUnit.SECONDS;
 }
