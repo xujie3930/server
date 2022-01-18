@@ -133,5 +133,7 @@ public interface IBasSellerService extends IService<BasSeller> {
      */
     Boolean queryCkPushFlag(String sellerCode);
 
+
+    void updateUserInfoForMan();
 }
 
