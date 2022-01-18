@@ -85,7 +85,6 @@ public class BasSeller extends BaseEntity {
     @Excel(name = "业务经理")
     private String serviceManagerName;
 
-    @TableField(exist = false)
     @ApiModelProperty(value = "业务经理-名称")
     @Excel(name = "业务经理")
     private String serviceManagerNickName;
@@ -106,7 +105,6 @@ public class BasSeller extends BaseEntity {
     @Excel(name = "客服姓名")
     private String serviceStaffName;
 
-    @TableField(exist = false)
     @ApiModelProperty(value = "客服姓名")
     @Excel(name = "客服姓名")
     private String serviceStaffNickName;

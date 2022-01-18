@@ -51,6 +51,7 @@ import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.feign.RemoteUserService;
 import com.szmsd.system.api.model.UserInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.BeanUtils;
@@ -66,11 +67,9 @@ import javax.print.attribute.standard.SheetCollate;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -82,6 +81,7 @@ import java.util.stream.Collectors;
 * @author l
 * @since 2021-03-09
 */
+@Slf4j
 @Service
 public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller> implements IBasSellerService {
 
@@ -240,6 +240,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                     SysUser sysUser = (SysUser)result.getData();
                     basSeller.setServiceManager(sysUser.getUserId().toString());
                     basSeller.setServiceManagerName(sysUser.getUserName());
+                    basSeller.setServiceManagerNickName(sysUser.getNickName());
                 }
             }
             //注册到系统用户表
@@ -313,6 +314,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         queryWrapper.eq("seller_code", sellerCode);
         return getBasSellerInfoVO(queryWrapper);
     }
+
     private BasSellerInfoVO getBasSellerInfoVO(QueryWrapper<BasSeller> queryWrapper) {
         BasSeller basSeller = super.getOne(queryWrapper);
         //查询用户证件信息
@@ -346,30 +348,16 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
         basSellerInfoVO.setBasSellerCertificateList(basSellerCertificateVOS);
 
-        String serviceStaff = basSeller.getServiceStaff();
-        String serviceManager = basSeller.getServiceManager();
-        // 查询客服名称
-        CompletableFuture<Void> voidCompletableFuture = CompletableFuture.runAsync(() -> {
-            if (StringUtils.isBlank(serviceStaff))return;
-            R<SysUser> sysUserR = remoteUserService.queryGetInfoByUserId(Long.parseLong(serviceStaff));
-            SysUser dataAndException1 = R.getDataAndException(sysUserR);
-            String nickName = dataAndException1.getNickName();
-            basSellerInfoVO.setServiceStaffNickName(nickName);
-        });
-        CompletableFuture<Void> voidCompletableFuture1 = CompletableFuture.runAsync(() -> {
-            if (StringUtils.isBlank(serviceManager))return;
-            R<SysUser> sysUserR = remoteUserService.queryGetInfoByUserId(Long.parseLong(serviceManager));
-            SysUser dataAndException1 = R.getDataAndException(sysUserR);
-            String nickName = dataAndException1.getNickName();
-            basSellerInfoVO.setServiceManagerNickName(nickName);
-        });
-        CompletableFuture<Void> voidCompletableFuture2 = CompletableFuture.runAsync(() -> {
+        CompletableFuture<List<UserCreditInfoVO>> listCompletableFuture = CompletableFuture.supplyAsync(() -> {
             R<List<UserCreditInfoVO>> listR = rechargesFeignService.queryUserCredit(basSeller.getSellerCode());
             List<UserCreditInfoVO> dataAndException = R.getDataAndException(listR);
-            List<UserCreditInfoVO> collect = dataAndException.stream().filter(x -> (x.getCreditStatus() != null) && (CreditConstant.CreditStatusEnum.ACTIVE.getValue()).equals(x.getCreditStatus())).collect(Collectors.toList());
-            basSellerInfoVO.setUserCreditList(collect);
+            return dataAndException.stream().filter(x -> (x.getCreditStatus() != null) && (CreditConstant.CreditStatusEnum.ACTIVE.getValue()).equals(x.getCreditStatus())).collect(Collectors.toList());
         });
-        CompletableFuture.allOf(voidCompletableFuture1,voidCompletableFuture,voidCompletableFuture2).join();
+        try {
+            basSellerInfoVO.setUserCreditList(listCompletableFuture.get());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
         return basSellerInfoVO;
     }
 
@@ -630,6 +618,52 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 }
             }
         }
+    }
+
+    @Override
+    public void updateUserInfoForMan() {
+        List<BasSeller> basSellers = baseMapper.selectList(Wrappers.lambdaQuery());
+        basSellers.stream().filter(x -> StringUtils.isNotBlank(x.getServiceStaff()) || StringUtils.isNotBlank(x.getServiceManager())).peek(x -> {
+            log.info("开始更新--{}", x);
+            String serviceStaff = x.getServiceStaff();
+            CompletableFuture<String> stringCompletableFuture = null;
+            if (StringUtils.isNotBlank(serviceStaff)) {
+                // 查询客服名称
+                stringCompletableFuture = CompletableFuture.supplyAsync(() -> {
+                    R<SysUser> sysUserR = remoteUserService.queryGetInfoByUserId(Long.parseLong(serviceStaff));
+                    SysUser dataAndException1 = R.getDataAndException(sysUserR);
+                    return dataAndException1.getNickName();
+                });
+            }
+            String serviceManager = x.getServiceManager();
+            CompletableFuture<String> stringCompletableFuture2 = null;
+            if (StringUtils.isNotBlank(serviceManager)) {
+                // 查询客服名称
+                stringCompletableFuture2 = CompletableFuture.supplyAsync(() -> {
+                    R<SysUser> sysUserR = remoteUserService.queryGetInfoByUserId(Long.parseLong(serviceManager));
+                    SysUser dataAndException1 = R.getDataAndException(sysUserR);
+                    return dataAndException1.getNickName();
+                });
+            }
+            try {
+                if (stringCompletableFuture2 != null) {
+                    String s1 = stringCompletableFuture2.get();
+                    x.setServiceManagerNickName(s1);
+                }
+
+                if (stringCompletableFuture!= null) {
+                    String s1 = stringCompletableFuture.get();
+                    x.setServiceStaffNickName(s1);
+                }
+                log.info("【更新】={},{}.{}",x.getId(),x.getServiceManagerNickName(),x.getServiceStaffNickName());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+            baseMapper.update(null, Wrappers.<BasSeller>lambdaUpdate().eq(BasSeller::getId, x.getId())
+                    .set(BasSeller::getServiceStaffNickName, x.getServiceStaffNickName())
+                    .set(BasSeller::getServiceManagerNickName, x.getServiceManagerNickName())
+            );
+        }).count();
     }
 
     }

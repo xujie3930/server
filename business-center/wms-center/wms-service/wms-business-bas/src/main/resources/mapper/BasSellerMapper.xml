@@ -33,8 +33,8 @@
             id, create_by, update_by, del_flag, account, init_email, cus_no, password, state, is_active, salt, service _manager
         </sql>
     <select id="selectBasSeller" resultType="com.szmsd.bas.dto.BasSellerSysDto">
-        SELECT o.id,o.init_email,o.user_name,o.service_manager,o.service_manager_name,o.service_staff,
-        o.service_staff_name,o.seller_code,if(count(s.vaild = '0' or null)=0,1,0) as reviewState,o.is_active
+        SELECT o.id,o.init_email,o.user_name,o.service_manager,o.service_manager_name,o.service_manager_nick_name,o.service_staff,
+        o.service_staff_name,o.service_staff_nick_name,o.seller_code,if(count(s.vaild = '0' or null)=0,1,0) as reviewState,o.is_active
         FROM bas_seller o left join bas_seller_certificate s on o.seller_code = s.seller_code
         ${ew.customSqlSegment}
         group by o.seller_code

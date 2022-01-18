@@ -186,4 +186,12 @@ public class BasSellerController extends BaseController{
     public R<String> getRealState(@RequestBody String sellerCode) {
         return R.ok(this.basSellerService.getRealState(sellerCode));
     }
+
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:getRealState')")
+    @GetMapping("/updateUserInfoForMan")
+    @ApiOperation(value = "查询实名状态-更新用")
+    public R<String> updateUserInfoForMan() {
+        this.basSellerService.updateUserInfoForMan();
+        return R.ok();
+    }
 }

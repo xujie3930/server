@@ -125,5 +125,7 @@ public interface IBasSellerService extends IService<BasSeller> {
      * @return String
      */
     String getRealState(String sellerCode);
+
+    void updateUserInfoForMan();
 }
 
