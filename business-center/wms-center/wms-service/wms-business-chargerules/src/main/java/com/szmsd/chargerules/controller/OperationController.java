@@ -159,23 +159,9 @@ public class OperationController extends BaseController {
     @ApiOperation(value = "业务计费 - 出库冻结余额")
     @PostMapping("/delOutboundFreeze")
     public R delOutboundFreeze(@RequestBody DelOutboundOperationVO delOutboundVO) {
-        log.info("请求---------------------------- {}", delOutboundVO);
-        RLock lock = redissonClient.getLock(genKey());
-        try {
-            if (lock.tryLock(OperationConstant.LOCK_TIME, OperationConstant.LOCK_TIME_UNIT)) {
-                log.info("【执行】delOutboundFreeze---------------------------- {}", delOutboundVO);
-                return operationService.delOutboundFreeze(delOutboundVO);
-            } else {
-                return R.failed("请求超时");
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return R.failed("请求失败");
-        } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
-        }
+        log.info("【执行】delOutboundFreeze---------------------------- {}", delOutboundVO);
+        return operationService.delOutboundFreeze(delOutboundVO);
+
     }
 
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundThaw')")

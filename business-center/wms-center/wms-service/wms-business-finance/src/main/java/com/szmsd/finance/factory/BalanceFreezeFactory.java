@@ -74,9 +74,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
-            log.error("BalanceFreezeFactory异常：", e);
-            log.error("获取余额异常，加锁失败");
-            log.error("异常信息:" + e.getMessage());
+            log.error("获取余额异常，加锁失败 BalanceFreezeFactory异常：", e);
             throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
