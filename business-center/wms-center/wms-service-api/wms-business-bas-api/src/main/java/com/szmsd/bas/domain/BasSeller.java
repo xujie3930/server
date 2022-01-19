@@ -180,4 +180,7 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "是否需要推送CK1")
     private Boolean pushFlag;
 
+    @ApiModelProperty(value = "授权码")
+    private String authorizationCode;
+
 }

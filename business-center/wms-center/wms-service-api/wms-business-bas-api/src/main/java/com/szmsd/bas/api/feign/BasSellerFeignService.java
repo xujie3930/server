@@ -8,6 +8,7 @@ import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BasSellerInfoVO;
+import com.szmsd.bas.vo.BasSellerWrapVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.ApiOperation;
@@ -68,5 +69,5 @@ public interface BasSellerFeignService {
 
     @GetMapping("/bas/seller/queryCkPushFlag/{sellerCode}")
     @ApiOperation(value = "查询实名状态")
-    R<Boolean> queryCkPushFlag(@PathVariable("sellerCode") String sellerCode);
+    R<BasSellerWrapVO> queryCkPushFlag(@PathVariable("sellerCode") String sellerCode);
 }

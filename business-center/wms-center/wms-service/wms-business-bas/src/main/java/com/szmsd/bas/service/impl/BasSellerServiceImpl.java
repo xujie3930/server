@@ -24,6 +24,7 @@ import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BasSellerCertificateVO;
 import com.szmsd.bas.vo.BasSellerInfoVO;
+import com.szmsd.bas.vo.BasSellerWrapVO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
@@ -566,17 +567,20 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
     }
 
     @Override
-    public Boolean queryCkPushFlag(String sellerCode) {
+    public BasSellerWrapVO queryCkPushFlag(String sellerCode) {
         BasSeller basSeller = super.getOne(Wrappers.<BasSeller>lambdaQuery()
                 .eq(BasSeller::getSellerCode, sellerCode)
                 .select(BasSeller::getPushFlag, BasSeller::getId, BasSeller::getSellerCode)
         );
+        BasSellerWrapVO wrapVO = new BasSellerWrapVO();
+        wrapVO.setPushFlag(true);
         if (Objects.nonNull(basSeller)) {
             Boolean pushFlag = basSeller.getPushFlag();
             // 配置不推送才不推，其余情况默认推送
-            return (pushFlag == null || pushFlag);
+            wrapVO.setPushFlag((pushFlag == null || pushFlag));
+            wrapVO.setAuthorizationCode(basSeller.getAuthorizationCode());
         }
-        return true;
+        return wrapVO;
     }
 
     private String sellerCode(){

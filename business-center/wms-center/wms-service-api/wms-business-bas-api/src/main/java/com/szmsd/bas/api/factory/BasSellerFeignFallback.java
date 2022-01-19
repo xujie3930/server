@@ -5,6 +5,7 @@ import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BasSellerInfoVO;
+import com.szmsd.bas.vo.BasSellerWrapVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import feign.hystrix.FallbackFactory;
@@ -69,7 +70,7 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
             }
 
             @Override
-            public R<Boolean> queryCkPushFlag(String sellerCode) {
+            public R<BasSellerWrapVO> queryCkPushFlag(String sellerCode) {
                 return R.convertResultJson(throwable);
             }
         };
