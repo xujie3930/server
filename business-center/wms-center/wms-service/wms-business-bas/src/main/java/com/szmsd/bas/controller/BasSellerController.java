@@ -4,6 +4,7 @@ import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
+import com.szmsd.bas.vo.BasSellerWrapVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -189,7 +190,7 @@ public class BasSellerController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:getRealState')")
     @GetMapping("/queryCkPushFlag/{sellerCode}")
     @ApiOperation(value = "查询实名状态")
-    public R<Boolean> queryCkPushFlag(@PathVariable("sellerCode") String sellerCode) {
+    public R<BasSellerWrapVO> queryCkPushFlag(@PathVariable("sellerCode") String sellerCode) {
         return R.ok(this.basSellerService.queryCkPushFlag(sellerCode));
     }
 

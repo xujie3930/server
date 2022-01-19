@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BasSellerInfoVO;
+import com.szmsd.bas.vo.BasSellerWrapVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 
@@ -131,7 +132,7 @@ public interface IBasSellerService extends IService<BasSeller> {
      * @param sellerCode 用户code
      * @return false 不推送
      */
-    Boolean queryCkPushFlag(String sellerCode);
+    BasSellerWrapVO queryCkPushFlag(String sellerCode);
 
 
     void updateUserInfoForMan();

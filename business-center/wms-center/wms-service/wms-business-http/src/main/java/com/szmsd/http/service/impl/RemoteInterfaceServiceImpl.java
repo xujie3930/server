@@ -109,11 +109,16 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             if (CollectionUtils.isNotEmpty(plugins)) {
                 handlerPlugins.addAll(plugins);
             }
+            String Authorization = requestHeaders.get("_authorization_code");
+            requestHeaders.remove("_authorization_code");
             for (String plugin : handlerPlugins) {
                 DomainPlugin domainPlugin = getDomainPlugin(plugin, domain);
                 requestHeaders = domainPlugin.headers(requestHeaders);
                 uri = domainPlugin.uri(uri);
                 requestBody = domainPlugin.requestBody(requestBody);
+            }
+            if (StringUtils.isNotEmpty(Authorization)) {
+                requestHeaders.put("Authorization", Authorization);
             }
             // 二进制
             Boolean binary = dto.getBinary();

@@ -1,6 +1,7 @@
 package com.szmsd.http.plugins;
 
 import com.szmsd.bas.api.feign.BasSellerFeignService;
+import com.szmsd.bas.vo.BasSellerWrapVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.http.util.DomainInterceptorUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -34,19 +35,22 @@ public class Ck1DomainInterceptor implements DomainInterceptor {
             }
         }
         boolean returnValue = true;
+        String authorizationCode = "";
         try {
             // 根据客户编码查询状态信息
-            R<Boolean> booleanR = this.basSellerFeignService.queryCkPushFlag(sellerCode);
-            if (null != booleanR) {
-                Boolean aBoolean = booleanR.getData();
-                if (null != aBoolean) {
-                    returnValue = aBoolean;
+            R<BasSellerWrapVO> r = this.basSellerFeignService.queryCkPushFlag(sellerCode);
+            if (null != r) {
+                BasSellerWrapVO wrapVO = r.getData();
+                if (null != wrapVO) {
+                    returnValue = wrapVO.getPushFlag();
+                    authorizationCode = wrapVO.getAuthorizationCode();
                 }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
         headers.put("_return_value", String.valueOf(returnValue));
+        headers.put("_authorization_code", authorizationCode);
         // 默认返回true
         return returnValue;
     }
