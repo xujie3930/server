@@ -4,6 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.returnex.api.feign.serivice.IReturnExpressFeignService;
 import com.szmsd.returnex.dto.wms.ReturnArrivalReqDTO;
 import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
+import com.szmsd.returnex.vo.ReturnExpressVO;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,11 @@ public class ReturnExpressFeignFallback implements FallbackFactory<IReturnExpres
 
             @Override
             public R<Integer> saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<ReturnExpressVO> updateTrackNoByOutBoundNo(String outBoundNo, String trackNo) {
                 return R.convertResultJson(throwable);
             }
         };

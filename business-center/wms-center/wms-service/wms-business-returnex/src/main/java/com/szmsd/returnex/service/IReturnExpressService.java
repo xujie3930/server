@@ -107,4 +107,6 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
     int saveProcessingInfoFromVms(ReturnProcessingReqDTO returnProcessingReqDTO);
 
     void importByTemplate(MultipartFile multipartFile);
+
+    void updateTrackNoByOutBoundNo(String outBoundNo, String trackNo);
 }

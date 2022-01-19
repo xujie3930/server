@@ -32,6 +32,9 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
         if (ignoreConfig.isEnabled()) {
             // 1. 获取Authorization
             String authorization = request.getHeaders().getFirst("Authorization");
+            if (StringUtils.isEmpty(authorization)) {
+                authorization = request.getHeaders().getFirst("authorization");
+            }
             String ip = request.getHeaders().getFirst("Gateway-X-Access-IP");
             String path = request.getURI().getPath();
             boolean jump = false;
