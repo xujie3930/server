@@ -101,6 +101,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private String applicationName;
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private IDelOutboundExceptionService delOutboundExceptionService;
 
     @Override
     public int shipmentPacking(Long id) {
@@ -156,6 +158,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 try {
                     ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, ShipmentEnum.END, ShipmentEnum.BEGIN);
                     applicationContainer.action();
+                    if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                        this.delOutboundExceptionService.updateTrackNoByOutBoundNo(delOutbound.getOrderNo());
+                    }
                     logger.info("(3)完成操作，timer:{}", timer.intervalRestart());
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);

@@ -28,11 +28,13 @@ import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
 import com.szmsd.delivery.imported.*;
 import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
+import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
@@ -97,6 +99,8 @@ public class DelOutboundController extends BaseController {
     private BaseProductClientService baseProductClientService;
     @Autowired
     private IDelOutboundBringVerifyAsyncService delOutboundBringVerifyAsyncService;
+    @Autowired
+    private IDelOutboundCompletedService delOutboundCompletedService;
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/page")
@@ -617,7 +621,15 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 重派", position = 2200)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<DelOutboundAddResponse> reassign(@RequestBody DelOutboundDto dto) {
-        return R.ok(delOutboundService.reassign(dto));
+        // 处理重派逻辑
+        DelOutboundAddResponse delOutboundAddResponse = delOutboundService.reassign(dto);
+        if (null != delOutboundAddResponse
+                && null != delOutboundAddResponse.getStatus()
+                && delOutboundAddResponse.getStatus()) {
+            // 添加提审记录
+            this.delOutboundCompletedService.add(delOutboundAddResponse.getOrderNo(), DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
+        }
+        return R.ok(delOutboundAddResponse);
     }
 
 }

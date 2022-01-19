@@ -20,7 +20,6 @@ import com.szmsd.delivery.service.wrapper.ApplicationContainer;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
-import com.szmsd.http.config.CkConfig;
 import com.szmsd.http.util.Ck1DomainPluginUtil;
 import com.szmsd.http.util.DomainInterceptorUtil;
 import org.apache.commons.collections4.CollectionUtils;
