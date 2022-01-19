@@ -636,6 +636,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public void htpShipmentLabel(DelOutbound delOutbound) {
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            return;
+        }
         DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
         String pathname = null;
         // 如果是批量出库，将批量出库上传的文件和标签文件合并在一起传过去
@@ -734,6 +737,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public void shipmentShipping(DelOutbound delOutbound) {
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            return;
+        }
         ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
         shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
         shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
@@ -764,6 +770,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public void shipmentShippingEx(DelOutbound delOutbound, String exRemark) {
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            return;
+        }
         ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
         shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
         shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());

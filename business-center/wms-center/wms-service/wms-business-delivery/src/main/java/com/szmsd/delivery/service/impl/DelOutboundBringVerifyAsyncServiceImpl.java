@@ -4,8 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.enums.DelOutboundConstant;
+import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
+import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.ApplicationContainer;
 import com.szmsd.delivery.service.wrapper.ApplicationContext;
@@ -34,6 +37,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
     private String applicationName;
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private IDelOutboundCompletedService delOutboundCompletedService;
 
     @Override
     public void bringVerifyAsync(String orderNo) {
@@ -84,6 +89,10 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
             // 修改状态为提审中
             this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
             applicationContainer.action();
+            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                // 增加出库单已取消记录，异步处理，定时任务
+                this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
+            }
             logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
             // 回滚操作
