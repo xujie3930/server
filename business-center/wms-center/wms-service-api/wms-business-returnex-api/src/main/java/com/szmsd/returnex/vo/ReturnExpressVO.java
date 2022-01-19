@@ -3,6 +3,7 @@ package com.szmsd.returnex.vo;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
@@ -113,11 +114,11 @@ public class ReturnExpressVO {
     @ApiModelProperty(value = "申请处理方式编码")
     @Excel(name = "申请处理方式编码")
     private String applyProcessMethodStr;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "到仓时间")
     @Excel(name = "到仓时间")
     private LocalDateTime arrivalTime;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "完成时间")
     @Excel(name = "完成时间")
     private LocalDateTime finishTime;
@@ -162,13 +163,14 @@ public class ReturnExpressVO {
     List<ReturnExpressGoodVO> goodList;
 
     /**---ADD----*/
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "过期时间")
     @Excel(name = "过期时间")
     private Date expireTime;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "处理时间")
     @Excel(name = "处理时间")
-    private String processTime;
+    private Date processTime;
 
     @ApiModelProperty(value = "客户备注")
     @Excel(name = "客户备注")
