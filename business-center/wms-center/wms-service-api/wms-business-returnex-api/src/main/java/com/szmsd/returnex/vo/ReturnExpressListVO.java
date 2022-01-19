@@ -82,11 +82,11 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "新物流跟踪号 改发跟踪号")
     @Excel(name = "改发跟踪号")
     private String scanCodeNew;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "到仓时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "到仓时间")
     private Date arrivalTime;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "处理时间")
     @Excel(name = "处理时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date processTime;
@@ -94,6 +94,7 @@ public class ReturnExpressListVO implements Serializable {
     /**
      * ---ADD----
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "过期时间")
     @Excel(name = "过期时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date expireTime;
@@ -133,7 +134,7 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "实际处理方式编码", hidden = true)
     private String applyProcessMethodStr;
 
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "完成时间")
     private LocalDateTime finishTime;
 

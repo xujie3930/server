@@ -119,6 +119,12 @@ public class ReturnExpressServerController extends BaseController {
         return R.ok(returnExpressService.getInfo(id));
     }
 
+    @PatchMapping("/updateTrackNo/byOutBoundNo/{outBoundNo}/{trackNo}")
+    @ApiOperation(value = "更新运单跟踪号-根据出库单号", notes = "退件后重派创建新出库单,回调接口")
+    public R<ReturnExpressVO> updateTrackNoByOutBoundNo(@PathVariable(value = "outBoundNo") String outBoundNo, @PathVariable(value = "trackNo") String trackNo) {
+        returnExpressService.updateTrackNoByOutBoundNo(outBoundNo, trackNo);
+        return R.ok();
+    }
     /**
      * 新建退件单
      * 用户新增退件单，本地化数据，并推送给WMS

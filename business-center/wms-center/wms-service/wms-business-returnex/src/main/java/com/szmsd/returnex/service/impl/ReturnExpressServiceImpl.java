@@ -47,6 +47,7 @@ import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -551,18 +552,18 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 dealStatusStr = configStatus.getDealStatus().getWmsReceivedDealWayStr();
             }
         }
-
+        ReturnExpressServiceAddDTO expressUpdateServiceDTO = (ReturnExpressServiceAddDTO) expressUpdateDTO;
         int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
 
-                .set(ReturnExpressDetail::getProcessTime,new Date())
+                .set(ReturnExpressDetail::getProcessTime, new Date())
                 .set(ReturnExpressDetail::getSku, expressUpdateDTO.getSku())
                 .set(ReturnExpressDetail::getDealStatus, dealStatus)
                 .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
                 .set(expressUpdateDTO.getProcessTypeStr() != null, ReturnExpressDetail::getProcessTypeStr, expressUpdateDTO.getProcessTypeStr())
-                .set(StringUtil.isNotBlank(expressUpdateDTO.getFromOrderNo()), ReturnExpressDetail::getFromOrderNo, expressUpdateDTO.getFromOrderNo())
+                .set(StringUtil.isNotBlank(expressUpdateServiceDTO.getFromOrderNoNew()), ReturnExpressDetail::getFromOrderNoNew, expressUpdateServiceDTO.getFromOrderNoNew())
                 .last("LIMIT 1")
         );
         AssertUtil.isTrue(update == 1, "更新异常,请勿重复提交!");
@@ -701,6 +702,17 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         return returnExpressVO;
     }
 
+    @Async
+    @Override
+    public void updateTrackNoByOutBoundNo(String outBoundNo, String trackNo) {
+        if (StringUtils.isBlank(outBoundNo)) return;
+        baseMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
+                .eq(ReturnExpressDetail::getFromOrderNoNew, outBoundNo)
+                .set(ReturnExpressDetail::getScanCodeNew, trackNo)
+                .set(ReturnExpressDetail::getFinishTime,LocalDateTime.now())
+        );
+    }
+
     @Override
     public void importByTemplate(MultipartFile multipartFile) {
         try (InputStream inputStream = multipartFile.getInputStream()) {
@@ -721,7 +733,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     errorMsg.append(constraintViolation.getMessage());
                 }
                 if (StringUtils.isNotBlank(errorMsg.toString())) {
-                    errorMsgList.add(String.format("请检查第%s条数据:参数校验异常：%s", i+1, errorMsg.toString()));
+                    errorMsgList.add(String.format("请检查第%s条数据:参数校验异常：%s", i + 1, errorMsg.toString()));
                 }
             }
             if (CollectionUtils.isNotEmpty(errorMsgList)) {
