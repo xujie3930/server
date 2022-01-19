@@ -273,16 +273,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 BigDecimal declareValue = BigDecimal.ZERO;
-                Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
                 for (DelOutboundDetail detail : detailList) {
-                    String sku = detail.getSku();
-                    BaseProduct product = productMap.get(sku);
-                    if (null == product) {
-                        throw new CommonException("400", "查询SKU[" + sku + "]信息失败");
-                    }
                     BigDecimal productDeclaredValue;
-                    if (null != product.getDeclaredValue()) {
-                        productDeclaredValue = BigDecimal.valueOf(product.getDeclaredValue());
+                    if (null != detail.getDeclaredValue()) {
+                        productDeclaredValue = BigDecimal.valueOf(detail.getDeclaredValue());
                     } else {
                         productDeclaredValue = BigDecimal.ZERO;
                     }
