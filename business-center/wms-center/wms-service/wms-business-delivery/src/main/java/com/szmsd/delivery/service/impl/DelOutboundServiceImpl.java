@@ -491,7 +491,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (StringUtils.isEmpty(sellerCode)) {
                 throw new CommonException("400", "操作失败，客户代码不能为空");
             }
-            delOutbound.setOrderNo(orderNo = ("CK" + sellerCode + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
+            String prefix = "CK";
+            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(dto.getReassignType())) {
+                prefix = "RE" + prefix;
+            }
+            delOutbound.setOrderNo(orderNo = (prefix + sellerCode + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
             // 默认状态
             delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
             // 默认异常状态

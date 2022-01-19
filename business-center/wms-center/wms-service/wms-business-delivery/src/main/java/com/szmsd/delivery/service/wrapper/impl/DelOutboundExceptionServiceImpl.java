@@ -1,38 +1,35 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
-import cn.hutool.core.codec.Base64;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.core.utils.FileStream;
-import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.dto.DelOutboundAgainTrackingNoDto;
+import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundService;
-import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
-import com.szmsd.http.dto.*;
+import com.szmsd.http.dto.ChargeWrapper;
+import com.szmsd.http.dto.ProblemDetails;
+import com.szmsd.http.dto.ResponseObject;
 import com.szmsd.http.vo.PricedProductInfo;
-import com.szmsd.http.vo.ResponseVO;
-import org.apache.commons.io.FileUtils;
+import com.szmsd.returnex.api.feign.serivice.IReturnExpressFeignService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
 
 @Service
@@ -52,6 +49,9 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
     private IHtpOutboundClientService htpOutboundClientService;
     @Autowired
     private IHtpCarrierClientService htpCarrierClientService;
+    @SuppressWarnings({"all"})
+    @Autowired
+    private IReturnExpressFeignService returnExpressFeignService;
 
     @Transactional
     @Override
@@ -183,5 +183,15 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
         Object[] params = new Object[]{delOutbound, productCode};
         DelOutboundOperationLogEnum.AGAIN_TRACKING_NO.listener(params);
         return update;
+    }
+
+    @Async
+    @Override
+    public void updateTrackNoByOutBoundNo(String orderNo) {
+        DelOutbound delOutbound = this.delOutboundService.getByOrderNo(orderNo);
+        // 判断是否为重派件
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            this.returnExpressFeignService.updateTrackNoByOutBoundNo(orderNo, delOutbound.getTrackingNo());
+        }
     }
 }

@@ -105,6 +105,11 @@
                 <artifactId>wms-business-report-api</artifactId>
                 <version>${business.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-returnex-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -1,5 +1,7 @@
 package com.szmsd.gateway.filter;
 
+import com.alibaba.fastjson.JSON;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.gateway.config.IgnoreConfig;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,8 +53,12 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
             }
             logger.info("当前请求的url:{}, method:{}, token:{}, ip:{}, jump:{}", path, request.getMethodValue(), authorization, ip, jump);
             if (!jump && StringUtils.isEmpty(authorization)) {
-                response.setStatusCode(HttpStatus.UNAUTHORIZED);
-                return response.setComplete();
+                response.setStatusCode(HttpStatus.FORBIDDEN);
+                R<?> r = new R<>();
+                r.setCode(HttpStatus.FORBIDDEN.value());
+                r.setMsg("token无效或已过期！");
+                response.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
+                return response.writeWith(Mono.just(response.bufferFactory().wrap(JSON.toJSONBytes(r))));
             }
         }
         return chain.filter(exchange);
