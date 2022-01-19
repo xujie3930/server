@@ -778,6 +778,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                return;
+            }
             // 推单到WMS
             // 重派出库单不扣库存
             String refOrderNo = "";

@@ -273,16 +273,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 BigDecimal declareValue = BigDecimal.ZERO;
-                Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
                 for (DelOutboundDetail detail : detailList) {
-                    String sku = detail.getSku();
-                    BaseProduct product = productMap.get(sku);
-                    if (null == product) {
-                        throw new CommonException("400", "查询SKU[" + sku + "]信息失败");
-                    }
                     BigDecimal productDeclaredValue;
-                    if (null != product.getDeclaredValue()) {
-                        productDeclaredValue = BigDecimal.valueOf(product.getDeclaredValue());
+                    if (null != detail.getDeclaredValue()) {
+                        productDeclaredValue = BigDecimal.valueOf(detail.getDeclaredValue());
                     } else {
                         productDeclaredValue = BigDecimal.ZERO;
                     }
@@ -671,6 +665,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public void htpShipmentLabel(DelOutbound delOutbound) {
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            return;
+        }
         DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
         String pathname = null;
         // 如果是批量出库，将批量出库上传的文件和标签文件合并在一起传过去
@@ -769,6 +766,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public void shipmentShipping(DelOutbound delOutbound) {
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            return;
+        }
         ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
         shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
         shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
@@ -799,6 +799,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public void shipmentShippingEx(DelOutbound delOutbound, String exRemark) {
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            return;
+        }
         ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
         shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
         shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());

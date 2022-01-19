@@ -9,12 +9,11 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.DelCk1OutboundDto;
-import com.szmsd.delivery.enums.DelCk1RequestLogConstant;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelCk1RequestLogEvent;
 import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
+import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.ApplicationContainer;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
@@ -51,6 +50,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
     private String applicationName;
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private IDelOutboundCompletedService delOutboundCompletedService;
 
     @Override
     public void bringVerifyAsync(String orderNo) {
@@ -158,6 +159,10 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 ck1RequestLog.setRequestBody(JSON.toJSONString(ck1OutboundDto));
                 ck1RequestLog.setType(DelCk1RequestLogConstant.Type.create.name());
                 EventUtil.publishEvent(new DelCk1RequestLogEvent(ck1RequestLog));
+            }
+            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                // 增加出库单已取消记录，异步处理，定时任务
+                this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
             logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
