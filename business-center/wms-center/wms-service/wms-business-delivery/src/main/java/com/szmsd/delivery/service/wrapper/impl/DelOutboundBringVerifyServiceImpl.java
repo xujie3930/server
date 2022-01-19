@@ -260,58 +260,16 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             // 跟一件代发的逻辑一样
             // 这里明细的重量尺寸是定死的1*1*1 10g
             if (PricingEnum.SKU.equals(pricingEnum)) {
-                // 查询包材的信息
-                Set<String> skus = new HashSet<>();
                 for (DelOutboundDetail detail : detailList) {
-                    // sku包材信息
-                    if (StringUtils.isNotEmpty(detail.getBindCode())) {
-                        skus.add(detail.getBindCode());
-                    }
-                }
-                Map<String, BaseProduct> bindCodeMap = null;
-                if (!skus.isEmpty()) {
-                    BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
-                    baseProductConditionQueryDto.setSkus(new ArrayList<>(skus));
-                    List<BaseProduct> basProductList = this.baseProductClientService.queryProductList(baseProductConditionQueryDto);
-                    if (CollectionUtils.isNotEmpty(basProductList)) {
-                        bindCodeMap = basProductList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v1, v2) -> v1));
-                    }
-                }
-                if (null == bindCodeMap) {
-                    bindCodeMap = Collections.emptyMap();
-                }
-                Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
-                for (DelOutboundDetail detail : detailList) {
-                    String sku = detail.getSku();
-                    BaseProduct product = productMap.get(sku);
-                    if (null == product) {
-                        throw new CommonException("400", "查询SKU[" + sku + "]信息失败");
-                    }
                     BigDecimal declaredValue;
-                    if (null != product.getDeclaredValue()) {
-                        declaredValue = BigDecimal.valueOf(product.getDeclaredValue());
+                    if (null != detail.getDeclaredValue()) {
+                        declaredValue = BigDecimal.valueOf(detail.getDeclaredValue());
                     } else {
                         declaredValue = BigDecimal.ZERO;
                     }
-                    packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
-                            new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
-                            Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, product.getProductAttribute()));
-                    // 判断有没有包材
-                    String bindCode = detail.getBindCode();
-                    if (StringUtils.isNotEmpty(bindCode)) {
-                        BaseProduct baseProduct = bindCodeMap.get(bindCode);
-                        if (null == baseProduct) {
-                            throw new CommonException("400", "查询SKU[" + sku + "]的包材[" + bindCode + "]信息失败");
-                        }
-                        if (null != baseProduct.getDeclaredValue()) {
-                            declaredValue = BigDecimal.valueOf(baseProduct.getDeclaredValue());
-                        } else {
-                            declaredValue = BigDecimal.ZERO;
-                        }
-                        packageInfos.add(new PackageInfo(new Weight(BigDecimal.TEN, "g"),
-                                new Packing(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, "cm"),
-                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, ""));
-                    }
+                    packageInfos.add(new PackageInfo(new Weight(BigDecimal.TEN, "g"),
+                            new Packing(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, "cm"),
+                            Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, ""));
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 BigDecimal declareValue = BigDecimal.ZERO;
