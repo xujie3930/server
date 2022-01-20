@@ -482,7 +482,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 packageItems.add(new PackageItem(detail.getProductName(), detail.getProductNameChinese(), declaredValue, 10,
                         new Size(1D, 1D, 1D),
-                        Utils.valueOfLong(delOutbound.getBoxNumber()), detail.getHsCode(), String.valueOf(delOutbound.getId()), delOutbound.getNewSku()));
+                        Utils.valueOfLong(detail.getQty()), detail.getHsCode(), String.valueOf(detail.getId()), detail.getSku()));
             }
         } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
             List<String> skus = new ArrayList<>();
