@@ -21,8 +21,8 @@ import java.util.ArrayList;
  * @Author: 11
  * @Date: 2021/4/1 18:50
  */
-//@SpringBootTest
-//@RunWith(SpringRunner.class)
+@SpringBootTest
+@RunWith(SpringRunner.class)
 public class TestC {
 
     @Resource
