@@ -647,6 +647,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             boolean b = configStatus.getDestroy().equals(processType) || unpackAndPutOnTheShelf;
             AssertUtil.isTrue(b, "拆包检查后只能按明细上架/销毁");
         }
+        AssertUtil.isTrue(checkoutRefNo(expressUpdateDTO.getReturnNo()),"退件单号重复");
     }
 
     /**
@@ -719,6 +720,12 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 .set(ReturnExpressDetail::getScanCodeNew, trackNo)
                 .set(ReturnExpressDetail::getFinishTime, LocalDateTime.now())
         );
+    }
+
+    @Override
+    public Boolean checkoutRefNo(String refNo) {
+        if (StringUtils.isBlank(refNo)) return true;
+        return baseMapper.selectCount(Wrappers.<ReturnExpressDetail>lambdaQuery().eq(ReturnExpressDetail::getReturnNo, refNo)) == 0;
     }
 
     @Override

@@ -217,4 +217,11 @@ public class ReturnExpressServerController extends BaseController {
         returnExpressService.importByTemplate(multipartFile);
         return R.ok();
     }
+
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @GetMapping("/checkoutRefNo/{refNo}")
+    @ApiOperation(value = "校验退件单号重复是否重复")
+    public R<Boolean> checkoutRefNo(@PathVariable("refNo") String refNo) {
+        return R.ok(returnExpressService.checkoutRefNo(refNo));
+    }
 }
