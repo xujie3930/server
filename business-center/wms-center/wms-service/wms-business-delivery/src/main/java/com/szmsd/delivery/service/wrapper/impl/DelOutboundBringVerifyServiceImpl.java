@@ -467,9 +467,23 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         List<PackageItem> packageItems = new ArrayList<>();
         int weightInGram = 0;
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+            /*
             packageItems.add(new PackageItem(delOutbound.getOrderNo(), delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), weightInGram = Utils.valueOfDouble(delOutbound.getWeight()),
                     new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                     1, "", String.valueOf(delOutbound.getId()), delOutbound.getOrderNo()));
+
+             */
+            for (DelOutboundDetail detail : detailList) {
+                Double declaredValue;
+                if (null != detail.getDeclaredValue()) {
+                    declaredValue = detail.getDeclaredValue();
+                } else {
+                    declaredValue = 0D;
+                }
+                packageItems.add(new PackageItem(detail.getProductName(), detail.getProductNameChinese(), declaredValue, 10,
+                        new Size(1D, 1D, 1D),
+                        Utils.valueOfLong(delOutbound.getBoxNumber()), detail.getHsCode(), String.valueOf(delOutbound.getId()), delOutbound.getNewSku()));
+            }
         } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
             List<String> skus = new ArrayList<>();
             skus.add(delOutbound.getNewSku());
