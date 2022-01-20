@@ -28,7 +28,7 @@ public class RunnableExecute {
     /**
      * 定时任务：超时未处理的预报单；每天24点执行一次
      */
-    //@Scheduled(cron = "0 0 0,23 * * *")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void executeOperation() {
         log.info("【return_express】超时未处理的预报单 executeOperation() start...");
         RLock lock = redissonClient.getLock("executeOperation");

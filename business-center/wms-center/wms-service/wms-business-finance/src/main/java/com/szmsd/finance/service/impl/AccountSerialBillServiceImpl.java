@@ -185,11 +185,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                     x.setOrderTime(queryResultNo.getOrderTime());
                 });
             }
-            if (!(StringUtils.isNotBlank(x.getChargeType()) && positiveNumber.contains(x.getChargeType()))) {
+            if (!(StringUtils.isNotBlank(x.getChargeCategory()) && positiveNumber.contains(x.getChargeCategory()))) {
                 // 设置
-                Optional.ofNullable(x.getAmount()).ifPresent(amount -> {
-                    x.setAmount(amount.negate());
-                });
+                Optional.ofNullable(x.getAmount()).ifPresent(amount -> x.setAmount(amount.negate()));
             }
         }).count();
 
