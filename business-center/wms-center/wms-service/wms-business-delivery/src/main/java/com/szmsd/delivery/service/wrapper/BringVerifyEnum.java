@@ -19,6 +19,7 @@ import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
@@ -346,6 +347,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setShipmentOrderLabelUrl("");
             // 推单WMS
             updateDelOutbound.setRefOrderNo("");
+            // 提审失败
+            updateDelOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
             delOutboundService.updateById(updateDelOutbound);
             super.rollback(context);
         }
