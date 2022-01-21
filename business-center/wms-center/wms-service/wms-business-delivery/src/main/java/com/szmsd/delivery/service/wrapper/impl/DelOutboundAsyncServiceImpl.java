@@ -27,6 +27,7 @@ import com.szmsd.delivery.event.DelCk1RequestLogEvent;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
@@ -103,6 +104,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private RedissonClient redissonClient;
     @Autowired
     private IDelOutboundExceptionService delOutboundExceptionService;
+    @Autowired
+    private IDelOutboundCompletedService delOutboundCompletedService;
 
     @Override
     public int shipmentPacking(Long id) {
@@ -160,6 +163,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     applicationContainer.action();
                     if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                         this.delOutboundExceptionService.updateTrackNoByOutBoundNo(delOutbound.getOrderNo());
+                        // 添加完成状态
+                        // 增加出库单已完成记录，异步处理，定时任务
+                        List<String> orderNoList = new ArrayList<>();
+                        orderNoList.add(delOutbound.getOrderNo());
+                        this.delOutboundCompletedService.add(orderNoList, DelOutboundOperationTypeEnum.SHIPPED.getCode());
                     }
                     logger.info("(3)完成操作，timer:{}", timer.intervalRestart());
                 } catch (Exception e) {
