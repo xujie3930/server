@@ -20,10 +20,10 @@ import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.util.ITextPdfFontUtil;
 import com.szmsd.delivery.util.ITextPdfUtil;
-import com.szmsd.delivery.util.Utils;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -195,7 +195,7 @@ public final class DelOutboundServiceImplUtil {
     }
 
     private static void throwCommonException(String code, String msg) {
-        log.error("【throwCommonException】{},{}",code,msg);
+        log.error("【throwCommonException】{},{}", code, msg);
         throw new CommonException(code, msg);
     }
 
@@ -270,6 +270,14 @@ public final class DelOutboundServiceImplUtil {
         }
         QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
         QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
+        // 重派订单
+        String reassignType = queryDto.getReassignType();
+        if (StringUtils.isEmpty(reassignType)) {
+            // 如果没有传重派订单的逻辑，默认就查询不是重派订单
+            reassignType = DelOutboundConstant.REASSIGN_TYPE_N;
+        }
+        queryWrapper.eq("o.reassign_type", reassignType);
+
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
     }

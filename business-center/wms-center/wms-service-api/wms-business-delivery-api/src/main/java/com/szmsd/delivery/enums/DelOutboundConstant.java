@@ -33,8 +33,9 @@ public class DelOutboundConstant {
 
     /**
      * Y        是重派
-     * 空字符串 不是重派
-     * 默认值空字符串
+     * N        不是重派
+     * 默认值N
      */
     public static final String REASSIGN_TYPE_Y = "Y";
+    public static final String REASSIGN_TYPE_N = "N";
 }
