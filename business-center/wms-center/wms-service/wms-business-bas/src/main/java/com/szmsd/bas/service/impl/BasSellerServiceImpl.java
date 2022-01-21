@@ -570,7 +570,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
     public BasSellerWrapVO queryCkPushFlag(String sellerCode) {
         BasSeller basSeller = super.getOne(Wrappers.<BasSeller>lambdaQuery()
                 .eq(BasSeller::getSellerCode, sellerCode)
-                .select(BasSeller::getPushFlag, BasSeller::getId, BasSeller::getSellerCode)
+                .select(BasSeller::getPushFlag, BasSeller::getId, BasSeller::getSellerCode,BasSeller::getAuthorizationCode)
         );
         BasSellerWrapVO wrapVO = new BasSellerWrapVO();
         wrapVO.setPushFlag(true);
