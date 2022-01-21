@@ -67,7 +67,7 @@ public interface BasSellerFeignService {
     @ApiOperation(value = "获取模块详细信息", notes = "获取模块详细信息")
     R<BasSellerInfoVO> getInfoBySellerCode(@PathVariable("sellerCode") String sellerCode);
 
-    @GetMapping("/bas/seller/queryCkPushFlag/{sellerCode}")
+    @PostMapping("/bas/seller/queryCkPushFlag")
     @ApiOperation(value = "查询实名状态")
-    R<BasSellerWrapVO> queryCkPushFlag(@PathVariable("sellerCode") String sellerCode);
+    R<BasSellerWrapVO> queryCkPushFlag(@RequestBody String sellerCode);
 }
