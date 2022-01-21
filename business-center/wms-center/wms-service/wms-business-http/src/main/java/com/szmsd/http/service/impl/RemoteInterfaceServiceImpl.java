@@ -110,7 +110,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                 handlerPlugins.addAll(plugins);
             }
             String Authorization = requestHeaders.get("_authorization_code");
-            requestHeaders.remove("_authorization_code");
+            // requestHeaders.remove("_authorization_code");
             for (String plugin : handlerPlugins) {
                 DomainPlugin domainPlugin = getDomainPlugin(plugin, domain);
                 requestHeaders = domainPlugin.headers(requestHeaders);
