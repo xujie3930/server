@@ -35,6 +35,9 @@ public class Ck1DomainInterceptor implements DomainInterceptor {
                 sellerCode = wrapperSellerCode.substring(1, wrapperSellerCode.length() - 1);
             }
         }
+        if (StringUtils.isEmpty(sellerCode)) {
+            return true;
+        }
         boolean returnValue = true;
         String authorizationCode = "";
         try {

@@ -47,7 +47,7 @@ public class DelCk1RequestLogTimer {
             LambdaQueryWrapper<DelCk1RequestLog> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.select(DelCk1RequestLog::getId, DelCk1RequestLog::getOrderNo, DelCk1RequestLog::getRequestBody,
                     DelCk1RequestLog::getFailCount, DelCk1RequestLog::getNextRetryTime, DelCk1RequestLog::getType,
-                    DelCk1RequestLog::getUrl);
+                    DelCk1RequestLog::getUrl, DelCk1RequestLog::getRemark);
             queryWrapper.and(qw -> {
                 qw.eq(DelCk1RequestLog::getState, DelCk1RequestLogConstant.State.WAIT.name())
                         .or()
