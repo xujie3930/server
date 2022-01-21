@@ -118,6 +118,9 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                 requestBody = domainPlugin.requestBody(requestBody);
             }
             if (StringUtils.isNotEmpty(Authorization)) {
+                if (!Authorization.startsWith("Bearer")) {
+                    Authorization = "Bearer " + Authorization;
+                }
                 requestHeaders.put("Authorization", Authorization);
             }
             // 二进制
