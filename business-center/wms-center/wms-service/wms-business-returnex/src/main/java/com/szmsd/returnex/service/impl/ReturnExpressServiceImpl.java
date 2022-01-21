@@ -647,6 +647,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             boolean b = configStatus.getDestroy().equals(processType) || unpackAndPutOnTheShelf;
             AssertUtil.isTrue(b, "拆包检查后只能按明细上架/销毁");
         }
+        AssertUtil.isTrue(checkoutRefNo(expressUpdateDTO.getReturnNo()),"退件单号重复");
     }
 
     /**
@@ -684,9 +685,17 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Override
     public int expiredUnprocessedForecastOrder() {
         log.info("--------------更新过期未处理的预报单 开始--------------");
+        LocalDate localDate = LocalDate.now().minusDays(configStatus.getExpirationDays());
+        log.info("--------------更新过期未处理的预报单 小于 {} {} 开始--------------",configStatus.getExpirationDays(), localDate);
         int update = returnExpressMapper.update(null, Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getOverdue, 0)
-                .lt(BaseEntity::getUpdateTime, LocalDate.now().minusDays(configStatus.getExpirationDays()))
+                .isNull(ReturnExpressDetail::getExpireTime)
+                .lt(BaseEntity::getUpdateTime, localDate)
+                .set(ReturnExpressDetail::getOverdue, 1)
+        );
+        int update2 = returnExpressMapper.update(null, Wrappers.<ReturnExpressDetail>lambdaUpdate()
+                .eq(ReturnExpressDetail::getOverdue, 0)
+                .lt(ReturnExpressDetail::getExpireTime, localDate)
                 .set(ReturnExpressDetail::getOverdue, 1)
         );
         log.info("--------------更新过期未处理的预报单 结束--------------");
@@ -709,8 +718,14 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         baseMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getFromOrderNoNew, outBoundNo)
                 .set(ReturnExpressDetail::getScanCodeNew, trackNo)
-                .set(ReturnExpressDetail::getFinishTime,LocalDateTime.now())
+                .set(ReturnExpressDetail::getFinishTime, LocalDateTime.now())
         );
+    }
+
+    @Override
+    public Boolean checkoutRefNo(String refNo) {
+        if (StringUtils.isBlank(refNo)) return true;
+        return baseMapper.selectCount(Wrappers.<ReturnExpressDetail>lambdaQuery().eq(ReturnExpressDetail::getReturnNo, refNo)) == 0;
     }
 
     @Override
