@@ -164,4 +164,7 @@ public class PricedProductInfoVO {
     @ApiModelProperty(value = "装箱规则")
     private String packingRule;
 
+    @ApiModelProperty(value = "物流商code")
+    private String logisticsProviderCode;
+
 }
