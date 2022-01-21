@@ -50,4 +50,6 @@ public class DelOutboundListQueryDto extends QueryDto {
     @ApiModelProperty(value = "选中的ID")
     private List<Long> selectIds;
 
+    @ApiModelProperty(value = "重派")
+    private String reassignType;
 }
