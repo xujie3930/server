@@ -781,17 +781,16 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
-                return;
-            }
-            // 推单到WMS
-            // 重派出库单不扣库存
             String refOrderNo = "";
             if (!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
-                IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
-                refOrderNo = delOutboundBringVerifyService.shipmentCreate(delOutboundWrapperContext, delOutbound.getTrackingNo());
-                delOutbound.setRefOrderNo(refOrderNo);
-                DelOutboundOperationLogEnum.BRV_SHIPMENT_CREATE.listener(delOutbound);
+                // 推单到WMS
+                // 重派出库单不扣库存
+                if (!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                    IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+                    refOrderNo = delOutboundBringVerifyService.shipmentCreate(delOutboundWrapperContext, delOutbound.getTrackingNo());
+                    delOutbound.setRefOrderNo(refOrderNo);
+                    DelOutboundOperationLogEnum.BRV_SHIPMENT_CREATE.listener(delOutbound);
+                }
             }
             // 保存信息
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
