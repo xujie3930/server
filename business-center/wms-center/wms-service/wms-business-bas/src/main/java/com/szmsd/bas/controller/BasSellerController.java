@@ -188,9 +188,9 @@ public class BasSellerController extends BaseController{
         return R.ok(this.basSellerService.getRealState(sellerCode));
     }
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:getRealState')")
-    @GetMapping("/queryCkPushFlag/{sellerCode}")
+    @PostMapping("/queryCkPushFlag")
     @ApiOperation(value = "查询实名状态")
-    public R<BasSellerWrapVO> queryCkPushFlag(@PathVariable("sellerCode") String sellerCode) {
+    public R<BasSellerWrapVO> queryCkPushFlag(@RequestBody String sellerCode) {
         return R.ok(this.basSellerService.queryCkPushFlag(sellerCode));
     }
 
