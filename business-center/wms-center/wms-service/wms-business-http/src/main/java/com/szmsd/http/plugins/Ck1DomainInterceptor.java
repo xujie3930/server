@@ -1,5 +1,6 @@
 package com.szmsd.http.plugins;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.vo.BasSellerWrapVO;
 import com.szmsd.common.core.domain.R;
@@ -39,6 +40,7 @@ public class Ck1DomainInterceptor implements DomainInterceptor {
         try {
             // 根据客户编码查询状态信息
             R<BasSellerWrapVO> r = this.basSellerFeignService.queryCkPushFlag(sellerCode);
+            logger.info("获取返回的参数：{}", JSON.toJSONString(r));
             if (null != r) {
                 BasSellerWrapVO wrapVO = r.getData();
                 if (null != wrapVO) {
