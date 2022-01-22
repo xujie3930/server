@@ -228,10 +228,6 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         if (DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())) {
             return;
         }
-        // 重派
-        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
-            return;
-        }
         // 获取到处理状态
         String completedState = this.defaultValue(delOutbound.getCompletedState());
         String originCompletedState = completedState;
@@ -241,12 +237,15 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             if (lock.tryLock(0, TimeUnit.SECONDS)) {
                 // 空值默认处理
                 if (StringUtils.isEmpty(completedState)) {
-                    // 执行扣减库存
-                    try {
-                        this.deduction(delOutbound);
-                    } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
-                        throw new CommonException("500", "执行扣减库存失败，" + e.getMessage());
+                    // 重派订单不扣库存
+                    if (!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                        // 执行扣减库存
+                        try {
+                            this.deduction(delOutbound);
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                            throw new CommonException("500", "执行扣减库存失败，" + e.getMessage());
+                        }
                     }
                     completedState = "FEE_DE";
                 }
@@ -361,7 +360,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     completedState = "END";
                 }
                 // END
-                if ("END".equals(completedState)) {
+                // 重派订单不推出口1
+                if ("END".equals(completedState)
+                    && !DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                     // 推送给CK1
                     if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
                             || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
@@ -565,10 +566,6 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         if (DelOutboundStateEnum.CANCELLED.getCode().equals(delOutbound.getState())) {
             return;
         }
-        // 重派
-        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
-            return;
-        }
         // 获取到处理状态
         String cancelledState = this.defaultValue(delOutbound.getCancelledState());
         String originCancelledState = cancelledState;
@@ -577,7 +574,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         try {
             if (lock.tryLock(0, TimeUnit.SECONDS)) {
                 if (StringUtils.isEmpty(cancelledState)) {
-                    this.delOutboundService.unFreeze(delOutbound);
+                    // 重派订单不扣减库存
+                    if (!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                        this.delOutboundService.unFreeze(delOutbound);
+                    }
                     cancelledState = "UN_FEE";
                 }
                 // 销毁，自提，新SKU不扣物流费用
@@ -638,7 +638,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     }
                     cancelledState = "END";
                 }
-                if ("END".equals(cancelledState)) {
+                // 重派订单不推CK1
+                if ("END".equals(cancelledState)
+                    && !DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                     if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
                             || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
                         DelCk1RequestLog ck1RequestLog = new DelCk1RequestLog();
