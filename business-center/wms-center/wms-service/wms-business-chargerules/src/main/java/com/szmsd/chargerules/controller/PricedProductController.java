@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.chargerules.dto.CreateProductDTO;
 import com.szmsd.chargerules.dto.FreightCalculationDTO;
 import com.szmsd.chargerules.dto.PricedProductQueryDTO;
@@ -9,19 +10,25 @@ import com.szmsd.chargerules.vo.FreightCalculationVO;
 import com.szmsd.chargerules.vo.PricedProductInfoVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
+import com.szmsd.common.core.utils.HttpClientHelper;
+import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.vo.KeyValuePair;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.http.HttpRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Api(tags = {"PricedProduct"})
 @RestController
@@ -83,6 +90,19 @@ public class PricedProductController extends BaseController {
     public void exportFile(HttpServletResponse response, @RequestBody List<String> codes) {
         FileStream fileStream = iPricedProductService.exportFile(codes);
         super.fileStreamWrite(response, fileStream);
+    }
+
+    @ApiOperation(value = "获取PRC系统已定义的物流运输商的基础信息列表")
+    @GetMapping("/getCarriers")
+    public static R getCarriers(){
+        String requestUrl = "https://open-api.trackingyee.com/tracking/v1/carriers";
+        HttpResponseBody responseBody = HttpClientHelper.httpGet(requestUrl, null, new HashMap<String, String>());
+        String body = responseBody.getBody();
+        JSONObject resultObj = JSONObject.parseObject(body);
+        if ("OK".equalsIgnoreCase(resultObj.getString("status"))) {
+            return R.ok(resultObj.getJSONArray("data"));
+        }
+        return R.failed("查询异常！");
     }
 
 }
