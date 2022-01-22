@@ -94,13 +94,13 @@ public class PricedProductController extends BaseController {
 
     @ApiOperation(value = "获取PRC系统已定义的物流运输商的基础信息列表")
     @GetMapping("/getCarriers")
-    public R getCarriers(){
+    public static R getCarriers(){
         String requestUrl = "https://open-api.trackingyee.com/tracking/v1/carriers";
         HttpResponseBody responseBody = HttpClientHelper.httpGet(requestUrl, null, new HashMap<String, String>());
         String body = responseBody.getBody();
         JSONObject resultObj = JSONObject.parseObject(body);
         if ("OK".equalsIgnoreCase(resultObj.getString("status"))) {
-            return R.ok(resultObj.getJSONObject("data"));
+            return R.ok(resultObj.getJSONArray("data"));
         }
         return R.failed("查询异常！");
     }
