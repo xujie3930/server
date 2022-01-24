@@ -151,13 +151,18 @@ public class OperationServiceImpl implements IOperationService {
             double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00);
             operation = getOperationDetails(dto, OrderTypeEnum.Receipt, weight, "未找到" + dto.getOrderType() + "业务费用规则，请联系管理员");
             String unit = operation.getUnit();
+            BigDecimal discountRate = operation.getDiscountRate();
+            discountRate = Optional.ofNullable(discountRate).orElse(BigDecimal.ONE);
             if ("kg".equalsIgnoreCase(unit)) {
-                amount = operation.getFirstPrice().multiply(new BigDecimal((weight * vo.getQty() / 1000) + "").setScale(4, RoundingMode.HALF_UP)).add(amount);
+                BigDecimal multiply = operation.getFirstPrice().multiply(new BigDecimal((weight * vo.getQty() / 1000) + "").setScale(4, RoundingMode.HALF_UP));
+                multiply = multiply.multiply(discountRate).setScale(2, RoundingMode.HALF_UP);
+                amount = multiply.add(amount);
             } else {
-                amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
+                BigDecimal calculate = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty());
+                calculate = calculate.multiply(discountRate).setScale(2, RoundingMode.HALF_UP);
+                amount = calculate.add(amount);
             }
-            amount = amount.multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
-            log.info("orderNo: {} orderType: {} amount: {} getDiscountRate{}", dto.getOrderNo(), dto.getOrderType(), amount, operation.getDiscountRate());
+            log.info("orderNo: {} orderType: {} amount: {} getDiscountRate{}", dto.getOrderNo(), dto.getOrderType(), amount, discountRate);
         }
         return this.freezeBalance(dto, count, amount, operation);
     }
@@ -189,12 +194,17 @@ public class OperationServiceImpl implements IOperationService {
             double weight = Optional.ofNullable(skuWeightMap.get(vo.getSku())).orElse(0.00);
             operation = getOperationDetails(dto, weight, "未找到" + DelOutboundOrderEnum.getName(dto.getOrderType()) + "业务费用规则，请联系管理员");
             String unit = operation.getUnit();
+            BigDecimal discountRate = operation.getDiscountRate();
+            discountRate = Optional.ofNullable(discountRate).orElse(BigDecimal.ONE);
             if ("kg".equalsIgnoreCase(unit)) {
-                amount = operation.getFirstPrice().multiply(new BigDecimal(weight * vo.getQty() / 1000 + "").setScale(2, RoundingMode.HALF_UP)).setScale(2, RoundingMode.HALF_UP).add(amount);
+                BigDecimal bigDecimal = operation.getFirstPrice().multiply(new BigDecimal(weight * vo.getQty() / 1000 + "").setScale(2, RoundingMode.HALF_UP)).setScale(2, RoundingMode.HALF_UP);
+                bigDecimal = bigDecimal.multiply(discountRate).setScale(2, RoundingMode.HALF_UP);
+                amount = bigDecimal.add(amount);
             } else {
-                amount = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty()).add(amount);
+                BigDecimal calculate = payService.calculate(operation.getFirstPrice(), operation.getNextPrice(), vo.getQty());
+                calculate = calculate.multiply(discountRate).setScale(2, RoundingMode.HALF_UP);
+                amount = calculate.add(amount);
             }
-            amount = amount.multiply(operation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
             log.info("orderNo: {} orderType: {} amount: {}", dto.getOrderNo(), dto.getOrderType(), amount);
         }
         log.info("【执行】 - 3 calculateFreeze - 计算扣费 ---------------------------- {}", dto);
@@ -244,9 +254,10 @@ public class OperationServiceImpl implements IOperationService {
     private BigDecimal getBatchAmount(DelOutboundOperationVO dto, BigDecimal amount, Integer count, String type) {
         if (count != null && count > 0) {
             OperationRuleVO labelOperation = getOperationDetails(dto, Double.valueOf(count), "未找到" + DelOutboundOrderEnum.getName(type) + "业务费用规则，请联系管理员");
+            BigDecimal discountRate = labelOperation.getDiscountRate();
+            discountRate = Optional.ofNullable(discountRate).orElse(BigDecimal.ONE);
             BigDecimal calculate = payService.calculate(labelOperation.getFirstPrice(), labelOperation.getNextPrice(), count.longValue());
-            amount = amount.add(calculate);
-            amount = amount.multiply(labelOperation.getDiscountRate()).setScale(2, RoundingMode.HALF_UP);
+            amount = amount.add(calculate.multiply(discountRate).setScale(2, RoundingMode.HALF_UP));
         }
         return amount;
     }
