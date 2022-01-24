@@ -221,4 +221,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "重派")
     private String reassignType;
+
+    @ApiModelProperty(value = "原单号")
+    private String oldOrderNo;
 }
