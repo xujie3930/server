@@ -47,17 +47,9 @@ public class BasCarrierKeyword extends BaseEntity {
     @Excel(name = "状态（0正常 1停用）")
     private String status;
 
-    @ApiModelProperty(value = "创建人id")
-    @Excel(name = "创建人id")
-    private String createId;
-
     @ApiModelProperty(value = "创建人")
     @Excel(name = "创建人")
     private String createBy;
-
-    @ApiModelProperty(value = "修改者id")
-    @Excel(name = "修改者id")
-    private String updateId;
 
     @ApiModelProperty(value = "修改者名称")
     @Excel(name = "修改者名称")

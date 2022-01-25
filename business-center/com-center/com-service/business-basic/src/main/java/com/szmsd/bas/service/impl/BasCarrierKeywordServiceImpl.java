@@ -1,13 +1,12 @@
 package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.szmsd.bas.domain.BasCarrierKeyword;
-import com.szmsd.bas.mapper.BasCarrierKeywordMapper;
-import com.szmsd.bas.service.IBasCarrierKeywordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.dao.BasCarrierKeywordMapper;
+import com.szmsd.bas.domain.BasCarrierKeyword;
+import com.szmsd.bas.service.IBasCarrierKeywordService;
+import com.szmsd.common.core.utils.StringUtils;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.szmsd.common.core.domain.R;
 
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
     @Override
     public List<BasCarrierKeyword> selectBasCarrierKeywordList(BasCarrierKeyword basCarrierKeyword) {
         LambdaQueryWrapper<BasCarrierKeyword> where = new LambdaQueryWrapper<BasCarrierKeyword>()
-                .eq(BasCarrierKeyword::getCarrierCode, basCarrierKeyword.getCarrierCode())
+                .eq(StringUtils.isNotEmpty(basCarrierKeyword.getCarrierCode()), BasCarrierKeyword::getCarrierCode, basCarrierKeyword.getCarrierCode())
                 .orderByDesc(BasCarrierKeyword::getId);
         return baseMapper.selectList(where);
     }
