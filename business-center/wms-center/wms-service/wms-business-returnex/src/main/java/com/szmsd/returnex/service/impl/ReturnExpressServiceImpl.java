@@ -243,6 +243,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         if (StringUtils.isBlank(returnExpressAddDTO.getExpectedNo())) {
             String expectedNo = createExpectedNo();
             returnExpressAddDTO.setExpectedNo(expectedNo);
+            // 在没有退件单号的情况下，自动生成的预报单号，放在退件单号字段去。
+            if (StringUtils.isBlank(returnExpressAddDTO.getReturnNo())) {
+                returnExpressAddDTO.setReturnNo(expectedNo);
+            }
         }
         handleExpectedCreate(returnExpressAddDTO);
         return saveReturnExpressDetail(returnExpressAddDTO.convertThis(ReturnExpressDetail.class));
@@ -537,11 +541,14 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     public <T extends ReturnExpressAddDTO> int updateExpressInfo(T expressUpdateDTO) {
         //如果之前是销毁，已经结束了，到这都是要么销毁，要么拆包上架 还有WMS通知退件等待
         checkBeforeUpdate(expressUpdateDTO);
-        String dealStatus;
-        String dealStatusStr;
+        String dealStatus = "";
+        String dealStatusStr = "";
+
         if (expressUpdateDTO.getReturnSource().equals(configStatus.getReturnSource().getOmsReturn())) {
-            dealStatus = configStatus.getDealStatus().getWmsFinish();
-            dealStatusStr = configStatus.getDealStatus().getWmsFinishStr();
+            if (StringUtils.isNotBlank(expressUpdateDTO.getProcessType())) {
+                dealStatus = configStatus.getDealStatus().getWmsFinish();
+                dealStatusStr = configStatus.getDealStatus().getWmsFinishStr();
+            }
         } else {
             if (expressUpdateDTO.getProcessType().equals(configStatus.getUnpackingInspection())) {
                 dealStatus = configStatus.getDealStatus().getWmsWaitReceive();
@@ -559,8 +566,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
                 .set(ReturnExpressDetail::getProcessTime, new Date())
                 .set(ReturnExpressDetail::getSku, expressUpdateDTO.getSku())
-                .set(ReturnExpressDetail::getDealStatus, dealStatus)
-                .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
+                .set(StringUtils.isNotBlank(dealStatus), ReturnExpressDetail::getDealStatus, dealStatus)
+                .set(StringUtils.isNotBlank(dealStatusStr), ReturnExpressDetail::getDealStatusStr, dealStatusStr)
                 .set(expressUpdateDTO.getProcessType() != null, ReturnExpressDetail::getProcessType, expressUpdateDTO.getProcessType())
                 .set(expressUpdateDTO.getProcessTypeStr() != null, ReturnExpressDetail::getProcessTypeStr, expressUpdateDTO.getProcessTypeStr())
                 .set(StringUtil.isNotBlank(expressUpdateServiceDTO.getFromOrderNoNew()), ReturnExpressDetail::getFromOrderNoNew, expressUpdateServiceDTO.getFromOrderNoNew())
@@ -686,7 +693,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     public int expiredUnprocessedForecastOrder() {
         log.info("--------------更新过期未处理的预报单 开始--------------");
         LocalDate localDate = LocalDate.now().minusDays(configStatus.getExpirationDays());
-        log.info("--------------更新过期未处理的预报单 小于 {} {} 开始--------------",configStatus.getExpirationDays(), localDate);
+        log.info("--------------更新过期未处理的预报单 小于 {} {} 开始--------------", configStatus.getExpirationDays(), localDate);
         int update = returnExpressMapper.update(null, Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getOverdue, 0)
                 .isNull(ReturnExpressDetail::getExpireTime)
