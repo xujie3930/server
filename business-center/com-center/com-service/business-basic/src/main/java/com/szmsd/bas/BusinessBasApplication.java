@@ -3,6 +3,7 @@ package com.szmsd.bas;
 import com.szmsd.common.security.annotation.EnableCustomConfig;
 import com.szmsd.common.security.annotation.EnableRyFeignClients;
 import com.szmsd.common.swagger.annotation.EnableCustomSwagger2;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.client.SpringCloudApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableRyFeignClients
 @SpringCloudApplication
 @EnableScheduling
+@MapperScan(basePackages = "com.szmsd.bas.dao**")
 public class BusinessBasApplication {
 
     public static void main(String[] args) {
