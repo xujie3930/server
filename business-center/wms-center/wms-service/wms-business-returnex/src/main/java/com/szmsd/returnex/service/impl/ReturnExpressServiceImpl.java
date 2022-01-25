@@ -47,6 +47,7 @@ import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -318,14 +319,15 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         String returnSource = returnExpressAddDTO.getReturnSource();
         String processType = returnExpressAddDTO.getProcessType();
         String omsReturn = configStatus.getReturnSource().getOmsReturn();
-        if (returnSource.equals(omsReturn)) {
-            List<String> allProcessType = Arrays.asList(configStatus.getReassign(), configStatus.getDestroy());
-            AssertUtil.isTrue(allProcessType.contains(processType), "OMS退件预报只支持,销毁/重派");
-        } else {
-            List<String> allProcessType = Collections.singletonList(configStatus.getReassign());
-            AssertUtil.isTrue(!allProcessType.contains(processType), "退件预报暂不支持重派");
+        if (StringUtils.isNotBlank(processType)){
+            if (returnSource.equals(omsReturn)) {
+                List<String> allProcessType = Arrays.asList(configStatus.getReassign(), configStatus.getDestroy());
+                AssertUtil.isTrue(allProcessType.contains(processType), "OMS退件预报只支持,销毁/重派");
+            } else {
+                List<String> allProcessType = Collections.singletonList(configStatus.getReassign());
+                AssertUtil.isTrue(!allProcessType.contains(processType), "退件预报暂不支持重派");
+            }
         }
-
         // 校验重复条件
         String fromOrderNo = returnExpressAddDTO.getFromOrderNo();
         Integer integer = returnExpressMapper.selectCount(Wrappers.<ReturnExpressDetail>lambdaQuery()
@@ -559,8 +561,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 dealStatusStr = configStatus.getDealStatus().getWmsReceivedDealWayStr();
             }
         }
+        ReturnExpressDetail returnExpressDetail = new ReturnExpressDetail();
+        BeanUtils.copyProperties(expressUpdateDTO,returnExpressDetail);
         ReturnExpressServiceAddDTO expressUpdateServiceDTO = (ReturnExpressServiceAddDTO) expressUpdateDTO;
-        int update = returnExpressMapper.update(new ReturnExpressDetail(), Wrappers.<ReturnExpressDetail>lambdaUpdate()
+        int update = returnExpressMapper.update(returnExpressDetail, Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
 
