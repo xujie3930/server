@@ -3,11 +3,9 @@ package com.szmsd.common.core.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Consts;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
@@ -35,6 +33,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
 import org.apache.http.message.AbstractHttpMessage;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +48,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
@@ -173,7 +174,7 @@ public class HttpClientHelper {
     }
 
     /**
-     * 执行 http post 请求
+     * 执行 http post 请求，这里不支持表单的请求
      *
      * @param url         请求URL
      * @param requestBody 请求Body
@@ -182,6 +183,54 @@ public class HttpClientHelper {
      */
     public static HttpResponseBody httpPost(String url, String requestBody, Map<String, String> headerMap) {
         return execute(new HttpPost(url), requestBody, headerMap);
+    }
+
+    /**
+     * 执行 http post 请求，这里支持表单的请求
+     *
+     * @param url           请求URL
+     * @param requestParams 请求参数
+     * @param headerMap     请求Header
+     * @return 响应Body
+     */
+    public static HttpResponseBody httpPost(String url, Map<String, Object> requestParams, Map<String, String> headerMap) {
+        CloseableHttpClient httpClient = getHttpClient();
+        CloseableHttpResponse response = null;
+        try {
+            HttpPost httpPost = new HttpPost(url);
+            String result = null;
+            //添加http头信息
+            setHeader(httpPost, headerMap);
+            List<NameValuePair> paramList = new ArrayList<>();
+            for (String key : requestParams.keySet()) {
+                paramList.add(new BasicNameValuePair(key, String.valueOf(requestParams.get(key))));
+            }
+            HttpEntity httpEntity = new UrlEncodedFormEntity(paramList, "UTF-8");
+            httpPost.setEntity(httpEntity);
+            response = httpClient.execute(httpPost);
+            int status = response.getStatusLine().getStatusCode();
+            if (status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    result = EntityUtils.toString(entity, "UTF-8");
+                }
+            } else {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    result = EntityUtils.toString(entity, "UTF-8");
+                }
+            }
+            return new HttpResponseBody.HttpResponseBodyWrapper(status, result);
+        } catch (Exception e) {
+            try {
+                if (null != response)
+                    EntityUtils.consume(response.getEntity());
+            } catch (IOException e1) {
+                log.error(e.getMessage(), e1);
+            }
+            log.error(e.getMessage(), e);
+        }
+        return new HttpResponseBody.HttpResponseBodyEmpty();
     }
 
     /**
@@ -414,6 +463,9 @@ public class HttpClientHelper {
     }
 
     public static void setHeader(AbstractHttpMessage httpMessage, Map<String, String> headerMap) {
+        if (null == headerMap) {
+            return;
+        }
         //添加http头信息
         for (Map.Entry<String, String> entry : headerMap.entrySet()) {
             httpMessage.addHeader(entry.getKey(), String.valueOf(entry.getValue()));

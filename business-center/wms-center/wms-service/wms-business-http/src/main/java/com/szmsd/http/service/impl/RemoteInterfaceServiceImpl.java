@@ -4,18 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
-import com.szmsd.http.config.DomainConfig;
-import com.szmsd.http.config.DomainInterceptorConfig;
-import com.szmsd.http.config.DomainPluginConfig;
-import com.szmsd.http.config.DomainURIUtil;
+import com.szmsd.http.config.*;
 import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.event.EventUtil;
 import com.szmsd.http.event.RequestLogEvent;
-import com.szmsd.http.plugins.Domain;
-import com.szmsd.http.plugins.DomainInterceptor;
-import com.szmsd.http.plugins.DomainPlugin;
+import com.szmsd.http.plugins.*;
 import com.szmsd.http.service.ICommonRemoteService;
 import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.util.DomainUtil;
@@ -47,6 +42,8 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
     @Autowired
     private DomainConfig domainConfig;
     @Autowired
+    private DomainTokenConfig domainTokenConfig;
+    @Autowired
     private DomainInterceptorConfig domainInterceptorConfig;
     @Autowired
     private DomainPluginConfig domainPluginConfig;
@@ -76,12 +73,31 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
         } else {
             domain = DomainURIUtil.getDomain(uri);
         }
+        // 处理空值
         Map<String, String> requestHeaders = dto.getHeaders();
-        if (MapUtils.isEmpty(requestHeaders)) requestHeaders = new HashMap<>();
+        if (MapUtils.isEmpty(requestHeaders)) {
+            requestHeaders = new HashMap<>();
+        }
         // 请求body
         String requestBody = JSON.toJSONString(dto.getBody());
+        // 拦截器
         List<DomainInterceptor> domainInterceptorList = null;
         try {
+            // 处理请求token问题
+            DomainTokenValue domainTokenValue = this.domainTokenConfig.getToken(domain);
+            if (null != domainTokenValue) {
+                DomainToken domainToken = getDomainToken(domainTokenValue.getDomainToken());
+                if (domainToken instanceof AbstractDomainToken) {
+                    AbstractDomainToken abstractDomainToken = (AbstractDomainToken) domainToken;
+                    abstractDomainToken.setDomain(domain);
+                    abstractDomainToken.setDomainTokenValue(domainTokenValue);
+                }
+                String tokenName = domainToken.getTokenName();
+                String tokenValue = domainToken.getTokenValue();
+                if (StringUtils.isNotEmpty(tokenValue)) {
+                    requestHeaders.put(tokenName, tokenValue);
+                }
+            }
             // 处理拦截器逻辑
             List<String> interceptors = this.domainInterceptorConfig.getInterceptors(domain);
             if (CollectionUtils.isNotEmpty(interceptors)) {
@@ -140,7 +156,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                     uri = uri + params;
                 }
                 request = new HttpClientHelper.HttpGet(uri);
-                logger.info("-----------uri {} ",uri);
+                logger.info("-----------uri {} ", uri);
             } else if (HttpMethod.POST.equals(dto.getMethod())) {
                 request = new HttpPost(uri);
             } else if (HttpMethod.PUT.equals(dto.getMethod())) {
@@ -227,6 +243,10 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
 
     private DomainInterceptor getDomainInterceptor(String interceptor) {
         return this.applicationContext.getBean(interceptor, DomainInterceptor.class);
+    }
+
+    private DomainToken getDomainToken(String domainToken) {
+        return this.applicationContext.getBean(domainToken, DomainToken.class);
     }
 
     private Map<String, String> headerToMap(Header[] headers) {
