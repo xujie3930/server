@@ -243,6 +243,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         if (StringUtils.isBlank(returnExpressAddDTO.getExpectedNo())) {
             String expectedNo = createExpectedNo();
             returnExpressAddDTO.setExpectedNo(expectedNo);
+            // 在没有退件单号的情况下，自动生成的预报单号，放在退件单号字段去。
+            if (StringUtils.isBlank(returnExpressAddDTO.getReturnNo())) {
+                returnExpressAddDTO.setReturnNo(expectedNo);
+            }
         }
         handleExpectedCreate(returnExpressAddDTO);
         return saveReturnExpressDetail(returnExpressAddDTO.convertThis(ReturnExpressDetail.class));
@@ -686,7 +690,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     public int expiredUnprocessedForecastOrder() {
         log.info("--------------更新过期未处理的预报单 开始--------------");
         LocalDate localDate = LocalDate.now().minusDays(configStatus.getExpirationDays());
-        log.info("--------------更新过期未处理的预报单 小于 {} {} 开始--------------",configStatus.getExpirationDays(), localDate);
+        log.info("--------------更新过期未处理的预报单 小于 {} {} 开始--------------", configStatus.getExpirationDays(), localDate);
         int update = returnExpressMapper.update(null, Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getOverdue, 0)
                 .isNull(ReturnExpressDetail::getExpireTime)

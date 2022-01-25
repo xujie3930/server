@@ -64,6 +64,17 @@ public class ReturnExpressServerController extends BaseController {
     private IReturnExpressService returnExpressService;
 
     /**
+     * 新增退件单-生成预报单号
+     *
+     * @return 返回结果
+     */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:add')")
+    @GetMapping("/createExpectedNo")
+    @ApiOperation(value = "新增退件单-生成预报单号")
+    public R<String> createExpectedNo() {
+        return R.ok(returnExpressService.createExpectedNo());
+    }
+    /**
      * 退件单列表 - 分页
      *
      * @param queryDto 查询条件
