@@ -647,7 +647,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             boolean b = configStatus.getDestroy().equals(processType) || unpackAndPutOnTheShelf;
             AssertUtil.isTrue(b, "拆包检查后只能按明细上架/销毁");
         }
-        AssertUtil.isTrue(checkoutRefNo(expressUpdateDTO.getReturnNo()),"退件单号重复");
+        // AssertUtil.isTrue(checkoutRefNo(expressUpdateDTO.getReturnNo()),"退件单号重复");
     }
 
     /**
