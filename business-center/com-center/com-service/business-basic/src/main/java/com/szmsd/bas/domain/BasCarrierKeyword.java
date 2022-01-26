@@ -10,6 +10,8 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.szmsd.common.core.annotation.Excel;
 
+import javax.validation.constraints.NotBlank;
+
 
 /**
  * <p>
@@ -31,6 +33,7 @@ public class BasCarrierKeyword extends BaseEntity {
     @Excel(name = "id")
     private Integer id;
 
+    @NotBlank(message = "承运商不能为空")
     @ApiModelProperty(value = "承运商code")
     @Excel(name = "承运商code")
     private String carrierCode;
@@ -39,6 +42,7 @@ public class BasCarrierKeyword extends BaseEntity {
     @Excel(name = "承运商名称")
     private String carrierName;
 
+    @NotBlank(message = "关键词不能为空")
     @ApiModelProperty(value = "关键词（多个使用英文逗号拼接）")
     @Excel(name = "关键词（多个使用英文逗号拼接）")
     private String keywords;

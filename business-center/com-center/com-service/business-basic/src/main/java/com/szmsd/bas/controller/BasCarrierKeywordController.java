@@ -1,5 +1,6 @@
 package com.szmsd.bas.controller;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.log.enums.BusinessType;
@@ -33,7 +35,7 @@ import com.szmsd.common.core.web.controller.BaseController;
  */
 
 
-@Api(tags = {""})
+@Api(tags = {"关键词维护"})
 @RestController
 @RequestMapping("/bas-carrier-keyword")
 public class BasCarrierKeywordController extends BaseController {
@@ -84,7 +86,7 @@ public class BasCarrierKeywordController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("add")
     @ApiOperation(value = "新增模块", notes = "新增模块")
-    public R add(@RequestBody BasCarrierKeyword basCarrierKeyword) {
+    public R add(@RequestBody @Valid BasCarrierKeyword basCarrierKeyword) {
         return toOk(basCarrierKeywordService.insertBasCarrierKeyword(basCarrierKeyword));
     }
 
@@ -95,7 +97,7 @@ public class BasCarrierKeywordController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块", notes = "修改模块")
-    public R edit(@RequestBody BasCarrierKeyword basCarrierKeyword) {
+    public R edit(@RequestBody @Valid BasCarrierKeyword basCarrierKeyword) {
         return toOk(basCarrierKeywordService.updateBasCarrierKeyword(basCarrierKeyword));
     }
 
@@ -113,7 +115,6 @@ public class BasCarrierKeywordController extends BaseController {
         return R.ok();
     }
 
-
     /**
      * 删除模块
      */
@@ -125,4 +126,9 @@ public class BasCarrierKeywordController extends BaseController {
         return toOk(basCarrierKeywordService.deleteBasCarrierKeywordByIds(ids));
     }
 
+    @GetMapping("checkExistKeyword")
+    @ApiOperation(value = "检查关键词是否存在", notes = "检查关键词是否存在")
+    public R checkExistKeyword(@RequestParam String carrierCode, @RequestParam String text) {
+        return R.ok(basCarrierKeywordService.checkExistKeyword(carrierCode, text));
+    }
 }

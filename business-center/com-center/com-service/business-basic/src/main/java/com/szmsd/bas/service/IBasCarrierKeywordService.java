@@ -56,12 +56,11 @@ public interface IBasCarrierKeywordService extends IService<BasCarrierKeyword> {
     int deleteBasCarrierKeywordByIds(List<String> ids);
 
     /**
-     * 删除模块信息
-     *
-     * @param id 模块ID
-     * @return 结果
+     * 检查是否包含关键词
+     * @param carrierCode
+     * @param text
+     * @return
      */
-    int deleteBasCarrierKeywordById(String id);
-
+    Boolean checkExistKeyword(String carrierCode, String text);
 }
 

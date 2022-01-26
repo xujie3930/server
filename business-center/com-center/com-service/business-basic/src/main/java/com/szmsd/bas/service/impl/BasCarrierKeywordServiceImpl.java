@@ -4,11 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.dao.BasCarrierKeywordMapper;
 import com.szmsd.bas.domain.BasCarrierKeyword;
+import com.szmsd.bas.keyword.KeywordsInit;
+import com.szmsd.bas.keyword.KeywordsUtil;
 import com.szmsd.bas.service.IBasCarrierKeywordService;
 import com.szmsd.common.core.utils.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -21,6 +25,8 @@ import java.util.List;
 @Service
 public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordMapper, BasCarrierKeyword> implements IBasCarrierKeywordService {
 
+    @Autowired
+    private KeywordsInit keywordsInit;
 
     /**
      * 查询模块
@@ -80,17 +86,11 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
         return baseMapper.deleteBatchIds(ids);
     }
 
-    /**
-     * 删除模块信息
-     *
-     * @param id 模块ID
-     * @return 结果
-     */
     @Override
-    public int deleteBasCarrierKeywordById(String id) {
-        return baseMapper.deleteById(id);
+    public Boolean checkExistKeyword(String carrierCode, String text) {
+        Map keywordsMap = keywordsInit.initKeyWord(carrierCode);
+        KeywordsUtil.keywordsMap = keywordsMap;
+        return KeywordsUtil.isContaintKeywords(text);
     }
-
-
 }
 
