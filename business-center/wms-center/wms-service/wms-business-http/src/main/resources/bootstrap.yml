@@ -31,8 +31,8 @@ com:
           authorizeUrl: https://auth.360bbt.com/connect/authorize
           authorizeHttpMethod: GET
           authorizeRequestParams:
-            client_id: "YWY2MjlmNjAtY2MzOC00MjYyLTliMDEtZTljMzg2NjA0NzM1"
-            response_type: "b5RyFIgh6LbtCfsUIGA2uc4xw4cDm1ifNt1cP1QqS/6VgGk1sprA4C8lNK4O/Nw2L8d2"
+            client_id: "YTdjNmJiZTQtMTU5MC00MjViLTg5MzEtZmNkNmQ1ZDlkNGJi"
+            response_type: code
             redirect_uri: "http://183.3.221.136:22221/api/wms-http/api/redirect/uri"
             scope: basic
           # oauth2.0标准流程，token接口
@@ -40,8 +40,8 @@ com:
           tokenHttpMethod: POST
           tokenRequestParams:
             grant_type: authorization_code
-            client_id: "YWY2MjlmNjAtY2MzOC00MjYyLTliMDEtZTljMzg2NjA0NzM1"
-            client_secret: code
+            client_id: "YTdjNmJiZTQtMTU5MC00MjViLTg5MzEtZmNkNmQ1ZDlkNGJi"
+            client_secret: "tz81/Gk4AGo0jJ7QHEiUaCid/X6R6BxQxrn5zJCu3GeJZuDqHYYf/Dezsa4VYauHml"
             redirect_uri: "http://183.3.221.136:22221/api/wms-http/api/redirect/uri"
           tokenRequestHeaders:
             "Content-Type": "application/x-www-form-urlencoded"
@@ -49,6 +49,10 @@ com:
           accessTokenExpiresIn: 5184000
           # refresh token 过期时间，360天
           refreshTokenExpiresIn: 31104000
+          # default access token
+          defaultAccessToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6IkJFQ0M4NUNBOTc1MDEyQTZERUMzNzk2MzczODBBN0ZGQUZGMjkzMEMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJ2c3lGeXBkUUVxYmV3M2xqYzRDbl82X3lrd3cifQ.eyJuYmYiOjE2NDMxNTk4MzIsImV4cCI6MTY0ODM0MzgzMiwiaXNzIjoiaHR0cHM6Ly9hdXRoLjM2MGJidC5jb20iLCJhdWQiOiJiYXNpYyIsImNsaWVudF9pZCI6IllUZGpObUppWlRRdE1UVTVNQzAwTWpWaUxUZzVNekV0Wm1Oa05tUTFaRGxrTkdKaSIsInN1YiI6IjFjMDA1YzUwLWIzNjItNDA1ZC1hMGUzLWFlMDcwMTBmODlhYiIsImF1dGhfdGltZSI6MTY0MzE1OTgzMSwiaWRwIjoibG9jYWwiLCJlbnRlcnByaXNlbmFtZSI6IuW5v-W3nuW4gkRN5YWs5Y-4IiwidXNlcm5hbWUiOiJkZXZlbG9wZXJAZG0tZnVsZmlsbG1lbnQuY29tIiwiYXBwTmFtZSI6Iui9qOi_ueWvueaOpeW6lOeUqCIsImFwcElkIjoiYzhmMTEzZjAtMjkwNy00Y2UyLWI5NzktYWUyODAxMWQ5MGJjIiwidGVuYW50Y29kZSI6InVpdmw4MDY4Iiwic2NvcGUiOlsiYmFzaWMiLCJvZmZsaW5lX2FjY2VzcyJdLCJhbXIiOlsicHdkIl19.IwzO7uamXgFhW22egTxwmL6-57oIvwINn48Io7ovsD-6MFqsiUkv7cV_Ijk__IzOdVncwMe4W0HW2-dFpRG_JzRRp3WYBYCTL25wWwjvLEV5U7faJma-FGB1MYO3ergQk3PzZAaXV7jNqvnO2qPYcNkIrVxgIrpiTsKA4EwycSoiTXHdWtXfevMhKmNqVmfQGBEpBxLxaZuWJicxtJ7CjM-X3fy8NsrplQjxulwLTA_9hveZ7Y8xtnyZ4IhpGgLhHnE87K_3q801QzYnhckhjKRng4tdi1k50k3w6GPfFERmvFNiwnfwlZwM_Jknl65gu5fsikwsYzrWC2_leXwVDg"
+          # default refresh token
+          defaultRefreshToken: "Y9AJPi7W7Z2ZpSxfV_W1thM9pLygpDSdKtVO2LBmVJA"
     # domain interceptor
     domain-interceptor:
       values:

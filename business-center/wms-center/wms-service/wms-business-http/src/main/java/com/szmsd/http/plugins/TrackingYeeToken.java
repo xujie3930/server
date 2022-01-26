@@ -8,6 +8,7 @@ import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.http.config.DomainTokenValue;
 import com.szmsd.http.utils.RedirectUriUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,18 @@ public class TrackingYeeToken extends AbstractDomainToken {
     @Override
     TokenValue internalGetTokenValue() {
         DomainTokenValue domainTokenValue = super.getDomainTokenValue();
+        // 处理默认token
+        String defaultAccessToken = domainTokenValue.getDefaultAccessToken();
+        String defaultRefreshToken = domainTokenValue.getDefaultRefreshToken();
+        if (StringUtils.isNotEmpty(defaultAccessToken) && StringUtils.isNotEmpty(defaultRefreshToken)) {
+            // 直接返回
+            TokenValue tokenValue = new TokenValue();
+            // 前缀
+            tokenValue.setAccessToken("Bearer " + defaultAccessToken);
+            tokenValue.setExpiresIn(domainTokenValue.getAccessTokenExpiresIn());
+            tokenValue.setRefreshToken(defaultRefreshToken);
+            return tokenValue;
+        }
         String authorizeUrl = domainTokenValue.getAuthorizeUrl();
         HttpMethod authorizeHttpMethod = domainTokenValue.getAuthorizeHttpMethod();
         String stateKey = UUIDUtil.uuid();
@@ -32,7 +45,7 @@ public class TrackingYeeToken extends AbstractDomainToken {
         authorizeRequestParams.put("state", stateKey);
         String authorizeRequestBody = JSON.toJSONString(authorizeRequestParams);
         HttpResponseBody authorizeHttpResponseBody;
-        // https://auth.trackingyee.com/connect/authorize?response_type=code&client_id=YWY2MjlmNjAtY2MzOC00MjYyLTliMDEtZTljMzg2NjA0NzM1&redirect_uri=https://www.baidu.com&scope=basic&state=ok
+        // https://auth.trackingyee.com/connect/authorize?response_type=code&client_id=YTdjNmJiZTQtMTU5MC00MjViLTg5MzEtZmNkNmQ1ZDlkNGJi&redirect_uri=http://183.3.221.136:22221/api/wms-http/api/redirect/uri&scope=basic&state=ok
         if (HttpMethod.GET.equals(authorizeHttpMethod)) {
             authorizeHttpResponseBody = HttpClientHelper.httpGet(authorizeUrl, authorizeRequestBody, domainTokenValue.getAuthorizeRequestHeaders());
         } else if (HttpMethod.POST.equals(authorizeHttpMethod)) {
@@ -61,8 +74,8 @@ public class TrackingYeeToken extends AbstractDomainToken {
                 // 删除缓存
                 this.redisTemplate.delete(wrapRedirectUriKey);
             }
-            // 等待2分钟
-            if (delayState && (System.currentTimeMillis() - currentTimeMillis > 120000)) {
+            // 等待1分钟
+            if (delayState && (System.currentTimeMillis() - currentTimeMillis > 60000)) {
                 // 超时中断
                 delayState = false;
             }
@@ -79,7 +92,7 @@ public class TrackingYeeToken extends AbstractDomainToken {
             if (null != authorizationObject) {
                 authorizationCode = String.valueOf(authorizationObject);
             } else {
-                throw new CommonException("999", "获取TrackingYee授权码失败，未获取到授权码，请求处理超时2分钟");
+                throw new CommonException("999", "获取TrackingYee授权码失败，未获取到授权码，请求处理超时1分钟");
             }
         }
         // 根据授权码获取token信息
@@ -140,7 +153,8 @@ public class TrackingYeeToken extends AbstractDomainToken {
         JSONObject jsonObject = JSON.parseObject(body);
         if (null != jsonObject) {
             TokenValue tokenValue = new TokenValue();
-            tokenValue.setAccessToken(jsonObject.getString("access_token"));
+            // 前缀
+            tokenValue.setAccessToken("Bearer " + jsonObject.getString("access_token"));
             tokenValue.setExpiresIn(jsonObject.getLongValue("expires_in"));
             tokenValue.setScope(jsonObject.getString("scope"));
             tokenValue.setRefreshToken(jsonObject.getString("refresh_token"));

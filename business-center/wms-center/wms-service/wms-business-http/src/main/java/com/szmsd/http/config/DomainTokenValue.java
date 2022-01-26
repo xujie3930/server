@@ -30,4 +30,8 @@ public class DomainTokenValue {
     private long accessTokenExpiresIn;
     // 默认refresh token过期时间
     private long refreshTokenExpiresIn;
+    // 默认access token
+    private String defaultAccessToken;
+    // 默认refresh token
+    private String defaultRefreshToken;
 }
