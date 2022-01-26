@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.DelTyRequestLog;
-import com.szmsd.delivery.enums.DelCk1RequestLogConstant;
+import com.szmsd.delivery.enums.DelTyRequestLogConstant;
 import com.szmsd.delivery.mapper.DelTyRequestLogMapper;
 import com.szmsd.delivery.service.IDelTyRequestLogService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
@@ -85,13 +85,13 @@ public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMappe
                     }
                 }
                 if (success) {
-                    state = DelCk1RequestLogConstant.State.SUCCESS.name();
+                    state = DelTyRequestLogConstant.State.SUCCESS.name();
                 } else {
                     failCount++;
                     if (failCount >= retryCount) {
-                        state = DelCk1RequestLogConstant.State.FAIL.name();
+                        state = DelTyRequestLogConstant.State.FAIL.name();
                     } else {
-                        state = DelCk1RequestLogConstant.State.FAIL_CONTINUE.name();
+                        state = DelTyRequestLogConstant.State.FAIL_CONTINUE.name();
                         int t = retryTimeConfiguration[failCount];
                         nextRetryTime = DateUtils.addSeconds(tyRequestLog.getNextRetryTime(), t);
                     }
