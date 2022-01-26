@@ -18,13 +18,11 @@ import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.delivery.domain.DelCk1RequestLog;
-import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.domain.DelOutboundCharge;
-import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelCk1RequestLogEvent;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
+import com.szmsd.delivery.event.DelTyRequestLogEvent;
 import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
@@ -362,7 +360,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 // END
                 // 重派订单不推出口1
                 if ("END".equals(completedState)
-                    && !DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                        && !DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                     // 推送给CK1
                     if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
                             || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
@@ -374,6 +372,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         ck1RequestLog.setType(DelCk1RequestLogConstant.Type.finished.name());
                         EventUtil.publishEvent(new DelCk1RequestLogEvent(ck1RequestLog));
                     }
+                    // 推送给TY
+                    this.pushTy(delOutbound);
                     // 如果是组合SKU，拆分SKU，需要创建入库单
                     if ((DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
                             || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType()))) {
@@ -469,6 +469,19 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 lock.unlock();
             }
         }
+    }
+
+    private void pushTy(DelOutbound delOutbound) {
+        // 判断有没有发送承运商
+        if (StringUtils.isEmpty(delOutbound.getTrackingNo())) {
+            // 挂号是空的，则没有创建承运商订单，这里的值是创建了承运商之后回写的承运商单号
+            return;
+        }
+        // 请求体的内容异步填充
+        DelTyRequestLog tyRequestLog = new DelTyRequestLog();
+        tyRequestLog.setOrderNo(delOutbound.getOrderNo());
+        tyRequestLog.setType(DelTyRequestLogConstant.Type.shipments.name());
+        EventUtil.publishEvent(new DelTyRequestLogEvent(tyRequestLog));
     }
 
     private String getSkuName(BaseProduct baseProduct) {
@@ -640,7 +653,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 }
                 // 重派订单不推CK1
                 if ("END".equals(cancelledState)
-                    && !DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                        && !DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                     if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
                             || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
                         DelCk1RequestLog ck1RequestLog = new DelCk1RequestLog();

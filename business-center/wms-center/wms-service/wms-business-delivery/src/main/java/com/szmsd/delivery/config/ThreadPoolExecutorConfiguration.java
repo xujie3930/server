@@ -68,6 +68,16 @@ public class ThreadPoolExecutorConfiguration {
      */
     public static final String THREADPOOLEXECUTOR_CK1_REQUEST = "ThreadPoolExecutor-Ck1-Request";
 
+    /**
+     * TY保存请求信息
+     */
+    public static final String THREADPOOLEXECUTOR_TY_SAVE = "ThreadPoolExecutor-Ty-Save";
+
+    /**
+     * TY发送请求信息
+     */
+    public static final String THREADPOOLEXECUTOR_TY_REQUEST = "ThreadPoolExecutor-Ty-Request";
+
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundReviewed() {
         // 核心线程数量
@@ -173,8 +183,8 @@ public class ThreadPoolExecutorConfiguration {
     @Bean(THREADPOOLEXECUTOR_CK1_SAVE)
     public ThreadPoolExecutor threadPoolExecutorCk1Save() {
         // 核心线程数量
-        int corePoolSize = availableProcessors * 2;
-        int maximumPoolSize = availableProcessors * 4;
+        int corePoolSize = availableProcessors;
+        int maximumPoolSize = availableProcessors * 2;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(20480);
         // 核心和最大一致
@@ -198,6 +208,40 @@ public class ThreadPoolExecutorConfiguration {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("Ck1-Request", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
+    @Bean(THREADPOOLEXECUTOR_TY_SAVE)
+    public ThreadPoolExecutor threadPoolExecutorTySave() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors;
+        int maximumPoolSize = availableProcessors * 2;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(20480);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("Ty-Save", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
+    @Bean(THREADPOOLEXECUTOR_TY_REQUEST)
+    public ThreadPoolExecutor threadPoolExecutorTyRequest() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 4;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(20480);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("Ty-Request", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
         // 丢弃任务并抛出RejectedExecutionException异常
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());

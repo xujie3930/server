@@ -17,8 +17,8 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value = "推送CK1日志表", description = "DelCk1RequestLog对象")
-public class DelCk1RequestLog extends BaseEntity {
+@ApiModel(value = "推送TY日志表", description = "DelTyRequestLog对象")
+public class DelTyRequestLog extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -64,6 +64,21 @@ public class DelCk1RequestLog extends BaseEntity {
 
     @ApiModelProperty(value = "接口地址")
     private String url;
+
+    @ApiModelProperty(value = "接口方法")
+    private String method;
+
+    @ApiModelProperty(value = "扩展字段1")
+    private String attr1;
+
+    @ApiModelProperty(value = "扩展字段2")
+    private String attr2;
+
+    @ApiModelProperty(value = "扩展字段3")
+    private String attr3;
+
+    @ApiModelProperty(value = "扩展字段4")
+    private String attr4;
 
     @TableField(exist = false)
     @ApiModelProperty(value = "创建时间")
