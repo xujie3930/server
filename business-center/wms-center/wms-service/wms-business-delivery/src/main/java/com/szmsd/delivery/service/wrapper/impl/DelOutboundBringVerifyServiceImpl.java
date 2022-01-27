@@ -522,7 +522,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (weightInGram <= 0) {
             throw new CommonException("400", "包裹重量为0或者小于0，不能创建承运商物流订单");
         }
-        packages.add(new Package(delOutbound.getOrderNo(), String.valueOf(delOutbound.getId()),
+        String packageNumber;
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            packageNumber = delOutbound.getRefNo();
+        } else {
+            packageNumber = delOutbound.getOrderNo();
+        }
+        packages.add(new Package(packageNumber, String.valueOf(delOutbound.getId()),
                 new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                 weightInGram, packageItems));
         createShipmentOrderCommand.setPackages(packages);
