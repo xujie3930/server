@@ -107,7 +107,7 @@ public class PricedProductController extends BaseController {
         final String KEY = "PRC:CARRIERS";
         Object result = operations.get(KEY);
         if (result != null) {
-            return R.ok(JSONObject.parseObject(result.toString()));
+            return R.ok(JSONArray.parseArray(result.toString()));
         }
         String requestUrl = "https://open-api.trackingyee.com/tracking/v1/carriers";
         HttpResponseBody responseBody = HttpClientHelper.httpGet(requestUrl, null, new HashMap<String, String>());
