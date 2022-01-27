@@ -40,7 +40,8 @@ public final class EventUtil implements ApplicationContextAware {
      * @param event event
      */
     public static void publishEvent(DelCk1RequestLogEvent event) {
-        EventUtil.applicationContext.publishEvent(event);
+        // 暂时不启用
+        // EventUtil.applicationContext.publishEvent(event);
     }
 
     /**
