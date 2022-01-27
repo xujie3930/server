@@ -432,9 +432,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentOrderCommand.setWarehouseCode(delOutbound.getWarehouseCode());
         // 改成uuid
         createShipmentOrderCommand.setReferenceNumber(UUID.randomUUID().toString().replaceAll("-", "").toUpperCase());
-        // createShipmentOrderCommand.setOrderNumber(delOutbound.getOrderNo());
         // 订单号传refno
-        createShipmentOrderCommand.setOrderNumber(delOutbound.getRefNo());
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            createShipmentOrderCommand.setOrderNumber(delOutbound.getRefNo());
+        } else {
+            createShipmentOrderCommand.setOrderNumber(delOutbound.getOrderNo());
+        }
         createShipmentOrderCommand.setClientNumber(delOutbound.getSellerCode());
         createShipmentOrderCommand.setReceiverAddress(new AddressCommand(address.getConsignee(),
                 address.getPhoneNo(),
