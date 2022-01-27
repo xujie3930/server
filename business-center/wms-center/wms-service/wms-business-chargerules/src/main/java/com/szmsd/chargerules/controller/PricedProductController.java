@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.chargerules.dto.CreateProductDTO;
 import com.szmsd.chargerules.dto.FreightCalculationDTO;
@@ -21,6 +22,9 @@ import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.http.HttpRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Api(tags = {"PricedProduct"})
 @RestController
@@ -37,6 +42,9 @@ public class PricedProductController extends BaseController {
 
     @Resource
     private IPricedProductService iPricedProductService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @AutoValue
     @PreAuthorize("@ss.hasPermi('products:pricedproducts')")
@@ -94,13 +102,21 @@ public class PricedProductController extends BaseController {
 
     @ApiOperation(value = "获取PRC系统已定义的物流运输商的基础信息列表")
     @GetMapping("/getCarriers")
-    public static R getCarriers(){
+    public R getCarriers(){
+        ValueOperations operations = redisTemplate.opsForValue();
+        final String KEY = "PRC:CARRIERS";
+        Object result = operations.get(KEY);
+        if (result != null) {
+            return R.ok(JSONObject.parseObject(result.toString()));
+        }
         String requestUrl = "https://open-api.trackingyee.com/tracking/v1/carriers";
         HttpResponseBody responseBody = HttpClientHelper.httpGet(requestUrl, null, new HashMap<String, String>());
         String body = responseBody.getBody();
         JSONObject resultObj = JSONObject.parseObject(body);
         if ("OK".equalsIgnoreCase(resultObj.getString("status"))) {
-            return R.ok(resultObj.getJSONArray("data"));
+            JSONArray jsonArray = resultObj.getJSONArray("data");
+            operations.set(KEY, jsonArray.toJSONString(), 1, TimeUnit.DAYS);
+            return R.ok(jsonArray);
         }
         return R.failed("查询异常！");
     }
