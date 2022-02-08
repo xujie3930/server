@@ -112,10 +112,10 @@ public class CkSkuCreateDTO implements Serializable {
                 .setDeclareValue(new BigDecimal(Double.toString(baseProduct.getDeclaredValue())))
                 .setProductCategory(baseProduct.getCategory())
                 .setProductRemark(baseProduct.getRemark());
-        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        /*Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<CkSkuCreateDTO>> validate = validator.validate(ckSkuCreateDTO, Default.class);
         String error = validate.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","));
-        AssertUtil.isTrue(StringUtils.isBlank(error), "推送CK1-创建SKU请求参数异常：" + error);
+        AssertUtil.isTrue(StringUtils.isBlank(error), "推送CK1-创建SKU请求参数异常：" + error);*/
         return ckSkuCreateDTO;
     }
 }
