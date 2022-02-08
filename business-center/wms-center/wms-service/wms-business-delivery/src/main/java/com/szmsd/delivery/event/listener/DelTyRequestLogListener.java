@@ -59,9 +59,9 @@ public class DelTyRequestLogListener {
             List<Map<String, Object>> shipments = new ArrayList<>();
             Map<String, Object> shipment = new HashMap<>();
             shipment.put("trackingNo", delOutbound.getTrackingNo());
-            shipment.put("carrierCode", delOutbound.getShipmentRule());
-            shipment.put("logisticsServiceProvider", delOutbound.getShipmentRule());
-            shipment.put("logisticsServiceName", delOutbound.getShipmentRule());
+            shipment.put("carrierCode", delOutbound.getLogisticsProviderCode());
+            shipment.put("logisticsServiceProvider", delOutbound.getLogisticsProviderCode());
+            shipment.put("logisticsServiceName", delOutbound.getLogisticsProviderCode());
             shipment.put("platformCode", "DM");
             shipment.put("shopName", "");
             shipment.put("OrdersOn", delOutbound.getCreateTime());

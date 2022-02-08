@@ -206,6 +206,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 产品信息
             updateDelOutbound.setTrackingAcquireType(delOutbound.getTrackingAcquireType());
             updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+            updateDelOutbound.setLogisticsProviderCode(delOutbound.getLogisticsProviderCode());
             updateDelOutbound.setProductShipmentRule(delOutbound.getProductShipmentRule());
             updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
             // 创建承运商物流订单
@@ -277,6 +278,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     PricingPackageInfo packageInfo = data.getPackageInfo();
                     // 挂号服务
                     delOutbound.setShipmentService(data.getLogisticsRouteId());
+                    // 物流商code
+                    delOutbound.setLogisticsProviderCode(data.getLogisticsProviderCode());
                     // 包裹信息
                     Packing packing = packageInfo.getPacking();
                     delOutbound.setLength(Utils.valueOf(packing.getLength()));
@@ -339,6 +342,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 产品信息
             updateDelOutbound.setTrackingAcquireType("");
             updateDelOutbound.setShipmentService("");
+            updateDelOutbound.setLogisticsProviderCode("");
             updateDelOutbound.setProductShipmentRule("");
             updateDelOutbound.setPackingRule("");
             // 创建承运商物流订单
@@ -810,6 +814,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 产品信息
             updateDelOutbound.setTrackingAcquireType(delOutbound.getTrackingAcquireType());
             updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+            updateDelOutbound.setLogisticsProviderCode(delOutbound.getLogisticsProviderCode());
             updateDelOutbound.setProductShipmentRule(delOutbound.getProductShipmentRule());
             updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
             // 创建承运商物流订单
