@@ -20,7 +20,7 @@ com:
     domain:
       values:
         "Ck1OpenAPIDomain": "http://openapi.ck1info.com"
-        "TrackingYeeDomain": "https://open-api.trackingyee.com"
+        "TrackingYeeDomain": "https://open-api.360bbt.com"
     # domain token
     domain-token:
       values:
@@ -58,7 +58,7 @@ com:
       values:
         "[http://openapi.ck1info.com]":
           - "Ck1DomainInterceptor"
-        "[https://open-api.trackingyee.com]":
+        "[https://open-api.360bbt.com]":
           - "TrackingYeeOAuthDomainInterceptor"
     # domain plugin
     domain-plugin:

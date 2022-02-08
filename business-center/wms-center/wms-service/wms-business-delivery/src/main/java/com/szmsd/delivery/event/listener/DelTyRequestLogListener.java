@@ -67,7 +67,9 @@ public class DelTyRequestLogListener {
             shipment.put("OrdersOn", delOutbound.getCreateTime());
             shipment.put("paymentTime", "");
             shipment.put("shippingOn", "");
-            shipment.put("searchTags", "");
+            List<String> searchTags = new ArrayList<>();
+            searchTags.add(delOutbound.getSellerCode());
+            shipment.put("searchTags", searchTags);
             shipment.put("orderNo", "");
             Map<String, Object> senderAddress = new HashMap<>();
             if (null != delOutboundAddress) {
