@@ -71,7 +71,7 @@ public class DelTyRequestLogListener {
             searchTags.add(delOutbound.getSellerCode());
             searchTags.add(delOutbound.getOrderNo());
             shipment.put("searchTags", searchTags);
-            shipment.put("orderNo", "");
+            shipment.put("orderNo", delOutbound.getOrderNo());
             Map<String, Object> senderAddress = new HashMap<>();
             if (null != basWarehouse) {
                 senderAddress.put("country", basWarehouse.getCountryCode());
