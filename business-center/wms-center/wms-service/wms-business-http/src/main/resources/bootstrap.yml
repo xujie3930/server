@@ -24,7 +24,7 @@ com:
     # domain token
     domain-token:
       values:
-        "[https://open-api.trackingyee.com]":
+        "[https://open-api.360bbt.com]":
           # token组件名称
           domainToken: TrackingYeeToken
           # oauth2.0标准流程，授权码接口
