@@ -69,28 +69,29 @@ public class DelTyRequestLogListener {
             shipment.put("shippingOn", "");
             List<String> searchTags = new ArrayList<>();
             searchTags.add(delOutbound.getSellerCode());
+            searchTags.add(delOutbound.getOrderNo());
             shipment.put("searchTags", searchTags);
             shipment.put("orderNo", "");
             Map<String, Object> senderAddress = new HashMap<>();
-            if (null != delOutboundAddress) {
-                senderAddress.put("country", delOutboundAddress.getCountryCode());
-                senderAddress.put("province", delOutboundAddress.getStateOrProvince());
-                senderAddress.put("city", delOutboundAddress.getCity());
-                senderAddress.put("postcode", delOutboundAddress.getPostCode());
-                senderAddress.put("street1", delOutboundAddress.getStreet1());
-                senderAddress.put("street2", delOutboundAddress.getStreet2());
-                senderAddress.put("street3", delOutboundAddress.getStreet3());
+            if (null != basWarehouse) {
+                senderAddress.put("country", basWarehouse.getCountryCode());
+                senderAddress.put("province", basWarehouse.getProvince());
+                senderAddress.put("city", basWarehouse.getCity());
+                senderAddress.put("postcode", basWarehouse.getPostcode());
+                senderAddress.put("street1", basWarehouse.getStreet1());
+                senderAddress.put("street2", basWarehouse.getStreet2());
+                senderAddress.put("street3", "");
             }
             shipment.put("senderAddress", senderAddress);
             Map<String, Object> destinationAddress = new HashMap<>();
-            if (null != basWarehouse) {
-                destinationAddress.put("country", basWarehouse.getCountryCode());
-                destinationAddress.put("province", basWarehouse.getProvince());
-                destinationAddress.put("city", basWarehouse.getCity());
-                destinationAddress.put("postcode", basWarehouse.getPostcode());
-                destinationAddress.put("street1", basWarehouse.getStreet1());
-                destinationAddress.put("street2", basWarehouse.getStreet2());
-                destinationAddress.put("street3", "");
+            if (null != delOutboundAddress) {
+                destinationAddress.put("country", delOutboundAddress.getCountryCode());
+                destinationAddress.put("province", delOutboundAddress.getStateOrProvince());
+                destinationAddress.put("city", delOutboundAddress.getCity());
+                destinationAddress.put("postcode", delOutboundAddress.getPostCode());
+                destinationAddress.put("street1", delOutboundAddress.getStreet1());
+                destinationAddress.put("street2", delOutboundAddress.getStreet2());
+                destinationAddress.put("street3", delOutboundAddress.getStreet3());
             }
             shipment.put("destinationAddress", destinationAddress);
             Map<String, Object> recipientInfo = new HashMap<>();
