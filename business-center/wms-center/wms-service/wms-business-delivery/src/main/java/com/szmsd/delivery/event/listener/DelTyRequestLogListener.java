@@ -67,7 +67,7 @@ public class DelTyRequestLogListener {
             shipment.put("shopName", "");
             Date createTime = delOutbound.getCreateTime();
             if (null != createTime) {
-                shipment.put("OrdersOn", DateFormatUtils.format(createTime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+                shipment.put("OrdersOn", DateFormatUtils.format(createTime, "yyyy-MM-dd'T'HH:mm:ss.SS'Z'"));
             }
             shipment.put("paymentTime", "");
             shipment.put("shippingOn", "");
