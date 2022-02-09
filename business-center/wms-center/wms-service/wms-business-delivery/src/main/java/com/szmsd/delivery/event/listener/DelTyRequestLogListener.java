@@ -16,6 +16,7 @@ import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.IDelTyRequestLogService;
 import com.szmsd.http.enums.DomainEnum;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -64,7 +65,10 @@ public class DelTyRequestLogListener {
             shipment.put("logisticsServiceName", delOutbound.getLogisticsProviderCode());
             shipment.put("platformCode", "DM");
             shipment.put("shopName", "");
-            shipment.put("OrdersOn", delOutbound.getCreateTime());
+            Date createTime = delOutbound.getCreateTime();
+            if (null != createTime) {
+                shipment.put("OrdersOn", DateFormatUtils.format(createTime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+            }
             shipment.put("paymentTime", "");
             shipment.put("shippingOn", "");
             List<String> searchTags = new ArrayList<>();
