@@ -1,13 +1,17 @@
 package com.szmsd.delivery.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelTyRequestLog;
 import com.szmsd.delivery.enums.DelTyRequestLogConstant;
 import com.szmsd.delivery.mapper.DelTyRequestLogMapper;
+import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.IDelTyRequestLogService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
 import com.szmsd.http.dto.HttpRequestDto;
@@ -37,6 +41,8 @@ public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMappe
     private RedissonClient redissonClient;
     @Autowired
     private IHtpRmiClientService htpRmiClientService;
+    @Autowired
+    private IDelOutboundService delOutboundService;
     //                                            0   1   2   3   4   5   6   7   8    9    10   11
     private final int[] retryTimeConfiguration = {30, 30, 60, 60, 60, 60, 60, 60, 180, 180, 180, 180};
     public static final int retryCount = 10;
@@ -82,6 +88,37 @@ public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMappe
                     responseBody = e.getMessage();
                     if (null == responseBody) {
                         responseBody = "请求失败";
+                    }
+                }
+                // 请求成功，解析响应报文
+                if (success) {
+                    try {
+                        // 解析响应报文，获取响应参数信息
+                        JSONObject jsonObject = JSON.parseObject(responseBody);
+                        // 判断状态是否为OK
+                        if ("OK".equals(jsonObject.getString("status"))) {
+                            // 判断结果明细是不是成功的
+                            JSONObject data = jsonObject.getJSONObject("data");
+                            if (1 == data.getIntValue("successNumber")) {
+                                JSONArray successImportRowResults = data.getJSONArray("successImportRowResults");
+                                JSONObject successImportRowResult = successImportRowResults.getJSONObject(0);
+                                String tyShipmentId = successImportRowResult.getString("id");
+                                if (StringUtils.isNotEmpty(tyShipmentId)) {
+                                    // 回写到出库表上
+                                    LambdaUpdateWrapper<DelOutbound> delOutboundLambdaUpdateWrapper = Wrappers.lambdaUpdate();
+                                    delOutboundLambdaUpdateWrapper.set(DelOutbound::getTyShipmentId, tyShipmentId);
+                                    delOutboundLambdaUpdateWrapper.eq(DelOutbound::getOrderNo, tyRequestLog.getOrderNo());
+                                    this.delOutboundService.update(delOutboundLambdaUpdateWrapper);
+                                }
+                            } else {
+                                // 返回的成功数量不是1，判定为异常
+                                success = false;
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        // 解析失败，判定为异常
+                        success = false;
                     }
                 }
                 if (success) {

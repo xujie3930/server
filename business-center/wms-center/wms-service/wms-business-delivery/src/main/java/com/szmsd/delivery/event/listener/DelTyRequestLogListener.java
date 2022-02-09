@@ -55,7 +55,10 @@ public class DelTyRequestLogListener {
             DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
             BasWarehouse basWarehouse = this.basWarehouseClientService.queryByWarehouseCode(delOutbound.getWarehouseCode());
             // 接口文档
+            // 生产环境
             // https://developer.trackingyee.com/documentCenter/list?index=2&id=6272629d-5e51-4f88-94cd-ab0201248f82&type=api
+            // 开发环境
+            // https://developer.360bbt.com/documentCenter/list?index=2&id=6272629d-5e51-4f88-94cd-ab0201248f82&type=api
             Map<String, Object> requestBodyMap = new HashMap<>();
             List<Map<String, Object>> shipments = new ArrayList<>();
             Map<String, Object> shipment = new HashMap<>();
