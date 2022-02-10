@@ -657,9 +657,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 byte[] inputStream;
                 if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
-                    File labelFile = new File(file.getPath() + "/" + orderNumber);
+                    File labelFile = new File(file.getPath() + "/" + orderNumber + ".pdf");
                     if (labelFile.exists()) {
-                        File destFile = new File(file.getPath() + "/" + orderNumber + "_" + DateFormatUtils.format(new Date(), "yyyyMMdd_HHmmss"));
+                        File destFile = new File(file.getPath() + "/" + orderNumber + "_" + DateFormatUtils.format(new Date(), "yyyyMMdd_HHmmss") + ".pdf");
                         try {
                             FileUtils.copyFile(labelFile, destFile);
                         } catch (IOException e) {
@@ -742,7 +742,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                             }
                         } else {
                             // 标签文件 - 从承运商物流那边获取的
-                            labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+                            labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
                         }
                         // 合并文件
                         try {
@@ -762,7 +762,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
         }
         if (null == pathname) {
-            pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+            pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
         }
         File labelFile = new File(pathname);
         if (!labelFile.exists()) {

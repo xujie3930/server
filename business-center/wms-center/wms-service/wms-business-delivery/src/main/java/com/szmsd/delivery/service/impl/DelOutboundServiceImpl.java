@@ -1375,7 +1375,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (StringUtils.isEmpty(delOutbound.getShipmentOrderNumber())) {
             throw new CommonException("400", "未获取承运商标签");
         }
-        String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber();
+        String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
         File labelFile = new File(pathname);
         if (!labelFile.exists()) {
             throw new CommonException("400", "标签文件不存在");
