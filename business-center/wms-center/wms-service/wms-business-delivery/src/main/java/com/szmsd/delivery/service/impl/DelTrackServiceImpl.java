@@ -171,9 +171,11 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             if (delOutbound != null) {
                 List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getNo).reversed()).collect(Collectors.toList());
                 DelTrack delTrack = delTrackList.get(0);
-                delOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
-                delOutbound.setTrackingDescription(delTrack.getDescription() + " ("+delTrack.getTrackingTime()+")");
-                delOutboundMapper.updateById(delOutbound);
+                DelOutbound updateDelOutbound = new DelOutbound();
+                updateDelOutbound.setId(delOutbound.getId());
+                updateDelOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
+                updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " ("+delTrack.getTrackingTime()+")");
+                delOutboundMapper.updateById(updateDelOutbound);
             }
         }
     }
