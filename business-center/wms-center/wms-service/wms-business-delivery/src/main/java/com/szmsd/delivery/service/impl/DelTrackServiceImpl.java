@@ -1,24 +1,29 @@
 package com.szmsd.delivery.service.impl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Maps;
 
 import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelTrack;
 import com.szmsd.delivery.dto.TrackingYeeTraceDto;
+import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.mapper.DelTrackMapper;
 import com.szmsd.delivery.service.IDelTrackService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.domain.R;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -31,6 +36,8 @@ import java.util.List;
 @Service
 public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> implements IDelTrackService {
 
+    @Autowired
+    private DelOutboundMapper delOutboundMapper;
 
     /**
      * 查询模块
@@ -160,8 +167,15 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         });
         if (CollectionUtils.isNotEmpty(trackList)) {
             this.saveBatch(trackList);
+            DelOutbound delOutbound = delOutboundMapper.selectOne(new LambdaQueryWrapper<DelOutbound>().eq(DelOutbound::getOrderNo, trackingYeeTraceDto.getOrderNo()).last("limit 1"));
+            if (delOutbound != null) {
+                List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getNo).reversed()).collect(Collectors.toList());
+                DelTrack delTrack = delTrackList.get(0);
+                delOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
+                delOutbound.setTrackingDescription(delTrack.getDescription() + " ("+delTrack.getTrackingTime()+")");
+                delOutboundMapper.updateById(delOutbound);
+            }
         }
-        // TODO: 修改del_outbound 表状态
     }
 
 
