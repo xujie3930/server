@@ -231,9 +231,9 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "TY运输包裹ID")
     private String tyShipmentId;
 
-    @ApiModelProperty(value = "TY运输包裹ID")
+    @ApiModelProperty(value = "轨迹状态")
     private String trackingStatus;
 
-    @ApiModelProperty(value = "TY运输包裹ID")
+    @ApiModelProperty(value = "轨迹信息描述")
     private String trackingDescription;
 }
