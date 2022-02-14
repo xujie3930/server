@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -186,7 +187,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         TrackingYeeTraceDto.TrackingTimeDto trackingTime = item.getTrackingTime();
                         if (trackingTime != null) {
                             String trackingTimeStr = trackingTime.getDateTime();
-                            delTrack.setTrackingTime(DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeStr));
+                            if (StringUtils.isNotBlank(trackingTimeStr)) {
+                                delTrack.setTrackingTime(DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeStr.replace("T"," ").replace("+", " ")));
+                            }
                         }
                         delTrack.setActionCode(item.getActionCode());
                         // 获取地址
@@ -228,7 +231,6 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             }
         }
     }
-
 
 }
 
