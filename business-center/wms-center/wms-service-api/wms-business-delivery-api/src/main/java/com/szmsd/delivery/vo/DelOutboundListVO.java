@@ -137,8 +137,12 @@ public class DelOutboundListVO implements Serializable {
     @ApiModelProperty(value = "是否贴箱标")
     private Boolean isLabelBox;
 
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "099", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "轨迹状态")
     private String trackingStatus;
+
+    @ApiModelProperty(value = "轨迹状态名称")
+    private String trackingStatusName;
 
     @ApiModelProperty(value = "轨迹信息描述")
     private String trackingDescription;

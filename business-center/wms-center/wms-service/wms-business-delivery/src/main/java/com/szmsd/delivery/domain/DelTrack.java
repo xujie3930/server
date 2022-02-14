@@ -4,11 +4,14 @@ import java.math.BigDecimal;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
 import com.szmsd.common.core.web.domain.BaseEntity;
 
 import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -66,9 +69,13 @@ public class DelTrack extends BaseEntity {
     @Excel(name = "运输包裹的订单号，可以是电商平台的订单号，也可以是用 于自己做唯一标示的号。")
     private String orderNo;
 
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "099", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "轨迹状态")
-    @Excel(name = "轨迹状态")
     private String trackingStatus;
+
+    @ApiModelProperty(value = "轨迹状态名称")
+    @TableField(exist = false)
+    private String trackingStatusName;
 
     @ApiModelProperty(value = " 序号，每单轨迹从 1 开始")
     @Excel(name = " 序号，每单轨迹从 1 开始")
