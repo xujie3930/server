@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -13,6 +14,7 @@ import com.szmsd.delivery.dto.TrackingYeeTraceDto;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.mapper.DelTrackMapper;
 import com.szmsd.delivery.service.IDelTrackService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
  * @since 2022-02-10
  */
 @Service
+@Slf4j
 public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> implements IDelTrackService {
 
     @Autowired
@@ -154,6 +157,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     @Override
     @Transactional
     public void traceCallback(TrackingYeeTraceDto trackingYeeTraceDto) {
+        log.info("接收到TrackingYee回调参数：{}", JSON.toJSONString(trackingYeeTraceDto));
         List<TrackingYeeTraceDto.LogisticsTrackingSectionsDto> logisticsTrackingSections = trackingYeeTraceDto.getLogisticsTrackingSections();
         if (CollectionUtils.isEmpty(logisticsTrackingSections)) {
             return;

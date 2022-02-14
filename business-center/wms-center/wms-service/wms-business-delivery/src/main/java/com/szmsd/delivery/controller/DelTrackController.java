@@ -99,6 +99,7 @@ public class DelTrackController extends BaseController {
         String trackingyeeSign = request.getHeader("trackingyee-webhook-signature");
         String requestStr = JSONObject.toJSONString(trackingYeeTraceDto);
         String verifySign = SHA256Util.getSHA256Str(webhookSecret + requestStr);
+        log.info("trackingyeeSign:{}", trackingyeeSign);
         log.info("verifySign:{}", verifySign);
         if (StringUtils.isBlank(trackingyeeSign) || !trackingyeeSign.equalsIgnoreCase(verifySign)) {
             return R.failed("非法请求，验签失败！");
