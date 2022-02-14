@@ -2,6 +2,7 @@ package com.szmsd.delivery.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.dto.TrackingYeeTraceDto;
@@ -24,6 +25,7 @@ import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.log.enums.BusinessType;
 import io.swagger.annotations.Api;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.io.IOException;
 
@@ -94,13 +96,13 @@ public class DelTrackController extends BaseController {
 
     @ApiOperation(value = "用于接收TrackingYee回调的路由信息", notes = "")
     @PostMapping("/traceCallback")
-    public R traceCallback(HttpServletRequest request, @RequestBody JSONObject jsonObject){
-        if(jsonObject == null) {
+    public R traceCallback(HttpServletRequest request, @RequestBody Object params){
+        if(params == null) {
             return R.failed("非法请求，参数异常！");
         }
         // 验证签名
         String trackingyeeSign = request.getHeader("trackingyee-webhook-signature");
-        String requestStr = jsonObject.toJSONString();
+        String requestStr = JSONObject.toJSONString(params, SerializerFeature.WriteMapNullValue);
         String verifySign = SHA256Util.getSHA256Str(webhookSecret + requestStr);
         log.info("trackingyeeSign: {}", trackingyeeSign);
         log.info("待加密验签字符串: {}", webhookSecret + requestStr);
