@@ -136,4 +136,10 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "是否贴箱标")
     private Boolean isLabelBox;
+
+    @ApiModelProperty(value = "轨迹状态")
+    private String trackingStatus;
+
+    @ApiModelProperty(value = "轨迹信息描述")
+    private String trackingDescription;
 }

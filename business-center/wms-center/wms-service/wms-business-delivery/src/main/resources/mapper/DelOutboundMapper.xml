@@ -55,7 +55,9 @@
             a.country,
             a.post_code,
             o.is_print,
-            o.is_label_box
+            o.is_label_box,
+            o.tracking_status,
+            o.tracking_description
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}

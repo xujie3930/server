@@ -1,12 +1,11 @@
 package com.szmsd.delivery.service.impl;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.common.collect.Maps;
-
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.feign.BasCarrierKeywordFeignService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelTrack;
@@ -14,14 +13,14 @@ import com.szmsd.delivery.dto.TrackingYeeTraceDto;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.mapper.DelTrackMapper;
 import com.szmsd.delivery.service.IDelTrackService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.szmsd.common.core.domain.R;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +37,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
     @Autowired
     private DelOutboundMapper delOutboundMapper;
+
+    @Autowired
+    private BasCarrierKeywordFeignService basCarrierKeywordFeignService;
 
     /**
      * 查询模块
@@ -58,8 +60,51 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
      */
     @Override
     public List<DelTrack> selectDelTrackList(DelTrack delTrack) {
-        QueryWrapper<DelTrack> where = new QueryWrapper<DelTrack>();
-        return baseMapper.selectList(where);
+        LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+        boolean orderNoNotEmpty = StringUtils.isNotEmpty(delTrack.getOrderNo());
+        delTrackLambdaQueryWrapper.eq(orderNoNotEmpty, DelTrack::getOrderNo, delTrack.getOrderNo());
+        List<DelTrack> selectList = baseMapper.selectList(delTrackLambdaQueryWrapper);
+        if (CollectionUtils.isNotEmpty(selectList) && orderNoNotEmpty) {
+            LambdaQueryWrapper<DelOutbound> delOutboundLambdaQueryWrapper = Wrappers.lambdaQuery();
+            delOutboundLambdaQueryWrapper.eq(DelOutbound::getOrderNo, delTrack.getOrderNo());
+            DelOutbound delOutbound = delOutboundMapper.selectOne(delOutboundLambdaQueryWrapper);
+            String carrierCode = "";
+            if (null != delOutbound) {
+                carrierCode = delOutbound.getLogisticsProviderCode();
+            }
+            // default Y
+            String filterKeyword = delTrack.getFilterKeyword();
+            if (StringUtils.isEmpty(filterKeyword)) {
+                filterKeyword = "Y";
+            }
+            // filter keyword value is 'Y' and carrier code is not empty
+            if ("Y".equals(filterKeyword) && StringUtils.isNotEmpty(carrierCode)) {
+                for (int i = 0; i < selectList.size(); i++) {
+                    DelTrack track = selectList.get(i);
+                    // check
+                    R<Boolean> booleanR = this.basCarrierKeywordFeignService.checkExistKeyword(carrierCode, track.getDescription());
+                    boolean ignore;
+                    if (null != booleanR) {
+                        Boolean data = booleanR.getData();
+                        if (null != data) {
+                            // check result value
+                            ignore = data;
+                        } else {
+                            // check result value is null, default ignore
+                            ignore = true;
+                        }
+                    } else {
+                        // check result is null, ignore
+                        ignore = true;
+                    }
+                    if (ignore) {
+                        selectList.remove(i);
+                        i--;
+                    }
+                }
+            }
+        }
+        return selectList;
     }
 
     /**
@@ -174,7 +219,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                 DelOutbound updateDelOutbound = new DelOutbound();
                 updateDelOutbound.setId(delOutbound.getId());
                 updateDelOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
-                updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " ("+delTrack.getTrackingTime()+")");
+                updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + delTrack.getTrackingTime() + ")");
                 delOutboundMapper.updateById(updateDelOutbound);
             }
         }

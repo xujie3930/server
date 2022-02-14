@@ -3,4 +3,5 @@ com.szmsd.bas.api.factory.RemoteAttachmentServiceFallbackFactory,\
 com.szmsd.bas.api.factory.BasFeignServiceFallbackFactory,\
 com.szmsd.bas.api.factory.BasRegionFeignServiceFallbackFactory,\
 com.szmsd.bas.api.factory.BasSubFeignServiceFallbackFactory,\
+com.szmsd.bas.api.factory.BasCarrierKeywordFeignServiceFallbackFactory,\
 com.szmsd.bas.api.client.impl.BasSubClientServiceImpl

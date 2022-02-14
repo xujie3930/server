@@ -3,6 +3,7 @@ package com.szmsd.delivery.domain;
 import java.math.BigDecimal;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.szmsd.common.core.web.domain.BaseEntity;
 
 import java.util.Date;
@@ -125,5 +126,7 @@ public class DelTrack extends BaseEntity {
     @Excel(name = "街道3")
     private String street3;
 
-
+    @ApiModelProperty(value = "过滤关键词，Y过滤，N不过滤，默认Y")
+    @TableField(exist = false)
+    private String filterKeyword;
 }

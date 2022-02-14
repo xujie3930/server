@@ -52,4 +52,7 @@ public class DelOutboundListQueryDto extends QueryDto {
 
     @ApiModelProperty(value = "重派")
     private String reassignType;
+
+    @ApiModelProperty(value = "轨迹状态")
+    private String trackingStatus;
 }
