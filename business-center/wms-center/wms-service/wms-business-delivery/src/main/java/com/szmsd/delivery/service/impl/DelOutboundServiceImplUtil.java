@@ -277,7 +277,7 @@ public final class DelOutboundServiceImplUtil {
             reassignType = DelOutboundConstant.REASSIGN_TYPE_N;
         }
         queryWrapper.eq("o.reassign_type", reassignType);
-
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.tracking_status", queryDto.getTrackingStatus());
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
     }
