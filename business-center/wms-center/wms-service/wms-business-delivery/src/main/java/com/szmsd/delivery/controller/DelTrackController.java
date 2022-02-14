@@ -94,16 +94,23 @@ public class DelTrackController extends BaseController {
 
     @ApiOperation(value = "用于接收TrackingYee回调的路由信息", notes = "")
     @PostMapping("/traceCallback")
-    public R traceCallback(HttpServletRequest request, @RequestBody TrackingYeeTraceDto trackingYeeTraceDto){
+    public R traceCallback(HttpServletRequest request, @RequestBody JSONObject jsonObject){
+        if(jsonObject == null) {
+            return R.failed("非法请求，参数异常！");
+        }
         // 验证签名
         String trackingyeeSign = request.getHeader("trackingyee-webhook-signature");
-        String requestStr = JSONObject.toJSONString(trackingYeeTraceDto);
+        String requestStr = jsonObject.toJSONString();
         String verifySign = SHA256Util.getSHA256Str(webhookSecret + requestStr);
-        log.info("trackingyeeSign:{}", trackingyeeSign);
-        log.info("待加密验签字符串:{}", webhookSecret + requestStr);
-        log.info("verifySign:{}", verifySign);
+        log.info("trackingyeeSign: {}", trackingyeeSign);
+        log.info("待加密验签字符串: {}", webhookSecret + requestStr);
+        log.info("verifySign: {}", verifySign);
+        TrackingYeeTraceDto trackingYeeTraceDto = JSONObject.parseObject(requestStr, TrackingYeeTraceDto.class);
         if (StringUtils.isBlank(trackingyeeSign) || !trackingyeeSign.equalsIgnoreCase(verifySign)) {
             return R.failed("非法请求，验签失败！");
+        }
+        if (trackingYeeTraceDto == null) {
+            return R.failed("非法请求，参数异常！");
         }
         // 处理数据
         delTrackService.traceCallback(trackingYeeTraceDto);
