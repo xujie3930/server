@@ -3,6 +3,7 @@ package com.szmsd.delivery.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.dto.TrackingYeeTraceDto;
 import com.szmsd.delivery.util.SHA256Util;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +59,7 @@ public class DelTrackController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelTrack:DelTrack:list')")
     @GetMapping("/list")
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
+    @AutoValue
     public TableDataInfo list(DelTrack delTrack) {
         startPage();
         List<DelTrack> list = delTrackService.selectDelTrackList(delTrack);
