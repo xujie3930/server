@@ -1,5 +1,6 @@
 package com.szmsd.finance.dto;
 
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.enums.BillEnum;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,10 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 @Data
@@ -28,11 +26,27 @@ public class AccountSerialBillDTO {
     @ApiModelProperty(value = "单号")
     private String no;
 
+    public void setNo(String no) {
+        this.no = no;
+        Optional.ofNullable(no).filter(StringUtils::isNotBlank).ifPresent(x -> this.noList = StringToolkit.getCodeByArray(x));
+    }
+
+    @ApiModelProperty(value = "单号")
+    private List<String> noList;
+
     @ApiModelProperty(value = "跟踪号")
     private String trackingNo;
 
     @ApiModelProperty(value = "客户编码")
     private String cusCode;
+
+    public void setCusCode(String cusCode) {
+        this.cusCode = cusCode;
+        Optional.ofNullable(cusCode).filter(StringUtils::isNotBlank).ifPresent(x -> this.cusCodeList = StringToolkit.getCodeByArray(x));
+    }
+
+    @ApiModelProperty(value = "客户编码")
+    private List<String> cusCodeList;
 
     @ApiModelProperty(value = "客户名称")
     private String cusName;
@@ -73,6 +87,14 @@ public class AccountSerialBillDTO {
 
     @ApiModelProperty(value = "产品代码")
     private String productCode;
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
+        Optional.ofNullable(productCode).filter(StringUtils::isNotBlank).ifPresent(x -> this.productCodeList = StringToolkit.getCodeByArray(x));
+    }
+
+    @ApiModelProperty(value = "产品代码")
+    private List<String> productCodeList;
     /**
      * #{@link BillEnum.ProductCategoryEnum}
      */

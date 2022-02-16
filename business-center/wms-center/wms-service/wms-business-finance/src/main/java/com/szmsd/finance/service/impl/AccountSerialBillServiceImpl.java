@@ -2,6 +2,7 @@ package com.szmsd.finance.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -44,14 +45,11 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     @DataScope("cus_code")
     public List<AccountSerialBill> listPage(AccountSerialBillDTO dto) {
         LambdaQueryWrapper<AccountSerialBill> query = Wrappers.lambdaQuery();
-        if (StringUtils.isNotBlank(dto.getNo())) {
-            query.eq(AccountSerialBill::getNo, dto.getNo());
-        }
+        query.in(CollectionUtils.isNotEmpty(dto.getNoList()), AccountSerialBill::getNo, dto.getNoList());
+        query.in(CollectionUtils.isNotEmpty(dto.getCusCodeList()), AccountSerialBill::getCusCode, dto.getCusCodeList());
+        query.in(CollectionUtils.isNotEmpty(dto.getProductCodeList()), AccountSerialBill::getProductCode, dto.getProductCodeList());
         if (StringUtils.isNotBlank(dto.getChargeType())) {
             query.eq(AccountSerialBill::getChargeType, dto.getChargeType());
-        }
-        if (StringUtils.isNotBlank(dto.getCusCode())) {
-            query.eq(AccountSerialBill::getCusCode, dto.getCusCode());
         }
         if (StringUtils.isNotBlank(dto.getWarehouseCode())) {
             query.eq(AccountSerialBill::getWarehouseCode, dto.getWarehouseCode());
@@ -64,9 +62,6 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         }
         if (StringUtils.isNotBlank(dto.getProductCategory())) {
             query.eq(AccountSerialBill::getProductCategory, dto.getProductCategory());
-        }
-        if (StringUtils.isNotBlank(dto.getProductCode())) {
-            query.eq(AccountSerialBill::getProductCode, dto.getProductCode());
         }
         if (StringUtils.isNotBlank(dto.getChargeCategory())) {
             query.eq(AccountSerialBill::getChargeCategory, dto.getChargeCategory());
@@ -177,7 +172,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         log.info("===========================================");
         log.info(JSONObject.toJSONString(queryResultMap));
         log.info("===========================================");
-        List<String> positiveNumber = Arrays.asList("线下充值","退费","优惠");
+        List<String> positiveNumber = Arrays.asList("线下充值", "退费", "优惠");
         long count = accountSerialBills.parallelStream().peek(x -> {
             if (StringUtils.isNotBlank(x.getNo())) {
                 Optional.ofNullable(queryResultMap.get(x.getNo())).ifPresent(queryResultNo -> {

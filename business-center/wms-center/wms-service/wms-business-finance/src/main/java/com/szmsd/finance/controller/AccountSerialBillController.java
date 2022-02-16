@@ -34,6 +34,7 @@ public class AccountSerialBillController extends BaseController {
         return getDataTable(accountSerialBillService.listPage(dto));
     }
 
+    @AutoValue
     @PreAuthorize("@ss.hasPermi('AccountSerialBill:list')")
     @ApiOperation(value = "第三方 - 流水账单 - 列表")
     @PostMapping("/list")
