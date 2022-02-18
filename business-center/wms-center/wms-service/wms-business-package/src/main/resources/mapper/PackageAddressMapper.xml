@@ -40,7 +40,7 @@
                 update_by_name,
                 update_time,
                 remark,
-            id, create_by, update_by, version, del_flag, seller_code, default_flag, link_user_name, link_phone, country_name_zh, country_code, country_name_en, province_name_zh, province_code, province_name_en, city_name_zh, city_code, city_name_en, district_name_zh, district_code, district_name_en, address_zh, address_en
+            id, create_by, update_by, version, del_flag, seller_code, default_flag, link_user_name, link_phone, country_name_zh, country_code, country_name_en, province_name_zh, province_code, province_name_en, city_name_zh, city_code, city_name_en, district_name_zh, district_code, district_name_en, address_zh, address_en, post_code
     </sql>
 
     <select id="selectPackageAddressList" resultType="com.szmsd.pack.vo.PackageAddressVO">
