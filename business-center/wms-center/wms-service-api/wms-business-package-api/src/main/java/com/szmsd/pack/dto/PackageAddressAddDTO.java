@@ -55,6 +55,18 @@ public class PackageAddressAddDTO implements BOConvert {
     @Excel(name = "联系电话")
     private String linkPhone;
 
+    @ApiModelProperty(value = "国家 - 名称")
+    @Excel(name = "国家 - 名称")
+    private String countryNameZh;
+
+    @ApiModelProperty(value = "国家 - 简码")
+    @Excel(name = "国家 - 简码")
+    private String countryCode;
+
+    @ApiModelProperty(value = "国家 - 英文名")
+    @Excel(name = "国家 - 英文名")
+    private String countryNameEn;
+
     @NotEmpty(message = "省名称不能为空")
     @ApiModelProperty(value = "省 - 名称")
     @Excel(name = "省 - 名称")
