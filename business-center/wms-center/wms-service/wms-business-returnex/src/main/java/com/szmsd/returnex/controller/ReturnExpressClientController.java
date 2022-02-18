@@ -6,6 +6,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.common.plugin.HandlerContext;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.returnex.dto.ReturnExpressAddDTO;
 import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
@@ -89,6 +90,24 @@ public class ReturnExpressClientController extends BaseController {
         return getDataTable(returnExpressListVOS);
     }
 
+    /**
+     * 更新退件单信息
+     *
+     * @param expressUpdateDTO 更新条件
+     * @return 返回结果
+     */
+    @AutoValue
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @PostMapping("/export")
+    @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "导出")
+    public void export(HttpServletResponse httpServerResponse, @Validated ReturnExpressListQueryDTO queryDto) {
+        List<ReturnExpressListVO> list = returnExpressService.selectReturnOrderList(queryDto);
+        HandlerContext<List<ReturnExpressListVO>> objectHandlerContext = new HandlerContext<>(list);
+        objectHandlerContext.handlerValue();
+        ExcelUtil<ReturnExpressListVO> util = new ExcelUtil<>(ReturnExpressListVO.class);
+        util.exportExcel(httpServerResponse, list, "退货记录-" + LocalDate.now());
+    }
     /**
      * 更新退件单信息
      *
