@@ -89,9 +89,13 @@ public class DelTrack extends BaseEntity {
     @Excel(name = "轨迹时间")
     private Date trackingTime;
 
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "100", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "动作节点")
-    @Excel(name = "动作节点")
     private String actionCode;
+
+    @ApiModelProperty(value = "动作节点名称")
+    @TableField(exist = false)
+    private String actionCodeName;
 
     @ApiModelProperty(value = "物流轨迹发生的位置显示描述")
     @Excel(name = "物流轨迹发生的位置显示描述")

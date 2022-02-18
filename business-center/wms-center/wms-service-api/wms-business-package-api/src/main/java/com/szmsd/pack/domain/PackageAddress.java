@@ -123,5 +123,6 @@ public class PackageAddress extends BaseEntity implements BOConvert {
     @Excel(name = "具体地址 - 英文名")
     private String addressEn;
 
-
+    @ApiModelProperty(value = "邮编")
+    private String postCode;
 }

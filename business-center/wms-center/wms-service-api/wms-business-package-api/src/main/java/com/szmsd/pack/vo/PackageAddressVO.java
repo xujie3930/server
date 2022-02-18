@@ -102,6 +102,9 @@ public class PackageAddressVO {
     @Excel(name = "详细地址")
     private String showAddr;
 
+    @ApiModelProperty(value = "邮编")
+    private String postCode;
+
     public void setShowAddr() {
         this.showAddr = String.join(" ", this.getProvinceNameZh(), this.getCityNameZh(), this.getDistrictNameZh(), this.getAddressZh());
     }

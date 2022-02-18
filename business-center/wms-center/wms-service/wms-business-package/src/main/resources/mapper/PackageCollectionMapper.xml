@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.pack.mapper.PackageCollectionMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.szmsd.pack.domain.PackageCollection">
+                    <id column="id" property="id"/>
+                    <result column="create_by_name" property="createByName"/>
+                    <result column="create_time" property="createTime"/>
+                    <result column="update_by_name" property="updateByName"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="remark" property="remark"/>
+                    <result column="create_by" property="createBy"/>
+                    <result column="update_by" property="updateBy"/>
+                    <result column="version" property="version"/>
+                    <result column="del_flag" property="delFlag"/>
+                    <result column="collection_name" property="collectionName"/>
+                    <result column="collection_phone" property="collectionPhone"/>
+                    <result column="collection_country" property="collectionCountry"/>
+                    <result column="collection_province" property="collectionProvince"/>
+                    <result column="collection_city" property="collectionCity"/>
+                    <result column="collection_post_code" property="collectionPostCode"/>
+                    <result column="collection_address" property="collectionAddress"/>
+                    <result column="collection_to_warehouse" property="collectionToWarehouse"/>
+                    <result column="warehouse_code" property="warehouseCode"/>
+                    <result column="receiver_name" property="receiverName"/>
+                    <result column="receiver_phone" property="receiverPhone"/>
+                    <result column="receiver_country" property="receiverCountry"/>
+                    <result column="receiver_province" property="receiverProvince"/>
+                    <result column="receiver_city" property="receiverCity"/>
+                    <result column="receiver_post_code" property="receiverPostCode"/>
+                    <result column="receiver_address" property="receiverAddress"/>
+                    <result column="collection_service_code" property="collectionServiceCode"/>
+                    <result column="collection_service_name" property="collectionServiceName"/>
+                    <result column="collection_plan" property="collectionPlan"/>
+                    <result column="handle_mode" property="handleMode"/>
+                    <result column="receiver_begin_date" property="receiverBeginDate"/>
+                    <result column="receiver_end_date" property="receiverEndDate"/>
+                    <result column="box_number" property="boxNumber"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+                create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, create_by, update_by, version, del_flag, collection_name, collection_phone, collection_country, collection_province, collection_city, collection_post_code, collection_address, collection_to_warehouse, warehouse_code, receiver_name, receiver_phone, receiver_country, receiver_province, receiver_city, receiver_post_code, receiver_address, collection_service_code, collection_service_name, collection_plan, handle_mode, receiver_begin_date, receiver_end_date, box_number
+        </sql>
+
+
+</mapper>
