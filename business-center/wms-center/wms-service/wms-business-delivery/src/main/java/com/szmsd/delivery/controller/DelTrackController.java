@@ -3,8 +3,13 @@ package com.szmsd.delivery.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.dto.TrackAnalysisDto;
+import com.szmsd.delivery.dto.TrackAnalysisRequestDto;
 import com.szmsd.delivery.dto.TrackingYeeTraceDto;
 import com.szmsd.delivery.util.SHA256Util;
 import org.springframework.beans.factory.annotation.Value;
@@ -118,4 +123,18 @@ public class DelTrackController extends BaseController {
         delTrackService.traceCallback(trackingYeeTraceDto);
         return R.ok();
     }
+
+    @ApiOperation(value = "获取轨迹分析", notes = "获取轨迹分析")
+    @GetMapping("getTrackAnalysis")
+    public R getTrackAnalysis(TrackAnalysisRequestDto requestDto){
+        return R.ok(delTrackService.getTrackAnalysis(requestDto));
+    }
+
+
+    @ApiOperation(value = "获取轨迹状态下的各个发货服务订单量分析", notes = "获取轨迹状态下的各个发货服务订单量分析")
+    @GetMapping("getProductAnalysis")
+    public R getProductAnalysis(TrackAnalysisRequestDto requestDto){
+        return R.ok(delTrackService.getProductServiceAnalysis(requestDto));
+    }
+
 }

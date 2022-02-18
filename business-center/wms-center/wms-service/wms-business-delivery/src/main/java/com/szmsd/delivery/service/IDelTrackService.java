@@ -1,7 +1,12 @@
 package com.szmsd.delivery.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.szmsd.delivery.domain.DelTrack;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.dto.TrackAnalysisDto;
+import com.szmsd.delivery.dto.TrackAnalysisRequestDto;
 import com.szmsd.delivery.dto.TrackingYeeTraceDto;
 
 import java.util.List;
@@ -70,5 +75,18 @@ public interface IDelTrackService extends IService<DelTrack> {
      */
     void traceCallback(TrackingYeeTraceDto trackingYeeTraceDto);
 
+    /**
+     * 获取轨迹分析饼状图数据
+     * @param requestDto
+     * @return
+     */
+    List<TrackAnalysisDto> getTrackAnalysis(TrackAnalysisRequestDto requestDto);
+
+    /**
+     * 获取轨迹分析饼柱状图数据
+     * @param requestDto
+     * @return
+     */
+    List<TrackAnalysisDto> getProductServiceAnalysis(TrackAnalysisRequestDto requestDto);
 }
 

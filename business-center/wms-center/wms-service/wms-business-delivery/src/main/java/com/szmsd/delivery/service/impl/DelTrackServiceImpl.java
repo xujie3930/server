@@ -1,19 +1,26 @@
 package com.szmsd.delivery.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.feign.BasCarrierKeywordFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelTrack;
+import com.szmsd.delivery.dto.TrackAnalysisDto;
+import com.szmsd.delivery.dto.TrackAnalysisRequestDto;
 import com.szmsd.delivery.dto.TrackingYeeTraceDto;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.mapper.DelTrackMapper;
 import com.szmsd.delivery.service.IDelTrackService;
+import com.szmsd.http.api.service.IHtpPricedProductClientService;
+import com.szmsd.http.dto.PricedProductInServiceCriteria;
+import com.szmsd.http.vo.PricedProduct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,10 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +48,12 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
     @Autowired
     private BasCarrierKeywordFeignService basCarrierKeywordFeignService;
+
+    @Autowired
+    private BasSubClientService basSubClientService;
+
+    @Autowired
+    private IHtpPricedProductClientService htpPricedProductClientService;
 
     /**
      * 查询模块
@@ -180,7 +190,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         delTrack.setCarrierCode(trackingYeeTraceDto.getCarrierCode());
                         delTrack.setShipmentId(trackingYeeTraceDto.getShipmentId());
                         delTrack.setOrderNo(trackingYeeTraceDto.getOrderNo());
-                        delTrack.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
+                        delTrack.setTrackingStatus(logisticsTracking.getStatus());
                         delTrack.setNo(item.getNo());
                         delTrack.setDescription(item.getDescription());
                         // 获取时间
@@ -226,10 +236,72 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                 DelOutbound updateDelOutbound = new DelOutbound();
                 updateDelOutbound.setId(delOutbound.getId());
                 updateDelOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
-                updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + delTrack.getTrackingTime() + ")");
+                updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
                 delOutboundMapper.updateById(updateDelOutbound);
             }
         }
+    }
+
+    @Override
+    public List<TrackAnalysisDto> getTrackAnalysis(TrackAnalysisRequestDto requestDto) {
+        List<TrackAnalysisDto> trackAnalysis = baseMapper.getTrackAnalysis(queryWrapper(requestDto));
+        List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
+        Map<String, String> subList = basSubClientService.getSubList("099"); // 099为轨迹状态
+        subList.forEach((k,v) -> {
+            TrackAnalysisDto analysisDto = new TrackAnalysisDto();
+            analysisDto.setKeyName(k);
+            analysisDto.setKeyCode(v);
+            TrackAnalysisDto trackAnalysisDto = trackAnalysis.stream().filter(a -> a.getKeyCode().equalsIgnoreCase(v)).findFirst().orElse(null);
+            if (trackAnalysisDto != null) {
+                analysisDto.setNum(trackAnalysisDto.getNum());
+            }else {
+                analysisDto.setNum(0);
+            }
+            trackAnalysisResult.add(analysisDto);
+        });
+        return trackAnalysisResult;
+    }
+
+    @Override
+    public List<TrackAnalysisDto> getProductServiceAnalysis(TrackAnalysisRequestDto requestDto) {
+        PricedProductInServiceCriteria serviceCriteria = new PricedProductInServiceCriteria();
+        if (StringUtils.isNotBlank(requestDto.getCountryName())) {
+            serviceCriteria.setCountryName(requestDto.getCountryName());
+        }
+        List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
+        List<PricedProduct> products = htpPricedProductClientService.inService(serviceCriteria);
+        List<TrackAnalysisDto> serviceAnalysis = baseMapper.getProductServiceAnalysis(queryWrapper(requestDto));
+        products.forEach(p -> {
+            TrackAnalysisDto analysisDto = new TrackAnalysisDto();
+            analysisDto.setKeyName(p.getName());
+            analysisDto.setKeyCode(p.getCode());
+            TrackAnalysisDto trackAnalysisDto = serviceAnalysis.stream().filter(a -> a.getKeyCode().equalsIgnoreCase(p.getCode())).findFirst().orElse(null);
+            if (trackAnalysisDto != null) {
+                analysisDto.setNum(trackAnalysisDto.getNum());
+            }else {
+                analysisDto.setNum(0);
+            }
+            trackAnalysisResult.add(analysisDto);
+        });
+        return trackAnalysisResult;
+    }
+
+    private QueryWrapper<TrackAnalysisRequestDto> queryWrapper(TrackAnalysisRequestDto requestDto){
+        QueryWrapper<TrackAnalysisRequestDto> wrapper = new QueryWrapper<>();
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getShipmentService()) , "a.shipment_service", requestDto.getShipmentService());
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getCountryCode()) , "b.country_code", requestDto.getCountryCode());
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getWarehouseCode()) , "a.warehouse_code", requestDto.getWarehouseCode());
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getTrackingStatus()) , "a.tracking_status", requestDto.getTrackingStatus());
+        if (requestDto.getDateType() != null){
+            if (requestDto.getDateType() == 1) {
+                wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()) , "a.create_time", DateUtils.parseDate(requestDto.getStartTime()));
+                wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()) , "a.create_time", DateUtils.parseDate(requestDto.getEndTime()));
+            }else {
+                wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()) , "a.shipments_time", DateUtils.parseDate(requestDto.getStartTime()));
+                wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()) , "a.shipments_time", DateUtils.parseDate(requestDto.getEndTime()));
+            }
+        }
+        return wrapper;
     }
 
 }
