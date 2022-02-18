@@ -113,9 +113,8 @@ public class ReturnExpressClientController extends BaseController {
     @PostMapping("/importByTemplate")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "导入")
-    public R<String> importByTemplate(@RequestPart("file") MultipartFile multipartFile) {
-        returnExpressService.importByTemplateClient(multipartFile);
-        return R.ok();
+    public R<List<String>> importByTemplate(@RequestPart("file") MultipartFile multipartFile) {
+        return R.ok(returnExpressService.importByTemplateClient(multipartFile));
     }
 
     /**

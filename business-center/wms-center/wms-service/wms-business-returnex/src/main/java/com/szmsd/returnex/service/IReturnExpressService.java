@@ -78,7 +78,7 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @param expressUpdateDTO 更新条件
      * @return 返回结果
      */
-    <T extends ReturnExpressAddDTO> int updateExpressInfo(T expressUpdateDTO);
+    <T extends ReturnExpressAddDTO> int updateExpressInfo(ReturnExpressServiceAddDTO expressUpdateDTO);
 
     /**
      * 新增退件单-生成预报单号

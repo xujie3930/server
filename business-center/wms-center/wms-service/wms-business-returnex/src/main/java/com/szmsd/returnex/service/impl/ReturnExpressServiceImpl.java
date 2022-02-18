@@ -555,7 +555,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public <T extends ReturnExpressAddDTO> int updateExpressInfo(T expressUpdateDTO) {
+    public <T extends ReturnExpressAddDTO> int updateExpressInfo(ReturnExpressServiceAddDTO expressUpdateDTO) {
         //如果之前是销毁，已经结束了，到这都是要么销毁，要么拆包上架 还有WMS通知退件等待
         checkBeforeUpdate(expressUpdateDTO);
         String dealStatus = "";
@@ -957,7 +957,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     }
 
     private String updateThis(ReturnExpressClientImportBO returnExpressClientImportBO, ReturnExpressVO infoByNo) {
-        ReturnExpressAddDTO returnExpressAddDTO = new ReturnExpressAddDTO();
+        ReturnExpressServiceAddDTO returnExpressAddDTO = new ReturnExpressServiceAddDTO();
         BeanUtils.copyProperties(infoByNo, returnExpressAddDTO);
         List<ReturnExpressClientImportSkuDTO> skuDTO = returnExpressClientImportBO.getSkuDTO();
         Map<String, ReturnExpressClientImportSkuDTO> skuDTOMap = skuDTO.stream().filter(x -> StringUtils.isNotBlank(x.getSku())).collect(Collectors.toMap(ReturnExpressClientImportSkuDTO::getSku, x -> x));
@@ -980,7 +980,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @param infoByNo
      * @return
      */
-    private String updateThis(ReturnExpressAddDTO returnExpressAddDTO) {
+    private String updateThis(ReturnExpressServiceAddDTO returnExpressAddDTO) {
         try {
             log.info("更新退件信息:{}", JSONObject.toJSONString(returnExpressAddDTO));
             this.updateExpressInfo(returnExpressAddDTO);
@@ -1000,11 +1000,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      */
     private String reassign(ReturnExpressClientImportBO returnExpressClientImportBO, ReturnExpressVO infoByNo) {
         String expectedNo = returnExpressClientImportBO.getExpectedNo();
-        ReturnExpressClientImportBaseDTO baseDTO = returnExpressClientImportBO.getBaseDTO();
         ReturnExpressClientImportDelOutboundDto importReassignDTO = returnExpressClientImportBO.getReassignDTO();
-        String processTypeStr = baseDTO.getProcessTypeStr();
-        infoByNo.setProcessType("");
-        infoByNo.setProcessTypeStr(processTypeStr);
+
         //源出库单号
         String fromOrderNo = infoByNo.getFromOrderNo();
         // 查询出库单信息
@@ -1024,6 +1021,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         delOutboundDto.setShipmentRule(getStrOrDefault(importReassignDTO.getShipmentRule(), delOutboundVO.getShipmentRule()));
         delOutboundDto.setRemark(getStrOrDefault(importReassignDTO.getShipmentRule(), ""));
         //地址信息
+        DelOutboundAddressDto delOutboundAddressDto = Optional.ofNullable(delOutboundDto.getAddress()).orElse(new DelOutboundAddressDto());
+        delOutboundDto.setAddress(delOutboundAddressDto);
         DelOutboundAddressDto addressDTO = delOutboundDto.getAddress();
         DelOutboundAddressVO addressVO = delOutboundVO.getAddress();
         addressDTO.setConsignee(getStrOrDefault(importReassignDTO.getConsignee(), addressVO.getConsignee()));
@@ -1048,7 +1047,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         DelOutboundAddResponse delOutboundAddResponse = reassignR.getData();
         String orderNoNew = delOutboundAddResponse.getOrderNo();
         infoByNo.setFromOrderNoNew(orderNoNew);
-        ReturnExpressAddDTO returnExpressAddDTO = new ReturnExpressAddDTO();
+        ReturnExpressServiceAddDTO returnExpressAddDTO = new ReturnExpressServiceAddDTO();
         BeanUtils.copyProperties(infoByNo, returnExpressAddDTO);
         String s = this.updateThis(returnExpressAddDTO);
         if (StringUtils.isNotBlank(s)) return s;
