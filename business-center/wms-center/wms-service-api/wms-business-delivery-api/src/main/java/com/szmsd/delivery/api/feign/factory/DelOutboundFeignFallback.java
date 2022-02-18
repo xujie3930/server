@@ -151,6 +151,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public TableDataInfo<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO) {
                 throw new RuntimeException(throwable.getMessage());
             }
+
+            @Override
+            public R<DelOutboundAddResponse> reassign(DelOutboundDto dto) {
+                throw new RuntimeException(throwable.getMessage());
+            }
         };
     }
 }

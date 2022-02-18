@@ -111,4 +111,10 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
     void updateTrackNoByOutBoundNo(String outBoundNo, String trackNo);
 
     Boolean checkoutRefNo(String refNo);
+
+    /**
+     * 客户端导入
+     * @param multipartFile
+     */
+    List<String> importByTemplateClient(MultipartFile multipartFile);
 }

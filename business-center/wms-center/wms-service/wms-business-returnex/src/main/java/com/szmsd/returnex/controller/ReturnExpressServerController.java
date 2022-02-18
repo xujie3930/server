@@ -210,8 +210,6 @@ public class ReturnExpressServerController extends BaseController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ExcelUtil<ReturnExpressServiceAddDTO> util = new ExcelUtil<>(ReturnExpressServiceAddDTO.class);
-        util.exportExcel(response, new ArrayList<>(), "退货记录-" + LocalDate.now());
     }
 
     /**

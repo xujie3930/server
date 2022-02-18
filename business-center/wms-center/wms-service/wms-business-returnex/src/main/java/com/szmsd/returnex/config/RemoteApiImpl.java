@@ -1,16 +1,14 @@
-package com.szmsd.finance.compont;
+package com.szmsd.returnex.config;
 
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.cache.impl.WeakCache;
 import cn.hutool.core.date.DateUnit;
-import com.szmsd.bas.api.domain.BasApiCountry;
 import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.*;
-import com.szmsd.bas.domain.BasSellerCertificate;
 import com.szmsd.bas.dto.BasSellerQueryDto;
 import com.szmsd.bas.dto.BasSellerSysDto;
 import com.szmsd.bas.dto.WarehouseKvDTO;
@@ -58,8 +56,6 @@ public class RemoteApiImpl implements IRemoteApi {
     private BasSellerFeignService basSellerFeignService;
     @Resource
     private BasSubFeignService basSubFeignService;
-    @Resource
-    private ConfigData configData;
 
     /**
      * 根据主类+子类别名称获取 子类别信息

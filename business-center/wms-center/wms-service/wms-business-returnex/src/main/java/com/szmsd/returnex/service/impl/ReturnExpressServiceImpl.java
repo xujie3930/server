@@ -19,9 +19,14 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.dto.DelOutboundAddressDto;
+import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.vo.DelOutboundAddResponse;
+import com.szmsd.delivery.vo.DelOutboundAddressVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.http.dto.returnex.CreateExpectedReqDTO;
 import com.szmsd.http.dto.returnex.ProcessingUpdateReqDTO;
 import com.szmsd.http.dto.returnex.ReturnDetail;
@@ -31,6 +36,7 @@ import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
 import com.szmsd.returnex.config.BeanCopyUtil;
 import com.szmsd.returnex.config.ConfigStatus;
+import com.szmsd.returnex.config.IRemoteApi;
 import com.szmsd.returnex.constant.ReturnExpressConstant;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
 import com.szmsd.returnex.dto.*;
@@ -43,29 +49,35 @@ import com.szmsd.returnex.service.IReturnExpressService;
 import com.szmsd.returnex.vo.ReturnExpressGoodVO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
+import io.swagger.annotations.ApiModelProperty;
 import jodd.util.StringUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -103,6 +115,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     @Resource
     private DelOutboundFeignService delOutboundFeignService;
+
+    @Resource
+    private IRemoteApi iRemoteApi;
 
     /**
      * 获取用户sellerCode
@@ -319,7 +334,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         String returnSource = returnExpressAddDTO.getReturnSource();
         String processType = returnExpressAddDTO.getProcessType();
         String omsReturn = configStatus.getReturnSource().getOmsReturn();
-        if (StringUtils.isNotBlank(processType)){
+        if (StringUtils.isNotBlank(processType)) {
             if (returnSource.equals(omsReturn)) {
                 List<String> allProcessType = Arrays.asList(configStatus.getReassign(), configStatus.getDestroy());
                 AssertUtil.isTrue(allProcessType.contains(processType), "OMS退件预报只支持,销毁/重派");
@@ -562,7 +577,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             }
         }
         ReturnExpressDetail returnExpressDetail = new ReturnExpressDetail();
-        BeanUtils.copyProperties(expressUpdateDTO,returnExpressDetail);
+        BeanUtils.copyProperties(expressUpdateDTO, returnExpressDetail);
         ReturnExpressServiceAddDTO expressUpdateServiceDTO = (ReturnExpressServiceAddDTO) expressUpdateDTO;
         int update = returnExpressMapper.update(returnExpressDetail, Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
@@ -713,9 +728,22 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         return update;
     }
 
+    public ReturnExpressVO getInfo(String expectedNo) {
+        if (StringUtils.isBlank(expectedNo))
+            return null;
+        ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaQuery().eq(ReturnExpressDetail::getExpectedNo, expectedNo).last("LIMIT 1"));
+        if (Objects.isNull(returnExpressDetail))
+            return null;
+        return getReturnExpressVO(returnExpressDetail);
+    }
+
     @Override
     public ReturnExpressVO getInfo(Long id) {
         ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectById(id);
+        return getReturnExpressVO(returnExpressDetail);
+    }
+
+    private ReturnExpressVO getReturnExpressVO(ReturnExpressDetail returnExpressDetail) {
         Optional.ofNullable(returnExpressDetail).orElseThrow(() -> new BaseException("数据不存在！"));
         ReturnExpressVO returnExpressVO = returnExpressDetail.convertThis(ReturnExpressVO.class);
         returnExpressVO.setGoodList(returnExpressGoodService.queryGoodListByExId(returnExpressVO.getId()));
@@ -793,5 +821,258 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             e.printStackTrace();
         }
     }
+
+    /**
+     * 客户端导入
+     *
+     * @param multipartFile 文件
+     */
+    @SneakyThrows
+    @Override
+    public List<String> importByTemplateClient(MultipartFile multipartFile) {
+        try (
+                InputStream inputStream = multipartFile.getInputStream();
+                InputStream inputStream1 = multipartFile.getInputStream();
+                InputStream inputStream2 = multipartFile.getInputStream();
+        ) {
+            StopWatch importWatch = new StopWatch("导入解析");
+            importWatch.start("解析");
+            CompletableFuture<List<ReturnExpressClientImportBaseDTO>> baseInfoListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream, ReturnExpressClientImportBaseDTO.class, new SyncReadListener()).sheet(0).doReadSync());
+            CompletableFuture<List<ReturnExpressClientImportSkuDTO>> skuListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream1, ReturnExpressClientImportSkuDTO.class, new SyncReadListener()).sheet(1).doReadSync());
+            CompletableFuture<List<ReturnExpressClientImportDelOutboundDto>> reassignListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream2, ReturnExpressClientImportDelOutboundDto.class, new SyncReadListener()).headRowNumber(2).sheet(2).doReadSync());
+            CompletableFuture.allOf(reassignListFuture, skuListFuture, baseInfoListFuture).get();
+            importWatch.stop();
+            importWatch.start("获取转换map");
+            List<ReturnExpressClientImportBaseDTO> baseInfoList = baseInfoListFuture.get();
+            Map<String, ReturnExpressClientImportBaseDTO> baseInfoListMap = baseInfoList.parallelStream().collect(Collectors.toMap(ReturnExpressClientImportBaseDTO::getExpectedNo, x -> x, (x1, x2) -> x1));
+            baseInfoList.clear();
+
+            List<ReturnExpressClientImportSkuDTO> skuList = skuListFuture.get();
+            Map<String, List<ReturnExpressClientImportSkuDTO>> skuListMap = skuList.parallelStream().collect(Collectors.groupingBy(ReturnExpressClientImportSkuDTO::getExpectedNo));
+            skuList.clear();
+
+            List<ReturnExpressClientImportDelOutboundDto> reassignList = reassignListFuture.get();
+            Map<String, ReturnExpressClientImportDelOutboundDto> reassignListMap = reassignList.stream().collect(Collectors.toMap(ReturnExpressClientImportDelOutboundDto::getExpectedNo, x -> x, (x1, x2) -> x1));
+            reassignList.clear();
+            importWatch.stop();
+            importWatch.start("组装参数");
+            // 组装参数
+            List<ReturnExpressClientImportBO> importBOList = new ArrayList<>(skuList.size());
+            baseInfoListMap.forEach((expectedNo, baseInfo) -> {
+                ReturnExpressClientImportBO returnExpressClientImportBO = new ReturnExpressClientImportBO();
+                returnExpressClientImportBO.setExpectedNo(expectedNo);
+                returnExpressClientImportBO.setBaseDTO(baseInfo);
+                returnExpressClientImportBO.setSkuDTO(skuListMap.get(expectedNo));
+                returnExpressClientImportBO.setReassignDTO(reassignListMap.get(expectedNo));
+                importBOList.add(returnExpressClientImportBO);
+            });
+            importWatch.stop();
+            return execute(importBOList);
+        } catch (IOException e) {
+            throw new RuntimeException("文件读取异常");
+        }
+
+    }
+
+    /**
+     * 实际执行
+     *
+     * @param importBOList
+     * @return errorMsg
+     */
+    private List<String> execute(List<ReturnExpressClientImportBO> importBOList) throws ExecutionException, InterruptedException {
+        int count = 20;
+        int size = importBOList.size();
+        int segments = size / count;
+        segments = size % count == 0 ? segments : segments + 1;
+        List<CompletableFuture<List<String>>> errorMsgList = new ArrayList<>();
+        for (int i = 0; i < segments; i++) {
+            List<ReturnExpressClientImportBO> importBOS;
+            if (i == segments - 1) {
+                importBOS = importBOList.subList(count * i, size);
+            } else {
+                importBOS = importBOList.subList(count * i, count * (i + 1));
+            }
+            errorMsgList.add(executeReal(importBOS));
+        }
+        CompletableFuture.allOf(errorMsgList.toArray(new CompletableFuture[0])).get();
+        List<String> resultMsg = new ArrayList<>(importBOList.size());
+        errorMsgList.forEach(x -> {
+            try {
+                resultMsg.addAll(x.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        });
+        return resultMsg;
+    }
+
+    private CompletableFuture<List<String>> executeReal(List<ReturnExpressClientImportBO> importBOList) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        return CompletableFuture.supplyAsync(() -> {
+            RequestContextHolder.setRequestAttributes(requestAttributes);
+            SecurityContextHolder.setContext(context);
+            List<String> errorMsgList = new ArrayList<>();
+            importBOList.forEach(x -> {
+                String errorMsg = executeReal(x);
+                if (StringUtils.isNotBlank(errorMsg))
+                    errorMsgList.add(errorMsg);
+            });
+            return errorMsgList;
+        });
+    }
+
+    private static final String EMPTY_STR = "\\";
+
+    private String executeReal(ReturnExpressClientImportBO returnExpressClientImportBO) {
+        // 查询
+        String expectedNo = returnExpressClientImportBO.getExpectedNo();
+        ReturnExpressVO infoByNo = getInfo(expectedNo);
+        if (infoByNo == null) return "预报单：" + expectedNo + "不存在";
+
+        ReturnExpressClientImportBaseDTO baseDTO = returnExpressClientImportBO.getBaseDTO();
+        String processTypeStr = baseDTO.getProcessTypeStr();
+
+        String reassignCode = configStatus.getReassign();
+        String destroyCode = configStatus.getDestroy();
+
+        infoByNo.setProcessTypeStr(processTypeStr);
+        if ("重派".equals(processTypeStr)) {
+            infoByNo.setProcessType(reassignCode);
+        } else if ("销毁".equals(processTypeStr)) {
+            infoByNo.setProcessType(destroyCode);
+        } else {
+            return "预报单：" + expectedNo + "处理方式[" + processTypeStr + "]不存在";
+        }
+        ReturnExpressClientImportDelOutboundDto importReassignDTO = returnExpressClientImportBO.getReassignDTO();
+        if (importReassignDTO == null) return "预报单：" + expectedNo + "重派信息异常或不存在";
+        String errorMsg = "";
+        if ("重派".equals(processTypeStr)) {
+            errorMsg = reassign(returnExpressClientImportBO, infoByNo);
+        } else {
+            errorMsg = updateThis(returnExpressClientImportBO, infoByNo);
+        }
+        return errorMsg;
+    }
+
+    private String updateThis(ReturnExpressClientImportBO returnExpressClientImportBO, ReturnExpressVO infoByNo) {
+        ReturnExpressAddDTO returnExpressAddDTO = new ReturnExpressAddDTO();
+        BeanUtils.copyProperties(infoByNo, returnExpressAddDTO);
+        List<ReturnExpressClientImportSkuDTO> skuDTO = returnExpressClientImportBO.getSkuDTO();
+        Map<String, ReturnExpressClientImportSkuDTO> skuDTOMap = skuDTO.stream().filter(x -> StringUtils.isNotBlank(x.getSku())).collect(Collectors.toMap(ReturnExpressClientImportSkuDTO::getSku, x -> x));
+        List<ReturnExpressGoodAddDTO> goodList = returnExpressAddDTO.getGoodList();
+        goodList.forEach(x -> {
+            String sku = x.getSku();
+            ReturnExpressClientImportSkuDTO importSkuDTO = skuDTOMap.get(sku);
+            if (importSkuDTO != null) {
+                x.setProcessRemark(importSkuDTO.getRemark());
+                x.setPutawaySku(importSkuDTO.getPutawaySku());
+                x.setPutawayQty(importSkuDTO.getPutawayQty());
+            }
+        });
+        return updateThis(returnExpressAddDTO);
+    }
+
+    /**
+     * 默认处理方式
+     *
+     * @param infoByNo
+     * @return
+     */
+    private String updateThis(ReturnExpressAddDTO returnExpressAddDTO) {
+        try {
+            log.info("更新退件信息:{}", JSONObject.toJSONString(returnExpressAddDTO));
+            this.updateExpressInfo(returnExpressAddDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+        return null;
+    }
+
+    /**
+     * 重派
+     *
+     * @param returnExpressClientImportBO
+     * @param infoByNo
+     * @return
+     */
+    private String reassign(ReturnExpressClientImportBO returnExpressClientImportBO, ReturnExpressVO infoByNo) {
+        String expectedNo = returnExpressClientImportBO.getExpectedNo();
+        ReturnExpressClientImportBaseDTO baseDTO = returnExpressClientImportBO.getBaseDTO();
+        ReturnExpressClientImportDelOutboundDto importReassignDTO = returnExpressClientImportBO.getReassignDTO();
+        String processTypeStr = baseDTO.getProcessTypeStr();
+        infoByNo.setProcessType("");
+        infoByNo.setProcessTypeStr(processTypeStr);
+        //源出库单号
+        String fromOrderNo = infoByNo.getFromOrderNo();
+        // 查询出库单信息
+        R<DelOutboundVO> delOutboundVOR = delOutboundFeignService.getInfoByOrderNo(fromOrderNo);
+        if ((delOutboundVOR == null || delOutboundVOR.getCode() != HttpStatus.SUCCESS || delOutboundVOR.getData() == null)) {
+            return "预报单：" + expectedNo + "关联的出库单" + fromOrderNo + "不存在"+Optional.ofNullable(delOutboundVOR).map(R::getMsg).orElse("");
+        }
+        DelOutboundVO delOutboundVO = delOutboundVOR.getData();
+
+        // 调用重派出库单
+        DelOutboundDto delOutboundDto = new DelOutboundDto();
+        BeanUtils.copyProperties(delOutboundVO, delOutboundDto);
+        //主单信息
+        delOutboundDto.setIsFirst("是".equals(getStrOrDefault(importReassignDTO.getIsFirstStr(), delOutboundDto.getIsFirst() ? "是" : "否")));
+        delOutboundDto.setOldOrderNo(fromOrderNo);
+        delOutboundDto.setRefOrderNo(getStrOrDefault(importReassignDTO.getRefNo(), expectedNo));
+        delOutboundDto.setShipmentRule(getStrOrDefault(importReassignDTO.getShipmentRule(), delOutboundVO.getShipmentRule()));
+        delOutboundDto.setRemark(getStrOrDefault(importReassignDTO.getShipmentRule(), ""));
+        //地址信息
+        DelOutboundAddressDto addressDTO = delOutboundDto.getAddress();
+        DelOutboundAddressVO addressVO = delOutboundVO.getAddress();
+        addressDTO.setConsignee(getStrOrDefault(importReassignDTO.getConsignee(), addressVO.getConsignee()));
+        String countryName = getStrOrDefault(importReassignDTO.getCountry(), addressVO.getConsignee());
+        addressDTO.setCountry(countryName);
+        addressDTO.setCountryCode(countryName.equals(addressVO.getCountry()) ? addressVO.getCountryCode() : iRemoteApi.getCountryCode(countryName));
+        addressDTO.setZone("");
+        addressDTO.setStateOrProvince(getStrOrDefault(importReassignDTO.getStateOrProvince(), addressVO.getStateOrProvince()));
+        addressDTO.setCity(getStrOrDefault(importReassignDTO.getCity(), addressVO.getCity()));
+        addressDTO.setStreet1(getStrOrDefault(importReassignDTO.getStreet1(), addressVO.getStreet1()));
+        addressDTO.setStreet2(getStrOrDefault(importReassignDTO.getStreet2(), addressVO.getStreet2()));
+        addressDTO.setStreet3("");
+        addressDTO.setPostCode(getStrOrDefault(importReassignDTO.getPostCode(), addressVO.getPostCode()));
+        addressDTO.setPhoneNo(getStrOrDefault(importReassignDTO.getPhoneNo(), addressVO.getPhoneNo()));
+        addressDTO.setEmail(getStrOrDefault(importReassignDTO.getEmail(), addressVO.getEmail()));
+
+        log.info("重派信息推送：" + JSONObject.toJSONString(delOutboundDto));
+        R<DelOutboundAddResponse> reassignR = delOutboundFeignService.reassign(delOutboundDto);
+        if ((reassignR == null || reassignR.getCode() != HttpStatus.SUCCESS || reassignR.getData() == null)) {
+            return "预报单：" + expectedNo + "重派异常:" + Optional.ofNullable(reassignR).map(R::getMsg).orElse("");
+        }
+        DelOutboundAddResponse delOutboundAddResponse = reassignR.getData();
+        String orderNoNew = delOutboundAddResponse.getOrderNo();
+        infoByNo.setFromOrderNoNew(orderNoNew);
+        ReturnExpressAddDTO returnExpressAddDTO = new ReturnExpressAddDTO();
+        BeanUtils.copyProperties(infoByNo, returnExpressAddDTO);
+        String s = this.updateThis(returnExpressAddDTO);
+        if (StringUtils.isNotBlank(s)) return s;
+        return null;
+    }
+
+    /**
+     * 如果是 \ 则返回 ""
+     *
+     * @param targetStr  对象
+     * @param defaultStr 默认值
+     * @return 实际值
+     */
+    private static String getStrOrDefault(String targetStr, String defaultStr) {
+        if (StringUtils.isBlank(targetStr)) {
+            return defaultStr;
+        } else {
+            if (EMPTY_STR.equals(targetStr)) {
+                return "";
+            } else {
+                return targetStr;
+            }
+        }
+    }
+
 
 }

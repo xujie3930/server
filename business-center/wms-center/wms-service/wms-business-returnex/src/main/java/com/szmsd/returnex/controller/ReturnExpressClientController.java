@@ -1,6 +1,7 @@
 package com.szmsd.returnex.controller;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
@@ -14,11 +15,21 @@ import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -92,6 +103,46 @@ public class ReturnExpressClientController extends BaseController {
         return toOk(returnExpressService.updateExpressInfo(expressUpdateDTO));
     }
 
+    /**
+     * 更新退件单信息
+     *
+     * @param multipartFile 更新条件
+     * @return 返回结果
+     */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @PostMapping("/importByTemplate")
+    @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "导入")
+    public R<String> importByTemplate(@RequestPart("file") MultipartFile multipartFile) {
+        returnExpressService.importByTemplateClient(multipartFile);
+        return R.ok();
+    }
+
+    /**
+     * 更新退件单信息
+     *
+     * @param expressUpdateDTO 更新条件
+     * @return 返回结果
+     */
+    @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:update')")
+    @PostMapping("/exportTemplate")
+    @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "导出模板")
+    public void exportTemplate(HttpServletResponse response) {
+        ClassPathResource classPathResource = new ClassPathResource("/template/退货处理模板.xlsx");
+        try (InputStream inputStream = classPathResource.getInputStream();
+             ServletOutputStream outputStream = response.getOutputStream()) {
+
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setCharacterEncoding("UTF-8");
+            String excelName = URLEncoder.encode("退货处理模板", "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + excelName + ".xls");
+            IOUtils.copy(inputStream, outputStream);
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     /**
      * 获取退件单信息详情
      *

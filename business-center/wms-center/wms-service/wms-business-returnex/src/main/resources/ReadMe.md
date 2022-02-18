@@ -2,22 +2,12 @@
 ![img.png](img.png)
 
 > 1. -- 客户端-退件预报
+> 2. 新建数据 按处理状态通知wms仓库进行处理 如果是拆包检查 wms会把sku信息回调；拆包上架需要填写新sku ，进行上架 拆包检查等其余条件都需要wms回调
 > > - 推送WMS （com.szmsd.returnex.controller.ReturnExpressOpenController.expectedCreate）
 > > - WMS接收到货，回调OMS （com.szmsd.returnex.controller.ReturnExpressOpenController.saveArrivalInfoFormWms）
 > >    -销毁
 > > ### 处理
 >
-```mermaid
-graph TD
-A[WMS退件-无名件] --> B(退件列表) 
-AAAA[客户退件] --> B(退件列表) 
-AA[OMS退件] --> B 
-AAA[WMS退件预报] --> B 
-    B --> C{条件a}
-    C --> |a=1| D[结果1]
-    C --> |a=2| E[结果2]
-    F[竖向流程图]
-```
 ```mermaid
 graph TD
 N(处理方式)  --> A1[OMS退件通知] 

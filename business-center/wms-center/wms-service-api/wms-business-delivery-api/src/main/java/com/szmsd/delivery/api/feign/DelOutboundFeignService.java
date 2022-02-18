@@ -180,4 +180,9 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/queryFinishList")
     @ApiOperation(value = "查询已完成的单号", notes = "查询已完成的单号")
     TableDataInfo<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
+
+    @PostMapping("/api/outbound/reassign")
+    @ApiOperation(value = "出库管理 - 重派", position = 2200)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
+    R<DelOutboundAddResponse> reassign(@RequestBody DelOutboundDto dto);
 }
