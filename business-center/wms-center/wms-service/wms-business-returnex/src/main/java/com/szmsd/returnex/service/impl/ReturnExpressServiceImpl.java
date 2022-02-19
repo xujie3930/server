@@ -728,10 +728,20 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         return update;
     }
 
-    public ReturnExpressVO getInfo(String expectedNo) {
+    /**
+     * 查询该用户待处理的订单 客户导入时查询用
+     * @param expectedNo
+     * @return
+     */
+    private ReturnExpressVO getInfo(String expectedNo) {
         if (StringUtils.isBlank(expectedNo))
             return null;
-        ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaQuery().eq(ReturnExpressDetail::getExpectedNo, expectedNo).last("LIMIT 1"));
+        String sellerCode = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaQuery()
+                .eq(ReturnExpressDetail::getExpectedNo, expectedNo)
+                .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
+                .eq(StringUtils.isNotBlank(sellerCode), ReturnExpressDetail::getSellerCode, sellerCode)
+                .last("LIMIT 1"));
         if (Objects.isNull(returnExpressDetail))
             return null;
         return getReturnExpressVO(returnExpressDetail);
@@ -1007,7 +1017,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         // 查询出库单信息
         R<DelOutboundVO> delOutboundVOR = delOutboundFeignService.getInfoByOrderNo(fromOrderNo);
         if ((delOutboundVOR == null || delOutboundVOR.getCode() != HttpStatus.SUCCESS || delOutboundVOR.getData() == null)) {
-            return "预报单：" + expectedNo + "关联的出库单" + fromOrderNo + "不存在"+Optional.ofNullable(delOutboundVOR).map(R::getMsg).orElse("");
+            return "预报单：" + expectedNo + "关联的出库单" + fromOrderNo + "不存在" + Optional.ofNullable(delOutboundVOR).map(R::getMsg).orElse("");
         }
         DelOutboundVO delOutboundVO = delOutboundVOR.getData();
 
