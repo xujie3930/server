@@ -12,11 +12,13 @@ import com.szmsd.returnex.dto.ReturnExpressAddDTO;
 import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
 import com.szmsd.returnex.dto.ReturnExpressServiceAddDTO;
 import com.szmsd.returnex.service.IReturnExpressService;
+import com.szmsd.returnex.vo.ReturnExpressClientListVO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -32,6 +34,7 @@ import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName: ReturnExpressClientController
@@ -102,12 +105,18 @@ public class ReturnExpressClientController extends BaseController {
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "导出")
     public void export(HttpServletResponse httpServerResponse, @Validated ReturnExpressListQueryDTO queryDto) {
-        List<ReturnExpressListVO> list = returnExpressService.selectReturnOrderList(queryDto);
+        List<ReturnExpressListVO> list = returnExpressService.selectClientReturnOrderList(queryDto);
         HandlerContext<List<ReturnExpressListVO>> objectHandlerContext = new HandlerContext<>(list);
         objectHandlerContext.handlerValue();
-        ExcelUtil<ReturnExpressListVO> util = new ExcelUtil<>(ReturnExpressListVO.class);
-        util.exportExcel(httpServerResponse, list, "退货记录-" + LocalDate.now());
+        List<ReturnExpressClientListVO> exportList = list.stream().map(x -> {
+            ReturnExpressClientListVO returnExpressClientListVO = new ReturnExpressClientListVO();
+            BeanUtils.copyProperties(x, returnExpressClientListVO);
+            return returnExpressClientListVO;
+        }).collect(Collectors.toList());
+        ExcelUtil<ReturnExpressClientListVO> util = new ExcelUtil<>(ReturnExpressClientListVO.class);
+        util.exportExcel(httpServerResponse, exportList, "退货记录-" + LocalDate.now());
     }
+
     /**
      * 更新退件单信息
      *
@@ -161,6 +170,7 @@ public class ReturnExpressClientController extends BaseController {
             e.printStackTrace();
         }
     }
+
     /**
      * 获取退件单信息详情
      *
