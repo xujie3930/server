@@ -7,10 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.plugin.annotation.AutoValue;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.dto.TrackAnalysisDto;
-import com.szmsd.delivery.dto.TrackAnalysisRequestDto;
-import com.szmsd.delivery.dto.TrackingYeeTraceDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.util.SHA256Util;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -130,11 +127,22 @@ public class DelTrackController extends BaseController {
         return R.ok(delTrackService.getTrackAnalysis(requestDto));
     }
 
-
     @ApiOperation(value = "获取轨迹状态下的各个发货服务订单量分析", notes = "获取轨迹状态下的各个发货服务订单量分析")
     @GetMapping("getProductAnalysis")
     public R getProductAnalysis(TrackAnalysisRequestDto requestDto){
         return R.ok(delTrackService.getProductServiceAnalysis(requestDto));
     }
 
+    /**
+     * 导出轨迹分析
+     */
+    @PreAuthorize("@ss.hasPermi('DelTrack:DelTrack:exportTrackAnalysis')")
+    @Log(title = "模块", businessType = BusinessType.EXPORT)
+    @GetMapping("/exportTrackAnalysis")
+    @ApiOperation(value = "导出轨迹分析", notes = "导出轨迹分析")
+    public void exportTrackAnalysis(HttpServletResponse response, TrackAnalysisRequestDto requestDto) throws IOException {
+        List<TrackAnalysisExportDto> list = delTrackService.getAnalysisExportData(requestDto);
+        ExcelUtil<TrackAnalysisExportDto> util = new ExcelUtil<TrackAnalysisExportDto>(TrackAnalysisExportDto.class);
+        util.exportExcel(response, list, "TrackAnalysis");
+    }
 }

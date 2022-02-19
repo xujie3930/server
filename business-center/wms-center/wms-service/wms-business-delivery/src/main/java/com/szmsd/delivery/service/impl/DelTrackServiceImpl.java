@@ -13,6 +13,7 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelTrack;
 import com.szmsd.delivery.dto.TrackAnalysisDto;
+import com.szmsd.delivery.dto.TrackAnalysisExportDto;
 import com.szmsd.delivery.dto.TrackAnalysisRequestDto;
 import com.szmsd.delivery.dto.TrackingYeeTraceDto;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
@@ -284,6 +285,32 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             trackAnalysisResult.add(analysisDto);
         });
         return trackAnalysisResult;
+    }
+
+    @Override
+    public List<TrackAnalysisExportDto> getAnalysisExportData(TrackAnalysisRequestDto requestDto) {
+        PricedProductInServiceCriteria serviceCriteria = new PricedProductInServiceCriteria();
+        if (StringUtils.isNotBlank(requestDto.getCountryName())) {
+            serviceCriteria.setCountryName(requestDto.getCountryName());
+        }
+        List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
+        List<PricedProduct> products = htpPricedProductClientService.inService(serviceCriteria);
+        Map<String, String> subList = basSubClientService.getSubList("099");
+        List<TrackAnalysisExportDto> exportData = baseMapper.getAnalysisExportData(queryWrapper(requestDto).ne("a.order_no", ""));
+        exportData.forEach(data -> {
+            // 设置物流状态中文
+            subList.forEach((k,v) -> {
+                if (v.equalsIgnoreCase(data.getTrackingStatus())) {
+                    data.setTrackingStatus(k);
+                    return;
+                }
+            });
+            PricedProduct product = products.stream().filter(v -> v.getCode().equalsIgnoreCase(data.getShipmentRule())).findFirst().orElse(null);
+            if (product != null) {
+                data.setShipmentRuleName(product.getName());
+            }
+        });
+        return exportData;
     }
 
     private QueryWrapper<TrackAnalysisRequestDto> queryWrapper(TrackAnalysisRequestDto requestDto){
