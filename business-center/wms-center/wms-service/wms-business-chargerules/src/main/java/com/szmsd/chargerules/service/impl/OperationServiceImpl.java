@@ -27,7 +27,6 @@ import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +34,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -101,9 +97,75 @@ public class OperationServiceImpl implements IOperationService {
             log.info("【执行】 - 1 chargeBatch---------------------------- {}", dto);
             return chargeBatch(dto, details);
         }
-
+        if (dto.getOrderType().equals(DelOutboundOrderEnum.PackageCollection.getCode())) {
+            log.info("【执行】 - 1 PackageCollection---------------------------- {}", dto);
+            return packageCollection(dto);
+        }
         return this.calculateFreeze(dto, details, amount);
 
+    }
+
+    /**
+     * 包裹揽收 冻结费用 根据订单操作类型去查询计费规则
+     *
+     * @param dto
+     * @return
+     */
+    private R<?> packageCollection(DelOutboundOperationVO dto) {
+        BigDecimal amount = calculateCostForDetails(dto);
+        Long count = dto.getDetails().stream().map(DelOutboundOperationDetailVO::getQty).filter(Objects::nonNull).reduce(Long::sum).orElse(0L);
+        return this.freezeBalance(dto, count, amount, new OperationRuleVO().setCurrencyCode(dto.getCurrency()));
+    }
+
+    /**
+     * 计算金额
+     * @param dto
+     * @return
+     */
+    private BigDecimal calculateCostForDetails(DelOutboundOperationVO dto) {
+        List<DelOutboundOperationDetailVO> details = dto.getDetails();
+        BigDecimal amount = BigDecimal.ZERO;
+        for (DelOutboundOperationDetailVO vo : details) {
+            BigDecimal calculateWeight = Optional.ofNullable(vo.getWeight()).map(BigDecimal::valueOf).orElse(BigDecimal.ZERO);
+            BigDecimal calculateNum = Optional.ofNullable(vo.getQty()).map(BigDecimal::valueOf).orElse(BigDecimal.ZERO);
+            String orderType = dto.getOrderType();
+            OperationRuleVO operation = getOperationDetails(dto, OrderTypeEnum.valueOf(orderType), calculateWeight.doubleValue(), "未找到" + orderType + "业务费用规则，请联系管理员");
+            String currencyCode = operation.getCurrencyCode();
+            dto.setCurrency(currencyCode);
+            BigDecimal calculateAmount = calculateCostForDetails(operation, calculateWeight, calculateNum);
+            amount = amount.add(calculateAmount);
+        }
+        return amount;
+    }
+
+    /**
+     * 如果单位是kg：则用重量*首件价格
+     * 单位是 件数 则按首件及续件计算
+     *
+     * @param operation       计费规则
+     * @param calculateWeight 计费参数 重量/件数
+     * @return 计算金额
+     */
+    private BigDecimal calculateCostForDetails(OperationRuleVO operation, BigDecimal calculateWeight, BigDecimal calculateNum) {
+        String unit = operation.getUnit();
+        calculateWeight = Optional.ofNullable(calculateWeight).orElse(BigDecimal.ZERO);
+        calculateNum = Optional.ofNullable(calculateNum).orElse(BigDecimal.ZERO);
+        BigDecimal discountRate = Optional.ofNullable(operation.getDiscountRate()).orElse(BigDecimal.ONE);
+        BigDecimal amount = BigDecimal.ZERO;
+        if ("kg".equalsIgnoreCase(unit)) {
+            // g->kg
+            calculateWeight = calculateWeight.divide(new BigDecimal("1000"), 2, RoundingMode.HALF_UP);
+            BigDecimal weightAmount = operation.getFirstPrice().multiply(calculateWeight);
+            weightAmount = weightAmount.multiply(discountRate).setScale(2, RoundingMode.HALF_UP);
+            amount = amount.add(weightAmount);
+        } else {
+            BigDecimal firstPrice = operation.getFirstPrice();
+            BigDecimal nextPrice = operation.getNextPrice();
+            BigDecimal numAmount = calculateNum.compareTo(BigDecimal.ZERO) <= 0 ? BigDecimal.ZERO : firstPrice.add(nextPrice.multiply(calculateNum.subtract(BigDecimal.ONE)));
+            numAmount = numAmount.multiply(discountRate).setScale(2, RoundingMode.HALF_UP);
+            amount = amount.add(numAmount);
+        }
+        return amount;
     }
 
     /**

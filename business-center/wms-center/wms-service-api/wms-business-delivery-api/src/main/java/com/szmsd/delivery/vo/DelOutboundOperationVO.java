@@ -1,6 +1,7 @@
 package com.szmsd.delivery.vo;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -46,7 +47,11 @@ public class DelOutboundOperationVO implements Serializable {
 
     @ApiModelProperty(value = "明细信息")
     private List<DelOutboundOperationDetailVO> details;
-
+    /**
+     * 计费币别
+     */
+    @JsonIgnore
+    private String currency;
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
