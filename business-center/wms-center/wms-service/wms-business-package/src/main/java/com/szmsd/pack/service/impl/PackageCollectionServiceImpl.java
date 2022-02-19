@@ -7,23 +7,44 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.service.SerialNumberClientService;
+import com.szmsd.chargerules.api.feign.OperationFeignService;
+import com.szmsd.common.core.constant.Constants;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
+import com.szmsd.delivery.vo.DelOutboundOperationVO;
+import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.CusFreezeBalanceDTO;
+import com.szmsd.http.api.service.IHtpCarrierClientService;
+import com.szmsd.http.api.service.IHtpPricedProductClientService;
+import com.szmsd.http.dto.Package;
+import com.szmsd.http.dto.*;
+import com.szmsd.pack.constant.PackageCollectionConstants;
+import com.szmsd.pack.constant.PackageCollectionOperationRecordConstants;
 import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.pack.domain.PackageCollectionDetail;
+import com.szmsd.pack.domain.PackageCollectionOperationRecord;
 import com.szmsd.pack.dto.PackageCollectionQueryDto;
+import com.szmsd.pack.events.PackageCollectionContextEvent;
 import com.szmsd.pack.mapper.PackageCollectionMapper;
 import com.szmsd.pack.service.IPackageCollectionDetailService;
+import com.szmsd.pack.service.IPackageCollectionOperationRecordService;
 import com.szmsd.pack.service.IPackageCollectionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,9 +57,24 @@ import java.util.stream.Collectors;
  */
 @Service
 public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionMapper, PackageCollection> implements IPackageCollectionService {
+    private final Logger logger = LoggerFactory.getLogger(PackageCollectionServiceImpl.class);
 
     @Autowired
     private IPackageCollectionDetailService packageCollectionDetailService;
+    @Autowired
+    private SerialNumberClientService serialNumberClientService;
+    @Autowired
+    private IHtpPricedProductClientService htpPricedProductClientService;
+    @Autowired
+    private IHtpCarrierClientService htpCarrierClientService;
+    @SuppressWarnings({"all"})
+    @Autowired
+    private RechargesFeignService rechargesFeignService;
+    @SuppressWarnings({"all"})
+    @Autowired
+    private OperationFeignService operationFeignService;
+    @Autowired
+    private IPackageCollectionOperationRecordService packageCollectionOperationRecordService;
 
     /**
      * 查询package - 交货管理 - 揽收模块
@@ -48,7 +84,15 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
      */
     @Override
     public PackageCollection selectPackageCollectionById(String id) {
-        return baseMapper.selectById(id);
+        PackageCollection packageCollection = baseMapper.selectById(id);
+        if (null != packageCollection) {
+            LambdaQueryWrapper<PackageCollectionDetail> packageCollectionDetailLambdaQueryWrapper = Wrappers.lambdaQuery();
+            packageCollectionDetailLambdaQueryWrapper.eq(PackageCollectionDetail::getCollectionId, id);
+            packageCollectionDetailLambdaQueryWrapper.orderByAsc(PackageCollectionDetail::getSort);
+            List<PackageCollectionDetail> detailList = this.packageCollectionDetailService.list(packageCollectionDetailLambdaQueryWrapper);
+            packageCollection.setDetailList(detailList);
+        }
+        return packageCollection;
     }
 
     /**
@@ -59,7 +103,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
      */
     @Override
     public List<PackageCollection> selectPackageCollectionList(PackageCollection packageCollection) {
-        QueryWrapper<PackageCollection> where = new QueryWrapper<PackageCollection>();
+        QueryWrapper<PackageCollection> where = new QueryWrapper<>();
         return baseMapper.selectList(where);
     }
 
@@ -69,14 +113,314 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
      * @param packageCollection package - 交货管理 - 揽收模块
      * @return 结果
      */
+    @Transactional
     @Override
     public int insertPackageCollection(PackageCollection packageCollection) {
-        packageCollection.setTotalQty(this.countTotalQty(packageCollection.getDetailList()));
-        int insert = baseMapper.insert(packageCollection);
-        if (insert > 0) {
-            this.saveDetail(packageCollection.getId(), packageCollection.getDetailList());
+        PackageCollectionContext packageCollectionContext = new PackageCollectionContext(packageCollection);
+        try {
+            List<PackageCollectionDetail> detailList = packageCollection.getDetailList();
+            packageCollection.setTotalQty(this.countTotalQty(detailList));
+            // 揽收单号
+            String collectionNo = this.serialNumberClientService.generateNumber("COLLECTION_NO");
+            packageCollection.setCollectionNo(collectionNo);
+            // 设置状态
+            if (PackageCollectionConstants.COLLECTION_PLAN_YES.equals(packageCollection.getCollectionPlan())) {
+                packageCollection.setStatus(PackageCollectionConstants.Status.PLANNED.name());
+            } else {
+                packageCollection.setStatus(PackageCollectionConstants.Status.NO_PLAN.name());
+            }
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            if (null == loginUser) {
+                throw new CommonException("500", "操作失败，获取登录信息异常");
+            }
+            packageCollection.setSellerCode(loginUser.getSellerCode());
+            // PRC计算费用，冻结运费
+            ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> responseObject = this.pricing(packageCollection);
+            if (null == responseObject) {
+                // 返回值是空的
+                throw new CommonException("400", "计算包裹费用失败，响应数据异常");
+            } else {
+                // 判断返回值
+                if (responseObject.isSuccess()) {
+                    // 计算成功了
+                    ChargeWrapper chargeWrapper = responseObject.getObject();
+                    ShipmentChargeInfo data = chargeWrapper.getData();
+                    PricingPackageInfo packageInfo = data.getPackageInfo();
+                    // 挂号服务
+                    packageCollection.setShipmentService(data.getLogisticsRouteId());
+                    // 物流商code
+                    packageCollection.setLogisticsProviderCode(data.getLogisticsProviderCode());
+                    // 包裹信息
+                    Packing packing = packageInfo.getPacking();
+                    BigDecimal length = packing.getLength();
+                    if (null == length) {
+                        length = BigDecimal.ZERO;
+                    }
+                    packageCollection.setLength(length.doubleValue());
+                    BigDecimal width = packing.getWidth();
+                    if (null == width) {
+                        width = BigDecimal.ZERO;
+                    }
+                    packageCollection.setWidth(width.doubleValue());
+                    BigDecimal height = packing.getHeight();
+                    if (null == height) {
+                        height = BigDecimal.ZERO;
+                    }
+                    packageCollection.setHeight(height.doubleValue());
+                    // 计费重信息
+                    Weight calcWeight = packageInfo.getCalcWeight();
+                    packageCollection.setCalcWeight(calcWeight.getValue());
+                    packageCollection.setCalcWeightUnit(calcWeight.getUnit());
+                    List<ChargeItem> charges = chargeWrapper.getCharges();
+                    // 汇总费用
+                    BigDecimal totalAmount = BigDecimal.ZERO;
+                    String totalCurrencyCode = charges.get(0).getMoney().getCurrencyCode();
+                    for (ChargeItem charge : charges) {
+                        BigDecimal amount = BigDecimal.ZERO;
+                        Money money = charge.getMoney();
+                        if (null != money) {
+                            Double amount1 = money.getAmount();
+                            if (null != amount1) {
+                                amount = BigDecimal.valueOf(amount1);
+                            }
+                        }
+                        totalAmount = totalAmount.add(amount);
+                    }
+                    // 更新值
+                    packageCollection.setAmount(totalAmount);
+                    packageCollection.setCurrencyCode(totalCurrencyCode);
+                } else {
+                    // 计算失败
+                    String exceptionMessage = ProblemDetails.getErrorMessageOrNull(responseObject.getError());
+                    if (StringUtils.isNotEmpty(exceptionMessage)) {
+                        exceptionMessage = "计算包裹费用失败";
+                    }
+                    throw new CommonException("400", exceptionMessage);
+                }
+            }
+            CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+            cusFreezeBalanceDTO.setAmount(packageCollection.getAmount());
+            cusFreezeBalanceDTO.setCurrencyCode(packageCollection.getCurrencyCode());
+            cusFreezeBalanceDTO.setCusCode(packageCollection.getSellerCode());
+            cusFreezeBalanceDTO.setNo(packageCollection.getCollectionNo());
+            cusFreezeBalanceDTO.setOrderType("Freight");
+            // 调用冻结费用接口
+            R<?> freezeBalanceR = this.rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
+            if (null != freezeBalanceR) {
+                if (Constants.SUCCESS != freezeBalanceR.getCode()) {
+                    // 异常信息
+                    String msg = freezeBalanceR.getMsg();
+                    throw new CommonException("400", msg);
+                }
+            } else {
+                // 异常信息
+                throw new CommonException("400", "冻结费用信息失败，响应数据异常");
+            }
+            // 添加操作记录记录
+            this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.FREIGHT.name());
+            // 创建承运商订单，获取面单
+            CreateShipmentOrderCommand createShipmentOrderCommand = new CreateShipmentOrderCommand();
+            createShipmentOrderCommand.setWarehouseCode(packageCollection.getWarehouseCode());
+            // 改成uuid
+            createShipmentOrderCommand.setReferenceNumber(UUID.randomUUID().toString().replaceAll("-", "").toUpperCase());
+            createShipmentOrderCommand.setOrderNumber(packageCollection.getCollectionNo());
+            createShipmentOrderCommand.setClientNumber(packageCollection.getSellerCode());
+            createShipmentOrderCommand.setReceiverAddress(new AddressCommand(packageCollection.getReceiverName(),
+                    packageCollection.getReceiverPhone(),
+                    "",
+                    packageCollection.getReceiverAddress(),
+                    "",
+                    "",
+                    packageCollection.getReceiverCity(),
+                    packageCollection.getReceiverProvince(),
+                    packageCollection.getReceiverPostCode(),
+                    packageCollection.getReceiverCountry()));
+            createShipmentOrderCommand.setReturnAddress(new AddressCommand(packageCollection.getCollectionName(),
+                    packageCollection.getCollectionPhone(),
+                    "",
+                    packageCollection.getReceiverAddress(),
+                    "",
+                    "",
+                    packageCollection.getCollectionCity(),
+                    packageCollection.getCollectionProvince(),
+                    packageCollection.getCollectionPostCode(),
+                    packageCollection.getCollectionCountry()));
+            // 包裹信息
+            List<Package> packages = new ArrayList<>();
+            List<PackageItem> packageItems = new ArrayList<>();
+            BigDecimal weightInGram = BigDecimal.ZERO;
+            for (PackageCollectionDetail detail : detailList) {
+                String sku = detail.getSku();
+                BigDecimal weight = detail.getWeight();
+                if (null == weight) {
+                    weight = BigDecimal.ZERO;
+                }
+                weightInGram = weightInGram.add(weight);
+                BigDecimal length = detail.getLength();
+                if (null == length) {
+                    length = BigDecimal.ZERO;
+                }
+                BigDecimal width = detail.getWidth();
+                if (null == width) {
+                    width = BigDecimal.ZERO;
+                }
+                BigDecimal height = detail.getHeight();
+                if (null == height) {
+                    height = BigDecimal.ZERO;
+                }
+                BigDecimal declaredValue = detail.getDeclaredValue();
+                if (null == declaredValue) {
+                    declaredValue = BigDecimal.ZERO;
+                }
+                packageItems.add(new PackageItem(detail.getSku(), detail.getSkuName(), declaredValue.doubleValue(), weight.intValue(),
+                        new Size(length.doubleValue(), width.doubleValue(), height.doubleValue()),
+                        detail.getQty(), "", String.valueOf(detail.getId()), sku));
+            }
+            if (weightInGram.intValue() <= 0) {
+                throw new CommonException("400", "包裹重量为0或者小于0，不能创建承运商物流订单");
+            }
+            String packageNumber = packageCollection.getCollectionNo();
+            packages.add(new Package(packageNumber, String.valueOf(packageCollection.getId()),
+                    new Size(packageCollection.getLength(), packageCollection.getWidth(), packageCollection.getHeight()),
+                    weightInGram.intValue(), packageItems));
+            createShipmentOrderCommand.setPackages(packages);
+            createShipmentOrderCommand.setCarrier(new Carrier(packageCollection.getShipmentService()));
+            ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
+            if (null == responseObjectWrapper) {
+                throw new CommonException("400", "创建承运商物流订单失败，调用承运商系统无响应");
+            }
+            if (responseObjectWrapper.isSuccess()) {
+                // 保存挂号
+                // 判断结果集是不是正确的
+                ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
+                if (null == shipmentOrderResult) {
+                    throw new CommonException("400", "创建承运商物流订单失败，调用承运商系统返回数据为空");
+                }
+                if (null == shipmentOrderResult.getSuccess() || !shipmentOrderResult.getSuccess()) {
+                    // 判断有没有错误信息
+                    ErrorDto error = shipmentOrderResult.getError();
+                    StringBuilder builder = new StringBuilder();
+                    if (null != error && StringUtils.isNotEmpty(error.getMessage())) {
+                        if (StringUtils.isNotEmpty(error.getErrorCode())) {
+                            builder.append("[")
+                                    .append(error.getErrorCode())
+                                    .append("]");
+                        }
+                        builder.append(error.getMessage());
+                    } else {
+                        builder.append("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空");
+                    }
+                    throw new CommonException("400", builder.toString());
+                }
+                packageCollection.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
+                packageCollection.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                packageCollection.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+            } else {
+                String exceptionMessage = ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError());
+                if (StringUtils.isEmpty(exceptionMessage)) {
+                    exceptionMessage = "创建承运商物流订单失败，调用承运商系统失败";
+                }
+                throw new CommonException("400", exceptionMessage);
+            }
+            // 添加操作记录记录
+            this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.CARRIER.name());
+            // 保存揽收单
+            int insert = baseMapper.insert(packageCollection);
+            if (insert > 0) {
+                // 保存明细
+                this.saveDetail(packageCollection.getId(), detailList);
+                // 冻结业务费
+                DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+                List<DelOutboundOperationDetailVO> detailVOList = new ArrayList<>(detailList.size());
+                // 处理操作费用参数
+                for (PackageCollectionDetail detail : detailList) {
+                    String sku = detail.getSku();
+                    // 操作费对象
+                    DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
+                    detailVO.setSku(sku);
+                    Integer qty = detail.getQty();
+                    if (null == qty) {
+                        qty = 0;
+                    }
+                    detailVO.setQty(Long.valueOf(qty));
+                    BigDecimal weight = detail.getWeight();
+                    if (null == weight) {
+                        weight = BigDecimal.ZERO;
+                    }
+                    detailVO.setWeight(weight.doubleValue());
+                    detailVOList.add(detailVO);
+                }
+                delOutboundOperationVO.setDetails(detailVOList);
+                delOutboundOperationVO.setOrderType("PackageCollection");
+                R<?> r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
+                if (null == r) {
+                    throw new CommonException("500", "冻结操作费用信息失败，响应数据异常");
+                }
+                if (Constants.SUCCESS != r.getCode()) {
+                    String msg = r.getMsg();
+                    if (StringUtils.isEmpty(msg)) {
+                        msg = "冻结操作费用信息失败";
+                    }
+                    throw new CommonException("500", msg);
+                }
+                // 添加操作记录记录
+                this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.OPERATING_FEE.name());
+            }
+            return insert;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            // 通知保存揽收失败
+            PackageCollectionContextEvent.publishEvent(packageCollectionContext);
+            if (e instanceof CommonException) {
+                throw e;
+            }
+            throw new CommonException("500", e.getMessage());
         }
-        return insert;
+    }
+
+    private ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> pricing(PackageCollection packageCollection) {
+        // 计算包裹费用
+        CalcShipmentFeeCommand calcShipmentFeeCommand = new CalcShipmentFeeCommand();
+        // true代表需要验证，false的话，主要是用于测算
+        calcShipmentFeeCommand.setAddressValifition(true);
+        // 产品代码就是选择的物流承运商
+        calcShipmentFeeCommand.setProductCode(packageCollection.getCollectionServiceCode());
+        calcShipmentFeeCommand.setClientCode(packageCollection.getSellerCode());
+        calcShipmentFeeCommand.setShipmentType("");
+        calcShipmentFeeCommand.setIoss("");
+        List<PackageInfo> packageInfos = new ArrayList<>();
+        List<PackageCollectionDetail> detailList = packageCollection.getDetailList();
+        if (CollectionUtils.isNotEmpty(detailList)) {
+            for (PackageCollectionDetail detail : detailList) {
+                packageInfos.add(new PackageInfo(new Weight(detail.getWeight(), "g"),
+                        new Packing(detail.getLength(), detail.getWidth(), detail.getHeight(), "cm"),
+                        Math.toIntExact(detail.getQty()), packageCollection.getCollectionNo(), detail.getDeclaredValue(), ""));
+            }
+        }
+        calcShipmentFeeCommand.setPackageInfos(packageInfos);
+        // 收货地址
+        calcShipmentFeeCommand.setToAddress(new Address(packageCollection.getReceiverAddress(),
+                "",
+                "",
+                packageCollection.getReceiverPostCode(),
+                packageCollection.getReceiverCity(),
+                packageCollection.getReceiverProvince(),
+                new CountryInfo("", "", "", packageCollection.getReceiverCountry())
+        ));
+        // 发货地址
+        calcShipmentFeeCommand.setFromAddress(new Address(packageCollection.getCollectionAddress(),
+                "",
+                "",
+                packageCollection.getCollectionPostCode(),
+                packageCollection.getCollectionCity(),
+                packageCollection.getCollectionProvince(),
+                new CountryInfo("", "", "", packageCollection.getCollectionCountry())
+        ));
+        // 联系信息
+        calcShipmentFeeCommand.setToContactInfo(new ContactInfo(packageCollection.getReceiverName(), packageCollection.getReceiverPhone(), "", ""));
+        calcShipmentFeeCommand.setCalcTimeForDiscount(new Date());
+        // 调用接口
+        return this.htpPricedProductClientService.pricing(calcShipmentFeeCommand);
     }
 
     /**
@@ -98,6 +442,119 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
         return update;
     }
 
+    @Override
+    public int updatePackageCollectionPlan(PackageCollection packageCollection) {
+        PackageCollection updatePackageCollection = new PackageCollection();
+        updatePackageCollection.setId(packageCollection.getId());
+        updatePackageCollection.setStatus(PackageCollectionConstants.Status.PLANNED.name());
+        updatePackageCollection.setCollectionDate(packageCollection.getCollectionDate());
+        updatePackageCollection.setHandleMode(packageCollection.getHandleMode());
+        return baseMapper.updateById(updatePackageCollection);
+    }
+
+    @Override
+    public int cancel(List<Long> idList) {
+        List<PackageCollection> collectionList = super.listByIds(idList);
+        if (CollectionUtils.isNotEmpty(collectionList)) {
+            // 验证状态，只有状态为：有计划，没有计划的揽收单可以取消
+            for (PackageCollection collection : collectionList) {
+                if (!(PackageCollectionConstants.Status.PLANNED.name().equals(collection.getStatus())
+                        || PackageCollectionConstants.Status.NO_PLAN.name().equals(collection.getStatus()))) {
+                    throw new CommonException("500", collection.getCollectionNo() + "单据不可以取消，状态不符合");
+                }
+                // 取消运费冻结
+                this.cancelFreight(collection);
+                // 取消业务费冻结
+                this.cancelOperatingFee(collection);
+            }
+            // 取消承运商订单
+            this.cancelCarrier(collectionList);
+            return collectionList.size();
+        }
+        return 0;
+    }
+
+    @Override
+    public void notRecordCancel(PackageCollection packageCollection) {
+        LambdaQueryWrapper<PackageCollectionOperationRecord> lambdaQueryWrapper = Wrappers.lambdaQuery();
+        lambdaQueryWrapper.eq(PackageCollectionOperationRecord::getCollectionNo, packageCollection.getCollectionNo());
+        List<PackageCollectionOperationRecord> operationRecordList = this.packageCollectionOperationRecordService.list(lambdaQueryWrapper);
+        if (CollectionUtils.isNotEmpty(operationRecordList)) {
+            for (PackageCollectionOperationRecord operationRecord : operationRecordList) {
+                if (PackageCollectionOperationRecordConstants.Type.FREIGHT.name().equals(operationRecord.getType())) {
+                    this.cancelFreight(packageCollection);
+                } else if (PackageCollectionOperationRecordConstants.Type.CARRIER.name().equals(operationRecord.getType())) {
+                    this.cancelCarrier(Collections.singletonList(packageCollection));
+                } else if (PackageCollectionOperationRecordConstants.Type.OPERATING_FEE.name().equals(operationRecord.getType())) {
+                    this.cancelOperatingFee(packageCollection);
+                }
+            }
+            this.packageCollectionOperationRecordService.remove(lambdaQueryWrapper);
+        }
+    }
+
+    private void cancelFreight(PackageCollection collection) {
+        CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+        cusFreezeBalanceDTO.setAmount(collection.getAmount());
+        cusFreezeBalanceDTO.setCurrencyCode(collection.getCurrencyCode());
+        cusFreezeBalanceDTO.setCusCode(collection.getSellerCode());
+        cusFreezeBalanceDTO.setNo(collection.getCollectionNo());
+        cusFreezeBalanceDTO.setOrderType("Freight");
+        R<?> thawBalanceR = this.rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+        if (null == thawBalanceR) {
+            throw new CommonException("400", "取消冻结费用失败，响应数据异常");
+        }
+        if (Constants.SUCCESS != thawBalanceR.getCode()) {
+            String msg = thawBalanceR.getMsg();
+            if (StringUtils.isEmpty(msg)) {
+                msg = "取消冻结费用失败";
+            }
+            throw new CommonException("400", msg);
+        }
+    }
+
+    private void cancelOperatingFee(PackageCollection collection) {
+        DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
+        delOutboundOperationVO.setOrderType("PackageCollection");
+        delOutboundOperationVO.setOrderNo(collection.getCollectionNo());
+        R<?> r = this.operationFeignService.delOutboundThaw(delOutboundOperationVO);
+        if (null == r) {
+            throw new CommonException("400", "取消业务操作费用失败，响应数据异常");
+        }
+        if (Constants.SUCCESS != r.getCode()) {
+            String msg = r.getMsg();
+            if (StringUtils.isEmpty(msg)) {
+                msg = "取消业务操作费用失败";
+            }
+            throw new CommonException("400", msg);
+        }
+    }
+
+    private void cancelCarrier(List<PackageCollection> collectionList) {
+        if (CollectionUtils.isEmpty(collectionList)) {
+            return;
+        }
+        Map<String, List<PackageCollection>> collectionListMap = collectionList.stream().collect(Collectors.groupingBy(PackageCollection::getWarehouseCode));
+        for (String warehouseCode : collectionListMap.keySet()) {
+            try {
+                CancelShipmentOrderCommand command = new CancelShipmentOrderCommand();
+                command.setWarehouseCode(warehouseCode);
+                command.setReferenceNumber(UUID.randomUUID().toString().replaceAll("-", ""));
+                List<PackageCollection> list = collectionListMap.get(warehouseCode);
+                if (CollectionUtils.isNotEmpty(list)) {
+                    List<CancelShipmentOrder> cancelShipmentOrders = new ArrayList<>();
+                    for (PackageCollection collection : list) {
+                        cancelShipmentOrders.add(new CancelShipmentOrder(collection.getShipmentOrderNumber(), collection.getTrackingNo()));
+                    }
+                    command.setCancelShipmentOrders(cancelShipmentOrders);
+                    this.htpCarrierClientService.cancellation(command);
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+
     private int countTotalQty(List<PackageCollectionDetail> detailList) {
         int totalQty = 0;
         if (CollectionUtils.isNotEmpty(detailList)) {
@@ -114,8 +571,10 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
 
     private void saveDetail(Long collectionId, List<PackageCollectionDetail> detailList) {
         if (CollectionUtils.isNotEmpty(detailList)) {
+            int sort = 0;
             for (PackageCollectionDetail detail : detailList) {
                 detail.setCollectionId(collectionId);
+                detail.setSort(sort++);
             }
             this.packageCollectionDetailService.saveBatch(detailList);
         }

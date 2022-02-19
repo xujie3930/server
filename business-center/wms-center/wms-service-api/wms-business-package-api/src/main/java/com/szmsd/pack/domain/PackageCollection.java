@@ -3,14 +3,18 @@ package com.szmsd.pack.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -85,8 +89,10 @@ public class PackageCollection extends BaseEntity {
     private String collectionToWarehouse;
 
     @ApiModelProperty(value = "仓库编码")
-    @Excel(name = "仓库编码")
     private String warehouseCode;
+
+    @ApiModelProperty(value = "仓库名称")
+    private String warehouseName;
 
     @ApiModelProperty(value = "收货人")
     @Excel(name = "收货人")
@@ -144,11 +150,51 @@ public class PackageCollection extends BaseEntity {
     @ApiModelProperty(value = "跟踪号")
     private String trackingNo;
 
+    @ApiModelProperty(value = "承运商订单号")
+    private String shipmentOrderNumber;
+
+    @ApiModelProperty(value = "承运商标签路径")
+    private String shipmentOrderLabelUrl;
+
     @ApiModelProperty(value = "合计数量")
     private Integer totalQty;
 
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "101", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "状态")
     private String status;
+
+    @ApiModelProperty(value = "状态名称")
+    private String statusName;
+
+    @ApiModelProperty(value = "卖家代码")
+    private String sellerCode;
+
+    @ApiModelProperty(value = "长 CM")
+    private Double length;
+
+    @ApiModelProperty(value = "宽 CM")
+    private Double width;
+
+    @ApiModelProperty(value = "高 CM")
+    private Double height;
+
+    @ApiModelProperty(value = "计费重")
+    private BigDecimal calcWeight;
+
+    @ApiModelProperty(value = "计费重单位")
+    private String calcWeightUnit;
+
+    @ApiModelProperty(value = "金额")
+    private BigDecimal amount;
+
+    @ApiModelProperty(value = "币种")
+    private String currencyCode;
+
+    @ApiModelProperty(value = "发货服务名称")
+    private String shipmentService;
+
+    @ApiModelProperty(value = "物流商code")
+    private String logisticsProviderCode;
 
     @ApiModelProperty(value = "货物名称")
     @TableField(exist = false)

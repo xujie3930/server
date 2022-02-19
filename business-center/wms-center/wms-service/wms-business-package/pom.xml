@@ -99,6 +99,18 @@
             <groupId>com.szmsd</groupId>
             <artifactId>business-basic-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-bas-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-delivery-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-chargerules-api</artifactId>
+        </dependency>
 
 
     </dependencies>

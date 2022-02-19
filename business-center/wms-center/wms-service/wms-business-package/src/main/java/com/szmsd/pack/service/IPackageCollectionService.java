@@ -49,6 +49,12 @@ public interface IPackageCollectionService extends IService<PackageCollection> {
      */
     int updatePackageCollection(PackageCollection packageCollection);
 
+    int updatePackageCollectionPlan(PackageCollection packageCollection);
+
+    int cancel(List<Long> idList);
+
+    void notRecordCancel(PackageCollection packageCollection);
+
     /**
      * 批量删除package - 交货管理 - 揽收模块
      *

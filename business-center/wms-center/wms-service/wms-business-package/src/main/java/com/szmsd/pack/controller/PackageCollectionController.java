@@ -5,6 +5,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.PricedProductInServiceCriteria;
 import com.szmsd.http.vo.PricedProduct;
@@ -43,6 +44,7 @@ public class PackageCollectionController extends BaseController {
     @PostMapping("/list")
     @ApiOperation(value = "交货管理 - 揽收 - 列表", notes = "交货管理 - 揽收 - 列表")
     @ApiImplicitParam(name = "dto", value = "参数", dataType = "PackageCollectionQueryDto")
+    @AutoValue
     public R<IPage<PackageCollection>> list(@RequestBody PackageCollectionQueryDto dto) {
         IPage<PackageCollection> page = this.packageCollectionService.page(dto);
         return R.ok(page);
@@ -51,6 +53,7 @@ public class PackageCollectionController extends BaseController {
     @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:query')")
     @GetMapping(value = "getInfo/{id}")
     @ApiOperation(value = "交货管理 - 揽收 - 详细信息", notes = "交货管理 - 揽收 - 详细信息")
+    @AutoValue
     public R getInfo(@PathVariable("id") String id) {
         return R.ok(packageCollectionService.selectPackageCollectionById(id));
     }
@@ -69,6 +72,22 @@ public class PackageCollectionController extends BaseController {
     @ApiOperation(value = "交货管理 - 揽收 - 修改", notes = "交货管理 - 揽收 - 修改")
     public R edit(@RequestBody PackageCollection packageCollection) {
         return toOk(packageCollectionService.updatePackageCollection(packageCollection));
+    }
+
+    @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:editPlan')")
+    @Log(title = "package - 交货管理 - 揽收模块", businessType = BusinessType.UPDATE)
+    @PutMapping("editPlan")
+    @ApiOperation(value = "交货管理 - 揽收 - 创建提货计划", notes = "交货管理 - 揽收 - 创建提货计划")
+    public R editPlan(@RequestBody PackageCollection packageCollection) {
+        return toOk(packageCollectionService.updatePackageCollectionPlan(packageCollection));
+    }
+
+    @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:cancel')")
+    @Log(title = "package - 交货管理 - 揽收模块", businessType = BusinessType.UPDATE)
+    @PostMapping("cancel")
+    @ApiOperation(value = "交货管理 - 揽收 - 取消", notes = "交货管理 - 揽收 - 取消")
+    public R cancel(@RequestBody List<Long> idList) {
+        return toOk(packageCollectionService.cancel(idList));
     }
 
     @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:remove')")
