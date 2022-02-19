@@ -2,6 +2,7 @@ package com.szmsd.pack.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
@@ -469,6 +470,11 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             }
             // 取消承运商订单
             this.cancelCarrier(collectionList);
+            // 修改揽收单状态为已取消
+            LambdaUpdateWrapper<PackageCollection> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+            lambdaUpdateWrapper.set(PackageCollection::getStatus, PackageCollectionConstants.Status.CANCELLED.name());
+            lambdaUpdateWrapper.in(PackageCollection::getId, idList);
+            super.update(lambdaUpdateWrapper);
             return collectionList.size();
         }
         return 0;
