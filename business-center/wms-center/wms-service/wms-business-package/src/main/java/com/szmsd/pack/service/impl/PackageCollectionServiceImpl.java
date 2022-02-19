@@ -1,5 +1,8 @@
 package com.szmsd.pack.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -21,8 +24,11 @@ import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
+import com.szmsd.http.api.service.IHtpRmiClientService;
 import com.szmsd.http.dto.Package;
 import com.szmsd.http.dto.*;
+import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.pack.constant.PackageCollectionConstants;
 import com.szmsd.pack.constant.PackageCollectionOperationRecordConstants;
 import com.szmsd.pack.domain.PackageCollection;
@@ -38,9 +44,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,6 +84,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     private OperationFeignService operationFeignService;
     @Autowired
     private IPackageCollectionOperationRecordService packageCollectionOperationRecordService;
+    @Autowired
+    private IHtpRmiClientService htpRmiClientService;
 
     /**
      * 查询package - 交货管理 - 揽收模块
@@ -366,6 +376,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 }
                 // 添加操作记录记录
                 this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.OPERATING_FEE.name());
+                // 创建TrackingYee
+                this.createTrackingYee(packageCollection);
             }
             return insert;
         } catch (Exception e) {
@@ -496,6 +508,116 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 }
             }
             this.packageCollectionOperationRecordService.remove(lambdaQueryWrapper);
+        }
+    }
+
+    private void createTrackingYee(PackageCollection collection) {
+        boolean success = false;
+        String responseBody;
+        try {
+            Map<String, Object> requestBodyMap = new HashMap<>();
+            List<Map<String, Object>> shipments = new ArrayList<>();
+            Map<String, Object> shipment = new HashMap<>();
+            shipment.put("trackingNo", collection.getTrackingNo());
+            shipment.put("carrierCode", collection.getLogisticsProviderCode());
+            shipment.put("logisticsServiceProvider", collection.getLogisticsProviderCode());
+            shipment.put("logisticsServiceName", collection.getLogisticsProviderCode());
+            shipment.put("platformCode", "DM");
+            shipment.put("shopName", "");
+            Date createTime = collection.getCreateTime();
+            if (null != createTime) {
+                shipment.put("OrdersOn", DateFormatUtils.format(createTime, "yyyy-MM-dd'T'HH:mm:ss.SS'Z'"));
+            }
+            shipment.put("paymentTime", "");
+            shipment.put("shippingOn", "");
+            List<String> searchTags = new ArrayList<>();
+            searchTags.add(collection.getSellerCode());
+            searchTags.add(collection.getCollectionNo());
+            shipment.put("searchTags", searchTags);
+            shipment.put("orderNo", collection.getCollectionNo());
+            Map<String, Object> senderAddress = new HashMap<>();
+            senderAddress.put("country", collection.getCollectionCountry());
+            senderAddress.put("province", collection.getCollectionProvince());
+            senderAddress.put("city", collection.getCollectionCity());
+            senderAddress.put("postcode", collection.getCollectionPostCode());
+            senderAddress.put("street1", collection.getCollectionAddress());
+            senderAddress.put("street2", "");
+            senderAddress.put("street3", "");
+            shipment.put("senderAddress", senderAddress);
+            Map<String, Object> destinationAddress = new HashMap<>();
+            destinationAddress.put("country", collection.getReceiverCountry());
+            destinationAddress.put("province", collection.getReceiverProvince());
+            destinationAddress.put("city", collection.getReceiverCity());
+            destinationAddress.put("postcode", collection.getReceiverPostCode());
+            destinationAddress.put("street1", collection.getReceiverAddress());
+            destinationAddress.put("street2", "");
+            destinationAddress.put("street3", "");
+            shipment.put("destinationAddress", destinationAddress);
+            Map<String, Object> recipientInfo = new HashMap<>();
+            recipientInfo.put("recipient", collection.getReceiverName());
+            recipientInfo.put("phoneNumber", collection.getReceiverPhone());
+            recipientInfo.put("email", "");
+            shipment.put("recipientInfo", recipientInfo);
+            Map<String, Object> customFieldInfo = new HashMap<>();
+            customFieldInfo.put("fieldOne", collection.getCollectionNo());
+            customFieldInfo.put("fieldTwo", "");
+            customFieldInfo.put("fieldThree", "");
+            shipment.put("customFieldInfo", customFieldInfo);
+            shipments.add(shipment);
+            requestBodyMap.put("shipments", shipments);
+            HttpRequestDto httpRequestDto = new HttpRequestDto();
+            httpRequestDto.setMethod(HttpMethod.POST);
+            String url = DomainEnum.TrackingYeeDomain.wrapper("/tracking/v1/shipments");
+            httpRequestDto.setUri(url);
+            httpRequestDto.setBody(requestBodyMap);
+            HttpResponseVO httpResponseVO = htpRmiClientService.rmi(httpRequestDto);
+            if (200 == httpResponseVO.getStatus() ||
+                    201 == httpResponseVO.getStatus()) {
+                success = true;
+            }
+            responseBody = (String) httpResponseVO.getBody();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            responseBody = e.getMessage();
+            if (null == responseBody) {
+                responseBody = "请求失败";
+            }
+        }
+        // 请求成功，解析响应报文
+        if (success) {
+            try {
+                // 解析响应报文，获取响应参数信息
+                JSONObject jsonObject = JSON.parseObject(responseBody);
+                // 判断状态是否为OK
+                if ("OK".equals(jsonObject.getString("status"))) {
+                    // 判断结果明细是不是成功的
+                    JSONObject data = jsonObject.getJSONObject("data");
+                    if (1 != data.getIntValue("successNumber")) {
+                        // 返回的成功数量不是1，判定为异常
+                        success = false;
+                        // 获取异常信息
+                        int failNumber = data.getIntValue("failNumber");
+                        if (failNumber > 0) {
+                            JSONArray failImportRowResults = data.getJSONArray("failImportRowResults");
+                            JSONObject failImportRowResult = failImportRowResults.getJSONObject(0);
+                            JSONObject errorInfo = failImportRowResult.getJSONObject("errorInfo");
+                            String errorCode = errorInfo.getString("errorCode");
+                            String errorMessage = errorInfo.getString("errorMessage");
+                            throw new CommonException("500", "[" + errorCode + "]" + errorMessage);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                if (e instanceof CommonException) {
+                    throw e;
+                }
+                // 解析失败，判定为异常
+                success = false;
+            }
+        }
+        if (!success) {
+            throw new CommonException("500", "创建TrackingYee失败");
         }
     }
 
@@ -642,6 +764,25 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
         return page;
     }
 
+    @Override
+    public int updateCollecting(String collectionNo) {
+        LambdaQueryWrapper<PackageCollection> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(PackageCollection::getCollectionNo, collectionNo);
+        PackageCollection packageCollection = super.getOne(queryWrapper);
+        if (null != packageCollection) {
+            if (PackageCollectionConstants.Status.PLANNED.name().equals(packageCollection.getStatus())) {
+                PackageCollection updatePackageCollection = new PackageCollection();
+                updatePackageCollection.setStatus(PackageCollectionConstants.Status.COLLECTING.name());
+                updatePackageCollection.setId(packageCollection.getId());
+                return super.baseMapper.updateById(updatePackageCollection);
+            }
+            // 状态不符合
+            return -1;
+        }
+        // 单据不存在
+        return -2;
+    }
+
     private void autoSettingDateCondition(LambdaQueryWrapper<PackageCollection> queryWrapper, SFunction<PackageCollection, ?> column, String[] dates) {
         if (ArrayUtils.isNotEmpty(dates) && dates.length == 2) {
             queryWrapper.between(column, dates[0] + " 00:00:00", dates[1] + " 23:59:59");
@@ -651,9 +792,9 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     private void autoSettingListCondition(LambdaQueryWrapper<PackageCollection> queryWrapper, SFunction<PackageCollection, ?> column, List<?> list) {
         if (CollectionUtils.isNotEmpty(list)) {
             if (list.size() == 1) {
-                queryWrapper.eq(PackageCollection::getCollectionNo, list.get(0));
+                queryWrapper.eq(column, list.get(0));
             } else {
-                queryWrapper.in(PackageCollection::getCollectionNo, list);
+                queryWrapper.in(column, list);
             }
         }
     }

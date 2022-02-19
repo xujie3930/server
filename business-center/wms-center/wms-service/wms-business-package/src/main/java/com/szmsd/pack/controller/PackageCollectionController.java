@@ -105,4 +105,12 @@ public class PackageCollectionController extends BaseController {
     public R<List<PricedProduct>> inService(@RequestBody PricedProductInServiceCriteria criteria) {
         return R.ok(this.htpPricedProductClientService.inService(criteria));
     }
+
+    @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:updateCollecting')")
+    @PostMapping("/updateCollecting")
+    @ApiOperation(value = "交货管理 - 揽收 - 修改状态为揽收中", notes = "交货管理 - 揽收 - 修改状态为揽收中", position = 110)
+    @ApiImplicitParam(name = "collectionNo", value = "参数", dataType = "String")
+    public R<Integer> updateCollecting(@RequestBody String collectionNo) {
+        return R.ok(this.packageCollectionService.updateCollecting(collectionNo));
+    }
 }

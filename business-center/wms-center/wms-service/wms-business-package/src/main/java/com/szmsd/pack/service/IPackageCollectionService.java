@@ -79,5 +79,6 @@ public interface IPackageCollectionService extends IService<PackageCollection> {
      */
     IPage<PackageCollection> page(PackageCollectionQueryDto dto);
 
+    int updateCollecting(String collectionNo);
 }
 
