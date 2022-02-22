@@ -26,13 +26,12 @@ public class OperationQueryDTO extends QueryDto implements Serializable {
     @ApiModelProperty(value = "仓库")
     private String warehouseCode;
     /**
-     * {@link OrderTypeEnum}
+     * {@link DelOutboundOrderEnum}
      */
     @ApiModelProperty(value = "操作类型")
     private String operationType;
-
     /**
-     * {@link DelOutboundOrderEnum}
+     * {@link OrderTypeEnum}
      */
     @ApiModelProperty(value = "订单类型")
     private String orderType;

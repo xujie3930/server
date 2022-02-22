@@ -29,6 +29,9 @@ public class BasWarehouseVO {
     @ApiModelProperty(value = "国家显示名称")
     private String countryDisplayName;
 
+    @ApiModelProperty(value = "省")
+    private String province;
+
     @ApiModelProperty(value = "城市")
     private String city;
 

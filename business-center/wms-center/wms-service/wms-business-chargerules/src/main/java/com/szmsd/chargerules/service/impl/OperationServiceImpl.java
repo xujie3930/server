@@ -129,7 +129,7 @@ public class OperationServiceImpl implements IOperationService {
             BigDecimal calculateWeight = Optional.ofNullable(vo.getWeight()).map(BigDecimal::valueOf).orElse(BigDecimal.ZERO);
             BigDecimal calculateNum = Optional.ofNullable(vo.getQty()).map(BigDecimal::valueOf).orElse(BigDecimal.ZERO);
             String orderType = dto.getOrderType();
-            OperationRuleVO operation = getOperationDetails(dto, OrderTypeEnum.valueOf(orderType), calculateWeight.doubleValue(), "未找到" + orderType + "业务费用规则，请联系管理员");
+            OperationRuleVO operation = getOperationDetails(dto, OrderTypeEnum.Shipment, calculateWeight.doubleValue(), "未找到" + OrderTypeEnum.Shipment + "业务费用规则，请联系管理员");
             String currencyCode = operation.getCurrencyCode();
             dto.setCurrency(currencyCode);
             BigDecimal calculateAmount = calculateCostForDetails(operation, calculateWeight, calculateNum);

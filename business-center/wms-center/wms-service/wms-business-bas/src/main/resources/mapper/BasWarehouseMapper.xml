@@ -49,6 +49,7 @@
         t.is_check_vat,
         t.country_code,
         t.country_display_name,
+        t.province,
         t.city,
         t.time_zone,
         t.status,
