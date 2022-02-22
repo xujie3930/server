@@ -1,5 +1,6 @@
 package com.szmsd.common.plugin;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.language.util.LanguageUtil;
 import com.szmsd.common.core.utils.SpringUtils;
@@ -59,6 +60,12 @@ public class HandlerContext<T> {
             Object data = result.getData();
             if (null != data) {
                 handlerAutoValue(data);
+            }
+        } else if (source instanceof IPage) {
+            IPage<?> iPage = (IPage<?>) source;
+            List<?> records = iPage.getRecords();
+            if (CollectionUtils.isNotEmpty(records)) {
+                doJsonEncryptInit(records);
             }
         } else {
             doJsonEncryptInit(source);

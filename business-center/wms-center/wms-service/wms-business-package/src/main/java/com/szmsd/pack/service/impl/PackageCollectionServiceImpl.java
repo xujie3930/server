@@ -773,6 +773,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
         queryWrapper.eq(StringUtils.isNotEmpty(dto.getCollectionToWarehouse()), PackageCollection::getCollectionToWarehouse, dto.getCollectionToWarehouse());
         // 处理方式
         queryWrapper.eq(StringUtils.isNotEmpty(dto.getHandleMode()), PackageCollection::getHandleMode, dto.getHandleMode());
+        queryWrapper.orderByDesc(PackageCollection::getCreateTime);
         IPage<PackageCollection> page = super.page(iPage, queryWrapper);
         List<PackageCollection> records = page.getRecords();
         if (CollectionUtils.isNotEmpty(records)) {
