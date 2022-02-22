@@ -140,11 +140,6 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             } else {
                 packageCollection.setStatus(PackageCollectionConstants.Status.NO_PLAN.name());
             }
-            LoginUser loginUser = SecurityUtils.getLoginUser();
-            if (null == loginUser) {
-                throw new CommonException("500", "操作失败，获取登录信息异常");
-            }
-            packageCollection.setSellerCode(loginUser.getSellerCode());
             // PRC计算费用，冻结运费
             ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> responseObject = this.pricing(packageCollection);
             if (null == responseObject) {

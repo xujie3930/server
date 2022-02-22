@@ -1,9 +1,13 @@
 package com.szmsd.pack.listeners;
 
+import com.szmsd.common.core.constant.Constants;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.pack.events.PackageCollectionContextEvent;
 import com.szmsd.pack.service.IPackageCollectionService;
 import com.szmsd.pack.service.impl.PackageCollectionContext;
+import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -14,6 +18,9 @@ public class PackageCollectionContextListener {
 
     @Autowired
     private IPackageCollectionService packageCollectionService;
+    @SuppressWarnings({"all"})
+    @Autowired
+    private InboundReceiptFeignService inboundReceiptFeignService;
 
     @Async
     @EventListener
@@ -27,6 +34,10 @@ public class PackageCollectionContextListener {
                 this.packageCollectionService.notRecordCancel(packageCollection);
             } else if (PackageCollectionContext.Type.CREATE_RECEIVER.equals(packageCollectionContext.getType())) {
                 // 创建入库单
+                R<InboundReceiptInfoVO> r = inboundReceiptFeignService.collectAndInbound(packageCollection);
+                if (null != r && Constants.SUCCESS == r.getCode()) {
+                    
+                }
             }
         }
     }
