@@ -31,6 +31,12 @@
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-http-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-package-api</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 

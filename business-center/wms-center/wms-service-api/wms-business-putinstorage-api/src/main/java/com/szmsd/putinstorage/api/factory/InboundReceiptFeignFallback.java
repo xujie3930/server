@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.InboundCountVO;
@@ -92,6 +93,12 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
             @Override
             public R<Integer> updateTracking(UpdateTrackingNoRequest updateTrackingNoRequest) {
                 log.info("InboundReceiptFeignFallback updateTracking{}", updateTrackingNoRequest, throwable);
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<InboundReceiptInfoVO> collectAndInbound(PackageCollection packageCollection) {
+                log.info("InboundReceiptFeignFallback collectAndInbound{}", JSONObject.toJSONString(packageCollection));
                 return R.convertResultJson(throwable);
             }
         };
