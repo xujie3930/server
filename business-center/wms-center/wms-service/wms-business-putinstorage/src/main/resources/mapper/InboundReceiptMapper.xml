@@ -112,6 +112,7 @@
         t.tracking_number,
         t.status,
         t.remark,
+        t.collection_no,
 
         -- 多语言字段
         t.cus_code cus_name,

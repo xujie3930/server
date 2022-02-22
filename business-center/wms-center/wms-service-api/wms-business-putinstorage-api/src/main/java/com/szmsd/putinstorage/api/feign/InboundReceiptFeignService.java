@@ -67,5 +67,5 @@ public interface InboundReceiptFeignService {
 
     @PostMapping("/inbound/collectAndInbound")
     @ApiOperation(value = "揽收入库", notes = "查询sku的入库状况-指定范围内")
-     R<InboundReceiptInfoVO> collectAndInbound(@RequestBody @Validated PackageCollection packageCollection);
+    R<InboundReceiptInfoVO> collectAndInbound(@RequestBody @Validated PackageCollection packageCollection);
 }

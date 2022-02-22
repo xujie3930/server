@@ -111,4 +111,7 @@ public class InboundReceiptInfoVO {
     @ApiModelProperty(value = "数据来源")
     private String sourceType;
 
+    @ApiModelProperty(value = "揽收单号")
+    private String collectionNo;
+
 }
