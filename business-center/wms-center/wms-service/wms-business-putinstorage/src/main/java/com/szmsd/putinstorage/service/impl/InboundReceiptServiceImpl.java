@@ -78,6 +78,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -954,10 +955,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         createInboundReceiptDTO.setReceiptDetailIds(Lists.newArrayList());
         createInboundReceiptDTO.setDeliveryNo("");
-        createInboundReceiptDTO.setWarehouseNo(packageCollection.getWarehouseCode());
         createInboundReceiptDTO.setOrderNo("");
         createInboundReceiptDTO.setCusCode(packageCollection.getSellerCode());
-        createInboundReceiptDTO.setOrderType(InboundReceiptEnum.OrderType.COLLECTION_INBOUND.getValue());
+        createInboundReceiptDTO.setOrderType(InboundReceiptEnum.OrderType.NORMAL.getValue());
         createInboundReceiptDTO.setWarehouseCode(packageCollection.getWarehouseCode());
         // SKU点数上架
         createInboundReceiptDTO.setWarehouseMethodCode("055001");
@@ -967,8 +967,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         // 预约揽收
         createInboundReceiptDTO.setDeliveryWayCode("053003");
         createInboundReceiptDTO.setDeliveryNoList(Lists.newArrayList());
-        createInboundReceiptDTO.setTotalDeclareQty(0);
-        createInboundReceiptDTO.setTotalPutQty(0);
+
         createInboundReceiptDTO.setGoodsSourceCode("");
         createInboundReceiptDTO.setTrackingNumber("");
         createInboundReceiptDTO.setRemark("Source From " + packageCollection.getCollectionNo());
@@ -978,7 +977,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         createInboundReceiptDTO.setCollectionNo(packageCollection.getCollectionNo());
         createInboundReceiptDTO.setTransferNoList(Lists.newArrayList());
         List<PackageCollectionDetail> detailList = packageCollection.getDetailList();
+        AtomicInteger qtyTotal= new AtomicInteger();
         List<InboundReceiptDetailDTO> detailDTOList = detailList.stream().map(detail -> {
+            Integer qty = Optional.ofNullable(detail.getQty()).orElse(0);
+            qtyTotal.addAndGet(qty);
             InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
             inboundReceiptDetailDTO.setWarehouseNo("");
             inboundReceiptDetailDTO.setSku(detail.getSku());
@@ -992,6 +994,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             return inboundReceiptDetailDTO;
         }).collect(Collectors.toList());
         createInboundReceiptDTO.setInboundReceiptDetails(detailDTOList);
+
+        createInboundReceiptDTO.setTotalDeclareQty(qtyTotal.get());
+        createInboundReceiptDTO.setTotalPutQty(qtyTotal.get());
         log.info("创建揽收入库单信息：{}", JSONObject.toJSONString(createInboundReceiptDTO));
         return saveOrUpdate(createInboundReceiptDTO);
     }
