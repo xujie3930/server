@@ -18,6 +18,11 @@ public class PackageCollectionFeignFallback implements FallbackFactory<PackageCo
             }
 
             @Override
+            public R<Integer> updateOutboundNo(PackageCollection packageCollection) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R<PackageCollection> getInfoByNo(PackageCollection packageCollection) {
                 return R.convertResultJson(throwable);
             }

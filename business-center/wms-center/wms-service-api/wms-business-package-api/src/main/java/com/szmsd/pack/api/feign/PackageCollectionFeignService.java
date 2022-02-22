@@ -6,6 +6,7 @@ import com.szmsd.pack.api.feign.factory.PackageCollectionFeignFallback;
 import com.szmsd.pack.domain.PackageCollection;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(contextId = "FeignClient.PackageCollectionFeignService", name = BusinessPackageInterface.SERVICE_NAME, fallbackFactory = PackageCollectionFeignFallback.class)
@@ -19,6 +20,15 @@ public interface PackageCollectionFeignService {
      */
     @PostMapping("/package-collection/updateCollecting")
     R<Integer> updateCollecting(@RequestBody String collectionNo);
+
+    /**
+     * 交货管理 - 揽收 - 更新出库单号
+     *
+     * @param packageCollection packageCollection
+     * @return Integer
+     */
+    @PutMapping("/package-collection/updateOutboundNo")
+    R<Integer> updateOutboundNo(@RequestBody PackageCollection packageCollection);
 
     /**
      * 交货管理 - 揽收 - 详细信息(CollectionNo)

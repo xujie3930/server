@@ -24,6 +24,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.http.api.feign.HtpRmiFeignService;
@@ -643,7 +644,13 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                         detailList.add(delOutboundDetailDto);
                     }
                     delOutboundDto.setDetails(detailList);
-                    this.delOutboundClientService.addShipment(delOutboundDto);
+                    DelOutboundAddResponse outboundAddResponse = this.delOutboundClientService.addShipment(delOutboundDto);
+                    if (null != outboundAddResponse) {
+                        PackageCollection updatePackageCollection = new PackageCollection();
+                        updatePackageCollection.setOutboundNo(outboundAddResponse.getOrderNo());
+                        updatePackageCollection.setCollectionNo(collectionNo);
+                        packageCollectionFeignService.updateOutboundNo(updatePackageCollection);
+                    }
                 }
             }
         }

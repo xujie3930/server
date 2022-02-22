@@ -90,6 +90,14 @@ public class PackageCollectionController extends BaseController {
         return toOk(packageCollectionService.updatePackageCollectionPlan(packageCollection));
     }
 
+    @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:updateOutboundNo')")
+    @Log(title = "package - 交货管理 - 揽收模块", businessType = BusinessType.UPDATE)
+    @PutMapping("/updateOutboundNo")
+    @ApiOperation(value = "交货管理 - 揽收 - 更新出库单号", notes = "交货管理 - 揽收 - 更新出库单号")
+    public R<Integer> updateOutboundNo(@RequestBody PackageCollection packageCollection) {
+        return R.ok(packageCollectionService.updateOutboundNo(packageCollection));
+    }
+
     @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:cancel')")
     @Log(title = "package - 交货管理 - 揽收模块", businessType = BusinessType.UPDATE)
     @PostMapping("cancel")

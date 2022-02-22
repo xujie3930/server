@@ -489,6 +489,14 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     }
 
     @Override
+    public int updateOutboundNo(PackageCollection packageCollection) {
+        LambdaUpdateWrapper<PackageCollection> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(PackageCollection::getOutboundNo, packageCollection.getOutboundNo());
+        updateWrapper.eq(PackageCollection::getCollectionNo, packageCollection.getCollectionNo());
+        return super.baseMapper.update(null, updateWrapper);
+    }
+
+    @Override
     public int cancel(List<Long> idList) {
         List<PackageCollection> collectionList = super.listByIds(idList);
         if (CollectionUtils.isNotEmpty(collectionList)) {

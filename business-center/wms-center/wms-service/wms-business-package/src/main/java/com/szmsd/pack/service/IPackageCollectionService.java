@@ -53,6 +53,8 @@ public interface IPackageCollectionService extends IService<PackageCollection> {
 
     int updatePackageCollectionPlan(PackageCollection packageCollection);
 
+    int updateOutboundNo(PackageCollection packageCollection);
+
     int cancel(List<Long> idList);
 
     void notRecordCancel(PackageCollection packageCollection);

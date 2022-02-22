@@ -204,6 +204,9 @@ public class PackageCollection extends BaseEntity {
     @ApiModelProperty(value = "入库单号")
     private String receiptNo;
 
+    @ApiModelProperty(value = "出库单号")
+    private String outboundNo;
+
     @ApiModelProperty(value = "货物名称")
     @TableField(exist = false)
     private String skuNames;
