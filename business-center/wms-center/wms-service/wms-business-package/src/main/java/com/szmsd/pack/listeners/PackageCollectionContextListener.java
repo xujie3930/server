@@ -3,7 +3,6 @@ package com.szmsd.pack.listeners;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.pack.domain.PackageCollectionDetail;
@@ -13,6 +12,8 @@ import com.szmsd.pack.service.IPackageCollectionService;
 import com.szmsd.pack.service.impl.PackageCollectionContext;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PackageCollectionContextListener {
+    private final Logger logger = LoggerFactory.getLogger(PackageCollectionContextListener.class);
 
     @Autowired
     private IPackageCollectionService packageCollectionService;
@@ -48,14 +50,16 @@ public class PackageCollectionContextListener {
                 }
                 // 创建入库单
                 R<InboundReceiptInfoVO> r = inboundReceiptFeignService.collectAndInbound(packageCollection);
-                if (null != r && Constants.SUCCESS == r.getCode()) {
-                    InboundReceiptInfoVO receiptInfoVO = r.getData();
+                try {
+                    InboundReceiptInfoVO receiptInfoVO = R.getDataAndException(r);
                     String warehouseNo = receiptInfoVO.getWarehouseNo();
                     // 把入库单号更新到揽收单上
                     LambdaUpdateWrapper<PackageCollection> updateWrapper = Wrappers.lambdaUpdate();
                     updateWrapper.eq(PackageCollection::getId, packageCollection.getId());
                     updateWrapper.set(PackageCollection::getReceiptNo, warehouseNo);
                     this.packageCollectionService.update(updateWrapper);
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
                 }
             }
         }
