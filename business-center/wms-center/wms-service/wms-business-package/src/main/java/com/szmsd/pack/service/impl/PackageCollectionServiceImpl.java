@@ -356,6 +356,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     detailVO.setWeight(weight.doubleValue());
                     detailVOList.add(detailVO);
                 }
+                delOutboundOperationVO.setCustomCode(packageCollection.getSellerCode());
+                delOutboundOperationVO.setOrderNo(packageCollection.getCollectionNo());
                 delOutboundOperationVO.setDetails(detailVOList);
                 delOutboundOperationVO.setOrderType("PackageCollection");
                 R<?> r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
