@@ -473,7 +473,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             updatePackageCollection.setCollectionDate(packageCollection.getCollectionDate());
             updatePackageCollection.setHandleMode(packageCollection.getHandleMode());
             LambdaUpdateWrapper<PackageCollection> updateWrapper = Wrappers.lambdaUpdate();
-            updateWrapper.eq(PackageCollection::getId, idList);
+            updateWrapper.in(PackageCollection::getId, idList);
             int update = super.baseMapper.update(updatePackageCollection, updateWrapper);
             if (update > 0) {
                 List<PackageCollection> packageCollectionList = super.listByIds(idList);
