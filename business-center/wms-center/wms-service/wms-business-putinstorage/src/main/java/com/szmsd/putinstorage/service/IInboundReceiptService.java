@@ -2,6 +2,7 @@ package com.szmsd.putinstorage.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
@@ -57,5 +58,13 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO);
 
     int updateTrackingNo(UpdateTrackingNoRequest updateTrackingNoRequest);
+
+    /**
+     * 揽收后创建入库单
+     *
+     * @param packageCollection 揽收单信息
+     * @return 入库单号
+     */
+    InboundReceiptInfoVO collectAndInbound(PackageCollection packageCollection);
 }
 

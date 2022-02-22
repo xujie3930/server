@@ -29,6 +29,10 @@ public class InboundReceiptEnum {
         COUNTING("Counting", "点数入库"),
         /** 入库单类型：转运入库 **/
         PACKAGE_TRANSFER("PackageTransfer", "包裹转运入库"),
+        /**
+         * 揽收入库
+         */
+        COLLECTION_INBOUND("CollectionInbound", "揽收入库"),
         ;
         private String value;
 

@@ -2,6 +2,7 @@ package com.szmsd.putinstorage.domain.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.utils.StringToolkit;
+import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -34,6 +35,9 @@ public class InboundReceiptDTO {
     @Size(max = 30, message = "客户编码仅支持 0-30字符")
     @ApiModelProperty(value = "客户编码 (0-30]")
     private String cusCode;
+    /**
+     * {@link InboundReceiptEnum.OrderType}
+     */
     @Size(max = 30, message = "入库方式仅支持0-30字符")
     @ApiModelProperty(value = "普通入库（OMS用）：Normal" +
             "集运入库（OMS用）：Collection" +
@@ -99,6 +103,8 @@ public class InboundReceiptDTO {
     private String status;
     @ApiModelProperty(value = "数据来源")
     private String sourceType;
+    @ApiModelProperty(value = "揽收单号")
+    private String collectionNo;
     @ApiModelProperty(value = "转运单列表 - 出库单号", required = true, hidden = true)
     private List<String> transferNoList;
 

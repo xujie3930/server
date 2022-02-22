@@ -14,6 +14,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.putinstorage.annotation.InboundReceiptLog;
 import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
@@ -501,5 +502,12 @@ public class InboundReceiptController extends BaseController {
         inventoryStockByRangeDTO.valid();
         return R.ok(iInboundReceiptService.querySkuStockByRange(inventoryStockByRangeDTO));
     }
+    @PreAuthorize("@ss.hasPermi('inventory:querySkuStockByRange')")
+    @PostMapping("/collectAndInbound")
+    @ApiOperation(value = "揽收入库", notes = "查询sku的入库状况-指定范围内")
+    public R<InboundReceiptInfoVO> collectAndInbound(@RequestBody @Validated PackageCollection packageCollection) {
+        return R.ok(iInboundReceiptService.collectAndInbound(packageCollection));
+    }
+
 
 }

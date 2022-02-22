@@ -1,4 +1,7 @@
 package com.szmsd.putinstorage.service.impl;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
+
+import com.google.common.collect.Lists;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -32,6 +35,8 @@ import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
+import com.szmsd.pack.domain.PackageCollection;
+import com.szmsd.pack.domain.PackageCollectionDetail;
 import com.szmsd.putinstorage.api.dto.CkCreateIncomingOrderDTO;
 import com.szmsd.putinstorage.api.dto.CkGenCustomSkuNoDTO;
 import com.szmsd.putinstorage.api.dto.CkPutawayDTO;
@@ -894,6 +899,60 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Override
     public List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO) {
         return iInboundReceiptDetailService.querySkuStockByRange(inventoryStockByRangeDTO);
+    }
+
+    /**
+     * 揽收后创建入库单
+     *
+     * @param packageCollection 揽收单信息
+     * @return 入库单号
+     */
+    @Override
+    public InboundReceiptInfoVO collectAndInbound(PackageCollection packageCollection) {
+        CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+
+        createInboundReceiptDTO.setReceiptDetailIds(Lists.newArrayList());
+        createInboundReceiptDTO.setDeliveryNo("");
+        createInboundReceiptDTO.setWarehouseNo(packageCollection.getWarehouseCode());
+        createInboundReceiptDTO.setOrderNo("");
+        createInboundReceiptDTO.setCusCode(packageCollection.getSellerCode());
+        createInboundReceiptDTO.setOrderType(InboundReceiptEnum.OrderType.COLLECTION_INBOUND.getValue());
+        createInboundReceiptDTO.setWarehouseCode(packageCollection.getWarehouseCode());
+        // SKU点数上架
+        createInboundReceiptDTO.setWarehouseMethodCode("055001");
+        // SKU
+        createInboundReceiptDTO.setWarehouseCategoryCode("056001");
+        createInboundReceiptDTO.setVat("");
+        // 预约揽收
+        createInboundReceiptDTO.setDeliveryWayCode("053003");
+        createInboundReceiptDTO.setDeliveryNoList(Lists.newArrayList());
+        createInboundReceiptDTO.setTotalDeclareQty(0);
+        createInboundReceiptDTO.setTotalPutQty(0);
+        createInboundReceiptDTO.setGoodsSourceCode("");
+        createInboundReceiptDTO.setTrackingNumber("");
+        createInboundReceiptDTO.setRemark("Source From " + packageCollection.getCollectionNo());
+        createInboundReceiptDTO.setDocumentsFile(Lists.newArrayList());
+        createInboundReceiptDTO.setStatus("0");
+        createInboundReceiptDTO.setSourceType("CK1");
+        createInboundReceiptDTO.setCollectionNo(packageCollection.getCollectionNo());
+        createInboundReceiptDTO.setTransferNoList(Lists.newArrayList());
+        List<PackageCollectionDetail> detailList = packageCollection.getDetailList();
+        List<InboundReceiptDetailDTO> detailDTOList = detailList.stream().map(detail -> {
+            InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
+            inboundReceiptDetailDTO.setWarehouseNo("");
+            inboundReceiptDetailDTO.setSku(detail.getSku());
+            inboundReceiptDetailDTO.setSkuName(detail.getSku());
+            inboundReceiptDetailDTO.setDeclareQty(detail.getQty());
+            inboundReceiptDetailDTO.setPutQty(detail.getQty());
+            inboundReceiptDetailDTO.setOriginCode(detail.getSku());
+            inboundReceiptDetailDTO.setRemark("");
+            inboundReceiptDetailDTO.setEditionImage(new AttachmentFileDTO());
+            inboundReceiptDetailDTO.setDeliveryNo("");
+            return inboundReceiptDetailDTO;
+        }).collect(Collectors.toList());
+        createInboundReceiptDTO.setInboundReceiptDetails(detailDTOList);
+        log.info("创建揽收入库单信息：{}",JSONObject.toJSONString(createInboundReceiptDTO));
+        return saveOrUpdate(createInboundReceiptDTO);
     }
 }
 
