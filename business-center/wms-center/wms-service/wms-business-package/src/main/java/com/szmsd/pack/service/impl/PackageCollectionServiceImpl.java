@@ -418,7 +418,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 packageCollection.getReceiverPostCode(),
                 packageCollection.getReceiverCity(),
                 packageCollection.getReceiverProvince(),
-                new CountryInfo("", "", "", packageCollection.getReceiverCountry())
+                new CountryInfo(packageCollection.getReceiverCountryCode(), "", "", packageCollection.getReceiverCountry())
         ));
         // 发货地址
         calcShipmentFeeCommand.setFromAddress(new Address(packageCollection.getCollectionAddress(),
@@ -427,7 +427,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 packageCollection.getCollectionPostCode(),
                 packageCollection.getCollectionCity(),
                 packageCollection.getCollectionProvince(),
-                new CountryInfo("", "", "", packageCollection.getCollectionCountry())
+                new CountryInfo(packageCollection.getCollectionCountryCode(), "", "", packageCollection.getCollectionCountry())
         ));
         // 联系信息
         calcShipmentFeeCommand.setToContactInfo(new ContactInfo(packageCollection.getReceiverName(), packageCollection.getReceiverPhone(), "", ""));

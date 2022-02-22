@@ -65,8 +65,10 @@ public class PackageCollection extends BaseEntity {
     private String collectionPhone;
 
     @ApiModelProperty(value = "国家")
-    @Excel(name = "国家")
     private String collectionCountry;
+
+    @ApiModelProperty(value = "国家编码")
+    private String collectionCountryCode;
 
     @ApiModelProperty(value = "州省")
     @Excel(name = "州省")
@@ -103,8 +105,10 @@ public class PackageCollection extends BaseEntity {
     private String receiverPhone;
 
     @ApiModelProperty(value = "国家")
-    @Excel(name = "国家")
     private String receiverCountry;
+
+    @ApiModelProperty(value = "国家编码")
+    private String receiverCountryCode;
 
     @ApiModelProperty(value = "州省")
     @Excel(name = "州省")
