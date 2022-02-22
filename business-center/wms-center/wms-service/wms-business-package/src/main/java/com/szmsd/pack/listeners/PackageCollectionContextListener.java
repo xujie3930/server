@@ -20,8 +20,14 @@ public class PackageCollectionContextListener {
     public void onApplicationEvent(PackageCollectionContextEvent event) {
         Object source = event.getSource();
         if (source instanceof PackageCollectionContext) {
-            PackageCollection packageCollection = ((PackageCollectionContext) source).getPackageCollection();
-            this.packageCollectionService.notRecordCancel(packageCollection);
+            PackageCollectionContext packageCollectionContext = (PackageCollectionContext) source;
+            PackageCollection packageCollection = packageCollectionContext.getPackageCollection();
+            if (PackageCollectionContext.Type.CANCEL.equals(packageCollectionContext.getType())) {
+                // 处理单据取消的逻辑
+                this.packageCollectionService.notRecordCancel(packageCollection);
+            } else if (PackageCollectionContext.Type.CREATE_RECEIVER.equals(packageCollectionContext.getType())) {
+                // 创建入库单
+            }
         }
     }
 }

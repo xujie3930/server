@@ -127,7 +127,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     @Transactional
     @Override
     public int insertPackageCollection(PackageCollection packageCollection) {
-        PackageCollectionContext packageCollectionContext = new PackageCollectionContext(packageCollection);
+        PackageCollectionContext packageCollectionContextCancel = new PackageCollectionContext(packageCollection, PackageCollectionContext.Type.CANCEL);
         try {
             List<PackageCollectionDetail> detailList = packageCollection.getDetailList();
             packageCollection.setTotalQty(this.countTotalQty(detailList));
@@ -378,12 +378,18 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.OPERATING_FEE.name());
                 // 创建TrackingYee
                 this.createTrackingYee(packageCollection);
+                // 判断有没有揽收计划
+                if (PackageCollectionConstants.COLLECTION_PLAN_YES.equals(packageCollection.getCollectionPlan())) {
+                    // 通知创建入库单
+                    PackageCollectionContext packageCollectionContextCreateReceiver = new PackageCollectionContext(packageCollection, PackageCollectionContext.Type.CREATE_RECEIVER);
+                    PackageCollectionContextEvent.publishEvent(packageCollectionContextCreateReceiver);
+                }
             }
             return insert;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // 通知保存揽收失败
-            PackageCollectionContextEvent.publishEvent(packageCollectionContext);
+            PackageCollectionContextEvent.publishEvent(packageCollectionContextCancel);
             if (e instanceof CommonException) {
                 throw e;
             }
@@ -461,11 +467,21 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
         if (CollectionUtils.isNotEmpty(idList)) {
             PackageCollection updatePackageCollection = new PackageCollection();
             updatePackageCollection.setStatus(PackageCollectionConstants.Status.PLANNED.name());
+            updatePackageCollection.setCollectionPlan(PackageCollectionConstants.COLLECTION_PLAN_YES);
             updatePackageCollection.setCollectionDate(packageCollection.getCollectionDate());
             updatePackageCollection.setHandleMode(packageCollection.getHandleMode());
             LambdaUpdateWrapper<PackageCollection> updateWrapper = Wrappers.lambdaUpdate();
             updateWrapper.eq(PackageCollection::getId, idList);
-            return baseMapper.update(updatePackageCollection, updateWrapper);
+            int update = super.baseMapper.update(updatePackageCollection, updateWrapper);
+            if (update > 0) {
+                List<PackageCollection> packageCollectionList = super.listByIds(idList);
+                for (PackageCollection collection : packageCollectionList) {
+                    // 通知创建入库单
+                    PackageCollectionContext packageCollectionContextCreateReceiver = new PackageCollectionContext(collection, PackageCollectionContext.Type.CREATE_RECEIVER);
+                    PackageCollectionContextEvent.publishEvent(packageCollectionContextCreateReceiver);
+                }
+            }
+            return update;
         }
         return 0;
     }
