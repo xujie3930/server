@@ -106,15 +106,18 @@ public class LocalDateConfig {
         javaTimeModule.addDeserializer(Date.class, new JsonDeserializer<Date>() {
             @Override
             public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+                String text = jsonParser.getText();
+                if (null == text || "".equals(text.trim())) {
+                    return null;
+                }
                 SimpleDateFormat format;
-                if (jsonParser.getText().contains("T")) {
+                if (text.contains("T")) {
                     format = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_T, Locale.CHINA);
                 } else {
                     format = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT, Locale.CHINA);
                 }
-                String date = jsonParser.getText();
                 try {
-                    return format.parse(date);
+                    return format.parse(text);
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
