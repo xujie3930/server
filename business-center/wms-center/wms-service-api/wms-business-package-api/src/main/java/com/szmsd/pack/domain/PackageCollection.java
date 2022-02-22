@@ -164,6 +164,7 @@ public class PackageCollection extends BaseEntity {
     private String status;
 
     @ApiModelProperty(value = "状态名称")
+    @TableField(exist = false)
     private String statusName;
 
     @ApiModelProperty(value = "卖家代码")
