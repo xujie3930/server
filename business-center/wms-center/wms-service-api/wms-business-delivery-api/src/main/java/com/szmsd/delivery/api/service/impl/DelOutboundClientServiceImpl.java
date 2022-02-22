@@ -60,6 +60,11 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     }
 
     @Override
+    public DelOutboundAddResponse addShipment(DelOutboundDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.addShipment(dto));
+    }
+
+    @Override
     public List<DelOutboundLabelResponse> labelBase64(DelOutboundLabelDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.labelBase64(dto));
     }

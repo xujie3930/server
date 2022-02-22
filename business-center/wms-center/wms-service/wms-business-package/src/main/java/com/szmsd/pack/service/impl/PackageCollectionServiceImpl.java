@@ -16,8 +16,6 @@ import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.security.domain.LoginUser;
-import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
@@ -97,11 +95,18 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     public PackageCollection selectPackageCollectionById(String id) {
         PackageCollection packageCollection = baseMapper.selectById(id);
         if (null != packageCollection) {
-            LambdaQueryWrapper<PackageCollectionDetail> packageCollectionDetailLambdaQueryWrapper = Wrappers.lambdaQuery();
-            packageCollectionDetailLambdaQueryWrapper.eq(PackageCollectionDetail::getCollectionId, id);
-            packageCollectionDetailLambdaQueryWrapper.orderByAsc(PackageCollectionDetail::getSort);
-            List<PackageCollectionDetail> detailList = this.packageCollectionDetailService.list(packageCollectionDetailLambdaQueryWrapper);
-            packageCollection.setDetailList(detailList);
+            packageCollection.setDetailList(this.packageCollectionDetailService.listByCollectionId(packageCollection.getId()));
+        }
+        return packageCollection;
+    }
+
+    @Override
+    public PackageCollection selectPackageCollectionByNo(String no) {
+        LambdaQueryWrapper<PackageCollection> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(PackageCollection::getCollectionNo, no);
+        PackageCollection packageCollection = super.getOne(queryWrapper);
+        if (null != packageCollection) {
+            packageCollection.setDetailList(this.packageCollectionDetailService.listByCollectionId(packageCollection.getId()));
         }
         return packageCollection;
     }
@@ -378,7 +383,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 // 判断有没有揽收计划
                 if (PackageCollectionConstants.COLLECTION_PLAN_YES.equals(packageCollection.getCollectionPlan())) {
                     // 通知创建入库单
-                    PackageCollectionContext packageCollectionContextCreateReceiver = new PackageCollectionContext(packageCollection, PackageCollectionContext.Type.CREATE_RECEIVER);
+                    PackageCollectionContext packageCollectionContextCreateReceiver = new PackageCollectionContext(packageCollection, PackageCollectionContext.Type.CREATE_RECEIVER, true);
                     PackageCollectionContextEvent.publishEvent(packageCollectionContextCreateReceiver);
                 }
             }
@@ -474,7 +479,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 List<PackageCollection> packageCollectionList = super.listByIds(idList);
                 for (PackageCollection collection : packageCollectionList) {
                     // 通知创建入库单
-                    PackageCollectionContext packageCollectionContextCreateReceiver = new PackageCollectionContext(collection, PackageCollectionContext.Type.CREATE_RECEIVER);
+                    PackageCollectionContext packageCollectionContextCreateReceiver = new PackageCollectionContext(collection, PackageCollectionContext.Type.CREATE_RECEIVER, false);
                     PackageCollectionContextEvent.publishEvent(packageCollectionContextCreateReceiver);
                 }
             }

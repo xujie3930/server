@@ -50,12 +50,20 @@ public class PackageCollectionController extends BaseController {
         return R.ok(page);
     }
 
-    @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:query')")
-    @GetMapping(value = "getInfo/{id}")
-    @ApiOperation(value = "交货管理 - 揽收 - 详细信息", notes = "交货管理 - 揽收 - 详细信息")
+    @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:getInfo')")
+    @GetMapping(value = "/getInfo/{id}")
+    @ApiOperation(value = "交货管理 - 揽收 - 详细信息(ID)", notes = "交货管理 - 揽收 - 详细信息(ID)")
     @AutoValue
-    public R getInfo(@PathVariable("id") String id) {
+    public R<PackageCollection> getInfo(@PathVariable("id") String id) {
         return R.ok(packageCollectionService.selectPackageCollectionById(id));
+    }
+
+    @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:getInfoByNo')")
+    @PostMapping(value = "/getInfoByNo")
+    @ApiOperation(value = "交货管理 - 揽收 - 详细信息(CollectionNo)", notes = "交货管理 - 揽收 - 详细信息(CollectionNo)")
+    @AutoValue
+    public R<PackageCollection> getInfoByNo(@RequestBody PackageCollection packageCollection) {
+        return R.ok(packageCollectionService.selectPackageCollectionByNo(packageCollection.getCollectionNo()));
     }
 
     @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:add')")

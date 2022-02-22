@@ -109,5 +109,13 @@ public class PackageCollectionDetailServiceImpl extends ServiceImpl<PackageColle
             return Collections.emptyMap();
         }
     }
+
+    @Override
+    public List<PackageCollectionDetail> listByCollectionId(Long collectionId) {
+        LambdaQueryWrapper<PackageCollectionDetail> packageCollectionDetailLambdaQueryWrapper = Wrappers.lambdaQuery();
+        packageCollectionDetailLambdaQueryWrapper.eq(PackageCollectionDetail::getCollectionId, collectionId);
+        packageCollectionDetailLambdaQueryWrapper.orderByAsc(PackageCollectionDetail::getSort);
+        return super.list(packageCollectionDetailLambdaQueryWrapper);
+    }
 }
 

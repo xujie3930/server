@@ -1,11 +1,14 @@
 package com.szmsd.pack.listeners;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.pack.domain.PackageCollection;
+import com.szmsd.pack.domain.PackageCollectionDetail;
 import com.szmsd.pack.events.PackageCollectionContextEvent;
+import com.szmsd.pack.service.IPackageCollectionDetailService;
 import com.szmsd.pack.service.IPackageCollectionService;
 import com.szmsd.pack.service.impl.PackageCollectionContext;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
@@ -20,6 +23,8 @@ public class PackageCollectionContextListener {
 
     @Autowired
     private IPackageCollectionService packageCollectionService;
+    @Autowired
+    private IPackageCollectionDetailService packageCollectionDetailService;
     @SuppressWarnings({"all"})
     @Autowired
     private InboundReceiptFeignService inboundReceiptFeignService;
@@ -35,6 +40,12 @@ public class PackageCollectionContextListener {
                 // 处理单据取消的逻辑
                 this.packageCollectionService.notRecordCancel(packageCollection);
             } else if (PackageCollectionContext.Type.CREATE_RECEIVER.equals(packageCollectionContext.getType())) {
+                if (!packageCollectionContext.isHasDetail()) {
+                    LambdaQueryWrapper<PackageCollectionDetail> packageCollectionDetailLambdaQueryWrapper = Wrappers.lambdaQuery();
+                    packageCollectionDetailLambdaQueryWrapper.eq(PackageCollectionDetail::getCollectionId, packageCollection.getId());
+                    packageCollectionDetailLambdaQueryWrapper.orderByAsc(PackageCollectionDetail::getSort);
+                    packageCollection.setDetailList(this.packageCollectionDetailService.list(packageCollectionDetailLambdaQueryWrapper));
+                }
                 // 创建入库单
                 R<InboundReceiptInfoVO> r = inboundReceiptFeignService.collectAndInbound(packageCollection);
                 if (null != r && Constants.SUCCESS == r.getCode()) {

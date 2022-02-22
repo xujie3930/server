@@ -72,6 +72,14 @@ public interface DelOutboundClientService {
     List<DelOutboundAddResponse> add(List<DelOutboundDto> dto);
 
     /**
+     * 出库单新增
+     *
+     * @param dto dto
+     * @return DelOutboundAddResponse
+     */
+    DelOutboundAddResponse addShipment(DelOutboundDto dto);
+
+    /**
      * 获取标签
      *
      * @param dto dto

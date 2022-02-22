@@ -1,19 +1,18 @@
 package com.szmsd.putinstorage.service.impl;
-import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
-
-import com.google.common.collect.Lists;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
@@ -22,6 +21,9 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.api.service.DelOutboundClientService;
+import com.szmsd.delivery.dto.DelOutboundDetailDto;
+import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.http.api.feign.HtpRmiFeignService;
@@ -35,6 +37,7 @@ import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
+import com.szmsd.pack.api.feign.PackageCollectionFeignService;
 import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.pack.domain.PackageCollectionDetail;
 import com.szmsd.putinstorage.api.dto.CkCreateIncomingOrderDTO;
@@ -114,6 +117,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     private CkThreadPool ckThreadPool;
     @Resource
     private CkConfig ckConfig;
+    @Resource
+    private PackageCollectionFeignService packageCollectionFeignService;
+    @Resource
+    private DelOutboundClientService delOutboundClientService;
 
     /**
      * 入库单查询
@@ -534,10 +541,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         log.info("#B3 接收完成入库：{}", receivingCompletedRequest);
         String orderNo = receivingCompletedRequest.getOrderNo();
         updateStatus(orderNo, InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
+        //查询入库单号的创建客户code
+        final InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(orderNo);
         log.info("#B3 接收完成入库：操作完成");
         CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
-            //查询入库单号的创建客户code
-            InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(orderNo);
             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.PUT);
             httpRequestDto.setBinary(false);
@@ -605,6 +612,40 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         R r = rechargesFeignService.feeDeductions(custPayDTO);
         R.getDataAndException(r);*/
 
+        // 创建销毁出库单
+        String collectionNo = inboundReceiptInfoVO.getCollectionNo();
+        if (StringUtils.isNotEmpty(collectionNo)) {
+            // 查询揽收单信息
+            PackageCollection queryPackageCollection = new PackageCollection();
+            queryPackageCollection.setCollectionNo(collectionNo);
+            R<PackageCollection> packageCollectionR = packageCollectionFeignService.getInfoByNo(queryPackageCollection);
+            if (null != packageCollectionR && Constants.SUCCESS == packageCollectionR.getCode()) {
+                PackageCollection packageCollection = packageCollectionR.getData();
+                if (null != packageCollection && "Y".equals(packageCollection.getCollectionPlan())) {
+                    DelOutboundDto delOutboundDto = new DelOutboundDto();
+                    delOutboundDto.setCustomCode(packageCollection.getSellerCode());
+                    delOutboundDto.setSellerCode(packageCollection.getSellerCode());
+                    delOutboundDto.setWarehouseCode(packageCollection.getWarehouseCode());
+                    delOutboundDto.setOrderType("Destroy");
+                    List<DelOutboundDetailDto> detailList = new ArrayList<>();
+                    List<PackageCollectionDetail> packageCollectionDetailList = packageCollection.getDetailList();
+                    for (PackageCollectionDetail packageCollectionDetail : packageCollectionDetailList) {
+                        DelOutboundDetailDto delOutboundDetailDto = new DelOutboundDetailDto();
+                        delOutboundDetailDto.setSku(packageCollectionDetail.getSku());
+                        delOutboundDetailDto.setQty(Long.valueOf(packageCollectionDetail.getQty()));
+                        delOutboundDetailDto.setProductNameChinese(packageCollectionDetail.getSkuName());
+                        BigDecimal declaredValue = packageCollectionDetail.getDeclaredValue();
+                        if (null == declaredValue) {
+                            declaredValue = BigDecimal.ZERO;
+                        }
+                        delOutboundDetailDto.setDeclaredValue(declaredValue.doubleValue());
+                        detailList.add(delOutboundDetailDto);
+                    }
+                    delOutboundDto.setDetails(detailList);
+                    this.delOutboundClientService.addShipment(delOutboundDto);
+                }
+            }
+        }
     }
 
     /**
@@ -951,7 +992,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             return inboundReceiptDetailDTO;
         }).collect(Collectors.toList());
         createInboundReceiptDTO.setInboundReceiptDetails(detailDTOList);
-        log.info("创建揽收入库单信息：{}",JSONObject.toJSONString(createInboundReceiptDTO));
+        log.info("创建揽收入库单信息：{}", JSONObject.toJSONString(createInboundReceiptDTO));
         return saveOrUpdate(createInboundReceiptDTO);
     }
 }

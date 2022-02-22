@@ -136,6 +136,10 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - DOC支持 - 创建")
     R<List<DelOutboundAddResponse>> add(@RequestBody List<DelOutboundDto> dto);
 
+    @PostMapping("/api/outbound/shipment")
+    @ApiOperation(value = "出库管理 - 创建")
+    R<DelOutboundAddResponse> addShipment(@RequestBody DelOutboundDto dto);
+
     @PostMapping("/api/outbound/labelBase64")
     @ApiOperation(value = "出库管理 - 获取标签（根据订单号批量查询，DOC支持）")
     R<List<DelOutboundLabelResponse>> labelBase64(@RequestBody DelOutboundLabelDto dto);

@@ -11,6 +11,8 @@ public class PackageCollectionContext {
 
     private Type type;
 
+    private boolean hasDetail;
+
     public PackageCollectionContext() {
     }
 
@@ -21,6 +23,12 @@ public class PackageCollectionContext {
     public PackageCollectionContext(PackageCollection packageCollection, Type type) {
         this.packageCollection = packageCollection;
         this.type = type;
+    }
+
+    public PackageCollectionContext(PackageCollection packageCollection, Type type, boolean hasDetail) {
+        this.packageCollection = packageCollection;
+        this.type = type;
+        this.hasDetail = hasDetail;
     }
 
     public PackageCollection getPackageCollection() {
@@ -37,6 +45,14 @@ public class PackageCollectionContext {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public boolean isHasDetail() {
+        return hasDetail;
+    }
+
+    public void setHasDetail(boolean hasDetail) {
+        this.hasDetail = hasDetail;
     }
 
     public enum Type {

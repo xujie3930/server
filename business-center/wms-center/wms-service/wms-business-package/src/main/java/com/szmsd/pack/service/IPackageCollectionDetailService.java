@@ -71,5 +71,7 @@ public interface IPackageCollectionDetailService extends IService<PackageCollect
      * @return Map
      */
     Map<Long, String> getCollectionSkuNames(List<Long> collectionIdList);
+
+    List<PackageCollectionDetail> listByCollectionId(Long collectionId);
 }
 
