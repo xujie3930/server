@@ -49,4 +49,12 @@ public class BasWarehouseVO {
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_REVIEW)
     private String inboundReceiptReview;
 
+    @ApiModelProperty(value = "联系人")
+    private String contact;
+
+    @ApiModelProperty(value = "邮编")
+    private String postcode;
+
+    @ApiModelProperty(value = "电话")
+    private String telephone;
 }

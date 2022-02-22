@@ -74,7 +74,7 @@ public class BasWarehouse extends BaseEntity {
     @ApiModelProperty(value = "街道2")
     private String street2;
 
-    @ApiModelProperty(value = "街道3")
+    @ApiModelProperty(value = "邮编")
     private String postcode;
 
     @ApiModelProperty(value = "电话")

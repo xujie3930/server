@@ -52,6 +52,9 @@
         t.city,
         t.time_zone,
         t.status,
+        t.postcode,
+		t.contact,
+		t.telephone,
         t.inbound_receipt_review
     </sql>
 
