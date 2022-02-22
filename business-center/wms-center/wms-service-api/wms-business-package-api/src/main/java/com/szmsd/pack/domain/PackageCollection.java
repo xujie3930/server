@@ -203,4 +203,8 @@ public class PackageCollection extends BaseEntity {
     @ApiModelProperty(value = "揽收货物")
     @TableField(exist = false)
     private List<PackageCollectionDetail> detailList;
+
+    @ApiModelProperty(value = "idList")
+    @TableField(exist = false)
+    private List<Long> idList;
 }

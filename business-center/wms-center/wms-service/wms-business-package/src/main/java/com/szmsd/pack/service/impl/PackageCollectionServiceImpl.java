@@ -457,12 +457,17 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
 
     @Override
     public int updatePackageCollectionPlan(PackageCollection packageCollection) {
-        PackageCollection updatePackageCollection = new PackageCollection();
-        updatePackageCollection.setId(packageCollection.getId());
-        updatePackageCollection.setStatus(PackageCollectionConstants.Status.PLANNED.name());
-        updatePackageCollection.setCollectionDate(packageCollection.getCollectionDate());
-        updatePackageCollection.setHandleMode(packageCollection.getHandleMode());
-        return baseMapper.updateById(updatePackageCollection);
+        List<Long> idList = packageCollection.getIdList();
+        if (CollectionUtils.isNotEmpty(idList)) {
+            PackageCollection updatePackageCollection = new PackageCollection();
+            updatePackageCollection.setStatus(PackageCollectionConstants.Status.PLANNED.name());
+            updatePackageCollection.setCollectionDate(packageCollection.getCollectionDate());
+            updatePackageCollection.setHandleMode(packageCollection.getHandleMode());
+            LambdaUpdateWrapper<PackageCollection> updateWrapper = Wrappers.lambdaUpdate();
+            updateWrapper.eq(PackageCollection::getId, idList);
+            return baseMapper.update(updatePackageCollection, updateWrapper);
+        }
+        return 0;
     }
 
     @Override
