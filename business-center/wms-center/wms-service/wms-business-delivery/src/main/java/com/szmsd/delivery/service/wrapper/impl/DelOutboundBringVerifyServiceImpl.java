@@ -531,7 +531,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         } else {
             packageNumber = delOutbound.getOrderNo();
         }
-        packages.add(new Package(packageNumber, delOutbound.getRemark(),
+        packages.add(new Package(packageNumber, delOutbound.getRemark() + "|" + delOutbound.getOrderNo(),
                 new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                 weightInGram, packageItems));
         createShipmentOrderCommand.setPackages(packages);
