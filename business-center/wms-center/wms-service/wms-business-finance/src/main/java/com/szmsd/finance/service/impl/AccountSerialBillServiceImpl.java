@@ -110,7 +110,6 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         List<AccountSerialBill> noList = accountSerialBills.stream().filter(x -> StringUtils.isNotBlank(x.getNo())).collect(Collectors.toList());
 
         CompletableFuture<List<ListProcess>> listCompletableFuture = CompletableFuture.supplyAsync(() -> {
-            log.info("ruku--------------------------");
             List<AccountSerialBill> rk = noList.parallelStream().filter(x -> x.getNo().startsWith("RK")).distinct().collect(Collectors.toList());
             String rkNo = rk.stream().map(AccountSerialBill::getNo).distinct().collect(Collectors.joining(","));
 
@@ -133,13 +132,11 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                     }).filter(Objects::nonNull).collect(Collectors.toList());
                 }
             }
-            log.info("ruku--------------------------");
             return result;
         });
 
 
         CompletableFuture<List<ListProcess>> listCompletableFuture1 = CompletableFuture.supplyAsync(() -> {
-            log.info("CK--------------------------");
             List<AccountSerialBill> ck = noList.parallelStream().filter(x -> x.getNo().startsWith("CK")).distinct().collect(Collectors.toList());
             String ckNo = ck.stream().map(AccountSerialBill::getNo).distinct().collect(Collectors.joining(","));
             if (StringUtils.isNotBlank(ckNo)) {
@@ -149,7 +146,6 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                 if (page.getCode() == HttpStatus.SUCCESS) {
                     List<DelOutboundListVO> rows = page.getRows();
                     Map<String, DelOutboundListVO> collect = rows.stream().collect(Collectors.toMap(DelOutboundListVO::getOrderNo, x -> x, (x1, x2) -> x1));
-                    log.info("CK--------------------------");
                     return ck.stream().map(x -> {
                         DelOutboundListVO delOutboundListVO = collect.get(x.getNo());
                         if (Objects.nonNull(delOutboundListVO)) {
@@ -174,10 +170,12 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         queryResult.addAll(listProcesses);
         queryResult.addAll(listProcesses1);
         Map<String, ListProcess> queryResultMap = queryResult.stream().collect(Collectors.toMap(ListProcess::getNo, x -> x, (x1, x2) -> x1));
-        log.info("===========================================");
+        /*log.info("===========================================");
         log.info(JSONObject.toJSONString(queryResultMap));
-        log.info("===========================================");
-        List<String> positiveNumber = Arrays.asList("线下充值","退费","优惠");
+        log.info("===========================================");*/
+        List<String> positiveNumber = Arrays.asList("线下充值", "退费", "优惠");
+        // 退费下的 集合为负数
+        List<String> negativeNumber = Arrays.asList("补收", "增值消费");
         long count = accountSerialBills.parallelStream().peek(x -> {
             if (StringUtils.isNotBlank(x.getNo())) {
                 Optional.ofNullable(queryResultMap.get(x.getNo())).ifPresent(queryResultNo -> {
@@ -185,9 +183,16 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                     x.setOrderTime(queryResultNo.getOrderTime());
                 });
             }
-            if (!(StringUtils.isNotBlank(x.getChargeCategory()) && positiveNumber.contains(x.getChargeCategory()))) {
-                // 设置
-                Optional.ofNullable(x.getAmount()).ifPresent(amount -> x.setAmount(amount.negate()));
+            // 负数
+            String chargeCategory = x.getChargeCategory();
+            boolean b = StringUtils.isBlank(chargeCategory);
+            boolean b2 = ("退费".equals(chargeCategory) && negativeNumber.contains(x.getBusinessCategory()));
+            boolean b1 = !positiveNumber.contains(chargeCategory);
+
+            if (b || b1 || b2) {
+                Optional.ofNullable(x.getAmount()).ifPresent(amount -> x.setAmount(amount.abs().negate()));
+            } else {
+                x.setAmount(x.getAmount().abs());
             }
         }).count();
 
