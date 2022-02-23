@@ -88,7 +88,7 @@ public class ReturnExpressClientController extends BaseController {
     @PostMapping("/update")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "更新退件单信息 指定sku的处理方式")
-    public R update(@RequestBody ReturnExpressAddDTO expressUpdateDTO) {
+    public R update(@RequestBody ReturnExpressServiceAddDTO expressUpdateDTO) {
         return toOk(returnExpressService.updateExpressInfo(expressUpdateDTO));
     }
 
