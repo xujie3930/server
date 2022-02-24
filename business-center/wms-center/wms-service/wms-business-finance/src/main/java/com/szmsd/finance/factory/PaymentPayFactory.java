@@ -71,9 +71,12 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     AccountBalanceChange accountBalanceChange = balanceChange.get(0);
                     BigDecimal freeze = accountBalanceChange.getAmountChange();
                     // if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
-                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, (x, y) -> this.calculateBalance(x, y, freeze, dto))) {
+                    //先解冻 然后扣费
+                    this.calculateBalance(oldBalance, changeAmount, freeze, dto);
+                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, null)) {
                         return false;
                     }
+                    setHasFreeze(dto);
                 }
                 if (balanceChange.size() > 1) {
                     log.info("该单存在多个冻结额，操作失败。单号： {} 币种： {}", dto.getNo(), dto.getCurrencyCode());
@@ -167,7 +170,6 @@ public class PaymentPayFactory extends AbstractPayFactory {
             oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().subtract(difference)); // 可用余额扣除冻结金额不够扣的部分
             oldBalance.setTotalBalance(oldBalance.getTotalBalance().subtract(amount)); //总金额扣掉实际产生费用
         }*/
-        setHasFreeze(dto);
         return true;
     }
 
