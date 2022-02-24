@@ -194,4 +194,8 @@ public abstract class AbstractPayFactory {
 
     }
 
+    protected void rollbackFreeze(BalanceDTO oldBalance, BigDecimal freeze) {
+        oldBalance.setFreezeBalance(oldBalance.getFreezeBalance().subtract(freeze));
+        oldBalance.setCurrentBalance(oldBalance.getCurrentBalance().add(freeze));
+    }
 }
