@@ -72,8 +72,8 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     BigDecimal freeze = accountBalanceChange.getAmountChange();
                     // if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
                     //先解冻 然后扣费
-                    this.calculateBalance(oldBalance, changeAmount, freeze, dto);
-                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, null)) {
+                    this.rollbackFreeze(oldBalance, freeze);
+                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, (x, y) -> this.calculateBalance(x, y, BigDecimal.ZERO, dto))) {
                         return false;
                     }
                     setHasFreeze(dto);
