@@ -235,7 +235,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 throw new CommonException("400", "冻结费用信息失败，响应数据异常");
             }
             // 添加操作记录记录
-            this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.FREIGHT.name());
+            // this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.FREIGHT.name());
+            packageCollectionContextCancel.addUndoType(PackageCollectionOperationRecordConstants.Type.FREIGHT);
             // 创建承运商订单，获取面单
             CreateShipmentOrderCommand createShipmentOrderCommand = new CreateShipmentOrderCommand();
             createShipmentOrderCommand.setWarehouseCode(packageCollection.getWarehouseCode());
@@ -342,11 +343,12 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 throw new CommonException("400", exceptionMessage);
             }
             // 添加操作记录记录
-            this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.CARRIER.name());
+            // this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.CARRIER.name());
+            packageCollectionContextCancel.addUndoType(PackageCollectionOperationRecordConstants.Type.CARRIER);
             // 保存揽收单
-            int insert = baseMapper.insert(packageCollection);
+            boolean save = super.save(packageCollection);
             this.logger.info(">>>insertPackageCollection: 新增揽收单，耗时：{}", timer.intervalRestart());
-            if (insert > 0) {
+            if (save) {
                 // 保存明细
                 this.saveDetail(packageCollection.getId(), detailList);
                 this.logger.info(">>>insertPackageCollection: 新增揽收单明细，耗时：{}", timer.intervalRestart());
@@ -388,7 +390,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     throw new CommonException("500", msg);
                 }
                 // 添加操作记录记录
-                this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.OPERATING_FEE.name());
+                // this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.OPERATING_FEE.name());
+                packageCollectionContextCancel.addUndoType(PackageCollectionOperationRecordConstants.Type.OPERATING_FEE);
                 // 创建TrackingYee
                 this.createTrackingYee(packageCollection);
                 this.logger.info(">>>insertPackageCollection: 创建TY，耗时：{}", timer.intervalRestart());
@@ -399,7 +402,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     PackageCollectionContextEvent.publishEvent(packageCollectionContextCreateReceiver);
                 }
             }
-            return insert;
+            return 1;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // 通知保存揽收失败
