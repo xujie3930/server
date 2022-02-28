@@ -346,8 +346,9 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             // this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.CARRIER.name());
             packageCollectionContextCancel.addUndoType(PackageCollectionOperationRecordConstants.Type.CARRIER);
             // 保存揽收单
+            this.logger.info(">>>insertPackageCollection: 开始-新增揽收单，耗时：{}", timer.intervalRestart());
             boolean save = super.save(packageCollection);
-            this.logger.info(">>>insertPackageCollection: 新增揽收单，耗时：{}", timer.intervalRestart());
+            this.logger.info(">>>insertPackageCollection: 结束-新增揽收单，耗时：{}", timer.intervalRestart());
             if (save) {
                 // 保存明细
                 this.saveDetail(packageCollection.getId(), detailList);
