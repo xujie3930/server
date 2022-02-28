@@ -118,6 +118,6 @@ public class PackageAddressVO {
     private String postCode;
 
     public void setShowAddr() {
-        this.showAddr = String.join(" ", this.getProvinceNameZh(), this.getCityNameZh(), this.getDistrictNameZh(), this.getAddressZh());
+        this.showAddr = String.join(" ", this.getProvinceNameZh(), this.getCityNameZh(), this.getAddressZh());
     }
 }
