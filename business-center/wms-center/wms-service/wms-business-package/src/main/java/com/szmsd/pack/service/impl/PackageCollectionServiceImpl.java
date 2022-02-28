@@ -1,5 +1,7 @@
 package com.szmsd.pack.service.impl;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.TimeInterval;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -132,6 +134,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     @Transactional
     @Override
     public int insertPackageCollection(PackageCollection packageCollection) {
+        this.logger.info(">>>insertPackageCollection: 开始新增");
+        TimeInterval timer = DateUtil.timer();
         PackageCollectionContext packageCollectionContextCancel = new PackageCollectionContext(packageCollection, PackageCollectionContext.Type.CANCEL);
         try {
             List<PackageCollectionDetail> detailList = packageCollection.getDetailList();
@@ -145,8 +149,10 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             } else {
                 packageCollection.setStatus(PackageCollectionConstants.Status.NO_PLAN.name());
             }
+            this.logger.info(">>>insertPackageCollection: 初始化业务，耗时：{}", timer.intervalRestart());
             // PRC计算费用，冻结运费
             ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> responseObject = this.pricing(packageCollection);
+            this.logger.info(">>>insertPackageCollection: PRC计费，耗时：{}", timer.intervalRestart());
             if (null == responseObject) {
                 // 返回值是空的
                 throw new CommonException("400", "计算包裹费用失败，响应数据异常");
@@ -217,6 +223,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             cusFreezeBalanceDTO.setOrderType("Freight");
             // 调用冻结费用接口
             R<?> freezeBalanceR = this.rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
+            this.logger.info(">>>insertPackageCollection: 冻结费用，耗时：{}", timer.intervalRestart());
             if (null != freezeBalanceR) {
                 if (Constants.SUCCESS != freezeBalanceR.getCode()) {
                     // 异常信息
@@ -297,6 +304,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             createShipmentOrderCommand.setPackages(packages);
             createShipmentOrderCommand.setCarrier(new Carrier(packageCollection.getShipmentService()));
             ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
+            this.logger.info(">>>insertPackageCollection: 创建承运商物流订单，耗时：{}", timer.intervalRestart());
             if (null == responseObjectWrapper) {
                 throw new CommonException("400", "创建承运商物流订单失败，调用承运商系统无响应");
             }
@@ -337,9 +345,11 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.CARRIER.name());
             // 保存揽收单
             int insert = baseMapper.insert(packageCollection);
+            this.logger.info(">>>insertPackageCollection: 新增揽收单，耗时：{}", timer.intervalRestart());
             if (insert > 0) {
                 // 保存明细
                 this.saveDetail(packageCollection.getId(), detailList);
+                this.logger.info(">>>insertPackageCollection: 新增揽收单明细，耗时：{}", timer.intervalRestart());
                 // 冻结业务费
                 DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
                 List<DelOutboundOperationDetailVO> detailVOList = new ArrayList<>(detailList.size());
@@ -366,6 +376,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 delOutboundOperationVO.setDetails(detailVOList);
                 delOutboundOperationVO.setOrderType("PackageCollection");
                 R<?> r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
+                this.logger.info(">>>insertPackageCollection: 冻结操作费用，耗时：{}", timer.intervalRestart());
                 if (null == r) {
                     throw new CommonException("500", "冻结操作费用信息失败，响应数据异常");
                 }
@@ -380,6 +391,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 this.packageCollectionOperationRecordService.add(packageCollection.getCollectionNo(), PackageCollectionOperationRecordConstants.Type.OPERATING_FEE.name());
                 // 创建TrackingYee
                 this.createTrackingYee(packageCollection);
+                this.logger.info(">>>insertPackageCollection: 创建TY，耗时：{}", timer.intervalRestart());
                 // 判断有没有揽收计划
                 if (PackageCollectionConstants.COLLECTION_PLAN_YES.equals(packageCollection.getCollectionPlan())) {
                     // 通知创建入库单
@@ -396,6 +408,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 throw e;
             }
             throw new CommonException("500", e.getMessage());
+        } finally {
+            this.logger.info(">>>insertPackageCollection: 结束新增");
         }
     }
 
