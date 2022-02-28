@@ -66,10 +66,10 @@ public class ReturnExpressClientImportDelOutboundDto implements Serializable {
     @ExcelProperty(index = 13)
     @ApiModelProperty(value = "物流服务")
     private String shipmentRule;
+//    @ExcelProperty(index = 14)
+//    @ApiModelProperty(value = "refno")
+//    private String refNo;
     @ExcelProperty(index = 14)
-    @ApiModelProperty(value = "refno")
-    private String refNo;
-    @ExcelProperty(index = 15)
     @ApiModelProperty(value = "备注")
     private String remark;
 

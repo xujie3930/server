@@ -48,11 +48,7 @@ public class RefundPayFactory extends AbstractPayFactory {
             boolean success = false;
             if (lock.tryLock(time, unit)) {
                 log.info("【退费】RefundPayFactory--");
-                StopWatch stopWatch = new StopWatch("退费");
-                stopWatch.start("查询余额");
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
-                stopWatch.stop();
-                stopWatch.start("业务逻辑");
                 BigDecimal changeAmount = dto.getAmount();
                 if (changeAmount.compareTo(BigDecimal.ZERO) >= 0) {
                     // 充值
@@ -62,18 +58,13 @@ public class RefundPayFactory extends AbstractPayFactory {
                     // 退费强制扣钱
                     success = oldBalance.payAnyWay(changeAmount.negate());
                 }
-                stopWatch.stop();
                 if (!success) return false;
                 BalanceDTO result = oldBalance;
-                stopWatch.start("更新余额");
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result, true);
-                stopWatch.stop();
-                stopWatch.start("记录日志");
                 recordOpLogAsync(dto, result.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
                 setSerialBillLog(dto);
                 //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
-                log.info("处理退费完成:{}", stopWatch.prettyPrint());
                 return true;
             } else {
                 log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(dto));

@@ -730,6 +730,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     /**
      * 查询该用户待处理的订单 客户导入时查询用
+     *
      * @param expectedNo
      * @return
      */
@@ -1027,7 +1028,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         //主单信息
         delOutboundDto.setIsFirst("是".equals(getStrOrDefault(importReassignDTO.getIsFirstStr(), delOutboundDto.getIsFirst() ? "是" : "否")));
         delOutboundDto.setOldOrderNo(fromOrderNo);
-        delOutboundDto.setRefOrderNo(getStrOrDefault(importReassignDTO.getRefNo(), expectedNo));
+        delOutboundDto.setRefNo(fromOrderNo);
+        delOutboundDto.setRefOrderNo(expectedNo);
         delOutboundDto.setShipmentRule(getStrOrDefault(importReassignDTO.getShipmentRule(), delOutboundVO.getShipmentRule()));
         delOutboundDto.setRemark(getStrOrDefault(importReassignDTO.getShipmentRule(), ""));
         //地址信息
