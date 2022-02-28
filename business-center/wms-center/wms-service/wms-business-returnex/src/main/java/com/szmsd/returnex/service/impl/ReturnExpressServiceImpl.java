@@ -1034,7 +1034,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         DelOutboundAddressDto delOutboundAddressDto = Optional.ofNullable(delOutboundDto.getAddress()).orElse(new DelOutboundAddressDto());
         delOutboundDto.setAddress(delOutboundAddressDto);
         DelOutboundAddressDto addressDTO = delOutboundDto.getAddress();
-        DelOutboundAddressVO addressVO = delOutboundVO.getAddress();
+        DelOutboundAddressVO addressVO = Optional.ofNullable(delOutboundVO.getAddress()).orElse(new DelOutboundAddressVO());
         addressDTO.setConsignee(getStrOrDefault(importReassignDTO.getConsignee(), addressVO.getConsignee()));
         String countryName = getStrOrDefault(importReassignDTO.getCountry(), addressVO.getConsignee());
         addressDTO.setCountry(countryName);
