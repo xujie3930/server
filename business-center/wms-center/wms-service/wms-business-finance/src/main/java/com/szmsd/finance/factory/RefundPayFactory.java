@@ -47,8 +47,8 @@ public class RefundPayFactory extends AbstractPayFactory {
         try {
             boolean success = false;
             if (lock.tryLock(time, unit)) {
-                log.info("【退费】RefundPayFactory--");
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
+                log.info("【退费】RefundPayFactory-- {}",JSONObject.toJSONString(oldBalance));
                 BigDecimal changeAmount = dto.getAmount();
                 if (changeAmount.compareTo(BigDecimal.ZERO) >= 0) {
                     // 充值

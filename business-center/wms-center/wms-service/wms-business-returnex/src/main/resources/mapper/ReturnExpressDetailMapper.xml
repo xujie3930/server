@@ -52,6 +52,12 @@
         <include refid="Base_Column_List"/>
         from return_express_detail
         <where>
+            <if test="cm.idList != null and cm.idList.size() > 0 ">
+                and id IN
+                <foreach collection="cm.idList" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
             <if test="cm.returnSource != null and cm.returnSource != '' ">
                 and return_source = #{cm.returnSource}
             </if>

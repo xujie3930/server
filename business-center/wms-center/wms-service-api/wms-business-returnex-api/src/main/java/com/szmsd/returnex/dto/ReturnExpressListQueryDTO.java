@@ -29,7 +29,8 @@ public class ReturnExpressListQueryDTO extends PageDomain {
     @Min(value = 0, message = "数据异常")
     @ApiModelProperty(value = "主键ID")
     private Integer id;
-
+    @ApiModelProperty(value = "主键ID")
+    private List<Integer> idList;
     @ApiModelProperty(value = "创建日期 开始", example = "2021-03-01")
     private String createTimeStart;
 
