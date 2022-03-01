@@ -268,11 +268,11 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 processNoList = processNoList.stream().distinct().collect(Collectors.toList());
                 Map<Integer, List<String>> ck = processNoList.stream().collect(Collectors.groupingBy(x -> x.startsWith("CK") ? 1 : 0));
 
-                List<String> finalProcessNoList = processNoList;
+
                 ck.forEach((type, list) -> {
                     QueryFinishListDTO queryFinishListDTO = new QueryFinishListDTO();
                     queryFinishListDTO.setCusCode(cusCode);
-                    queryFinishListDTO.setNoList(finalProcessNoList);
+                    queryFinishListDTO.setNoList(list);
                     queryFinishListDTO.setType(type);
                     queryFinishListDTO.setPageNum(1);
                     queryFinishListDTO.setPageSize(999);
@@ -280,10 +280,10 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     TableDataInfo<QueryFinishListVO> queryFinishListVOTableDataInfo = this.queryFinishList(queryFinishListDTO);
                     log.info("校验单号返回：{}", JSONObject.toJSONString(queryFinishListVOTableDataInfo));
                     AssertUtil.isTrue(queryFinishListVOTableDataInfo.getCode() == HttpStatus.SUCCESS, "校验单号失败");
-                    if (queryFinishListVOTableDataInfo.getTotal() != finalProcessNoList.size()) {
+                    if (queryFinishListVOTableDataInfo.getTotal() != list.size()) {
                         List<String> collect1 = queryFinishListVOTableDataInfo.getRows().stream().map(QueryFinishListVO::getNo).collect(Collectors.toList());
-                        finalProcessNoList.removeAll(collect1);
-                        errorMsgBuilder.append("请检查用户【").append(cusCode).append("】的单号:").append(StringUtils.join(finalProcessNoList, ",")).append("是否已完成/不属于该用户;").append("\n");
+                        list.removeAll(collect1);
+                        errorMsgBuilder.append("请检查用户【").append(cusCode).append("】的单号:").append(StringUtils.join(list, ",")).append("是否已完成/不属于该用户;").append("\n");
                     }
                 });
             });
