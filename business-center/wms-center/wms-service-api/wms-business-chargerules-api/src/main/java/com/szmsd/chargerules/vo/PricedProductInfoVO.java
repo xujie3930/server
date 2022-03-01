@@ -158,6 +158,12 @@ public class PricedProductInfoVO {
     @ApiModelProperty(value = "白名单")
     private List<String> whiteList;
 
+    @ApiModelProperty(value = "供应商计价类型")
+    private String  supplierCalcType;
+
+    @ApiModelProperty(value = "供应商计价id（线路图id或者物流服务id）")
+    private String  supplierCalcId;
+
     @ApiModelProperty(value = "发货规则")
     private String shipmentRule;
 

@@ -1,5 +1,8 @@
 package com.szmsd.chargerules.controller;
 
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.TimedCache;
+import cn.hutool.core.date.DateUnit;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.chargerules.dto.CreateProductDTO;
@@ -9,6 +12,7 @@ import com.szmsd.chargerules.dto.UpdateProductDTO;
 import com.szmsd.chargerules.service.IPricedProductService;
 import com.szmsd.chargerules.vo.FreightCalculationVO;
 import com.szmsd.chargerules.vo.PricedProductInfoVO;
+import com.szmsd.chargerules.vo.PricedServiceListVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.HttpClientHelper;
@@ -21,6 +25,7 @@ import com.szmsd.http.vo.KeyValuePair;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -102,7 +107,7 @@ public class PricedProductController extends BaseController {
 
     @ApiOperation(value = "获取PRC系统已定义的物流运输商的基础信息列表")
     @GetMapping("/getCarriers")
-    public R getCarriers(){
+    public R getCarriers() {
         ValueOperations operations = redisTemplate.opsForValue();
         final String KEY = "PRC:CARRIERS";
         Object result = operations.get(KEY);
@@ -117,6 +122,27 @@ public class PricedProductController extends BaseController {
             JSONArray jsonArray = resultObj.getJSONArray("data");
             operations.set(KEY, jsonArray.toJSONString(), 1, TimeUnit.DAYS);
             return R.ok(jsonArray);
+        }
+        return R.failed("查询异常！");
+    }
+
+    private TimedCache<String, List<PricedServiceListVO>> CACHE_SERVICE = CacheUtil.newWeakCache(DateUnit.HOUR.getMillis() * 4);
+
+    @ApiOperation(value = "获取所有物流服务的API", notes = "展示ID Name 保存时展示id")
+    @GetMapping("/services/list")
+    public R<List<PricedServiceListVO>> queryServiceList() {
+        List<PricedServiceListVO> cacheService = CACHE_SERVICE.get("CACHE_SERVICE");
+        if (CollectionUtils.isNotEmpty(cacheService)) return R.ok(cacheService);
+
+        String requestUrl = "https://dmsrm-api.dsloco.com/api/services/list";
+        HttpResponseBody responseBody = HttpClientHelper.httpGet(requestUrl, null, new HashMap<String, String>());
+        String body = responseBody.getBody();
+        JSONObject resultObj = JSONObject.parseObject(body);
+        JSONArray resultJson = resultObj.getJSONArray("Data");
+        if (resultJson != null) {
+            List<PricedServiceListVO> data = JSONObject.parseArray(resultObj.getJSONArray("Data").toJSONString(), PricedServiceListVO.class);
+            CACHE_SERVICE.put("CACHE_SERVICE", data);
+            return R.ok(data);
         }
         return R.failed("查询异常！");
     }
