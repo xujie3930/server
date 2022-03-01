@@ -20,4 +20,8 @@ public class PricedServiceListVO {
     private String id;
     @ApiModelProperty("name")
     private String name;
+    @ApiModelProperty("supplierId")
+    private String supplierId;
+    @ApiModelProperty("externalSupplier")
+    private String externalSupplier;
 }
