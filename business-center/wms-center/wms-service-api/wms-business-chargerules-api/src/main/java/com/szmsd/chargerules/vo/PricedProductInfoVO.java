@@ -202,7 +202,7 @@ public class PricedProductInfoVO {
             list.parallelStream()
                     .filter(x -> x.getId().equals(supplierCalcId))
                     .findAny()
-                    .ifPresent(x -> this.setSupplierCalcTypeName(x.getName()));
+                    .ifPresent(x -> this.setSupplierCalcIdName(x.getName()));
         }
 
         String supplierCalcType = this.getSupplierCalcType();

@@ -90,7 +90,7 @@ public class PricedProductController extends BaseController {
         PricedProductInfoVO pricedProductInfoVO = iPricedProductService.getInfo(productCode);
         String type = pricedProductInfoVO.getSupplierCalcType();
         List<PricedServiceListVO> list = new ArrayList<>();
-        if ("005001".equals(type)) {
+        if ("LogisticsService".equals(type)) {
             //供应商成本价格
             list = this.queryServiceList().getData();
         } else {
