@@ -954,11 +954,12 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             infoByNo.setProcessType(reassignCode);
         } else if ("销毁".equals(processTypeStr)) {
             infoByNo.setProcessType(destroyCode);
+
+            ReturnExpressClientImportDelOutboundDto importReassignDTO = returnExpressClientImportBO.getReassignDTO();
+            if (importReassignDTO == null) return "预报单：" + expectedNo + "重派信息异常或不存在";
         } else {
             return "预报单：" + expectedNo + "处理方式[" + processTypeStr + "]不存在";
         }
-        ReturnExpressClientImportDelOutboundDto importReassignDTO = returnExpressClientImportBO.getReassignDTO();
-        if (importReassignDTO == null) return "预报单：" + expectedNo + "重派信息异常或不存在";
         String errorMsg = "";
         if ("重派".equals(processTypeStr)) {
             errorMsg = reassign(returnExpressClientImportBO, infoByNo);

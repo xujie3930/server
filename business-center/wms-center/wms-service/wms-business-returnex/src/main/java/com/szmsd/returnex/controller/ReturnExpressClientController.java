@@ -104,7 +104,7 @@ public class ReturnExpressClientController extends BaseController {
     @PostMapping("/export")
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "导出")
-    public void export(HttpServletResponse httpServerResponse, @Validated ReturnExpressListQueryDTO queryDto) {
+    public void export(HttpServletResponse httpServerResponse, @RequestBody @Validated ReturnExpressListQueryDTO queryDto) {
         List<ReturnExpressListVO> list = returnExpressService.selectClientReturnOrderList(queryDto);
         HandlerContext<List<ReturnExpressListVO>> objectHandlerContext = new HandlerContext<>(list);
         objectHandlerContext.handlerValue();
