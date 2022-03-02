@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,15 @@ public class PricedProductController extends BaseController {
     @ApiOperation(value = "根据产品代码获取计价产品信息")
     public R<PricedProductInfoVO> info(@PathVariable("productCode") String productCode) {
         PricedProductInfoVO pricedProductInfoVO = iPricedProductService.getInfo(productCode);
+        String type = pricedProductInfoVO.getSupplierCalcType();
+        List<PricedServiceListVO> list = new ArrayList<>();
+        if ("005001".equals(type)) {
+            //供应商成本价格
+            list = this.queryServiceList().getData();
+        } else {
+            list = this.queryRoutesList().getData();
+        }
+        pricedProductInfoVO.processVO(list);
         return R.ok(pricedProductInfoVO);
     }
 
@@ -94,6 +104,7 @@ public class PricedProductController extends BaseController {
     @PutMapping("/update")
     @ApiOperation(value = "修改报价产品信息")
     public R update(@RequestBody UpdateProductDTO updateProductDTO) {
+        updateProductDTO.processDTO();
         iPricedProductService.update(updateProductDTO);
         return R.ok();
     }

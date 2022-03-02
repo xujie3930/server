@@ -1,12 +1,17 @@
 package com.szmsd.chargerules.vo;
 
+import com.szmsd.common.core.utils.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @Accessors(chain = true)
@@ -159,10 +164,14 @@ public class PricedProductInfoVO {
     private List<String> whiteList;
 
     @ApiModelProperty(value = "供应商计价类型")
-    private String  supplierCalcType;
+    private String supplierCalcType;
+    @ApiModelProperty(value = "供应商计价类型", notes = "不存在,展示转换")
+    private String supplierCalcTypeName;
 
     @ApiModelProperty(value = "供应商计价id（线路图id或者物流服务id）")
-    private String  supplierCalcId;
+    private String supplierCalcId;
+    @ApiModelProperty(value = "供应商计价id（线路图id或者物流服务id）", notes = "不存在,展示转换")
+    private String supplierCalcIdName;
 
     @ApiModelProperty(value = "发货规则")
     private String shipmentRule;
@@ -173,4 +182,59 @@ public class PricedProductInfoVO {
     @ApiModelProperty(value = "物流商code")
     private String logisticsProviderCode;
 
+    public void processDTO() {
+        //参数转换
+        String supplierCalcId = this.getSupplierCalcId();
+        if (StringUtils.isNotBlank(supplierCalcId)) {
+
+        }
+
+        String supplierCalcType = this.getSupplierCalcType();
+        if (StringUtils.isNotBlank(supplierCalcType)) {
+            this.setSupplierCalcType(SupplierCalcTypeEnum.convertToParam(supplierCalcType));
+        }
+    }
+
+    public void processVO(List<PricedServiceListVO> list) {
+        //参数转换
+        String supplierCalcId = this.getSupplierCalcId();
+        if (StringUtils.isNotBlank(supplierCalcId)) {
+            list.parallelStream()
+                    .filter(x -> x.getId().equals(supplierCalcId))
+                    .findAny()
+                    .ifPresent(x -> this.setSupplierCalcTypeName(x.getName()));
+        }
+
+        String supplierCalcType = this.getSupplierCalcType();
+        if (StringUtils.isNotBlank(supplierCalcType)) {
+            this.setSupplierCalcType(SupplierCalcTypeEnum.convertToSubCode(supplierCalcType));
+        }
+    }
+}
+
+@Getter
+@AllArgsConstructor
+enum SupplierCalcTypeEnum {
+
+    /**
+     * 主子类别 -> PRC 枚举参数
+     * 供应商成本价格 -> 物流服务
+     */
+    LOGISTICS_SERVICE("005001", "LogisticsService"),
+
+    /**
+     * 供应商成本路由 -> 物流线路图
+     */
+    LOGISTICS_ROUTE("005002", "LogisticsRoute");
+
+    private final String subCode;
+    private final String param;
+
+    public static String convertToParam(String subCode) {
+        return Arrays.stream(SupplierCalcTypeEnum.values()).filter(x -> x.getSubCode().equals(subCode)).findAny().orElse(LOGISTICS_SERVICE).getParam();
+    }
+
+    public static String convertToSubCode(String param) {
+        return Arrays.stream(SupplierCalcTypeEnum.values()).filter(x -> x.getParam().equals(param)).findAny().orElse(LOGISTICS_SERVICE).getSubCode();
+    }
 }

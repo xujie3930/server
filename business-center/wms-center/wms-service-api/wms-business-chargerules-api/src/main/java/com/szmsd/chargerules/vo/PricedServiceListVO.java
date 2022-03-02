@@ -14,14 +14,15 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@ApiModel( description = "prc服务列表")
+@ApiModel(description = "prc服务列表")
 public class PricedServiceListVO {
     @ApiModelProperty("id")
     private String id;
     @ApiModelProperty("name")
     private String name;
-    @ApiModelProperty("supplierId")
+
+    @ApiModelProperty(value = "supplierId", notes = "展示用")
     private String supplierId;
-    @ApiModelProperty("externalSupplier")
+    @ApiModelProperty(value = "externalSupplier", notes = "展示用")
     private String externalSupplier;
 }
