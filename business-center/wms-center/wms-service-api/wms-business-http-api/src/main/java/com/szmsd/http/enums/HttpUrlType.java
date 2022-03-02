@@ -16,6 +16,7 @@ public enum HttpUrlType {
     CARRIER_SERVICE("carrierService"),
     PRODUCT_REMOTE_AREA("productRemoteArea"),
     THIRD_PAYMENT("thirdPayment"),
+    SRM("srm"),
     ;
     private final String key;
 }

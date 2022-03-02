@@ -13,6 +13,7 @@ public class UrlGroupConfig {
     private SaaSCarrierServiceAdminUrlConfig carrierService;
     private SaaSProductRemoteAreaUrlConfig productRemoteArea;
     private ThirdPaymentUrlConfig thirdPayment;
+    private SrmUrlConfig srm;
 
     public WmsUrlConfig getWms() {
         return wms;
@@ -52,5 +53,13 @@ public class UrlGroupConfig {
 
     public void setThirdPayment(ThirdPaymentUrlConfig thirdPayment) {
         this.thirdPayment = thirdPayment;
+    }
+
+    public SrmUrlConfig getSrm() {
+        return srm;
+    }
+
+    public void setSrm(SrmUrlConfig srm) {
+        this.srm = srm;
     }
 }

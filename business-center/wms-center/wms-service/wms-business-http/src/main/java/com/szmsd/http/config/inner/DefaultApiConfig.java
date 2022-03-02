@@ -13,6 +13,7 @@ public class DefaultApiConfig {
     private SaaSCarrierServiceAdminApiConfig carrierService;
     private SaaSProductRemoteAreaApiConfig productRemoteArea;
     private ThirdPaymentApiConfig thirdPayment;
+    private SrmApiConfig srm;
 
     public WmsApiConfig getWms() {
         return wms;
@@ -52,5 +53,13 @@ public class DefaultApiConfig {
 
     public void setThirdPayment(ThirdPaymentApiConfig thirdPayment) {
         this.thirdPayment = thirdPayment;
+    }
+
+    public SrmApiConfig getSrm() {
+        return srm;
+    }
+
+    public void setSrm(SrmApiConfig srm) {
+        this.srm = srm;
     }
 }
