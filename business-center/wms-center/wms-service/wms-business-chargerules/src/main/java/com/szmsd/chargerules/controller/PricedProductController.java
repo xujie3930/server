@@ -128,7 +128,7 @@ public class PricedProductController extends BaseController {
 
     private TimedCache<String, List<PricedServiceListVO>> CACHE_SERVICE = CacheUtil.newWeakCache(DateUnit.HOUR.getMillis() * 4);
 
-    @ApiOperation(value = "获取所有物流服务的API", notes = "展示ID Name 保存时展示id")
+    @ApiOperation(value = "获取所有物流服务的API", notes = "展示ID Name 保存时展示id 成本价格调用改接口")
     @GetMapping("/services/list")
     public R<List<PricedServiceListVO>> queryServiceList() {
         List<PricedServiceListVO> cacheService = CACHE_SERVICE.get("CACHE_SERVICE");
@@ -140,8 +140,27 @@ public class PricedProductController extends BaseController {
         JSONObject resultObj = JSONObject.parseObject(body);
         JSONArray resultJson = resultObj.getJSONArray("Data");
         if (resultJson != null) {
-            List<PricedServiceListVO> data = JSONObject.parseArray(resultObj.getJSONArray("Data").toJSONString(), PricedServiceListVO.class);
+            List<PricedServiceListVO> data = JSONObject.parseArray(resultJson.toJSONString(), PricedServiceListVO.class);
             CACHE_SERVICE.put("CACHE_SERVICE", data);
+            return R.ok(data);
+        }
+        return R.failed("查询异常！");
+    }
+
+    @ApiOperation(value = "获取路由数据", notes = "展示ID Name 保存时展示id 成本路由调用该接口")
+    @GetMapping("/routes")
+    public R<List<PricedServiceListVO>> queryRoutesList() {
+        List<PricedServiceListVO> cacheService = CACHE_SERVICE.get("CACHE_ROUTES");
+        if (CollectionUtils.isNotEmpty(cacheService)) return R.ok(cacheService);
+
+        String requestUrl = "https://dmsrm-api.dsloco.com/api/routes";
+        HttpResponseBody responseBody = HttpClientHelper.httpGet(requestUrl, null, new HashMap<String, String>());
+        String body = responseBody.getBody();
+        JSONObject resultObj = JSONObject.parseObject(body);
+        JSONArray resultJson = resultObj.getJSONArray("Data");
+        if (resultJson != null) {
+            List<PricedServiceListVO> data = JSONObject.parseArray(resultJson.toJSONString(), PricedServiceListVO.class);
+            CACHE_SERVICE.put("CACHE_ROUTES", data);
             return R.ok(data);
         }
         return R.failed("查询异常！");
