@@ -1029,7 +1029,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         //主单信息
         delOutboundDto.setIsFirst("是".equals(getStrOrDefault(importReassignDTO.getIsFirstStr(), delOutboundDto.getIsFirst() ? "是" : "否")));
         delOutboundDto.setOldOrderNo(fromOrderNo);
-        delOutboundDto.setRefNo(fromOrderNo);
+        // refno = wms 处理号 = 平台端的退件单号
+        delOutboundDto.setRefNo(infoByNo.getReturnNo());
         delOutboundDto.setRefOrderNo(expectedNo);
         delOutboundDto.setShipmentRule(getStrOrDefault(importReassignDTO.getShipmentRule(), delOutboundVO.getShipmentRule()));
         delOutboundDto.setRemark(getStrOrDefault(importReassignDTO.getShipmentRule(), ""));
