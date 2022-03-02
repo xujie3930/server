@@ -849,9 +849,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         ) {
             StopWatch importWatch = new StopWatch("导入解析");
             importWatch.start("解析");
-            CompletableFuture<List<ReturnExpressClientImportBaseDTO>> baseInfoListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream, ReturnExpressClientImportBaseDTO.class, new SyncReadListener()).sheet(0).doReadSync());
+            CompletableFuture<List<ReturnExpressClientImportBaseDTO>> baseInfoListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream, ReturnExpressClientImportBaseDTO.class, new SyncReadListener()).headRowNumber(2).sheet(0).doReadSync());
 //            CompletableFuture<List<ReturnExpressClientImportSkuDTO>> skuListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream1, ReturnExpressClientImportSkuDTO.class, new SyncReadListener()).sheet(1).doReadSync());
-            CompletableFuture<List<ReturnExpressClientImportDelOutboundDto>> reassignListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream2, ReturnExpressClientImportDelOutboundDto.class, new SyncReadListener()).headRowNumber(2).sheet(2).doReadSync());
+            CompletableFuture<List<ReturnExpressClientImportDelOutboundDto>> reassignListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream2, ReturnExpressClientImportDelOutboundDto.class, new SyncReadListener()).headRowNumber(2).sheet(1).doReadSync());
             CompletableFuture.allOf(reassignListFuture,/* skuListFuture,*/ baseInfoListFuture).get();
             importWatch.stop();
             importWatch.start("获取转换map");
