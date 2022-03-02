@@ -273,7 +273,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 BigDecimal declareValue = BigDecimal.ZERO;
-                Long qty = 0L;
                 for (DelOutboundDetail detail : detailList) {
                     BigDecimal productDeclaredValue;
                     if (null != detail.getDeclaredValue()) {
@@ -281,14 +280,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     } else {
                         productDeclaredValue = BigDecimal.ZERO;
                     }
-                    if (null != detail.getQty()) {
-                        qty += detail.getQty();
-                    }
                     declareValue = declareValue.add(productDeclaredValue);
                 }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                        , Math.toIntExact(qty), delOutbound.getOrderNo(), declareValue, ""));
+                        , 1, delOutbound.getOrderNo(), declareValue, ""));
             }
         } else {
             if (PricingEnum.SKU.equals(pricingEnum)) {
