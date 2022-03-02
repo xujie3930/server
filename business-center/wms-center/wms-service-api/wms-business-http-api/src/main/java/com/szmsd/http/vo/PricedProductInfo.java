@@ -235,6 +235,12 @@ public class PricedProductInfo {
     @ApiModelProperty(value = "AvaibleSheets")
     private String avaibleSheets;
 
+    @ApiModelProperty(value = "供应商计价类型")
+    private String  supplierCalcType;
+
+    @ApiModelProperty(value = "供应商计价id（线路图id或者物流服务id）")
+    private String  supplierCalcId;
+
     @ApiModelProperty(value = "发货规则")
     private String shipmentRule;
 
