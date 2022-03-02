@@ -12,7 +12,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(contextId = "FeignClient.HtpRmiFeignService", name = BusinessHttpInterface.SERVICE_NAME, fallbackFactory = HtpSrmFeignFallback.class)
+@FeignClient(contextId = "FeignClient.HtpSrmFeignService", name = BusinessHttpInterface.SERVICE_NAME, fallbackFactory = HtpSrmFeignFallback.class)
 public interface HtpSrmFeignService {
 
     @PostMapping("/api/srm/http/packageCost/batch")
