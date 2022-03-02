@@ -36,15 +36,12 @@ public class ReturnExpressClientListVO implements Serializable {
     @ApiModelProperty(value = "WMS处理单号 退件单号")
     private String returnNo;
     @Excel(name = "类型")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
     @Excel(name = "退件目标仓库")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "目的仓库名称", hidden = true)
     private String warehouseCodeStr;
     @Excel(name = "退件类型")
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     @ApiModelProperty(value = "退件类型", hidden = true)
     private String returnTypeStr;
     @Excel(name = "申请处理方式")
@@ -58,7 +55,7 @@ public class ReturnExpressClientListVO implements Serializable {
     @Excel(name = "完成时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "完成时间")
     private LocalDateTime finishTime;
-    @Excel(name = "是否逾期")
+    @Excel(name = "是否逾期", readConverterExp = "0=否,1=是")
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.YN)
     @ApiModelProperty(value = "是否逾期", hidden = true)
     private String overdueStr;

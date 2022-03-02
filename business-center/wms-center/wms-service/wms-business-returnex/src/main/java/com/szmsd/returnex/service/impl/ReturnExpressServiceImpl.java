@@ -874,7 +874,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 ReturnExpressClientImportBO returnExpressClientImportBO = new ReturnExpressClientImportBO();
                 returnExpressClientImportBO.setExpectedNo(expectedNo);
                 returnExpressClientImportBO.setBaseDTO(baseInfo);
-                returnExpressClientImportBO.setSkuDTO(skuListMap.get(expectedNo));
+                returnExpressClientImportBO.setSkuDTO(Optional.ofNullable(skuListMap.get(expectedNo)).orElse(new ArrayList<>()));
                 returnExpressClientImportBO.setReassignDTO(reassignListMap.get(expectedNo));
                 importBOList.add(returnExpressClientImportBO);
             });
@@ -952,11 +952,10 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         infoByNo.setProcessTypeStr(processTypeStr);
         if ("重派".equals(processTypeStr)) {
             infoByNo.setProcessType(reassignCode);
-        } else if ("销毁".equals(processTypeStr)) {
-            infoByNo.setProcessType(destroyCode);
-
             ReturnExpressClientImportDelOutboundDto importReassignDTO = returnExpressClientImportBO.getReassignDTO();
             if (importReassignDTO == null) return "预报单：" + expectedNo + "重派信息异常或不存在";
+        } else if ("销毁".equals(processTypeStr)) {
+            infoByNo.setProcessType(destroyCode);
         } else {
             return "预报单：" + expectedNo + "处理方式[" + processTypeStr + "]不存在";
         }

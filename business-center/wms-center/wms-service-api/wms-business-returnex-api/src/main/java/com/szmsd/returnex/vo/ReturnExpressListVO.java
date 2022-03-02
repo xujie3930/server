@@ -112,21 +112,17 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "修改人")
     private String updateBy;
 
-
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "070", nameField = "returnTypeStr", cp = BasSubCodeCommonParameter.class)
     @ApiModelProperty(value = "退件单类型[ 自有库存退件 转运单退件 外部渠道退件]")
     private String returnType;
     //@FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.RETURN_EXPRESS)
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
+//    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     @ApiModelProperty(value = "退件单类型", hidden = true)
     private String returnTypeStr;
 
     public void setReturnType(String returnType) {
         this.returnType = returnType;
         this.returnTypeStr = returnType;
-    }
-
-    public void setReturnTypeStr(String returnTypeStr) {
-        //empty
     }
 
     @ApiModelProperty(value = "实际处理方式编码", hidden = true)
@@ -140,6 +136,7 @@ public class ReturnExpressListVO implements Serializable {
 
     @ApiModelProperty(value = "是否逾期")
     private String overdue;
+
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.YN)
     @ApiModelProperty(value = "是否逾期", hidden = true)
     private String overdueStr;
@@ -149,13 +146,10 @@ public class ReturnExpressListVO implements Serializable {
         this.overdueStr = overdue;
     }
 
-    public void setOverdueStr(String overdueStr) {
-        //empty
-    }
-
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "068", nameField = "returnSourceStr", cp = BasSubCodeCommonParameter.class)
     @ApiModelProperty(value = "类型[默认：1：退件预报，2：VMS通知退件]")
     private String returnSource;
-    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
+//    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     //@FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.RETURN_EXPRESS)
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
@@ -164,11 +158,6 @@ public class ReturnExpressListVO implements Serializable {
         this.returnSource = returnSource;
         this.returnSourceStr = returnSource;
     }
-
-    public void setReturnSourceStr(String returnSourceStr) {
-        //empty
-    }
-
 
     @ApiModelProperty(value = "目的仓库名称")
     private String warehouseCode;
@@ -179,10 +168,6 @@ public class ReturnExpressListVO implements Serializable {
     public void setWarehouseCode(String warehouseCode) {
         this.warehouseCode = warehouseCode;
         this.warehouseCodeStr = warehouseCode;
-    }
-
-    public void setWarehouseCodeStr(String warehouseCodeStr) {
-        //empty
     }
 
 
