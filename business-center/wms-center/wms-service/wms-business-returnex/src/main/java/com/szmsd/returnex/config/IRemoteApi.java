@@ -1,6 +1,7 @@
 package com.szmsd.returnex.config;
 
 import com.szmsd.bas.api.domain.BasSub;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 
 import java.util.List;
 
@@ -41,5 +42,5 @@ public interface IRemoteApi {
      * @param countryName 国家
      * @return 国家code
      */
-    String getCountryCode(String countryName);
+    BasRegionSelectListVO getCountryCode(String countryName);
 }

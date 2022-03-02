@@ -205,27 +205,26 @@ public class RemoteApiImpl implements IRemoteApi {
     /**
      * 获取国家code
      *
-     * @param countryName 国家
+     * @param countryName 国家 简码/国家code/英文
      * @return 国家code
      */
     @Override
-    public String getCountryCode(String countryName) {
-        if (StringUtils.isBlank(countryName)) return "";
-        BasRegionSelectListVO countryInfo = countryCache.get(countryName);
-        if (countryInfo == null) {
+    public BasRegionSelectListVO getCountryCode(String countryName) {
+        if (StringUtils.isBlank(countryName)) return new BasRegionSelectListVO();
+        if (countryCache.isEmpty()) {
+            // 查询所有国家
             BasRegionSelectListQueryDto basRegionSelectListQueryDto = new BasRegionSelectListQueryDto();
-            basRegionSelectListQueryDto.setName(countryName);
             R<List<BasRegionSelectListVO>> countryByNameR = basRegionFeignService.countryList(basRegionSelectListQueryDto);
-
-            if ((countryByNameR == null || countryByNameR.getCode() != HttpStatus.SUCCESS || CollectionUtils.isEmpty(countryByNameR.getData()))) {
-                countryInfo = new BasRegionSelectListVO();
-                countryCache.put(countryName, null);
-            } else {
-                BasRegionSelectListVO basRegionSelectListVO = countryByNameR.getData().get(0);
-                countryCache.put(countryName, basRegionSelectListVO);
-                countryInfo = basRegionSelectListVO;
-            }
+            List<BasRegionSelectListVO> resultList = R.getDataAndException(countryByNameR);
+            resultList.forEach(x -> {
+                String enName = x.getEnName();
+                String name = x.getName();
+                String addressCode = x.getAddressCode();
+                countryCache.put(enName, x);
+                countryCache.put(name, x);
+                countryCache.put(addressCode, x);
+            });
         }
-        return countryInfo.getAddressCode();
+        return Optional.ofNullable(countryCache.get(countryName)).orElseThrow(() -> new RuntimeException("未找到" + countryName + "关联的国家"));
     }
 }
