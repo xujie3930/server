@@ -113,6 +113,9 @@ abstract class AbstractRequest extends BaseRequest {
             case PRODUCT_REMOTE_AREA:
                 urlConfig = urlGroupConfig.getProductRemoteArea();
                 break;
+            case SRM:
+                urlConfig = urlGroupConfig.getSrm();
+                break;
         }
         return urlConfig;
     }
@@ -136,6 +139,8 @@ abstract class AbstractRequest extends BaseRequest {
                     return defaultApiConfig.getCarrierService();
                 case PRODUCT_REMOTE_AREA:
                     return defaultApiConfig.getProductRemoteArea();
+                case SRM:
+                    return defaultApiConfig.getSrm();
             }
         }
         return apiConfig;
