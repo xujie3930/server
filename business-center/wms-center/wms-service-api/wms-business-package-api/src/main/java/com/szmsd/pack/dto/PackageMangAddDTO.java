@@ -60,7 +60,6 @@ public class PackageMangAddDTO implements BOConvert {
     @Excel(name = "联系电话")
     private String linkPhone;
 
-    @NotBlank(message = "省名称不能为空")
     @ApiModelProperty(value = "省 - 名称", required = true)
     @Excel(name = "省 - 名称")
     private String provinceNameZh;
@@ -73,7 +72,6 @@ public class PackageMangAddDTO implements BOConvert {
     @Excel(name = "省 - 英文名")
     private String provinceNameEn;
 
-    @NotBlank(message = "市名称不能为空")
     @ApiModelProperty(value = "市 - 名称", required = true)
     @Excel(name = "市 - 名称")
     private String cityNameZh;
@@ -86,7 +84,6 @@ public class PackageMangAddDTO implements BOConvert {
     @Excel(name = "市 - 英文名")
     private String cityNameEn;
 
-    @NotBlank(message = "区名称不能为空")
     @ApiModelProperty(value = "区 - 名称", required = true)
     @Excel(name = "区 - 名称")
     private String districtNameZh;
