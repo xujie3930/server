@@ -993,7 +993,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceiptDetailDTO.setSku(detail.getSku());
             inboundReceiptDetailDTO.setSkuName(detail.getSku());
             inboundReceiptDetailDTO.setDeclareQty(detail.getQty());
-            inboundReceiptDetailDTO.setPutQty(detail.getQty());
+            inboundReceiptDetailDTO.setPutQty(0);
             inboundReceiptDetailDTO.setOriginCode(detail.getSku());
             inboundReceiptDetailDTO.setRemark("");
             inboundReceiptDetailDTO.setEditionImage(new AttachmentFileDTO());
