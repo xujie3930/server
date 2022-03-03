@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.szmsd.pack.api.feign.PackageCollectionFeignService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,6 +56,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
     @Autowired
     private IHtpPricedProductClientService htpPricedProductClientService;
+
+    @Autowired
+    private PackageCollectionFeignService packageCollectionFeignService;
 
     /**
      * 查询模块
@@ -230,15 +234,23 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         });
         if (CollectionUtils.isNotEmpty(trackList)) {
             this.saveBatch(trackList);
-            DelOutbound delOutbound = delOutboundMapper.selectOne(new LambdaQueryWrapper<DelOutbound>().eq(DelOutbound::getOrderNo, trackingYeeTraceDto.getOrderNo()).last("limit 1"));
-            if (delOutbound != null) {
-                List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getNo).reversed()).collect(Collectors.toList());
-                DelTrack delTrack = delTrackList.get(0);
-                DelOutbound updateDelOutbound = new DelOutbound();
-                updateDelOutbound.setId(delOutbound.getId());
-                updateDelOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
-                updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
-                delOutboundMapper.updateById(updateDelOutbound);
+            if (StringUtils.isBlank(trackingYeeTraceDto.getOrderNo())) {
+                return;
+            }
+            // 如果LS开头的单号则为揽收单 修改揽收单的状态
+            if (trackingYeeTraceDto.getOrderNo().startsWith("LS")) {
+                packageCollectionFeignService.updateCollecting(trackingYeeTraceDto.getOrderNo());
+            }else {
+                DelOutbound delOutbound = delOutboundMapper.selectOne(new LambdaQueryWrapper<DelOutbound>().eq(DelOutbound::getOrderNo, trackingYeeTraceDto.getOrderNo()).last("limit 1"));
+                if (delOutbound != null) {
+                    List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getNo).reversed()).collect(Collectors.toList());
+                    DelTrack delTrack = delTrackList.get(0);
+                    DelOutbound updateDelOutbound = new DelOutbound();
+                    updateDelOutbound.setId(delOutbound.getId());
+                    updateDelOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
+                    updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
+                    delOutboundMapper.updateById(updateDelOutbound);
+                }
             }
         }
     }
