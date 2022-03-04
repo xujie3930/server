@@ -1033,7 +1033,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         delOutboundDto.setRefNo(infoByNo.getReturnNo());
         delOutboundDto.setRefOrderNo(expectedNo);
         delOutboundDto.setShipmentRule(getStrOrDefault(importReassignDTO.getShipmentRule(), delOutboundVO.getShipmentRule()));
-        delOutboundDto.setRemark(getStrOrDefault(importReassignDTO.getShipmentRule(), ""));
+        delOutboundDto.setRemark(getStrOrDefault(importReassignDTO.getRemark(), delOutboundVO.getRemark()));
         //地址信息
         DelOutboundAddressDto delOutboundAddressDto = Optional.ofNullable(delOutboundDto.getAddress()).orElse(new DelOutboundAddressDto());
         delOutboundDto.setAddress(delOutboundAddressDto);
