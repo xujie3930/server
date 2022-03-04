@@ -315,8 +315,8 @@ public class TrackingYeeTraceDto {
 
         private String type;
         private String dateTime;
-        private Object utcTime;
-        private Object utcOfferset;
+        private String utcTime;
+        private String utcOfferset;
     }
 
     @NoArgsConstructor

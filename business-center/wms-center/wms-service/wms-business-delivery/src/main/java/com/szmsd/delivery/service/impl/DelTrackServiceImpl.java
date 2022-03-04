@@ -22,6 +22,7 @@ import com.szmsd.delivery.service.IDelTrackService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.PricedProductInServiceCriteria;
 import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.pack.constant.PackageConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -185,10 +186,20 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             if (logisticsTracking != null && logisticsTracking.getTrackingNo().equalsIgnoreCase(trackingYeeTraceDto.getTrackingNo())) {
                 List<TrackingYeeTraceDto.ItemsDto> trackingItems = logisticsTracking.getItems();
                 trackingItems.forEach(item -> {
+                    // 获取时间
+                    Date trackingTime = null;
+                    TrackingYeeTraceDto.TrackingTimeDto trackingTimeDto = item.getTrackingTime();
+                    if (trackingTimeDto != null) {
+                        String trackingTimeStr = trackingTimeDto.getUtcTime();
+                        if (StringUtils.isNotBlank(trackingTimeStr)) {
+                            trackingTime = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeStr.replace("T", " ").replace("Z", ""));
+                        }
+                    }
+
                     // 校验路由信息存不存在
                     Integer trackCount = this.count(new LambdaQueryWrapper<DelTrack>().eq(DelTrack::getOrderNo, trackingYeeTraceDto.getOrderNo())
                             .eq(DelTrack::getTrackingNo, trackingYeeTraceDto.getTrackingNo())
-                            .eq(DelTrack::getNo, item.getNo()).last("limit 1"));
+                            .eq(DelTrack::getTrackingTime, trackingTime));
                     if (trackCount == 0) {
                         DelTrack delTrack = new DelTrack();
                         delTrack.setTrackingNo(trackingYeeTraceDto.getTrackingNo());
@@ -198,14 +209,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         delTrack.setTrackingStatus(logisticsTracking.getStatus());
                         delTrack.setNo(item.getNo());
                         delTrack.setDescription(item.getDescription());
-                        // 获取时间
-                        TrackingYeeTraceDto.TrackingTimeDto trackingTime = item.getTrackingTime();
-                        if (trackingTime != null) {
-                            String trackingTimeStr = trackingTime.getDateTime();
-                            if (StringUtils.isNotBlank(trackingTimeStr)) {
-                                delTrack.setTrackingTime(DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeStr.replace("T"," ").replace("+", " ")));
-                            }
-                        }
+                        delTrack.setTrackingTime(trackingTime);
                         delTrack.setActionCode(item.getActionCode());
                         // 获取地址
                         TrackingYeeTraceDto.LocationDto itemLocation = item.getLocation();
@@ -238,7 +242,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                 return;
             }
             // 如果LS开头的单号则为揽收单 修改揽收单的状态
-            if (trackingYeeTraceDto.getOrderNo().startsWith("LS")) {
+            if (trackingYeeTraceDto.getOrderNo().startsWith(PackageConstant.LS_PREFIX)) {
                 packageCollectionFeignService.updateCollecting(trackingYeeTraceDto.getOrderNo());
             }else {
                 DelOutbound delOutbound = delOutboundMapper.selectOne(new LambdaQueryWrapper<DelOutbound>().eq(DelOutbound::getOrderNo, trackingYeeTraceDto.getOrderNo()).last("limit 1"));
