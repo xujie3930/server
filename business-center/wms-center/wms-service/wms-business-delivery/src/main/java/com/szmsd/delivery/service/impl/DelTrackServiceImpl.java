@@ -331,7 +331,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
     private QueryWrapper<TrackAnalysisRequestDto> queryWrapper(TrackAnalysisRequestDto requestDto){
         QueryWrapper<TrackAnalysisRequestDto> wrapper = new QueryWrapper<>();
-        wrapper.eq(StringUtils.isNotBlank(requestDto.getShipmentService()) , "a.shipment_service", requestDto.getShipmentService());
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getShipmentService()) , "a.shipment_rule", requestDto.getShipmentService());
         wrapper.eq(StringUtils.isNotBlank(requestDto.getCountryCode()) , "b.country_code", requestDto.getCountryCode());
         wrapper.eq(StringUtils.isNotBlank(requestDto.getWarehouseCode()) , "a.warehouse_code", requestDto.getWarehouseCode());
         wrapper.eq(StringUtils.isNotBlank(requestDto.getTrackingStatus()) , "a.tracking_status", requestDto.getTrackingStatus());
