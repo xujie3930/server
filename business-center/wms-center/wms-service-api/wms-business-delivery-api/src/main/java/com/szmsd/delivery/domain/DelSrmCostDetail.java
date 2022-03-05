@@ -86,11 +86,11 @@ public class DelSrmCostDetail extends BaseEntity {
 
 
     @TableField(exist = false)
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "计价时间查询条件")
     private String[] createTimes;
 
     @TableField(exist = false)
-    @ApiModelProperty(value = "计价时间")
+    @ApiModelProperty(value = "下单时间查询条件")
     private String[] orderTimes;
 
     @TableField(exist = false)

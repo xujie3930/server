@@ -17,6 +17,8 @@ import com.szmsd.delivery.service.IDelSrmCostLogService;
 import com.szmsd.http.api.service.IHtpSrmClientService;
 import com.szmsd.http.dto.PackageCostRequest;
 import com.szmsd.http.vo.OperationResultOfIListOfPackageCost;
+import com.szmsd.http.vo.PackageCost;
+import com.szmsd.http.vo.PackageCostItem;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.redisson.api.RLock;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -74,12 +77,13 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                 Date nextRetryTime = null;
                 boolean success = false;
                 DelSrmCostLogConstant.Type type = DelSrmCostLogConstant.Type.valueOf(delSrmCostLog.getType());
+                OperationResultOfIListOfPackageCost httpResponseVO = null;
                 try {
 
                     PackageCostRequest httpRequestDto = new PackageCostRequest();
                     httpRequestDto.setCurrency(delSrmCostLog.getCurrencyCode());
                     httpRequestDto.setProcessNoList(Arrays.asList(delSrmCostLog.getOrderNo()));
-                    OperationResultOfIListOfPackageCost httpResponseVO = htpSrmClientService.packageCostBatch(httpRequestDto);
+                    httpResponseVO = htpSrmClientService.packageCostBatch(httpRequestDto);
                     if (httpResponseVO.getSucceeded()){
                         success = true;
                     }
@@ -106,10 +110,32 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                         delSrmCostDetailService.deleteDelSrmCostDetailById(String.valueOf(dataDelSrmCostDetail.getId()));
                     }
                     DelSrmCostDetail delSrmCostDetail = new DelSrmCostDetail();
-                    delSrmCostDetail.setCurrencyCode(delOutbound.getCurrencyCode());
                     delSrmCostDetail.setOrderNo(delOutbound.getOrderNo());
                     delSrmCostDetail.setOrderTime(delOutbound.getCreateTime());
                     delSrmCostDetail.setCreateTime(new Date());
+
+
+                    //接口返回参数拼接
+                    if(httpResponseVO.getData() != null && httpResponseVO.getData().size() > 0){
+                        PackageCost packageCost = httpResponseVO.getData().get(0);
+                        if(packageCost.getCostItems() != null && packageCost.getCostItems().size() > 0){
+                            PackageCostItem packageCostItem = packageCost.getCostItems().get(0);
+                            delSrmCostDetail.setProductCode(packageCostItem.getServiceName());
+                            delSrmCostDetail.setPdCode(packageCostItem.getServiceCode());
+                            delSrmCostDetail.setCuspriceCode(packageCost.getProcessNo());
+                            delSrmCostDetail.setAmount(packageCostItem.getAmountCost().getAmount());
+                            delSrmCostDetail.setCurrencyCode(packageCostItem.getAmountCost().getCurrencyCode());
+                            java.util.Map<String, Object> responseBodyMap = new HashMap();
+                            responseBodyMap.put("productCode", delSrmCostDetail.getProductCode());
+                            responseBodyMap.put("pdCode", delSrmCostDetail.getPdCode());
+                            responseBodyMap.put("cuspriceCode", delSrmCostDetail.getCuspriceCode());
+                            responseBodyMap.put("amount", delSrmCostDetail.getAmount());
+                            responseBodyMap.put("currencyCode", delSrmCostDetail.getCurrencyCode());
+                            responseBody = (String) JSON.toJSONString(responseBody);
+                        }
+
+
+                    }
                     delSrmCostDetailService.insertDelSrmCostDetail(delSrmCostDetail);
                     
                     
