@@ -78,6 +78,17 @@ public class ThreadPoolExecutorConfiguration {
      */
     public static final String THREADPOOLEXECUTOR_TY_REQUEST = "ThreadPoolExecutor-Ty-Request";
 
+    /**
+     * SRM保存请求信息
+     */
+    public static final String THREADPOOLEXECUTOR_SRM_SAVE = "ThreadPoolExecutor-Srm-Save";
+
+    /**
+     * SRM发送请求信息
+     */
+    public static final String THREADPOOLEXECUTOR_SRM_REQUEST = "ThreadPoolExecutor-Srm-Request";
+
+
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundReviewed() {
         // 核心线程数量
@@ -247,5 +258,40 @@ public class ThreadPoolExecutorConfiguration {
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
+
+    @Bean(THREADPOOLEXECUTOR_SRM_SAVE)
+    public ThreadPoolExecutor threadPoolExecutorSrmSave() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors;
+        int maximumPoolSize = availableProcessors * 2;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(20480);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("Srm-Save", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
+    @Bean(THREADPOOLEXECUTOR_SRM_REQUEST)
+    public ThreadPoolExecutor threadPoolExecutorSrmRequest() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 4;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(20480);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("Srm-Request", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
 
 }

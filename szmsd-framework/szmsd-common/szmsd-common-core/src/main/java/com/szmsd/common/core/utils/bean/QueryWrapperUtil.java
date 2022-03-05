@@ -3,11 +3,12 @@ package com.szmsd.common.core.utils.bean;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.enums.SqlLike;
+import com.szmsd.common.core.utils.StringToolkit;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.util.*;
 
 /**
  * @author zhangyuyuan
@@ -36,9 +37,23 @@ public final class QueryWrapperUtil {
                 queryWrapper.like(column, value);
             } else if (SqlKeyword.NE.equals(keyword)) {
                 queryWrapper.ne(column, value);
+            } else if (SqlKeyword.IN.equals(keyword)) {
+                //特殊符合做完字符的拆解\n|\r|\\s|，|;|,
+                Set<String> newValues = new LinkedHashSet<>();
+                for(String val: StringToolkit.getCodeByArray(value)){
+                    val = val.trim();
+                    if (val.length() > 0) {
+                        newValues.add(val);
+                    }
+                }
+                if(newValues.size() == 0){
+                    return;
+                }
+                queryWrapper.in(column, newValues);
             }
         }
     }
+
 
     /**
      * 字段like
