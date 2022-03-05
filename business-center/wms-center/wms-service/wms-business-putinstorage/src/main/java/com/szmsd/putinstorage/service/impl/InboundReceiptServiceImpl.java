@@ -973,7 +973,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         createInboundReceiptDTO.setVat("");
         // 预约揽收
         createInboundReceiptDTO.setDeliveryWayCode("053003");
-        createInboundReceiptDTO.setDeliveryNoList(Lists.newArrayList());
+        createInboundReceiptDTO.setDeliveryNoList(Arrays.asList(packageCollection.getOutboundNo()));
 
         createInboundReceiptDTO.setGoodsSourceCode("");
         createInboundReceiptDTO.setTrackingNumber("");
@@ -997,13 +997,13 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceiptDetailDTO.setOriginCode(detail.getSku());
             inboundReceiptDetailDTO.setRemark("");
             inboundReceiptDetailDTO.setEditionImage(new AttachmentFileDTO());
-            inboundReceiptDetailDTO.setDeliveryNo("");
+            inboundReceiptDetailDTO.setDeliveryNo(packageCollection.getTrackingNo());
             return inboundReceiptDetailDTO;
         }).collect(Collectors.toList());
         createInboundReceiptDTO.setInboundReceiptDetails(detailDTOList);
 
         createInboundReceiptDTO.setTotalDeclareQty(qtyTotal.get());
-        createInboundReceiptDTO.setTotalPutQty(qtyTotal.get());
+        createInboundReceiptDTO.setTotalPutQty(0);
         log.info("创建揽收入库单信息：{}", JSONObject.toJSONString(createInboundReceiptDTO));
         return saveOrUpdate(createInboundReceiptDTO);
     }
