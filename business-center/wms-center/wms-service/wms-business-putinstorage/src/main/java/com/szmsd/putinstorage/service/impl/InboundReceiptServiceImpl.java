@@ -961,7 +961,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
 
         createInboundReceiptDTO.setReceiptDetailIds(Lists.newArrayList());
-        createInboundReceiptDTO.setDeliveryNo("");
+        createInboundReceiptDTO.setDeliveryNo(packageCollection.getTrackingNo());
+        createInboundReceiptDTO.setDeliveryNoList(Arrays.asList(packageCollection.getTrackingNo()));
         createInboundReceiptDTO.setOrderNo("");
         createInboundReceiptDTO.setCusCode(packageCollection.getSellerCode());
         createInboundReceiptDTO.setOrderType(InboundReceiptEnum.OrderType.NORMAL.getValue());
@@ -973,7 +974,6 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         createInboundReceiptDTO.setVat("");
         // 预约揽收
         createInboundReceiptDTO.setDeliveryWayCode("053003");
-        createInboundReceiptDTO.setDeliveryNoList(Arrays.asList(packageCollection.getOutboundNo()));
 
         createInboundReceiptDTO.setGoodsSourceCode("");
         createInboundReceiptDTO.setTrackingNumber("");
@@ -997,7 +997,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceiptDetailDTO.setOriginCode(detail.getSku());
             inboundReceiptDetailDTO.setRemark("");
             inboundReceiptDetailDTO.setEditionImage(new AttachmentFileDTO());
-            inboundReceiptDetailDTO.setDeliveryNo(packageCollection.getTrackingNo());
+            inboundReceiptDetailDTO.setDeliveryNo(packageCollection.getOutboundNo());
             return inboundReceiptDetailDTO;
         }).collect(Collectors.toList());
         createInboundReceiptDTO.setInboundReceiptDetails(detailDTOList);
