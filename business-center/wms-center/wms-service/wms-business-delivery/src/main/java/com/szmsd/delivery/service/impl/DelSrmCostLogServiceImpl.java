@@ -84,7 +84,8 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                     httpRequestDto.setCurrency(delSrmCostLog.getCurrencyCode());
                     httpRequestDto.setProcessNoList(Arrays.asList(delSrmCostLog.getOrderNo()));
                     httpResponseVO = htpSrmClientService.packageCostBatch(httpRequestDto);
-                    if (httpResponseVO.getSucceeded()){
+                    if (httpResponseVO.getSucceeded() && httpResponseVO.getData().size() > 0 &&
+                            httpResponseVO.getData().get(0).getIsSucesss()){
                         success = true;
                     }
                     responseBody = (String) JSON.toJSONString(httpResponseVO);
