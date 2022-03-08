@@ -888,10 +888,10 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 // 文件存在，获取文件信息，输出给前端
                 try {
                     byte[] byteArray = FileUtils.readFileToByteArray(packageCollectionLabelFile);
-                    this.output(response.getOutputStream(), byteArray);
+                    this.output(response, byteArray, packageCollection.getCollectionNo() + ".pdf");
                     // end
                     return;
-                } catch (IOException e) {
+                } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                     throw new CommonException("500", "标签文件已下载，获取输出文件流失败");
                 }
@@ -929,8 +929,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                         }
                         // 写出文件流
                         try {
-                            this.output(response.getOutputStream(), inputStream);
-                        } catch (IOException e) {
+                            this.output(response, inputStream, packageCollection.getCollectionNo() + ".pdf");
+                        } catch (Exception e) {
                             logger.error(e.getMessage(), e);
                             throw new CommonException("500", "标签文件已下载，获取输出文件流失败");
                         }
@@ -953,8 +953,14 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
         }
     }
 
-    private void output(OutputStream outputStream, byte[] bytes) {
+    private void output(HttpServletResponse response, byte[] bytes, String name) {
+        OutputStream outputStream = null;
         try {
+            outputStream = response.getOutputStream();
+            //response为HttpServletResponse对象
+            response.setContentType("application/pdf;charset=utf-8");
+            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition", "attachment;filename=" + name);
             IOUtils.write(bytes, outputStream);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
