@@ -243,7 +243,12 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             }
             // 如果LS开头的单号则为揽收单 修改揽收单的状态
             if (trackingYeeTraceDto.getOrderNo().startsWith(PackageConstant.LS_PREFIX)) {
-                packageCollectionFeignService.updateCollecting(trackingYeeTraceDto.getOrderNo());
+                // 已妥投修改揽收单状态为完成
+                if ("Delivered".equalsIgnoreCase(trackingYeeTraceDto.getTrackingStatus())){
+                    packageCollectionFeignService.updateCollectingCompleted(trackingYeeTraceDto.getOrderNo());
+                }else {
+                    packageCollectionFeignService.updateCollecting(trackingYeeTraceDto.getOrderNo());
+                }
             }else {
                 DelOutbound delOutbound = delOutboundMapper.selectOne(new LambdaQueryWrapper<DelOutbound>().eq(DelOutbound::getOrderNo, trackingYeeTraceDto.getOrderNo()).last("limit 1"));
                 if (delOutbound != null) {
