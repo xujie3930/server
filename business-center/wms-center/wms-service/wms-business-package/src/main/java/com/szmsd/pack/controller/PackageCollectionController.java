@@ -131,9 +131,17 @@ public class PackageCollectionController extends BaseController {
         return R.ok(this.packageCollectionService.updateCollecting(collectionNo));
     }
 
+    @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:updateCollectingCompleted')")
+    @PostMapping("/updateCollectingCompleted")
+    @ApiOperation(value = "交货管理 - 揽收 - 修改状态为已完成", notes = "交货管理 - 揽收 - 修改状态为已完成", position = 120)
+    @ApiImplicitParam(name = "collectionNo", value = "参数", dataType = "String")
+    public R<Integer> updateCollectingCompleted(@RequestBody String collectionNo) {
+        return R.ok(this.packageCollectionService.updateCollectingCompleted(collectionNo));
+    }
+
     @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:collectionLabel')")
     @PostMapping("/collectionLabel")
-    @ApiOperation(value = "交货管理 - 揽收 - 标签", notes = "交货管理 - 揽收 - 标签", position = 120)
+    @ApiOperation(value = "交货管理 - 揽收 - 标签", notes = "交货管理 - 揽收 - 标签", position = 130)
     @ApiImplicitParam(name = "collectionNo", value = "参数", dataType = "String")
     public void collectionLabel(@RequestBody String collectionNo, HttpServletResponse httpServletResponse) {
         this.packageCollectionService.collectionLabel(collectionNo, httpServletResponse);

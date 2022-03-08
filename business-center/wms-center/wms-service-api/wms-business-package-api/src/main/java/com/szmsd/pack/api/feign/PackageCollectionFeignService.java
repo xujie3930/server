@@ -22,6 +22,15 @@ public interface PackageCollectionFeignService {
     R<Integer> updateCollecting(@RequestBody String collectionNo);
 
     /**
+     * 交货管理 - 揽收 - 修改状态为已完成
+     *
+     * @param collectionNo collectionNo
+     * @return Integer
+     */
+    @PostMapping("/package-collection/updateCollectingCompleted")
+    R<Integer> updateCollectingCompleted(@RequestBody String collectionNo);
+
+    /**
      * 交货管理 - 揽收 - 更新出库单号
      *
      * @param packageCollection packageCollection

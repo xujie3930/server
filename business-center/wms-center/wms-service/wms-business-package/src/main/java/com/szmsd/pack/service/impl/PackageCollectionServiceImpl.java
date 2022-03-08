@@ -37,6 +37,7 @@ import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.pack.domain.PackageCollectionDetail;
 import com.szmsd.pack.domain.PackageCollectionOperationRecord;
 import com.szmsd.pack.dto.PackageCollectionQueryDto;
+import com.szmsd.pack.events.PackageCollectionCompletedEvent;
 import com.szmsd.pack.events.PackageCollectionContextEvent;
 import com.szmsd.pack.mapper.PackageCollectionMapper;
 import com.szmsd.pack.service.IPackageCollectionDetailService;
@@ -831,6 +832,28 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 updatePackageCollection.setStatus(PackageCollectionConstants.Status.COLLECTING.name());
                 updatePackageCollection.setId(packageCollection.getId());
                 return super.baseMapper.updateById(updatePackageCollection);
+            }
+            // 状态不符合
+            return -1;
+        }
+        // 单据不存在
+        return -2;
+    }
+
+    @Override
+    public int updateCollectingCompleted(String collectionNo) {
+        PackageCollection packageCollection = this.getByCollectionNo(collectionNo);
+        if (null != packageCollection) {
+            if (PackageCollectionConstants.Status.COLLECTING.name().equals(packageCollection.getStatus())) {
+                PackageCollection updatePackageCollection = new PackageCollection();
+                updatePackageCollection.setStatus(PackageCollectionConstants.Status.COMPLETED.name());
+                updatePackageCollection.setId(packageCollection.getId());
+                int i = super.baseMapper.updateById(updatePackageCollection);
+                if (i > 0) {
+                    // 揽收单完成事件
+                    PackageCollectionCompletedEvent.publishEvent(packageCollection);
+                }
+                return i;
             }
             // 状态不符合
             return -1;

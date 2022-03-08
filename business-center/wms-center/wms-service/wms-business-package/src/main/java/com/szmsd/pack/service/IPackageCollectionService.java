@@ -86,6 +86,8 @@ public interface IPackageCollectionService extends IService<PackageCollection> {
 
     int updateCollecting(String collectionNo);
 
+    int updateCollectingCompleted(String collectionNo);
+
     /**
      * 标签
      *
