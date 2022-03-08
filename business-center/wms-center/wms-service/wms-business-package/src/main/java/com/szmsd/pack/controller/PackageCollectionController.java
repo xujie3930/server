@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 
@@ -128,5 +129,13 @@ public class PackageCollectionController extends BaseController {
     @ApiImplicitParam(name = "collectionNo", value = "参数", dataType = "String")
     public R<Integer> updateCollecting(@RequestBody String collectionNo) {
         return R.ok(this.packageCollectionService.updateCollecting(collectionNo));
+    }
+
+    @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:collectionLabel')")
+    @PostMapping("/collectionLabel")
+    @ApiOperation(value = "交货管理 - 揽收 - 标签", notes = "交货管理 - 揽收 - 标签", position = 120)
+    @ApiImplicitParam(name = "collectionNo", value = "参数", dataType = "String")
+    public void collectionLabel(@RequestBody String collectionNo, HttpServletResponse httpServletResponse) {
+        this.packageCollectionService.collectionLabel(collectionNo, httpServletResponse);
     }
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.pack.dto.PackageCollectionQueryDto;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -84,5 +85,13 @@ public interface IPackageCollectionService extends IService<PackageCollection> {
     IPage<PackageCollection> page(PackageCollectionQueryDto dto);
 
     int updateCollecting(String collectionNo);
+
+    /**
+     * 标签
+     *
+     * @param collectionNo 揽收单号
+     * @param response     response
+     */
+    void collectionLabel(String collectionNo, HttpServletResponse response);
 }
 

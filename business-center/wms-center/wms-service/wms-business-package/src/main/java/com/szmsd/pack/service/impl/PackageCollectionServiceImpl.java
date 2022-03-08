@@ -18,6 +18,8 @@ import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.FileStream;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
@@ -42,6 +44,8 @@ import com.szmsd.pack.service.IPackageCollectionOperationRecordService;
 import com.szmsd.pack.service.IPackageCollectionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -52,6 +56,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -816,9 +824,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
 
     @Override
     public int updateCollecting(String collectionNo) {
-        LambdaQueryWrapper<PackageCollection> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(PackageCollection::getCollectionNo, collectionNo);
-        PackageCollection packageCollection = super.getOne(queryWrapper);
+        PackageCollection packageCollection = this.getByCollectionNo(collectionNo);
         if (null != packageCollection) {
             if (PackageCollectionConstants.Status.PLANNED.name().equals(packageCollection.getStatus())) {
                 PackageCollection updatePackageCollection = new PackageCollection();
@@ -831,6 +837,110 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
         }
         // 单据不存在
         return -2;
+    }
+
+    private PackageCollection getByCollectionNo(String collectionNo) {
+        LambdaQueryWrapper<PackageCollection> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(PackageCollection::getCollectionNo, collectionNo);
+        return super.getOne(queryWrapper);
+    }
+
+    @Override
+    public void collectionLabel(String collectionNo, HttpServletResponse response) {
+        PackageCollection packageCollection = this.getByCollectionNo(collectionNo);
+        if (null != packageCollection) {
+            // 文件夹根目录
+            String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/package/tmp");
+            // 文件类型
+            basedir += "/label";
+            // 年月日
+            Date createTime = packageCollection.getCreateTime();
+            String datePath = DateFormatUtils.format(createTime, "yyyy/MM/dd");
+            basedir += "/" + datePath;
+            // 文件全路径
+            String pathname = basedir + "/" + packageCollection.getCollectionNo() + ".pdf";
+            // 判断文件是否存在
+            File packageCollectionLabelFile = new File(pathname);
+            if (packageCollectionLabelFile.exists()) {
+                // 文件存在，获取文件信息，输出给前端
+                try {
+                    byte[] byteArray = FileUtils.readFileToByteArray(packageCollectionLabelFile);
+                    this.output(response.getOutputStream(), byteArray);
+                    // end
+                    return;
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                    throw new CommonException("500", "标签文件已下载，获取输出文件流失败");
+                }
+            }
+            // 获取标签
+            CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
+            command.setWarehouseCode(packageCollection.getWarehouseCode());
+            command.setOrderNumber(packageCollection.getShipmentOrderNumber());
+            command.setShipmentOrderLabelUrl(packageCollection.getShipmentOrderLabelUrl());
+            logger.info("正在获取标签文件，揽收单号：{}，承运商订单号：{}", packageCollection.getCollectionNo(), packageCollection.getShipmentOrderNumber());
+            ResponseObject<FileStream, ProblemDetails> responseObject = this.htpCarrierClientService.label(command);
+            if (null != responseObject) {
+                if (responseObject.isSuccess()) {
+                    // 判断文件夹是否存在
+                    File file = new File(basedir);
+                    if (!file.exists()) {
+                        try {
+                            // 创建文件夹
+                            FileUtils.forceMkdir(file);
+                        } catch (IOException e) {
+                            // 内部异常，不再重试，直接抛出去
+                            throw new CommonException("500", "创建文件夹[" + file.getPath() + "]失败，Error：" + e.getMessage());
+                        }
+                    }
+                    byte[] inputStream;
+                    FileStream fileStream = responseObject.getObject();
+                    if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
+                        // 保存文件至本地
+                        File labelFile = new File(pathname);
+                        try {
+                            FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
+                        } catch (IOException e) {
+                            // 内部异常，不再重试，直接抛出去
+                            throw new CommonException("500", "保存标签文件失败，Error：" + e.getMessage());
+                        }
+                        // 写出文件流
+                        try {
+                            this.output(response.getOutputStream(), inputStream);
+                        } catch (IOException e) {
+                            logger.error(e.getMessage(), e);
+                            throw new CommonException("500", "标签文件已下载，获取输出文件流失败");
+                        }
+                        // end
+                    }
+                } else {
+                    // 接口响应异常，继续重试
+                    String exceptionMessage = ProblemDetails.getErrorMessageOrNull(responseObject.getError());
+                    if (StringUtils.isNotEmpty(exceptionMessage)) {
+                        exceptionMessage = "获取标签文件流失败，接口无错误信息";
+                    }
+                    throw new CommonException("500", exceptionMessage);
+                }
+            } else {
+                // 接口响应异常继续重试
+                throw new CommonException("500", "获取标签文件流失败，接口无响应");
+            }
+        } else {
+            throw new CommonException("500", "揽收计划不存在");
+        }
+    }
+
+    private void output(OutputStream outputStream, byte[] bytes) {
+        try {
+            IOUtils.write(bytes, outputStream);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new CommonException("500", "标签文件已下载，写入输出流失败");
+        } finally {
+            if (null != outputStream) {
+                IOUtils.closeQuietly(outputStream);
+            }
+        }
     }
 
     private void autoSettingDateCondition(LambdaQueryWrapper<PackageCollection> queryWrapper, SFunction<PackageCollection, ?> column, String[] dates) {
