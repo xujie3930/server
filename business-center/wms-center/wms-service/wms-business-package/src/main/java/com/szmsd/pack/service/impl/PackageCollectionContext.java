@@ -82,7 +82,7 @@ public class PackageCollectionContext {
          */
         CANCEL,
         /**
-         * 创建出库单
+         * 创建入库单
          */
         CREATE_RECEIVER
     }

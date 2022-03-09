@@ -623,7 +623,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             R<PackageCollection> packageCollectionR = packageCollectionFeignService.getInfoByNo(queryPackageCollection);
             if (null != packageCollectionR && Constants.SUCCESS == packageCollectionR.getCode()) {
                 PackageCollection packageCollection = packageCollectionR.getData();
-                if (null != packageCollection && "Y".equals(packageCollection.getCollectionPlan())) {
+                // 揽收单处理方式是销毁就创建出库单
+                if (null != packageCollection && "destroy".equals(packageCollection.getHandleMode())) {
                     DelOutboundDto delOutboundDto = new DelOutboundDto();
                     delOutboundDto.setCustomCode(packageCollection.getSellerCode());
                     delOutboundDto.setSellerCode(packageCollection.getSellerCode());
