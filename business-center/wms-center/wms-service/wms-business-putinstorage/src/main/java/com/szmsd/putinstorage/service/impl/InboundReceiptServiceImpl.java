@@ -645,7 +645,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                         detailList.add(delOutboundDetailDto);
                     }
                     delOutboundDto.setDetails(detailList);
-                    DelOutboundAddResponse outboundAddResponse = this.delOutboundClientService.addShipment(delOutboundDto);
+                    DelOutboundAddResponse outboundAddResponse = this.delOutboundClientService.addShipmentPackageCollection(delOutboundDto);
                     if (null != outboundAddResponse) {
                         PackageCollection updatePackageCollection = new PackageCollection();
                         updatePackageCollection.setOutboundNo(outboundAddResponse.getOrderNo());

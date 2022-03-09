@@ -190,7 +190,21 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 创建", position = 300)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<DelOutboundAddResponse> add(@RequestBody @Validated({ValidationSaveGroup.class}) DelOutboundDto dto) {
-        return R.ok(delOutboundService.insertDelOutbound(dto));
+        DelOutboundAddResponse data = delOutboundService.insertDelOutbound(dto);
+        return R.ok(data);
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:addPackageCollection')")
+    @Log(title = "出库单模块", businessType = BusinessType.INSERT)
+    @PostMapping("/shipment-package-collection")
+    @ApiOperation(value = "出库管理 - 创建揽收销毁出库单", position = 310)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
+    public R<DelOutboundAddResponse> addPackageCollection(@RequestBody @Validated({ValidationSaveGroup.class}) DelOutboundDto dto) {
+        DelOutboundAddResponse data = delOutboundService.insertDelOutbound(dto);
+        if (data.getStatus()) {
+            this.delOutboundCompletedService.add(data.getOrderNo(), DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
+        }
+        return R.ok(data);
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:edit')")

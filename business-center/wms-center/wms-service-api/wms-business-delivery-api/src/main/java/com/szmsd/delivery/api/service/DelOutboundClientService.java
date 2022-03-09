@@ -79,6 +79,8 @@ public interface DelOutboundClientService {
      */
     DelOutboundAddResponse addShipment(DelOutboundDto dto);
 
+    DelOutboundAddResponse addShipmentPackageCollection(DelOutboundDto dto);
+
     /**
      * 获取标签
      *
