@@ -53,6 +53,12 @@ public class ShipmentChargeInfo implements Serializable {
     // 价格计算方式
     private String calculationMethod;
 
+    // 供应商计价类型
+    private String supplierCalcType;
+
+    // 供应商计价id（线路图id或者物流服务id）
+    private String supplierCalcId;
+
     @JSONField(name = "package")
     private PricingPackageInfo packageInfo;
 }

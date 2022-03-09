@@ -174,6 +174,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setLength(delOutbound.getLength());
             updateDelOutbound.setWidth(delOutbound.getWidth());
             updateDelOutbound.setHeight(delOutbound.getHeight());
+            updateDelOutbound.setSupplierCalcType(delOutbound.getSupplierCalcType());
+            updateDelOutbound.setSupplierCalcId(delOutbound.getSupplierCalcId());
             // 规格，长*宽*高
             updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
@@ -593,6 +595,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     delOutbound.setLength(Utils.valueOf(packing.getLength()));
                     delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
                     delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
+                    delOutbound.setSupplierCalcType(data.getSupplierCalcType());
+                    delOutbound.setSupplierCalcId(data.getSupplierCalcId());
                     // 费用信息
                     Weight calcWeight = packageInfo.getCalcWeight();
                     delOutbound.setCalcWeight(calcWeight.getValue());
@@ -817,6 +821,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setLength(delOutbound.getLength());
             updateDelOutbound.setWidth(delOutbound.getWidth());
             updateDelOutbound.setHeight(delOutbound.getHeight());
+            updateDelOutbound.setSupplierCalcType(delOutbound.getSupplierCalcType());
+            updateDelOutbound.setSupplierCalcId(delOutbound.getSupplierCalcId());
             // 规格，长*宽*高
             updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
