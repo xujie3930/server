@@ -67,4 +67,7 @@ public class BaseProductMeasureDto {
     @ApiModelProperty(value = "客户（卖家）编码")
     @Excel(name = "客户（卖家）编码")
     private String sellerCode;
+
+    @ApiModelProperty(value = "是否一票多件(0:否,1:是)")
+    private Integer multipleTicketFlag;
 }

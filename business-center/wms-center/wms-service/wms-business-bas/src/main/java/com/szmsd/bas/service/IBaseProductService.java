@@ -6,7 +6,7 @@ import com.szmsd.bas.dto.*;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -151,5 +151,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @return BaseProduct
      */
     List<BaseProduct> queryProductList(BaseProductConditionQueryDto conditionQueryDto);
+
+    String importMultipleTicket(MultipartFile file);
 }
 

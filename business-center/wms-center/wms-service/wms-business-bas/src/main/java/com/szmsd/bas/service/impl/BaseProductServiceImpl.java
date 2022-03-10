@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
@@ -25,6 +26,7 @@ import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.bas.service.IBasePackingService;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.util.ObjectUtil;
+import com.szmsd.bas.vo.BasProductMultipleTicketDTO;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -33,6 +35,7 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -55,10 +58,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import javax.annotation.Resource;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -610,6 +615,63 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             return Collections.emptyList();
         }
         return list.stream().map(BaseProduct::getProductAttribute).collect(Collectors.toList());
+    }
+
+    @Override
+    public String importMultipleTicket(MultipartFile file) {
+        try {
+            InputStream inputStream = file.getInputStream();
+            ExcelUtil<BasProductMultipleTicketDTO> util = new ExcelUtil<>(BasProductMultipleTicketDTO.class);
+            List<BasProductMultipleTicketDTO> basSellerMultipleTicketDTOS = util.importExcel(inputStream);
+            if (CollectionUtils.isEmpty(basSellerMultipleTicketDTOS))
+                return "导入数据为空";
+            List<BasProductMultipleTicketDTO> updateList = basSellerMultipleTicketDTOS.parallelStream()
+                    .filter(x -> StringUtils.isNotBlank(x.getSellerCode()) && StringUtils.isNotBlank(x.getMultipleTicketFlagStr()))
+                    .collect(Collectors.toList());
+            List<String> sellerCodeList = updateList.parallelStream().map(BasProductMultipleTicketDTO::getSellerCode).distinct().collect(Collectors.toList());
+            List<String> skuList = updateList.parallelStream().map(BasProductMultipleTicketDTO::getSku).distinct().collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(sellerCodeList) || CollectionUtils.isEmpty(skuList))
+                return "导入数据内容异常";
+
+            List<BaseProduct> canUpdateSellerCodeList = baseMapper.selectList(Wrappers.<BaseProduct>lambdaQuery()
+                    .in(BaseProduct::getSellerCode, sellerCodeList)
+                    .in(BaseProduct::getCode, skuList)
+                    .select(BaseProduct::getSellerCode, BaseProduct::getId, BaseProduct::getCode));
+            // 数据库 有的sku
+            Map<String, List<BaseProduct>> canUpdateSellerCodeMap = canUpdateSellerCodeList.stream().collect(Collectors.groupingBy(BaseProduct::getSellerCode));
+            sellerCodeList.clear();
+            skuList.clear();
+            List<String> errorMsg = new ArrayList<>();
+            List<BaseProduct> updateResultList = new ArrayList<>();
+            // 导入的数据
+            Map<String, List<BasProductMultipleTicketDTO>> updateInfoMap = updateList.stream().collect(Collectors.groupingBy(BasProductMultipleTicketDTO::getSellerCode));
+            updateInfoMap.forEach((sellerCode, infoList) -> {
+                List<BaseProduct> baseProducts = canUpdateSellerCodeMap.get(sellerCode);
+                if (CollectionUtils.isEmpty(baseProducts)) {
+                    errorMsg.add("用户不存在：" + sellerCode);
+                    return;
+                }
+
+                Map<String, BaseProduct> skuInfoMap = baseProducts.stream().collect(Collectors.toMap(BaseProduct::getCode, x -> x));
+                infoList.forEach(x -> {
+                    BaseProduct baseProduct = skuInfoMap.get(x.getSku());
+                    if (null != baseProduct) {
+                        BaseProduct baseProduct1 = new BaseProduct();
+                        baseProduct1.setId(baseProduct.getId());
+                        baseProduct1.setMultipleTicketFlag(x.getMultipleTicketFlag());
+                        updateResultList.add(baseProduct1);
+                    } else {
+                        errorMsg.add("用户" + sellerCode + "不存在SKU：" + x.getSku());
+                    }
+                });
+            });
+            if (CollectionUtils.isNotEmpty(updateResultList))
+                this.updateBatchById(updateResultList);
+            return StringUtils.join(errorMsg, ";");
+        } catch (Exception e) {
+            log.error("", e);
+            return "导入数据异常";
+        }
     }
 
     @Override
