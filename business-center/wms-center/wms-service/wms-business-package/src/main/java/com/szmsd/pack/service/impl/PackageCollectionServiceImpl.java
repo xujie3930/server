@@ -844,7 +844,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     public int updateCollectingCompleted(String collectionNo) {
         PackageCollection packageCollection = this.getByCollectionNo(collectionNo);
         if (null != packageCollection) {
-            if (PackageCollectionConstants.Status.COLLECTING.name().equals(packageCollection.getStatus())) {
+            if (PackageCollectionConstants.Status.PLANNED.name().equals(packageCollection.getStatus())
+                    || PackageCollectionConstants.Status.COLLECTING.name().equals(packageCollection.getStatus())) {
                 PackageCollection updatePackageCollection = new PackageCollection();
                 updatePackageCollection.setStatus(PackageCollectionConstants.Status.COMPLETED.name());
                 updatePackageCollection.setId(packageCollection.getId());
