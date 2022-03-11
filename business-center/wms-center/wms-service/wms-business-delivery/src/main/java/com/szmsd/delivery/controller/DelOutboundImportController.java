@@ -322,7 +322,7 @@ public class DelOutboundImportController extends BaseController {
     @GetMapping("/batchImportTemplate")
     @ApiOperation(value = "出库管理 - 导入 - 批量出库导入模板", position = 600)
     public void batchImportTemplate(HttpServletResponse response) {
-        String filePath = "/template/DM_packageTransfer.xls";
+        String filePath = "/template/DM_batch.xls";
         String fileName = "批量出库模板";
         this.downloadTemplate(response, filePath, fileName);
     }
