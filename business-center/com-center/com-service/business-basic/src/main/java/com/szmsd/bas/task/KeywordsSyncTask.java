@@ -3,14 +3,18 @@ package com.szmsd.bas.task;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.szmsd.bas.domain.BasCarrierKeyword;
+import com.szmsd.bas.event.KeywordSyncEvent;
 import com.szmsd.bas.keyword.KeywordsUtil;
 import com.szmsd.bas.service.IBasCarrierKeywordService;
 import com.szmsd.common.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -32,16 +36,16 @@ public class KeywordsSyncTask {
     private RedisTemplate redisTemplate;
 
     /**
-     * 设置10 分钟执行执行一次
+     * 设置60 分钟执行执行一次
      */
-    @Scheduled(fixedDelay = 10*60*1000)
+    @Scheduled(fixedDelay = 60*60*1000)
     public void sync(){
         this.sync(null);
     }
 
     public void sync(String carrierCode){
         log.info("================开始关键词同步至Redis===================");
-        List<BasCarrierKeyword> carrierKeywords = carrierKeywordService.list(new LambdaQueryWrapper<BasCarrierKeyword>().eq(StringUtils.isNotBlank(carrierCode), BasCarrierKeyword::getCarrierCode, carrierCode));
+        List<BasCarrierKeyword> carrierKeywords = carrierKeywordService.list(new LambdaQueryWrapper<BasCarrierKeyword>().eq(StringUtils.isNotBlank(carrierCode), BasCarrierKeyword::getCarrierCode, carrierCode).eq(BasCarrierKeyword::getStatus, "0"));
         ValueOperations operations = redisTemplate.opsForValue();
         if (CollectionUtils.isEmpty(carrierKeywords)) {
             return;
@@ -51,4 +55,12 @@ public class KeywordsSyncTask {
         log.info("================结束关键词同步至Redis===================");
     }
 
+    @Async
+    @EventListener
+    public void onApplicationEvent(KeywordSyncEvent event) {
+        if (event.getSource() == null) {
+            return;
+        }
+        sync(event.getSource().toString());
+    }
 }

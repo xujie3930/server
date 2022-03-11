@@ -1,6 +1,9 @@
 package com.szmsd.bas.controller;
 
+import com.szmsd.bas.event.KeywordSyncEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +45,9 @@ public class BasCarrierKeywordController extends BaseController {
 
     @Resource
     private IBasCarrierKeywordService basCarrierKeywordService;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     /**
      * 查询模块列表
@@ -112,6 +118,7 @@ public class BasCarrierKeywordController extends BaseController {
         }
         keyword.setStatus(status);
         basCarrierKeywordService.updateById(keyword);
+        applicationContext.publishEvent(new KeywordSyncEvent(keyword.getCarrierCode()));
         return R.ok();
     }
 
