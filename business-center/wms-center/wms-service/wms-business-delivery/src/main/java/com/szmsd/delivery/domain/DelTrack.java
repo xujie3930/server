@@ -140,4 +140,8 @@ public class DelTrack extends BaseEntity {
     @ApiModelProperty(value = "过滤关键词，Y过滤，N不过滤，默认Y")
     @TableField(exist = false)
     private String filterKeyword;
+
+    @ApiModelProperty(value = "来源类型，DEL出库，PCK揽收")
+    @TableField(exist = false)
+    private String sourceType;
 }

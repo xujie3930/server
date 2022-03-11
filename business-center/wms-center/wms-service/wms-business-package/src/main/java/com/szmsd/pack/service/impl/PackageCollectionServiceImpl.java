@@ -112,11 +112,14 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     }
 
     @Override
-    public PackageCollection selectPackageCollectionByNo(String no) {
+    public PackageCollection selectPackageCollectionByNo(String no, String hasDetail) {
         LambdaQueryWrapper<PackageCollection> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(PackageCollection::getCollectionNo, no);
         PackageCollection packageCollection = super.getOne(queryWrapper);
-        if (null != packageCollection) {
+        if (StringUtils.isNotEmpty(hasDetail)) {
+            hasDetail = "Y";
+        }
+        if (null != packageCollection && "Y".equals(hasDetail)) {
             packageCollection.setDetailList(this.packageCollectionDetailService.listByCollectionId(packageCollection.getId()));
         }
         return packageCollection;

@@ -64,7 +64,7 @@ public class PackageCollectionController extends BaseController {
     @ApiOperation(value = "交货管理 - 揽收 - 详细信息(CollectionNo)", notes = "交货管理 - 揽收 - 详细信息(CollectionNo)")
     @AutoValue
     public R<PackageCollection> getInfoByNo(@RequestBody PackageCollection packageCollection) {
-        return R.ok(packageCollectionService.selectPackageCollectionByNo(packageCollection.getCollectionNo()));
+        return R.ok(packageCollectionService.selectPackageCollectionByNo(packageCollection.getCollectionNo(), packageCollection.getHasDetail()));
     }
 
     @PreAuthorize("@ss.hasPermi('PackageCollection:PackageCollection:add')")

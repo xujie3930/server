@@ -26,7 +26,7 @@ public interface IPackageCollectionService extends IService<PackageCollection> {
      */
     PackageCollection selectPackageCollectionById(String id);
 
-    PackageCollection selectPackageCollectionByNo(String no);
+    PackageCollection selectPackageCollectionByNo(String no, String hasDetail);
 
     /**
      * 查询package - 交货管理 - 揽收模块列表
