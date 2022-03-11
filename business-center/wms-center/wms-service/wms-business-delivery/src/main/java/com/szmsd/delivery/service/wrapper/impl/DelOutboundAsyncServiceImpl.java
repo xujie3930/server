@@ -476,7 +476,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 请求体的内容异步填充
         DelSrmCostLog delSrmCostLog = new DelSrmCostLog();
         delSrmCostLog.setOrderNo(delOutbound.getOrderNo());
-        delSrmCostLog.setType(DelSrmCostLogConstant.Type.create.name());
+        delSrmCostLog.setType(DelSrmCostLogEnum.Type.create.name());
         EventUtil.publishEvent(new DelSrmCostLogEvent(delSrmCostLog));
     }
 

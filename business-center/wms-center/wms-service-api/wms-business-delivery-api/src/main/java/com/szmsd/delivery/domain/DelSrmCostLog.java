@@ -66,9 +66,6 @@ public class DelSrmCostLog extends BaseEntity {
     @ApiModelProperty(value = "接口方法")
     private String method;
 
-    @ApiModelProperty(value = "扩展字段4")
-    private String currencyCode;
-
     @TableField(exist = false)
     @ApiModelProperty(value = "创建时间")
     private String[] createTimes;

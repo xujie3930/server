@@ -3,8 +3,7 @@ package com.szmsd.delivery.timer;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.delivery.domain.DelSrmCostLog;
-import com.szmsd.delivery.domain.DelSrmCostLog;
-import com.szmsd.delivery.enums.DelSrmCostLogConstant;
+import com.szmsd.delivery.enums.DelSrmCostLogEnum;
 import com.szmsd.delivery.service.IDelSrmCostLogService;
 import com.szmsd.delivery.service.impl.DelSrmCostLogServiceImpl;
 import com.szmsd.delivery.util.LockerUtil;
@@ -48,11 +47,11 @@ public class DelSrmCostLogTimer {
             LambdaQueryWrapper<DelSrmCostLog> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.select(DelSrmCostLog::getId, DelSrmCostLog::getOrderNo, DelSrmCostLog::getRequestBody,
                     DelSrmCostLog::getFailCount, DelSrmCostLog::getNextRetryTime, DelSrmCostLog::getType,
-                    DelSrmCostLog::getUrl, DelSrmCostLog::getMethod, DelSrmCostLog::getCurrencyCode);
+                    DelSrmCostLog::getUrl, DelSrmCostLog::getMethod);
             queryWrapper.and(qw -> {
-                qw.eq(DelSrmCostLog::getState, DelSrmCostLogConstant.State.WAIT.name())
+                qw.eq(DelSrmCostLog::getState, DelSrmCostLogEnum.State.WAIT.name())
                         .or()
-                        .eq(DelSrmCostLog::getState, DelSrmCostLogConstant.State.FAIL_CONTINUE.name());
+                        .eq(DelSrmCostLog::getState, DelSrmCostLogEnum.State.FAIL_CONTINUE.name());
             });
             // 小于10次
             queryWrapper.lt(DelSrmCostLog::getFailCount, DelSrmCostLogServiceImpl.retryCount);

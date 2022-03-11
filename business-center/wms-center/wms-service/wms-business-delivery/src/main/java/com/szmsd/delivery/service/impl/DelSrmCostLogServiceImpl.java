@@ -1,25 +1,28 @@
 package com.szmsd.delivery.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelSrmCostDetail;
 import com.szmsd.delivery.domain.DelSrmCostLog;
-import com.szmsd.delivery.enums.DelSrmCostLogConstant;
+import com.szmsd.delivery.enums.DelOutboundConstant;
+import com.szmsd.delivery.enums.DelSrmCostLogEnum;
 import com.szmsd.delivery.mapper.DelSrmCostLogMapper;
+import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.IDelSrmCostDetailService;
 import com.szmsd.delivery.service.IDelSrmCostLogService;
 import com.szmsd.http.api.service.IHtpSrmClientService;
-import com.szmsd.http.dto.PackageCostRequest;
-import com.szmsd.http.vo.OperationResultOfIListOfPackageCost;
-import com.szmsd.http.vo.PackageCost;
-import com.szmsd.http.vo.PackageCostItem;
-import org.apache.commons.lang3.StringUtils;
+import com.szmsd.http.dto.*;
+import com.szmsd.http.vo.*;
+import com.szmsd.http.vo.ChargeItem;
 import org.apache.commons.lang3.time.DateUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -30,10 +33,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -58,9 +59,189 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
     private IDelOutboundService delOutboundService;
     @Autowired
     private IDelSrmCostDetailService delSrmCostDetailService;
+    @Autowired
+    private IDelOutboundAddressService delOutboundAddressService;
     //                                            0   1   2   3   4   5   6   7   8    9    10   11
     private final int[] retryTimeConfiguration = {30, 30, 60, 60, 60, 60, 60, 60, 180, 180, 180, 180};
     public static final int retryCount = 10;
+
+
+    /**
+     * 成本更新时接口调用
+     * @param delOutbound
+     * @param delSrmCostDetail
+     */
+    private String processForUpdate(DelOutbound delOutbound, DelSrmCostDetail delSrmCostDetail){
+
+        PackageCostRequest httpRequestDto = new PackageCostRequest();
+        httpRequestDto.setProcessNoList(Arrays.asList(delOutbound.getOrderNo()));
+        OperationResultOfIListOfPackageCost httpResponseVO = htpSrmClientService.packageCostBatch(httpRequestDto);
+        if (httpResponseVO.getSucceeded() && httpResponseVO.getData().size() > 0 &&
+                httpResponseVO.getData().get(0).getIsSucesss()){
+            //接口返回参数拼接
+            PackageCost packageCost = httpResponseVO.getData().get(0);
+            if(packageCost.getCostItems() != null && packageCost.getCostItems().size() > 0){
+                PackageCostItem packageCostItem = packageCost.getCostItems().get(0);
+                delSrmCostDetail.setProductCode(packageCostItem.getServiceName());
+                delSrmCostDetail.setPdCode(packageCostItem.getServiceCode());
+                delSrmCostDetail.setCuspriceCode(packageCost.getProcessNo());
+                delSrmCostDetail.setAmount(packageCostItem.getAmountCost().getAmount());
+                delSrmCostDetail.setCurrencyCode(packageCostItem.getAmountCost().getCurrencyCode());
+            }
+
+
+
+            return null;
+        }else{
+
+            return JSON.toJSONString(httpResponseVO);
+        }
+    }
+
+
+    /**
+     * 成本第一次获取是调用-LogisticsService
+     * @param delOutbound
+     * @param delSrmCostDetail
+     */
+    private String processForService(DelOutbound delOutbound, DelSrmCostDetail delSrmCostDetail) {
+
+        AnalysisInfo httpRequestDto = new AnalysisInfo()
+        .setService(delOutbound.getSupplierCalcId())
+        .setRefNo(delOutbound.getOrderNo())
+        .setWarehouseCode(delOutbound.getWarehouseCode());
+
+
+        // 包裹
+        AnalysisInfoPackageInfo packages = new AnalysisInfoPackageInfo();
+        packages.setWeight(new Weight().setUnit(delOutbound.getCalcWeightUnit()).setValue(new BigDecimal(delOutbound.getWeight())));
+        if(delOutbound.getBoxNumber() != null){
+            packages.setQuantity(Integer.parseInt(String.valueOf(delOutbound.getBoxNumber())));
+        }
+
+
+
+        httpRequestDto.setPackages(Arrays.asList(packages));
+
+
+        LambdaQueryWrapper<DelOutboundAddress> outboundAddressLambdaQueryWrapper = Wrappers.lambdaQuery();
+        outboundAddressLambdaQueryWrapper.eq(DelOutboundAddress::getOrderNo, delOutbound.getOrderNo());
+        DelOutboundAddress delOutboundAddress = delOutboundAddressService.getOne(outboundAddressLambdaQueryWrapper);
+        if (Objects.nonNull(delOutboundAddress)) {
+            httpRequestDto.setToAddress(new AnalysisInfoAddress()
+                    .setCountryCode(delOutboundAddress.getCountryCode())
+                    .setCountryName(delOutboundAddress.getCountry())
+                    .setCity(delOutboundAddress.getCity())
+                    .setProvince(delOutboundAddress.getStateOrProvince())
+                    .setPostcode(delOutboundAddress.getPostCode())
+            );
+        }
+
+        OperationResultOfChargeWrapperOfPricingChargeInfo httpResponseVO = htpSrmClientService.pricingService(httpRequestDto);
+
+        if (httpResponseVO.getSucceeded() && httpResponseVO.getData() != null){
+            ChargeWrapperOfPricingChargeInfo data = httpResponseVO.getData();
+
+            if(data.getData() != null){
+                delSrmCostDetail.setProductCode(data.getData().getServiceName());
+                delSrmCostDetail.setPdCode(data.getData().getServiceId());
+                delSrmCostDetail.setCuspriceCode(data.getData().getPricingSheet());
+
+
+            }
+
+            BigDecimal amount = new BigDecimal(0);
+            String currencyCode = null;
+            for (ChargeItem item : data.getCharges()){
+
+                if(item.getMoney() != null){
+                    amount = amount.add(item.getMoney().getAmount());
+                    currencyCode = item.getMoney().getCurrencyCode();
+                }
+            }
+
+            delSrmCostDetail.setAmount(amount);
+            delSrmCostDetail.setCurrencyCode(currencyCode);
+
+            return null;
+
+        }else{
+
+            return JSON.toJSONString(httpResponseVO);
+        }
+    }
+
+    /**
+     * 成本第一次获取是调用-LogisticsRoute
+     * @param delOutbound
+     * @param delSrmCostDetail
+     */
+    private String processForRoute(DelOutbound delOutbound, DelSrmCostDetail delSrmCostDetail) {
+
+        AnalysisInfo httpRequestDto = new AnalysisInfo()
+                .setService(delOutbound.getSupplierCalcId())
+                .setRefNo(delOutbound.getOrderNo())
+                .setWarehouseCode(delOutbound.getWarehouseCode());
+
+
+        // 包裹
+        AnalysisInfoPackageInfo packages = new AnalysisInfoPackageInfo();
+        packages.setWeight(new Weight().setUnit(delOutbound.getCalcWeightUnit()).setValue(new BigDecimal(delOutbound.getWeight())));
+        if(delOutbound.getBoxNumber() != null){
+            packages.setQuantity(Integer.parseInt(String.valueOf(delOutbound.getBoxNumber())));
+        }
+
+
+
+        httpRequestDto.setPackages(Arrays.asList(packages));
+
+
+        LambdaQueryWrapper<DelOutboundAddress> outboundAddressLambdaQueryWrapper = Wrappers.lambdaQuery();
+        outboundAddressLambdaQueryWrapper.eq(DelOutboundAddress::getOrderNo, delOutbound.getOrderNo());
+        DelOutboundAddress delOutboundAddress = delOutboundAddressService.getOne(outboundAddressLambdaQueryWrapper);
+        if (Objects.nonNull(delOutboundAddress)) {
+            httpRequestDto.setToAddress(new AnalysisInfoAddress()
+                    .setCountryCode(delOutboundAddress.getCountryCode())
+                    .setCountryName(delOutboundAddress.getCountry())
+                    .setCity(delOutboundAddress.getCity())
+                    .setProvince(delOutboundAddress.getStateOrProvince())
+                    .setPostcode(delOutboundAddress.getPostCode())
+            );
+        }
+
+        OperationResultOfAnalysisRouteResult httpResponseVO = htpSrmClientService.routePathRoute(httpRequestDto);
+
+        if (httpResponseVO.getSucceeded() && httpResponseVO.getData() != null && httpResponseVO.getData().getLinks().size() > 0){
+            ChargeWrapperOfPricingChargeInfo data = httpResponseVO.getData().getLinks().get(0).getChargeModel();
+
+            if(data.getData() != null){
+                delSrmCostDetail.setProductCode(data.getData().getServiceName());
+                delSrmCostDetail.setPdCode(data.getData().getServiceId());
+                delSrmCostDetail.setCuspriceCode(data.getData().getPricingSheet());
+
+
+            }
+
+            BigDecimal amount = new BigDecimal(0);
+            String currencyCode = null;
+            for (ChargeItem item : data.getCharges()){
+
+                if(item.getMoney() != null){
+                    amount = amount.add(item.getMoney().getAmount());
+                    currencyCode = item.getMoney().getCurrencyCode();
+                }
+            }
+
+            delSrmCostDetail.setAmount(amount);
+            delSrmCostDetail.setCurrencyCode(currencyCode);
+
+            return null;
+
+        }else{
+
+            return JSON.toJSONString(httpResponseVO);
+        }
+    }
 
     @Async(value = ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_SRM_REQUEST)
     @Override
@@ -70,25 +251,41 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
         RLock lock = redissonClient.getLock(lockName);
         try {
             if (lock.tryLock(0, TimeUnit.SECONDS)) {
-                String responseBody;
+                String responseBody = null;
                 int failCount = delSrmCostLog.getFailCount();
                 String state;
                 long st = System.currentTimeMillis();
                 Date nextRetryTime = null;
                 boolean success = false;
-                DelSrmCostLogConstant.Type type = DelSrmCostLogConstant.Type.valueOf(delSrmCostLog.getType());
-                OperationResultOfIListOfPackageCost httpResponseVO = null;
+                DelSrmCostLogEnum.Type type = DelSrmCostLogEnum.Type.valueOf(delSrmCostLog.getType());
+                DelOutbound delOutbound = null;
+                DelSrmCostDetail delSrmCostDetail = new DelSrmCostDetail();
                 try {
+                    delOutbound = this.delOutboundService.getByOrderNo(delSrmCostLog.getOrderNo());
+                    if (null == delOutbound) {
+                        throw new RuntimeException("单号不存在系统"+delSrmCostLog.getOrderNo());
+                    }
 
-                    PackageCostRequest httpRequestDto = new PackageCostRequest();
-                    httpRequestDto.setCurrency(delSrmCostLog.getCurrencyCode());
-                    httpRequestDto.setProcessNoList(Arrays.asList(delSrmCostLog.getOrderNo()));
-                    httpResponseVO = htpSrmClientService.packageCostBatch(httpRequestDto);
-                    if (httpResponseVO.getSucceeded() && httpResponseVO.getData().size() > 0 &&
-                            httpResponseVO.getData().get(0).getIsSucesss()){
+
+                    if(type == DelSrmCostLogEnum.Type.create){
+
+                        if(DelOutboundConstant.SUPPLIER_CALC_TYPE_SERVICE.equals(delOutbound.getSupplierCalcType())){
+                            responseBody = processForService(delOutbound, delSrmCostDetail);
+
+                        }else/* if(DelOutboundConstant.SUPPLIER_CALC_TYPE_ROUTE_ID.equals(delOutbound.getSupplierCalcType()))*/{
+                            responseBody = processForRoute(delOutbound, delSrmCostDetail);
+
+                        }
+
+                    }else if(type == DelSrmCostLogEnum.Type.update){
+
+                        responseBody = processForUpdate(delOutbound, delSrmCostDetail);
+                    }
+
+
+                    if(responseBody == null){
                         success = true;
                     }
-                    responseBody = (String) JSON.toJSONString(httpResponseVO);
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                     responseBody = e.getMessage();
@@ -97,55 +294,35 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                     }
                 }
                 if (success) {
-                    state = DelSrmCostLogConstant.State.SUCCESS.name();
-
-                    DelOutbound delOutbound = this.delOutboundService.getByOrderNo(delSrmCostLog.getOrderNo());
-                    if (null == delOutbound) {
-                        return;
-                    }
-
+                    state = DelSrmCostLogEnum.State.SUCCESS.name();
 
                     //生成成本明细,原来有的情况下，先删除老的数据
                     DelSrmCostDetail dataDelSrmCostDetail = delSrmCostDetailService.getByOrderNo(delSrmCostLog.getOrderNo());
                     if(dataDelSrmCostDetail != null){
                         delSrmCostDetailService.deleteDelSrmCostDetailById(String.valueOf(dataDelSrmCostDetail.getId()));
                     }
-                    DelSrmCostDetail delSrmCostDetail = new DelSrmCostDetail();
                     delSrmCostDetail.setOrderNo(delOutbound.getOrderNo());
                     delSrmCostDetail.setOrderTime(delOutbound.getCreateTime());
                     delSrmCostDetail.setCreateTime(new Date());
 
 
                     //接口返回参数拼接
-                    if(httpResponseVO.getData() != null && httpResponseVO.getData().size() > 0){
-                        PackageCost packageCost = httpResponseVO.getData().get(0);
-                        if(packageCost.getCostItems() != null && packageCost.getCostItems().size() > 0){
-                            PackageCostItem packageCostItem = packageCost.getCostItems().get(0);
-                            delSrmCostDetail.setProductCode(packageCostItem.getServiceName());
-                            delSrmCostDetail.setPdCode(packageCostItem.getServiceCode());
-                            delSrmCostDetail.setCuspriceCode(packageCost.getProcessNo());
-                            delSrmCostDetail.setAmount(packageCostItem.getAmountCost().getAmount());
-                            delSrmCostDetail.setCurrencyCode(packageCostItem.getAmountCost().getCurrencyCode());
-                            java.util.Map<String, Object> responseBodyMap = new HashMap();
-                            responseBodyMap.put("productCode", delSrmCostDetail.getProductCode());
-                            responseBodyMap.put("pdCode", delSrmCostDetail.getPdCode());
-                            responseBodyMap.put("cuspriceCode", delSrmCostDetail.getCuspriceCode());
-                            responseBodyMap.put("amount", delSrmCostDetail.getAmount());
-                            responseBodyMap.put("currencyCode", delSrmCostDetail.getCurrencyCode());
-                            responseBody = (String) JSON.toJSONString(responseBody);
-                        }
-
-
-                    }
+                    java.util.Map<String, Object> responseBodyMap = new HashMap();
+                    responseBodyMap.put("productCode", delSrmCostDetail.getProductCode());
+                    responseBodyMap.put("pdCode", delSrmCostDetail.getPdCode());
+                    responseBodyMap.put("cuspriceCode", delSrmCostDetail.getCuspriceCode());
+                    responseBodyMap.put("amount", delSrmCostDetail.getAmount());
+                    responseBodyMap.put("currencyCode", delSrmCostDetail.getCurrencyCode());
+                    responseBody = (String) JSON.toJSONString(responseBody);
                     delSrmCostDetailService.insertDelSrmCostDetail(delSrmCostDetail);
                     
                     
                 } else {
                     failCount++;
                     if (failCount >= retryCount) {
-                        state = DelSrmCostLogConstant.State.FAIL.name();
+                        state = DelSrmCostLogEnum.State.FAIL.name();
                     } else {
-                        state = DelSrmCostLogConstant.State.FAIL_CONTINUE.name();
+                        state = DelSrmCostLogEnum.State.FAIL_CONTINUE.name();
                         int t = retryTimeConfiguration[failCount];
                         nextRetryTime = DateUtils.addSeconds(delSrmCostLog.getNextRetryTime(), t);
                     }

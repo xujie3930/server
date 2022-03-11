@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "AnalysisInfo", description = "AnalysisInfo对象")
+@Accessors(chain = true)
 public class AnalysisInfo {
 
     private String warehouseCode;

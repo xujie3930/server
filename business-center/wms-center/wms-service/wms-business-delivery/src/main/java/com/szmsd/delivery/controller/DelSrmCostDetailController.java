@@ -10,7 +10,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.domain.DelSrmCostDetail;
 import com.szmsd.delivery.domain.DelSrmCostLog;
-import com.szmsd.delivery.enums.DelSrmCostLogConstant;
+import com.szmsd.delivery.enums.DelSrmCostLogEnum;
 import com.szmsd.delivery.event.DelSrmCostLogEvent;
 import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.IDelSrmCostDetailService;
@@ -76,7 +76,7 @@ public class DelSrmCostDetailController extends BaseController{
                 if(dataDelSrmCostDetail != null){
                     DelSrmCostLog delSrmCostLog = new DelSrmCostLog();
                     delSrmCostLog.setOrderNo(dataDelSrmCostDetail.getOrderNo());
-                    delSrmCostLog.setType(DelSrmCostLogConstant.Type.create.name());
+                    delSrmCostLog.setType(DelSrmCostLogEnum.Type.update.name());
                     EventUtil.publishEvent(new DelSrmCostLogEvent(delSrmCostLog));
 
                 }

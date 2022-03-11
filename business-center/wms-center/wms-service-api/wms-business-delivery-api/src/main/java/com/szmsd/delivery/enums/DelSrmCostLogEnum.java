@@ -2,7 +2,7 @@ package com.szmsd.delivery.enums;
 
 import org.springframework.http.HttpMethod;
 
-public final class DelSrmCostLogConstant {
+public final class DelSrmCostLogEnum {
 
     /**
      * 状态
@@ -19,7 +19,8 @@ public final class DelSrmCostLogConstant {
      * 类型
      */
     public enum Type {
-        create(HttpMethod.POST, "createDelSrmCostLogCallback"),
+        create(HttpMethod.POST),
+        update(HttpMethod.POST),
         finished(HttpMethod.PUT),
         cancel(HttpMethod.PUT),
         ;
@@ -35,7 +36,6 @@ public final class DelSrmCostLogConstant {
             this.httpMethod = httpMethod;
             this.callbackService = callbackService;
         }
-
         public HttpMethod getHttpMethod() {
             return httpMethod;
         }
