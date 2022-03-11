@@ -1,8 +1,10 @@
 package com.szmsd.http.dto;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 public class AnalysisInfoAddress {
 
     private String ToNode;

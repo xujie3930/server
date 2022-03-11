@@ -38,4 +38,10 @@ public class DelOutboundConstant {
      */
     public static final String REASSIGN_TYPE_Y = "Y";
     public static final String REASSIGN_TYPE_N = "N";
+
+
+    public static final String SUPPLIER_CALC_TYPE_SERVICE = "LogisticsService";
+
+    public static final String SUPPLIER_CALC_TYPE_ROUTE_ID = "LogisticsRoute";
+
 }
