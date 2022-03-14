@@ -52,4 +52,7 @@ public class BaseProductVO {
 
     @ApiModelProperty(value = "文件信息")
     private List<AttachmentFileDTO> documentsFiles;
+
+    @ApiModelProperty(value = "是否一票多件)")
+    private Integer multipleTicketFlag;
 }

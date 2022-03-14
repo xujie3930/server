@@ -258,4 +258,6 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "用途")
     private String purpose;
 
+    @ApiModelProperty(value = "是否一票多件(0:否,1:是)")
+    private Integer multipleTicketFlag;
 }

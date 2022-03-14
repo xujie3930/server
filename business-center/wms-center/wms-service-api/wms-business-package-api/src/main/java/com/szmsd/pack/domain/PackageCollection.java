@@ -218,4 +218,8 @@ public class PackageCollection extends BaseEntity {
     @ApiModelProperty(value = "idList")
     @TableField(exist = false)
     private List<Long> idList;
+
+    @ApiModelProperty(value = "是否需要明细，Y是，N否")
+    @TableField(exist = false)
+    private String hasDetail;
 }

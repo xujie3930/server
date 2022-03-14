@@ -10,9 +10,11 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBaseProductService;
+import com.szmsd.bas.vo.BasProductMultipleTicketDTO;
 import com.szmsd.bas.vo.BaseProductVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -27,8 +29,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.apache.commons.io.IOUtils;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,10 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 
 /**
@@ -128,6 +125,29 @@ public class BaseProductController extends BaseController {
         }
         baseProductService.importBaseProduct(userList);
         return R.ok();
+    }
+
+    /**
+     * 导出模块列表
+     */
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:export')")
+    @Log(title = "模块", businessType = BusinessType.EXPORT)
+    @GetMapping("/exportTemplate/multipleTicket")
+    @ApiOperation(value = "导出模板-一票多件", notes = "导出模块列表")
+    public void exportTemplate(HttpServletResponse response) throws IOException {
+        ExcelUtil<BasProductMultipleTicketDTO> util = new ExcelUtil<>(BasProductMultipleTicketDTO.class);
+        util.exportExcel(response, new ArrayList<>(), "一票多件");
+    }
+    /**
+     * 导出模块列表
+     */
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:export')")
+    @Log(title = "模块", businessType = BusinessType.EXPORT)
+    @PostMapping("/importTemplate/multipleTicket")
+    @ApiOperation(value = "导入-一票多件", notes = "导出模块列表")
+    public R<Void> importMultipleTicket(@RequestPart("file") MultipartFile file) {
+        String s = baseProductService.importMultipleTicket(file);
+        return StringUtils.isBlank(s)?R.ok():R.failed(s);
     }
 
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:add')")

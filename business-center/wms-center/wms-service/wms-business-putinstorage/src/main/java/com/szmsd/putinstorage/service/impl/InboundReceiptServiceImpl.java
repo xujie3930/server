@@ -623,7 +623,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             R<PackageCollection> packageCollectionR = packageCollectionFeignService.getInfoByNo(queryPackageCollection);
             if (null != packageCollectionR && Constants.SUCCESS == packageCollectionR.getCode()) {
                 PackageCollection packageCollection = packageCollectionR.getData();
-                if (null != packageCollection && "Y".equals(packageCollection.getCollectionPlan())) {
+                // 揽收单处理方式是销毁就创建出库单
+                if (null != packageCollection && "destroy".equals(packageCollection.getHandleMode())) {
                     DelOutboundDto delOutboundDto = new DelOutboundDto();
                     delOutboundDto.setCustomCode(packageCollection.getSellerCode());
                     delOutboundDto.setSellerCode(packageCollection.getSellerCode());
@@ -644,7 +645,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                         detailList.add(delOutboundDetailDto);
                     }
                     delOutboundDto.setDetails(detailList);
-                    DelOutboundAddResponse outboundAddResponse = this.delOutboundClientService.addShipment(delOutboundDto);
+                    DelOutboundAddResponse outboundAddResponse = this.delOutboundClientService.addShipmentPackageCollection(delOutboundDto);
                     if (null != outboundAddResponse) {
                         PackageCollection updatePackageCollection = new PackageCollection();
                         updatePackageCollection.setOutboundNo(outboundAddResponse.getOrderNo());
@@ -961,7 +962,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
 
         createInboundReceiptDTO.setReceiptDetailIds(Lists.newArrayList());
-        createInboundReceiptDTO.setDeliveryNo("");
+        createInboundReceiptDTO.setDeliveryNo(packageCollection.getTrackingNo());
+        createInboundReceiptDTO.setDeliveryNoList(Arrays.asList(packageCollection.getTrackingNo()));
         createInboundReceiptDTO.setOrderNo("");
         createInboundReceiptDTO.setCusCode(packageCollection.getSellerCode());
         createInboundReceiptDTO.setOrderType(InboundReceiptEnum.OrderType.NORMAL.getValue());
@@ -973,7 +975,6 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         createInboundReceiptDTO.setVat("");
         // 预约揽收
         createInboundReceiptDTO.setDeliveryWayCode("053003");
-        createInboundReceiptDTO.setDeliveryNoList(Lists.newArrayList());
 
         createInboundReceiptDTO.setGoodsSourceCode("");
         createInboundReceiptDTO.setTrackingNumber("");
@@ -997,13 +998,13 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceiptDetailDTO.setOriginCode(detail.getSku());
             inboundReceiptDetailDTO.setRemark("");
             inboundReceiptDetailDTO.setEditionImage(new AttachmentFileDTO());
-            inboundReceiptDetailDTO.setDeliveryNo("");
+            inboundReceiptDetailDTO.setDeliveryNo(packageCollection.getOutboundNo());
             return inboundReceiptDetailDTO;
         }).collect(Collectors.toList());
         createInboundReceiptDTO.setInboundReceiptDetails(detailDTOList);
 
         createInboundReceiptDTO.setTotalDeclareQty(qtyTotal.get());
-        createInboundReceiptDTO.setTotalPutQty(qtyTotal.get());
+        createInboundReceiptDTO.setTotalPutQty(0);
         log.info("创建揽收入库单信息：{}", JSONObject.toJSONString(createInboundReceiptDTO));
         return saveOrUpdate(createInboundReceiptDTO);
     }

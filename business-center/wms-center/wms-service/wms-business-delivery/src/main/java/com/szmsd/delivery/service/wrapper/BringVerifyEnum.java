@@ -197,6 +197,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setLength(delOutbound.getLength());
             updateDelOutbound.setWidth(delOutbound.getWidth());
             updateDelOutbound.setHeight(delOutbound.getHeight());
+            updateDelOutbound.setSupplierCalcType(delOutbound.getSupplierCalcType());
+            updateDelOutbound.setSupplierCalcId(delOutbound.getSupplierCalcId());
             // 规格，长*宽*高
             updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
@@ -285,6 +287,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     delOutbound.setLength(Utils.valueOf(packing.getLength()));
                     delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
                     delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
+                    delOutbound.setSupplierCalcType(data.getSupplierCalcType());
+                    delOutbound.setSupplierCalcId(data.getSupplierCalcId());
                     // 计费重信息
                     Weight calcWeight = packageInfo.getCalcWeight();
                     delOutbound.setCalcWeight(calcWeight.getValue());
@@ -339,6 +343,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setCalcWeightUnit("");
             updateDelOutbound.setAmount(BigDecimal.ZERO);
             updateDelOutbound.setCurrencyCode("");
+            updateDelOutbound.setSupplierCalcType("");
+            updateDelOutbound.setSupplierCalcId("");
             // 产品信息
             updateDelOutbound.setTrackingAcquireType("");
             updateDelOutbound.setShipmentService("");
@@ -805,6 +811,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setLength(delOutbound.getLength());
             updateDelOutbound.setWidth(delOutbound.getWidth());
             updateDelOutbound.setHeight(delOutbound.getHeight());
+            updateDelOutbound.setSupplierCalcType(delOutbound.getSupplierCalcType());
+            updateDelOutbound.setSupplierCalcId(delOutbound.getSupplierCalcId());
             // 规格，长*宽*高
             updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());

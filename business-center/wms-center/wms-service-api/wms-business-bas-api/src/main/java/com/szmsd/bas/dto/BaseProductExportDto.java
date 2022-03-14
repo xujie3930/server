@@ -61,4 +61,8 @@ public class BaseProductExportDto {
     @ApiModelProperty(value = "备注")
     @Excel(name = "备注" ,width = 30)
     private String remark;
+
+    @ApiModelProperty(value = "是否一票多件")
+    @Excel(name = "是否一票多件" ,readConverterExp = "0=否,1=是")
+    private Integer multipleTicketFlag;
 }

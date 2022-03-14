@@ -20,14 +20,8 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.enums.*;
-import com.szmsd.delivery.event.DelCk1RequestLogEvent;
-import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
-import com.szmsd.delivery.event.DelTyRequestLogEvent;
-import com.szmsd.delivery.event.EventUtil;
-import com.szmsd.delivery.service.IDelOutboundChargeService;
-import com.szmsd.delivery.service.IDelOutboundCompletedService;
-import com.szmsd.delivery.service.IDelOutboundDetailService;
-import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.event.*;
+import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
@@ -104,6 +98,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private IDelOutboundExceptionService delOutboundExceptionService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
+    @Autowired
+    private IDelSrmCostLogService delSrmCostLogService;
 
     @Override
     public int shipmentPacking(Long id) {
@@ -448,6 +444,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         createInboundReceiptDTO.setInboundReceiptDetails(inboundReceiptDetailAddList);
                         this.inboundReceiptFeignService.saveOrUpdate(createInboundReceiptDTO);
                     }
+
+                    /**
+                     * 推送SRM成本计费计算
+                     */
+                    this.pushSrmCost(delOutbound);
+
                 }
             }
         } catch (Exception e) {
@@ -469,6 +471,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 lock.unlock();
             }
         }
+    }
+    private void pushSrmCost(DelOutbound delOutbound) {
+        // 请求体的内容异步填充
+        DelSrmCostLog delSrmCostLog = new DelSrmCostLog();
+        delSrmCostLog.setOrderNo(delOutbound.getOrderNo());
+        delSrmCostLog.setType(DelSrmCostLogEnum.Type.create.name());
+        EventUtil.publishEvent(new DelSrmCostLogEvent(delSrmCostLog));
     }
 
     private void pushTy(DelOutbound delOutbound) {

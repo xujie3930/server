@@ -2,6 +2,7 @@ package com.szmsd.bas.dto;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.utils.StringUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -103,7 +104,20 @@ public class BaseProductImportDto {
 
     @ApiModelProperty(value = "价格区间")
     private String priceRange;
+    @ExcelProperty(index = 15)
+    @ApiModelProperty(value = "是否一票多件)")
+    private String multipleTicketFlagStr;
 
+    public void setMultipleTicketFlagStr(String multipleTicketFlagStr) {
+        this.multipleTicketFlagStr = multipleTicketFlagStr;
+        if (StringUtils.isNotBlank(multipleTicketFlagStr) && "是".equals(multipleTicketFlagStr)) {
+            this.multipleTicketFlag = 1;
+        } else {
+            this.multipleTicketFlag = 0;
+        }
+    }
 
+    @ApiModelProperty(value = "是否一票多件)")
+    private Integer multipleTicketFlag;
 
 }

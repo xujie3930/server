@@ -98,12 +98,12 @@ public class DelTrackController extends BaseController {
 
     @ApiOperation(value = "用于接收TrackingYee回调的路由信息", notes = "")
     @PostMapping("/traceCallback")
-    public R traceCallback(HttpServletRequest request, @RequestBody Object params){
+    public R traceCallback(@RequestHeader(value = "trackingyee-webhook-signature") String trackingyeeSign,@RequestBody Object params){
         if(params == null) {
             return R.failed("非法请求，参数异常！");
         }
         // 验证签名
-        String trackingyeeSign = request.getHeader("trackingyee-webhook-signature");
+//        String trackingyeeSign = request.getHeader("trackingyee-webhook-signature");
         String requestStr = JSONObject.toJSONString(params, SerializerFeature.WriteMapNullValue);
         String verifySign = SHA256Util.getSHA256Str(webhookSecret + requestStr);
         log.info("trackingyeeSign: {}", trackingyeeSign);

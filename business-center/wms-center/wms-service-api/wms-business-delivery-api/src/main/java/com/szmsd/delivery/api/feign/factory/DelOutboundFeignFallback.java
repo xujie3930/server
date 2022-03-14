@@ -103,6 +103,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             }
 
             @Override
+            public R<DelOutboundAddResponse> addShipmentPackageCollection(DelOutboundDto dto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R<List<DelOutboundLabelResponse>> labelBase64(DelOutboundLabelDto dto) {
                 return R.convertResultJson(throwable);
             }

@@ -51,6 +51,10 @@ public final class EventUtil implements ApplicationContextAware {
         EventUtil.applicationContext.publishEvent(event);
     }
 
+    public static void publishEvent(DelSrmCostLogEvent event) {
+        EventUtil.applicationContext.publishEvent(event);
+    }
+
     @Override
     public void setApplicationContext(@Nullable ApplicationContext applicationContext) throws BeansException {
         EventUtil.applicationContext = applicationContext;

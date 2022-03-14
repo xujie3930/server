@@ -22,6 +22,9 @@ import com.szmsd.delivery.service.IDelTrackService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.PricedProductInServiceCriteria;
 import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.pack.api.feign.PackageCollectionFeignService;
+import com.szmsd.pack.constant.PackageConstant;
+import com.szmsd.pack.domain.PackageCollection;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +59,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     @Autowired
     private IHtpPricedProductClientService htpPricedProductClientService;
 
+    @Autowired
+    private PackageCollectionFeignService packageCollectionFeignService;
+
     /**
      * 查询模块
      *
@@ -80,12 +86,23 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         delTrackLambdaQueryWrapper.eq(orderNoNotEmpty, DelTrack::getOrderNo, delTrack.getOrderNo());
         List<DelTrack> selectList = baseMapper.selectList(delTrackLambdaQueryWrapper);
         if (CollectionUtils.isNotEmpty(selectList) && orderNoNotEmpty) {
-            LambdaQueryWrapper<DelOutbound> delOutboundLambdaQueryWrapper = Wrappers.lambdaQuery();
-            delOutboundLambdaQueryWrapper.eq(DelOutbound::getOrderNo, delTrack.getOrderNo());
-            DelOutbound delOutbound = delOutboundMapper.selectOne(delOutboundLambdaQueryWrapper);
             String carrierCode = "";
-            if (null != delOutbound) {
-                carrierCode = delOutbound.getLogisticsProviderCode();
+            if ("DEL".equals(delTrack.getSourceType())) {
+                LambdaQueryWrapper<DelOutbound> delOutboundLambdaQueryWrapper = Wrappers.lambdaQuery();
+                delOutboundLambdaQueryWrapper.eq(DelOutbound::getOrderNo, delTrack.getOrderNo());
+                DelOutbound delOutbound = delOutboundMapper.selectOne(delOutboundLambdaQueryWrapper);
+                if (null != delOutbound) {
+                    carrierCode = delOutbound.getLogisticsProviderCode();
+                }
+            } else if ("PCK".equals(delTrack.getSourceType())) {
+                PackageCollection queryPackageCollection = new PackageCollection();
+                queryPackageCollection.setCollectionNo(delTrack.getOrderNo());
+                queryPackageCollection.setHasDetail("N");
+                R<PackageCollection> packageCollectionR = packageCollectionFeignService.getInfoByNo(queryPackageCollection);
+                if (null != packageCollectionR) {
+                    PackageCollection packageCollection = packageCollectionR.getData();
+                    carrierCode = packageCollection.getLogisticsProviderCode();
+                }
             }
             // default Y
             String filterKeyword = delTrack.getFilterKeyword();
@@ -181,10 +198,20 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             if (logisticsTracking != null && logisticsTracking.getTrackingNo().equalsIgnoreCase(trackingYeeTraceDto.getTrackingNo())) {
                 List<TrackingYeeTraceDto.ItemsDto> trackingItems = logisticsTracking.getItems();
                 trackingItems.forEach(item -> {
+                    // 获取时间
+                    Date trackingTime = null;
+                    TrackingYeeTraceDto.TrackingTimeDto trackingTimeDto = item.getTrackingTime();
+                    if (trackingTimeDto != null) {
+                        String trackingTimeStr = trackingTimeDto.getUtcTime();
+                        if (StringUtils.isNotBlank(trackingTimeStr)) {
+                            trackingTime = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeStr.replace("T", " ").replace("Z", ""));
+                        }
+                    }
+
                     // 校验路由信息存不存在
                     Integer trackCount = this.count(new LambdaQueryWrapper<DelTrack>().eq(DelTrack::getOrderNo, trackingYeeTraceDto.getOrderNo())
                             .eq(DelTrack::getTrackingNo, trackingYeeTraceDto.getTrackingNo())
-                            .eq(DelTrack::getNo, item.getNo()).last("limit 1"));
+                            .eq(DelTrack::getTrackingTime, trackingTime));
                     if (trackCount == 0) {
                         DelTrack delTrack = new DelTrack();
                         delTrack.setTrackingNo(trackingYeeTraceDto.getTrackingNo());
@@ -194,14 +221,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         delTrack.setTrackingStatus(logisticsTracking.getStatus());
                         delTrack.setNo(item.getNo());
                         delTrack.setDescription(item.getDescription());
-                        // 获取时间
-                        TrackingYeeTraceDto.TrackingTimeDto trackingTime = item.getTrackingTime();
-                        if (trackingTime != null) {
-                            String trackingTimeStr = trackingTime.getDateTime();
-                            if (StringUtils.isNotBlank(trackingTimeStr)) {
-                                delTrack.setTrackingTime(DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeStr.replace("T"," ").replace("+", " ")));
-                            }
-                        }
+                        delTrack.setTrackingTime(trackingTime);
                         delTrack.setActionCode(item.getActionCode());
                         // 获取地址
                         TrackingYeeTraceDto.LocationDto itemLocation = item.getLocation();
@@ -230,15 +250,28 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         });
         if (CollectionUtils.isNotEmpty(trackList)) {
             this.saveBatch(trackList);
-            DelOutbound delOutbound = delOutboundMapper.selectOne(new LambdaQueryWrapper<DelOutbound>().eq(DelOutbound::getOrderNo, trackingYeeTraceDto.getOrderNo()).last("limit 1"));
-            if (delOutbound != null) {
-                List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getNo).reversed()).collect(Collectors.toList());
-                DelTrack delTrack = delTrackList.get(0);
-                DelOutbound updateDelOutbound = new DelOutbound();
-                updateDelOutbound.setId(delOutbound.getId());
-                updateDelOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
-                updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
-                delOutboundMapper.updateById(updateDelOutbound);
+            if (StringUtils.isBlank(trackingYeeTraceDto.getOrderNo())) {
+                return;
+            }
+            // 如果LS开头的单号则为揽收单 修改揽收单的状态
+            if (trackingYeeTraceDto.getOrderNo().startsWith(PackageConstant.LS_PREFIX)) {
+                // 已妥投修改揽收单状态为完成
+                if ("Delivered".equalsIgnoreCase(trackingYeeTraceDto.getTrackingStatus())) {
+                    packageCollectionFeignService.updateCollectingCompleted(trackingYeeTraceDto.getOrderNo());
+                } else {
+                    packageCollectionFeignService.updateCollecting(trackingYeeTraceDto.getOrderNo());
+                }
+            } else {
+                DelOutbound delOutbound = delOutboundMapper.selectOne(new LambdaQueryWrapper<DelOutbound>().eq(DelOutbound::getOrderNo, trackingYeeTraceDto.getOrderNo()).last("limit 1"));
+                if (delOutbound != null) {
+                    List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getNo).reversed()).collect(Collectors.toList());
+                    DelTrack delTrack = delTrackList.get(0);
+                    DelOutbound updateDelOutbound = new DelOutbound();
+                    updateDelOutbound.setId(delOutbound.getId());
+                    updateDelOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
+                    updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
+                    delOutboundMapper.updateById(updateDelOutbound);
+                }
             }
         }
     }
@@ -248,14 +281,14 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         List<TrackAnalysisDto> trackAnalysis = baseMapper.getTrackAnalysis(queryWrapper(requestDto));
         List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
         Map<String, String> subList = basSubClientService.getSubList("099"); // 099为轨迹状态
-        subList.forEach((k,v) -> {
+        subList.forEach((k, v) -> {
             TrackAnalysisDto analysisDto = new TrackAnalysisDto();
             analysisDto.setKeyName(k);
             analysisDto.setKeyCode(v);
             TrackAnalysisDto trackAnalysisDto = trackAnalysis.stream().filter(a -> a.getKeyCode().equalsIgnoreCase(v)).findFirst().orElse(null);
             if (trackAnalysisDto != null) {
                 analysisDto.setNum(trackAnalysisDto.getNum());
-            }else {
+            } else {
                 analysisDto.setNum(0);
             }
             trackAnalysisResult.add(analysisDto);
@@ -279,7 +312,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             TrackAnalysisDto trackAnalysisDto = serviceAnalysis.stream().filter(a -> a.getKeyCode().equalsIgnoreCase(p.getCode())).findFirst().orElse(null);
             if (trackAnalysisDto != null) {
                 analysisDto.setNum(trackAnalysisDto.getNum());
-            }else {
+            } else {
                 analysisDto.setNum(0);
             }
             trackAnalysisResult.add(analysisDto);
@@ -299,7 +332,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         List<TrackAnalysisExportDto> exportData = baseMapper.getAnalysisExportData(queryWrapper(requestDto).ne("a.order_no", ""));
         exportData.forEach(data -> {
             // 设置物流状态中文
-            subList.forEach((k,v) -> {
+            subList.forEach((k, v) -> {
                 if (v.equalsIgnoreCase(data.getTrackingStatus())) {
                     data.setTrackingStatus(k);
                     return;
@@ -313,19 +346,19 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         return exportData;
     }
 
-    private QueryWrapper<TrackAnalysisRequestDto> queryWrapper(TrackAnalysisRequestDto requestDto){
+    private QueryWrapper<TrackAnalysisRequestDto> queryWrapper(TrackAnalysisRequestDto requestDto) {
         QueryWrapper<TrackAnalysisRequestDto> wrapper = new QueryWrapper<>();
-        wrapper.eq(StringUtils.isNotBlank(requestDto.getShipmentService()) , "a.shipment_service", requestDto.getShipmentService());
-        wrapper.eq(StringUtils.isNotBlank(requestDto.getCountryCode()) , "b.country_code", requestDto.getCountryCode());
-        wrapper.eq(StringUtils.isNotBlank(requestDto.getWarehouseCode()) , "a.warehouse_code", requestDto.getWarehouseCode());
-        wrapper.eq(StringUtils.isNotBlank(requestDto.getTrackingStatus()) , "a.tracking_status", requestDto.getTrackingStatus());
-        if (requestDto.getDateType() != null){
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getShipmentService()), "a.shipment_rule", requestDto.getShipmentService());
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getCountryCode()), "b.country_code", requestDto.getCountryCode());
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getWarehouseCode()), "a.warehouse_code", requestDto.getWarehouseCode());
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getTrackingStatus()), "a.tracking_status", requestDto.getTrackingStatus());
+        if (requestDto.getDateType() != null) {
             if (requestDto.getDateType() == 1) {
-                wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()) , "a.create_time", DateUtils.parseDate(requestDto.getStartTime()));
-                wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()) , "a.create_time", DateUtils.parseDate(requestDto.getEndTime()));
-            }else {
-                wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()) , "a.shipments_time", DateUtils.parseDate(requestDto.getStartTime()));
-                wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()) , "a.shipments_time", DateUtils.parseDate(requestDto.getEndTime()));
+                wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()), "a.create_time", DateUtils.parseDate(requestDto.getStartTime()));
+                wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()), "a.create_time", DateUtils.parseDate(requestDto.getEndTime()));
+            } else {
+                wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()), "a.shipments_time", DateUtils.parseDate(requestDto.getStartTime()));
+                wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()), "a.shipments_time", DateUtils.parseDate(requestDto.getEndTime()));
             }
         }
         return wrapper;

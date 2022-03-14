@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.dao.BasCarrierKeywordMapper;
 import com.szmsd.bas.domain.BasCarrierKeyword;
+import com.szmsd.bas.event.KeywordSyncEvent;
 import com.szmsd.bas.keyword.KeywordsInit;
 import com.szmsd.bas.keyword.KeywordsUtil;
 import com.szmsd.bas.service.IBasCarrierKeywordService;
 import com.szmsd.common.core.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +29,9 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
 
     @Autowired
     private KeywordsInit keywordsInit;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     /**
      * 查询模块
@@ -61,7 +66,9 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
      */
     @Override
     public int insertBasCarrierKeyword(BasCarrierKeyword basCarrierKeyword) {
-        return baseMapper.insert(basCarrierKeyword);
+        int result = baseMapper.insert(basCarrierKeyword);
+        applicationContext.publishEvent(new KeywordSyncEvent(basCarrierKeyword.getCarrierCode()));
+        return result;
     }
 
     /**
@@ -72,7 +79,9 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
      */
     @Override
     public int updateBasCarrierKeyword(BasCarrierKeyword basCarrierKeyword) {
-        return baseMapper.updateById(basCarrierKeyword);
+        int result = baseMapper.updateById(basCarrierKeyword);
+        applicationContext.publishEvent(new KeywordSyncEvent(basCarrierKeyword.getCarrierCode()));
+        return result;
     }
 
     /**
