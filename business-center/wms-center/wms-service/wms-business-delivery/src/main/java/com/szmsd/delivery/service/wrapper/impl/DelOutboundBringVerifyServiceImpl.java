@@ -411,7 +411,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         ));
         // 联系信息
         calcShipmentFeeCommand.setToContactInfo(new ContactInfo(address.getConsignee(), address.getPhoneNo(), address.getEmail(), null));
-        calcShipmentFeeCommand.setCalcTimeForDiscount(new Date());
+        // calcShipmentFeeCommand.setCalcTimeForDiscount(new Date());
         // 调用接口
         return this.htpPricedProductClientService.pricing(calcShipmentFeeCommand);
     }
