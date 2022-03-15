@@ -800,7 +800,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
         // 只查询自己的揽收单
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (null != loginUser) {
-            queryWrapper.eq(PackageCollection::getSellerCode, loginUser.getSellerCode());
+            String sellerCode = loginUser.getSellerCode();
+            queryWrapper.eq(StringUtils.isNotEmpty(sellerCode), PackageCollection::getSellerCode, sellerCode);
         }
         // 揽收单号
         this.autoSettingListCondition(queryWrapper, PackageCollection::getCollectionNo, this.getTextList(dto.getCollectionNo()));
