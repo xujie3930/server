@@ -55,7 +55,8 @@ public class DelOutboundBatchImportValidation implements ImportValidation<DelOut
         }
         String countryCode = this.getCountryCode(country);
         this.importContext.isEmpty(countryCode, rowIndex, 15, country, "国家不存在");
-        this.importContext.isEmpty(object.getPhoneNo(), 16, rowIndex, null, "联系方式不能为空");
+        // 界面上不是必填的，导入也不要
+        // this.importContext.isEmpty(object.getPhoneNo(), rowIndex, 16, null, "联系方式不能为空");
     }
 
     public String getCountryCode(String country) {
