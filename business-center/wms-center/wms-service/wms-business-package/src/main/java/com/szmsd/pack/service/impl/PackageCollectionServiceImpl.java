@@ -20,6 +20,8 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
@@ -795,6 +797,11 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     public IPage<PackageCollection> page(PackageCollectionQueryDto dto) {
         IPage<PackageCollection> iPage = new Page<>(dto.getPageNum(), dto.getPageSize());
         LambdaQueryWrapper<PackageCollection> queryWrapper = Wrappers.lambdaQuery();
+        // 只查询自己的揽收单
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (null != loginUser) {
+            queryWrapper.eq(PackageCollection::getSellerCode, loginUser.getSellerCode());
+        }
         // 揽收单号
         this.autoSettingListCondition(queryWrapper, PackageCollection::getCollectionNo, this.getTextList(dto.getCollectionNo()));
         // 跟踪号
