@@ -330,6 +330,9 @@ public class HttpClientHelper {
                 if (entity != null) {
                     result = EntityUtils.toString(entity, "UTF-8");
                 }
+                if (status == 500 && entity == null) {
+                    result = "{\"errors\":\"未知异常请联系管理员\"}";
+                }
             }
             return new HttpResponseBody.HttpResponseBodyWrapper(status, result);
         } catch (Exception e) {
