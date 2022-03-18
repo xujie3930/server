@@ -60,7 +60,7 @@
         FROM
         (
         SELECT sku, sku_name,
-        IF (`status` = 0 , 0 , declare_qty) as declare_qty,
+        IF (`status` = 5 OR `status` = 0 , 0 , declare_qty) as declare_qty,
         put_qty, `status`,
         IF ( `status` = 5 OR `status` = 0, 0, IF (( declare_qty - put_qty ) > 0,( declare_qty - put_qty ), 0)) AS inTransitTotal
         FROM
