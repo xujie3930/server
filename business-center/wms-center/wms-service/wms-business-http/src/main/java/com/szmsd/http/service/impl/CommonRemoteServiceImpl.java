@@ -1,5 +1,7 @@
 package com.szmsd.http.service.impl;
 
+import com.szmsd.http.dto.ProductRequest;
+import com.szmsd.http.service.IBasService;
 import com.szmsd.http.vo.HttpResponseVO;
 
 import com.alibaba.fastjson.JSONObject;
@@ -14,6 +16,7 @@ import com.szmsd.http.enums.RemoteConstant;
 import com.szmsd.http.mapper.CommonScanMapper;
 import com.szmsd.http.service.ICommonRemoteService;
 import com.szmsd.http.service.RemoteInterfaceService;
+import com.szmsd.http.vo.ResponseVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,8 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
     private HttpServletRequest httpServletRequest;
     @Resource
     private RemoteInterfaceService remoteInterfaceService;
+    @Resource
+    private IBasService iBasService;
 
     /**
      * 实际 单线程 执行任务
@@ -55,6 +60,8 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
 
         log.info("开始调用-{}", oneTask);
         Integer scanType = oneTask.getRemoteType();
+        RemoteTypeEnum scanEnumByType = RemoteTypeEnum.getScanEnumByType(scanType);
+
         oneTask.setRequestStatus(RemoteConstant.RemoteStatusEnum.SUCCESS.getStatus());
         oneTask.setReRequestTime(LocalDateTime.now());
         oneTask.setRetryTimes(oneTask.getRetryTimes() + 1);
@@ -68,14 +75,29 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
         httpRequestDto.setBinary(false);
 
         try {
-            HttpResponseVO rmi = remoteInterfaceService.rmi(httpRequestDto);
-            String errorMsg = rmi.getErrorMsg();
-            log.info("【RMI】SYNC 开始调用-{}", httpRequestDto);
-            if (StringUtils.isNotBlank(errorMsg)) {
-                oneTask.setRequestStatus(RemoteStatusEnum.FAIL.getStatus());
-                oneTask.setErrorMsg(errorMsg);
+            if ("CK1".equals(scanEnumByType.getTypeName())) {
+                HttpResponseVO rmi = remoteInterfaceService.rmi(httpRequestDto);
+                String errorMsg = rmi.getErrorMsg();
+                log.info("【RMI】SYNC 开始调用-{}", httpRequestDto);
+                if (StringUtils.isNotBlank(errorMsg)) {
+                    oneTask.setRequestStatus(RemoteStatusEnum.FAIL.getStatus());
+                    oneTask.setErrorMsg(errorMsg);
+                } else {
+                    oneTask.setRequestStatus(RemoteStatusEnum.SUCCESS.getStatus());
+                }
             } else {
-                oneTask.setRequestStatus(RemoteStatusEnum.SUCCESS.getStatus());
+                ResponseVO responseVO = new ResponseVO();
+                // 出口易接口单独调用
+                switch (scanEnumByType) {
+                    case WMS_SKU_CREATE:
+                        ProductRequest productRequest = JSONObject.parseObject(oneTask.getRequestParams(), ProductRequest.class);
+                        log.info("【WMS】SYNC 【sku创建】-{}", productRequest);
+                        responseVO = iBasService.createProduct(productRequest);
+                        break;
+                    default:
+                        break;
+                }
+                ResponseVO.resultAssert(responseVO, scanEnumByType.getDesc());
             }
         } catch (Exception e) {
             log.error("推送失败请求参数：{}\n", oneTask, e);
