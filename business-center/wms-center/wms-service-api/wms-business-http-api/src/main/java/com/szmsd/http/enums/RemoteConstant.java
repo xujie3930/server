@@ -51,6 +51,8 @@ public class RemoteConstant {
         ADJUST_INVENTORY(5, CK1, Object.class),
 
         WMS_SKU_CREATE(6, WMS, Object.class, "SKU创建"),
+        WMS_INBOUND_CREATE(7, WMS, Object.class, "入库单创建"),
+        WMS_INBOUND_LOGISTICS_CREATE(8, WMS, Object.class, "入库单物流创建"),
         ;
         private Integer typeCode;
         private String typeName;

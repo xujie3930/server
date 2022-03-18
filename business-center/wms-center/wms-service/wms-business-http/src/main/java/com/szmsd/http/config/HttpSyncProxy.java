@@ -1,10 +1,13 @@
 package com.szmsd.http.config;
 
 import com.szmsd.http.dto.*;
+import com.szmsd.http.enums.RemoteConstant;
 import com.szmsd.http.service.IBasService;
 import com.szmsd.http.service.ICommonRemoteService;
+import com.szmsd.http.service.IInboundService;
 import com.szmsd.http.service.IRemoteExecutorTask;
 import com.szmsd.http.vo.BaseOperationResponse;
+import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +25,11 @@ import javax.annotation.Resource;
 @Data
 @Slf4j
 @Component
-public class HttpSyncProxy implements IBasService {
+public class HttpSyncProxy implements IBasService, IInboundService {
 
     @Resource
     private IBasService iBasService;
+    @Resource
     private ICommonRemoteService iCommonRemoteService;
     /**
      * 新增/修改物料
@@ -35,7 +39,7 @@ public class HttpSyncProxy implements IBasService {
      */
     @Override
     public ResponseVO createPacking(PackingRequest packingRequest) {
-        return iBasService.createPacking(packingRequest);
+        return null;
     }
 
     /**
@@ -46,7 +50,8 @@ public class HttpSyncProxy implements IBasService {
      */
     @Override
     public ResponseVO createProduct(ProductRequest productRequest) {
-        return null;
+        iCommonRemoteService.insertObj(productRequest, RemoteConstant.RemoteTypeEnum.WMS_SKU_CREATE);
+        return new ResponseVO();
     }
 
     /**
@@ -107,5 +112,27 @@ public class HttpSyncProxy implements IBasService {
     @Override
     public ResponseVO inspection(AddSkuInspectionRequest request) {
         return null;
+    }
+
+    @Override
+    public CreateReceiptResponse create(CreateReceiptRequest createReceiptRequestDTO) {
+        iCommonRemoteService.insertObj(createReceiptRequestDTO, RemoteConstant.RemoteTypeEnum.WMS_INBOUND_CREATE);
+        return new CreateReceiptResponse();
+    }
+
+    @Override
+    public ResponseVO cancel(CancelReceiptRequest cancelReceiptRequestDTO) {
+        return null;
+    }
+
+    @Override
+    public ResponseVO createPackage(CreatePackageReceiptRequest createPackageReceiptRequest) {
+        return null;
+    }
+
+    @Override
+    public ResponseVO createTracking(CreateTrackRequest createTrackRequest) {
+        iCommonRemoteService.insertObj(createTrackRequest, RemoteConstant.RemoteTypeEnum.WMS_INBOUND_LOGISTICS_CREATE);
+        return new ResponseVO();
     }
 }

@@ -408,6 +408,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             ProductRequest productRequest = tuple.getT2();
             CompletableFuture<BaseProduct> future = CompletableFuture.supplyAsync(() -> {
                 R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
+                R.getDataAndException(r);
                 //验证wms
                 toWms(r);
                 log.info("【推送WMS】SKU创建推送 {} 返回 {}", productRequest, JSONObject.toJSONString(r));
