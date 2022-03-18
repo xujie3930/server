@@ -79,7 +79,7 @@
             <if test="sellerCode != null and sellerCode != ''">
                 AND ir.cus_code = #{sellerCode}
             </if>
-           AND status in (3,4)
+           AND status in (0,3,4,5)
         </where>
         ) temp
         GROUP BY sku
