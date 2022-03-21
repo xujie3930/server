@@ -206,7 +206,11 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                     if (trackingTimeDto != null) {
                         String trackingTimeStr = trackingTimeDto.getUtcTime();
                         if (StringUtils.isNotBlank(trackingTimeStr)) {
+                            // UTC Date
                             trackingTime = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeStr.replace("T", " ").replace("Z", ""));
+                        }else {
+                            // Normal Date
+                            trackingTime = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeDto.getDateTime());
                         }
                     }
 
