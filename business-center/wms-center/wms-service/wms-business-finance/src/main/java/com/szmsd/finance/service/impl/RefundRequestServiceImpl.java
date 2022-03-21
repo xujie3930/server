@@ -331,6 +331,12 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(refundReviewDTO));
             log.error("退费业务处理超时,请稍候重试", e);
             throw new RuntimeException("退费业务处理超时,请稍候重试");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+                log.info("【退费】RefundPayFactory 解锁结束--");
+            }
+            log.info("【退费】RefundPayFactory --结束--");
         }
     }
 
