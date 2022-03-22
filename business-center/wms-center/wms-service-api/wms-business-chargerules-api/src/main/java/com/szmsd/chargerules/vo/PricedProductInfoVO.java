@@ -210,6 +210,12 @@ public class PricedProductInfoVO {
             this.setSupplierCalcType(SupplierCalcTypeEnum.convertToSubCode(supplierCalcType));
         }
     }
+
+    @ApiModelProperty(value = "是否提货服务")
+    private Boolean isPickupPackageServce;
+
+    @ApiModelProperty(value = "提货服务名称:serviceName")
+    private String pickupPackageServiceName;
 }
 
 @Getter
