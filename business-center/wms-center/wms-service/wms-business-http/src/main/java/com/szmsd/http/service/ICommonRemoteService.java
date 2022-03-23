@@ -23,5 +23,7 @@ public interface ICommonRemoteService extends IService<CommonRemote> {
     CommonRemote getOneTask(Integer id, RemoteConstant.RemoteTypeEnum remoteTypeEnum);
 
     void insertRmiOne(HttpRequestSyncDTO dto);
+
+    void insertObj(Object obj, RemoteConstant.RemoteTypeEnum remoteTypeEnum);
 }
 

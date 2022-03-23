@@ -6,6 +6,7 @@ import com.szmsd.http.dto.CancelReceiptRequest;
 import com.szmsd.http.dto.CreatePackageReceiptRequest;
 import com.szmsd.http.dto.CreateReceiptRequest;
 import com.szmsd.http.dto.CreateTrackRequest;
+import com.szmsd.http.service.IBasService;
 import com.szmsd.http.service.IInboundService;
 import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.ResponseVO;
@@ -25,10 +26,14 @@ public class InboundController extends BaseController {
     @Resource
     private IInboundService iInboundService;
 
+    @Resource
+    private IInboundService httpSyncProxy;
+
     @PostMapping("/receipt")
     @ApiOperation(value = "B1 创建入库单")
     public R<CreateReceiptResponse> create(@RequestBody CreateReceiptRequest createReceiptRequestDTO) {
         CreateReceiptResponse createReceiptResponse = iInboundService.create(createReceiptRequestDTO);
+//        CreateReceiptResponse createReceiptResponse = httpSyncProxy.create(createReceiptRequestDTO);
         return R.ok(createReceiptResponse);
     }
 
@@ -50,6 +55,7 @@ public class InboundController extends BaseController {
     @ApiOperation(value = "B4 创建入库单物流信息列表")
     public R<ResponseVO> createTracking(@RequestBody CreateTrackRequest createTrackRequest) {
         ResponseVO createTracking = iInboundService.createTracking(createTrackRequest);
+        //ResponseVO createTracking = httpSyncProxy.createTracking(createTrackRequest);
         return R.ok(createTracking);
     }
 }

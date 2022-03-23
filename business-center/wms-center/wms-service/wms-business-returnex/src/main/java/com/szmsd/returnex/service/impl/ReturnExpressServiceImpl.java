@@ -73,6 +73,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -1033,7 +1034,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         delOutboundDto.setRefNo(infoByNo.getReturnNo());
         delOutboundDto.setRefOrderNo(expectedNo);
         delOutboundDto.setShipmentRule(getStrOrDefault(importReassignDTO.getShipmentRule(), delOutboundVO.getShipmentRule()));
-        delOutboundDto.setRemark(getStrOrDefault(importReassignDTO.getShipmentRule(), ""));
+        delOutboundDto.setRemark(getStrOrDefault(importReassignDTO.getRemark(), delOutboundVO.getRemark()));
+        BigDecimal codAmount = importReassignDTO.getCodAmount() == null ? Optional.ofNullable(delOutboundVO.getCodAmount()).orElse(BigDecimal.ZERO) : importReassignDTO.getCodAmount();
+        delOutboundDto.setCodAmount(codAmount);
         //地址信息
         DelOutboundAddressDto delOutboundAddressDto = Optional.ofNullable(delOutboundDto.getAddress()).orElse(new DelOutboundAddressDto());
         delOutboundDto.setAddress(delOutboundAddressDto);

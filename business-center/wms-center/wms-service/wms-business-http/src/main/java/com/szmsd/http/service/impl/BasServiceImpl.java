@@ -9,7 +9,7 @@ import com.szmsd.http.vo.BaseOperationResponse;
 import com.szmsd.http.vo.ResponseVO;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service(value = "iBasService")
 public class BasServiceImpl extends WmsRequest implements IBasService {
 
     public BasServiceImpl(HttpConfig httpConfig) {

@@ -21,6 +21,8 @@ import javax.annotation.Resource;
 public class BasController extends BaseController {
     @Resource
     private IBasService iBasService;
+    @Resource
+    private IBasService httpSyncProxy;
 
     @PostMapping("/createPacking")
     @ApiOperation(value = "新增/修改物料")
@@ -32,7 +34,7 @@ public class BasController extends BaseController {
     @PostMapping("/createProduct")
     @ApiOperation(value = "新增/修改sku")
     public R<ResponseVO> createProduct(@RequestBody ProductRequest productRequest) {
-        ResponseVO responseVO = iBasService.createProduct(productRequest);
+        ResponseVO responseVO = httpSyncProxy.createProduct(productRequest);
         return R.ok(responseVO);
     }
 

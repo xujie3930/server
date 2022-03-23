@@ -60,7 +60,7 @@
         FROM
         (
         SELECT sku, sku_name,
-        IF (`status` = 0 , 0 , declare_qty) as declare_qty,
+        IF (`status` = 5 OR `status` = 0 , 0 , declare_qty) as declare_qty,
         put_qty, `status`,
         IF ( `status` = 5 OR `status` = 0, 0, IF (( declare_qty - put_qty ) > 0,( declare_qty - put_qty ), 0)) AS inTransitTotal
         FROM
@@ -76,7 +76,10 @@
                     #{item}
                 </foreach>
             </if>
-            AND ird.create_by = #{userId} AND status in (3,4)
+            <if test="sellerCode != null and sellerCode != ''">
+                AND ir.cus_code = #{sellerCode}
+            </if>
+           AND status in (0,3,4,5)
         </where>
         ) temp
         GROUP BY sku

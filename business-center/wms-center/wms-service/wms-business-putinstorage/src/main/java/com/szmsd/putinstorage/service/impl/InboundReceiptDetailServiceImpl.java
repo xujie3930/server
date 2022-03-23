@@ -210,8 +210,8 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
 
     @Override
     public List<SkuInventoryStockRangeVo> querySkuStockByRange(InventoryStockByRangeDTO inventoryStockByRangeDTO) {
-        Long userId = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getUserId).orElse(-1L);
-        return baseMapper.querySkuStockByRange(inventoryStockByRangeDTO,userId);
+        String sellerCode = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        return baseMapper.querySkuStockByRange(inventoryStockByRangeDTO,sellerCode);
     }
 
     @Override

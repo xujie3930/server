@@ -4,7 +4,6 @@ import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.thread.NamedThreadFactory;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.event.SyncReadListener;
-import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -36,14 +35,13 @@ import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -70,7 +68,8 @@ import java.util.stream.Collectors;
 public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, FssRefundRequest> implements IRefundRequestService {
     @Resource
     private IRemoteApi remoteApi;
-
+    @Resource
+    private RedissonClient redissonClient;
     @Resource
     private IAccountBalanceService accountBalanceService;
 
@@ -295,28 +294,50 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         }
     }
 
+    public static final long time = 90L;
+    public static final TimeUnit unit = TimeUnit.SECONDS;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int approve(RefundReviewDTO refundReviewDTO) {
-        List<String> ids = refundReviewDTO.getIdList();
-        RefundStatusEnum status = refundReviewDTO.getStatus();
-        String reviewRemark = refundReviewDTO.getReviewRemark();
-        LoginUser loginUser = SecurityUtils.getLoginUser();
-        int update = baseMapper.update(null, Wrappers.<FssRefundRequest>lambdaUpdate()
-                .in(FssRefundRequest::getId, ids)
-                .eq(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus())
+        String key = "cky-test-fss-approve";
+        RLock lock = redissonClient.getLock(key);
+        try {
+            if (lock.tryLock(time, unit)) {
+                List<String> ids = refundReviewDTO.getIdList();
+                RefundStatusEnum status = refundReviewDTO.getStatus();
+                String reviewRemark = refundReviewDTO.getReviewRemark();
+                LoginUser loginUser = SecurityUtils.getLoginUser();
+                int update = baseMapper.update(null, Wrappers.<FssRefundRequest>lambdaUpdate()
+                        .in(FssRefundRequest::getId, ids)
+                        .eq(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus())
 
-                .set(FssRefundRequest::getReviewRemark, reviewRemark)
-                .set(FssRefundRequest::getAuditStatus, status.getStatus())
-                .set(FssRefundRequest::getAuditTime, LocalDateTime.now())
-                .set(FssRefundRequest::getReviewerId, loginUser.getUserId())
-                .set(FssRefundRequest::getReviewerCode, loginUser.getSellerCode())
-                .set(FssRefundRequest::getReviewerName, loginUser.getUsername())
-        );
-        AssertUtil.isTrue(update == ids.size(), "审核异常!");
-        //审核完成触发扣减
-        this.afterApprove(status, ids);
-        return update;
+                        .set(FssRefundRequest::getReviewRemark, reviewRemark)
+                        .set(FssRefundRequest::getAuditStatus, status.getStatus())
+                        .set(FssRefundRequest::getAuditTime, LocalDateTime.now())
+                        .set(FssRefundRequest::getReviewerId, loginUser.getUserId())
+                        .set(FssRefundRequest::getReviewerCode, loginUser.getSellerCode())
+                        .set(FssRefundRequest::getReviewerName, loginUser.getUsername())
+                );
+                AssertUtil.isTrue(update == ids.size(), "审核异常!");
+                //审核完成触发扣减
+                this.afterApprove(status, ids);
+                return update;
+            } else {
+                log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(refundReviewDTO));
+                throw new RuntimeException("退费业务处理超时,请稍候重试");
+            }
+        } catch (InterruptedException  e) {
+            log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(refundReviewDTO));
+            log.error("退费业务处理超时,请稍候重试", e);
+            throw new RuntimeException("退费业务处理超时,请稍候重试");
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+                log.info("【退费】RefundPayFactory 解锁结束--");
+            }
+            log.info("【退费】RefundPayFactory --结束--");
+        }
     }
 
     /**

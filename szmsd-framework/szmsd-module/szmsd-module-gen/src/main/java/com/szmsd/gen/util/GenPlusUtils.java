@@ -134,10 +134,10 @@ public class GenPlusUtils {
          * usr       用户名
          * pwd       密码
          */
-        String   url="jdbc:mysql://139.159.218.145:8090/gfs?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8";
+        String   url="jdbc:mysql://116.63.66.153:22220/ck1-wms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8";
         String driver="com.mysql.cj.jdbc.Driver";
-        String usr="root";
-        String pwd="msd123456";
+        String usr="e3data";
+        String pwd="e3data";
         Map<String, Object> map = new HashMap<>();
         map.put("url",url );
         map.put("driver", driver);
@@ -152,9 +152,9 @@ public class GenPlusUtils {
          * packgeName   项目的包名称
          * tableName  数据交库表名称  多个使用,隔开
          */
-        String projectPath = "F:\\work\\api-mysql-new\\api_mysql\\business-center\\business-bil";
-        String packgeName = "com.szmsd.bil";
-        String tableName = "bil_third_tracking";
+        String projectPath = "E:\\msd-project\\chukou1\\server\\business-center\\wms-center\\wms-service\\wms-business-delivery";
+        String packgeName = "com.szmsd.delivery";
+        String tableName = "del_track";
         map.put("projectPath",projectPath);
         map.put("packgeName", packgeName);
         map.put("tableName",tableName);

@@ -13,7 +13,7 @@ import com.szmsd.http.vo.CreateTrackingResponse;
 import com.szmsd.http.vo.ResponseVO;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("iInboundService")
 public class InboundServiceImpl extends WmsRequest implements IInboundService {
 
     public InboundServiceImpl(HttpConfig httpConfig) {
