@@ -21,6 +21,8 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.exception.domain.ExceptionInfo;
 import com.szmsd.exception.dto.*;
 import com.szmsd.exception.enums.StateSubEnum;
@@ -110,6 +112,13 @@ public class ExceptionInfoController extends BaseController {
     @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
     public void export(HttpServletResponse response, ExceptionInfoQueryDto dto) throws IOException {
         try {
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            if (null == loginUser) {
+                throw new CommonException("500", "非法的操作");
+            }
+            // 获取登录用户的客户编码
+            String sellerCode = loginUser.getSellerCode();
+            dto.setSellerCode(sellerCode);
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("085");
             ExceptionInfoExportContext exportContext = new ExceptionInfoExportContext();
