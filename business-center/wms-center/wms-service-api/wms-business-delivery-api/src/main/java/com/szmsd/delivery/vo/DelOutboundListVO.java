@@ -146,4 +146,7 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "轨迹信息描述")
     private String trackingDescription;
+
+    @ApiModelProperty(value = "COD")
+    private BigDecimal codAmount;
 }
