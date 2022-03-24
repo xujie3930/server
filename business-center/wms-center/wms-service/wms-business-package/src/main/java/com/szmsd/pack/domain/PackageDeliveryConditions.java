@@ -1,6 +1,7 @@
 package com.szmsd.pack.domain;
 
 import java.math.BigDecimal;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -13,23 +14,23 @@ import com.szmsd.common.core.annotation.Excel;
 
 
 /**
-* <p>
-    * 发货条件表
-    * </p>
-*
-* @author admpon
-* @since 2022-03-23
-*/
+ * <p>
+ * 发货条件表
+ * </p>
+ *
+ * @author admpon
+ * @since 2022-03-23
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value="发货条件表", description="PackageDeliveryConditions对象")
+@ApiModel(value = "发货条件表", description = "PackageDeliveryConditions对象")
 public class PackageDeliveryConditions extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "主键ID")
-            @TableId(value = "id", type = IdType.UUID)
+    @TableId(value = "id", type = IdType.AUTO)
     @Excel(name = "主键ID")
     private Integer id;
 
