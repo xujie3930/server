@@ -47,8 +47,8 @@ public class RemoteApiImpl implements IRemoteApi {
      */
     TimedCache<String, List<BasSub>> codeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
     TimedCache<Long, List<WarehouseKvDTO>> wareHouseCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
-    WeakCache<String, Map<String, BasSellerSysDto>> cusCodeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
-    WeakCache<String, BasRegionSelectListVO> countryCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
+    TimedCache<String, Map<String, BasSellerSysDto>> cusCodeCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
+    TimedCache<String, BasRegionSelectListVO> countryCache = CacheUtil.newWeakCache(DateUnit.MINUTE.getMillis() * 30);
 
     @Resource
     private BasFeignService basFeignService;
@@ -211,11 +211,13 @@ public class RemoteApiImpl implements IRemoteApi {
     @Override
     public BasRegionSelectListVO getCountryCode(String countryName) {
         if (StringUtils.isBlank(countryName)) return new BasRegionSelectListVO();
-        if (countryCache.isEmpty()) {
+        BasRegionSelectListVO regionSelectListVO = countryCache.get(countryName);
+        if (regionSelectListVO == null) {
             // 查询所有国家
             BasRegionSelectListQueryDto basRegionSelectListQueryDto = new BasRegionSelectListQueryDto();
             R<List<BasRegionSelectListVO>> countryByNameR = basRegionFeignService.countryList(basRegionSelectListQueryDto);
             List<BasRegionSelectListVO> resultList = R.getDataAndException(countryByNameR);
+            countryCache.clear();
             resultList.forEach(x -> {
                 String enName = x.getEnName();
                 String name = x.getName();
@@ -225,6 +227,6 @@ public class RemoteApiImpl implements IRemoteApi {
                 countryCache.put(addressCode, x);
             });
         }
-        return Optional.ofNullable(countryCache.get(countryName)).orElseThrow(() -> new RuntimeException("未找到" + countryName + "关联的国家"));
+        return Optional.ofNullable(regionSelectListVO).orElseThrow(() -> new RuntimeException("未找到" + countryName + "关联的国家"));
     }
 }
