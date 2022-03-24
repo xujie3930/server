@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.pack.mapper.PackageDeliveryConditionsMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.szmsd.pack.domain.PackageDeliveryConditions">
+                    <id column="id" property="id"/>
+                    <result column="create_by_name" property="createByName"/>
+                    <result column="create_time" property="createTime"/>
+                    <result column="update_by_name" property="updateByName"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="remark" property="remark"/>
+                    <result column="product_code" property="productCode"/>
+                    <result column="warehouse_code" property="warehouseCode"/>
+                    <result column="warehouse_name_cn" property="warehouseNameCn"/>
+                    <result column="warehouse_name_en" property="warehouseNameEn"/>
+                    <result column="command_node_code" property="commandNodeCode"/>
+                    <result column="command_node_name" property="commandNodeName"/>
+                    <result column="package_returned" property="packageReturned"/>
+                    <result column="weight_returned" property="weightReturned"/>
+                    <result column="warehouse_labeling" property="warehouseLabeling"/>
+                    <result column="status" property="status"/>
+                    <result column="create_by" property="createBy"/>
+                    <result column="update_by" property="updateBy"/>
+                    <result column="version" property="version"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+                create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, product_code, warehouse_code, warehouse_name_cn, warehouse_name_en, command_node_code, command_node_name, package_returned, weight_returned, warehouse_labeling, status, create_by, update_by, version
+        </sql>
+
+
+</mapper>
