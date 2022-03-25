@@ -11,6 +11,7 @@ import com.szmsd.chargerules.dto.PricedProductQueryDTO;
 import com.szmsd.chargerules.dto.UpdateProductDTO;
 import com.szmsd.chargerules.service.IPricedProductService;
 import com.szmsd.chargerules.vo.FreightCalculationVO;
+import com.szmsd.chargerules.vo.PickupPackageListVO;
 import com.szmsd.chargerules.vo.PricedProductInfoVO;
 import com.szmsd.chargerules.vo.PricedServiceListVO;
 import com.szmsd.common.core.domain.R;
@@ -20,13 +21,12 @@ import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.plugin.annotation.AutoValue;
-import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.vo.KeyValuePair;
 import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.http.HttpRequest;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Api(tags = {"PricedProduct"})
@@ -177,4 +176,22 @@ public class PricedProductController extends BaseController {
         return R.failed("查询异常！");
     }
 
+    private TimedCache<String, List<PickupPackageListVO>> CACHE_PICK_PACKAGE = CacheUtil.newWeakCache(DateUnit.HOUR.getMillis() * 4);
+
+    @ApiOperation(value = "获取可用的提货服务名称", notes = "展示ID Name 保存时展示id 成本路由调用该接口")
+    @GetMapping("/pickupPackage/services")
+    public R<List<PickupPackageListVO>> queryPickupPackageList() {
+        List<PickupPackageListVO> cacheService = CACHE_PICK_PACKAGE.get("CACHE_PICK_PACKAGE");
+        if (CollectionUtils.isNotEmpty(cacheService)) return R.ok(cacheService);
+
+        String requestUrl = "https://carrierservice-api-admin1.dsloco.com/api/v1/carrierService/pickupPackage/services";
+        HttpResponseBody responseBody = HttpClientHelper.httpGet(requestUrl, null, new HashMap<String, String>());
+        if (responseBody.getStatus() == HttpStatus.SC_OK) {
+            String body = responseBody.getBody();
+            List<PickupPackageListVO> data = JSONObject.parseArray(body, PickupPackageListVO.class);
+            CACHE_PICK_PACKAGE.put("CACHE_PICK_PACKAGE",data);
+            return R.ok(data);
+        }
+        return R.failed("查询异常！");
+    }
 }
