@@ -66,9 +66,13 @@ public class PackageDeliveryConditions extends BaseEntity {
     @Excel(name = "重量是否回传（0：否，1：是）")
     private String weightReturned;
 
-    @ApiModelProperty(value = "是否仓库贴标（0：否，1：是）")
+    @ApiModelProperty(value = "仓库贴标类型编码")
     @Excel(name = "是否仓库贴标（0：否，1：是）")
-    private String warehouseLabeling;
+    private String warehouseLabelingCode;
+
+    @ApiModelProperty(value = "仓库贴标类型名称")
+    @Excel(name = "是否仓库贴标（0：否，1：是）")
+    private String warehouseLabelingName;
 
     @ApiModelProperty(value = "状态")
     @Excel(name = "状态")

@@ -2,7 +2,8 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.http.api.config.TransactionHandlerConfig,\
   com.szmsd.http.api.feign.fallback.HtpWarMappingFeignFallback,\
   com.szmsd.http.config.CkThreadPool,\
-  com.szmsd.http.config.CkConfig
+  com.szmsd.http.config.CkConfig,\
+  com.szmsd.http.api.feign.fallback.HtpPickupPackageFeignFallback
 
 
   
