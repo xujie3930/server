@@ -23,7 +23,7 @@ public class CreatePickupPackageCommand {
      */
     private String referenceNumber;
 
-    private Address pickupAddress;
+    private Address4PackageService pickupAddress;
 
     private PickupPieces pickupPieces;
 

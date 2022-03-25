@@ -448,7 +448,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     private void createPackageService(PackageCollection packageCollection) {
         CreatePickupPackageCommand createPickupPackageCommand = new CreatePickupPackageCommand().setReferenceNumber(packageCollection.getCollectionNo()).setPickupPackageServiceName(packageCollection.getPickupPackageServiceName());
 
-        Address address = new Address().setName(packageCollection.getCollectionName()).setCompanyName(packageCollection.getCollectionName()).setPhone(packageCollection.getCollectionPhone()).setEmail(null).setAddress1(packageCollection.getCollectionAddress()).setAddress2(null).setAddress3(null).setCity(packageCollection.getCollectionCity()).setProvince(packageCollection.getCollectionProvince()).setPostCode(packageCollection.getCollectionPostCode()).setCountry(packageCollection.getCollectionCountry());
+        Address4PackageService address = new Address4PackageService().setName(packageCollection.getCollectionName()).setCompanyName(packageCollection.getCollectionName()).setPhone(packageCollection.getCollectionPhone()).setEmail(null).setAddress1(packageCollection.getCollectionAddress()).setAddress2(null).setAddress3(null).setCity(packageCollection.getCollectionCity()).setProvince(packageCollection.getCollectionProvince()).setPostCode(packageCollection.getCollectionPostCode()).setCountry(packageCollection.getCollectionCountry());
         createPickupPackageCommand.setPickupAddress(address);
 
         PickupPieces pickupPieces = new PickupPieces();
