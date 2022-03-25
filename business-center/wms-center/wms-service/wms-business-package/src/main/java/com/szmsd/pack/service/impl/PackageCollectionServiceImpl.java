@@ -556,11 +556,18 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     PackageCollectionContext packageCollectionContextCreateReceiver = new PackageCollectionContext(collection, PackageCollectionContext.Type.CREATE_RECEIVER, false);
                     PackageCollectionContextEvent.publishEvent(packageCollectionContextCreateReceiver);
                 }
+                //查询出该提货计划列表
+                LambdaQueryWrapper<PackageCollection> queryWrapper = Wrappers.lambdaQuery();
+                queryWrapper.in(PackageCollection::getId, idList);
+                List<PackageCollection> dataList = super.baseMapper.selectList(queryWrapper);
+                dataList.stream().forEach(e -> {
+                    e.setDetailList(this.packageCollectionDetailService.listByCollectionId(e.getId()));
+                    //通知提货商创建提货服务
+                    createPackageService(e);
+                });
             }
             return update;
         }
-        //通知提货商创建提货服务
-        createPackageService(packageCollection);
         return 0;
     }
 
