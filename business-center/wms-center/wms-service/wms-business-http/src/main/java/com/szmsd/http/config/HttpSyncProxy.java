@@ -132,7 +132,8 @@ public class HttpSyncProxy implements IBasService, IInboundService {
 
     @Override
     public ResponseVO createTracking(CreateTrackRequest createTrackRequest) {
-        iCommonRemoteService.insertObj(createTrackRequest, RemoteConstant.RemoteTypeEnum.WMS_INBOUND_LOGISTICS_CREATE);
+        //iCommonRemoteService.insertObj(createTrackRequest, RemoteConstant.RemoteTypeEnum.WMS_INBOUND_LOGISTICS_CREATE);
+        iCommonRemoteService.insertObj(createTrackRequest, RemoteConstant.RemoteTypeEnum.WMS_INBOUND_CREATE);
         return new ResponseVO();
     }
 }
