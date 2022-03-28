@@ -109,7 +109,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
         AnalysisInfo httpRequestDto = new AnalysisInfo()
         .setService(delOutbound.getSupplierCalcId())
         .setRefNo(delOutbound.getOrderNo())
-        .setWarehouseCode(delOutbound.getWarehouseCode());
+        .setWarehouseCode(delOutbound.getWarehouseCode()).setStartNode(delOutbound.getWarehouseCode());
 
 
         // 包裹
@@ -125,7 +125,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                 .setHeight(new BigDecimal(delOutbound.getHeight()))
                 .setLength(new BigDecimal(delOutbound.getLength()))
                 .setWidth(new BigDecimal(delOutbound.getWidth()))
-                .setUnit(delOutbound.getCalcWeightUnit())
+                .setUnit("cm")
         );
 
         httpRequestDto.setPackages(Arrays.asList(packages));
@@ -188,7 +188,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
         AnalysisInfo httpRequestDto = new AnalysisInfo()
                 .setService(delOutbound.getSupplierCalcId())
                 .setRefNo(delOutbound.getOrderNo())
-                .setWarehouseCode(delOutbound.getWarehouseCode());
+                .setWarehouseCode(delOutbound.getWarehouseCode()).setStartNode(delOutbound.getWarehouseCode());
 
 
         // 包裹
@@ -203,7 +203,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                 .setHeight(new BigDecimal(delOutbound.getHeight()))
                 .setLength(new BigDecimal(delOutbound.getLength()))
                 .setWidth(new BigDecimal(delOutbound.getWidth()))
-                .setUnit(delOutbound.getCalcWeightUnit())
+                .setUnit("cm")
         );
 
 
