@@ -26,4 +26,13 @@ public class AttachmentDataDTO {
     @NotEmpty(message = "附件URL不能为空")
     private String attachmentUrl;
 
+    /**
+     *  目前该字段仅用于一票多件
+     */
+    @ApiModelProperty(value = "箱标类型")
+    private String attachmentType;
+
+    @ApiModelProperty(value = "名称")
+    private String attachmentName;
+
 }
