@@ -90,9 +90,16 @@ public class HandlerContext<T> {
         if (null == iterable) {
             return false;
         }
+        Iterator<?> iterator = iterable.iterator();
+        if (!iterator.hasNext()) {
+            return false;
+        }
+        Object next = iterator.next();
+        if (null == next) {
+            return false;
+        }
         boolean hasAuto = false;
         boolean hasI18n = false;
-        Object next = iterable.iterator().next();
         Field[] fields = getFields(next);
         if (ArrayUtils.isNotEmpty(fields)) {
             Map<String, AutoFieldValue> autoFieldValueMap = new HashMap<>();
