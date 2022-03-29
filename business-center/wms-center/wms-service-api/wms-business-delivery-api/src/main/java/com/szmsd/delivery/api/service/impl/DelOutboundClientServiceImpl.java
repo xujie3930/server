@@ -35,6 +35,16 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     }
 
     @Override
+    public int shipmentPackingMaterial(ShipmentPackingMaterialRequestDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.shipmentPackingMaterial(dto));
+    }
+
+    @Override
+    public int shipmentPackingMeasure(ShipmentPackingMaterialRequestDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.shipmentPackingMeasure(dto));
+    }
+
+    @Override
     public int shipmentContainers(ShipmentContainersRequestDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.shipmentContainers(dto));
     }

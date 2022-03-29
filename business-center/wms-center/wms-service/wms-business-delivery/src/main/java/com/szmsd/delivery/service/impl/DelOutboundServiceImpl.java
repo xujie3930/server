@@ -1082,14 +1082,26 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional
     @Override
     public int shipmentPackingMaterial(ShipmentPackingMaterialRequestDto dto) {
+        return this.shipmentPackingMaterial(dto, DelOutboundStateEnum.PROCESSING);
+    }
+
+    private int shipmentPackingMaterial(ShipmentPackingMaterialRequestDto dto, DelOutboundStateEnum stateEnum) {
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
         }
         updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
-        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
+        if (null != stateEnum) {
+            updateWrapper.set(DelOutbound::getState, stateEnum.getCode());
+        }
         updateWrapper.set(DelOutbound::getPackingMaterial, dto.getPackingMaterial());
         return this.baseMapper.update(null, updateWrapper);
+    }
+
+    @Transactional
+    @Override
+    public int shipmentPackingMaterialIgnoreState(ShipmentPackingMaterialRequestDto dto) {
+        return this.shipmentPackingMaterial(dto, null);
     }
 
     @Transactional

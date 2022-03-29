@@ -38,6 +38,16 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             }
 
             @Override
+            public R<Integer> shipmentPackingMaterial(ShipmentPackingMaterialRequestDto dto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<Integer> shipmentPackingMeasure(ShipmentPackingMaterialRequestDto dto) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R<Integer> shipmentContainers(ShipmentContainersRequestDto dto) {
                 return R.convertResultJson(throwable);
             }

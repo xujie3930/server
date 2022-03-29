@@ -34,7 +34,6 @@ import javax.validation.groups.Default;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -92,6 +91,13 @@ public class PackageDeliveryConditionsController extends BaseController {
     @ApiOperation(value = "获取发货条件表模块详细信息", notes = "获取发货条件表模块详细信息")
     public R getInfo(@PathVariable("id") String id) {
         return R.ok(packageDeliveryConditionsService.selectPackageDeliveryConditionsById(id));
+    }
+
+    @PreAuthorize("@ss.hasPermi('PackageDeliveryConditions:PackageDeliveryConditions:query')")
+    @PostMapping(value = "/info")
+    @ApiOperation(value = "获取发货条件表模块详细信息", notes = "获取发货条件表模块详细信息")
+    public R<PackageDeliveryConditions> info(@RequestBody PackageDeliveryConditions packageDeliveryConditions) {
+        return R.ok(packageDeliveryConditionsService.getInfo(packageDeliveryConditions));
     }
 
     /**

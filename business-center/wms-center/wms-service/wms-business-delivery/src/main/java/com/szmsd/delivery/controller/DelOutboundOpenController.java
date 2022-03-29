@@ -49,10 +49,26 @@ public class DelOutboundOpenController extends BaseController {
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
     @PostMapping("/shipment/packing")
-    @ApiOperation(value = "出库管理 - Open - #D2 接收出库包裹信息", position = 200)
+    @ApiOperation(value = "出库管理 - Open - #D2 接收出库包裹信息(拆分为D21和D22)", position = 200)
     @ApiImplicitParam(name = "dto", value = "ShipmentPackingMaterialRequestDto", dataType = "ShipmentPackingMaterialRequestDto")
     public R<Integer> shipmentPacking(@RequestBody @Validated ShipmentPackingMaterialRequestDto dto) {
         return R.ok(this.delOutboundOpenService.shipmentPacking(dto));
+    }
+
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/shipment/packing/material")
+    @ApiOperation(value = "出库管理 - Open - #D21 接收出库包裹包材信息", position = 210)
+    @ApiImplicitParam(name = "dto", value = "ShipmentPackingMaterialRequestDto", dataType = "ShipmentPackingMaterialRequestDto")
+    public R<Integer> shipmentPackingMaterial(@RequestBody ShipmentPackingMaterialRequestDto dto) {
+        return R.ok(this.delOutboundOpenService.shipmentPackingMaterial(dto));
+    }
+
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/shipment/packing/measure")
+    @ApiOperation(value = "出库管理 - Open - #D22 接收出库包裹测量信息", position = 220)
+    @ApiImplicitParam(name = "dto", value = "ShipmentPackingMaterialRequestDto", dataType = "ShipmentPackingMaterialRequestDto")
+    public R<Integer> shipmentPackingMeasure(@RequestBody ShipmentPackingMaterialRequestDto dto) {
+        return R.ok(this.delOutboundOpenService.shipmentPackingMeasure(dto));
     }
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)

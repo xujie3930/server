@@ -699,8 +699,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
         String pathname = null;
         // 如果是批量出库，将批量出库上传的文件和标签文件合并在一起传过去
-        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
-                && delOutbound.getIsLabelBox()) {
+        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
             // 判断文件是否已经创建
             String mergeFileDirPath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
             File mergeFileDir = new File(mergeFileDirPath);
@@ -715,53 +714,52 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
             File mergeFile = new File(mergeFilePath);
             if (!mergeFile.exists()) {
-                // 合并文件
-                // 查询上传文件
-                // 查询上传文件信息
-                BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
-                basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
-                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
-                R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
-                if (null != listR && null != listR.getData()) {
-                    List<BasAttachment> attachmentList = listR.getData();
-                    if (CollectionUtils.isNotEmpty(attachmentList)) {
-                        BasAttachment attachment = attachmentList.get(0);
-                        // 箱标文件 - 上传的
-                        String boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
-                        String labelFilePath = "";
-                        if ((DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
-                                && "SelfPick".equals(delOutbound.getShipmentChannel()))) {
-                            // 批量出库的自提出库标签是上传的
-                            // 查询上传的文件
-                            basAttachmentQueryDTO = new BasAttachmentQueryDTO();
-                            basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
-                            basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
-                            R<List<BasAttachment>> documentListR = remoteAttachmentService.list(basAttachmentQueryDTO);
-                            if (null != documentListR && null != documentListR.getData()) {
-                                List<BasAttachment> documentList = documentListR.getData();
-                                if (CollectionUtils.isNotEmpty(documentList)) {
-                                    BasAttachment basAttachment = documentList.get(0);
-                                    labelFilePath = basAttachment.getAttachmentPath() + "/" + basAttachment.getAttachmentName() + basAttachment.getAttachmentFormat();
-                                }
-                            }
-                        } else {
-                            // 标签文件 - 从承运商物流那边获取的
-                            labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
+                String boxFilePath = "";
+                // 标签文件
+                if (delOutbound.getIsLabelBox()) {
+                    BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                    basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
+                    basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                    R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                    if (null != listR && null != listR.getData()) {
+                        List<BasAttachment> attachmentList = listR.getData();
+                        if (CollectionUtils.isNotEmpty(attachmentList)) {
+                            BasAttachment attachment = attachmentList.get(0);
+                            // 箱标文件 - 上传的
+                            boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
                         }
-                        // 合并文件
-                        try {
-                            if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath)) {
-                                pathname = mergeFilePath;
-                            }
-                        } catch (IOException e) {
-                            logger.error(e.getMessage(), e);
-                            throw new CommonException("500", "合并箱标文件，标签文件失败");
+                    }
+                }
+                String labelFilePath = "";
+                if ("SelfPick".equals(delOutbound.getShipmentChannel())) {
+                    // 批量出库的自提出库标签是上传的
+                    // 查询上传的文件
+                    BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                    basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
+                    basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                    R<List<BasAttachment>> documentListR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                    if (null != documentListR && null != documentListR.getData()) {
+                        List<BasAttachment> documentList = documentListR.getData();
+                        if (CollectionUtils.isNotEmpty(documentList)) {
+                            BasAttachment basAttachment = documentList.get(0);
+                            labelFilePath = basAttachment.getAttachmentPath() + "/" + basAttachment.getAttachmentName() + basAttachment.getAttachmentFormat();
                         }
-                    } else {
+                    }
+                    if (StringUtils.isEmpty(labelFilePath)) {
                         throw new CommonException("500", "箱标文件未上传");
                     }
                 } else {
-                    throw new CommonException("500", "箱标文件未上传");
+                    // 标签文件 - 从承运商物流那边获取的
+                    labelFilePath = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
+                }
+                // 合并文件
+                try {
+                    if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath)) {
+                        pathname = mergeFilePath;
+                    }
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                    throw new CommonException("500", "合并箱标文件，标签文件失败");
                 }
             }
         }
