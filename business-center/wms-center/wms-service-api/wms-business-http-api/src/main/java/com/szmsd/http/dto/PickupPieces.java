@@ -24,7 +24,7 @@ public class PickupPieces {
     /**
      * 总重量
      */
-    private BigDecimal totalWeight;
+    private Integer totalWeight;
 
     /**
      * 重量单位 "KGS,LBS"   (总重量除以1000即为KGS，两位小数)

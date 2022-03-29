@@ -5,6 +5,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.api.service.IHtpPickupPackageService;
+import com.szmsd.http.service.IPickupPackageService;
 import com.szmsd.http.vo.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,7 +20,7 @@ import java.util.List;
 public class PickupPackageController extends BaseController {
 
     @Resource
-    private IHtpPickupPackageService iPickupPackageService;
+    private IPickupPackageService iPickupPackageService;
 
     @GetMapping("/services")
     @ApiOperation(value = "获取可用的提货服务名称")
@@ -27,6 +28,7 @@ public class PickupPackageController extends BaseController {
         List<PickupPackageService> directServiceFeeData = iPickupPackageService.services();
         return R.ok(directServiceFeeData);
     }
+
 
     @PostMapping("/create")
     @ApiOperation(value = "创建提货服务")
