@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 
 /**
@@ -19,7 +20,7 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "BasAttachmentDataDTO", description = "BasAttachment附件表")
-public class BasAttachmentDataDTO {
+public class BasMultiplePiecesDataDTO {
 
     @ApiModelProperty(value = "主键ID")
     private Integer id;
@@ -34,7 +35,7 @@ public class BasAttachmentDataDTO {
     @NotEmpty(message = "附件URL不能为空")
     private String attachmentUrl;
 
-    @ApiModelProperty(value = "附带值备注")
-    private String remark;
+    @ApiModelProperty(value = "箱标数据")
+    private List<BasAttachmentDataDTO> list;
 
 }

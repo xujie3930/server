@@ -146,4 +146,6 @@ public class DelOutboundDto implements Serializable {
 
     @ApiModelProperty(value = "组合信息")
     private List<DelOutboundCombinationDto> combinations;
+
+
 }

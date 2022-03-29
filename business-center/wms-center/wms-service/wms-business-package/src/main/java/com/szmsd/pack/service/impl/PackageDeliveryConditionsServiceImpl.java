@@ -1,6 +1,8 @@
 package com.szmsd.pack.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.pack.domain.PackageDeliveryConditions;
 import com.szmsd.pack.dto.PackageDeliveryConditionsDTO;
@@ -33,6 +35,15 @@ public class PackageDeliveryConditionsServiceImpl extends ServiceImpl<PackageDel
     @Override
     public PackageDeliveryConditions selectPackageDeliveryConditionsById(String id) {
         return baseMapper.selectById(id);
+    }
+
+    @Override
+    public PackageDeliveryConditions getInfo(PackageDeliveryConditions packageDeliveryConditions) {
+        LambdaQueryWrapper<PackageDeliveryConditions> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(PackageDeliveryConditions::getWarehouseCode, packageDeliveryConditions.getWarehouseCode());
+        queryWrapper.eq(PackageDeliveryConditions::getProductCode, packageDeliveryConditions.getProductCode());
+        queryWrapper.last("LIMIT 1");
+        return super.getOne(queryWrapper);
     }
 
     /**

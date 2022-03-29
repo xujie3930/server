@@ -17,6 +17,8 @@ public enum DelOutboundOrderTypeEnum {
     SPLIT_SKU("SplitSku", "拆分SKU上架出库单"),
     BATCH("Batch", "批量出库单"),
     SALES("Sales", "普通销售订单"),
+    MULTIPLE_PIECES("MultiplePieces","一票多件出库单"),
+
 
     ;
 

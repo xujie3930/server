@@ -205,4 +205,14 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             throw e;
         }
     }
+
+    @Override
+    public int shipmentPackingMaterial(ShipmentPackingMaterialRequestDto dto) {
+        return this.delOutboundService.shipmentPackingMaterialIgnoreState(dto);
+    }
+
+    @Override
+    public int shipmentPackingMeasure(ShipmentPackingMaterialRequestDto dto) {
+        return this.delOutboundService.shipmentPacking(dto, null);
+    }
 }

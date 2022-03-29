@@ -22,8 +22,12 @@ public class TestWrappers {
         LambdaUtils.installCache(tableInfo);
 
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.select(DelOutbound::getId, DelOutbound::getOrderNo, DelOutbound::getOrderType);
         queryWrapper.eq(DelOutbound::getOrderNo, "CK123456");
         queryWrapper.in(DelOutbound::getOrderType, "AAA", "BBB");
+
+        System.out.println(queryWrapper);
+        System.out.println(queryWrapper.getCustomSqlSegment());
 
         System.out.println(queryWrapper.getSqlSegment());
         System.out.println(JSON.toJSONString(queryWrapper.getParamNameValuePairs()));

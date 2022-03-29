@@ -7,7 +7,6 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundRetryLabel;
-import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundRetryLabelStateEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundRetryLabelEvent;
@@ -75,13 +74,16 @@ public class DelOutboundRetryLabelListener {
                     try {
                         if (null != delOutbound) {
                             // 获取标签
+                            // 只要是以下两种就需要去获取标签：
+                            // 1.下单后供应商获取
+                            // 2.核重后供应商获取
                             if (!DelOutboundTrackingAcquireTypeEnum.NONE.getCode().equals(delOutbound.getTrackingAcquireType())) {
                                 delOutboundBringVerifyService.getShipmentLabel(delOutbound);
                                 logger.info("(7)获取标签完成，id：{}", id);
-                                // 推送标签
-                                this.delOutboundBringVerifyService.htpShipmentLabel(delOutbound);
-                                logger.info("(8)推送标签完成，id：{}", id);
                             }
+                            // 推送标签，处理那种存在自己上传文件的逻辑，自己上传的文件也需要推送给WMS
+                            this.delOutboundBringVerifyService.htpShipmentLabel(delOutbound);
+                            logger.info("(8)推送标签完成，id：{}", id);
                             // 发货指令
                             this.delOutboundBringVerifyService.shipmentShipping(delOutbound);
                             logger.info("(9)调用成功发货指令完成，id：{}", id);

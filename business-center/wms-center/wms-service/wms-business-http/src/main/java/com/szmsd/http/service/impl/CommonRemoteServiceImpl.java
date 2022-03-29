@@ -71,7 +71,8 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
         oneTask.setErrorMsg("");
         HttpRequestDto httpRequestDto = new HttpRequestDto();
         httpRequestDto.setMethod(oneTask.getRequestMethod());
-        httpRequestDto.setUri(oneTask.getRequestUri());
+        String requestUri = oneTask.getRequestUri();
+        httpRequestDto.setUri(requestUri);
         HashMap<String, String> hashMap = JSONObject.parseObject(oneTask.getRequestHead(), HashMap.class);
         httpRequestDto.setHeaders(hashMap);
         httpRequestDto.setBody(JSONObject.parseObject(oneTask.getRequestParams()));
@@ -98,14 +99,17 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
                         responseVO = iBasService.createProduct(productRequest);
                         break;
                     case WMS_INBOUND_CREATE:
-                        CreateReceiptRequest createReceiptRequest = JSONObject.parseObject(oneTask.getRequestParams(), CreateReceiptRequest.class);
-                        log.info("【WMS】SYNC 【入库单创建】-{}", createReceiptRequest);
-                        responseVO = iInboundService.create(createReceiptRequest);
+                        // 因为要先创建入库单后创建 物流跟踪信息 得放一组先后执行
+                        if (StringUtils.isNotBlank(requestUri) && requestUri.contains("receipt")) {
+                            CreateReceiptRequest createReceiptRequest = JSONObject.parseObject(oneTask.getRequestParams(), CreateReceiptRequest.class);
+                            log.info("【WMS】SYNC 【入库单创建】-{}", createReceiptRequest);
+                            responseVO = iInboundService.create(createReceiptRequest);
+                        } else if (StringUtils.isNotBlank(requestUri) && requestUri.contains("tracking")) {
+                            CreateTrackRequest createTrackRequest = JSONObject.parseObject(oneTask.getRequestParams(), CreateTrackRequest.class);
+                            log.info("【WMS】SYNC 【入库单物流跟踪创建】-{}", createTrackRequest);
+                            responseVO = iInboundService.createTracking(createTrackRequest);
+                        }
                         break;
-                    case WAREHOUSE_ORDER_COMPLETED:
-                        CreateTrackRequest createTrackRequest = JSONObject.parseObject(oneTask.getRequestParams(), CreateTrackRequest.class);
-                        log.info("【WMS】SYNC 【入库单物流跟踪创建】-{}", createTrackRequest);
-                        responseVO = iInboundService.createTracking(createTrackRequest);
                     default:
                         break;
                 }
