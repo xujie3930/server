@@ -1,6 +1,7 @@
 package com.szmsd.http.dto;
 
 
+import com.sun.istack.NotNull;
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class CreatePickupPackageCommand {
     /**
      * 系统提货服务
      */
-    private String pickupPackageServiceName;
+    @NotNull
+    private String pickupServiceName ;
 
 }

@@ -66,6 +66,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -446,7 +447,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
 
     //创建提货服务
     private void createPackageService(PackageCollection packageCollection) {
-        CreatePickupPackageCommand createPickupPackageCommand = new CreatePickupPackageCommand().setReferenceNumber(packageCollection.getCollectionNo()).setPickupPackageServiceName(packageCollection.getPickupPackageServiceName());
+        CreatePickupPackageCommand createPickupPackageCommand = new CreatePickupPackageCommand().setReferenceNumber(packageCollection.getCollectionNo()).setPickupServiceName(packageCollection.getPickupPackageServiceName());
 
         Address4PackageService address = new Address4PackageService().setName(packageCollection.getCollectionName()).setCompanyName(packageCollection.getCollectionName()).setPhone(packageCollection.getCollectionPhone()).setEmail(null).setAddress1(packageCollection.getCollectionAddress()).setAddress2(null).setAddress3(null).setCity(packageCollection.getCollectionCity()).setProvince(packageCollection.getCollectionProvince()).setPostCode(packageCollection.getCollectionPostCode()).setCountry(packageCollection.getCollectionCountry());
         createPickupPackageCommand.setPickupAddress(address);
@@ -462,12 +463,15 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             totalWeight.add(detail.getWeight());
         }
         pickupPieces.setPickupPieceItems(list);
-        pickupPieces.setTotalWeight(totalWeight.divide(new BigDecimal("1000")).setScale(2, RoundingMode.HALF_UP));
+        pickupPieces.setTotalWeight(totalWeight/*.divide(new BigDecimal("1000")*/.intValue());
         pickupPieces.setUnitOfMeasurement("KGS");
         createPickupPackageCommand.setPickupPieces(pickupPieces);
 
         PickupDateInfo pickupDateInfo = new PickupDateInfo();
-        pickupDateInfo.setPickupDate(packageCollection.getCollectionDate());
+        if(packageCollection.getCollectionDate()!=null){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+            pickupDateInfo.setPickupDate(sdf.format(packageCollection.getCollectionDate()));
+        }
         createPickupPackageCommand.setPickupDateInfo(pickupDateInfo);
 
         httpPickupPackageService.create(createPickupPackageCommand);

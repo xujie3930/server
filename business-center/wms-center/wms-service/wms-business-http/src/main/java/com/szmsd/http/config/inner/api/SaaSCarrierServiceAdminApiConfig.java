@@ -36,6 +36,26 @@ public class SaaSCarrierServiceAdminApiConfig implements ApiConfig {
         private String label;
         // 根据标签文件路径去获取文件流
         private String labelUrl;
+        //获取可用的提货服务名称
+        private String pickupPackageServices;
+        //创建提货服务
+        private String pickupPackageCreate;
+
+        public String getPickupPackageServices() {
+            return pickupPackageServices;
+        }
+
+        public void setPickupPackageServices(String pickupPackageServices) {
+            this.pickupPackageServices = pickupPackageServices;
+        }
+
+        public String getPickupPackageCreate() {
+            return pickupPackageCreate;
+        }
+
+        public void setPickupPackageCreate(String pickupPackageCreate) {
+            this.pickupPackageCreate = pickupPackageCreate;
+        }
 
         public String getServices() {
             return services;
