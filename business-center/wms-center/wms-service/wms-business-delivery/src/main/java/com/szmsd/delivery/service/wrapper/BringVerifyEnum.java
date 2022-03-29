@@ -17,12 +17,10 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
-import com.szmsd.delivery.enums.DelOutboundConstant;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
+import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.util.Utils;
@@ -833,6 +831,15 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 推单WMS
             updateDelOutbound.setRefOrderNo(refOrderNo);
             delOutboundService.bringVerifySuccess(updateDelOutbound);
+            // 处理发货条件
+            TaskConfigInfo taskConfigInfo = delOutboundWrapperContext.getTaskConfigInfo();
+            if (null != taskConfigInfo) {
+                if ("NotReceive".equals(taskConfigInfo.getReceiveShippingType())) {
+                    // 增加出库单已取消记录，异步处理，定时任务
+                    IDelOutboundCompletedService delOutboundCompletedService = SpringUtils.getBean(IDelOutboundCompletedService.class);
+                    delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
+                }
+            }
         }
 
         @Override

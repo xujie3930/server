@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.szmsd.pack.api.feign.factory.PackageCollectionFeignFallback
+  com.szmsd.pack.api.feign.factory.PackageCollectionFeignFallback,\
+  com.szmsd.pack.api.feign.factory.PackageDeliveryConditionsFeignFallback
