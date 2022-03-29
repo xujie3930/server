@@ -1,5 +1,6 @@
 package com.szmsd.delivery.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.szmsd.common.core.validator.ValidationSaveGroup;
 import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import io.swagger.annotations.ApiModel;
@@ -71,4 +72,15 @@ public class DelOutboundDetailDto implements Serializable {
 
     @ApiModelProperty(value = "海关编码")
     private String hsCode;
+
+    @ApiModelProperty(value = "箱标")
+    private String boxMark;
+
+    @ApiModelProperty(value = "sku新标签文件")
+    @TableField(exist = false)
+    private String skuFile;
+
+    @ApiModelProperty(value = "箱标文件")
+    @TableField(exist = false)
+    private String boxMarkFile;
 }

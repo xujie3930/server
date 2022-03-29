@@ -26,6 +26,13 @@ public enum AttachmentTypeEnum {
     EXCEPTION_DOCUMENT("EXCEPTION_DOCUMENT","异常信息","异常处理附件","exceptionDocument"),
     MESSAGE_IMAGE("MESSAGE_IMAGE","信息通知","信息通知图片","messageImage"),
     SELLER_IMAGE("SELLER_IMAGE","基础信息","客户实名认证图片","sellerImage"),
+    MULTIPLE_PIECES_BOX_MARK("MULTIPLE_PIECES_BOX_MARK","出库箱标","箱标","multiplePiecesBoxMark"),
+    MULTIPLE_PIECES_INVOICE("MULTIPLE_PIECES_INVOICE","出库发货单","发货单","multiplePiecesInvoice"),
+
+    MULTIPLE_PIECES_BOX_DETAIL("MULTIPLE_PIECES_BOX_DETAIL","出库箱标明细","出库箱标明细","multiplePiecesBoxDetail"),
+    MULTIPLE_PIECES_SKU("MULTIPLE_PIECES_SKU","出库箱标SKU","出库箱标SKU","multiplePiecesSku"),
+
+
     ;
 
     /** 业务编码 **/
