@@ -51,7 +51,7 @@ public class HttpSyncProxy implements IBasService, IInboundService {
     @Override
     public ResponseVO createProduct(ProductRequest productRequest) {
         iCommonRemoteService.insertObj(productRequest, RemoteConstant.RemoteTypeEnum.WMS_SKU_CREATE);
-        return new ResponseVO();
+        return creatSuccessResponse();
     }
 
     /**
@@ -117,7 +117,13 @@ public class HttpSyncProxy implements IBasService, IInboundService {
     @Override
     public CreateReceiptResponse create(CreateReceiptRequest createReceiptRequestDTO) {
         iCommonRemoteService.insertObj(createReceiptRequestDTO, RemoteConstant.RemoteTypeEnum.WMS_INBOUND_CREATE);
-        return new CreateReceiptResponse();
+        return creatSuccessResponse();
+    }
+
+    public static CreateReceiptResponse creatSuccessResponse(){
+        CreateReceiptResponse createReceiptResponse = new CreateReceiptResponse();
+        createReceiptResponse.setSuccess(true);
+        return createReceiptResponse;
     }
 
     @Override
@@ -134,6 +140,6 @@ public class HttpSyncProxy implements IBasService, IInboundService {
     public ResponseVO createTracking(CreateTrackRequest createTrackRequest) {
         //iCommonRemoteService.insertObj(createTrackRequest, RemoteConstant.RemoteTypeEnum.WMS_INBOUND_LOGISTICS_CREATE);
         iCommonRemoteService.insertObj(createTrackRequest, RemoteConstant.RemoteTypeEnum.WMS_INBOUND_CREATE);
-        return new ResponseVO();
+        return creatSuccessResponse();
     }
 }
