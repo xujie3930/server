@@ -635,7 +635,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
         String orderNumber = delOutbound.getShipmentOrderNumber();
         if (StringUtils.isEmpty(orderNumber)) {
-            throw new CommonException("500", "承运商订单号为空");
+            return false;
         }
         // 获取标签
         CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
@@ -729,7 +729,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         // 箱标文件 - 上传的
                         String boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
                         String labelFilePath = "";
-                        if ((DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel()))) {
+                        if ((DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
+                                && "SelfPick".equals(delOutbound.getShipmentChannel()))) {
                             // 批量出库的自提出库标签是上传的
                             // 查询上传的文件
                             basAttachmentQueryDTO = new BasAttachmentQueryDTO();
@@ -765,30 +766,31 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
         }
         if (null == pathname) {
+            // 判断从承运商获取的标签文件是否存在
             pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
         }
         File labelFile = new File(pathname);
-        if (!labelFile.exists()) {
-            throw new CommonException("500", "标签文件不存在");
-        }
-        try {
-            byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
-            String encode = cn.hutool.core.codec.Base64.encode(byteArray);
-            ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
-            shipmentLabelChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
-            shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
-            shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
-            shipmentLabelChangeRequestDto.setLabel(encode);
-            ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
-            if (null == responseVO || null == responseVO.getSuccess()) {
-                throw new CommonException("400", "更新标签失败，请求无响应");
+        // 判断标签文件是否存在
+        if (labelFile.exists()) {
+            try {
+                byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
+                String encode = cn.hutool.core.codec.Base64.encode(byteArray);
+                ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+                shipmentLabelChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
+                shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+                shipmentLabelChangeRequestDto.setLabel(encode);
+                ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
+                if (null == responseVO || null == responseVO.getSuccess()) {
+                    throw new CommonException("400", "更新标签失败，请求无响应");
+                }
+                if (!responseVO.getSuccess()) {
+                    throw new CommonException("400", "更新标签失败，" + Utils.defaultValue(responseVO.getMessage(), ""));
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+                throw new CommonException("500", "读取标签文件失败");
             }
-            if (!responseVO.getSuccess()) {
-                throw new CommonException("400", "更新标签失败，" + Utils.defaultValue(responseVO.getMessage(), ""));
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            throw new CommonException("500", "读取标签文件失败");
         }
     }
 
