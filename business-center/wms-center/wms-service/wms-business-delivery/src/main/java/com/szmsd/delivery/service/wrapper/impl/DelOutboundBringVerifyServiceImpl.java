@@ -12,6 +12,7 @@ import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.FileStream;
@@ -43,6 +44,8 @@ import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.BaseOperationResponse;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
+import com.szmsd.pack.domain.PackageDeliveryConditions;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -100,6 +103,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private RedisTemplate<Object, Object> redisTemplate;
     @Autowired
     private ExceptionInfoClientService exceptionInfoClientService;
+    @SuppressWarnings({"all"})
+    @Autowired
+    private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -1035,6 +1041,28 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setIsPackingByRequired(delOutbound.getIsPackingByRequired());
         createShipmentRequestDto.setIsFirst(delOutbound.getIsFirst());
         createShipmentRequestDto.setNewSKU(delOutbound.getNewSku());
+        // 查询发货条件
+        if (StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
+                && StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
+            PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
+            packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
+            packageDeliveryConditions.setProductCode(delOutbound.getShipmentRule());
+            R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+            PackageDeliveryConditions packageDeliveryConditionsRData = null;
+            if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
+                packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
+            }
+            if (null != packageDeliveryConditionsRData) {
+                TaskConfigInfo taskConfigInfo = new TaskConfigInfo();
+                taskConfigInfo.setReceiveShippingType(packageDeliveryConditionsRData.getCommandNodeCode());
+                taskConfigInfo.setIsPublishPackageMaterial("1".equals(packageDeliveryConditionsRData.getPackageReturned()));
+                taskConfigInfo.setIsPublishPackageWeight("1".equals(packageDeliveryConditionsRData.getWeightReturned()));
+                taskConfigInfo.setPrintShippingLabelType(packageDeliveryConditionsRData.getWarehouseLabelingCode());
+                createShipmentRequestDto.setTaskConfig(taskConfigInfo);
+                // 上下文值传递
+                delOutboundWrapperContext.setTaskConfigInfo(taskConfigInfo);
+            }
+        }
         // 批量出口增加装箱要求
         if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
             List<DelOutboundPackingVO> packingList = this.delOutboundPackingService.listByOrderNo(delOutbound.getOrderNo(), DelOutboundPackingTypeConstant.TYPE_1);
