@@ -115,9 +115,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
         // 包裹
         AnalysisInfoPackageInfo packages = new AnalysisInfoPackageInfo();
         packages.setWeight(new Weight().setUnit(delOutbound.getCalcWeightUnit()).setValue(new BigDecimal(delOutbound.getWeight())));
-        if(delOutbound.getBoxNumber() != null){
-            packages.setQuantity(Integer.parseInt(String.valueOf(delOutbound.getBoxNumber())));
-        }
+        packages.setQuantity(1);
 
 
         // 尺寸
@@ -194,9 +192,8 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
         // 包裹
         AnalysisInfoPackageInfo packages = new AnalysisInfoPackageInfo();
         packages.setWeight(new Weight().setUnit(delOutbound.getCalcWeightUnit()).setValue(new BigDecimal(delOutbound.getWeight())));
-        if(delOutbound.getBoxNumber() != null){
-            packages.setQuantity(Integer.parseInt(String.valueOf(delOutbound.getBoxNumber())));
-        }
+        packages.setQuantity(1);
+
 
         // 尺寸
         packages.setPacking(new AnalysisInfoPacking()
