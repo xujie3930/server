@@ -1,6 +1,7 @@
 package com.szmsd.delivery.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -83,4 +84,10 @@ public class DelOutboundDetail extends BaseEntity {
 
     @ApiModelProperty(value = "海关编码")
     private String hsCode;
+
+    @ApiModelProperty(value = "箱标")
+    private String boxMark;
+
+
+
 }

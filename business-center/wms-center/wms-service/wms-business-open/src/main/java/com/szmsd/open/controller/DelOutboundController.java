@@ -52,6 +52,24 @@ public class DelOutboundController extends BaseController {
     }
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/shipment/package/material")
+    @ApiOperation(value = "出库管理 - #D21 接收出库包裹包材信息", position = 210)
+    @ApiImplicitParam(name = "dto", value = "ShipmentPackingMaterialRequestDto", dataType = "ShipmentPackingMaterialRequestDto")
+    public ResponseVO shipmentPackingMaterial(@RequestBody @Validated ShipmentPackingMaterialRequestDto dto) {
+        delOutboundClientService.shipmentPackingMaterial(dto);
+        return ResponseVO.ok();
+    }
+
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/shipment/package/measure")
+    @ApiOperation(value = "出库管理 - #D22 接收出库包裹测量信息", position = 220)
+    @ApiImplicitParam(name = "dto", value = "ShipmentPackingMaterialRequestDto", dataType = "ShipmentPackingMaterialRequestDto")
+    public ResponseVO shipmentPackingMeasure(@RequestBody @Validated ShipmentPackingMaterialRequestDto dto) {
+        delOutboundClientService.shipmentPackingMeasure(dto);
+        return ResponseVO.ok();
+    }
+
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
     @PostMapping("/shipment/containers")
     @ApiOperation(value = "出库管理 - #D3 接收批量出库单类型装箱信息", position = 300)
     @ApiImplicitParam(name = "dto", value = "ShipmentContainersRequestDto", dataType = "ShipmentContainersRequestDto")

@@ -41,13 +41,31 @@ public interface DelOutboundFeignService {
     R<Integer> shipment(@RequestBody ShipmentRequestDto dto);
 
     /**
-     * 出库管理 - Open - 接收出库包裹使用包材
+     * 出库管理 - Open - 接收出库包裹使用包材(拆分为D21和D22)
      *
      * @param dto dto
      * @return Integer
      */
     @PostMapping("/api/outbound/open/shipment/packing")
     R<Integer> shipmentPacking(@RequestBody ShipmentPackingMaterialRequestDto dto);
+
+    /**
+     * 出库管理 - Open - 接收出库包裹包材信息
+     *
+     * @param dto dto
+     * @return Integer
+     */
+    @PostMapping("/api/outbound/open/shipment/packing/material")
+    R<Integer> shipmentPackingMaterial(@RequestBody ShipmentPackingMaterialRequestDto dto);
+
+    /**
+     * 出库管理 - Open - 接收出库包裹测量信息
+     *
+     * @param dto dto
+     * @return Integer
+     */
+    @PostMapping("/api/outbound/open/shipment/packing/measure")
+    R<Integer> shipmentPackingMeasure(@RequestBody ShipmentPackingMaterialRequestDto dto);
 
     /**
      * 出库管理 - Open - 接收批量出库单类型装箱信息

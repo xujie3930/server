@@ -59,6 +59,12 @@ public class ShipmentChargeInfo implements Serializable {
     // 供应商计价id（线路图id或者物流服务id）
     private String supplierCalcId;
 
+    //是否提货服务
+    private Integer isPickupPackageService;
+
+    //提货服务名称
+    private String pickupPackageServiceName;
+
     @JSONField(name = "package")
     private PricingPackageInfo packageInfo;
 }

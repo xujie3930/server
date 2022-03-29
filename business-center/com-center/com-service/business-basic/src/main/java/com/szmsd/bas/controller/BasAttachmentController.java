@@ -3,11 +3,13 @@ package com.szmsd.bas.controller;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
+import com.szmsd.bas.api.domain.dto.BasMultiplePiecesDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.domain.dto.BasAttachmentDTO;
 import com.szmsd.bas.domain.dto.FileDTO;
 import com.szmsd.bas.service.IBasAttachmentService;
 import com.szmsd.bas.util.FileUtil;
+import com.szmsd.bas.util.PdfUtil;
 import com.szmsd.common.core.domain.Files;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -130,6 +132,76 @@ public class BasAttachmentController extends BaseController {
             return r;
         }
         return R.ok(filesUrl);
+    }
+
+    private List<BasAttachmentDataDTO> processBoxMark(MultipartFile multipartFile){
+        List<BasAttachmentDataDTO> filesUrl = new ArrayList<>();
+        PdfUtil.toMonyFile(multipartFile).forEach(map -> {
+            MultipartFile myFile = (MultipartFile)map.get("multipartFile");
+            String barCode = (String)map.get("barCode");
+            Files files = FileUtil.getFileUrl(new FileDTO()
+                    .setUrl(env.getProperty("file.url"))
+                    .setMyFile(myFile)
+                    .setUploadFolder(env.getProperty("file.uploadFolder"))
+                    .setType(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL)
+                    .setMainUploadFolder(env.getProperty("file.mainUploadFolder")));
+            String url = files.getUrl();
+
+            filesUrl.add(new BasAttachmentDataDTO().setAttachmentName(files.getFileName()).setAttachmentType(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL.getAttachmentType()).setAttachmentUrl(url)
+                    .setRemark(barCode));
+        });
+        return filesUrl;
+    }
+
+    @PreAuthorize("@ss.hasPermi('bas:attachment:uploadMultiplePieces')")
+    @ApiOperation(httpMethod = "POST", value = "一票多件附件上传 - bas:uploadMultiplePieces:uploadMultiplePieces - swagger接收不到文件", notes = "一票多件附件上传")
+    @PostMapping(value = "/uploadMultiplePieces", headers = "content-type=multipart/form-data")
+    @ApiImplicitParams({@ApiImplicitParam(name = "attachmentTypeEnum", value = "附件类型", required = true)})
+    public R<List<BasMultiplePiecesDataDTO>> uploadMultiplePieces(@RequestParam("attachmentUrl") MultipartFile[] myFiles,
+                                                                  @RequestParam("attachmentTypeEnum") AttachmentTypeEnum attachmentTypeEnum) {
+
+
+        if(attachmentTypeEnum == AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK){
+
+            List<BasMultiplePiecesDataDTO> filesUrl = new ArrayList<>();
+            List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
+            if (CollectionUtils.isEmpty(multipartFiles)) {
+                throw new CommonException("999", "附件不能为空！");
+            }
+            multipartFiles.forEach(myFile -> {
+                Files files = FileUtil.getFileUrl(new FileDTO()
+                        .setUrl(env.getProperty("file.url"))
+                        .setMyFile(myFile)
+                        .setUploadFolder(env.getProperty("file.uploadFolder"))
+                        .setType(attachmentTypeEnum)
+                        .setMainUploadFolder(env.getProperty("file.mainUploadFolder")));
+                String url = files.getUrl();
+
+                BasMultiplePiecesDataDTO dto = new BasMultiplePiecesDataDTO();
+                filesUrl.add(dto.setAttachmentName(files.getFileName()).setAttachmentType(attachmentTypeEnum.getAttachmentType()).setAttachmentUrl(url));
+                //处理箱标数据
+                dto.setList(this.processBoxMark(myFile));
+            });
+            return R.ok(filesUrl);
+        }else{
+            List<BasMultiplePiecesDataDTO> filesUrl = new ArrayList<>();
+            List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
+            if (CollectionUtils.isEmpty(multipartFiles)) {
+                throw new CommonException("999", "附件不能为空！");
+            }
+            multipartFiles.forEach(myFile -> {
+                Files files = FileUtil.getFileUrl(new FileDTO()
+                        .setUrl(env.getProperty("file.url"))
+                        .setMyFile(myFile)
+                        .setUploadFolder(env.getProperty("file.uploadFolder"))
+                        .setType(attachmentTypeEnum)
+                        .setMainUploadFolder(env.getProperty("file.mainUploadFolder")));
+                String url = files.getUrl();
+                filesUrl.add(new BasMultiplePiecesDataDTO().setAttachmentName(files.getFileName()).setAttachmentType(attachmentTypeEnum.getAttachmentType()).setAttachmentUrl(url));
+            });
+            return R.ok(filesUrl);
+        }
+
     }
 
 }

@@ -109,15 +109,13 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
         AnalysisInfo httpRequestDto = new AnalysisInfo()
         .setService(delOutbound.getSupplierCalcId())
         .setRefNo(delOutbound.getOrderNo())
-        .setWarehouseCode(delOutbound.getWarehouseCode());
+        .setWarehouseCode(delOutbound.getWarehouseCode()).setStartNode(delOutbound.getWarehouseCode());
 
 
         // 包裹
         AnalysisInfoPackageInfo packages = new AnalysisInfoPackageInfo();
         packages.setWeight(new Weight().setUnit(delOutbound.getCalcWeightUnit()).setValue(new BigDecimal(delOutbound.getWeight())));
-        if(delOutbound.getBoxNumber() != null){
-            packages.setQuantity(Integer.parseInt(String.valueOf(delOutbound.getBoxNumber())));
-        }
+        packages.setQuantity(1);
 
 
         // 尺寸
@@ -125,7 +123,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                 .setHeight(new BigDecimal(delOutbound.getHeight()))
                 .setLength(new BigDecimal(delOutbound.getLength()))
                 .setWidth(new BigDecimal(delOutbound.getWidth()))
-                .setUnit(delOutbound.getCalcWeightUnit())
+                .setUnit("cm")
         );
 
         httpRequestDto.setPackages(Arrays.asList(packages));
@@ -188,22 +186,21 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
         AnalysisInfo httpRequestDto = new AnalysisInfo()
                 .setService(delOutbound.getSupplierCalcId())
                 .setRefNo(delOutbound.getOrderNo())
-                .setWarehouseCode(delOutbound.getWarehouseCode());
+                .setWarehouseCode(delOutbound.getWarehouseCode()).setStartNode(delOutbound.getWarehouseCode());
 
 
         // 包裹
         AnalysisInfoPackageInfo packages = new AnalysisInfoPackageInfo();
         packages.setWeight(new Weight().setUnit(delOutbound.getCalcWeightUnit()).setValue(new BigDecimal(delOutbound.getWeight())));
-        if(delOutbound.getBoxNumber() != null){
-            packages.setQuantity(Integer.parseInt(String.valueOf(delOutbound.getBoxNumber())));
-        }
+        packages.setQuantity(1);
+
 
         // 尺寸
         packages.setPacking(new AnalysisInfoPacking()
                 .setHeight(new BigDecimal(delOutbound.getHeight()))
                 .setLength(new BigDecimal(delOutbound.getLength()))
                 .setWidth(new BigDecimal(delOutbound.getWidth()))
-                .setUnit(delOutbound.getCalcWeightUnit())
+                .setUnit("cm")
         );
 
 

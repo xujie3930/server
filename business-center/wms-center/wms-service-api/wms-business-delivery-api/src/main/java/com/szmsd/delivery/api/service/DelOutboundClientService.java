@@ -32,6 +32,22 @@ public interface DelOutboundClientService {
     int shipmentPacking(ShipmentPackingMaterialRequestDto dto);
 
     /**
+     * 出库管理 - Open - 接收出库包裹使用包材
+     *
+     * @param dto dto
+     * @return int
+     */
+    int shipmentPackingMaterial(ShipmentPackingMaterialRequestDto dto);
+
+    /**
+     * 出库管理 - Open - 接收出库包裹测量信息
+     *
+     * @param dto dto
+     * @return int
+     */
+    int shipmentPackingMeasure(ShipmentPackingMaterialRequestDto dto);
+
+    /**
      * 出库管理 - Open - 接收批量出库单类型装箱信息
      *
      * @param dto dto

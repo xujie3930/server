@@ -222,4 +222,10 @@ public class PackageCollection extends BaseEntity {
     @ApiModelProperty(value = "是否需要明细，Y是，N否")
     @TableField(exist = false)
     private String hasDetail;
+
+    @ApiModelProperty(value = "是否提货服务(0否1是)")
+    private Integer isPickupPackageService;
+
+    @ApiModelProperty(value = "提货服务名称")
+    private String pickupPackageServiceName;
 }

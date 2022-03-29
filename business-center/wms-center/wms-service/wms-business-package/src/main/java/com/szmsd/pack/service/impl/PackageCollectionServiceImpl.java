@@ -27,6 +27,7 @@ import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
+import com.szmsd.http.api.service.IHtpPickupPackageService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
 import com.szmsd.http.dto.Package;
@@ -64,6 +65,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,6 +95,8 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     @SuppressWarnings({"all"})
     @Autowired
     private OperationFeignService operationFeignService;
+    @Autowired
+    private IHtpPickupPackageService httpPickupPackageService;
     @Autowired
     private IPackageCollectionOperationRecordService packageCollectionOperationRecordService;
     @Autowired
@@ -202,6 +206,10 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     Weight calcWeight = packageInfo.getCalcWeight();
                     packageCollection.setCalcWeight(calcWeight.getValue());
                     packageCollection.setCalcWeightUnit(calcWeight.getUnit());
+
+                    if (data.getIsPickupPackageService() != null) packageCollection.setIsPickupPackageService(data.getIsPickupPackageService());
+                    if (data.getPickupPackageServiceName() != null) packageCollection.setPickupPackageServiceName(data.getPickupPackageServiceName());
+
                     List<ChargeItem> charges = chargeWrapper.getCharges();
                     // 汇总费用
                     BigDecimal totalAmount = BigDecimal.ZERO;
@@ -415,6 +423,11 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     // 通知创建入库单
                     PackageCollectionContext packageCollectionContextCreateReceiver = new PackageCollectionContext(packageCollection, PackageCollectionContext.Type.CREATE_RECEIVER, true);
                     PackageCollectionContextEvent.publishEvent(packageCollectionContextCreateReceiver);
+                    operationFeignService.delOutboundFreeze(delOutboundOperationVO);
+                }
+                //通知提货商创建提货服务
+                if (StringUtils.isNotEmpty(packageCollection.getPickupPackageServiceName())) {
+                    createPackageService(packageCollection);
                 }
             }
             return 1;
@@ -429,6 +442,35 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
         } finally {
             this.logger.info(">>>insertPackageCollection: 结束新增");
         }
+    }
+
+    //创建提货服务
+    private void createPackageService(PackageCollection packageCollection) {
+        CreatePickupPackageCommand createPickupPackageCommand = new CreatePickupPackageCommand().setReferenceNumber(packageCollection.getCollectionNo()).setPickupPackageServiceName(packageCollection.getPickupPackageServiceName());
+
+        Address4PackageService address = new Address4PackageService().setName(packageCollection.getCollectionName()).setCompanyName(packageCollection.getCollectionName()).setPhone(packageCollection.getCollectionPhone()).setEmail(null).setAddress1(packageCollection.getCollectionAddress()).setAddress2(null).setAddress3(null).setCity(packageCollection.getCollectionCity()).setProvince(packageCollection.getCollectionProvince()).setPostCode(packageCollection.getCollectionPostCode()).setCountry(packageCollection.getCollectionCountry());
+        createPickupPackageCommand.setPickupAddress(address);
+
+        PickupPieces pickupPieces = new PickupPieces();
+        List<PickupPieceItemPickupPieceItem> list = new ArrayList<>();
+        BigDecimal totalWeight = BigDecimal.ZERO;
+        for (PackageCollectionDetail detail : packageCollection.getDetailList()) {
+            PickupPieceItemPickupPieceItem item = new PickupPieceItemPickupPieceItem();
+            item.setQuantity(detail.getQty());
+            item.setCustomerTag(detail.getSkuName());
+            list.add(item);
+            totalWeight.add(detail.getWeight());
+        }
+        pickupPieces.setPickupPieceItems(list);
+        pickupPieces.setTotalWeight(totalWeight.divide(new BigDecimal("1000")).setScale(2, RoundingMode.HALF_UP));
+        pickupPieces.setUnitOfMeasurement("KGS");
+        createPickupPackageCommand.setPickupPieces(pickupPieces);
+
+        PickupDateInfo pickupDateInfo = new PickupDateInfo();
+        pickupDateInfo.setPickupDate(packageCollection.getCollectionDate());
+        createPickupPackageCommand.setPickupDateInfo(pickupDateInfo);
+
+        httpPickupPackageService.create(createPickupPackageCommand);
     }
 
     private ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> pricing(PackageCollection packageCollection) {
@@ -514,6 +556,15 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     PackageCollectionContext packageCollectionContextCreateReceiver = new PackageCollectionContext(collection, PackageCollectionContext.Type.CREATE_RECEIVER, false);
                     PackageCollectionContextEvent.publishEvent(packageCollectionContextCreateReceiver);
                 }
+                //查询出该提货计划列表
+                LambdaQueryWrapper<PackageCollection> queryWrapper = Wrappers.lambdaQuery();
+                queryWrapper.in(PackageCollection::getId, idList);
+                List<PackageCollection> dataList = super.baseMapper.selectList(queryWrapper);
+                dataList.stream().forEach(e -> {
+                    e.setDetailList(this.packageCollectionDetailService.listByCollectionId(e.getId()));
+                    //通知提货商创建提货服务
+                    createPackageService(e);
+                });
             }
             return update;
         }
