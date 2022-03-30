@@ -1,5 +1,6 @@
 package com.szmsd.http.dto;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -34,4 +35,8 @@ public class CreateReceiptRequest implements Serializable {
     /** 收货单明细 **/
     private List<ReceiptDetailInfo> details;
 
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 }
