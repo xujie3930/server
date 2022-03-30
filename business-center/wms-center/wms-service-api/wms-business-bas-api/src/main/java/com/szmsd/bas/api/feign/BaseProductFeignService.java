@@ -30,7 +30,7 @@ public interface BaseProductFeignService {
      */
     @PostMapping("/base/product/add")
     R add(@RequestBody BaseProductDto baseProductDto);
-    @GetMapping(value = "rePushBaseProduct/{sku}")
+    @GetMapping(value = "/base/product/rePushBaseProduct/{sku}")
     @ApiOperation(value = "获取模块详细信息", notes = "获取模块详细信息")
     R rePushBaseProduct(@PathVariable("sku") String sku);
     @PostMapping(value = "/base/product/checkSkuValidToDelivery")
