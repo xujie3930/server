@@ -237,6 +237,39 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
             }
         }
+
+        if(DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())){
+            //一票多件
+            BasAttachmentQueryDTO dto = new BasAttachmentQueryDTO();
+            dto.setBusinessNo(delOutbound.getOrderNo());
+            List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService.list(dto).getData());
+
+            List<AttachmentDataDTO> attachmentDataDTOList = new ArrayList();
+            for (BasAttachment basAttachment: attachment) {
+                if(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK.getAttachmentType().equals(basAttachment.getAttachmentType())
+             || AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE.getAttachmentType().equals(basAttachment.getAttachmentType()) ){
+                    attachmentDataDTOList.add(new AttachmentDataDTO().setId(basAttachment.getId()).setAttachmentName(basAttachment.getAttachmentName())
+                            .setAttachmentType(basAttachment.getAttachmentType())
+                            .setAttachmentUrl(basAttachment.getAttachmentUrl()));
+                }else{
+
+                    //明细相关附件
+                    for (DelOutboundDetailVO detailVO: delOutboundVO.getDetails()){
+                        if(StringUtils.equals(""+detailVO.getId(), basAttachment.getBusinessItemNo())){
+                            if(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL.getAttachmentType().equals(basAttachment.getAttachmentType())){
+                                detailVO.setBoxMarkFile(basAttachment.getAttachmentUrl());
+                            }else if(AttachmentTypeEnum.MULTIPLE_PIECES_SKU.getAttachmentType().equals(basAttachment.getAttachmentType())){
+                                detailVO.setSkuFile(basAttachment.getAttachmentUrl());
+                            }
+                        }
+                    }
+
+
+                }
+            }
+
+            delOutboundVO.setDocumentsFiles(attachmentDataDTOList);
+        }
         return delOutboundVO;
     }
 
@@ -516,12 +549,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 保存明细
             this.saveDetail(dto, delOutbound.getOrderNo());
 
-            //过滤掉一票多件的附件处理
-            if (!DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
-                // 附件信息
-                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
-                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
-            }
+            // 附件信息
+            AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
+            this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
 
 
             // 批量出库保存装箱信息
@@ -541,11 +571,27 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
                 //一票多件出库
+
+                //箱标
+                List<AttachmentDataDTO> batchLabels = new ArrayList();
+                //发货单
+                List<AttachmentDataDTO> documentsFiles = new ArrayList();
+                if(dto.getDocumentsFiles() != null){
+                    for (AttachmentDataDTO vo : dto.getDocumentsFiles()){
+                        if(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK.getAttachmentType().equals(vo.getAttachmentType())){
+                            batchLabels.add(vo);
+                        }else if(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE.getAttachmentType().equals(vo.getAttachmentType())){
+                            documentsFiles.add(vo);
+                        }
+                    }
+                }
                 // 箱标文件
-                AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK).build();
+                AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(batchLabels)
+                        .attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK).build();
                 this.remoteAttachmentService.saveAndUpdate(batchLabel);
                 // 发货单文件
-                AttachmentDTO invoiceBatchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE).build();
+                AttachmentDTO invoiceBatchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(documentsFiles)
+                        .attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE).build();
                 this.remoteAttachmentService.saveAndUpdate(invoiceBatchLabel);
                 for (DelOutboundDetailDto detail: dto.getDetails()){
                     if(StringUtils.isNotEmpty(detail.getBoxMarkFile())){
@@ -781,10 +827,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 计算发货类型
             inputDelOutbound.setShipmentType(this.buildShipmentType(dto));
             // 附件信息
-            if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
-                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(delOutbound.getOrderNo()).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
-                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
-            }
+            AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(delOutbound.getOrderNo()).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
+            this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+
 
             // 计算包裹大小
             this.countPackageSize(inputDelOutbound, dto);
@@ -805,11 +850,26 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
                 //一票多件出库
+                //箱标
+                List<AttachmentDataDTO> batchLabels = new ArrayList();
+                //发货单
+                List<AttachmentDataDTO> documentsFiles = new ArrayList();
+                if(dto.getDocumentsFiles() != null){
+                    for (AttachmentDataDTO vo : dto.getDocumentsFiles()){
+                        if(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK.getAttachmentType().equals(vo.getAttachmentType())){
+                            batchLabels.add(vo);
+                        }else if(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE.getAttachmentType().equals(vo.getAttachmentType())){
+                            documentsFiles.add(vo);
+                        }
+                    }
+                }
                 // 箱标文件
-                AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK).build();
+                AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(batchLabels)
+                        .attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK).build();
                 this.remoteAttachmentService.saveAndUpdate(batchLabel);
                 // 发货单文件
-                AttachmentDTO invoiceBatchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE).build();
+                AttachmentDTO invoiceBatchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(documentsFiles)
+                        .attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE).build();
                 this.remoteAttachmentService.saveAndUpdate(invoiceBatchLabel);
                 for (DelOutboundDetailDto detail: dto.getDetails()){
                     if(StringUtils.isNotEmpty(detail.getBoxMarkFile())){
@@ -1079,7 +1139,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return orderNos.size();
     }
 
-    @Transactional
+     @Transactional
     @Override
     public int shipmentPackingMaterial(ShipmentPackingMaterialRequestDto dto) {
         return this.shipmentPackingMaterial(dto, DelOutboundStateEnum.PROCESSING);

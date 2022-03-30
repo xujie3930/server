@@ -104,6 +104,8 @@ public interface IBaseProductService extends IService<BaseProduct> {
      */
     List<BaseProduct> BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos);
 
+    void rePushBaseProduct(String sku);
+
     /**
      * 修改模块
      *

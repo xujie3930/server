@@ -30,6 +30,11 @@ public class BaseProductFeignFallback implements FallbackFactory<BaseProductFeig
             }
 
             @Override
+            public R rePushBaseProduct(String sku) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct) {
                 return R.convertResultJson(throwable);
             }

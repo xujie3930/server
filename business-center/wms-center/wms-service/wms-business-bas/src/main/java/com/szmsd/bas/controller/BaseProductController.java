@@ -243,6 +243,13 @@ public class BaseProductController extends BaseController {
         return R.ok(baseProductService.selectBaseProductById(id));
     }
 
+    @GetMapping(value = "rePushBaseProduct/{sku}")
+    @ApiOperation(value = "获取模块详细信息", notes = "获取模块详细信息")
+    public R rePushBaseProduct(@PathVariable("sku") String sku) {
+        baseProductService.rePushBaseProduct(sku);
+        return R.ok();
+    }
+
     /**
      * 新增模块
      */
