@@ -166,8 +166,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 this.delOutboundBringVerifyAsyncService.bringVerifyAsync(delOutbound, asyncThreadObject);*/
                 // 增加出库单已取消记录，异步处理，定时任务
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
-                // 修改状态为提交中，定时任务收取到任务之后修改状态为提审中，这里不修改状态
-                // this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
+                // 修改状态为提交中
+                this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
                 resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), true, "处理成功"));
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
