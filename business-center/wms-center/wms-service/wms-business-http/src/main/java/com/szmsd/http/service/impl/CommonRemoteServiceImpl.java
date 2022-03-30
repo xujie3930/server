@@ -89,6 +89,7 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
                 } else {
                     oneTask.setRequestStatus(RemoteStatusEnum.SUCCESS.getStatus());
                 }
+                oneTask.setResponseBody(JSONObject.toJSONString(rmi.getBody() + ""));
             } else {
                 ResponseVO responseVO = new ResponseVO();
                 // 出口易接口单独调用
@@ -113,7 +114,10 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
                     default:
                         break;
                 }
+                oneTask.setResponseBody(JSONObject.toJSONString(responseVO));
                 ResponseVO.resultAssert(responseVO, scanEnumByType.getDesc());
+                oneTask.setRequestStatus(RemoteStatusEnum.SUCCESS.getStatus());
+
             }
         } catch (Exception e) {
             log.error("推送失败请求参数：{}\n", oneTask, e);
