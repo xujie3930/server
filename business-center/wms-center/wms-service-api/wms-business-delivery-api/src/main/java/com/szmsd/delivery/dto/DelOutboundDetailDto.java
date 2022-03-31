@@ -12,6 +12,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -80,9 +81,9 @@ public class DelOutboundDetailDto implements Serializable {
 
     @ApiModelProperty(value = "sku新标签文件")
     @TableField(exist = false)
-    private AttachmentDataDTO skuFile;
+    private List<AttachmentDataDTO> skuFile;
 
     @ApiModelProperty(value = "箱标文件")
     @TableField(exist = false)
-    private AttachmentDataDTO boxMarkFile;
+    private List<AttachmentDataDTO> boxMarkFile;
 }
