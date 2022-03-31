@@ -257,9 +257,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     for (DelOutboundDetailVO detailVO: delOutboundVO.getDetails()){
                         if(StringUtils.equals(""+detailVO.getId(), basAttachment.getBusinessItemNo())){
                             if(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL.getAttachmentType().equals(basAttachment.getAttachmentType())){
-                                detailVO.setBoxMarkFile(basAttachment.getAttachmentUrl());
+                                detailVO.setBoxMarkFile(new AttachmentFileDTO().setId(basAttachment.getId()).setAttachmentName(basAttachment.getAttachmentName()).setAttachmentUrl(basAttachment.getAttachmentUrl()));
                             }else if(AttachmentTypeEnum.MULTIPLE_PIECES_SKU.getAttachmentType().equals(basAttachment.getAttachmentType())){
-                                detailVO.setSkuFile(basAttachment.getAttachmentUrl());
+                                detailVO.setSkuFile(new AttachmentFileDTO().setId(basAttachment.getId()).setAttachmentName(basAttachment.getAttachmentName()).setAttachmentUrl(basAttachment.getAttachmentUrl()));
                             }
                         }
                     }
@@ -594,17 +594,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         .attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE).build();
                 this.remoteAttachmentService.saveAndUpdate(invoiceBatchLabel);
                 for (DelOutboundDetailDto detail: dto.getDetails()){
-                    if(StringUtils.isNotEmpty(detail.getBoxMarkFile())){
+                    if(detail.getBoxMarkFile() != null &&  StringUtils.isNotEmpty(detail.getBoxMarkFile().getAttachmentUrl())){
                         // 箱标明细
                         AttachmentDTO boxMarkDetailFiels = AttachmentDTO.builder().businessNo(orderNo).businessItemNo("" + detail.getId()).fileList(
-                                Arrays.asList(new AttachmentDataDTO().setAttachmentUrl(detail.getBoxMarkFile()))).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL).build();
+                                Arrays.asList(new AttachmentDataDTO().setAttachmentUrl(detail.getBoxMarkFile().getAttachmentUrl()))).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL).build();
                         this.remoteAttachmentService.saveAndUpdate(boxMarkDetailFiels);
 
                     }
-                    if(StringUtils.isNotEmpty(detail.getSkuFile())){
+                    if(detail.getSkuFile() != null &&  StringUtils.isNotEmpty(detail.getSkuFile().getAttachmentUrl())){
                         // SKU
                         AttachmentDTO skuFiles = AttachmentDTO.builder().businessNo(orderNo).businessItemNo("" + detail.getId()).fileList(
-                                Arrays.asList(new AttachmentDataDTO().setAttachmentUrl(detail.getSkuFile()))).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_SKU).build();
+                                Arrays.asList(new AttachmentDataDTO().setAttachmentUrl(detail.getSkuFile().getAttachmentUrl()))).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_SKU).build();
                         this.remoteAttachmentService.saveAndUpdate(skuFiles);
                     }
 
@@ -872,17 +872,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         .attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE).build();
                 this.remoteAttachmentService.saveAndUpdate(invoiceBatchLabel);
                 for (DelOutboundDetailDto detail: dto.getDetails()){
-                    if(StringUtils.isNotEmpty(detail.getBoxMarkFile())){
+                    if(detail.getBoxMarkFile() != null && StringUtils.isNotEmpty(detail.getBoxMarkFile().getAttachmentUrl())){
                         // 箱标明细
                         AttachmentDTO boxMarkDetailFiels = AttachmentDTO.builder().businessNo(orderNo).businessItemNo("" + detail.getId()).fileList(
-                                Arrays.asList(new AttachmentDataDTO().setAttachmentUrl(detail.getBoxMarkFile()))).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL).build();
+                                Arrays.asList(detail.getBoxMarkFile())).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL).build();
                         this.remoteAttachmentService.saveAndUpdate(boxMarkDetailFiels);
 
                     }
-                    if(StringUtils.isNotEmpty(detail.getSkuFile())){
+                    if(detail.getSkuFile() != null && StringUtils.isNotEmpty(detail.getSkuFile().getAttachmentUrl())){
                         // SKU
                         AttachmentDTO skuFiles = AttachmentDTO.builder().businessNo(orderNo).businessItemNo("" + detail.getId()).fileList(
-                                Arrays.asList(new AttachmentDataDTO().setAttachmentUrl(detail.getSkuFile()))).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_SKU).build();
+                                Arrays.asList(detail.getSkuFile())).attachmentTypeEnum(AttachmentTypeEnum.MULTIPLE_PIECES_SKU).build();
                         this.remoteAttachmentService.saveAndUpdate(skuFiles);
                     }
 

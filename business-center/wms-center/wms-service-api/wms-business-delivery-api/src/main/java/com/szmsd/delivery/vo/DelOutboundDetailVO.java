@@ -115,8 +115,8 @@ public class DelOutboundDetailVO implements Serializable {
     private String boxMark;
 
     @ApiModelProperty(value = "sku新标签文件")
-    private String skuFile;
+    private AttachmentFileDTO skuFile;
 
     @ApiModelProperty(value = "箱标文件")
-    private String boxMarkFile;
+    private AttachmentFileDTO boxMarkFile;
 }
