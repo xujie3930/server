@@ -1,11 +1,15 @@
 package com.szmsd.putinstorage.controller;
 
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -283,11 +287,22 @@ public class InboundReceiptController extends BaseController {
         return R.ok(inboundReceiptDetailVOS);
     }
 
+    TimedCache<String, Long> skuRep = CacheUtil.newTimedCache(DateUnit.MINUTE.getMillis() * 3);
+
     @PreAuthorize("@ss.hasPermi('inbound:receiving')")
     @PostMapping("/receiving")
     @ApiOperation(value = "#B1 接收入库上架", notes = "#B1 接收入库上架")
     @InboundReceiptLog(record = InboundReceiptRecordEnum.PUT)
     public R receiving(@RequestBody ReceivingRequest receivingRequest) {
+        String repeatRequestKey = JSONObject.toJSONString(receivingRequest);
+        Long excuteTime = skuRep.get(repeatRequestKey);
+        if (null == excuteTime) {
+            skuRep.put(repeatRequestKey, System.currentTimeMillis());
+        } else {
+            log.info("#B1 接收入库上架 重复请求：{}==={}", receivingRequest, excuteTime);
+            return R.ok();
+        }
+
         String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
         RLock lock = redissonClient.getLock("InboundReceiptController#receiving" + localKey);
         try {
@@ -300,6 +315,10 @@ public class InboundReceiptController extends BaseController {
         } catch (InterruptedException e) {
             e.printStackTrace();
             return R.failed("接收入库上架失败!");
+        } catch (Exception e) {
+            skuRep.remove(repeatRequestKey);
+            log.error("接收入库上架失败:", e);
+            throw new RuntimeException(e.getMessage());
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
@@ -502,6 +521,7 @@ public class InboundReceiptController extends BaseController {
         inventoryStockByRangeDTO.valid();
         return R.ok(iInboundReceiptService.querySkuStockByRange(inventoryStockByRangeDTO));
     }
+
     @PreAuthorize("@ss.hasPermi('inventory:querySkuStockByRange')")
     @PostMapping("/collectAndInbound")
     @ApiOperation(value = "揽收入库", notes = "查询sku的入库状况-指定范围内")
