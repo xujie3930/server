@@ -567,7 +567,7 @@ public class DelOutboundController extends BaseController {
     public void export(HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
         try {
 
-            String len = StringUtils.isEmpty(queryDto.getLen()) ? "cn": queryDto.getLen();
+            String len = getLen();
 
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066");
@@ -585,8 +585,7 @@ public class DelOutboundController extends BaseController {
             QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService);
 
 
-
-            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("en".equals(len) ? "Data_list" : "出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
                         @Override
                         public String sheetName() {
 

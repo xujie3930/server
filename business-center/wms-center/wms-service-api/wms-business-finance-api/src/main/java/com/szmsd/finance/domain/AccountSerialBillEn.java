@@ -35,7 +35,7 @@ public class AccountSerialBillEn{
     @AutoFieldI18n
     @ApiModelProperty(value = "币种名")
     @Excel(name = "Currency")
-    private String currencyName;
+    private String currencyCode;
 
     @ApiModelProperty(value = "发生额")
     @Excel(name = "Cost")

@@ -182,7 +182,7 @@ public class BaseProductController extends BaseController {
 
             }
             ExcelUtil<BaseProductEnExportDto> util = new ExcelUtil<BaseProductEnExportDto>(BaseProductEnExportDto.class);
-            util.exportExcel(response, enList, "sku export");
+            util.exportExcel(response, enList, "sku_export");
         }else{
             ExcelUtil<BaseProductExportDto> util = new ExcelUtil<BaseProductExportDto>(BaseProductExportDto.class);
             util.exportExcel(response, list, "sku导出");

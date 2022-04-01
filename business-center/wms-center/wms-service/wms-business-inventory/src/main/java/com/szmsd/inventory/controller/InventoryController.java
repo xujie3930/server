@@ -90,7 +90,7 @@ public class InventoryController extends BaseController {
                 list.set(i, null);
             }
             ExcelUtil<InventorySkuEnVO> util = new ExcelUtil<InventorySkuEnVO>(InventorySkuEnVO.class);
-            util.exportExcel(response, enList, "Inventory Exprot"+ DateUtils.dateTimeNow());
+            util.exportExcel(response, enList, "Inventory_Exprot"+ DateUtils.dateTimeNow());
             return getDataTable(list);
 
         }else{
