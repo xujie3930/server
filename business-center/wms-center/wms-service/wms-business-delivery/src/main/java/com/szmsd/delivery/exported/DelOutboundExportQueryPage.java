@@ -23,6 +23,7 @@ public class DelOutboundExportQueryPage implements QueryPage<DelOutboundExportLi
     private final ExportContext exportContext;
     private final IDelOutboundService delOutboundService;
 
+
     public DelOutboundExportQueryPage(DelOutboundListQueryDto delOutboundListQueryDto, QueryDto queryDto, ExportContext exportContext, IDelOutboundService delOutboundService) {
         this.delOutboundListQueryDto = delOutboundListQueryDto;
         this.queryDto = queryDto;

@@ -321,7 +321,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto) {
+    public List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto, String len) {
         List<BaseProduct> list = selectBaseProductPage(queryDto);
         List<BaseProductExportDto> exportList = BeanMapperUtil.mapList(list, BaseProductExportDto.class);
         Iterator<BaseProductExportDto> iterable = exportList.iterator();
@@ -329,7 +329,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         while (iterable.hasNext()) {
             BaseProductExportDto b = iterable.next();
             b.setNo(count++);
-            b.setWarehouseAcceptanceValue(b.getWarehouseAcceptance() == true ? "是" : "否");
+
+            if("en".equals(len)){
+                b.setWarehouseAcceptanceValue(b.getWarehouseAcceptance() == true ? "Yes" : "No");
+
+            }else{
+                b.setWarehouseAcceptanceValue(b.getWarehouseAcceptance() == true ? "是" : "否");
+
+            }
         }
 
         return exportList;

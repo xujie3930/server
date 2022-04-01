@@ -218,7 +218,7 @@ public class InboundReceiptController extends BaseController {
         String fileName;
         if ("en".equals(len)) {
             fileName = "inbound_order_sku_import";
-            rows = CollUtil.newArrayList("inbound order no", "SKU", "QTY", "Original product code", "Note");
+            rows = CollUtil.newArrayList("inbound order no", "SKU", "Quantity", "Original product code", "Remarks");
         } else {
             fileName = "入库单SKU导入";
             rows = CollUtil.newArrayList("入库单号", "SKU", "申报数量", "原产品编码", "备注");
@@ -443,9 +443,12 @@ public class InboundReceiptController extends BaseController {
 
     static {
         INBOUND_RECEIPT_EXPORT_HEAD_ZH = Arrays.asList("入库单号", "采购单号", "送货方式", "快递单号/揽收单号", "状态", "目的仓库", "入库方式", "SKU", "初始数量", "到仓数量", "原产品编码", "下单时间", "到仓时间", "审核备注", "客户备注", "销售VAT");
-        INBOUND_RECEIPT_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Purchase Orders", "Delivery Method", "Tracking Nu of pickup", "Status", "Destinatuon Warehouse", "Inbound Method", "SKU", "Order Qty", "Put on sale Qty", "Original product Number", "Order Create Time", "Arriving time", "System Note", "Note", "VAT Nu");
+        INBOUND_RECEIPT_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Purchase Orders", "Delivery Method", "Tracking Nu of pickup", "Status",
+                "Destinatuon Warehouse", "Inbound Method", "SKU", "Initial Qty", "Received Qty", "Original Product Code", "Order Time",
+                "Arriving time", "Under Review", "Customer Remarks", "Sales manager VAT");
 
-        INBOUND_TRACKING_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Tracking Nu of pickup", "Receipt Status", "Operating Time");
+        INBOUND_TRACKING_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Tracking Number/\n" +
+                "Collecting Number", "Status", "Operating Time");
         INBOUND_TRACKING_EXPORT_HEAD_ZH = Arrays.asList("入库单号", "快递单号/揽收单号", "收货状态", "操作时间");
     }
 
