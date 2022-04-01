@@ -88,17 +88,15 @@ public class ResponseVO implements Serializable {
     public static void resultAssert(ResponseVO responseVO, String api) {
         log.info("【响应：{}--{}】", api, JSONObject.toJSONString(responseVO));
         if (null == responseVO) return;
-        String code = Optional.ofNullable(responseVO.getCode()).orElse("500");
+        String code = responseVO.getCode();
+        // 如果为空则也是正常
+        boolean codeSuccess = StringUtils.isBlank(code) || ("" + HttpStatus.SUCCESS).equals(code);
 
-        if (!(("" + HttpStatus.SUCCESS).equals(code)) || !responseVO.getSuccess()) {
+        if (!codeSuccess || !responseVO.getSuccess()) {
             // 不是正常返回
             String errors = Optional.ofNullable(responseVO.getErrors()).orElse("调用异常!");
             String mssage = Optional.ofNullable(responseVO.getMessage()).orElse("调用异常!");
             AssertUtil.isTrue(false, () -> "RemoteRequest[" + api + "失败:" + getDefaultStr(errors).concat(mssage) + "]");
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(!(("" + HttpStatus.SUCCESS).equals("200")));
     }
 }
