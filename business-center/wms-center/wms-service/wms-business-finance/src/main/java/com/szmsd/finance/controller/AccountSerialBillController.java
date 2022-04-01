@@ -110,6 +110,10 @@ public class AccountSerialBillController extends BaseController {
                     if(map045.containsKey(vo.getChargeType())){
                         vo.setChargeType(map045.get(vo.getChargeType()));
                     }
+
+                    if(map045.containsKey(vo.getChargeCategory())){
+                        vo.setChargeCategory(map045.get(vo.getChargeCategory()));
+                    }
                 }
             }
             if(warehouseCodes.size() > 0){
