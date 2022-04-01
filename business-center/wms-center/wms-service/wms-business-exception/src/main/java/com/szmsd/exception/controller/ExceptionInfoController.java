@@ -130,7 +130,7 @@ public class ExceptionInfoController extends BaseController {
             String pathName = "/temp/exception_export_template.xlsx";
             org.springframework.core.io.Resource resource = new ClassPathResource(pathName);
             InputStream inputStream = resource.getInputStream();
-            ExcelUtils.export(response, inputStream, null, ExcelUtils.ExportExcel.build("异常通知中心_异常导出", null, new ExcelUtils.ExportSheet<ExceptionInfoExportDto>() {
+            ExcelUtils.export(response, inputStream, null, ExcelUtils.ExportExcel.build("异常通知中心_异常导出", null, null, null, new ExcelUtils.ExportSheet<ExceptionInfoExportDto>() {
                 @Override
                 public String sheetName() {
                     return "";

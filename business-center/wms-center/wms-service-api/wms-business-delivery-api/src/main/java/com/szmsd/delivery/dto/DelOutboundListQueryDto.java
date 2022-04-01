@@ -55,4 +55,8 @@ public class DelOutboundListQueryDto extends QueryDto {
 
     @ApiModelProperty(value = "轨迹状态")
     private String trackingStatus;
+
+
+    @ApiModelProperty(value = "当前语言")
+    private String len;
 }

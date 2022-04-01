@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -115,8 +116,8 @@ public class DelOutboundDetailVO implements Serializable {
     private String boxMark;
 
     @ApiModelProperty(value = "sku新标签文件")
-    private String skuFile;
+    private List<AttachmentFileDTO> skuFile;
 
     @ApiModelProperty(value = "箱标文件")
-    private String boxMarkFile;
+    private List<AttachmentFileDTO> boxMarkFile;
 }

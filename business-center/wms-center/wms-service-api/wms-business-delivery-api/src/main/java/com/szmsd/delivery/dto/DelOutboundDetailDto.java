@@ -1,8 +1,10 @@
 package com.szmsd.delivery.dto;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.common.core.validator.ValidationSaveGroup;
 import com.szmsd.common.core.validator.ValidationUpdateGroup;
+import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,6 +12,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -78,9 +81,9 @@ public class DelOutboundDetailDto implements Serializable {
 
     @ApiModelProperty(value = "sku新标签文件")
     @TableField(exist = false)
-    private String skuFile;
+    private List<AttachmentDataDTO> skuFile;
 
     @ApiModelProperty(value = "箱标文件")
     @TableField(exist = false)
-    private String boxMarkFile;
+    private List<AttachmentDataDTO> boxMarkFile;
 }

@@ -63,6 +63,7 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
             outboundDto.setDetails(this.buildDetails(dto));
             outboundDto.setSourceType(DelOutboundConstant.SOURCE_TYPE_IMP);
             outboundDto.setCodAmount(dto.getCodAmount());
+            outboundDto.setEmail(dto.getEmail());
             outboundDtoList.add(outboundDto);
         }
         return outboundDtoList;
