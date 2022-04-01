@@ -585,7 +585,7 @@ public class DelOutboundController extends BaseController {
             QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService);
 
 
-            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("en".equals(len) ? "Data_list" : "出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("en".equals(len) ? "Outbound_order" : "出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
                         @Override
                         public String sheetName() {
 
