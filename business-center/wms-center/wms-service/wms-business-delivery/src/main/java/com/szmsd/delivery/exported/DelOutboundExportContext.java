@@ -144,4 +144,9 @@ public class DelOutboundExportContext implements ExportContext {
             return null;
         });
     }
+
+    @Override
+    public String len() {
+        return this.len;
+    }
 }

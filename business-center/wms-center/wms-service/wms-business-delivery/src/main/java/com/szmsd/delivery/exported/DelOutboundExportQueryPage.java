@@ -46,7 +46,7 @@ public class DelOutboundExportQueryPage implements QueryPage<DelOutboundExportLi
                 vo.setWarehouseName(this.exportContext.getWarehouseName(dto.getWarehouseCode()));
                 vo.setOrderTypeName(this.exportContext.getOrderTypeName(dto.getOrderType()));
                 vo.setExceptionStateName(this.exportContext.getExceptionStateName(dto.getExceptionState()));
-                if (StringUtils.isEmpty(dto.getCountry()) && StringUtils.isNotEmpty(dto.getCountryCode())) {
+                if (StringUtils.isEmpty(dto.getCountry()) && StringUtils.isNotEmpty(dto.getCountryCode()) || "en".equals(this.exportContext.len())) {
                     // 根据编码去查询名称
                     vo.setCountry(this.exportContext.getCountry(dto.getCountryCode()));
                 }
