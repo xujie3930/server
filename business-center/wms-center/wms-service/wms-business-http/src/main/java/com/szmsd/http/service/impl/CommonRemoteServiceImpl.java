@@ -109,7 +109,7 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
                             CreateReceiptRequest createReceiptRequest = JSONObject.parseObject(oneTask.getRequestParams(), CreateReceiptRequest.class);
                             log.info("【WMS】SYNC 【入库单创建】-{}", createReceiptRequest);
                             responseVO = iInboundService.create(createReceiptRequest);
-                            if (responseVO != null && responseVO.getSuccess() && responseVO.getMessage().contains("此编码未创建产品信息")) {
+                            if (responseVO != null && StringUtils.isNotBlank(responseVO.getMessage()) && responseVO.getMessage().contains("此编码未创建产品信息")) {
                                 log.info("【WMS】SYNC 【入库单创建】-失败：可能未创建sku,尝试推送sku {}", createReceiptRequest);
                                 List<String> skuNeedPushList = createReceiptRequest.getDetails().stream().map(ReceiptDetailInfo::getSku).collect(Collectors.toList());
                                 skuNeedPushList.forEach(x -> baseProductFeignService.rePushBaseProduct(x));
