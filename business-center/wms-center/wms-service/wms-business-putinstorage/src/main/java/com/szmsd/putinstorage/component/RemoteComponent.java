@@ -213,6 +213,7 @@ public class RemoteComponent {
         log.info("调用入库接口：{}", receivingRequest);
         InboundInventoryDTO inboundInventoryDTO = BeanMapperUtil.map(receivingRequest, InboundInventoryDTO.class);
         R inbound = inventoryFeignService.inbound(inboundInventoryDTO);
+        R.getDataAndException(inbound);
         AssertUtil.notNull(inbound, "入库请求异常");
         AssertUtil.isTrue(inbound.getCode() == HttpStatus.SUCCESS, "入库失败：" + inbound.getMsg());
         log.info("调用入库接口：操作完成");
