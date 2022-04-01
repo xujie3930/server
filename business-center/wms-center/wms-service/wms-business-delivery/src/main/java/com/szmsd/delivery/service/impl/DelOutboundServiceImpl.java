@@ -549,6 +549,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             DelOutboundOperationLogEnum.CREATE.listener(delOutbound);
             // 保存地址
             this.saveAddress(dto, delOutbound.getOrderNo());
+
+            if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
+                //如果明细中商标为空，系统自动生成
+
+                for (DelOutboundDetailDto detailDto:dto.getDetails()) {
+                    if(StringUtils.isEmpty(detailDto.getBoxMark())){
+                        detailDto.setBoxMark(this.serialNumberClientService.generateNumber(SerialNumberConstant.BOX_MARK));
+                    }
+                }
+            }
+
+
+
+
+
             // 保存明细
             this.saveDetail(dto, delOutbound.getOrderNo());
 

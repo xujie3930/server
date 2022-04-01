@@ -52,6 +52,9 @@ public class DelOutboundImportDto implements Serializable {
     @ApiModelProperty(value = "联系方式")
     private String phoneNo;
 
+    @ApiModelProperty(value = "邮箱")
+    private String email;
+
     @ApiModelProperty(value = "提货方式")
     private String deliveryMethodName;
 
@@ -69,4 +72,6 @@ public class DelOutboundImportDto implements Serializable {
 
     @ApiModelProperty(value = "COD")
     private BigDecimal codAmount;
+
+
 }

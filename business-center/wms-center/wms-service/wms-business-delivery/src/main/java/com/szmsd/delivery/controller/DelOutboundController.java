@@ -29,6 +29,7 @@ import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
@@ -298,10 +299,26 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundImportTemplate')")
     @GetMapping("/delOutboundImportTemplate")
     @ApiOperation(value = "出库管理 - 列表 - 出库单导入模板", position = 1000)
-    public void delOutboundImportTemplate(HttpServletResponse response) {
-        String filePath = "/template/DM.xls";
-        String fileName = "DM出库（正常，自提，销毁）模板";
-        this.downloadTemplate(response, filePath, fileName);
+    public void delOutboundImportTemplate(HttpServletRequest request, HttpServletResponse response) {
+        if(StringUtils.equals(DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode(), request.getParameter("orderType"))){
+            if (request.getParameter("len").equals("zh")) {
+                String filePath = "/template/DM-cn.xls";
+                String fileName = "DM出库（正常，自提，销毁）模板";
+                this.downloadTemplate(response, filePath, fileName);
+            }else{
+                String filePath = "/template/DM-en.xls";
+                String fileName = "DM delivery (normal, self delivery, destruction) template";
+                this.downloadTemplate(response, filePath, fileName);
+            }
+
+        }else{
+            String filePath = "/template/DM.xls";
+            String fileName = "DM出库（正常，自提，销毁）模板";
+            this.downloadTemplate(response, filePath, fileName);
+        }
+
+
+
     }
 
     /**
@@ -498,7 +515,7 @@ public class DelOutboundController extends BaseController {
     @Log(title = "出库管理 - 导出", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     @ApiOperation(value = "出库管理 - 导出", position = 1600)
-    public void export(HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
+    public void export(HttpServletRequest request, HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
         try {
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066");
@@ -514,10 +531,18 @@ public class DelOutboundController extends BaseController {
             queryDto2.setPageNum(1);
             queryDto2.setPageSize(500);
             QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService);
-            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("出库单", null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
+
+
+            String len = request.getParameter("len");
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
                         @Override
                         public String sheetName() {
-                            return "出库单详情";
+
+                            if("en".equals(len)){
+                                return "Outbound Order Information";
+                            }else{
+                                return "出库单详情";
+                            }
                         }
 
                         @Override
@@ -533,7 +558,11 @@ public class DelOutboundController extends BaseController {
                     new ExcelUtils.ExportSheet<DelOutboundExportItemListVO>() {
                         @Override
                         public String sheetName() {
-                            return "包裹明细";
+                            if("en".equals(len)){
+                                return "SKU list";
+                            }else{
+                                return "包裹明细";
+                            }
                         }
 
                         @Override
