@@ -156,6 +156,8 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                     exportDto.setStateOrProvince(exportVO.getStateOrProvince());
                     exportDto.setCountry(exportVO.getCountry());
                     exportDto.setPostCode(exportVO.getPostCode());
+                    exportDto.setPhoneNo(exportVO.getPhoneNo());
+                    exportDto.setEmail(exportVO.getEmail());
                 }
             }
         }
