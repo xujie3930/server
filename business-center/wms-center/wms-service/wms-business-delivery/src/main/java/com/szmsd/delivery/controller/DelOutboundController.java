@@ -566,9 +566,12 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 导出", position = 1600)
     public void export(HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
         try {
+
+            String len = getLen();
+
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066");
-            DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService);
+            DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
             exportContext.setStateCacheAdapter(listMap.get("065"));
             exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
             exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
@@ -582,9 +585,7 @@ public class DelOutboundController extends BaseController {
             QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService);
 
 
-            String len = StringUtils.isEmpty(queryDto.getLen()) ? "cn": queryDto.getLen();
-
-            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("en".equals(len) ? "Data_list" : "出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
                         @Override
                         public String sheetName() {
 

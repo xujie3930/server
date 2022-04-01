@@ -29,8 +29,9 @@ public class DelOutboundExportContext implements ExportContext {
     private final BasRegionFeignService basRegionFeignService;
     private final CacheContext<String, String> countryCache;
     private final Lock countryLock;
+    private String len;
 
-    public DelOutboundExportContext(BasWarehouseClientService basWarehouseClientService, BasRegionFeignService basRegionFeignService) {
+    public DelOutboundExportContext(BasWarehouseClientService basWarehouseClientService, BasRegionFeignService basRegionFeignService, String... len) {
         this.basRegionFeignService = basRegionFeignService;
         this.warehouseLock = new ReentrantLock();
         this.basWarehouseClientService = basWarehouseClientService;
@@ -40,13 +41,24 @@ public class DelOutboundExportContext implements ExportContext {
         this.exceptionStateCache = new CacheContext.MapCacheContext<>();
         this.countryCache = new CacheContext.MapCacheContext<>();
         this.countryLock = new ReentrantLock();
+        if(len != null && len.length > 0){
+            this.len = len[0];
+        }
     }
 
     private void setBySubValue(CacheContext<String, String> cacheContext, List<BasSubWrapperVO> list) {
         if (CollectionUtils.isNotEmpty(list)) {
-            for (BasSubWrapperVO vo : list) {
-                cacheContext.put(vo.getSubValue(), vo.getSubName());
+
+            if("en".equals(len)) {
+                for (BasSubWrapperVO vo : list) {
+                    cacheContext.put(vo.getSubValue(), vo.getSubNameEn());
+                }
+            }else{
+                for (BasSubWrapperVO vo : list) {
+                    cacheContext.put(vo.getSubValue(), vo.getSubName());
+                }
             }
+
         }
     }
 
@@ -72,6 +84,9 @@ public class DelOutboundExportContext implements ExportContext {
         return this.getLockValue(warehouseCode, this.warehouseLock, this.warehouseCache, (key) -> {
             BasWarehouse basWarehouse = this.basWarehouseClientService.queryByWarehouseCode(key);
             if (null != basWarehouse) {
+                if("en".equals(len)){
+                    return basWarehouse.getWarehouseNameEn();
+                }
                 return basWarehouse.getWarehouseNameCn();
             }
             return null;
@@ -120,10 +135,18 @@ public class DelOutboundExportContext implements ExportContext {
             if (null != countryR) {
                 BasRegionSelectListVO data = countryR.getData();
                 if (null != data) {
+                    if("en".equals(len)) {
+                        return data.getEnName();
+                    }
                     return data.getName();
                 }
             }
             return null;
         });
+    }
+
+    @Override
+    public String len() {
+        return this.len;
     }
 }

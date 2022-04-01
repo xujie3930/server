@@ -29,6 +29,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,7 +156,7 @@ public class BaseProductController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @GetMapping("importTemplate")
     @ApiOperation(value = "导入模板下载", notes = "导入模板下载")
-    public void importTemplate(HttpServletResponse response) throws Exception {
+    public void importTemplate(HttpServletRequest request, HttpServletResponse response) throws Exception {
         commonExport(response, "sku_import_template");
     }
 
@@ -166,10 +168,26 @@ public class BaseProductController extends BaseController {
     @GetMapping("/export")
     @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
     public void export(HttpServletResponse response, BaseProductQueryDto queryDto) throws IOException {
+
+        String len = getLen();
         queryDto.setCategory(ProductConstant.SKU_NAME);
-        List<BaseProductExportDto> list = baseProductService.exportProduceList(queryDto);
-        ExcelUtil<BaseProductExportDto> util = new ExcelUtil<BaseProductExportDto>(BaseProductExportDto.class);
-        util.exportExcel(response, list, "sku导出");
+        List<BaseProductExportDto> list = baseProductService.exportProduceList(queryDto, len);
+        if("en".equals(len)){
+
+            List<BaseProductEnExportDto> enList = new ArrayList();
+            for (BaseProductExportDto vo:list) {
+                BaseProductEnExportDto enDto = new BaseProductEnExportDto();
+                BeanUtils.copyProperties(vo, enDto);
+                enList.add(enDto);
+
+            }
+            ExcelUtil<BaseProductEnExportDto> util = new ExcelUtil<BaseProductEnExportDto>(BaseProductEnExportDto.class);
+            util.exportExcel(response, enList, "sku_export");
+        }else{
+            ExcelUtil<BaseProductExportDto> util = new ExcelUtil<BaseProductExportDto>(BaseProductExportDto.class);
+            util.exportExcel(response, list, "sku导出");
+        }
+
 //        EasyExcel.write(response.getOutputStream()).withTemplate(new ClassPathResource(getFileName("sku_export_template")).getInputStream()).sheet().doWrite(list);
     }
 

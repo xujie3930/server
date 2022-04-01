@@ -66,7 +66,7 @@ public class ReturnExpressListVO implements Serializable {
         this.processTypeStr = processType;
     }
 
-    @ApiModelProperty(value = "处理状态编码")
+    @ApiModelProperty(value = "处理状态编码", allowableValues = "wmsWaitReceive:处理中,waitAssigned:待指派,waitCustomerDeal:待客户处理,wmsReceivedDealWay:等待仓库处理中,wmsFinish:已完成")
     private String dealStatus;
 
     @Excel(name = "订单状态")
@@ -149,7 +149,7 @@ public class ReturnExpressListVO implements Serializable {
     @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "068", nameField = "returnSourceStr", cp = BasSubCodeCommonParameter.class)
     @ApiModelProperty(value = "类型[默认：1：退件预报，2：VMS通知退件]")
     private String returnSource;
-//    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
+    //    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     //@FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.RETURN_EXPRESS)
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;

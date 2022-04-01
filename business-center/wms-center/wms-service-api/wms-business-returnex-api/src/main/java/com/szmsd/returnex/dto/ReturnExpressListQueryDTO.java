@@ -108,7 +108,7 @@ public class ReturnExpressListQueryDTO extends PageDomain {
     @Excel(name = "退件单号")
     private String fromOrderNo;
 
-    @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "状态", allowableValues = "wmsWaitReceive:处理中,waitAssigned:待指派,waitCustomerDeal:待客户处理,wmsReceivedDealWay:等待仓库处理中,wmsFinish:已完成")
     @Excel(name = "状态")
     private String dealStatus;
 
