@@ -3,11 +3,13 @@ package com.szmsd.bas.controller;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.event.SyncReadListener;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.constant.BaseConstant;
 import com.szmsd.bas.constant.ProductConstant;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBaseProductService;
 import com.szmsd.bas.vo.BasProductMultipleTicketDTO;
@@ -44,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -68,6 +71,8 @@ public class BaseProductController extends BaseController {
     private IBasSellerService basSellerService;
     @Resource
     private RedissonClient redissonClient;
+    @Autowired
+    private BasSubClientService basSubClientService;
 
     private String genKey() {
         String lockKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
@@ -173,9 +178,20 @@ public class BaseProductController extends BaseController {
         queryDto.setCategory(ProductConstant.SKU_NAME);
         List<BaseProductExportDto> list = baseProductService.exportProduceList(queryDto, len);
         if("en".equals(len)){
+            // 查询产品属性
+            java.util.Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("059");
+            java.util.Map<String, String> map059 = new HashMap();
+            if(listMap.get("059") != null){
+                map059 = listMap.get("059").stream()
+                        .collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO:: getSubNameEn, (v1, v2) -> v1));
+            }
 
             List<BaseProductEnExportDto> enList = new ArrayList();
             for (BaseProductExportDto vo:list) {
+                if(map059.containsKey(vo.getProductAttributeName())){
+                    vo.setProductAttributeName(map059.get(vo.getProductAttributeName()));
+                }
+
                 BaseProductEnExportDto enDto = new BaseProductEnExportDto();
                 BeanUtils.copyProperties(vo, enDto);
                 enList.add(enDto);

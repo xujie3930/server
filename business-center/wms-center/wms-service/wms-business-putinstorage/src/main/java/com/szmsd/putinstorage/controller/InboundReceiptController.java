@@ -408,16 +408,20 @@ public class InboundReceiptController extends BaseController {
         ExcelWriter excelWriter = null;
         try (ServletOutputStream outputStream = httpServletResponse.getOutputStream()) {
             String fileName = "入库单导出_" + System.currentTimeMillis();
-            String efn = URLEncoder.encode(fileName, "utf-8");
-            httpServletResponse.setContentType("application/vnd.ms-excel");
-            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xlsx");
-            excelWriter = EasyExcel.write(outputStream).build();
             String sheetName1 = "入库单信息";
             String sheetName2 = "入库到货情况";
             if ("en".equals(getLen().toLowerCase(Locale.ROOT))) {
                 sheetName1 = "Inbound Order Information";
                 sheetName2 = "Inbound Arrival Situation";
+                fileName = "Inbound_Order" + System.currentTimeMillis();
             }
+
+
+            String efn = URLEncoder.encode(fileName, "utf-8");
+            httpServletResponse.setContentType("application/vnd.ms-excel");
+            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xlsx");
+            excelWriter = EasyExcel.write(outputStream).build();
+
             WriteSheet build1 = EasyExcel.writerSheet(0, sheetName1).head(inboundReceiptExportHead()).build();
             excelWriter.write(list, build1);
 
