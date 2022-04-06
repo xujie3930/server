@@ -226,6 +226,7 @@ public class RemoteApiImpl implements IRemoteApi {
                 countryCache.put(name, x);
                 countryCache.put(addressCode, x);
             });
+            regionSelectListVO = countryCache.get(countryName);
         }
         return Optional.ofNullable(regionSelectListVO).orElseThrow(() -> new RuntimeException("未找到" + countryName + "关联的国家"));
     }
