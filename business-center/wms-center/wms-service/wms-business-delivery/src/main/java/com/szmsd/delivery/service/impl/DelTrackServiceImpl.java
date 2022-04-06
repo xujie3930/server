@@ -286,7 +286,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     public List<TrackAnalysisDto> getTrackAnalysis(TrackAnalysisRequestDto requestDto) {
         List<TrackAnalysisDto> trackAnalysis = baseMapper.getTrackAnalysis(queryWrapper(requestDto));
         List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
-        Map<String, String> subList = basSubClientService.getSubList("099"); // 099为轨迹状态
+        Map<String, String> subList = basSubClientService.getSubListByLang("099", requestDto.getLang()); // 099为轨迹状态
         subList.forEach((k, v) -> {
             TrackAnalysisDto analysisDto = new TrackAnalysisDto();
             analysisDto.setKeyName(k);
@@ -334,7 +334,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         }
         List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
         List<PricedProduct> products = htpPricedProductClientService.inService(serviceCriteria);
-        Map<String, String> subList = basSubClientService.getSubList("099");
+        Map<String, String> subList = basSubClientService.getSubListByLang("099", requestDto.getLang());
         List<TrackAnalysisExportDto> exportData = baseMapper.getAnalysisExportData(queryWrapper(requestDto).ne("a.order_no", ""));
         exportData.forEach(data -> {
             // 设置物流状态中文

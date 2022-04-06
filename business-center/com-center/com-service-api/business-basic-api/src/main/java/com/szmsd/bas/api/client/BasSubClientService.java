@@ -29,6 +29,13 @@ public interface BasSubClientService {
     Map<String, String> getSubList(String code);
 
     /**
+     * 根据主类别编码查询
+     * @param code
+     * @return
+     */
+    Map<String, String> getSubListByLang(String code, String lang);
+
+    /**
      * 查询子类别列表api
      * @param mainCode
      * @param subValue

@@ -1,5 +1,9 @@
 package com.szmsd.inventory.controller;
 
+import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.dto.BaseProductEnExportDto;
+import com.szmsd.bas.dto.BaseProductExportDto;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
@@ -18,14 +22,18 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Api(tags = {"库存"})
 @RestController
@@ -41,6 +49,8 @@ public class InventoryController extends BaseController {
 
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private BasSubClientService basSubClientService;
 
     @PreAuthorize("@ss.hasPermi('inventory:inbound')")
     @PostMapping("/inbound")
@@ -73,10 +83,42 @@ public class InventoryController extends BaseController {
     @GetMapping("/export")
     @ApiOperation(value = "导出", notes = "库存管理 - 导出")
     public TableDataInfo<InventorySkuVO> export(InventorySkuQueryDTO inventorySkuQueryDTO, HttpServletResponse response) {
+        String len = getLen();
         List<InventorySkuVO> list = inventoryService.selectList(inventorySkuQueryDTO);
-        ExcelUtil<InventorySkuVO> util = new ExcelUtil<>(InventorySkuVO.class);
-        util.exportExcel(response, list, "产品库存_" + DateUtils.dateTimeNow());
-        return getDataTable(list);
+
+        if("en".equals(len)){
+
+            // 查询产品属性
+            java.util.Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("059");
+            java.util.Map<String, String> map059 = new HashMap();
+            if(listMap.get("059") != null){
+                map059 = listMap.get("059").stream()
+                        .collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO:: getSubNameEn, (v1, v2) -> v1));
+            }
+
+
+            List<InventorySkuEnVO> enList = new ArrayList();
+            for (int i = 0; i < list.size();i++) {
+                InventorySkuVO vo = list.get(i);
+                if(map059.containsKey(vo.getSkuPropertyName())){
+                    vo.setSkuPropertyName(map059.get(vo.getSkuPropertyName()));
+                }
+
+                InventorySkuEnVO enDto = new InventorySkuEnVO();
+                BeanUtils.copyProperties(vo, enDto);
+                enList.add(enDto);
+                list.set(i, null);
+            }
+            ExcelUtil<InventorySkuEnVO> util = new ExcelUtil<InventorySkuEnVO>(InventorySkuEnVO.class);
+            util.exportExcel(response, enList, "Inventory_Exprot"+ DateUtils.dateTimeNow());
+            return getDataTable(list);
+
+        }else{
+            ExcelUtil<InventorySkuVO> util = new ExcelUtil<>(InventorySkuVO.class);
+            util.exportExcel(response, list, "产品库存_" + DateUtils.dateTimeNow());
+            return getDataTable(list);
+        }
+
     }
 
     @PreAuthorize("@ss.hasPermi('inbound:receipt:page')")

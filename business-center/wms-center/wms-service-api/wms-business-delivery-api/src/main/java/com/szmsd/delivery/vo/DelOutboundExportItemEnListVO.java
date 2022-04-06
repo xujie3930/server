@@ -12,24 +12,24 @@ import java.io.Serializable;
  */
 @Data
 @ColumnWidth(15)
-public class DelOutboundExportItemListVO implements Serializable {
+public class DelOutboundExportItemEnListVO implements Serializable {
 
-    @ExcelProperty(value = {"出库单号", "Outbound Order Number"})
+    @ExcelProperty(value = "出库单号")
     private String orderNo;
 
-    @ExcelProperty(value = {"跟踪号", "Tracking Number"})
+    @ExcelProperty(value = "跟踪号")
     private String trackingNo;
 
-    @ExcelProperty(value = {"SKU", "SKU"})
+    @ExcelProperty(value = "SKU")
     private String sku;
 
-    @ExcelProperty(value = {"英文申报名称", "Declared Name (English)"})
+    @ExcelProperty(value = "英文申报名称")
     private String declaredNameEn;
 
-    @ExcelProperty(value = {"件数", "Qty"})
+    @ExcelProperty(value = "件数")
     private Long qty;
 
-    @ExcelProperty(value = {"产品属性", "Product Attribute"})
+    @ExcelProperty(value = "产品属性")
     private String productAttributeName;
 
 }

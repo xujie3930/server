@@ -1,6 +1,7 @@
 package com.szmsd.http.vo;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -85,10 +86,13 @@ public class ResponseVO implements Serializable {
     }
 
     public static void resultAssert(ResponseVO responseVO, String api) {
+        log.info("【响应：{}--{}】", api, JSONObject.toJSONString(responseVO));
         if (null == responseVO) return;
-        String code = Optional.ofNullable(responseVO.getCode()).orElse("500");
+        String code = responseVO.getCode();
+        // 如果为空则也是正常
+        boolean codeSuccess = StringUtils.isBlank(code) || ("" + HttpStatus.SUCCESS).equals(code);
 
-        if (!("" + org.apache.http.HttpStatus.SC_OK).equals(code) || !responseVO.getSuccess()) {
+        if (!codeSuccess || !responseVO.getSuccess()) {
             // 不是正常返回
             String errors = Optional.ofNullable(responseVO.getErrors()).orElse("调用异常!");
             String mssage = Optional.ofNullable(responseVO.getMessage()).orElse("调用异常!");

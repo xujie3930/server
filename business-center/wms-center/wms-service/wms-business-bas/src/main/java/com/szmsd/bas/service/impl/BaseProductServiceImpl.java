@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.enums.BaseMainEnum;
@@ -42,7 +42,6 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.api.feign.HtpRmiFeignService;
 import com.szmsd.http.config.CkThreadPool;
-import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.bas.api.dto.CkSkuCreateDTO;
@@ -54,6 +53,7 @@ import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -321,7 +321,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    public List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto) {
+    public List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto, String len) {
         List<BaseProduct> list = selectBaseProductPage(queryDto);
         List<BaseProductExportDto> exportList = BeanMapperUtil.mapList(list, BaseProductExportDto.class);
         Iterator<BaseProductExportDto> iterable = exportList.iterator();
@@ -329,7 +329,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         while (iterable.hasNext()) {
             BaseProductExportDto b = iterable.next();
             b.setNo(count++);
-            b.setWarehouseAcceptanceValue(b.getWarehouseAcceptance() == true ? "是" : "否");
+
+            if("en".equals(len)){
+                b.setWarehouseAcceptanceValue(b.getWarehouseAcceptance() == true ? "Yes" : "No");
+
+            }else{
+                b.setWarehouseAcceptanceValue(b.getWarehouseAcceptance() == true ? "是" : "否");
+
+            }
         }
 
         return exportList;
@@ -508,6 +515,34 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         super.saveBatch(result.getT1());
         AssertUtil.isTrue(StringUtils.isBlank(result.getT2()), result.getT2());
         return baseProducts;
+    }
+    @Override
+    public void rePushBaseProduct(String sku) {
+        if (StringUtils.isBlank(sku)) return;
+        log.info("【重推sku】{}", sku);
+        BaseProduct baseProduct = baseMapper.selectOne(Wrappers.<BaseProduct>lambdaQuery().eq(BaseProduct::getCode, sku));
+        if (baseProduct != null) {
+            BaseProductDto baseProductDto = new BaseProductDto();
+            BeanUtils.copyProperties(baseProduct, baseProductDto);
+            BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+            basAttachmentQueryDTO.setBusinessNo(sku);
+            basAttachmentQueryDTO.setAttachmentType("SKU图片");
+            R<List<BasAttachment>> list = this.remoteAttachmentService.list(basAttachmentQueryDTO);
+            List<BasAttachment> skuImage = R.getDataAndException(list);
+            List<AttachmentDataDTO> attachmentList = skuImage.stream().map(x -> {
+                AttachmentDataDTO attachmentDataDTO = new AttachmentDataDTO();
+                BeanUtils.copyProperties(x, attachmentDataDTO);
+                return attachmentDataDTO;
+            }).collect(Collectors.toList());
+            baseProductDto.setDocumentsFiles(attachmentList);
+            try {
+                log.info("【重推sku】{}---{}", sku, JSONObject.toJSONString(baseProductDto));
+                this.updateBaseProduct(baseProductDto);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     /**

@@ -45,4 +45,6 @@ public interface ExportContext {
      * @return String
      */
     String getCountry(String countryCode);
+
+    String len();
 }

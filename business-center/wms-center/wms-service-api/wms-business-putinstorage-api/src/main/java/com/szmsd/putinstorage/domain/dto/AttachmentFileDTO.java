@@ -20,4 +20,11 @@ public class AttachmentFileDTO {
     @NotEmpty(message = "文件名")
     private String attachmentName;
 
+
+    /**
+     * 目前用于一票多件
+     */
+    @ApiModelProperty(value = "类型")
+    private String attachmentType;
+
 }

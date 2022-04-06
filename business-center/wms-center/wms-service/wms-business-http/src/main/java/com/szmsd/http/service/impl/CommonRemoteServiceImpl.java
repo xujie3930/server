@@ -1,5 +1,6 @@
 package com.szmsd.http.service.impl;
 
+import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IBasService;
 import com.szmsd.http.service.IInboundService;
@@ -27,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.szmsd.http.enums.RemoteConstant.RemoteStatusEnum;
 import static com.szmsd.http.enums.RemoteConstant.RemoteTypeEnum;
@@ -51,6 +53,8 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
     private IBasService iBasService;
     @Resource
     private IInboundService iInboundService;
+    @Resource
+    private BaseProductFeignService baseProductFeignService;
 
     /**
      * 实际 单线程 执行任务
@@ -89,6 +93,7 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
                 } else {
                     oneTask.setRequestStatus(RemoteStatusEnum.SUCCESS.getStatus());
                 }
+                oneTask.setResponseBody(JSONObject.toJSONString(rmi.getBody() + ""));
             } else {
                 ResponseVO responseVO = new ResponseVO();
                 // 出口易接口单独调用
@@ -104,6 +109,11 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
                             CreateReceiptRequest createReceiptRequest = JSONObject.parseObject(oneTask.getRequestParams(), CreateReceiptRequest.class);
                             log.info("【WMS】SYNC 【入库单创建】-{}", createReceiptRequest);
                             responseVO = iInboundService.create(createReceiptRequest);
+                            if (responseVO != null && StringUtils.isNotBlank(responseVO.getMessage()) && responseVO.getMessage().contains("此编码未创建产品信息")) {
+                                log.info("【WMS】SYNC 【入库单创建】-失败：可能未创建sku,尝试推送sku {}", createReceiptRequest);
+                                List<String> skuNeedPushList = createReceiptRequest.getDetails().stream().map(ReceiptDetailInfo::getSku).collect(Collectors.toList());
+                                skuNeedPushList.forEach(x -> baseProductFeignService.rePushBaseProduct(x));
+                            }
                         } else if (StringUtils.isNotBlank(requestUri) && requestUri.contains("tracking")) {
                             CreateTrackRequest createTrackRequest = JSONObject.parseObject(oneTask.getRequestParams(), CreateTrackRequest.class);
                             log.info("【WMS】SYNC 【入库单物流跟踪创建】-{}", createTrackRequest);
@@ -113,7 +123,10 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
                     default:
                         break;
                 }
+                oneTask.setResponseBody(JSONObject.toJSONString(responseVO));
                 ResponseVO.resultAssert(responseVO, scanEnumByType.getDesc());
+                oneTask.setRequestStatus(RemoteStatusEnum.SUCCESS.getStatus());
+
             }
         } catch (Exception e) {
             log.error("推送失败请求参数：{}\n", oneTask, e);

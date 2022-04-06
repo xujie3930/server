@@ -61,16 +61,11 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "申请处理方式", hidden = true)
     private String processTypeStr;
 
-    public void setProcessType(String processType) {
-        this.processType = processType;
-        this.processTypeStr = processType;
-    }
-
     @ApiModelProperty(value = "处理状态编码")
     private String dealStatus;
 
     @Excel(name = "订单状态")
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.RETURN_EXPRESS)
+    @AutoFieldI18n
     @ApiModelProperty(value = "处理状态编码 订单状态", hidden = true)
     private String dealStatusStr;
 
@@ -120,11 +115,6 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "退件单类型", hidden = true)
     private String returnTypeStr;
 
-    public void setReturnType(String returnType) {
-        this.returnType = returnType;
-        this.returnTypeStr = returnType;
-    }
-
     @ApiModelProperty(value = "实际处理方式编码", hidden = true)
     private String applyProcessMethod;
     @ApiModelProperty(value = "实际处理方式编码", hidden = true)
@@ -154,22 +144,11 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
 
-    public void setReturnSource(String returnSource) {
-        this.returnSource = returnSource;
-        this.returnSourceStr = returnSource;
-    }
-
     @ApiModelProperty(value = "目的仓库名称")
     private String warehouseCode;
     @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "目的仓库名称", hidden = true)
     private String warehouseCodeStr;
-
-    public void setWarehouseCode(String warehouseCode) {
-        this.warehouseCode = warehouseCode;
-        this.warehouseCodeStr = warehouseCode;
-    }
-
 
     @Override
     public String toString() {

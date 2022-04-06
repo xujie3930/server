@@ -1,5 +1,6 @@
 package com.szmsd.delivery.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -7,6 +8,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -108,4 +110,14 @@ public class DelOutboundDetailVO implements Serializable {
 
     @ApiModelProperty(value = "增值税号")
     private String ioss;
+
+
+    @ApiModelProperty(value = "箱标")
+    private String boxMark;
+
+    @ApiModelProperty(value = "sku新标签文件")
+    private List<AttachmentFileDTO> skuFile;
+
+    @ApiModelProperty(value = "箱标文件")
+    private List<AttachmentFileDTO> boxMarkFile;
 }

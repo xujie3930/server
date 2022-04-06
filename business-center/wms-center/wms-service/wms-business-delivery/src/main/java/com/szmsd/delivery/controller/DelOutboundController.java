@@ -29,6 +29,7 @@ import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
@@ -49,6 +50,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -298,10 +300,26 @@ public class DelOutboundController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundImportTemplate')")
     @GetMapping("/delOutboundImportTemplate")
     @ApiOperation(value = "出库管理 - 列表 - 出库单导入模板", position = 1000)
-    public void delOutboundImportTemplate(HttpServletResponse response) {
-        String filePath = "/template/DM.xls";
-        String fileName = "DM出库（正常，自提，销毁）模板";
-        this.downloadTemplate(response, filePath, fileName);
+    public void delOutboundImportTemplate(HttpServletRequest request, HttpServletResponse response) {
+        if(StringUtils.isNotEmpty(request.getParameter("len"))){
+            if (request.getParameter("len").equals("zh")) {
+                String filePath = "/template/DM-cn.xls";
+                String fileName = "DM出库（正常，自提，销毁）模板";
+                this.downloadTemplate(response, filePath, fileName);
+            }else{
+                String filePath = "/template/DM-en.xls";
+                String fileName = "DM delivery (normal, self delivery, destruction) template";
+                this.downloadTemplate(response, filePath, fileName);
+            }
+
+        }else{
+            String filePath = "/template/DM.xls";
+            String fileName = "DM出库（正常，自提，销毁）模板";
+            this.downloadTemplate(response, filePath, fileName);
+        }
+
+
+
     }
 
     /**
@@ -366,7 +384,7 @@ public class DelOutboundController extends BaseController {
             @ApiImplicitParam(paramType = "form", dataType = "String", name = "sellerCode", value = "客户编码", required = true),
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
-    public R<ImportResult> delOutboundImport(@RequestParam("sellerCode") String sellerCode, HttpServletRequest request) {
+    public R<ImportResult> delOutboundImport(String len, @RequestParam("sellerCode") String sellerCode, HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile file = multipartHttpServletRequest.getFile("file");
         AssertUtil.notNull(file, "上传文件不存在");
@@ -375,23 +393,64 @@ public class DelOutboundController extends BaseController {
             // copy文件流
             byte[] byteArray = IOUtils.toByteArray(file.getInputStream());
             // 初始化读取第一个sheet页的数据
-            DefaultAnalysisEventListener<DelOutboundImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
-            if (defaultAnalysisEventListener.isError()) {
-                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
+
+
+            List<DelOutboundImportDto> dataList = null;
+            List<DelOutboundDetailImportDto2> detailList = null;
+            if("en".equals(len)){
+                DefaultAnalysisEventListener<DelOutboundEnImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundEnImportDto.class, 0, 1);
+                if (defaultAnalysisEventListener.isError()) {
+                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
+                }
+                List<DelOutboundEnImportDto> oldDataList = defaultAnalysisEventListener.getList();
+                if (CollectionUtils.isEmpty(oldDataList)) {
+                    return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
+                }
+                dataList = new ArrayList();
+                for(int i = 0 ; i < oldDataList.size(); i++){
+                    DelOutboundEnImportDto enDto = oldDataList.get(i);
+                    DelOutboundImportDto dto  =new DelOutboundImportDto();
+                    BeanUtils.copyProperties(enDto, dto);
+                    dataList.add(dto);
+                    oldDataList.set(i, null);
+                }
+
+                // 初始化读取第二个sheet页的数据
+                DefaultAnalysisEventListener<DelOutboundDetailEnImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDetailEnImportDto2.class, 1, 1);
+                if (defaultAnalysisEventListener1.isError()) {
+                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
+                }
+                List<DelOutboundDetailEnImportDto2> oldDetailList = defaultAnalysisEventListener1.getList();
+
+
+                detailList = new ArrayList<>();
+                for(int i = 0 ; i < oldDetailList.size(); i++){
+                    DelOutboundDetailEnImportDto2 enDto = oldDetailList.get(i);
+                    DelOutboundDetailImportDto2 dto  =new DelOutboundDetailImportDto2();
+                    BeanUtils.copyProperties(enDto, dto);
+                    detailList.add(dto);
+                    oldDetailList.set(i, null);
+                }
+
+            }else{
+                DefaultAnalysisEventListener<DelOutboundImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
+                if (defaultAnalysisEventListener.isError()) {
+                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
+                }
+                dataList = defaultAnalysisEventListener.getList();
+                if (CollectionUtils.isEmpty(dataList)) {
+                    return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
+                }
+
+                // 初始化读取第二个sheet页的数据
+                DefaultAnalysisEventListener<DelOutboundDetailImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDetailImportDto2.class, 1, 1);
+                if (defaultAnalysisEventListener1.isError()) {
+                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
+                }
+                detailList = defaultAnalysisEventListener1.getList();
             }
-            List<DelOutboundImportDto> dataList = defaultAnalysisEventListener.getList();
-            if (CollectionUtils.isEmpty(dataList)) {
-                return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
-            }
-            // 初始化读取第二个sheet页的数据
-            DefaultAnalysisEventListener<DelOutboundDetailImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDetailImportDto2.class, 1, 1);
-            if (defaultAnalysisEventListener1.isError()) {
-                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
-            }
-            List<DelOutboundDetailImportDto2> detailList = defaultAnalysisEventListener1.getList();
-            if (CollectionUtils.isEmpty(detailList)) {
-                return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据明细不能为空")));
-            }
+
+
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,058");
             List<BasSubWrapperVO> orderTypeList = listMap.get("063");
@@ -399,6 +458,13 @@ public class DelOutboundController extends BaseController {
             // 查询国家数据
             R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
             List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
+            if("en".equals(len)){
+                //英文环境下，nameEn做为key
+                for (BasRegionSelectListVO vo: countryList) {
+                    vo.setName(vo.getEnName());
+                }
+            }
+
             // 初始化导入上下文
             DelOutboundImportContext importContext = new DelOutboundImportContext(dataList, orderTypeList, countryList, deliveryMethodList);
             // 初始化外联导入上下文
@@ -500,9 +566,12 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 导出", position = 1600)
     public void export(HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
         try {
+
+            String len = getLen();
+
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066");
-            DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService);
+            DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
             exportContext.setStateCacheAdapter(listMap.get("065"));
             exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
             exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
@@ -514,10 +583,17 @@ public class DelOutboundController extends BaseController {
             queryDto2.setPageNum(1);
             queryDto2.setPageSize(500);
             QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService);
-            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("出库单", null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
+
+
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("en".equals(len) ? "Outbound_order" : "出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
                         @Override
                         public String sheetName() {
-                            return "出库单详情";
+
+                            if("en".equals(len)){
+                                return "Outbound Order Information";
+                            }else{
+                                return "出库单详情";
+                            }
                         }
 
                         @Override
@@ -533,7 +609,11 @@ public class DelOutboundController extends BaseController {
                     new ExcelUtils.ExportSheet<DelOutboundExportItemListVO>() {
                         @Override
                         public String sheetName() {
-                            return "包裹明细";
+                            if("en".equals(len)){
+                                return "SKU list";
+                            }else{
+                                return "包裹明细";
+                            }
                         }
 
                         @Override

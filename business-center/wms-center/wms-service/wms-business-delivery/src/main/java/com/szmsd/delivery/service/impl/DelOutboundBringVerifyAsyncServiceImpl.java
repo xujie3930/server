@@ -60,8 +60,9 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
         try {
             if (lock.tryLock(0, TimeUnit.SECONDS)) {
                 DelOutbound delOutbound = delOutboundService.getByOrderNo(orderNo);
-                // 可以提审的状态：待提审，审核失败
-                if (DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
+                // 可以提审的状态：提审中，待提审，审核失败
+                if (DelOutboundStateEnum.REVIEWED_DOING.getCode().equals(delOutbound.getState())
+                        || DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
                         || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState())) {
                     bringVerifyAsync(delOutbound, AsyncThreadObject.build());
                 }
@@ -100,7 +101,7 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
         ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
         try {
             // 修改状态为提审中
-            this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
+            // this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
             applicationContainer.action();
             // 提审成功，增加CK1数据
             if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())

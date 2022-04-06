@@ -1,11 +1,15 @@
 package com.szmsd.putinstorage.controller;
 
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -214,7 +218,7 @@ public class InboundReceiptController extends BaseController {
         String fileName;
         if ("en".equals(len)) {
             fileName = "inbound_order_sku_import";
-            rows = CollUtil.newArrayList("inbound order no", "SKU", "QTY", "Original product code", "Note");
+            rows = CollUtil.newArrayList("inbound order no", "SKU", "Quantity", "Original product code", "Remarks");
         } else {
             fileName = "入库单SKU导入";
             rows = CollUtil.newArrayList("入库单号", "SKU", "申报数量", "原产品编码", "备注");
@@ -283,11 +287,22 @@ public class InboundReceiptController extends BaseController {
         return R.ok(inboundReceiptDetailVOS);
     }
 
+    TimedCache<String, Long> skuRep = CacheUtil.newTimedCache(DateUnit.MINUTE.getMillis() * 3);
+
     @PreAuthorize("@ss.hasPermi('inbound:receiving')")
     @PostMapping("/receiving")
     @ApiOperation(value = "#B1 接收入库上架", notes = "#B1 接收入库上架")
     @InboundReceiptLog(record = InboundReceiptRecordEnum.PUT)
     public R receiving(@RequestBody ReceivingRequest receivingRequest) {
+        String repeatRequestKey = JSONObject.toJSONString(receivingRequest);
+        Long excuteTime = skuRep.get(repeatRequestKey);
+        if (null == excuteTime) {
+            skuRep.put(repeatRequestKey, System.currentTimeMillis());
+        } else {
+            log.info("#B1 接收入库上架 重复请求：{}==={}", receivingRequest, excuteTime);
+            return R.ok();
+        }
+
         String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
         RLock lock = redissonClient.getLock("InboundReceiptController#receiving" + localKey);
         try {
@@ -300,6 +315,10 @@ public class InboundReceiptController extends BaseController {
         } catch (InterruptedException e) {
             e.printStackTrace();
             return R.failed("接收入库上架失败!");
+        } catch (Exception e) {
+            skuRep.remove(repeatRequestKey);
+            log.error("接收入库上架失败:", e);
+            throw new RuntimeException(e.getMessage());
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
@@ -389,16 +408,20 @@ public class InboundReceiptController extends BaseController {
         ExcelWriter excelWriter = null;
         try (ServletOutputStream outputStream = httpServletResponse.getOutputStream()) {
             String fileName = "入库单导出_" + System.currentTimeMillis();
-            String efn = URLEncoder.encode(fileName, "utf-8");
-            httpServletResponse.setContentType("application/vnd.ms-excel");
-            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xlsx");
-            excelWriter = EasyExcel.write(outputStream).build();
             String sheetName1 = "入库单信息";
             String sheetName2 = "入库到货情况";
             if ("en".equals(getLen().toLowerCase(Locale.ROOT))) {
                 sheetName1 = "Inbound Order Information";
                 sheetName2 = "Inbound Arrival Situation";
+                fileName = "Inbound_Order" + System.currentTimeMillis();
             }
+
+
+            String efn = URLEncoder.encode(fileName, "utf-8");
+            httpServletResponse.setContentType("application/vnd.ms-excel");
+            httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + efn + ".xlsx");
+            excelWriter = EasyExcel.write(outputStream).build();
+
             WriteSheet build1 = EasyExcel.writerSheet(0, sheetName1).head(inboundReceiptExportHead()).build();
             excelWriter.write(list, build1);
 
@@ -424,9 +447,12 @@ public class InboundReceiptController extends BaseController {
 
     static {
         INBOUND_RECEIPT_EXPORT_HEAD_ZH = Arrays.asList("入库单号", "采购单号", "送货方式", "快递单号/揽收单号", "状态", "目的仓库", "入库方式", "SKU", "初始数量", "到仓数量", "原产品编码", "下单时间", "到仓时间", "审核备注", "客户备注", "销售VAT");
-        INBOUND_RECEIPT_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Purchase Orders", "Delivery Method", "Tracking Nu of pickup", "Status", "Destinatuon Warehouse", "Inbound Method", "SKU", "Order Qty", "Put on sale Qty", "Original product Number", "Order Create Time", "Arriving time", "System Note", "Note", "VAT Nu");
+        INBOUND_RECEIPT_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Purchase Orders", "Delivery Method", "Tracking Nu of pickup", "Status",
+                "Destinatuon Warehouse", "Inbound Method", "SKU", "Initial Qty", "Received Qty", "Original Product Code", "Order Time",
+                "Arriving time", "Under Review", "Customer Remarks", "Sales manager VAT");
 
-        INBOUND_TRACKING_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Tracking Nu of pickup", "Receipt Status", "Operating Time");
+        INBOUND_TRACKING_EXPORT_HEAD_EN = Arrays.asList("Inbound Orders", "Tracking Number/\n" +
+                "Collecting Number", "Status", "Operating Time");
         INBOUND_TRACKING_EXPORT_HEAD_ZH = Arrays.asList("入库单号", "快递单号/揽收单号", "收货状态", "操作时间");
     }
 
@@ -502,6 +528,7 @@ public class InboundReceiptController extends BaseController {
         inventoryStockByRangeDTO.valid();
         return R.ok(iInboundReceiptService.querySkuStockByRange(inventoryStockByRangeDTO));
     }
+
     @PreAuthorize("@ss.hasPermi('inventory:querySkuStockByRange')")
     @PostMapping("/collectAndInbound")
     @ApiOperation(value = "揽收入库", notes = "查询sku的入库状况-指定范围内")

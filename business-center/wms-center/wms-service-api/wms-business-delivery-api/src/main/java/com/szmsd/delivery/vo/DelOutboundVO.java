@@ -1,5 +1,6 @@
 package com.szmsd.delivery.vo;
 
+import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.plugin.BasSubCommonPlugin;
 import com.szmsd.bas.plugin.BasSubValueCommonParameter;
 import com.szmsd.common.plugin.annotation.AutoFieldValue;
@@ -148,4 +149,7 @@ public class DelOutboundVO implements Serializable {
 
     @ApiModelProperty(value = "组合信息")
     private List<DelOutboundCombinationVO> combinations;
+
+    @ApiModelProperty(value = "文件信息,用于一票多件")
+    private List<AttachmentDataDTO> documentsFiles;
 }

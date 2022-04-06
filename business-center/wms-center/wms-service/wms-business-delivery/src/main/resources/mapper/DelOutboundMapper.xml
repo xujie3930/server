@@ -170,7 +170,7 @@
     <select id="exceptionMessageExportList" resultType="com.szmsd.delivery.vo.DelOutboundListExceptionMessageExportVO">
         SELECT
             o.id, o.order_no, o.exception_message, o.shipment_rule,
-            a.consignee, a.street1, a.street2, a.city, a.state_or_province, a.country, a.post_code
+            a.consignee, a.street1, a.street2, a.city, a.state_or_province, a.country, a.post_code, a.phone_no, a.email
         FROM del_outbound o
         INNER JOIN del_outbound_address a ON a.order_no = o.order_no
         where o.order_no in

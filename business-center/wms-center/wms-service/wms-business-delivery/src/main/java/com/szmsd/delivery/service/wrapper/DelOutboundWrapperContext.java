@@ -7,6 +7,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.http.dto.TaskConfigInfo;
 
 import java.util.List;
 
@@ -25,6 +26,8 @@ public class DelOutboundWrapperContext implements ApplicationContext {
     private List<BasePacking> packingList;
     // 失败了是否推送发货指令，默认false不推送
     private boolean shipmentShipping;
+    // 发货条件
+    private TaskConfigInfo taskConfigInfo;
 
     public DelOutboundWrapperContext() {
     }
@@ -108,4 +111,11 @@ public class DelOutboundWrapperContext implements ApplicationContext {
         this.shipmentShipping = shipmentShipping;
     }
 
+    public TaskConfigInfo getTaskConfigInfo() {
+        return taskConfigInfo;
+    }
+
+    public void setTaskConfigInfo(TaskConfigInfo taskConfigInfo) {
+        this.taskConfigInfo = taskConfigInfo;
+    }
 }

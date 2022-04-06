@@ -28,8 +28,8 @@ public class AsyncConfig implements AsyncConfigurer {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        int corePoolSize = availableProcessors * 4;
-        int maximumPoolSize = availableProcessors * 8;
+        int corePoolSize = availableProcessors * 2;
+        int maximumPoolSize = availableProcessors * 4;
         // 配置核心线程数
         executor.setCorePoolSize(corePoolSize);
         // 配置最大线程数

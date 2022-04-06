@@ -2,6 +2,7 @@ package com.szmsd.common.core.utils;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.pagehelper.Page;
@@ -10,8 +11,11 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -107,6 +111,29 @@ public class ExcelUtils {
         export(response, null, condition, exportExcel);
     }
 
+
+    private static List<List<String>> myHead(Class clazz, String len){
+        List<List<String>> root = new ArrayList<>();
+        Field[] fields = clazz.getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            // 除过fieldMap中的属性，其他属性都获取
+            boolean annotationPresent = fields[i].isAnnotationPresent(ExcelProperty.class);
+            if (annotationPresent) {
+                // 获取注解值
+                String[] name = fields[i].getAnnotation(ExcelProperty.class).value();
+                if("en".equals(len)){
+                    if(name != null && name.length > 1){
+                        root.add(Arrays.asList(name[1]));
+                    }
+                }else{
+                    root.add(Arrays.asList(name[0]));
+                }
+
+            }
+        }
+        return root;
+    }
+
     /**
      * 导出
      *
@@ -128,7 +155,12 @@ public class ExcelUtils {
         }
         int sheetNo = 0;
         for (ExportSheet<?> sheet : sheets) {
-            WriteSheet writeSheet = EasyExcel.writerSheet(sheetNo).head(sheet.classType()).build();
+            WriteSheet writeSheet = null;
+            if(StringUtils.isNotEmpty(exportExcel.len())){
+                writeSheet = EasyExcel.writerSheet(sheetNo).head(myHead(sheet.classType(), exportExcel.len())).build();
+            }else{
+                writeSheet = EasyExcel.writerSheet(sheetNo).head(sheet.classType()).build();
+            }
             writeSheet.setSheetName(sheet.sheetName());
             QueryPage<?> queryPage = sheet.query(exportContext);
             boolean isWrite = false;
@@ -169,32 +201,6 @@ public class ExcelUtils {
         excelWriter.finish();
     }
 
-    /**
-     * 构建导出对象
-     *
-     * @param excelName         excelName
-     * @param headerInformation headerInformation
-     * @param sheets            sheets
-     * @return ExportExcel
-     */
-    public static ExportExcel build(final String excelName, final Map<String, String> headerInformation, final ExportSheet<?>... sheets) {
-        return new ExportExcel() {
-            @Override
-            public String excelName() {
-                return excelName;
-            }
-
-            @Override
-            public Map<String, String> headerInformation() {
-                return headerInformation;
-            }
-
-            @Override
-            public ExportSheet<?>[] sheets() {
-                return sheets;
-            }
-        };
-    }
 
     /**
      * 导出上下文
@@ -209,11 +215,16 @@ public class ExcelUtils {
      */
     public interface ExportExcel {
 
-        static ExportExcel build(final String excelName, final Map<String, String> headerInformation, final ExportSheet<?>... sheets) {
+        static ExportExcel build(final String excelName, String len, final Map<String, String> headerInformation, final ExportSheet<?>... sheets) {
             return new ExportExcel() {
                 @Override
                 public String excelName() {
                     return excelName;
+                }
+
+                @Override
+                public String len() {
+                    return len;
                 }
 
                 @Override
@@ -234,6 +245,9 @@ public class ExcelUtils {
          * @return String
          */
         String excelName();
+
+        String len();
+
 
         /**
          * 设置响应头信息

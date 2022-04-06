@@ -1044,7 +1044,12 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         DelOutboundAddressVO addressVO = Optional.ofNullable(delOutboundVO.getAddress()).orElse(new DelOutboundAddressVO());
         addressDTO.setConsignee(getStrOrDefault(importReassignDTO.getConsignee(), addressVO.getConsignee()));
         String countryName = getStrOrDefault(importReassignDTO.getCountry(), addressVO.getCountry());
-        BasRegionSelectListVO regionSelectListVO = iRemoteApi.getCountryCode(countryName);
+        BasRegionSelectListVO regionSelectListVO = null;
+        try {
+            regionSelectListVO = iRemoteApi.getCountryCode(countryName);
+        } catch (Exception e) {
+            return e.getMessage();
+        }
         addressDTO.setCountry(regionSelectListVO.getName());
         addressDTO.setCountryCode(regionSelectListVO.getAddressCode());
         addressDTO.setZone("");

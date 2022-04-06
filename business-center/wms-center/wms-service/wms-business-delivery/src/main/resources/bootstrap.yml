@@ -26,3 +26,14 @@ com:
         shipments:
           url: "/tracking/v1/shipments"
           httpMethod: POST
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env,prometheus,metrics,httptrace,threaddump,heapdump,springmetrics
+    jmx:
+      exposure:
+        include: '*'
+    shutdown:
+      enabled: false

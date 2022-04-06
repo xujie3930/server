@@ -32,6 +32,11 @@ public class BasSubClientServiceImpl implements BasSubClientService {
     }
 
     @Override
+    public Map<String, String> getSubListByLang(String code, String lang) {
+        return R.getDataAndException(this.basSubFeignService.getSubListByLang(code, lang));
+    }
+
+    @Override
     public List<BasSub> listApi(String mainCode, String subValue) {
         return this.basSubFeignService.listApi(mainCode, subValue);
     }

@@ -14,60 +14,61 @@ import java.util.Date;
  */
 @Data
 @ApiModel(value = "DelOutboundImportDto", description = "DelOutboundImportDto对象")
-public class DelOutboundImportDto implements Serializable {
+public class DelOutboundEnImportDto implements Serializable {
 
-    @ApiModelProperty(value = "订单顺序")
+    @ApiModelProperty(value = "Order Row")
     private Integer sort;
 
-    @ApiModelProperty(value = "仓库代码")
+    @ApiModelProperty(value = "Warehouse Code")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "出库方式")
+    @ApiModelProperty(value = "Outbound method")
     private String orderTypeName;
 
-    @ApiModelProperty(value = "物流服务")
+    @ApiModelProperty(value = "Logistics service")
     private String shipmentRule;
 
-    @ApiModelProperty(value = "收件人名称")
+    @ApiModelProperty(value = "Addressee's name")
     private String consignee;
 
-    @ApiModelProperty(value = "街道1")
+    @ApiModelProperty(value = "Address1")
     private String street1;
 
-    @ApiModelProperty(value = "街道2")
+    @ApiModelProperty(value = "Address2")
     private String street2;
 
-    @ApiModelProperty(value = "城镇/城市")
+    @ApiModelProperty(value = "City")
     private String city;
 
-    @ApiModelProperty(value = "州/省")
+    @ApiModelProperty(value = "State/province")
     private String stateOrProvince;
 
-    @ApiModelProperty(value = "邮编")
+    @ApiModelProperty(value = "Postcode")
     private String postCode;
 
-    @ApiModelProperty(value = "国家")
+    @ApiModelProperty(value = "Country")
     private String country;
 
-    @ApiModelProperty(value = "联系方式")
+    @ApiModelProperty(value = "Contact Information")
     private String phoneNo;
 
-    @ApiModelProperty(value = "邮箱")
+    @ApiModelProperty(value = "E-mail")
     private String email;
 
-    @ApiModelProperty(value = "提货方式")
+    @ApiModelProperty(value = "Pickup Method")
     private String deliveryMethodName;
 
-    @ApiModelProperty(value = "提货时间")
+    @ApiModelProperty(value = "Estimated time of delivery")
     private Date deliveryTime;
 
-    @ApiModelProperty(value = "自提人")
+    @ApiModelProperty(value = "Consignee")
     private String deliveryAgent;
 
-    @ApiModelProperty(value = "提货人联系方式/快递单号")
+    @ApiModelProperty(value = "Consignee's Number\n" +
+            "/Tracking Number")
     private String deliveryInfo;
 
-    @ApiModelProperty(value = "备注")
+    @ApiModelProperty(value = "Remarks")
     private String remark;
 
     @ApiModelProperty(value = "COD")

@@ -86,7 +86,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
      */
     R<BaseProduct> getSku(BaseProduct baseProduct);
 
-    List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto);
+    List<BaseProductExportDto> exportProduceList(BaseProductQueryDto queryDto, String len);
 
     /**
      * 新增模块
@@ -103,6 +103,8 @@ public interface IBaseProductService extends IService<BaseProduct> {
      * @return 结果
      */
     List<BaseProduct> BatchInsertBaseProduct(List<BaseProductDto> baseProductDtos);
+
+    void rePushBaseProduct(String sku);
 
     /**
      * 修改模块

@@ -41,6 +41,11 @@ public class BasSubFeignServiceFallbackFactory implements FallbackFactory<BasSub
                 return R.convertResultJson(throwable);
             }
 
+            @Override
+            public R<Map<String, String>> getSubListByLang(String code, String lang) {
+                return R.convertResultJson(throwable);
+            }
+
 //            @Override
 //            public R<?> list(String code, String name) {
 //                return R.convertResultJson(throwable);

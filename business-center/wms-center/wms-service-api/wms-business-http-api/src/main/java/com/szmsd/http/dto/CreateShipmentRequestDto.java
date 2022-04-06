@@ -57,4 +57,7 @@ public class CreateShipmentRequestDto implements Serializable {
     @ApiModelProperty(value = "装箱要求")
     private PackingRequirementInfoDto packingRequirement;
 
+    @ApiModelProperty(value = "任务流程配置")
+    private TaskConfigInfo taskConfig;
+
 }

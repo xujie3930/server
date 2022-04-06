@@ -35,6 +35,12 @@ public class ReturnExpressClientListVO implements Serializable {
     @Excel(name = "WMS处理单号")
     @ApiModelProperty(value = "WMS处理单号 退件单号")
     private String returnNo;
+    @Excel(name = "出库单号")
+    @ApiModelProperty(value = "出库单号")
+    private String fromOrderNo;
+    @Excel(name = "原跟踪号")
+    @ApiModelProperty(value = "退件可扫描编码 原跟踪号")
+    private String scanCode;
     @Excel(name = "类型")
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
@@ -55,6 +61,10 @@ public class ReturnExpressClientListVO implements Serializable {
     @Excel(name = "完成时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "完成时间")
     private LocalDateTime finishTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "截止时间")
+    @Excel(name = "截止时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date expireTime;
     @Excel(name = "是否逾期", readConverterExp = "0=否,1=是")
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.YN)
     @ApiModelProperty(value = "是否逾期", hidden = true)
@@ -63,7 +73,9 @@ public class ReturnExpressClientListVO implements Serializable {
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.RETURN_EXPRESS)
     @ApiModelProperty(value = "处理状态编码 订单状态", hidden = true)
     private String dealStatusStr;
-
+    @Excel(name = "备注")
+    @ApiModelProperty(value = "备注")
+    private String remark;
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

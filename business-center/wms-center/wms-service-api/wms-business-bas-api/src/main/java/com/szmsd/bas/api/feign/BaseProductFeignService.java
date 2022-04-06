@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.java.Log;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -29,7 +30,9 @@ public interface BaseProductFeignService {
      */
     @PostMapping("/base/product/add")
     R add(@RequestBody BaseProductDto baseProductDto);
-
+    @GetMapping(value = "/base/product/rePushBaseProduct/{sku}")
+    @ApiOperation(value = "获取模块详细信息", notes = "获取模块详细信息")
+    R rePushBaseProduct(@PathVariable("sku") String sku);
     @PostMapping(value = "/base/product/checkSkuValidToDelivery")
     R<Boolean> checkSkuValidToDelivery(@RequestBody BaseProduct baseProduct);
 
