@@ -24,7 +24,7 @@ public class CkThreadPool extends ThreadPoolTaskExecutor {
 
     public CkThreadPool() {
         setThreadNamePrefix("【CK1-Push】--");
-        setQueueCapacity(500);
+        setQueueCapacity(100);
         setCorePoolSize(Math.max(CPU_COUNT * 2, 10));
         setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         setMaxPoolSize(Math.max(CPU_COUNT * 3, 10));
