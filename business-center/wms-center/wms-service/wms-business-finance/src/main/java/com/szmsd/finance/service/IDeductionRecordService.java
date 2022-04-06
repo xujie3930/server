@@ -79,14 +79,23 @@ public interface IDeductionRecordService extends IService<FssDeductionRecord> {
      */
     void updateRecordStatusByCreditTimeInterval();
 
-    Map<String, CreditUseInfo> queryTimeCreditUse(String cusCode,List<String> currencyCodeList,List<CreditConstant.CreditBillStatusEnum> statusList);
+    Map<String, CreditUseInfo> queryTimeCreditUse(String cusCode, List<String> currencyCodeList, List<CreditConstant.CreditBillStatusEnum> statusList);
 
     /**
      * 更新授信额度的账单（还款销账）
-     * @param addMoney 销账额
-     * @param cusCode 客户code
+     *
+     * @param addMoney     销账额
+     * @param cusCode      客户code
      * @param currencyCode 币别
      */
-    void addForCreditBill(BigDecimal addMoney,String cusCode,String currencyCode);
+    void addForCreditBill(BigDecimal addMoney, String cusCode, String currencyCode);
+
+    /**
+     * 移动无效的账单数据
+     *
+     * @return
+     */
+    Long moveInvalidCreditBill();
+
 }
 

@@ -63,4 +63,13 @@
         </if>
         GROUP BY currency_code
     </select>
+
+    <insert id="moveInvalidCreditBill">
+        INSERT INTO fss_deduction_record_bak
+        SELECT  *  FROM fss_deduction_record WHERE   `status` = 2  OR (pay_method NOT IN ('BALANCE_DEDUCTIONS','BUSINESS_OPERATE')) ORDER BY  id desc LIMIT 1000;
+    </insert>
+
+    <delete id="removeInvalidCreditBill">
+        DELETE  FROM fss_deduction_record  WHERE   `status` = 2  OR (pay_method NOT IN ('BALANCE_DEDUCTIONS','BUSINESS_OPERATE'))  ORDER BY  id desc  LIMIT 1000;
+    </delete>
 </mapper>

@@ -23,4 +23,9 @@ public interface DeductionRecordMapper extends BaseMapper<FssDeductionRecord> {
     void updateDeductionRecordStatus(List<AccountBalance> updateBillList);
 
     List<CreditUseInfo> queryTimeCreditUse(@Param("cusCode") String cusCode,@Param("statusList") List<Integer> statusList,@Param("currencyCodeList") List<String> currencyCodeList);
+
+    Long moveInvalidCreditBill();
+
+    Long removeInvalidCreditBill();
+
 }

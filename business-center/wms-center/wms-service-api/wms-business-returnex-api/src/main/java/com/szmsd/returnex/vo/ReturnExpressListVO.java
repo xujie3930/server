@@ -61,16 +61,11 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "申请处理方式", hidden = true)
     private String processTypeStr;
 
-    public void setProcessType(String processType) {
-        this.processType = processType;
-        this.processTypeStr = processType;
-    }
-
-    @ApiModelProperty(value = "处理状态编码", allowableValues = "wmsWaitReceive:处理中,waitAssigned:待指派,waitCustomerDeal:待客户处理,wmsReceivedDealWay:等待仓库处理中,wmsFinish:已完成")
+    @ApiModelProperty(value = "处理状态编码")
     private String dealStatus;
 
     @Excel(name = "订单状态")
-    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.RETURN_EXPRESS)
+    @AutoFieldI18n
     @ApiModelProperty(value = "处理状态编码 订单状态", hidden = true)
     private String dealStatusStr;
 
@@ -120,11 +115,6 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "退件单类型", hidden = true)
     private String returnTypeStr;
 
-    public void setReturnType(String returnType) {
-        this.returnType = returnType;
-        this.returnTypeStr = returnType;
-    }
-
     @ApiModelProperty(value = "实际处理方式编码", hidden = true)
     private String applyProcessMethod;
     @ApiModelProperty(value = "实际处理方式编码", hidden = true)
@@ -149,27 +139,16 @@ public class ReturnExpressListVO implements Serializable {
     @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, code = "068", nameField = "returnSourceStr", cp = BasSubCodeCommonParameter.class)
     @ApiModelProperty(value = "类型[默认：1：退件预报，2：VMS通知退件]")
     private String returnSource;
-    //    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
+//    @FieldJsonI18n(type = RedisLanguageTable.BAS_SUB)
     //@FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.RETURN_EXPRESS)
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
-
-    public void setReturnSource(String returnSource) {
-        this.returnSource = returnSource;
-        this.returnSourceStr = returnSource;
-    }
 
     @ApiModelProperty(value = "目的仓库名称")
     private String warehouseCode;
     @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "目的仓库名称", hidden = true)
     private String warehouseCodeStr;
-
-    public void setWarehouseCode(String warehouseCode) {
-        this.warehouseCode = warehouseCode;
-        this.warehouseCodeStr = warehouseCode;
-    }
-
 
     @Override
     public String toString() {
