@@ -2,6 +2,10 @@ package com.szmsd.finance.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -24,9 +28,11 @@ public class ExchangeRate extends FssBaseEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, nameField = "exchangeFrom", code = "008", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "原币别id")
     private String exchangeFromCode;
 
+    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, nameField = "exchangeTo", code = "008", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "现币别id")
     private String exchangeToCode;
 

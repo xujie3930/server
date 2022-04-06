@@ -182,5 +182,18 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
         log.info("addForCreditBill {} - {} - {}\n{}", addMoney, cusCode, currencyCode, stopWatch.prettyPrint());
         // 多余的钱充值道钱包里面
     }
+
+    /**
+     * 移动无效的账单数据
+     *
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long moveInvalidCreditBill() {
+        Long aLong = baseMapper.moveInvalidCreditBill();
+        baseMapper.removeInvalidCreditBill();
+        return aLong;
+    }
 }
 

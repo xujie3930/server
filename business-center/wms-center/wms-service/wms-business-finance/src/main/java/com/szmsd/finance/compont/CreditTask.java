@@ -48,4 +48,13 @@ public class CreditTask {
         // 更新这些账户的账期
         iAccountBalanceService.updateUserCreditTime();
     }
+
+    /**
+     * 每天0点以后去截断用户的账单
+     */
+//    @Scheduled(cron = "* * * * * ?")
+    @Scheduled(cron = "0 30 0 * * ?")
+    public void moveInvalidCreditBill() {
+        Long aLong = iDeductionRecordService.moveInvalidCreditBill();
+    }
 }
