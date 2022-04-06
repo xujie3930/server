@@ -95,6 +95,26 @@ public class BasSubController extends BaseController {
     }
 
     @ApiOperation(value = "根据code查询子类别（下拉框）")
+    @RequestMapping("/getSubListByLang")
+    public R<Map<String, String>> getSubListByLang(@RequestParam("code") String code, @RequestParam("lang") String lang) {
+        QueryWrapper<BasSub> queryWrapper = Wrappers.query();
+        queryWrapper.select("main_code", "sub_code", "sub_value", "sub_name", "sub_name_en");
+        queryWrapper.eq("main_code", code);
+        List<BasSub> list = this.basSubService.list(queryWrapper);
+        Map<String, String> map;
+        if (CollectionUtils.isEmpty(list)) {
+            map = Collections.emptyMap();
+        } else {
+            map = new HashMap<>();
+            for (BasSub basSub : list) {
+                map.put("zh".equalsIgnoreCase(lang) ? basSub.getSubName() : basSub.getSubNameEn(), basSub.getSubValue());
+            }
+        }
+        return R.ok(map);
+    }
+
+
+    @ApiOperation(value = "根据code查询子类别（下拉框）")
     @RequestMapping("/getSub")
     public R<Map<String, List<BasSubWrapperVO>>> getSub(@RequestParam("code") String code) {
         List<String> codes = new ArrayList<>();

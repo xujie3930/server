@@ -40,4 +40,8 @@ public interface BasSubFeignService {
     @ApiOperation(value = "根据code查询子类别（下拉框）")
     @RequestMapping("/bas-sub/getSubList")
     R<Map<String, String>> getSubList(@RequestParam("code") String code);
+
+    @ApiOperation(value = "根据code查询子类别（下拉框）- 区分语言")
+    @RequestMapping("/bas-sub/getSubListByLang")
+    R<Map<String, String>> getSubListByLang(@RequestParam("code") String code, @RequestParam("lang") String lang);
 }
