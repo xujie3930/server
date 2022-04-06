@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.pack.domain.PackageDeliveryConditions;
 import com.szmsd.pack.dto.PackageDeliveryConditionsDTO;
 import com.szmsd.pack.mapper.PackageDeliveryConditionsMapper;
@@ -55,6 +56,10 @@ public class PackageDeliveryConditionsServiceImpl extends ServiceImpl<PackageDel
     @Override
     public List<PackageDeliveryConditions> selectPackageDeliveryConditionsList(PackageDeliveryConditions packageDeliveryConditions) {
         QueryWrapper<PackageDeliveryConditions> where = new QueryWrapper<PackageDeliveryConditions>();
+        where.like(StringUtils.isNotEmpty(packageDeliveryConditions.getProductCode()),"product_code", packageDeliveryConditions.getProductCode())
+                .like(StringUtils.isNotEmpty(packageDeliveryConditions.getWarehouseCode()),"warehouse_code", packageDeliveryConditions.getWarehouseCode())
+                .eq(StringUtils.isNotEmpty(packageDeliveryConditions.getCommandNodeCode()),"command_node_code", packageDeliveryConditions.getCommandNodeCode())
+                .eq(StringUtils.isNotEmpty(packageDeliveryConditions.getStatus()),"status", packageDeliveryConditions.getStatus());
         return baseMapper.selectList(where);
     }
 
