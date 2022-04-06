@@ -98,7 +98,7 @@ public enum LocalLanguageEnum {
     RETURN_EXPRESS_11(RETURN_EXPRESS,"处理中","处理中","In process"),
     RETURN_EXPRESS_12(RETURN_EXPRESS,"待客户处理","待客户处理","Waiting for customer to handle"),
     RETURN_EXPRESS_13(RETURN_EXPRESS,"待指派","待指派","Waiting assigned"),
-    RETURN_EXPRESS_14(RETURN_EXPRESS,"已完成","已完成","Completed"),
+    RETURN_EXPRESS_14(RETURN_EXPRESS,"已提交处理意见","已提交处理意见","Processing comments Have been submitted"),
 
     ;
 

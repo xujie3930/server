@@ -160,10 +160,10 @@ public class ThreadPoolExecutorConfiguration {
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_SHIPPED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundShipped() {
         // 核心线程数量
-        int corePoolSize = availableProcessors * 4;
+        int corePoolSize = availableProcessors * 2;
         int maximumPoolSize = availableProcessors * 4;
         // 队列
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(4096);
         // 核心和最大一致
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂

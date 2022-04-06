@@ -30,5 +30,6 @@ public class TrackAnalysisRequestDto {
     @ApiModelProperty(value = "状态")
     private String trackingStatus;
 
-
+    @ApiModelProperty(value = "系统语言")
+    private String lang;
 }

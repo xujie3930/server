@@ -105,10 +105,10 @@ public class DelOutboundTimer {
     /**
      * 处理完成失败的单据
      * <p/>
-     * 5分钟执行一次
+     * 3分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 */5 * * * ?")
+    @Scheduled(cron = "0 */3 * * * ?")
     public void completedFail() {
         logger.debug("开始执行任务 - 处理完成失败的单据");
         String key = applicationName + ":DelOutboundTimer:completedFail";
@@ -118,7 +118,7 @@ public class DelOutboundTimer {
             LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.FAIL.getCode());
             queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.SHIPPED.getCode());
-            queryWrapper.lt(DelOutboundCompleted::getHandleSize, 5);
+            queryWrapper.lt(DelOutboundCompleted::getHandleSize, 10);
             // 处理时间小于等于当前时间的
             queryWrapper.le(DelOutboundCompleted::getNextHandleTime, new Date());
             handleCompleted(queryWrapper);
@@ -246,7 +246,7 @@ public class DelOutboundTimer {
     }
 
     private void handleCompleted(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleCompleted(orderNo, id), 150, true);
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncHandleCompleted(orderNo, id), 200, true);
     }
 
     public void handleCancelled(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {

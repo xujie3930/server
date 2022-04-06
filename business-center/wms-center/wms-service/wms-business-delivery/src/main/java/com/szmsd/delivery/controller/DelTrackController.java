@@ -123,7 +123,8 @@ public class DelTrackController extends BaseController {
 
     @ApiOperation(value = "获取轨迹分析", notes = "获取轨迹分析")
     @GetMapping("getTrackAnalysis")
-    public R getTrackAnalysis(TrackAnalysisRequestDto requestDto){
+    public R getTrackAnalysis(TrackAnalysisRequestDto requestDto, @RequestHeader("langr") String langr){
+        requestDto.setLang(langr);
         return R.ok(delTrackService.getTrackAnalysis(requestDto));
     }
 
@@ -140,7 +141,8 @@ public class DelTrackController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.EXPORT)
     @GetMapping("/exportTrackAnalysis")
     @ApiOperation(value = "导出轨迹分析", notes = "导出轨迹分析")
-    public void exportTrackAnalysis(HttpServletResponse response, TrackAnalysisRequestDto requestDto) throws IOException {
+    public void exportTrackAnalysis(HttpServletResponse response, TrackAnalysisRequestDto requestDto, @RequestHeader("langr") String langr) throws IOException {
+        requestDto.setLang(langr);
         List<TrackAnalysisExportDto> list = delTrackService.getAnalysisExportData(requestDto);
         ExcelUtil<TrackAnalysisExportDto> util = new ExcelUtil<TrackAnalysisExportDto>(TrackAnalysisExportDto.class);
         util.exportExcel(response, list, "TrackAnalysis");

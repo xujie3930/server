@@ -2,6 +2,7 @@ package com.szmsd.finance.controller;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.finance.domain.ExchangeRate;
 import com.szmsd.finance.dto.ExchangeRateDTO;
 import com.szmsd.finance.service.IExchangeRateService;
@@ -24,6 +25,7 @@ public class ExchangeRateController extends FssBaseController {
     @Autowired
     IExchangeRateService exchangeRateService;
 
+    @AutoValue
     @PreAuthorize("@ss.hasPermi('ExchangeRate:listPage')")
     @ApiOperation(value = "分页查询汇率信息")
     @GetMapping("/listPage")
@@ -57,6 +59,7 @@ public class ExchangeRateController extends FssBaseController {
     @PreAuthorize("@ss.hasPermi('ExchangeRate:selectRate')")
     @ApiOperation(value = "汇率转换查询")
     @GetMapping("/selectRate")
+    @AutoValue
     public R selectRate(@RequestParam("currencyFromCode") String currencyFromCode,@RequestParam("currencyToCode") String currencyToCode){
         return exchangeRateService.selectRate(currencyFromCode,currencyToCode);
     }
