@@ -1,15 +1,24 @@
 package com.szmsd.http.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.http.config.DomainTokenConfig;
+import com.szmsd.http.config.DomainTokenValue;
+import com.szmsd.http.plugins.AbstractDomainToken;
+import com.szmsd.http.plugins.DomainToken;
 import com.szmsd.http.utils.RedirectUriUtil;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Api(tags = {"HTTP回调接收接口"})
@@ -20,6 +29,10 @@ public class RedirectUriController {
 
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
+    @Autowired
+    private DomainTokenConfig domainTokenConfig;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @GetMapping
     @ApiOperation(value = "HTTP回调接收接口 - #1", position = 100)
@@ -33,5 +46,77 @@ public class RedirectUriController {
         // 设置到缓存中，有效期1小时
         this.redisTemplate.opsForValue().set(wrapRedirectUriKey, code, 1, TimeUnit.HOURS);
         return R.ok(state);
+    }
+
+    @GetMapping(value = {"/token/config"})
+    @ApiOperation(value = "HTTP回调接收接口 - #2", position = 200)
+    public R<String> tokenConfig() {
+        return R.ok(JSON.toJSONString(domainTokenConfig.getValues()));
+    }
+
+    @GetMapping(value = {"/token/clear"})
+    @ApiOperation(value = "HTTP回调接收接口 - #21", position = 210)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "domain", value = "domain")
+    })
+    public R<Object> tokenClear(@RequestParam(value = "domain") String domain) {
+        if (StringUtils.isEmpty(domain)) {
+            return R.failed("domain不能为空");
+        }
+        DomainTokenValue domainTokenValue = domainTokenConfig.getToken(domain);
+        if (null == domainTokenValue) {
+            return R.failed("没有配置，" + domain);
+        }
+        String domainToken = domainTokenValue.getDomainToken();
+        try {
+            DomainToken bean = this.applicationContext.getBean(domainToken, DomainToken.class);
+
+            String accessTokenKey = bean.accessTokenKey();
+            String wrapAccessTokenKey = RedirectUriUtil.wrapAccessTokenKey(accessTokenKey);
+            Boolean aBoolean = this.redisTemplate.delete(wrapAccessTokenKey);
+
+            String refreshTokenKey = bean.refreshTokenKey();
+            String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
+            Boolean aBoolean1 = this.redisTemplate.delete(wrapRefreshTokenKey);
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("accessTokenKey", aBoolean);
+            map.put("refreshTokenKey", aBoolean1);
+            return R.ok(map);
+        } catch (Exception e) {
+            return R.failed("执行失败，错误信息：" + e.getMessage());
+        }
+    }
+
+    @GetMapping(value = {"/token/info"})
+    @ApiOperation(value = "HTTP回调接收接口 - #3", position = 300)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "domain", value = "domain")
+    })
+    public R<Object> getTokenInfo(@RequestParam(value = "domain") String domain) {
+        if (StringUtils.isEmpty(domain)) {
+            return R.failed("domain不能为空");
+        }
+        DomainTokenValue domainTokenValue = domainTokenConfig.getToken(domain);
+        if (null == domainTokenValue) {
+            return R.failed("没有配置，" + domain);
+        }
+        String domainToken = domainTokenValue.getDomainToken();
+        try {
+            DomainToken bean = this.applicationContext.getBean(domainToken, DomainToken.class);
+            if (bean instanceof AbstractDomainToken) {
+                AbstractDomainToken abstractDomainToken = (AbstractDomainToken) bean;
+                abstractDomainToken.setDomain(domain);
+                abstractDomainToken.setDomainTokenValue(domainTokenValue);
+            }
+            String tokenName = bean.getTokenName();
+            String tokenValue = bean.getTokenValue();
+            Map<String, Object> map = new HashMap<>();
+            map.put("tokenName", tokenName);
+            map.put("tokenValue", tokenValue);
+            return R.ok(map);
+        } catch (Exception e) {
+            return R.failed("执行失败，错误信息：" + e.getMessage());
+        }
     }
 }
