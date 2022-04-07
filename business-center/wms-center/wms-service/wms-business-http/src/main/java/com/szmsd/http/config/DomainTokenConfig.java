@@ -23,4 +23,12 @@ public class DomainTokenConfig {
         }
         return this.values.get(domain);
     }
+
+    public Map<String, DomainTokenValue> getValues() {
+        return values;
+    }
+
+    public void setValues(Map<String, DomainTokenValue> values) {
+        this.values = values;
+    }
 }
