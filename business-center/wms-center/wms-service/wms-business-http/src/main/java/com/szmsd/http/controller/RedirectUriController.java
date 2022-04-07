@@ -9,6 +9,8 @@ import com.szmsd.http.plugins.DomainToken;
 import com.szmsd.http.utils.RedirectUriUtil;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/api/redirect/uri")
 public class RedirectUriController {
+    private final Logger logger = LoggerFactory.getLogger(RedirectUriController.class);
 
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
@@ -63,6 +66,7 @@ public class RedirectUriController {
         if (StringUtils.isEmpty(domain)) {
             return R.failed("domain不能为空");
         }
+        this.logger.info("请求参数：{}", domain);
         DomainTokenValue domainTokenValue = domainTokenConfig.getToken(domain);
         if (null == domainTokenValue) {
             return R.failed("没有配置，" + domain);
@@ -72,11 +76,15 @@ public class RedirectUriController {
             DomainToken bean = this.applicationContext.getBean(domainToken, DomainToken.class);
 
             String accessTokenKey = bean.accessTokenKey();
+            this.logger.info("accessTokenKey: {}", accessTokenKey);
             String wrapAccessTokenKey = RedirectUriUtil.wrapAccessTokenKey(accessTokenKey);
+            this.logger.info("wrapAccessTokenKey: {}", wrapAccessTokenKey);
             Boolean aBoolean = this.redisTemplate.delete(wrapAccessTokenKey);
 
             String refreshTokenKey = bean.refreshTokenKey();
+            this.logger.info("refreshTokenKey: {}", refreshTokenKey);
             String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
+            this.logger.info("wrapRefreshTokenKey: {}", wrapRefreshTokenKey);
             Boolean aBoolean1 = this.redisTemplate.delete(wrapRefreshTokenKey);
 
             Map<String, Object> map = new HashMap<>();
@@ -97,6 +105,7 @@ public class RedirectUriController {
         if (StringUtils.isEmpty(domain)) {
             return R.failed("domain不能为空");
         }
+        this.logger.info("请求参数：{}", domain);
         DomainTokenValue domainTokenValue = domainTokenConfig.getToken(domain);
         if (null == domainTokenValue) {
             return R.failed("没有配置，" + domain);
