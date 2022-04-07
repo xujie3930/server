@@ -1,5 +1,6 @@
 package com.szmsd.delivery.vo;
 
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.bas.plugin.BasSubCommonPlugin;
 import com.szmsd.bas.plugin.BasSubValueCommonParameter;
@@ -149,4 +150,6 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "COD")
     private BigDecimal codAmount;
+    @ApiModelProperty(value = "RefNo")
+    private String refNo;
 }
