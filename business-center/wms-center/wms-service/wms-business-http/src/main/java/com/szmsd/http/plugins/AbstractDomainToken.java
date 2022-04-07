@@ -1,5 +1,6 @@
 package com.szmsd.http.plugins;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.http.config.DomainTokenValue;
 import com.szmsd.http.utils.RedirectUriUtil;
@@ -28,8 +29,10 @@ public abstract class AbstractDomainToken implements DomainToken {
 
     @Override
     public String getTokenValue() {
+        logger.info(">>>[获取Token]，1.开始获取Token");
         // 获取access token信息
         String accessToken = this.getAccessToken();
+        logger.info(">>>[获取Token]，2.获取Token值：{}", accessToken);
         if (StringUtils.isNotEmpty(accessToken)) {
             return accessToken;
         }
@@ -39,8 +42,10 @@ public abstract class AbstractDomainToken implements DomainToken {
         try {
             // 锁超时60秒
             if (lock.tryLock(60, TimeUnit.SECONDS)) {
+                logger.info(">>>[获取Token]，3.获取到锁");
                 // 二次验证
                 accessToken = this.getAccessToken();
+                logger.info(">>>[获取Token]，4.重新获取Token值：{}", accessToken);
                 if (StringUtils.isNotEmpty(accessToken)) {
                     return accessToken;
                 }
@@ -48,9 +53,11 @@ public abstract class AbstractDomainToken implements DomainToken {
                 String refreshTokenKey = this.getRefreshTokenKey();
                 String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
                 Object refreshTokenObject = this.redisTemplate.opsForValue().get(wrapRefreshTokenKey);
+                logger.info(">>>[获取Token]，5.获取RefreshToken值：{}", refreshTokenObject);
                 if (null != refreshTokenObject) {
                     String refreshToken = String.valueOf(refreshTokenObject);
                     TokenValue tokenValue = this.internalGetTokenValueByRefreshToken(refreshToken);
+                    logger.info(">>>[获取Token]，6.根据RefreshToken获取Token信息：{}", JSON.toJSONString(tokenValue));
                     if (null != tokenValue) {
                         this.setTokenValue(tokenValue);
                         return tokenValue.getAccessToken();
@@ -58,13 +65,14 @@ public abstract class AbstractDomainToken implements DomainToken {
                 }
                 // 直接获取token信息
                 TokenValue tokenValue = this.internalGetTokenValue();
+                logger.info(">>>[获取Token]，7.根据Token接口获取Token信息：{}", JSON.toJSONString(tokenValue));
                 if (null != tokenValue) {
                     this.setTokenValue(tokenValue);
                     return tokenValue.getAccessToken();
                 }
             }
         } catch (Exception e) {
-            this.logger.error(e.getMessage(), e);
+            this.logger.error(">>>[获取Token]，8.获取Token失败，" + e.getMessage(), e);
             throw new CommonException("999", "获取Token失败，" + e.getMessage());
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
