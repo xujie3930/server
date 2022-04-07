@@ -50,7 +50,7 @@ public abstract class AbstractDomainToken implements DomainToken {
                     return accessToken;
                 }
                 // 获取refresh token，根据refresh token去重新获取 token 信息
-                String refreshTokenKey = this.getRefreshTokenKey();
+                String refreshTokenKey = this.refreshTokenKey();
                 String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
                 Object refreshTokenObject = this.redisTemplate.opsForValue().get(wrapRefreshTokenKey);
                 logger.info(">>>[获取Token]，5.获取RefreshToken值：{}，Redis键值：{}", refreshTokenObject, wrapRefreshTokenKey);
@@ -90,17 +90,17 @@ public abstract class AbstractDomainToken implements DomainToken {
         }
         // 时间兼容，30分钟（30分钟 * 60秒）
         expiresIn -= 1800L;
-        String accessTokenKey = this.getAccessTokenKey();
+        String accessTokenKey = this.accessTokenKey();
         String wrapAccessTokenKey = RedirectUriUtil.wrapAccessTokenKey(accessTokenKey);
         this.redisTemplate.opsForValue().set(wrapAccessTokenKey, tokenValue.getAccessToken(), expiresIn, TimeUnit.SECONDS);
-        String refreshTokenKey = this.getRefreshTokenKey();
+        String refreshTokenKey = this.refreshTokenKey();
         String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
         long refreshTokenExpiresIn = this.domainTokenValue.getRefreshTokenExpiresIn();
         this.redisTemplate.opsForValue().set(wrapRefreshTokenKey, tokenValue.getRefreshToken(), refreshTokenExpiresIn, TimeUnit.SECONDS);
     }
 
     private String getAccessToken() {
-        String accessTokenKey = this.getAccessTokenKey();
+        String accessTokenKey = this.accessTokenKey();
         String wrapAccessTokenKey = RedirectUriUtil.wrapAccessTokenKey(accessTokenKey);
         Object accessTokenObject = this.redisTemplate.opsForValue().get(wrapAccessTokenKey);
         if (null != accessTokenObject) {
@@ -109,20 +109,14 @@ public abstract class AbstractDomainToken implements DomainToken {
         return null;
     }
 
-    private String getAccessTokenKey() {
-        String accessTokenKey = this.accessTokenKey();
-        if (StringUtils.isEmpty(accessTokenKey)) {
-            accessTokenKey = this.domainTokenValue.getDomainToken();
-        }
-        return accessTokenKey;
+    @Override
+    public String accessTokenKey() {
+        return this.domainTokenValue.getDomainToken();
     }
 
-    private String getRefreshTokenKey() {
-        String refreshTokenKey = this.refreshTokenKey();
-        if (StringUtils.isEmpty(refreshTokenKey)) {
-            refreshTokenKey = this.domainTokenValue.getDomainToken();
-        }
-        return refreshTokenKey;
+    @Override
+    public String refreshTokenKey() {
+        return this.domainTokenValue.getDomainToken();
     }
 
     /**
