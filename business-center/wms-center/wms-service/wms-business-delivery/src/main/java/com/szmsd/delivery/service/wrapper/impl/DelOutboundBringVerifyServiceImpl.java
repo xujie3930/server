@@ -1061,6 +1061,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 createShipmentRequestDto.setTaskConfig(taskConfigInfo);
                 // 上下文值传递
                 delOutboundWrapperContext.setTaskConfigInfo(taskConfigInfo);
+            } else {
+                throw new CommonException("500", "产品服务未配置，请联系管理员。仓库：" + delOutbound.getWarehouseCode() + "，产品代码：" + delOutbound.getShipmentRule());
             }
         }
         // 批量出口增加装箱要求
