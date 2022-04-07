@@ -511,6 +511,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         try {
             // DOC的验证SKU
             this.docValid(dto);
+
+            if(StringUtils.isNotEmpty(dto.getRefNo())){
+                LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
+                queryWrapper.eq(DelOutbound::getRefNo, dto.getRefNo());
+                DelOutbound data = baseMapper.selectOne(queryWrapper);
+                if(data != null){
+                    throw new CommonException("400", "Refno 必须唯一值"+data.getRefNo());
+                }
+            }
             DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
             if (null == delOutbound.getCodAmount()) {
                 delOutbound.setCodAmount(BigDecimal.ZERO);
@@ -670,11 +679,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public List<DelOutboundAddResponse> insertDelOutbounds(List<DelOutboundDto> dtoList) {
         List<DelOutboundAddResponse> result = new ArrayList<>();
         int index = 1;
+        List<String> refNoList = new ArrayList<String>();
         for (DelOutboundDto dto : dtoList) {
             DelOutboundAddResponse delOutbound = this.createDelOutbound(dto);
             delOutbound.setIndex(index);
             result.add(delOutbound);
             index++;
+
+            if(StringUtils.isNotEmpty(dto.getRefNo())){
+                if(refNoList.contains(dto.getRefNo())){
+                    throw new CommonException("400", "本次操作数据中Refno 必须唯一值"+dto.getRefNo());
+                }
+                refNoList.add(dto.getRefNo());
+            }
         }
         return result;
     }
