@@ -148,7 +148,8 @@ public class TrackingYeeToken extends AbstractDomainToken {
         int tokenStatus = tokenHttpResponseBody.getStatus();
         String body = tokenHttpResponseBody.getBody();
         if (HttpStatus.OK.value() != tokenStatus) {
-            throw new CommonException("999", "获取TrackingYee Token失败，错误信息：" + body);
+            super.logger.error("获取TrackingYee Token失败，错误信息：" + body);
+            return null;
         }
         JSONObject jsonObject = JSON.parseObject(body);
         if (null != jsonObject) {

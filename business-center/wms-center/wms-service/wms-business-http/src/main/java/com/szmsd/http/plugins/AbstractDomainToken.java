@@ -53,7 +53,7 @@ public abstract class AbstractDomainToken implements DomainToken {
                 String refreshTokenKey = this.getRefreshTokenKey();
                 String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
                 Object refreshTokenObject = this.redisTemplate.opsForValue().get(wrapRefreshTokenKey);
-                logger.info(">>>[获取Token]，5.获取RefreshToken值：{}", refreshTokenObject);
+                logger.info(">>>[获取Token]，5.获取RefreshToken值：{}，Redis键值：{}", refreshTokenObject, wrapRefreshTokenKey);
                 if (null != refreshTokenObject) {
                     String refreshToken = String.valueOf(refreshTokenObject);
                     TokenValue tokenValue = this.internalGetTokenValueByRefreshToken(refreshToken);
