@@ -142,6 +142,7 @@
             a.country_code,
             a.country,
             a.phone_no,
+            a.email,
             o.weight,
             o.calc_weight,
             o.specifications,
@@ -152,6 +153,36 @@
             o.cod_amount,
             o.remark,
             o.ioss
+        FROM del_outbound o
+        LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="reassignExportList" resultType="com.szmsd.delivery.dto.DelOutboundReassignExportListDto">
+        SELECT
+            o.ref_no,
+            o.seller_code,
+            o.order_no,
+            o.tracking_no,
+            o.warehouse_code,
+            o.order_type,
+            o.state,
+            o.shipment_rule,
+            a.consignee,
+            a.street1,
+            a.street2,
+            a.state_or_province,
+            a.city,
+            a.post_code,
+            a.country_code,
+            a.country,
+            a.phone_no,
+            a.email,
+            o.cod_amount,
+            o.remark,
+            o.tracking_status,
+            o.tracking_description,
+            o.create_time
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}

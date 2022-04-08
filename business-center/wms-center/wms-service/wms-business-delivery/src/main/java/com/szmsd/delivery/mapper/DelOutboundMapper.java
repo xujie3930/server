@@ -8,6 +8,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
 import com.szmsd.delivery.dto.DelOutboundExportListDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.dto.DelOutboundReassignExportListDto;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundListExceptionMessageExportVO;
 import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
@@ -63,6 +64,14 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
      * @return List<DelOutboundExportListDto>
      */
     List<DelOutboundExportListDto> exportList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
+
+    /**
+     * 退件单重派导出
+     *
+     * @param queryWrapper queryWrapper
+     * @return List<DelOutboundReassignExportListDto>
+     */
+    List<DelOutboundReassignExportListDto> reassignExportList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
 
     int updateTrackingNo(DelOutboundBatchUpdateTrackingNoDto dto);
 

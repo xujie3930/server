@@ -1756,6 +1756,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return this.baseMapper.exportList(queryWrapper);
     }
 
+    @Override
+    public List<DelOutboundReassignExportListDto> reassignExportList(DelOutboundListQueryDto queryDto) {
+        QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
+        // 界面上选择了记录进行导出
+        if (CollectionUtils.isNotEmpty(queryDto.getSelectIds())) {
+            queryWrapper.in("o.id", queryDto.getSelectIds());
+            // 按照创建时间倒序
+            queryWrapper.orderByDesc("o.create_time");
+        } else {
+            DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
+        }
+        return this.baseMapper.reassignExportList(queryWrapper);
+    }
+
     /**
      * 取消冻结库存
      *

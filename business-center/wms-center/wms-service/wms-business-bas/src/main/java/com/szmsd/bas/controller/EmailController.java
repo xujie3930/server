@@ -68,7 +68,7 @@ public class EmailController extends BaseController {
                 emailUtil.sendHtmlMail(email, varCode.getTitle(), varCode.get(code));
             } catch (Exception e) {
                 redisService.deleteObject(key);
-                log.error("邮件发送失败，请稍后重试, {}, {}", email, e.getMessage());
+                log.error("邮件发送失败，请稍后重试, {}, {}", email, e.getMessage(), e);
             }
         }, asyncTaskExecutor);
         return R.ok();
