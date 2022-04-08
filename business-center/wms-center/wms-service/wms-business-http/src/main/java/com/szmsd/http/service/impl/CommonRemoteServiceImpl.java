@@ -149,7 +149,7 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
 
     @Override
     public CommonRemote getOneTask(Integer id, RemoteTypeEnum remoteTypeEnum) {
-        return baseMapper.selectOne(Wrappers.<CommonRemote>lambdaQuery().lt(CommonRemote::getRetryTimes, 3)
+        return baseMapper.selectOne(Wrappers.<CommonRemote>lambdaQuery().lt(CommonRemote::getRetryTimes, 10)
                 .in(CommonRemote::getRequestStatus, RemoteStatusEnum.WAIT.getStatus(), RemoteConstant.RemoteStatusEnum.FAIL.getStatus())
                 .eq(remoteTypeEnum != null, CommonRemote::getRemoteType, remoteTypeEnum != null ? remoteTypeEnum.getTypeCode() : null)
                 .gt(CommonRemote::getId, id).last("LIMIT 1"));
