@@ -511,6 +511,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         try {
             // DOC的验证SKU
             this.docValid(dto);
+
+            if(StringUtils.isNotEmpty(dto.getRefNo())){
+                LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
+                queryWrapper.eq(DelOutbound::getRefNo, dto.getRefNo());
+                List<DelOutbound> data = baseMapper.selectList(queryWrapper);
+                if(data.size() > 0){
+                    throw new CommonException("400", "Refno 必须唯一值"+dto.getRefNo());
+                }
+            }
             DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
             if (null == delOutbound.getCodAmount()) {
                 delOutbound.setCodAmount(BigDecimal.ZERO);
@@ -670,11 +679,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public List<DelOutboundAddResponse> insertDelOutbounds(List<DelOutboundDto> dtoList) {
         List<DelOutboundAddResponse> result = new ArrayList<>();
         int index = 1;
+        List<String> refNoList = new ArrayList<String>();
         for (DelOutboundDto dto : dtoList) {
             DelOutboundAddResponse delOutbound = this.createDelOutbound(dto);
             delOutbound.setIndex(index);
             result.add(delOutbound);
             index++;
+
+            if(StringUtils.isNotEmpty(dto.getRefNo())){
+                if(refNoList.contains(dto.getRefNo())){
+                    throw new CommonException("400", "本次操作数据中Refno 必须唯一值"+dto.getRefNo());
+                }
+                refNoList.add(dto.getRefNo());
+            }
         }
         return result;
     }
@@ -1737,6 +1754,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
         }
         return this.baseMapper.exportList(queryWrapper);
+    }
+
+    @Override
+    public List<DelOutboundReassignExportListDto> reassignExportList(DelOutboundListQueryDto queryDto) {
+        QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
+        // 界面上选择了记录进行导出
+        if (CollectionUtils.isNotEmpty(queryDto.getSelectIds())) {
+            queryWrapper.in("o.id", queryDto.getSelectIds());
+            // 按照创建时间倒序
+            queryWrapper.orderByDesc("o.create_time");
+        } else {
+            DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
+        }
+        return this.baseMapper.reassignExportList(queryWrapper);
     }
 
     /**

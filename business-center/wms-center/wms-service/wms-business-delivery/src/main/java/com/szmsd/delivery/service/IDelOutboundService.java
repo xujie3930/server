@@ -323,6 +323,14 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     List<DelOutboundExportListDto> exportList(DelOutboundListQueryDto queryDto);
 
     /**
+     * 退件单重派导出
+     *
+     * @param queryDto queryDto
+     * @return List<DelOutboundReassignExportListDto>
+     */
+    List<DelOutboundReassignExportListDto> reassignExportList(DelOutboundListQueryDto queryDto);
+
+    /**
      * 出库-创建采购单后回写出库单 采购单号
      * 多个出库单，对应一个采购单
      *

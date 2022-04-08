@@ -13,11 +13,14 @@ import java.util.Date;
  * @date 2021-04-23 15:18
  */
 @Data
-@ApiModel(value = "DelOutboundExportListDto", description = "DelOutboundExportListDto对象")
-public class DelOutboundExportListDto implements Serializable {
+@ApiModel(value = "DelOutboundReassignExportListDto", description = "DelOutboundReassignExportListDto对象")
+public class DelOutboundReassignExportListDto implements Serializable {
 
-    @ApiModelProperty(value = "状态")
-    private String state;
+    @ApiModelProperty(value = "RefNo")
+    private String refNo;
+
+    @ApiModelProperty(value = "客户代码")
+    private String sellerCode;
 
     @ApiModelProperty(value = "出库单号")
     private String orderNo;
@@ -25,17 +28,14 @@ public class DelOutboundExportListDto implements Serializable {
     @ApiModelProperty(value = "跟踪号")
     private String trackingNo;
 
-    @ApiModelProperty(value = "客户代码")
-    private String sellerCode;
-
     @ApiModelProperty(value = "处理点/仓库")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "RefNo")
-    private String refNo;
-
     @ApiModelProperty(value = "出库方式")
     private String orderType;
+
+    @ApiModelProperty(value = "状态")
+    private String state;
 
     @ApiModelProperty(value = "物流服务")
     private String shipmentRule;
@@ -70,33 +70,19 @@ public class DelOutboundExportListDto implements Serializable {
     @ApiModelProperty(value = "邮箱")
     private String email;
 
-    @ApiModelProperty(value = "重量")
-    private Double weight;
-
-    @ApiModelProperty(value = "计费重")
-    private BigDecimal calcWeight;
-
-    @ApiModelProperty(value = "规格")
-    private String specifications;
-
-    @ApiModelProperty(value = "提审时间")
-    private Date bringVerifyTime;
-
-    @ApiModelProperty(value = "发货时间")
-    private Date shipmentsTime;
-
-    @ApiModelProperty(value = "异常状态")
-    private String exceptionState;
-
-    @ApiModelProperty(value = "异常描述")
-    private String exceptionMessage;
-
     @ApiModelProperty(value = "COD")
     private BigDecimal codAmount;
 
     @ApiModelProperty(value = "备注")
     private String remark;
 
-    @ApiModelProperty(value = "ioss")
-    private String ioss;
+    @ApiModelProperty(value = "轨迹状态")
+    private String trackingStatus;
+
+    @ApiModelProperty(value = "最新轨迹")
+    private String trackingDescription;
+
+    @ApiModelProperty(value = "创建时间")
+    private Date createTime;
+
 }
