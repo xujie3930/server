@@ -185,6 +185,7 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
 
     /**
      * 移动无效的账单数据
+     * 每次1W 迁移并删除原表数据
      *
      * @return
      */

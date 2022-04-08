@@ -50,11 +50,17 @@ public class CreditTask {
     }
 
     /**
-     * 每天0点以后去截断用户的账单
+     * 每天0点以后去迁移已还清的账单数据
      */
 //    @Scheduled(cron = "* * * * * ?")
-    @Scheduled(cron = "0 30 0 * * ?")
+    @Scheduled(cron = "0 30 1 * * ?")
     public void moveInvalidCreditBill() {
-        Long aLong = iDeductionRecordService.moveInvalidCreditBill();
+        Long cny = 0L;
+        long start = System.currentTimeMillis();
+        log.info("【迁移数据】账单-开始----------");
+        while ((cny = iDeductionRecordService.moveInvalidCreditBill()) > 0) {
+            log.info("【迁移数据】 sync data From fss_deduction_record To fss_deduction_record_bak | count: {}", cny);
+        }
+        log.info("【迁移数据】账单-完成----------{}", System.currentTimeMillis() - start);
     }
 }

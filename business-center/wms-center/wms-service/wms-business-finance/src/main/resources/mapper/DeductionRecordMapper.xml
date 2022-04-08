@@ -66,10 +66,10 @@
 
     <insert id="moveInvalidCreditBill">
         INSERT INTO fss_deduction_record_bak
-        SELECT  *  FROM fss_deduction_record WHERE   `status` = 2  OR (pay_method NOT IN ('BALANCE_DEDUCTIONS','BUSINESS_OPERATE')) ORDER BY  id desc LIMIT 1000;
+        SELECT  * FROM fss_deduction_record WHERE credit_end_time &lt; now()  AND remaining_repayment_amount  = 0 order by id LIMIT 10000;
     </insert>
 
     <delete id="removeInvalidCreditBill">
-        DELETE  FROM fss_deduction_record  WHERE   `status` = 2  OR (pay_method NOT IN ('BALANCE_DEDUCTIONS','BUSINESS_OPERATE'))  ORDER BY  id desc  LIMIT 1000;
+        DELETE  FROM fss_deduction_record WHERE credit_end_time &lt; now()  AND remaining_repayment_amount  = 0 order by id LIMIT 10000;
     </delete>
 </mapper>
