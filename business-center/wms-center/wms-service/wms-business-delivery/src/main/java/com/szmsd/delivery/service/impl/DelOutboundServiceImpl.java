@@ -503,23 +503,37 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
         }
     }
+    private void checkRefNo(DelOutboundDto dto){
+        if(StringUtils.isNotEmpty(dto.getRefNo())){
+            LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
+            queryWrapper.eq(DelOutbound::getRefNo, dto.getRefNo());
+            List<DelOutbound> data = baseMapper.selectList(queryWrapper);
+            if(data.size() > 0){
+                throw new CommonException("400", "Refno 必须唯一值"+dto.getRefNo());
+            }
+        }
+    }
 
     private DelOutboundAddResponse createDelOutbound(DelOutboundDto dto) {
         DelOutboundAddResponse response = new DelOutboundAddResponse();
         String orderNo;
+
+        if(StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)){
+            //单数据处理直接抛异常
+            this.checkRefNo(dto);
+        }
+
         // 创建出库单
         try {
             // DOC的验证SKU
             this.docValid(dto);
 
-            if(StringUtils.isNotEmpty(dto.getRefNo())){
-                LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
-                queryWrapper.eq(DelOutbound::getRefNo, dto.getRefNo());
-                List<DelOutbound> data = baseMapper.selectList(queryWrapper);
-                if(data.size() > 0){
-                    throw new CommonException("400", "Refno 必须唯一值"+dto.getRefNo());
-                }
+
+            if(!StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)){
+                //批量数据处理记录异常
+                this.checkRefNo(dto);
             }
+
             DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
             if (null == delOutbound.getCodAmount()) {
                 delOutbound.setCodAmount(BigDecimal.ZERO);
@@ -681,17 +695,22 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         int index = 1;
         List<String> refNoList = new ArrayList<String>();
         for (DelOutboundDto dto : dtoList) {
-            DelOutboundAddResponse delOutbound = this.createDelOutbound(dto);
+            DelOutboundAddResponse delOutbound = null;
+            if(StringUtils.isNotEmpty(dto.getRefNo()) && refNoList.contains(dto.getRefNo())){
+                delOutbound = new DelOutboundAddResponse();
+                logger.error("本次操作数据中Refno 必须唯一值"+dto.getRefNo());
+                // 返回异常错误信息
+                delOutbound.setStatus(false);
+                delOutbound.setMessage("本次操作数据中Refno 必须唯一值"+dto.getRefNo());
+            }else{
+                refNoList.add(dto.getRefNo());
+                delOutbound = this.createDelOutbound(dto);
+            }
             delOutbound.setIndex(index);
             result.add(delOutbound);
             index++;
 
-            if(StringUtils.isNotEmpty(dto.getRefNo())){
-                if(refNoList.contains(dto.getRefNo())){
-                    throw new CommonException("400", "本次操作数据中Refno 必须唯一值"+dto.getRefNo());
-                }
-                refNoList.add(dto.getRefNo());
-            }
+
         }
         return result;
     }
