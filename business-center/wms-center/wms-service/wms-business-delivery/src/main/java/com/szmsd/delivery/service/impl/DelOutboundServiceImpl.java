@@ -508,6 +508,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (StringUtils.isNotEmpty(dto.getRefNo())) {
             LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
             queryWrapper.eq(DelOutbound::getRefNo, dto.getRefNo());
+            queryWrapper.ne(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
+
             List<DelOutbound> data = baseMapper.selectList(queryWrapper);
             if (data.size() > 0) {
                 throw new CommonException("400", "Refno 必须唯一值" + dto.getRefNo());
