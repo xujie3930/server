@@ -24,7 +24,10 @@ public class TestWrappers {
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.select(DelOutbound::getId, DelOutbound::getOrderNo, DelOutbound::getOrderType);
         queryWrapper.eq(DelOutbound::getOrderNo, "CK123456");
-        queryWrapper.in(DelOutbound::getOrderType, "AAA", "BBB");
+        queryWrapper.in(DelOutbound::getOrderType, "AAA", "BBB").or(qw -> {
+            qw.eq(DelOutbound::getId, 3);
+            qw.eq(DelOutbound::getAmount, 4);
+        });
 
         System.out.println(queryWrapper);
         System.out.println(queryWrapper.getCustomSqlSegment());

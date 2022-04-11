@@ -36,6 +36,8 @@ import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
+import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
+import com.szmsd.pack.domain.PackageDeliveryConditions;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
@@ -100,6 +102,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private IDelOutboundCompletedService delOutboundCompletedService;
     @Autowired
     private IDelSrmCostLogService delSrmCostLogService;
+    @SuppressWarnings({"all"})
+    @Autowired
+    private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
 
     @Override
     public int shipmentPacking(Long id) {
@@ -139,6 +144,34 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         || DelOutboundStateEnum.DELIVERED.getCode().equals(delOutbound.getState()))) {
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
                     return 0;
+                }
+                boolean isReturn = false;
+                // 查询 - 接收发货指令类型
+                if (StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
+                        && StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
+                    PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
+                    packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
+                    packageDeliveryConditions.setProductCode(delOutbound.getShipmentRule());
+                    R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                    PackageDeliveryConditions packageDeliveryConditionsRData = null;
+                    if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
+                        packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
+                    }
+                    if (null != packageDeliveryConditionsRData) {
+                        // 不接收发货指令：NotReceive
+                        // 出库测量后接收发货指令：AfterMeasured
+                        if (!"AfterMeasured".equals(packageDeliveryConditionsRData.getCommandNodeCode())) {
+                            // 不处理发货指令信息
+                            isReturn = true;
+                        }
+                    }
+                    /*else {
+                        throw new CommonException("500", "产品服务未配置，请联系管理员。仓库：" + delOutbound.getWarehouseCode() + "，产品代码：" + delOutbound.getShipmentRule());
+                    }*/
+                }
+                if (isReturn) {
+                    // 直接返回，不处理
+                    return 10;
                 }
                 DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
                 logger.info("(2)初始化上下文信息，timer:{}", timer.intervalRestart());
@@ -472,6 +505,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             }
         }
     }
+
     private void pushSrmCost(DelOutbound delOutbound) {
         // 请求体的内容异步填充
         DelSrmCostLog delSrmCostLog = new DelSrmCostLog();
