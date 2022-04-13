@@ -504,10 +504,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
     }
 
-    private void checkRefNo(DelOutboundDto dto) {
+    private void checkRefNo(DelOutboundDto dto, Long id) {
         if (StringUtils.isNotEmpty(dto.getRefNo())) {
             LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
             queryWrapper.eq(DelOutbound::getRefNo, dto.getRefNo());
+            if(id != null){
+                queryWrapper.ne(DelOutbound::getId, dto.getId());
+            }
             queryWrapper.ne(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
 
             List<DelOutbound> data = baseMapper.selectList(queryWrapper);
@@ -523,7 +526,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         if (StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)) {
             //单数据处理直接抛异常
-            this.checkRefNo(dto);
+            this.checkRefNo(dto, null);
         }
 
         // 创建出库单
@@ -534,7 +537,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             if (!StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)) {
                 //批量数据处理记录异常
-                this.checkRefNo(dto);
+                this.checkRefNo(dto, null);
             }
 
             DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
@@ -877,6 +880,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (null == delOutbound.getCodAmount()) {
             delOutbound.setCodAmount(BigDecimal.ZERO);
         }
+        //单数据处理直接抛异常
+        this.checkRefNo(dto, dto.getId());
+
         // 先取消冻结，再冻结
         // 取消冻结
         String orderNo = delOutbound.getOrderNo();
