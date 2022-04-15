@@ -1,5 +1,6 @@
 package com.szmsd.delivery.imported;
 
+import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -20,6 +21,9 @@ public class ImportResult implements Serializable {
 
     @ApiModelProperty(value = "导入提示信息")
     private List<ImportMessage> messageList;
+
+    @ApiModelProperty(value = "结果信息")
+    private List<DelOutboundAddResponse> resultList;
 
     public ImportResult() {
     }

@@ -213,6 +213,68 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
 
     @Override
     public int shipmentPackingMeasure(ShipmentPackingMaterialRequestDto dto) {
-        return this.delOutboundService.shipmentPacking(dto, null);
+        try {
+            LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+            String orderNo = dto.getOrderNo();
+            queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
+            DelOutbound delOutbound = this.delOutboundService.getOne(queryWrapper);
+            if (null == delOutbound) {
+                throw new CommonException("400", "单据不存在");
+            }
+            if (logger.isInfoEnabled()) {
+                logger.info("======出库单据信息：{}", delOutbound);
+            }
+            boolean overBreak = false;
+            String orderType = delOutbound.getOrderType();
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(orderType) && delOutbound.getIsLabelBox()) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("======批量出库，需要打印标签，查询附件信息");
+                }
+                // 判断是否需要上传箱标
+                // 批量出库，判断有没有上传箱标
+                BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
+                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                R<List<BasAttachment>> listR = this.attachmentService.list(basAttachmentQueryDTO);
+                if (logger.isInfoEnabled()) {
+                    logger.info("======查询附件信息：{}", listR);
+                }
+                if (null != listR && null != listR.getData()) {
+                    List<BasAttachment> attachmentList = listR.getData();
+                    if (CollectionUtils.isEmpty(attachmentList)) {
+                        // 箱标文件不存在，不再继续处理
+                        overBreak = true;
+                        // 发送箱标文件未上传的发货指令
+                        ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+                        shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                        shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+                        if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
+                            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+                        } else {
+                            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+                        }
+                        shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+                        shipmentUpdateRequestDto.setIsEx(true);
+                        shipmentUpdateRequestDto.setExType("OutboundIntercept");
+                        String exRemark = "发货指令异常，箱标文件未上传";
+                        shipmentUpdateRequestDto.setExRemark(exRemark);
+                        shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+                        this.htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+                    }
+                }
+            }
+            DelOutboundOperationLogEnum.OPN_CONTAINERS.listener(delOutbound);
+            // 更新包裹信息
+            this.delOutboundService.shipmentPacking(dto, null);
+            // 执行异步任务
+            if (!overBreak) {
+                // 增加出库单已取消记录，异步处理，定时任务
+                this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
+            }
+            return 1;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
     }
 }

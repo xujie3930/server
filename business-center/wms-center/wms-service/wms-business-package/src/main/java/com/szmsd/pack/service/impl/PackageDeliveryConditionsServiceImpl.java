@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.pack.domain.PackageDeliveryConditions;
 import com.szmsd.pack.dto.PackageDeliveryConditionsDTO;
@@ -71,6 +72,13 @@ public class PackageDeliveryConditionsServiceImpl extends ServiceImpl<PackageDel
      */
     @Override
     public int insertPackageDeliveryConditions(PackageDeliveryConditions packageDeliveryConditions) {
+        LambdaQueryWrapper<PackageDeliveryConditions> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(PackageDeliveryConditions::getWarehouseCode, packageDeliveryConditions.getWarehouseCode());
+        queryWrapper.eq(PackageDeliveryConditions::getProductCode, packageDeliveryConditions.getProductCode());
+        List<PackageDeliveryConditions> list = baseMapper.selectList(queryWrapper);
+        if(list.size() > 0){
+            throw new CommonException("400", "仓库代码+产品代码必须唯一");
+        }
         return baseMapper.insert(packageDeliveryConditions);
     }
 
@@ -82,6 +90,16 @@ public class PackageDeliveryConditionsServiceImpl extends ServiceImpl<PackageDel
      */
     @Override
     public int updatePackageDeliveryConditions(PackageDeliveryConditions packageDeliveryConditions) {
+
+
+        LambdaQueryWrapper<PackageDeliveryConditions> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.ne(PackageDeliveryConditions::getId, packageDeliveryConditions.getId());
+        queryWrapper.eq(PackageDeliveryConditions::getWarehouseCode, packageDeliveryConditions.getWarehouseCode());
+        queryWrapper.eq(PackageDeliveryConditions::getProductCode, packageDeliveryConditions.getProductCode());
+        List<PackageDeliveryConditions> list = baseMapper.selectList(queryWrapper);
+        if(list.size() > 0){
+            throw new CommonException("400", "仓库代码+产品代码必须唯一");
+        }
         return baseMapper.updateById(packageDeliveryConditions);
     }
 
