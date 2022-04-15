@@ -84,11 +84,11 @@ public class ReturnExpressClientController extends BaseController {
      * @return 返回结果
      */
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
-    @GetMapping("/page")
+    @PostMapping("/page")
     @AutoValue
     @ApiOperation(value = "退件单列表 - 分页")
-    public TableDataInfo<ReturnExpressListVO> page(@Validated ReturnExpressListQueryDTO queryDto) {
-        startPage();
+    public TableDataInfo<ReturnExpressListVO> page(@RequestBody @Validated ReturnExpressListQueryDTO queryDto) {
+        startPage(queryDto);
         List<ReturnExpressListVO> returnExpressListVOS = returnExpressService.selectClientReturnOrderList(queryDto);
         return getDataTable(returnExpressListVOS);
     }

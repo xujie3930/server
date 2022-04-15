@@ -82,10 +82,10 @@ public class ReturnExpressServerController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
     @AutoValue
-    @GetMapping("/page")
+    @PostMapping("/page")
     @ApiOperation(value = "退件单列表 - 分页")
-    public TableDataInfo<ReturnExpressListVO> page(@Validated ReturnExpressListQueryDTO queryDto) {
-        startPage();
+    public TableDataInfo<ReturnExpressListVO> page(@RequestBody @Validated ReturnExpressListQueryDTO queryDto) {
+        startPage(queryDto);
         return getDataTable(returnExpressService.selectReturnOrderList(queryDto));
     }
 
@@ -97,10 +97,10 @@ public class ReturnExpressServerController extends BaseController {
      */
     @AutoValue
     @PreAuthorize("@ss.hasPermi('ReturnExpressDetail:ReturnExpressDetail:list')")
-    @GetMapping("/noUserBind/page")
+    @PostMapping("/noUserBind/page")
     @ApiOperation(value = "无名件管理列表 - 分页")
-    public TableDataInfo<ReturnExpressListVO> pageForNoUserBind(@Validated ReturnExpressListQueryDTO queryDto) {
-        startPage();
+    public TableDataInfo<ReturnExpressListVO> pageForNoUserBind(@RequestBody @Validated ReturnExpressListQueryDTO queryDto) {
+        startPage(queryDto);
         return getDataTable(returnExpressService.pageForNoUserBind(queryDto));
     }
 

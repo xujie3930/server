@@ -3,7 +3,7 @@ package com.szmsd.returnex.dto;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.utils.StringToolkit;
-import com.szmsd.common.core.web.page.PageDomain;
+import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModelProperty;
 import jodd.util.StringUtil;
 import lombok.Data;
@@ -11,7 +11,6 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.Min;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +23,7 @@ import java.util.Optional;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-public class ReturnExpressListQueryDTO extends PageDomain {
+public class ReturnExpressListQueryDTO extends QueryDto {
 
     @Min(value = 0, message = "数据异常")
     @ApiModelProperty(value = "主键ID")
@@ -47,7 +46,7 @@ public class ReturnExpressListQueryDTO extends PageDomain {
                 .ifPresent(x -> this.sellerCodeList = StringToolkit.getCodeByArray(x));
     }
 
-    @ApiModelProperty(value = "客户代码", example = "UID123456", hidden = true)
+    @ApiModelProperty(value = "客户代码", example = "UID123456")
     @Excel(name = "客户代码")
     private List<String> sellerCodeList;
 
@@ -60,7 +59,7 @@ public class ReturnExpressListQueryDTO extends PageDomain {
                 .ifPresent(x -> this.forecastNumberList = StringToolkit.getCodeByArray(x));
     }
 
-    @ApiModelProperty(value = "预报单号", hidden = true)
+    @ApiModelProperty(value = "预报单号")
     private List<String> forecastNumberList;
 
     @ApiModelProperty(value = "处理号", example = "123,123")
@@ -72,7 +71,7 @@ public class ReturnExpressListQueryDTO extends PageDomain {
                 .ifPresent(x -> this.returnNoList = StringToolkit.getCodeByArray(x));
     }
 
-    @ApiModelProperty(value = "WMS处理单号", hidden = true)
+    @ApiModelProperty(value = "WMS处理单号")
     private List<String> returnNoList;
 
     @ApiModelProperty(value = "退件类型[ 自有库存退件 转运单退件 外部渠道退件]", example = "OWN_INVENTORY_RETURN")
