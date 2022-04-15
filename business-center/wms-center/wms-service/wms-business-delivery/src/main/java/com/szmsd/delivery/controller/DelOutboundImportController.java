@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -310,10 +311,25 @@ public class DelOutboundImportController extends BaseController {
             List<DelOutboundDto> dtoList = new DelOutboundPackageTransferImportContainer(dataList, countryList, packageConfirmList, detailList, sellerCode).get();
             // 批量新增
             List<DelOutboundAddResponse> outboundAddResponseList = this.delOutboundService.insertDelOutbounds(dtoList);
+            List<ImportMessage> messageList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(outboundAddResponseList)) {
+                int index = 1;
+                for (DelOutboundAddResponse outboundAddResponse : outboundAddResponseList) {
+                    if (!outboundAddResponse.getStatus()) {
+                        messageList.add(new ImportMessage(index, 1, "", outboundAddResponse.getMessage()));
+                    }
+                    index++;
+                }
+            }
             // 返回成功的结果
-            ImportResult buildSuccess = ImportResult.buildSuccess();
-            buildSuccess.setResultList(outboundAddResponseList);
-            return R.ok(buildSuccess);
+            ImportResult importResult2;
+            if (CollectionUtils.isNotEmpty(messageList)) {
+                importResult2 = ImportResult.buildFail(messageList);
+            } else {
+                importResult2 = ImportResult.buildSuccess();
+            }
+            importResult2.setResultList(outboundAddResponseList);
+            return R.ok(importResult2);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             // 返回失败的结果
