@@ -17,6 +17,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.imported.*;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -308,9 +309,11 @@ public class DelOutboundImportController extends BaseController {
             // 获取导入的数据
             List<DelOutboundDto> dtoList = new DelOutboundPackageTransferImportContainer(dataList, countryList, packageConfirmList, detailList, sellerCode).get();
             // 批量新增
-            this.delOutboundService.insertDelOutbounds(dtoList);
+            List<DelOutboundAddResponse> outboundAddResponseList = this.delOutboundService.insertDelOutbounds(dtoList);
             // 返回成功的结果
-            return R.ok(ImportResult.buildSuccess());
+            ImportResult buildSuccess = ImportResult.buildSuccess();
+            buildSuccess.setResultList(outboundAddResponseList);
+            return R.ok(buildSuccess);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             // 返回失败的结果
