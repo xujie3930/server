@@ -62,6 +62,8 @@ public class DelOutboundRetryLabelListener {
                     logger.info("(4)查询记录失败，id：{}", id);
                     return;
                 }
+                // 只推送标签
+                boolean pushLabel = "pushLabel".equals(retryLabel.getRemark());
                 logger.info("(5)查询记录成功，id：{}，state：{}，对象JSON：{}", id, retryLabel.getState(), JSON.toJSONString(retryLabel));
                 if ((DelOutboundRetryLabelStateEnum.WAIT.name().equals(retryLabel.getState())
                         || DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name().equals(retryLabel.getState())) || force) {
@@ -85,10 +87,12 @@ public class DelOutboundRetryLabelListener {
                             this.delOutboundBringVerifyService.htpShipmentLabel(delOutbound);
                             logger.info("(8)推送标签完成，id：{}", id);
                             // 发货指令
-                            this.delOutboundBringVerifyService.shipmentShipping(delOutbound);
-                            logger.info("(9)调用成功发货指令完成，id：{}", id);
-                            // 调用忽略异常信息的接口，异步处理
-                            this.delOutboundBringVerifyService.ignoreExceptionInfo(delOutbound.getOrderNo());
+                            if (!pushLabel) {
+                                this.delOutboundBringVerifyService.shipmentShipping(delOutbound);
+                                logger.info("(9)调用成功发货指令完成，id：{}", id);
+                                // 调用忽略异常信息的接口，异步处理
+                                this.delOutboundBringVerifyService.ignoreExceptionInfo(delOutbound.getOrderNo());
+                            }
                             state = DelOutboundRetryLabelStateEnum.SUCCESS.name();
                         } else {
                             throw new CommonException("999", "出库单：" + retryLabel.getOrderNo() + "，不存在");
@@ -106,8 +110,10 @@ public class DelOutboundRetryLabelListener {
                         if (failCount >= retryCount) {
                             state = DelOutboundRetryLabelStateEnum.FAIL.name();
                             // 发货指令
-                            this.delOutboundBringVerifyService.shipmentShippingEx(delOutbound, lastFailMessage);
-                            logger.info("(10)调用失败发货指令完成，id：{}", id);
+                            if (!pushLabel) {
+                                this.delOutboundBringVerifyService.shipmentShippingEx(delOutbound, lastFailMessage);
+                                logger.info("(10)调用失败发货指令完成，id：{}", id);
+                            }
                         } else {
                             state = DelOutboundRetryLabelStateEnum.FAIL_CONTINUE.name();
                             int t = retryTimeConfiguration[failCount];

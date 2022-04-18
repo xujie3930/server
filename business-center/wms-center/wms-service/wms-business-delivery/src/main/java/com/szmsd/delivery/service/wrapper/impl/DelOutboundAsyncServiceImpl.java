@@ -105,6 +105,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     @SuppressWarnings({"all"})
     @Autowired
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
+    @Autowired
+    private IDelOutboundRetryLabelService delOutboundRetryLabelService;
 
     @Override
     public int shipmentPacking(Long id) {
@@ -196,6 +198,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         orderNoList.add(delOutbound.getOrderNo());
                         this.delOutboundCompletedService.add(orderNoList, DelOutboundOperationTypeEnum.SHIPPED.getCode());
                     }
+                    // 提交一个获取标签的任务
+                    delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo());
                     logger.info("(3)完成操作，timer:{}", timer.intervalRestart());
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);

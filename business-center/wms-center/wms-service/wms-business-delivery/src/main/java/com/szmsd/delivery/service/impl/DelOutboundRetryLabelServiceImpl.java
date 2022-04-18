@@ -21,4 +21,17 @@ public class DelOutboundRetryLabelServiceImpl extends ServiceImpl<DelOutboundRet
         retryLabel.setNextRetryTime(new Date());
         this.save(retryLabel);
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void saveAndPushLabel(String orderNo) {
+        DelOutboundRetryLabel retryLabel = new DelOutboundRetryLabel();
+        retryLabel.setOrderNo(orderNo);
+        retryLabel.setNextRetryTime(new Date());
+        /*
+         * 只推送标签，不执行发货指令
+         */
+        retryLabel.setRemark("pushLabel");
+        this.save(retryLabel);
+    }
 }
