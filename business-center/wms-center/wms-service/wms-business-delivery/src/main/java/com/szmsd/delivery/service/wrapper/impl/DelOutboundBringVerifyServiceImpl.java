@@ -1042,7 +1042,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setIsFirst(delOutbound.getIsFirst());
         createShipmentRequestDto.setNewSKU(delOutbound.getNewSku());
         // 查询发货条件
-        /*if (StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
+        if (StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
                 && StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
             PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
             packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
@@ -1062,10 +1062,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 // 上下文值传递
                 delOutboundWrapperContext.setTaskConfigInfo(taskConfigInfo);
             }
-            else {
+            /*else {
                 throw new CommonException("500", "产品服务未配置，请联系管理员。仓库：" + delOutbound.getWarehouseCode() + "，产品代码：" + delOutbound.getShipmentRule());
-            }
-        }*/
+            }*/
+        }
         // 批量出口增加装箱要求
         if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
             List<DelOutboundPackingVO> packingList = this.delOutboundPackingService.listByOrderNo(delOutbound.getOrderNo(), DelOutboundPackingTypeConstant.TYPE_1);
