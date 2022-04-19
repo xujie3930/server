@@ -14,6 +14,7 @@ import com.szmsd.delivery.event.DelCk1RequestLogEvent;
 import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
+import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.ApplicationContainer;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
@@ -52,6 +53,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
     private RedissonClient redissonClient;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
+    @Autowired
+    private IDelOutboundRetryLabelService delOutboundRetryLabelService;
 
     @Override
     public void bringVerifyAsync(String orderNo) {
@@ -181,6 +184,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 // 增加出库单已取消记录，异步处理，定时任务
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
+            // 提交一个获取标签的任务
+            delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo());
             logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
             // 回滚操作
