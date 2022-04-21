@@ -31,6 +31,7 @@ import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.http.dto.TaskConfigInfo;
 import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -145,9 +146,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
                     return 0;
                 }
-                boolean isReturn = false;
+                // 获取发货计划条件
+                TaskConfigInfo taskConfigInfo1 = TaskConfigInfoAdapter.getTaskConfigInfo(delOutbound.getOrderType());
+                String receiveShippingType = "";
                 // 查询 - 接收发货指令类型
-                if (StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
+                if (null == taskConfigInfo1
+                        && StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
                         && StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
                     PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
                     packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
@@ -158,19 +162,18 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
                     }
                     if (null != packageDeliveryConditionsRData) {
-                        // 不接收发货指令：NotReceive
-                        // 出库测量后接收发货指令：AfterMeasured
-                        if (!"AfterMeasured".equals(packageDeliveryConditionsRData.getCommandNodeCode())) {
-                            // 不处理发货指令信息
-                            isReturn = true;
-                        }
+                        receiveShippingType = packageDeliveryConditionsRData.getCommandNodeCode();
                     }
                     /*else {
                         throw new CommonException("500", "产品服务未配置，请联系管理员。仓库：" + delOutbound.getWarehouseCode() + "，产品代码：" + delOutbound.getShipmentRule());
                     }*/
+                } else if (null != taskConfigInfo1) {
+                    receiveShippingType = taskConfigInfo1.getReceiveShippingType();
                 }
-                if (isReturn) {
-                    // 直接返回，不处理
+                // 不接收发货指令：NotReceive
+                // 出库测量后接收发货指令：AfterMeasured
+                if (!"AfterMeasured".equals(receiveShippingType)) {
+                    // 不处理发货指令信息
                     return 10;
                 }
                 DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
