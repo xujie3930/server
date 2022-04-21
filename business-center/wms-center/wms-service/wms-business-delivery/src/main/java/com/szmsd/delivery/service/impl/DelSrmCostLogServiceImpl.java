@@ -184,7 +184,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
     private String processForRoute(DelOutbound delOutbound, DelSrmCostDetail delSrmCostDetail) {
 
         AnalysisInfo httpRequestDto = new AnalysisInfo()
-                .setService(delOutbound.getSupplierCalcId())
+                .setRouteId(delOutbound.getSupplierCalcId())
                 .setRefNo(delOutbound.getOrderNo())
                 .setWarehouseCode(delOutbound.getWarehouseCode()).setStartNode(delOutbound.getWarehouseCode());
 
