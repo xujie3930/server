@@ -139,6 +139,17 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
         List<DelOutboundBringVerifyVO> resultList = new ArrayList<>();
         for (DelOutbound delOutbound : delOutboundList) {
+            if(StringUtils.isNotBlank(delOutbound.getShipmentRule())){
+                PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
+                packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
+                packageDeliveryConditions.setProductCode(delOutbound.getShipmentRule());
+                R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                if(packageDeliveryConditionsR != null && packageDeliveryConditionsR.getCode() == 200){
+                    if(packageDeliveryConditionsR.getData() == null || !"1".equals(packageDeliveryConditionsR.getData().getStatus())){
+                        throw new CommonException("400", delOutbound.getShipmentRule()+ "物流服务未生效");
+                    }
+                }
+            }
             try {
                 if (Objects.isNull(delOutbound)) {
                     throw new CommonException("400", "单据不存在");
