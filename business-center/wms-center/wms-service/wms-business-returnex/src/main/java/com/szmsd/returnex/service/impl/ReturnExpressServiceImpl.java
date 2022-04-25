@@ -942,7 +942,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         // 查询
         String expectedNo = returnExpressClientImportBO.getExpectedNo();
         ReturnExpressVO infoByNo = getInfo(expectedNo);
-        if (infoByNo == null) return "预报单：" + expectedNo + "不存在";
+        if (infoByNo == null) return "预报单：" + expectedNo + "已提交过处理方式，请勿再次提交";
 
         ReturnExpressClientImportBaseDTO baseDTO = returnExpressClientImportBO.getBaseDTO();
         String processTypeStr = baseDTO.getProcessTypeStr();
