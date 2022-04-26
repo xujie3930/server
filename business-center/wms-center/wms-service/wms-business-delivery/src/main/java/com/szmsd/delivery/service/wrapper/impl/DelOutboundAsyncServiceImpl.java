@@ -146,6 +146,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
                     return 0;
                 }
+                logger.info("(1.1.1)开始获取发货计划相关信息，单号：{}", delOutbound.getOrderNo());
                 // 获取发货计划条件
                 TaskConfigInfo taskConfigInfo1 = TaskConfigInfoAdapter.getTaskConfigInfo(delOutbound.getOrderType());
                 String receiveShippingType = "";
@@ -170,10 +171,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 } else if (null != taskConfigInfo1) {
                     receiveShippingType = taskConfigInfo1.getReceiveShippingType();
                 }
+                logger.info("(1.1.2)发货计划结果，单号：{}，结果：{}", delOutbound.getOrderNo(), receiveShippingType);
                 // 不接收发货指令：NotReceive
                 // 出库测量后接收发货指令：AfterMeasured
                 if (!"AfterMeasured".equals(receiveShippingType)) {
                     // 不处理发货指令信息
+                    logger.info("(1.1.3)发货计划条件，不处理发货指令信息，单号：{}", delOutbound.getOrderNo());
                     return 10;
                 }
                 DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
