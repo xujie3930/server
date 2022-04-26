@@ -174,7 +174,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 logger.info("(1.1.2)发货计划结果，单号：{}，结果：{}", delOutbound.getOrderNo(), receiveShippingType);
                 // 不接收发货指令：NotReceive
                 // 出库测量后接收发货指令：AfterMeasured
-                if (!"AfterMeasured".equals(receiveShippingType)) {
+                if ("NotReceive".equals(receiveShippingType)) {
                     // 不处理发货指令信息
                     logger.info("(1.1.3)发货计划条件，不处理发货指令信息，单号：{}", delOutbound.getOrderNo());
                     return 10;
