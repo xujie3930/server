@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -19,6 +20,7 @@ import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.IDelSrmCostDetailService;
 import com.szmsd.delivery.service.IDelSrmCostLogService;
+import com.szmsd.http.api.feign.HtpWarMappingFeignService;
 import com.szmsd.http.api.service.IHtpSrmClientService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.*;
@@ -33,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +64,8 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
     private IDelSrmCostDetailService delSrmCostDetailService;
     @Autowired
     private IDelOutboundAddressService delOutboundAddressService;
+    @Resource
+    private HtpWarMappingFeignService htpWarMappingFeignService;
     //                                            0   1   2   3   4   5   6   7   8    9    10   11
     private final int[] retryTimeConfiguration = {30, 30, 60, 60, 60, 60, 60, 60, 180, 180, 180, 180};
     public static final int retryCount = 10;
@@ -105,11 +110,18 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
      * @param delSrmCostDetail
      */
     private String processForService(DelOutbound delOutbound, DelSrmCostDetail delSrmCostDetail) {
+        String warehouseCode = delOutbound.getWarehouseCode();
+        R<String> r = this.htpWarMappingFeignService.getMappingWarCode(delOutbound.getWarehouseCode());
+        if(r.getCode() == 200){
+            warehouseCode = r.getData();
+        }else{
+            log.error("ck1仓库代码映射获取时失败:"+delOutbound.getWarehouseCode()+",msg:"+r.getMsg());
+        }
 
         AnalysisInfo httpRequestDto = new AnalysisInfo()
         .setService(delOutbound.getSupplierCalcId())
         .setRefNo(delOutbound.getOrderNo())
-        .setWarehouseCode(delOutbound.getWarehouseCode()).setStartNode(delOutbound.getWarehouseCode());
+        .setWarehouseCode(warehouseCode).setStartNode(warehouseCode);
 
 
         // 包裹
@@ -182,11 +194,17 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
      * @param delSrmCostDetail
      */
     private String processForRoute(DelOutbound delOutbound, DelSrmCostDetail delSrmCostDetail) {
-
+        String warehouseCode = delOutbound.getWarehouseCode();
+        R<String> r = this.htpWarMappingFeignService.getMappingWarCode(delOutbound.getWarehouseCode());
+        if(r.getCode() == 200){
+            warehouseCode = r.getData();
+        }else{
+            log.error("ck1仓库代码映射获取时失败:"+delOutbound.getWarehouseCode()+",msg:"+r.getMsg());
+        }
         AnalysisInfo httpRequestDto = new AnalysisInfo()
                 .setRouteId(delOutbound.getSupplierCalcId())
                 .setRefNo(delOutbound.getOrderNo())
-                .setWarehouseCode(delOutbound.getWarehouseCode()).setStartNode(delOutbound.getWarehouseCode());
+                .setWarehouseCode(warehouseCode).setStartNode(warehouseCode);
 
 
         // 包裹
