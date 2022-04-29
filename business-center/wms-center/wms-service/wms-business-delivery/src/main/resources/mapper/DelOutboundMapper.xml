@@ -152,6 +152,8 @@
             o.exception_message,
             o.cod_amount,
             o.remark,
+            o.tracking_status,
+            o.tracking_description,
             o.ioss
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no

@@ -14,6 +14,8 @@ public interface ExportContext {
      */
     String getStateName(String state);
 
+    String getTrackingStatusName(String state);
+
     /**
      * 获取仓库名称
      *
