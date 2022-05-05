@@ -122,6 +122,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
         .setService(delOutbound.getSupplierCalcId())
         .setRefNo(delOutbound.getOrderNo())
         .setWarehouseCode(warehouseCode).setStartNode(warehouseCode);
+        log.error("processForService计算时原仓库代码:"+delOutbound.getWarehouseCode()+",转换后仓库代码:"+warehouseCode);
 
 
         // 包裹
@@ -156,7 +157,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
 
         OperationResultOfChargeWrapperOfPricingChargeInfo httpResponseVO = htpSrmClientService.pricingService(httpRequestDto);
 
-        if (httpResponseVO.getSucceeded() && httpResponseVO.getData() != null){
+        if (httpResponseVO.getSucceeded()  != null && httpResponseVO.getSucceeded() && httpResponseVO.getData() != null){
             ChargeWrapperOfPricingChargeInfo data = httpResponseVO.getData();
 
             if(data.getData() != null){
@@ -206,6 +207,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                 .setRefNo(delOutbound.getOrderNo())
                 .setWarehouseCode(warehouseCode).setStartNode(warehouseCode);
 
+        log.error("processForRoute计算时原仓库代码:"+delOutbound.getWarehouseCode()+",转换后仓库代码:"+warehouseCode);
 
         // 包裹
         AnalysisInfoPackageInfo packages = new AnalysisInfoPackageInfo();
@@ -240,7 +242,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
 
         OperationResultOfAnalysisRouteResult httpResponseVO = htpSrmClientService.routePathRoute(httpRequestDto);
 
-        if (httpResponseVO.getSucceeded() && httpResponseVO.getData() != null && httpResponseVO.getData().getLinks().size() > 0){
+        if (httpResponseVO.getSucceeded() != null && httpResponseVO.getSucceeded() && httpResponseVO.getData() != null && httpResponseVO.getData().getLinks().size() > 0){
             ChargeWrapperOfPricingChargeInfo data = httpResponseVO.getData().getLinks().get(0).getChargeModel();
 
             if(data.getData() != null){
