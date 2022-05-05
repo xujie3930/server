@@ -15,6 +15,12 @@ public class TrackAnalysisRequestDto {
     @ApiModelProperty("结束时间")
     private String endTime;
 
+    @ApiModelProperty("轨迹开始时间")
+    private String trackingStartTime;
+
+    @ApiModelProperty("轨迹结束时间")
+    private String trackingEndTime;
+
     @ApiModelProperty(value = "发货服务")
     private String shipmentService;
 

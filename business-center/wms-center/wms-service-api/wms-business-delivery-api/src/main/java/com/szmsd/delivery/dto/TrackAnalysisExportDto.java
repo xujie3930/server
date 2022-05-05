@@ -33,10 +33,23 @@ public class TrackAnalysisExportDto {
     @Excel(name = "轨迹状态")
     private String trackingStatus;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @Excel(name = "最新轨迹时间")
-    private String latestTrackTime;
+    private Date latestTrackTime;
 
     @Excel(name = "最新轨迹信息")
     private String latestTrackInfo;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Excel(name = "发货时间")
+    private Date shipmentsTime;
+
+    @Excel(name = "发货天数")
+    private Long shipmentsDays;
+
+    @Excel(name = "轨迹天数")
+    private Long trackDays;
+
+    @Excel(name = "轨迹备注")
+    private String trackRemark;
 }
