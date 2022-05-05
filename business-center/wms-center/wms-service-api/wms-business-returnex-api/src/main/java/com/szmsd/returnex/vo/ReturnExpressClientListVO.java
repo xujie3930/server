@@ -1,5 +1,6 @@
 package com.szmsd.returnex.vo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.bas.plugin.BasSubCodeCommonParameter;
@@ -61,9 +62,22 @@ public class ReturnExpressClientListVO implements Serializable {
     @Excel(name = "完成时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "完成时间")
     private LocalDateTime finishTime;
+    @Excel(name = "退回原因")
+    @ApiModelProperty(value = "备注(退回原因)")
+    private String processRemark;
+    @ApiModelProperty(value = "新出库单号 改发处理号")
+    @Excel(name = "改发处理号")
+    private String fromOrderNoNew;
+    @ApiModelProperty(value = "新物流跟踪号 改发跟踪号")
+    @Excel(name = "改发跟踪号")
+    private String scanCodeNew;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @ApiModelProperty(value = "截止时间")
-    @Excel(name = "截止时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "处理时间")
+    @Excel(name = "处理时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date processTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "过期时间")
+    @Excel(name = "过期时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date expireTime;
     @Excel(name = "是否逾期", readConverterExp = "0=否,1=是")
     @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.YN)
@@ -76,6 +90,7 @@ public class ReturnExpressClientListVO implements Serializable {
     @Excel(name = "备注")
     @ApiModelProperty(value = "备注")
     private String remark;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

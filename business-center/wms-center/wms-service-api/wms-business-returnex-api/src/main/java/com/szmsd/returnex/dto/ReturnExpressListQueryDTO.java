@@ -121,6 +121,18 @@ public class ReturnExpressListQueryDTO extends QueryDto {
     @Excel(name = "退件单号")
     private List<String> fromOrderNoList;
 
+    @ApiModelProperty(value = "refNo")
+    private String refNo;
+
+    public void setRefNo(String refNo) {
+        this.refNo = refNo;
+        Optional.ofNullable(refNo).filter(StringUtil::isNotBlank)
+                .ifPresent(x -> this.refNoList = StringToolkit.getCodeByArray(x));
+    }
+
+    @ApiModelProperty(value = "refNo")
+    private List<String> refNoList;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

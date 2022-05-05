@@ -105,6 +105,9 @@ public class ReturnExpressAddDTO implements Serializable, BOConvert {
     @ApiModelProperty(value = "商品sku列表数据")
     private List<ReturnExpressGoodAddDTO> goodList;
 
+    @ExcelIgnore
+    @ApiModelProperty(value = "refNo")
+    private String refNo;
 
     @Override
     public String toString() {

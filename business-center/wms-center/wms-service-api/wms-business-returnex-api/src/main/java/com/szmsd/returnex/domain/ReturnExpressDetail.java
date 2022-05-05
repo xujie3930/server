@@ -157,6 +157,9 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     @Excel(name = "新物流跟踪号")
     private String scanCodeNew;
 
+    @ApiModelProperty(value = "refNo")
+    private String refNo;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
