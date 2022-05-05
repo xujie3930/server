@@ -2,6 +2,9 @@ package com.szmsd.delivery.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -100,5 +103,12 @@ public class DelOutboundExportListVO implements Serializable {
 
     @ExcelProperty(value = {"备注", "Remark"})
     private String remark;
+
+    @ExcelProperty(value = {"轨迹状态", "Track state"})
+    private String trackingStatusName;
+
+    @ExcelProperty(value = {"轨迹信息描述", "Latest track"})
+    private String trackingDescription;
+
 
 }

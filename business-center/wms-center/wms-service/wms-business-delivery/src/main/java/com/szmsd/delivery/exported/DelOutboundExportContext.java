@@ -28,6 +28,8 @@ public class DelOutboundExportContext implements ExportContext {
     private final CacheContext<String, String> exceptionStateCache;
     private final BasRegionFeignService basRegionFeignService;
     private final CacheContext<String, String> countryCache;
+    private final CacheContext<String, String> trackingStatusCache;
+
     private final Lock countryLock;
     private String len;
 
@@ -41,6 +43,7 @@ public class DelOutboundExportContext implements ExportContext {
         this.exceptionStateCache = new CacheContext.MapCacheContext<>();
         this.countryCache = new CacheContext.MapCacheContext<>();
         this.countryLock = new ReentrantLock();
+        this.trackingStatusCache = new CacheContext.MapCacheContext<>();
         if(len != null && len.length > 0){
             this.len = len[0];
         }
@@ -62,6 +65,9 @@ public class DelOutboundExportContext implements ExportContext {
         }
     }
 
+    public void setTrackingStatusCache(List<BasSubWrapperVO> list) {
+        this.setBySubValue(this.trackingStatusCache, list);
+    }
     public void setStateCacheAdapter(List<BasSubWrapperVO> list) {
         this.setBySubValue(this.stateCache, list);
     }
@@ -77,6 +83,11 @@ public class DelOutboundExportContext implements ExportContext {
     @Override
     public String getStateName(String state) {
         return this.stateCache.get(state);
+    }
+
+    @Override
+    public String getTrackingStatusName(String trackingStatus) {
+        return this.trackingStatusCache.get(trackingStatus);
     }
 
     @Override

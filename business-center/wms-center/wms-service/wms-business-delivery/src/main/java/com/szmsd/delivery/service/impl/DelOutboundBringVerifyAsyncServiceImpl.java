@@ -201,7 +201,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
             // 异步错误在单据里面会显示错误信息
             this.logger.error("(4)提审异步操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
             // 抛出异常
-            throw e;
+            // 这里是异步执行，不抛出异常
+            // throw e;
         } finally {
             if (isAsyncThread) {
                 asyncThreadObject.unloadTid();

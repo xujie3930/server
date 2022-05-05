@@ -1,5 +1,6 @@
 package com.szmsd.delivery.dto;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -99,4 +100,11 @@ public class DelOutboundExportListDto implements Serializable {
 
     @ApiModelProperty(value = "ioss")
     private String ioss;
+
+
+    @ApiModelProperty(value = "轨迹状态")
+    private String trackingStatus;
+
+    @ApiModelProperty(value = "轨迹信息描述")
+    private String trackingDescription;
 }
