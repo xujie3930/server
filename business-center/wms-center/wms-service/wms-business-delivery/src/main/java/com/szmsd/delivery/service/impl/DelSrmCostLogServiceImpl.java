@@ -122,7 +122,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
         .setService(delOutbound.getSupplierCalcId())
         .setRefNo(delOutbound.getOrderNo())
         .setWarehouseCode(warehouseCode).setStartNode(warehouseCode);
-        log.error("processForService计算时原仓库代码:"+delOutbound.getWarehouseCode()+",转换后仓库代码:"+warehouseCode);
+        logger.info("processForService计算时原仓库代码:"+delOutbound.getWarehouseCode()+",转换后仓库代码:"+warehouseCode);
 
 
         // 包裹
@@ -207,7 +207,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                 .setRefNo(delOutbound.getOrderNo())
                 .setWarehouseCode(warehouseCode).setStartNode(warehouseCode);
 
-        log.error("processForRoute计算时原仓库代码:"+delOutbound.getWarehouseCode()+",转换后仓库代码:"+warehouseCode);
+        logger.info("processForRoute计算时原仓库代码:"+delOutbound.getWarehouseCode()+",转换后仓库代码:"+warehouseCode);
 
         // 包裹
         AnalysisInfoPackageInfo packages = new AnalysisInfoPackageInfo();
@@ -297,6 +297,7 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                         throw new RuntimeException("单号不存在系统"+delSrmCostLog.getOrderNo());
                     }
 
+                    logger.info("开始计算成本数据"+type+"："+JSON.toJSONString(delOutbound));
 
                     if(type == DelSrmCostLogEnum.Type.create){
 

@@ -30,7 +30,6 @@ public class DelTyRequestLogTimer {
     private RedissonClient redissonClient;
     @Autowired
     private IDelTyRequestLogService delTyRequestLogService;
-
     /**
      * ty接口请求
      * <p/>
