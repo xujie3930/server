@@ -117,7 +117,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         int result = iInventoryInspectionMapper.updateById(map);
         if (1 == map.getStatus()) {
             List<String> skuList = list.stream().map(InventoryInspectionDetails::getSku).collect(Collectors.toList());
-            AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(map.getWarehouseCode(), skuList, null);
+            AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(map.getWarehouseCode(), skuList, skuList);
             R<ResponseVO> response = htpBasFeignService.inspection(addSkuInspectionRequest);
             if (response.getCode() != 200) {
                 map.setErrorCode(response.getCode());
