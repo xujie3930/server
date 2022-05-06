@@ -20,6 +20,7 @@ import com.szmsd.delivery.dto.TrackAnalysisRequestDto;
 import com.szmsd.delivery.dto.TrackingYeeTraceDto;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.mapper.DelTrackMapper;
+import com.szmsd.delivery.service.IDelTrackRemarkService;
 import com.szmsd.delivery.service.IDelTrackService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.PricedProductInServiceCriteria;
@@ -31,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,6 +65,12 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
     @Autowired
     private PackageCollectionFeignService packageCollectionFeignService;
+
+    @Autowired
+    private IDelTrackRemarkService trackRemarkService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 查询模块
@@ -348,6 +356,13 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             if (latestTrackTime != null) {
                 data.setTrackDays(DateUtil.betweenDay(latestTrackTime,now,  true));
             }
+
+            // 设置轨迹备注  直接读取redis缓存
+            Object remarkObj = redisTemplate.opsForHash().get(DelTrackRemarkServiceImpl.TRACK_REMARK_KEY, data.getLatestTrackInfo());
+            if (remarkObj != null) {
+                data.setTrackRemark((String)remarkObj);
+            }
+
             // 设置物流状态中文
             subList.forEach((k, v) -> {
                 if (v.equalsIgnoreCase(data.getTrackingStatus())) {
