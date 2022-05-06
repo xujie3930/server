@@ -26,4 +26,7 @@ public class InboundInventoryInspectionDTO {
     @ApiModelProperty(value = "入库sku")
     private List<String> skus;
 
+    @ApiModelProperty(value = "检查属性sku")
+    private List<String> skuAttributeInspectionDetails;
+
 }

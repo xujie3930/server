@@ -39,7 +39,7 @@ public interface BasSellerFeignService {
      * @return
      */
     @PostMapping(value = "/bas/seller/getInspection")
-    R<String> getInspection(@RequestBody String sellerCode);
+    R<String[]> getInspection(@RequestBody String sellerCode);
 
     @PostMapping("/bas/seller/queryByServiceCondition")
     R<List<String>> queryByServiceCondition(@RequestBody ServiceConditionDto conditionDto);

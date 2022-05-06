@@ -27,9 +27,15 @@ public class AddSkuInspectionRequest {
      */
     private List<String> details;
 
-    public AddSkuInspectionRequest(String warehouseCode, List<String> details) {
+    /**
+     * 检查Sku属性
+     */
+    private List<String> skuAttributeInspectionDetails;
+
+    public AddSkuInspectionRequest(String warehouseCode, List<String> details, List<String> skuAttributeInspectionDetails) {
         this.warehouseCode = warehouseCode;
         this.details = details;
+        this.skuAttributeInspectionDetails = skuAttributeInspectionDetails;
     }
 
 }

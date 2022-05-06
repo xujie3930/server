@@ -149,9 +149,14 @@ public class BasSeller extends BaseEntity {
     @Excel(name = "性别 F 女 M 男")
     private String sex;
 
-    @ApiModelProperty(value = "验货要求")
-    @Excel(name = "验货要求")
+    @ApiModelProperty(value = "是否验重量尺寸")
+    @Excel(name = "是否验重量尺寸")
     private String inspectionRequirement;
+
+
+    @ApiModelProperty(value = "是否验属性")
+    @Excel(name = "是否验属性")
+    private String inspectionAttribute;
 
     @ApiModelProperty(value = "真实姓名")
     @Excel(name = "真实姓名")

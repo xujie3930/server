@@ -492,11 +492,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
     }
 
     @Override
-    public String getInspection(String sellerCode){
+    public String[] getInspection(String sellerCode){
         QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seller_code",sellerCode);
         BasSeller seller = super.getOne(queryWrapper);
-        return seller.getInspectionRequirement();
+        return new String[]{seller.getInspectionRequirement(), seller.getInspectionAttribute()};
     }
         /**
         * 删除模块信息

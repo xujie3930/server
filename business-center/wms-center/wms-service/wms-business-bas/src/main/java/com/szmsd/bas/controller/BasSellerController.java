@@ -86,7 +86,7 @@ public class BasSellerController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:list')")
     @PostMapping("/getInspection")
     @ApiOperation(value = "查询验货要求",notes = "查询验货要求")
-    public R<String> getInspection(@RequestBody String sellerCode)
+    public R<String[]> getInspection(@RequestBody String sellerCode)
     {
         R r = new R();
         r.setCode(200);

@@ -117,7 +117,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         int result = iInventoryInspectionMapper.updateById(map);
         if (1 == map.getStatus()) {
             List<String> skuList = list.stream().map(InventoryInspectionDetails::getSku).collect(Collectors.toList());
-            AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(map.getWarehouseCode(), skuList);
+            AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(map.getWarehouseCode(), skuList, null);
             R<ResponseVO> response = htpBasFeignService.inspection(addSkuInspectionRequest);
             if (response.getCode() != 200) {
                 map.setErrorCode(response.getCode());
@@ -126,6 +126,20 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
             }
         }
         return result;
+    }
+
+    private List<String> getNewSkuReq(InboundInventoryInspectionDTO dto){
+        List<String> skus = dto.getSkus();
+        List<String> skuList = new ArrayList<>();
+        for (String sku : skus) {
+            LambdaQueryWrapper<Inventory> query = Wrappers.lambdaQuery();
+            query.eq(Inventory::getSku, sku);
+            int count = inventoryService.count(query);
+            if (count == 0) { // 入库的SKU在库存表里不存在为新SKU
+                skuList.add(sku);
+            }
+        }
+        return skus;
     }
 
     /**
@@ -137,13 +151,44 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
     @Transactional
     @Override
     public boolean inboundInventory(InboundInventoryInspectionDTO dto) {
-        R<String> result = basSellerFeignService.getInspection(dto.getCusCode());
+        R<String[]> result = basSellerFeignService.getInspection(dto.getCusCode());
         if (result.getCode() != 200) {
             log.error("inboundInventory() code:{} message: {}", result.getMsg(), result.getMsg());
             return false;
         }
-        String data = result.getData();
-        if (data == null)  return true;
+        String[] data = result.getData();
+        if (data == null || data[0] == null && data[1] == null)  return true;
+
+
+
+        List<String> skuList = null;
+        List<String> skuAttributeInspectionDetails = null;
+
+        //是否验重量尺寸
+        if (InventoryInspectionEnum.NEW_SKU_REQ.getCode().equals(data[0])) {
+            skuList = getNewSkuReq(dto);
+            if(skuList.size() > 0){
+                skuList = null;
+            }
+        } else if(InventoryInspectionEnum.ALL_REQ.getCode().equals(data[0])){
+            skuList = dto.getSkus();
+        }
+
+        //是否验属性
+        if (InventoryInspectionEnum.NEW_SKU_REQ.getCode().equals(data[1])) {
+            skuAttributeInspectionDetails = getNewSkuReq(dto);
+            if(skuAttributeInspectionDetails.size() > 0){
+                skuAttributeInspectionDetails = null;
+            }
+        } else if(InventoryInspectionEnum.ALL_REQ.getCode().equals(data[1])){
+            skuAttributeInspectionDetails = dto.getSkus();
+        }
+
+        if(skuList != null || skuAttributeInspectionDetails != null){
+            return createInventory(dto);
+
+        }
+/*
         if (InventoryInspectionEnum.NO_REQ.getCode().equals(data)) return true;
 
         if (InventoryInspectionEnum.NEW_SKU_REQ.getCode().equals(data)) {
@@ -165,8 +210,11 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         // 入库必验
         if (InventoryInspectionEnum.ALL_REQ.getCode().equals(data)) {
             return createInventory(dto);
-        }
-        log.info("客户{} 验货级别未找到{}",dto.getCusCode(),data);
+        }*/
+//        log.info("客户{} 验货级别未找到{}",dto.getCusCode(),data);
+
+        log.info("客户{} 无需要验货{}",dto.getCusCode(), data == null ? null : data[0] + ";" + data[1]);
+
         return true;
     }
 
@@ -184,7 +232,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
                 .map(sku -> new InventoryInspectionDetailsDTO(sku, dto.getWarehouseCode(), dto.getCusCode())).collect(Collectors.toList());
 
         this.saveDetails(inventoryInspectionDetailsDTO, inspectionNo);
-        AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(dto.getWarehouseCode(), dto.getWarehouseNo(), dto.getSkus());
+        AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(dto.getWarehouseCode(), dto.getWarehouseNo(), dto.getSkus(), dto.getSkuAttributeInspectionDetails());
         R<ResponseVO> response = htpBasFeignService.inspection(addSkuInspectionRequest);
         if (response.getCode() != 200) {
             inventoryInspection.setErrorCode(response.getCode());
