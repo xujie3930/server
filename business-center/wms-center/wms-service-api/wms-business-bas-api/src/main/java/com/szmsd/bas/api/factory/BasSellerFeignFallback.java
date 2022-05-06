@@ -35,7 +35,7 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
             }
 
             @Override
-            public R<String> getInspection(@RequestBody String sellerCode) {
+            public R<String[]> getInspection(@RequestBody String sellerCode) {
                 return R.convertResultJson(throwable);
             }
 
