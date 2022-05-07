@@ -52,4 +52,5 @@ public class DelOutboundListExceptionMessageExportVO implements Serializable {
 
     @ApiModelProperty(value = "邮箱")
     private String email;
+
 }

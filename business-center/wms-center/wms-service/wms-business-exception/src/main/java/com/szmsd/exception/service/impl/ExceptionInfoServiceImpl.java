@@ -321,6 +321,8 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             addressDto.setCountryCode(countryCode);
             addressDto.setCountry(dto.getCountry());
             addressDto.setPostCode(dto.getPostCode());
+            addressDto.setPhoneNo(dto.getPhoneNo());
+            addressDto.setEmail(dto.getEmail());
             trackingNoDto.setAddress(addressDto);
             int i = this.delOutboundClientService.againTrackingNo(trackingNoDto);
             if (i != 1) {
