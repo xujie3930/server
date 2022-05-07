@@ -183,6 +183,8 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         } else if(InventoryInspectionEnum.ALL_REQ.getCode().equals(data[1])){
             skuAttributeInspectionDetails = dto.getSkus();
         }
+        dto.setSkus(skuList);
+        dto.setSkuAttributeInspectionDetails(skuAttributeInspectionDetails);
 
         if(skuList != null || skuAttributeInspectionDetails != null){
             return createInventory(dto);
