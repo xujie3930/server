@@ -1,5 +1,7 @@
 package com.szmsd.delivery.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelTrackRemark;
 import com.szmsd.delivery.mapper.DelTrackRemarkMapper;
 import com.szmsd.delivery.service.IDelTrackRemarkService;
@@ -50,8 +52,10 @@ public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper,
      */
     @Override
     public List<DelTrackRemark> selectDelTrackRemarkList(DelTrackRemark delTrackRemark) {
-        QueryWrapper<DelTrackRemark> where = new QueryWrapper<DelTrackRemark>();
-        where.orderByDesc("id");
+        LambdaQueryWrapper<DelTrackRemark> where = new LambdaQueryWrapper<DelTrackRemark>();
+        where.like(StringUtils.isNotBlank(delTrackRemark.getTrackDescription()), DelTrackRemark::getTrackDescription, delTrackRemark.getTrackDescription());
+        where.like(StringUtils.isNotBlank(delTrackRemark.getTrackRemark()), DelTrackRemark::getTrackRemark, delTrackRemark.getTrackRemark());
+        where.orderByDesc(DelTrackRemark::getId);
         return baseMapper.selectList(where);
     }
 
