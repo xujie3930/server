@@ -61,6 +61,11 @@ public class BaseProductFeignFallback implements FallbackFactory<BaseProductFeig
             }
 
             @Override
+            public R attribute(EtSkuAttributeRequest etSkuAttributeRequest) {
+                return null;
+            }
+
+            @Override
             public R<List<String>> listProductAttribute(BaseProductConditionQueryDto conditionQueryDto) {
                 return R.convertResultJson(throwable);
             }

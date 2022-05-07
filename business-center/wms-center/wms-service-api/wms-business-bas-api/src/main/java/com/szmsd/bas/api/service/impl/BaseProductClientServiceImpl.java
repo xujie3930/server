@@ -4,10 +4,7 @@ import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.constant.ShipmentType;
 import com.szmsd.bas.domain.BaseProduct;
-import com.szmsd.bas.dto.BaseProductConditionQueryDto;
-import com.szmsd.bas.dto.BaseProductDto;
-import com.szmsd.bas.dto.BaseProductQueryDto;
-import com.szmsd.bas.dto.MeasuringProductRequest;
+import com.szmsd.bas.dto.*;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -73,5 +70,10 @@ public class BaseProductClientServiceImpl implements BaseProductClientService {
     @Override
     public List<BaseProduct> queryProductList(BaseProductConditionQueryDto conditionQueryDto) {
         return R.getDataAndException(this.baseProductFeignService.queryProductList(conditionQueryDto));
+    }
+
+    @Override
+    public R attribute(EtSkuAttributeRequest etSkuAttributeRequest) {
+        return this.baseProductFeignService.attribute(etSkuAttributeRequest);
     }
 }

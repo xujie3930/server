@@ -155,5 +155,7 @@ public interface IBaseProductService extends IService<BaseProduct> {
     List<BaseProduct> queryProductList(BaseProductConditionQueryDto conditionQueryDto);
 
     String importMultipleTicket(MultipartFile file);
+
+    void attribute(EtSkuAttributeRequest etSkuAttributeRequest);
 }
 

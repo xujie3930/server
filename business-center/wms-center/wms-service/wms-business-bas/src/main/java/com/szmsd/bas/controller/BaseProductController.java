@@ -244,6 +244,16 @@ public class BaseProductController extends BaseController {
         return R.ok();
     }
 
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:attribute')")
+    @PostMapping("/attribute")
+    @ApiOperation(value = "et验收sku属性", notes = "et验收sku属性")
+    public R attribute(@RequestBody EtSkuAttributeRequest etSkuAttributeRequest) {
+        baseProductService.attribute(etSkuAttributeRequest);
+        return R.ok();
+    }
+
+
     @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:list')")
     @PostMapping("/listSku")
     @ApiOperation(value = "查询列表", notes = "查询列表")

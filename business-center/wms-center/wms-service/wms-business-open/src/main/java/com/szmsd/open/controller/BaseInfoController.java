@@ -5,6 +5,7 @@ import com.szmsd.bas.api.service.BasePackingClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.dto.AddWarehouseRequest;
 import com.szmsd.bas.dto.CreatePackingRequest;
+import com.szmsd.bas.dto.EtSkuAttributeRequest;
 import com.szmsd.bas.dto.MeasuringProductRequest;
 import com.szmsd.chargerules.api.service.SpecialOperationClientService;
 import com.szmsd.chargerules.dto.BasSpecialOperationRequestDTO;
@@ -48,6 +49,13 @@ public class BaseInfoController extends BaseController {
     @ApiOperation(value = "#A2 产品（SKU）测量")
     public ResponseVO measuringProduct(@RequestBody @Validated MeasuringProductRequest measuringProductRequest) {
         R.getDataAndException(baseProductClientService.measuringProduct(measuringProductRequest));
+        return ResponseVO.ok();
+    }
+
+    @PostMapping("/product/attribute")
+    @ApiOperation(value = "et验收sku属性")
+    public ResponseVO attribute(@RequestBody @Validated EtSkuAttributeRequest etSkuAttributeRequest) {
+        R.getDataAndException(baseProductClientService.attribute(etSkuAttributeRequest));
         return ResponseVO.ok();
     }
 

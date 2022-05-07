@@ -66,6 +66,10 @@ public interface BaseProductFeignService {
     @PostMapping(value = "/base/product/measuring")
     R measuringProduct(@RequestBody MeasuringProductRequest measuringProductRequest);
 
+
+    @PostMapping(value = "/base/product/attribute")
+    R attribute(@RequestBody EtSkuAttributeRequest etSkuAttributeRequest) ;
+
     /**
      * 根据sku返回产品属性
      *

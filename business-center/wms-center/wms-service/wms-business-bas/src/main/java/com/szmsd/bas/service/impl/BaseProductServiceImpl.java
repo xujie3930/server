@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
@@ -21,6 +22,7 @@ import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BaseProductMapper;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.service.IBasSerialNumberService;
 import com.szmsd.bas.service.IBasePackingService;
@@ -105,6 +107,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     private CkThreadPool ckThreadPool;
     @Resource
     private HtpRmiFeignService htpRmiFeignService;
+    @Autowired
+    private BasSubClientService basSubClientService;
 
     /**
      * 查询模块
@@ -261,6 +265,49 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         AssertUtil.isTrue(StringUtils.isBlank(result.getT2()), result.getT2());
 
     }
+
+    @Override
+    public void attribute(EtSkuAttributeRequest etSkuAttributeRequest) {
+
+        java.util.Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("059");
+        java.util.Map<String, String> map059 = new HashMap();
+        if(listMap.get("059") != null){
+            map059 = listMap.get("059").stream()
+                    .collect(Collectors.toMap(BasSubWrapperVO::getSubName,
+                            BasSubWrapperVO:: getSubValue, (v1, v2) -> v1));
+        }
+
+        log.info("et验收sku属性: {}", etSkuAttributeRequest);
+        QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("code", etSkuAttributeRequest.getSku());
+        if (super.count(queryWrapper) < 1) {
+            throw new BaseException("sku不存在");
+        }
+        String operationOn = etSkuAttributeRequest.getOperateOn();
+        BaseProduct baseProduct = new BaseProduct();
+        if (StringUtils.isNotEmpty(operationOn)) {
+            try {
+                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date date = df.parse(operationOn);
+                baseProduct.setOperateOn(date);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        baseProduct.setOperator(etSkuAttributeRequest.getOperator());
+
+        if(!map059.containsKey(etSkuAttributeRequest.getSkuAttribute())){
+            throw new BaseException("sku属性不存在"+etSkuAttributeRequest.getSkuAttribute());
+        }
+        baseProduct.setProductAttribute(map059.get(etSkuAttributeRequest.getSkuAttribute()));
+        baseProduct.setProductAttributeName(etSkuAttributeRequest.getSkuAttribute());
+
+        UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("code", etSkuAttributeRequest.getSku());
+        super.update(baseProduct, updateWrapper);
+    }
+
 
     @Override
     public void measuringProduct(MeasuringProductRequest request) {

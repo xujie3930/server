@@ -1,10 +1,7 @@
 package com.szmsd.bas.api.service;
 
 import com.szmsd.bas.domain.BaseProduct;
-import com.szmsd.bas.dto.BaseProductConditionQueryDto;
-import com.szmsd.bas.dto.BaseProductDto;
-import com.szmsd.bas.dto.BaseProductQueryDto;
-import com.szmsd.bas.dto.MeasuringProductRequest;
+import com.szmsd.bas.dto.*;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.ApiOperation;
@@ -68,4 +65,6 @@ public interface BaseProductClientService {
      * @return BaseProduct
      */
     List<BaseProduct> queryProductList(BaseProductConditionQueryDto conditionQueryDto);
+
+    R attribute(EtSkuAttributeRequest etSkuAttributeRequest);
 }
