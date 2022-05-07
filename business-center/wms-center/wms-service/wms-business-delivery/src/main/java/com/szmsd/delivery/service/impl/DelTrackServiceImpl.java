@@ -388,14 +388,13 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             if (requestDto.getDateType() == 1) {
                 wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()), "a.create_time", DateUtils.parseDate(requestDto.getStartTime()));
                 wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()), "a.create_time", DateUtils.parseDate(requestDto.getEndTime()));
-            } else {
+            } else if (requestDto.getDateType() == 2) {
                 wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()), "a.shipments_time", DateUtils.parseDate(requestDto.getStartTime()));
                 wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()), "a.shipments_time", DateUtils.parseDate(requestDto.getEndTime()));
+            } else if (requestDto.getDateType() == 3) {
+                wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()), "b.tracking_time", DateUtils.parseDate(requestDto.getStartTime()));
+                wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()), "b.tracking_time", DateUtils.parseDate(requestDto.getEndTime()));
             }
-        }
-        if (StringUtils.isNotBlank(requestDto.getTrackingStartTime()) || StringUtils.isNotBlank(requestDto.getTrackingEndTime())){
-            wrapper.ge(StringUtils.isNotBlank(requestDto.getTrackingStartTime()), "b.tracking_time", DateUtils.parseDate(requestDto.getTrackingStartTime()));
-            wrapper.le(StringUtils.isNotBlank(requestDto.getTrackingEndTime()), "b.tracking_time", DateUtils.parseDate(requestDto.getTrackingEndTime()));
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (null != loginUser) {
