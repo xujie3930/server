@@ -252,6 +252,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @param returnExpressAddDTO
      */
     public void setRefNoByOrderNo(ReturnExpressAddDTO returnExpressAddDTO) {
+        if (StringUtils.isNotBlank(returnExpressAddDTO.getRefNo())) return;
         DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
         delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
         TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);

@@ -110,6 +110,12 @@
                     #{rno}
                 </foreach>
             </if>
+            <if test="cm.refNoList != null and cm.refNoList.size() >0 ">
+                and ref_no in
+                <foreach collection="cm.refNoList" open="(" close=")" separator="," item="no">
+                    #{no}
+                </foreach>
+            </if>
         </where>
         order by id DESC
     </select>
