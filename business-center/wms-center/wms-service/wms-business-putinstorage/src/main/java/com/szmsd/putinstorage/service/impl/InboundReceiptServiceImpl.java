@@ -744,7 +744,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                     remoteComponent.createTracking(createInboundReceiptDTO);
                 }
                 this.updateByWarehouseNo(inboundReceipt);
-                this.inbound(inboundReceiptInfoVO);
+//                this.inbound(inboundReceiptInfoVO);
             } catch (Exception e) {
                 log.error(e.getMessage());
                 sb.append(e.getMessage().replace("运行时异常", warehouseNo));

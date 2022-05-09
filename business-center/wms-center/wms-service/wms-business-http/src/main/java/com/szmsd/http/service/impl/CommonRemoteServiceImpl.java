@@ -18,6 +18,10 @@ import com.szmsd.http.mapper.CommonScanMapper;
 import com.szmsd.http.service.ICommonRemoteService;
 import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
+import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
+import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -55,6 +59,28 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
     private IInboundService iInboundService;
     @Resource
     private BaseProductFeignService baseProductFeignService;
+    @Resource
+    private InventoryInspectionFeignService inventoryInspectionFeignService;
+
+    /** 入库单审核 根据客户配置的验货状态生成验货单
+ *
+         * @param inboundReceiptInfoVO inboundReceiptInfoVO
+ */
+    private void inbound(CreateReceiptRequest inboundReceiptInfoVO) {
+        // 集运入库不验货
+        if (!"Collection".equals(inboundReceiptInfoVO.getOrderType())) {
+            List<ReceiptDetailInfo> inboundReceiptDetails = inboundReceiptInfoVO.getDetails();
+            if (inboundReceiptDetails != null && inboundReceiptDetails.size() > 0) {
+                InboundInventoryInspectionDTO dto = new InboundInventoryInspectionDTO();
+                dto.setCusCode(inboundReceiptInfoVO.getSellerCode());
+                dto.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
+                dto.setWarehouseNo(inboundReceiptInfoVO.getRefOrderNo());
+                List<String> collect = inboundReceiptDetails.stream().map(ReceiptDetailInfo::getSku).collect(Collectors.toList());
+                dto.setSkus(collect);
+                inventoryInspectionFeignService.inbound(dto);
+            }
+        }
+    }
 
     /**
      * 实际 单线程 执行任务
@@ -114,6 +140,8 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
                                 List<String> skuNeedPushList = createReceiptRequest.getDetails().stream().map(ReceiptDetailInfo::getSku).collect(Collectors.toList());
                                 skuNeedPushList.forEach(x -> baseProductFeignService.rePushBaseProduct(x));
                             }
+                            //验货属性
+                            this.inbound(createReceiptRequest);
                         } else if (StringUtils.isNotBlank(requestUri) && requestUri.contains("tracking")) {
                             CreateTrackRequest createTrackRequest = JSONObject.parseObject(oneTask.getRequestParams(), CreateTrackRequest.class);
                             log.info("【WMS】SYNC 【入库单物流跟踪创建】-{}", createTrackRequest);
