@@ -167,7 +167,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         //是否验重量尺寸
         if (InventoryInspectionEnum.NEW_SKU_REQ.getCode().equals(data[0])) {
             skuList = getNewSkuReq(dto);
-            if(skuList.size() > 0){
+            if(skuAttributeInspectionDetails.size() == 0){
                 skuList = null;
             }
         } else if(InventoryInspectionEnum.ALL_REQ.getCode().equals(data[0])){
@@ -177,7 +177,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         //是否验属性
         if (InventoryInspectionEnum.NEW_SKU_REQ.getCode().equals(data[1])) {
             skuAttributeInspectionDetails = getNewSkuReq(dto);
-            if(skuAttributeInspectionDetails.size() > 0){
+            if(skuAttributeInspectionDetails.size() == 0){
                 skuAttributeInspectionDetails = null;
             }
         } else if(InventoryInspectionEnum.ALL_REQ.getCode().equals(data[1])){

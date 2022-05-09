@@ -273,8 +273,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         java.util.Map<String, String> map059 = new HashMap();
         if(listMap.get("059") != null){
             map059 = listMap.get("059").stream()
-                    .collect(Collectors.toMap(BasSubWrapperVO::getSubName,
-                            BasSubWrapperVO:: getSubValue, (v1, v2) -> v1));
+                    .collect(Collectors.toMap(BasSubWrapperVO::getSubValue,
+                            BasSubWrapperVO:: getSubName, (v1, v2) -> v1));
         }
 
         log.info("et验收sku属性: {}", etSkuAttributeRequest);
@@ -300,8 +300,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         if(!map059.containsKey(etSkuAttributeRequest.getSkuAttribute())){
             throw new BaseException("sku属性不存在"+etSkuAttributeRequest.getSkuAttribute());
         }
-        baseProduct.setProductAttribute(map059.get(etSkuAttributeRequest.getSkuAttribute()));
-        baseProduct.setProductAttributeName(etSkuAttributeRequest.getSkuAttribute());
+        baseProduct.setProductAttribute(etSkuAttributeRequest.getSkuAttribute());
+        baseProduct.setProductAttributeName(map059.get(etSkuAttributeRequest.getSkuAttribute()));
 
         UpdateWrapper<BaseProduct> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("code", etSkuAttributeRequest.getSku());
