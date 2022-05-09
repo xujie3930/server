@@ -230,9 +230,16 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         InventoryInspection inventoryInspection = new InventoryInspection();
         String inspectionNo = setInventoryInspection(dto, inventoryInspection);
 
-        List<InventoryInspectionDetailsDTO> inventoryInspectionDetailsDTO = dto.getSkus().stream()
-                .map(sku -> new InventoryInspectionDetailsDTO(sku, dto.getWarehouseCode(), dto.getCusCode())).collect(Collectors.toList());
+        List<InventoryInspectionDetailsDTO> inventoryInspectionDetailsDTO = new ArrayList<InventoryInspectionDetailsDTO>();
 
+        if(dto.getSkus() != null){
+            inventoryInspectionDetailsDTO.addAll(dto.getSkus().stream()
+                    .map(sku -> new InventoryInspectionDetailsDTO(sku, dto.getWarehouseCode(), dto.getCusCode())).collect(Collectors.toList()));
+        }
+        if(dto.getSkuAttributeInspectionDetails() != null){
+            inventoryInspectionDetailsDTO.addAll(dto.getSkuAttributeInspectionDetails().stream()
+                    .map(sku -> new InventoryInspectionDetailsDTO(sku, dto.getWarehouseCode(), dto.getCusCode())).collect(Collectors.toList()));
+        }
         this.saveDetails(inventoryInspectionDetailsDTO, inspectionNo);
         AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(dto.getWarehouseCode(), dto.getWarehouseNo(), dto.getSkus(), dto.getSkuAttributeInspectionDetails());
         R<ResponseVO> response = htpBasFeignService.inspection(addSkuInspectionRequest);

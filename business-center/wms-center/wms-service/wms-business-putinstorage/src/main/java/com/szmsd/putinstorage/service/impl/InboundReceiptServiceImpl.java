@@ -755,27 +755,6 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     }
 
     /**
-     * 入库单审核 根据客户配置的验货状态生成验货单
-     *
-     * @param inboundReceiptInfoVO inboundReceiptInfoVO
-     */
-    private void inbound(InboundReceiptInfoVO inboundReceiptInfoVO) {
-        // 集运入库不验货
-        if (!StringUtils.equals("Collection", inboundReceiptInfoVO.getOrderType())) {
-            List<InboundReceiptDetailVO> inboundReceiptDetails = inboundReceiptInfoVO.getInboundReceiptDetails();
-            if (inboundReceiptDetails != null && inboundReceiptDetails.size() > 0) {
-                InboundInventoryInspectionDTO dto = new InboundInventoryInspectionDTO();
-                dto.setCusCode(inboundReceiptInfoVO.getCusCode());
-                dto.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
-                dto.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
-                List<String> collect = inboundReceiptInfoVO.getInboundReceiptDetails().stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.toList());
-                dto.setSkus(collect);
-                inventoryInspectionFeignService.inbound(dto);
-            }
-        }
-    }
-
-    /**
      * 删除入库单 物理删除
      *
      * @param warehouseNo
