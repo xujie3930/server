@@ -183,7 +183,8 @@ public class ReturnExpressVO {
     @ApiModelProperty(value = "新物流跟踪号")
     @Excel(name = "新物流跟踪号")
     private String scanCodeNew;
-
+    @ApiModelProperty(value = "refNo")
+    private String refNo;
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

@@ -146,6 +146,10 @@ public class ReturnExpressListVO implements Serializable {
 
     @ApiModelProperty(value = "目的仓库名称")
     private String warehouseCode;
+
+    @ApiModelProperty(value = "refNo")
+    private String refNo;
+
     @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "目的仓库名称", hidden = true)
     private String warehouseCodeStr;

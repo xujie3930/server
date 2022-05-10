@@ -164,9 +164,8 @@
         SELECT <include refid="Column_List_Export_VO"/>
         FROM inbound_receipt t , inbound_receipt_detail t2 WHERE t.warehouse_no = t2.warehouse_no
         <include refid="selectListWhere"/>
-
-        <if test="exportIdIndex != null"> LIMIT #{exportIdIndex},100</if>
-        ORDER BY t.`status`
+        ORDER BY t.id
+        <if test="exportIdIndex != null"> LIMIT #{exportIdIndex},500</if>
     </select>
     <select id="statistics" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultMap="InboundCountVO">
         SELECT t.cus_code, DATE_FORMAT(t.create_time, '%Y-%m-%d') group_by, COUNT(1) count, COUNT(total_put_qty) count2 FROM inbound_receipt t

@@ -49,6 +49,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -401,42 +403,51 @@ public class InboundReceiptController extends BaseController {
             excelWriter = EasyExcel.write(outputStream).build();
             WriteSheet build1 = EasyExcel.writerSheet(0, sheetName1).head(inboundReceiptExportHead()).build();
             WriteSheet build2 = EasyExcel.writerSheet(1, sheetName2).head(inboundTrackingExportHead()).build();
-
-            long i = 0;
+            long start = System.currentTimeMillis();
             while ((list = iInboundReceiptService.selectExport(queryDTO)).size() != 0) {
-                i++;
+                log.info("查询时间1---" + (System.currentTimeMillis() - start));
                 Long exportIdIndex = queryDTO.getExportIdIndex();
-                queryDTO.setExportIdIndex(exportIdIndex + (100L * i));
+                queryDTO.setExportIdIndex(exportIdIndex + (500L));
+                List<InboundReceiptExportVO> finalList = list;
+                CompletableFuture<List<InboundTrackingExportVO>> listCompletableFuture = CompletableFuture.supplyAsync(() -> {
+                    List<String> orderNoList = finalList.stream().map(InboundReceiptExportVO::getWarehouseNo).collect(Collectors.toList());
+                    List<InboundTrackingExportVO> inboundTrackingVOS = iInboundTrackingService.selectInboundTrackingList(orderNoList);
+                    Map<String, List<InboundTrackingExportVO>> trackingNumberMap = inboundTrackingVOS.stream().collect(Collectors.groupingBy(InboundTrackingExportVO::getOrderNo));
+                    finalList.forEach(x -> {
+                        List<String> thisTrackingNumList = StringToolkit.getCodeByArray(x.getDeliveryNo());
+                        if (CollectionUtils.isEmpty(thisTrackingNumList)) thisTrackingNumList = new ArrayList<>();
+                        List<InboundTrackingExportVO> inboundTrackingVOS1 = trackingNumberMap.get(x.getWarehouseNo());
+                        if (CollectionUtils.isEmpty(inboundTrackingVOS1)) inboundTrackingVOS1 = new ArrayList<>();
+                        List<String> collect = inboundTrackingVOS1.stream().map(InboundTrackingExportVO::getTrackingNumber).collect(Collectors.toList());
+                        // 去除已完成的单 把未完成的拼接上去
+                        thisTrackingNumList.removeAll(collect);
+                        List<InboundTrackingExportVO> notArrivedList = thisTrackingNumList.stream().map(tr -> {
+                            InboundTrackingExportVO inboundTrackingVO = new InboundTrackingExportVO();
+                            inboundTrackingVO.setOrderNo(x.getWarehouseNo());
+                            inboundTrackingVO.setTrackingNumber(tr);
+                            inboundTrackingVO.setReceiptStatus("未到货");
+                            return inboundTrackingVO;
+                        }).collect(Collectors.toList());
+                        inboundTrackingVOS.addAll(notArrivedList);
+
+
+                    });
+                    return inboundTrackingVOS;
+                });
                 // 写sheet 1
                 excelWriter.write(list, build1);
-
-                List<String> orderNoList = list.stream().map(InboundReceiptExportVO::getWarehouseNo).collect(Collectors.toList());
-                List<InboundTrackingExportVO> inboundTrackingVOS = iInboundTrackingService.selectInboundTrackingList(orderNoList);
-                Map<String, List<InboundTrackingExportVO>> trackingNumberMap = inboundTrackingVOS.stream().collect(Collectors.groupingBy(InboundTrackingExportVO::getOrderNo));
-                list.forEach(x -> {
-                    List<String> thisTrackingNumList = StringToolkit.getCodeByArray(x.getDeliveryNo());
-                    if (CollectionUtils.isEmpty(thisTrackingNumList)) thisTrackingNumList = new ArrayList<>();
-                    List<InboundTrackingExportVO> inboundTrackingVOS1 = trackingNumberMap.get(x.getWarehouseNo());
-                    if (CollectionUtils.isEmpty(inboundTrackingVOS1)) inboundTrackingVOS1 = new ArrayList<>();
-                    List<String> collect = inboundTrackingVOS1.stream().map(InboundTrackingExportVO::getTrackingNumber).collect(Collectors.toList());
-                    // 去除已完成的单 把未完成的拼接上去
-                    thisTrackingNumList.removeAll(collect);
-                    List<InboundTrackingExportVO> notArrivedList = thisTrackingNumList.stream().map(tr -> {
-                        InboundTrackingExportVO inboundTrackingVO = new InboundTrackingExportVO();
-                        inboundTrackingVO.setOrderNo(x.getWarehouseNo());
-                        inboundTrackingVO.setTrackingNumber(tr);
-                        inboundTrackingVO.setReceiptStatus("未到货");
-                        return inboundTrackingVO;
-                    }).collect(Collectors.toList());
-                    inboundTrackingVOS.addAll(notArrivedList);
-                });
+                log.info("查询时间2---" + (System.currentTimeMillis() - start));
+                List<InboundTrackingExportVO> inboundTrackingExportVOS = listCompletableFuture.get();
+                log.info("查询时间3---" + (System.currentTimeMillis() - start));
                 // 写sheet 2
-                excelWriter.write(inboundTrackingVOS, build2);
+                excelWriter.write(inboundTrackingExportVOS, build2);
+                log.info("查询时间4---" + (System.currentTimeMillis() - start));
             }
-
+            log.info("查询时间5---" + (System.currentTimeMillis() - start));
             excelWriter.finish();
             outputStream.flush();
-        } catch (IOException e) {
+            log.info("查询时间5---" + (System.currentTimeMillis() - start));
+        } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         } finally {

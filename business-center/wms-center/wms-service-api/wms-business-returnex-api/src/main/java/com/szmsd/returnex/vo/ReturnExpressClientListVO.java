@@ -90,7 +90,8 @@ public class ReturnExpressClientListVO implements Serializable {
     @Excel(name = "备注")
     @ApiModelProperty(value = "备注")
     private String remark;
-
+    @ApiModelProperty(value = "refNo")
+    private String refNo;
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

@@ -44,6 +44,7 @@
                 update_by_name,
                 update_time,
                 remark,
+                ref_no,
             id, create_by, update_by, del_flag, version, sku, seller_code, from_order_no, scan_code, expected_no, return_no, process_type, process_type_str, return_type, return_type_str, return_channel, warehouse_code, warehouse_code_str, apply_process_method, apply_process_method_str, arrival_time, finish_time, expire_time, process_time, customer_remark, from_order_no_new, scan_code_new, overdue, process_remark, return_source, return_source_str, deal_status, deal_status_str
     </sql>
 

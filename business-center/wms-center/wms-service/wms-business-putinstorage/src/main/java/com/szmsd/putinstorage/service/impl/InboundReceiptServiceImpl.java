@@ -791,8 +791,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             queryDTO.setWarehouseNoList(Stream.of(warehouseNoSplit, warehouseNoList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
         }
         List<InboundReceiptExportVO> inboundReceiptExportVOS = baseMapper.selectExport(queryDTO);
-        List<InboundReceiptExportVO> serialize = ObjectMapperUtils.serialize(inboundReceiptExportVOS);
-        return BeanMapperUtil.mapList(serialize, InboundReceiptExportVO.class);
+        return inboundReceiptExportVOS;
+        /*List<InboundReceiptExportVO> serialize = ObjectMapperUtils.serialize(inboundReceiptExportVOS);
+        return BeanMapperUtil.mapList(serialize, InboundReceiptExportVO.class);*/
     }
 
     /**
