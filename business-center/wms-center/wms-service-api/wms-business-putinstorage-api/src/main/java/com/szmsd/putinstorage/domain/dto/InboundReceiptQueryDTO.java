@@ -91,4 +91,7 @@ public class InboundReceiptQueryDTO extends QueryDto {
         private String field;
     }
 
+    @ApiModelProperty(value = "导出id")
+    private Long exportIdIndex;
+
 }
