@@ -139,7 +139,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
                 skuList.add(sku);
             }
         }
-        return skus;
+        return skuList;
     }
 
     /**
