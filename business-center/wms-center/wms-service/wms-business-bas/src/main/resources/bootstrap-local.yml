@@ -15,3 +15,11 @@ spring:
         shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
         namespace: 368e9206-ab53-4fed-917e-4ba93c39136c
         group: DEFAULT_GROUP
+
+shopify:
+  app:
+    clientId: 068d53f1f7c5e7f57c36436e96545678
+    clientSecret: 2d68bfaaa40cbbda541bf948219e5a8e
+    oauthAuthorize: "https://{shop}.myshopify.com/admin/oauth/authorize?client_id={api_key}&scope={scopes}&redirect_uri={redirect_uri}&state={nonce}&grant_options[]={access_mode}"
+    scope: "read_orders,write_orders,read_locations,read_shipping,write_shipping"
+    redirectUri: "https://web-customer-1.dsloco.com/login"

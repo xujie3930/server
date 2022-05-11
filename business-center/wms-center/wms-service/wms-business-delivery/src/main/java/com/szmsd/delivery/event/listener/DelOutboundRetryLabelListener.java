@@ -90,9 +90,9 @@ public class DelOutboundRetryLabelListener {
                             if (!pushLabel) {
                                 this.delOutboundBringVerifyService.shipmentShipping(delOutbound);
                                 logger.info("(9)调用成功发货指令完成，id：{}", id);
-                                // 调用忽略异常信息的接口，异步处理
-                                this.delOutboundBringVerifyService.ignoreExceptionInfo(delOutbound.getOrderNo());
                             }
+                            // 调用忽略异常信息的接口，异步处理
+                            this.delOutboundBringVerifyService.ignoreExceptionInfo(delOutbound.getOrderNo());
                             state = DelOutboundRetryLabelStateEnum.SUCCESS.name();
                         } else {
                             throw new CommonException("999", "出库单：" + retryLabel.getOrderNo() + "，不存在");

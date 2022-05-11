@@ -1,12 +1,21 @@
 # Tomcat
-server: 
+server:
   port: 9200
 
 # Spring
-spring: 
+spring:
   application:
     # 应用名称
     name: szmsd-auth
   profiles:
     # 环境配置
     active: dev
+
+# 第三方认证
+third:
+  authentication:
+    values:
+      - applicationName: wms-business-bas
+        url: /bas-shopify-helper/login
+        httpMethod: POST
+        matcher: shopify
