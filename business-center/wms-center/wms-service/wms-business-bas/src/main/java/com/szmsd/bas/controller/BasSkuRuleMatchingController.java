@@ -57,14 +57,14 @@ public class BasSkuRuleMatchingController extends BaseController{
       public TableDataInfo list(BasSkuRuleMatching basSkuRuleMatching)
      {
 
-         /*LoginUser loginUser = SecurityUtils.getLoginUser();
+         LoginUser loginUser = SecurityUtils.getLoginUser();
          if (null == loginUser) {
              throw new CommonException("500", "非法的操作");
          }
          // 获取登录用户的客户编码
          String sellerCode = loginUser.getSellerCode();
 
-         basSkuRuleMatching.setSellerCode(sellerCode);*/
+         basSkuRuleMatching.setSellerCode(sellerCode);
          basSkuRuleMatching.setSystemType(SkuRuleMatchingEnum.SHOPIFY.getCode());
 
             List<BasSkuRuleMatching> list = basSkuRuleMatchingService.selectBasSkuRuleMatchingList(basSkuRuleMatching);

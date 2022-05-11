@@ -70,12 +70,12 @@ public class BasSkuRuleMatchingServiceImpl extends ServiceImpl<BasSkuRuleMatchin
         public List<BasSkuRuleMatching> selectBasSkuRuleMatchingList(BasSkuRuleMatching basSkuRuleMatching)
         {
             QueryWrapper<BasSkuRuleMatching> queryWrapper = new QueryWrapper<BasSkuRuleMatching>();
-            queryWrapper.select("source_sku,GROUP_CONCAT(oms_sku) oms_sku");
+            queryWrapper.select("seller_code,source_sku,GROUP_CONCAT(oms_sku) oms_sku");
             QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", basSkuRuleMatching.getSellerCode());
             QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "system_type", basSkuRuleMatching.getSystemType());
             QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "source_sku", basSkuRuleMatching.getSourceSku());
 
-            queryWrapper.groupBy("source_sku");
+            queryWrapper.groupBy("seller_code,source_sku");
             return baseMapper.selectList(queryWrapper);
         }
 
