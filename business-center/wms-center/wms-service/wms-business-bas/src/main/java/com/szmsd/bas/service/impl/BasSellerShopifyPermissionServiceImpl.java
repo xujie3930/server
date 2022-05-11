@@ -79,7 +79,7 @@ public class BasSellerShopifyPermissionServiceImpl extends ServiceImpl<BasSeller
             try {
                 String body = bodyJsonObject.toJSONString();
                 responseBody = HttpUtil.post(url, body);
-                logger.info("请求shopify获取access_token，url: {}, body: {}", url, body);
+                logger.info("请求shopify获取access_token，url: {}, body: {}, responseBody: {}", url, body, responseBody);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
