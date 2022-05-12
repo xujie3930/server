@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service.wrapper;
 
 import cn.hutool.core.codec.Base64;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
@@ -265,13 +266,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.SKU);
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            logger.info("{}-Pricing计算返回结果：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(responseObject));
             if (null == responseObject) {
                 // 返回值是空的
                 throw new CommonException("400", "计算包裹费用失败");
             } else {
                 // 判断返回值
                 if (responseObject.isSuccess()) {
-                    DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
                     // 计算成功了
                     ChargeWrapper chargeWrapper = responseObject.getObject();
                     ShipmentChargeInfo data = chargeWrapper.getData();

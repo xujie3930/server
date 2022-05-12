@@ -111,7 +111,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
      * @see com.szmsd.delivery.service.wrapper.BringVerifyEnum
      */
     BRV_PRC_PRICING {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},长宽高:{2}*{3}*{4},计费重:{5} {6},费用:{7} {8}");
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},长宽高:{2}*{3}*{4},计费重:{5} {6},费用:{7} {8},发货规则:{9}");
 
         @Override
         public String getType() {
@@ -123,7 +123,8 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight(),
                     delOutbound.getCalcWeight(), delOutbound.getCalcWeightUnit(),
-                    delOutbound.getAmount(), delOutbound.getCurrencyCode()};
+                    delOutbound.getAmount(), delOutbound.getCurrencyCode(),
+                    delOutbound.getProductShipmentRule()};
             return format.format(arguments);
         }
     },
@@ -143,7 +144,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
     },
     BRV_PRODUCT_INFO {
-        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},产品代码(发货规则):{2},结果@挂号获取方式:{3},发货服务名称:{4},临时产品编码:{5}");
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},产品代码(发货规则):{2}【发货规则：{6}】,结果@挂号获取方式:{3},发货服务名称:{4},临时产品编码:{5}");
 
         @Override
         public String getType() {
@@ -156,7 +157,8 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
                     delOutbound.getShipmentRule(),
                     delOutbound.getTrackingAcquireType(),
                     delOutbound.getShipmentService(),
-                    delOutbound.getPrcProductCode()};
+                    delOutbound.getPrcProductCode(),
+                    delOutbound.getProductShipmentRule()};
             return format.format(arguments);
         }
     },
