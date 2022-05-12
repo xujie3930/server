@@ -26,6 +26,12 @@ public class ShipmentChargeInfo implements Serializable {
     // 挂号服务
     private String logisticsRouteId;
 
+    // 发货规则
+    private String shipmentRule;
+
+    // 装箱规则
+    private String packingRule;
+
     // 物流商code
     private String logisticsProviderCode;
 

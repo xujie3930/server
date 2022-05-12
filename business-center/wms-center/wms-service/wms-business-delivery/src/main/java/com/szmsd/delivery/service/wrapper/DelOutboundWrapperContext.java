@@ -28,6 +28,8 @@ public class DelOutboundWrapperContext implements ApplicationContext {
     private boolean shipmentShipping;
     // 发货条件
     private TaskConfigInfo taskConfigInfo;
+    // 临时传值字段
+    private String prcProductCode;
 
     public DelOutboundWrapperContext() {
     }
@@ -117,5 +119,13 @@ public class DelOutboundWrapperContext implements ApplicationContext {
 
     public void setTaskConfigInfo(TaskConfigInfo taskConfigInfo) {
         this.taskConfigInfo = taskConfigInfo;
+    }
+
+    public String getPrcProductCode() {
+        return prcProductCode;
+    }
+
+    public void setPrcProductCode(String prcProductCode) {
+        this.prcProductCode = prcProductCode;
     }
 }
