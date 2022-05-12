@@ -280,6 +280,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     delOutbound.setShipmentService(data.getLogisticsRouteId());
                     // 物流商code
                     delOutbound.setLogisticsProviderCode(data.getLogisticsProviderCode());
+                    // 发货规则，装箱规则
+                    delOutbound.setProductShipmentRule(data.getShipmentRule());
+                    delOutbound.setPackingRule(data.getPackingRule());
+                    // 临时传值
+                    delOutboundWrapperContext.setPrcProductCode(data.getProductCode());
+                    logger.info("记录临时传值字段，prcProductCode：{}", data.getProductCode());
                     // 包裹信息
                     Packing packing = packageInfo.getPacking();
                     delOutbound.setLength(Utils.valueOf(packing.getLength()));
@@ -462,6 +468,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             String productCode = delOutbound.getShipmentRule();
+            String prcProductCode = delOutboundWrapperContext.getPrcProductCode();
+            logger.info("获取临时传值字段，prcProductCode：{}", prcProductCode);
+            if (StringUtils.isNotEmpty(prcProductCode)) {
+                productCode = prcProductCode;
+            }
             // 获取产品信息
             IHtpPricedProductClientService htpPricedProductClientService = SpringUtils.getBean(IHtpPricedProductClientService.class);
             PricedProductInfo pricedProductInfo = htpPricedProductClientService.infoAndSubProducts(productCode);
@@ -469,8 +480,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 // 从PRC返回进行取值，这里作废
                 // delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
                 delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
-                delOutbound.setProductShipmentRule(pricedProductInfo.getShipmentRule());
-                delOutbound.setPackingRule(pricedProductInfo.getPackingRule());
+                // 这两个字段从PRC返回赋值了
+                // delOutbound.setProductShipmentRule(pricedProductInfo.getShipmentRule());
+                // delOutbound.setPackingRule(pricedProductInfo.getPackingRule());
+                delOutbound.setPrcProductCode(prcProductCode);
                 DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
             } else {
                 // 异常信息

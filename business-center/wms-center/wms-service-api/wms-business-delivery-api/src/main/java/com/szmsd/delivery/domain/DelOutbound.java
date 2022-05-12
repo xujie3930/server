@@ -1,6 +1,7 @@
 package com.szmsd.delivery.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -243,7 +244,10 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "供应商计价id（线路图id或者物流服务id）")
     private String supplierCalcId;
 
-
     @ApiModelProperty(value = "邮箱")
     private String email;
+
+    @ApiModelProperty(value = "临时字段")
+    @TableField(exist = false)
+    private String prcProductCode;
 }
