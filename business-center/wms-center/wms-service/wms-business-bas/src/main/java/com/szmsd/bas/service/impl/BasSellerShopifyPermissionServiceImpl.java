@@ -4,6 +4,7 @@ import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.config.ShopifyAppConfig;
@@ -105,5 +106,14 @@ public class BasSellerShopifyPermissionServiceImpl extends ServiceImpl<BasSeller
                 }
             }
         }
+    }
+
+    @Async
+    @Override
+    public void disabledByShop(String shop) {
+        LambdaUpdateWrapper<BasSellerShopifyPermission> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+        lambdaUpdateWrapper.set(BasSellerShopifyPermission::getState, "2");
+        lambdaUpdateWrapper.eq(BasSellerShopifyPermission::getShop, shop);
+        super.update(lambdaUpdateWrapper);
     }
 }

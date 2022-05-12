@@ -3,9 +3,11 @@ package com.szmsd.bas.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.domain.BasCk1ShopifyWebhooksLog;
 import com.szmsd.bas.service.IBasCk1ShopifyWebhooksLogService;
+import com.szmsd.bas.service.IBasSellerShopifyPermissionService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import io.swagger.annotations.Api;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,8 @@ public class BasShopifyWebhooksController extends BaseController {
 
     @Autowired
     private IBasCk1ShopifyWebhooksLogService ck1ShopifyWebhooksLogService;
+    @Autowired
+    private IBasSellerShopifyPermissionService sellerShopifyPermissionService;
 
     // 接口文档：https://shopify.dev/apps/webhooks/configuration/mandatory-webhooks
     // webhook相关文档：https://shopify.dev/apps/webhooks
@@ -50,6 +54,7 @@ public class BasShopifyWebhooksController extends BaseController {
         return R.ok();
     }
 
+    // 客户卸载应用48小时后，shopify会推送该接口
     @PostMapping(value = "/shop/redact")
     public R<?> shopRedact(@RequestBody Map<String, String> map,
                            @RequestHeader(value = "X-Shopify-Topic", required = false) String topic,
@@ -61,6 +66,16 @@ public class BasShopifyWebhooksController extends BaseController {
         String type = "shop/redact";
         String payload = JSONObject.toJSONString(map);
         this.saveLog(type, payload, request);
+        /*
+        {
+          "shop_id": 954889,
+          "shop_domain": "{shop}.myshopify.com"
+        }
+         */
+        String shopDomain = map.get("shop_domain");
+        if (StringUtils.isNotEmpty(shopDomain)) {
+            this.sellerShopifyPermissionService.disabledByShop(shopDomain);
+        }
         return R.ok();
     }
 

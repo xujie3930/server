@@ -36,6 +36,8 @@ public class BasSellerShopifyPermissionController extends BaseController {
     public R<List<BasSellerShopifyPermission>> list(@RequestBody BasSellerShopifyPermission basSellerShopifyPermission) {
         LambdaQueryWrapper<BasSellerShopifyPermission> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(StringUtils.isNotEmpty(basSellerShopifyPermission.getSellerCode()), BasSellerShopifyPermission::getSellerCode, basSellerShopifyPermission.getSellerCode());
+        // 查询有效的
+        lambdaQueryWrapper.eq(BasSellerShopifyPermission::getState, "1");
         return R.ok(this.basSellerShopifyPermissionService.list(lambdaQueryWrapper));
     }
 }
