@@ -24,11 +24,11 @@ public class BasShopifyWebhooksController extends BaseController {
     // webhook相关文档：https://shopify.dev/apps/webhooks
     @PostMapping(value = "/data_request")
     public R<?> dataRequest(@RequestBody Map<String, String> map,
-                            @RequestHeader(value = "X-Shopify-Topic") String topic,
-                            @RequestHeader(value = "X-Shopify-Hmac-Sha256") String hmac,
-                            @RequestHeader(value = "X-Shopify-Webhook-Id") String webhookId,
-                            @RequestHeader(value = "X-Shopify-Shop-Domain") String shop,
-                            @RequestHeader(value = "X-Shopify-API-Version") String apiVersion,
+                            @RequestHeader(value = "X-Shopify-Topic", required = false) String topic,
+                            @RequestHeader(value = "X-Shopify-Hmac-Sha256", required = false) String hmac,
+                            @RequestHeader(value = "X-Shopify-Webhook-Id", required = false) String webhookId,
+                            @RequestHeader(value = "X-Shopify-Shop-Domain", required = false) String shop,
+                            @RequestHeader(value = "X-Shopify-API-Version", required = false) String apiVersion,
                             HttpServletRequest request) {
         String type = "customers/data_request";
         String payload = JSONObject.toJSONString(map);
@@ -38,11 +38,11 @@ public class BasShopifyWebhooksController extends BaseController {
 
     @PostMapping(value = "/redact")
     public R<?> redact(@RequestBody Map<String, String> map,
-                       @RequestHeader(value = "X-Shopify-Topic") String topic,
-                       @RequestHeader(value = "X-Shopify-Hmac-Sha256") String hmac,
-                       @RequestHeader(value = "X-Shopify-Webhook-Id") String webhookId,
-                       @RequestHeader(value = "X-Shopify-Shop-Domain") String shop,
-                       @RequestHeader(value = "X-Shopify-API-Version") String apiVersion,
+                       @RequestHeader(value = "X-Shopify-Topic", required = false) String topic,
+                       @RequestHeader(value = "X-Shopify-Hmac-Sha256", required = false) String hmac,
+                       @RequestHeader(value = "X-Shopify-Webhook-Id", required = false) String webhookId,
+                       @RequestHeader(value = "X-Shopify-Shop-Domain", required = false) String shop,
+                       @RequestHeader(value = "X-Shopify-API-Version", required = false) String apiVersion,
                        HttpServletRequest request) {
         String type = "customers/redact";
         String payload = JSONObject.toJSONString(map);
@@ -52,11 +52,11 @@ public class BasShopifyWebhooksController extends BaseController {
 
     @PostMapping(value = "/shop/redact")
     public R<?> shopRedact(@RequestBody Map<String, String> map,
-                           @RequestHeader(value = "X-Shopify-Topic") String topic,
-                           @RequestHeader(value = "X-Shopify-Hmac-Sha256") String hmac,
-                           @RequestHeader(value = "X-Shopify-Webhook-Id") String webhookId,
-                           @RequestHeader(value = "X-Shopify-Shop-Domain") String shop,
-                           @RequestHeader(value = "X-Shopify-API-Version") String apiVersion,
+                           @RequestHeader(value = "X-Shopify-Topic", required = false) String topic,
+                           @RequestHeader(value = "X-Shopify-Hmac-Sha256", required = false) String hmac,
+                           @RequestHeader(value = "X-Shopify-Webhook-Id", required = false) String webhookId,
+                           @RequestHeader(value = "X-Shopify-Shop-Domain", required = false) String shop,
+                           @RequestHeader(value = "X-Shopify-API-Version", required = false) String apiVersion,
                            HttpServletRequest request) {
         String type = "shop/redact";
         String payload = JSONObject.toJSONString(map);
