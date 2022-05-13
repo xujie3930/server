@@ -103,7 +103,7 @@ public class ShopifyOrderTask {
         BasSellerShopifyPermission permission = new BasSellerShopifyPermission();
         permission.setShop(shopName);
         R<List<BasSellerShopifyPermission>> listR = basSellerShopifyPermissionFeignService.list(permission);
-        if (listR == null || listR.getCode() == 200 || CollectionUtils.isEmpty(listR.getData())) {
+        if (listR == null || listR.getCode() != 200 || CollectionUtils.isEmpty(listR.getData())) {
             throw new BaseException("该店铺信息异常，无法拉取订单");
         }
         List<BasSellerShopifyPermission> shopifyPermissionList = listR.getData();
@@ -119,12 +119,12 @@ public class ShopifyOrderTask {
             BasSellerShopifyPermission permission = new BasSellerShopifyPermission();
             permission.setSellerId(customerId);
             R<List<BasSellerShopifyPermission>> listR = basSellerShopifyPermissionFeignService.list(permission);
-            if (listR == null || listR.getCode() == 200 || CollectionUtils.isEmpty(listR.getData())) {
+            if (listR == null || listR.getCode() != 200 || CollectionUtils.isEmpty(listR.getData())) {
                 log.info("未获取到shopify店铺, 不执行拉取订单任务");
                 return;
             }
             List<BasSellerShopifyPermission> shopifyPermissionList = listR.getData();
-            log.info("获取【Shopify】店铺个数：", shopifyPermissionList.size());
+            log.info("获取【Shopify】店铺个数：{}", shopifyPermissionList.size());
             pullShopifyOrder(shopifyPermissionList);
 
 //            redisTemplate.opsForValue().set(LAST_TIME_KEY, before);

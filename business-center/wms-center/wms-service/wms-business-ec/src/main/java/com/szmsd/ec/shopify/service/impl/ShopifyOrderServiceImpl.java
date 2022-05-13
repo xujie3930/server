@@ -187,7 +187,7 @@ public class ShopifyOrderServiceImpl extends ServiceImpl<ShopifyOrderMapper, Sho
                 BasSellerShopifyPermission permission = new BasSellerShopifyPermission();
                 permission.setShop(shopifyOrder.getShopName());
                 R<List<BasSellerShopifyPermission>> listR = basSellerShopifyPermissionFeignService.list(permission);
-                if (listR == null || listR.getCode() == 200 || CollectionUtils.isEmpty(listR.getData())) {
+                if (listR == null || listR.getCode() != 200 || CollectionUtils.isEmpty(listR.getData())) {
                     log.info("{}店铺信息异常，无法操作接口", shopifyOrder.getShopName());
                     throw new BaseException(shopifyOrder.getShopName()+"店铺信息异常，无法操作接口");
                 }
@@ -224,7 +224,7 @@ public class ShopifyOrderServiceImpl extends ServiceImpl<ShopifyOrderMapper, Sho
         BasSellerShopifyPermission permission = new BasSellerShopifyPermission();
         permission.setShop(shopName);
         R<List<BasSellerShopifyPermission>> listR = basSellerShopifyPermissionFeignService.list(permission);
-        if (listR == null || listR.getCode() == 200 || CollectionUtils.isEmpty(listR.getData())) {
+        if (listR == null || listR.getCode() != 200 || CollectionUtils.isEmpty(listR.getData())) {
             log.info("{}店铺信息异常，无法操作接口", shopName);
             throw new BaseException(shopName+"店铺信息异常，无法操作接口");
         }
