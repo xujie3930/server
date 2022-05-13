@@ -98,10 +98,10 @@ public class BasDeliveryServiceMatching extends BaseEntity {
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     @Excel(name = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
-/*
+
     @ApiModelProperty(value = "发货服务名称")
     @Excel(name = "发货服务名称")
-    private String shipmentService;*/
+    private String shipmentService;
 
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
