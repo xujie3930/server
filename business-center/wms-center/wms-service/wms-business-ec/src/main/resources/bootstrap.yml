@@ -1,0 +1,13 @@
+# Tomcat
+server:
+  port: 7205
+
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: wms-business-ec
+  profiles:
+    # 环境配置
+    active: test
+
