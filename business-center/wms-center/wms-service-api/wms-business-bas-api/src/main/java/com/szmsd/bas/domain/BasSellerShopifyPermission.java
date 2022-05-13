@@ -64,5 +64,6 @@ public class BasSellerShopifyPermission extends BaseEntity {
     @Excel(name = "状态，1有效，2无效")
     private String state;
 
-
+    @ApiModelProperty(value = "locations")
+    private String locations;
 }
