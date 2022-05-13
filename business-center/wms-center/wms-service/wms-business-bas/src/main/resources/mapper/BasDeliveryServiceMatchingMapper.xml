@@ -25,6 +25,9 @@
                     <result column="perimeter" property="perimeter"/>
                     <result column="lwh_sum" property="lwhSum"/>
                     <result column="warehouse_code" property="warehouseCode"/>
+                    <result column="warehouse_name" property="warehouseName"/>
+
+
                     <result column="shipment_rule" property="shipmentRule"/>
                     <result column="shipment_service" property="shipmentService"/>
                     <result column="seller_code" property="sellerCode"/>
@@ -37,7 +40,7 @@
                 update_by_name,
                 update_time,
                 remark,
-            id, create_by, update_by, version, del_flag, sku, country_code, country, buyer_service, start_weight, end_weight, size, volume, perimeter, lwh_sum, warehouse_code, shipment_rule, shipment_service, seller_code
+            id, create_by, update_by, version, del_flag, sku, country_code, country, buyer_service, start_weight, end_weight, size, volume, perimeter, lwh_sum, warehouse_code, warehouse_name, shipment_rule, shipment_service, seller_code
         </sql>
 
 
