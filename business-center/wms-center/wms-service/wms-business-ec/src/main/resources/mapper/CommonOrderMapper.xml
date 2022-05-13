@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.ec.common.mapper.CommonOrderMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.szmsd.ec.domain.CommonOrder">
+                    <id column="id" property="id"/>
+                    <result column="create_by_name" property="createByName"/>
+                    <result column="create_time" property="createTime"/>
+                    <result column="update_by_name" property="updateByName"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="remark" property="remark"/>
+                    <result column="cus_code" property="cusCode"/>
+                    <result column="cus_name" property="cusName"/>
+                    <result column="shop_id" property="shopId"/>
+                    <result column="shop_name" property="shopName"/>
+                    <result column="order_no" property="orderNo"/>
+                    <result column="order_date" property="orderDate"/>
+                    <result column="order_source" property="orderSource"/>
+                    <result column="order_type" property="orderType"/>
+                    <result column="status" property="status"/>
+                    <result column="sales_channels" property="salesChannels"/>
+                    <result column="warehouse_code" property="warehouseCode"/>
+                    <result column="warehouse_name" property="warehouseName"/>
+                    <result column="receiver" property="receiver"/>
+                    <result column="receiver_phone" property="receiverPhone"/>
+                    <result column="receiver_country_name" property="receiverCountryName"/>
+                    <result column="receiver_province_name" property="receiverProvinceName"/>
+                    <result column="receiver_city_name" property="receiverCityName"/>
+                    <result column="receiver_address1" property="receiverAddress1"/>
+                    <result column="receiver_address2" property="receiverAddress2"/>
+                    <result column="receiver_postcode" property="receiverPostcode"/>
+                    <result column="delivery_date_starts" property="deliveryDateStarts"/>
+                    <result column="delivery_date_end" property="deliveryDateEnd"/>
+                    <result column="shipping_channel" property="shippingChannel"/>
+                    <result column="waybill_no" property="waybillNo"/>
+                    <result column="amount" property="amount"/>
+                    <result column="currency" property="currency"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+                create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, cus_code, cus_name, shop_id, shop_name, order_no, order_date, order_source, order_type, status, sales_channels, warehouse_code, warehouse_name, receiver, receiver_phone, receiver_country_name, receiver_province_name, receiver_city_name, receiver_address1, receiver_address2, receiver_postcode, delivery_date_starts, delivery_date_end, shipping_channel, waybill_no, amount, currency, del_flag, version
+        </sql>
+
+    <select id="selectCountByStatus" resultType="com.szmsd.ec.dto.LabelCountDTO">
+        SELECT
+            count(1) count,
+            `status`
+            FROM ec_common_order
+            ${ew.customSqlSegment}
+    </select>
+
+</mapper>

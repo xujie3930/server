@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.ec.common.mapper.CommonOrderItemMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.szmsd.ec.domain.CommonOrderItem">
+                    <id column="id" property="id"/>
+                    <result column="create_by_name" property="createByName"/>
+                    <result column="create_time" property="createTime"/>
+                    <result column="update_by_name" property="updateByName"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="remark" property="remark"/>
+                    <result column="item_id" property="itemId"/>
+                    <result column="order_id" property="orderId"/>
+                    <result column="order_no" property="orderNo"/>
+                    <result column="title" property="title"/>
+                    <result column="asin" property="asin"/>
+                    <result column="quantity" property="quantity"/>
+                    <result column="price" property="price"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+                create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, item_id, order_id, order_no, title, asin, sku, quantity, price, del_flag, version
+        </sql>
+
+
+</mapper>
