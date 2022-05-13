@@ -30,6 +30,11 @@ public class OrderStatusConstant {
      * 取消
      */
     public static final String CANCEL ="Canceled";
+
+    /**
+     * 删除
+     */
+    public static final String DELETED ="Deleted";
     /**
      * 平台状态
      */

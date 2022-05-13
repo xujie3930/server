@@ -181,4 +181,15 @@ public class CommonOrderDTO {
     private List<CommonOrderItemDTO> commonOrderItemList;
 
     private String[] createDates;
+
+    @ApiModelProperty(value = "物流单号")
+    private String transferNumber;
+
+    @ApiModelProperty(value = "发货方式")
+    private String shippingMethod;
+
+    @ApiModelProperty(value = "发货服务")
+    private String shippingService;
+
+
 }

@@ -3,9 +3,11 @@ package com.szmsd.ec.common.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -118,8 +120,14 @@ public class CommonOrderController extends BaseController {
         List<LabelCountDTO> statusList = ecCommonOrderService.getCountByStatus(queryWrapper);
 
         Map<String, Object> collect = statusList.stream().collect(Collectors.toMap(item -> item.getStatus(), l -> l.getCount()));
-        collect.put(OrderStatusConstant.OrderPlatformStatusConstant.CANCELLED, ecCommonOrderService.count(new LambdaQueryWrapper<CommonOrder>().eq(CommonOrder::getPlatformOrderStatus, OrderStatusConstant.OrderPlatformStatusConstant.CANCELLED)));
         return R.ok(collect);
+    }
+
+    @ApiOperation(value = "批量删除")
+    @PostMapping("batchDelete")
+    public R deleteOrder(@RequestBody List<Long> ids){
+        ecCommonOrderService.update(new LambdaUpdateWrapper<CommonOrder>().set(CommonOrder::getStatus, OrderStatusConstant.DELETED).in(CommonOrder::getId, ids));
+        return R.ok();
     }
 
     /**
@@ -130,11 +138,19 @@ public class CommonOrderController extends BaseController {
     private LambdaQueryWrapper<CommonOrder> commonSearchWrapper(CommonOrderDTO queryDTO){
         LambdaQueryWrapper<CommonOrder> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(StringUtils.isNotEmpty(queryDTO.getOrderNo()), CommonOrder::getOrderNo, queryDTO.getOrderNo())
-                .eq(StringUtils.isNotEmpty(queryDTO.getStatus()) && !OrderStatusConstant.OrderPlatformStatusConstant.CANCELLED.equalsIgnoreCase(queryDTO.getStatus()), CommonOrder::getStatus, queryDTO.getStatus())
-                .eq(StringUtils.isNotEmpty(queryDTO.getStatus()) && OrderStatusConstant.OrderPlatformStatusConstant.CANCELLED.equalsIgnoreCase(queryDTO.getStatus()), CommonOrder::getPlatformOrderStatus, OrderStatusConstant.OrderPlatformStatusConstant.CANCELLED)
+                .eq(StringUtils.isNotEmpty(queryDTO.getStatus()), CommonOrder::getStatus, queryDTO.getStatus())
                 .eq(StringUtils.isNotEmpty(queryDTO.getOrderSource()), CommonOrder::getOrderSource, queryDTO.getOrderSource())
+                .eq(StringUtils.isNotEmpty(queryDTO.getShopName()), CommonOrder::getShopName, queryDTO.getShopName())
                 .eq(StringUtils.isNotEmpty(queryDTO.getPlatformOrderNumber()), CommonOrder::getPlatformOrderNumber, queryDTO.getPlatformOrderNumber())
                 .eq(StringUtils.isNotEmpty(queryDTO.getPlatformOrderStatus()), CommonOrder::getPlatformOrderStatus, queryDTO.getPlatformOrderStatus());
+        if (StringUtils.isNotBlank(queryDTO.getOrderNo())) {
+            List<String> orderNoArray = StringToolkit.getCodeByArray(queryDTO.getOrderNo());
+            queryWrapper.in(CommonOrder::getOrderNo, orderNoArray);
+        }
+        if (StringUtils.isNotBlank(queryDTO.getTransferNumber())) {
+            List<String> transferNumberArray = StringToolkit.getCodeByArray(queryDTO.getTransferNumber());
+            queryWrapper.in(CommonOrder::getTransferNumber, transferNumberArray);
+        }
         if (StringUtils.isNotEmpty(queryDTO.getCreateDates()) && queryDTO.getCreateDates().length > 1) {
             queryWrapper.between(CommonOrder::getOrderDate, queryDTO.getCreateDates()[0] + " 00:00:00", queryDTO.getCreateDates()[1] + " 23:59:59");
         }

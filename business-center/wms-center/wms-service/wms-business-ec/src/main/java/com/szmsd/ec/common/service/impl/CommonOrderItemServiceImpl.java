@@ -1,7 +1,10 @@
 package com.szmsd.ec.common.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.StringToolkit;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.ec.common.mapper.CommonOrderItemMapper;
 import com.szmsd.ec.common.service.ICommonOrderItemService;
 import com.szmsd.ec.domain.CommonOrderItem;
@@ -40,7 +43,7 @@ public class CommonOrderItemServiceImpl extends ServiceImpl<CommonOrderItemMappe
      */
     @Override
     public List<CommonOrderItem> selectEcCommonOrderItemList(CommonOrderItem commonOrderItem) {
-        QueryWrapper<CommonOrderItem> where = new QueryWrapper<CommonOrderItem>();
+        LambdaQueryWrapper<CommonOrderItem> where = new LambdaQueryWrapper<CommonOrderItem>();
         return baseMapper.selectList(where);
     }
 

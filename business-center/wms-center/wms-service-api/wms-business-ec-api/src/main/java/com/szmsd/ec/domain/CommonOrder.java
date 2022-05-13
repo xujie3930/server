@@ -183,6 +183,18 @@ public class CommonOrder extends BaseEntity {
     @Excel(name = "订单来源")
     private String orderVia;
 
+    @ApiModelProperty(value = "物流单号")
+    @Excel(name = "物流单号")
+    private String transferNumber;
+
+    @ApiModelProperty(value = "发货方式")
+    @Excel(name = "发货方式")
+    private String shippingMethod;
+
+    @ApiModelProperty(value = "发货服务")
+    @Excel(name = "发货服务")
+    private String shippingService;
+
     @ApiModelProperty(value = "item")
     @TableField(exist = false)
     private List<CommonOrderItem> commonOrderItemList;

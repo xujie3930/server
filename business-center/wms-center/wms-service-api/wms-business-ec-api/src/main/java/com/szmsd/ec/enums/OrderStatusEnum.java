@@ -28,5 +28,10 @@ public enum OrderStatusEnum {
     /**
      * 完成
      */
-    Compeleted;
+    Compeleted,
+
+    /**
+     * 已删除
+     */
+    Deleted;
 }
