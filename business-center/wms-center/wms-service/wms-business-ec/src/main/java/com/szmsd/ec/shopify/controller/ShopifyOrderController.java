@@ -1,12 +1,18 @@
 package com.szmsd.ec.shopify.controller;
 
+import com.alibaba.fastjson.JSONArray;
+import com.szmsd.bas.api.feign.BasSellerShopifyPermissionFeignService;
+import com.szmsd.bas.domain.BasSellerShopifyPermission;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.ec.dto.ShopifyOrderDTO;
 import com.szmsd.ec.shopify.service.ShopifyOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +32,9 @@ public class ShopifyOrderController extends BaseController {
 
     @Autowired
     private ShopifyOrderService shopifyOrderService;
-
+    @Autowired
+    private BasSellerShopifyPermissionFeignService basSellerShopifyPermissionFeignService;
+    
 //    @Resource
 //    private CurrUserFeignService currUserFeignService;
 
@@ -65,6 +73,26 @@ public class ShopifyOrderController extends BaseController {
 //            queryDTO.setCustomerId(vipLoginUserDTO.getCustomerId());
 //        }
         return R.ok(shopifyOrderService.getCountByStatus(queryDTO));
+    }
+
+    @ApiOperation(value = "根据店铺名称获取Shopify仓库列表")
+    @GetMapping("/getShopWarehouseList")
+    public R getShopWarehouseList(){
+        String sellerCode = SecurityUtils.getLoginUser().getSellerCode();
+        JSONArray jsonArray = new JSONArray();
+        BasSellerShopifyPermission permission = new BasSellerShopifyPermission();
+        permission.setSellerCode(sellerCode);
+        R<List<BasSellerShopifyPermission>> shopList = basSellerShopifyPermissionFeignService.list(permission);
+        if (Constants.SUCCESS.equals(shopList.getCode()) && shopList.getData() != null) {
+            List<BasSellerShopifyPermission> shopListData = shopList.getData();
+            shopListData.forEach(item -> {
+                JSONArray locations = shopifyOrderService.getShopLocations(item.getShop(), item.getAccessToken());
+                if (CollectionUtils.isNotEmpty(locations)) {
+                    jsonArray.addAll(locations);
+                }
+            });
+        }
+        return R.ok(jsonArray);
     }
 
 }

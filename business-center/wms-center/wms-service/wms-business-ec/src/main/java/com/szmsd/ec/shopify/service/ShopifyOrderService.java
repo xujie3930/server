@@ -1,5 +1,6 @@
 package com.szmsd.ec.shopify.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.core.domain.R;
@@ -56,4 +57,12 @@ public interface ShopifyOrderService extends IService<ShopifyOrder> {
     void updateOrder(ShopifyOrderDTO ebayOrderDTO);
 
     Map<String, Object> getCountByStatus(ShopifyOrderDTO queryDTO);
+
+    /**
+     * 获取locationId
+     * @param shopName
+     * @param accessToken
+     * @return
+     */
+    JSONArray getShopLocations(String shopName, String accessToken);
 }

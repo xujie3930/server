@@ -191,5 +191,12 @@ public class CommonOrderDTO {
     @ApiModelProperty(value = "发货服务")
     private String shippingService;
 
+    @ApiModelProperty(value = "发货仓库id")
+    private Long shippingWarehouseId;
+
+    @ApiModelProperty(value = "发货仓库名称")
+    @Excel(name = "发货仓库名称")
+    private String shippingWarehouseName;
+
 
 }

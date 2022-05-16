@@ -17,6 +17,7 @@ import com.szmsd.ec.common.service.ICommonOrderService;
 import com.szmsd.ec.constant.OrderStatusConstant;
 import com.szmsd.ec.domain.CommonOrder;
 import com.szmsd.ec.domain.CommonOrderItem;
+import com.szmsd.ec.dto.BindWarehouseRequestDTO;
 import com.szmsd.ec.dto.CommonOrderDTO;
 import com.szmsd.ec.dto.LabelCountDTO;
 import com.szmsd.ec.dto.TransferCallbackDTO;
@@ -127,6 +128,16 @@ public class CommonOrderController extends BaseController {
     @PostMapping("batchDelete")
     public R deleteOrder(@RequestBody List<Long> ids){
         ecCommonOrderService.update(new LambdaUpdateWrapper<CommonOrder>().set(CommonOrder::getStatus, OrderStatusConstant.DELETED).in(CommonOrder::getId, ids));
+        return R.ok();
+    }
+
+    @ApiOperation(value = "绑定发货仓库")
+    @PostMapping("bindWarehouse")
+    public R bindWarehouse(@RequestBody @Valid BindWarehouseRequestDTO bindWarehouseRequestDTO){
+        ecCommonOrderService.update(new LambdaUpdateWrapper<CommonOrder>()
+                .set(CommonOrder::getShippingWarehouseId, bindWarehouseRequestDTO.getWarehouseId())
+                .set(CommonOrder::getShippingWarehouseName, bindWarehouseRequestDTO.getWarehouseName())
+                .in(CommonOrder::getId, bindWarehouseRequestDTO.getIds()));
         return R.ok();
     }
 

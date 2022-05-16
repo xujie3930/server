@@ -1,6 +1,7 @@
 package com.szmsd.ec.shopify.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -504,4 +505,31 @@ public class ShopifyOrderServiceImpl extends ServiceImpl<ShopifyOrderMapper, Sho
         return collect;
     }
 
+    /**
+     * 获取locationId
+     * @param shopName
+     * @param accessToken
+     * @return
+     */
+    @Override
+    public JSONArray getShopLocations(String shopName,String accessToken){
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("X-Shopify-Access-Token", accessToken);
+        HttpResponseBody responseBody = HttpClientHelper.httpGet(ShopifyConfig.requestUrl(ShopifyConfig.getLocationUrl,shopName), "", headerMap);
+        if(responseBody == null ){
+            log.info("【Shopify】店铺{}获取location信息失败！", shopName);
+            return null;
+        }
+        String body = responseBody.getBody();
+        log.info("【Shopify】店铺{}获取location信息: {}", shopName, body);
+        if (com.szmsd.common.core.utils.StringUtils.isNotBlank(body)) {
+            JSONObject jsonObject = JSONObject.parseObject(body);
+            JSONArray locationsArr = jsonObject.getJSONArray("locations");
+            if (CollectionUtils.isNotEmpty(locationsArr)) {
+                return locationsArr;
+            }
+        }
+        log.info("【Shopify】店铺{} 未获取到location信息！", shopName);
+        return null;
+    }
 }
