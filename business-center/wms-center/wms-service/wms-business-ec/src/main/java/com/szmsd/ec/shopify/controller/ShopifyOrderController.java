@@ -77,11 +77,10 @@ public class ShopifyOrderController extends BaseController {
 
     @ApiOperation(value = "根据店铺名称获取Shopify仓库列表")
     @GetMapping("/getShopWarehouseList")
-    public R getShopWarehouseList(){
-        String sellerCode = SecurityUtils.getLoginUser().getSellerCode();
+    public R getShopWarehouseList(@RequestParam String shopName){
         JSONArray jsonArray = new JSONArray();
         BasSellerShopifyPermission permission = new BasSellerShopifyPermission();
-        permission.setSellerCode(sellerCode);
+        permission.setShop(shopName);
         R<List<BasSellerShopifyPermission>> shopList = basSellerShopifyPermissionFeignService.list(permission);
         if (Constants.SUCCESS.equals(shopList.getCode()) && shopList.getData() != null) {
             List<BasSellerShopifyPermission> shopListData = shopList.getData();
