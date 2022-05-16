@@ -8,6 +8,7 @@ import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasSkuRuleMatching;
 import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BasSkuRuleMatchingDto;
 import com.szmsd.bas.dto.BasSkuRuleMatchingImportDto;
 import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.dto.BaseProductImportDto;
@@ -121,7 +122,7 @@ public class BasSkuRuleMatchingServiceImpl extends ServiceImpl<BasSkuRuleMatchin
         /**
         * 批量删除sku规则匹配表模块
         *
-        * @param ids 需要删除的sku规则匹配表模块ID
+        * @param list 需要删除的sku规则匹配表模块对象
         * @return 结果
         */
         @Override
@@ -165,20 +166,6 @@ public class BasSkuRuleMatchingServiceImpl extends ServiceImpl<BasSkuRuleMatchin
                     }
                     checkData.add(omsSku);
                 }
-
-                /*LambdaQueryWrapper<BaseProduct> queryWrapper = new LambdaQueryWrapper<BaseProduct>();
-
-                queryWrapper.eq(BaseProduct::getSellerCode, sellerCode);
-                queryWrapper.eq(BaseProduct::getIsActive, true);
-                queryWrapper.in(BaseProduct::getCode, StringUtils.split(b.getOmsSku(), ","));
-
-                List<BaseProduct> baseProductList = baseProductService.list(queryWrapper);
-                List<String> baseSkuList = baseProductList.stream().map(vo -> vo.getCode()).collect(Collectors.toList());
-
-
-                for(){
-
-                }*/
             }
 
             if (!s.toString().equals("")) {
@@ -195,10 +182,7 @@ public class BasSkuRuleMatchingServiceImpl extends ServiceImpl<BasSkuRuleMatchin
     @Override
     public void importBaseProduct(List<BasSkuRuleMatchingImportDto> userList, String sellerCode) {
 
-     /*   //判断是否必填
-        QueryWrapper<BasSeller> basSellerQueryWrapper = new QueryWrapper<>();
-        basSellerQueryWrapper.eq("user_name", SecurityUtils.getLoginUser().getUsername());
-        BasSeller seller = basSellerService.getOne(basSellerQueryWrapper);*/
+     /*   //判断是否必填*/
         verifyBaseProductRequired(userList, sellerCode);
         List<BasSkuRuleMatching> list = BeanMapperUtil.mapList(userList, BasSkuRuleMatching.class);
         for (BasSkuRuleMatching b : list) {
@@ -233,6 +217,16 @@ public class BasSkuRuleMatchingServiceImpl extends ServiceImpl<BasSkuRuleMatchin
 
 
 
+    }
+
+    @Override
+    public List<BasSkuRuleMatching> getList(BasSkuRuleMatchingDto dto) {
+        QueryWrapper<BasSkuRuleMatching> queryWrapper = new QueryWrapper<BasSkuRuleMatching>();
+        queryWrapper.select("seller_code,source_sku,GROUP_CONCAT(oms_sku) oms_sku");
+        queryWrapper.eq("seller_code", dto.getSellerCode());
+        queryWrapper.in("source_sku", dto.getSourceSkuList());
+        queryWrapper.groupBy("seller_code,source_sku");
+        return baseMapper.selectList(queryWrapper);
     }
 
 

@@ -3,6 +3,7 @@ package com.szmsd.bas.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.szmsd.bas.domain.BasDeliveryServiceMatching;
+import com.szmsd.bas.dto.BasDeliveryServiceMatchingDto;
 import com.szmsd.bas.mapper.BasDeliveryServiceMatchingMapper;
 import com.szmsd.bas.service.IBasDeliveryServiceMatchingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -140,7 +141,15 @@ public class BasDeliveryServiceMatchingServiceImpl extends ServiceImpl<BasDelive
            return baseMapper.update(update, queryWrapper);
        }
 
-
-
+    @Override
+    public List<BasDeliveryServiceMatching> getList(BasDeliveryServiceMatchingDto dto) {
+        LambdaQueryWrapper<BasDeliveryServiceMatching> queryWrapper = new LambdaQueryWrapper<BasDeliveryServiceMatching>();
+        queryWrapper.eq(BasDeliveryServiceMatching::getSellerCode, dto.getSellerCode());
+        queryWrapper.in(BasDeliveryServiceMatching::getSku, dto.getSkuList());
+        List<BasDeliveryServiceMatching> list = baseMapper.selectList(queryWrapper);
+        return list;
     }
+
+
+}
 

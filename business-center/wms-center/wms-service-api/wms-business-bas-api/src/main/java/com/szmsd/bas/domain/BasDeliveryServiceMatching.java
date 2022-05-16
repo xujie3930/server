@@ -10,8 +10,6 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.szmsd.common.core.annotation.Excel;
 
-import javax.validation.constraints.NotEmpty;
-
 
 /**
 * <p>
@@ -19,7 +17,7 @@ import javax.validation.constraints.NotEmpty;
     * </p>
 *
 * @author Administrator
-* @since 2022-05-12
+* @since 2022-05-16
 */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -52,7 +50,6 @@ public class BasDeliveryServiceMatching extends BaseEntity {
 
     @ApiModelProperty(value = "sku")
     @Excel(name = "sku")
-    @NotEmpty(message = "sku不能为空")
     private String sku;
 
     @ApiModelProperty(value = "目的国家编码")
@@ -95,11 +92,6 @@ public class BasDeliveryServiceMatching extends BaseEntity {
     @Excel(name = "仓库代码")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "仓库代码")
-    @Excel(name = "仓库名称")
-    private String warehouseName;
-
-
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     @Excel(name = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
@@ -111,6 +103,10 @@ public class BasDeliveryServiceMatching extends BaseEntity {
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
     private String sellerCode;
+
+    @ApiModelProperty(value = "仓库名称")
+    @Excel(name = "仓库名称")
+    private String warehouseName;
 
 
 }

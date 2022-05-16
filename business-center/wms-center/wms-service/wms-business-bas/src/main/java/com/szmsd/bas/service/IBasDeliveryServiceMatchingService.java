@@ -2,6 +2,8 @@ package com.szmsd.bas.service;
 
 import com.szmsd.bas.domain.BasDeliveryServiceMatching;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.bas.dto.BasDeliveryServiceMatchingDto;
+
 import java.util.List;
 
 /**
@@ -55,5 +57,6 @@ public interface IBasDeliveryServiceMatchingService extends IService<BasDelivery
         int deleteBasDeliveryServiceMatchingByIds(List<String> ids);
 
 
+        List<BasDeliveryServiceMatching> getList(BasDeliveryServiceMatchingDto dto);
 }
 

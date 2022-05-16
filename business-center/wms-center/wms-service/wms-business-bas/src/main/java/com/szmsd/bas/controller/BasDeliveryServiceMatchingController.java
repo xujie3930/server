@@ -1,4 +1,7 @@
 package com.szmsd.bas.controller;
+import com.szmsd.bas.dto.BasDeliveryServiceMatchingDto;
+import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -72,6 +75,28 @@ public class BasDeliveryServiceMatchingController extends BaseController{
     {
     return R.ok(basDeliveryServiceMatchingService.selectBasDeliveryServiceMatchingById(id));
     }
+
+    /**
+     * 获取发货服务匹配模块详细信息List
+     */
+    @PreAuthorize("@ss.hasPermi('BasDeliveryServiceMatching:BasDeliveryServiceMatching:getList')")
+    @PostMapping(value = "getList")
+    @ApiOperation(value = "获取发货服务匹配模块详细信息List",notes = "获取发货服务匹配模块详细信息")
+    public R<List<BasDeliveryServiceMatching>> getList(@RequestBody BasDeliveryServiceMatchingDto dto)
+    {
+
+
+
+        if(StringUtils.isEmpty(dto.getSellerCode())){
+            throw new CommonException("400", "sellerCode 不能空");
+        }
+        if(StringUtils.isEmpty(dto.getSkuList())){
+            throw new CommonException("400", "skuList 不能空");
+        }
+        return R.ok(basDeliveryServiceMatchingService.getList(dto));
+    }
+
+
 
     /**
     * 新增发货服务匹配模块
