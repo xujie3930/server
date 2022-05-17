@@ -167,4 +167,12 @@ public interface DelOutboundClientService {
      * @param idList
      */
     void updateShipmentLabel(@RequestBody List<String> idList);
+
+    /**
+     * 创建Shopify出库单
+     *
+     * @param dto dto
+     * @return DelOutboundAddResponse
+     */
+    DelOutboundAddResponse addShopify(DelOutboundDto dto);
 }

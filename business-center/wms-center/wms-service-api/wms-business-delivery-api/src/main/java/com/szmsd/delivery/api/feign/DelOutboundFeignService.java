@@ -211,4 +211,9 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - 重派", position = 2200)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     R<DelOutboundAddResponse> reassign(@RequestBody DelOutboundDto dto);
+
+    @PostMapping("/api/outbound/addShopify")
+    @ApiOperation(value = "出库管理 - 创建Shopify出库单", position = 2300)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
+    R<DelOutboundAddResponse> addShopify(@RequestBody DelOutboundDto dto);
 }

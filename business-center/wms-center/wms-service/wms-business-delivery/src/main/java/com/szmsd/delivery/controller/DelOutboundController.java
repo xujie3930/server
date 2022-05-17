@@ -29,7 +29,6 @@ import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
@@ -726,6 +725,24 @@ public class DelOutboundController extends BaseController {
             this.delOutboundCompletedService.add(delOutboundAddResponse.getOrderNo(), DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
         }
         return R.ok(delOutboundAddResponse);
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:addShopify')")
+    @Log(title = "出库单模块", businessType = BusinessType.INSERT)
+    @PostMapping("/addShopify")
+    @ApiOperation(value = "出库管理 - 创建Shopify出库单", position = 2300)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
+    public R<DelOutboundAddResponse> addShopify(@RequestBody DelOutboundDto dto) {
+        // 新增出库单
+        DelOutboundAddResponse data = delOutboundService.insertDelOutboundShopify(dto);
+        // 添加提审操作
+        if (null != data
+                && null != data.getStatus()
+                && data.getStatus()) {
+            // 添加提审记录
+            this.delOutboundCompletedService.add(data.getOrderNo(), DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
+        }
+        return R.ok(data);
     }
 
 }
