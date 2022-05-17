@@ -85,11 +85,11 @@ public class CommonOrder extends BaseEntity {
     @Excel(name = "销售渠道")
     private String salesChannels;
 
-    @ApiModelProperty(value = "仓库编号")
+    @ApiModelProperty(value = "oms发货仓库编号")
     @Excel(name = "仓库编号")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "仓库名称")
+    @ApiModelProperty(value = "oms发货仓库名称")
     @Excel(name = "仓库名称")
     private String warehouseName;
 
@@ -187,9 +187,15 @@ public class CommonOrder extends BaseEntity {
     @Excel(name = "物流单号")
     private String transferNumber;
 
+    @ApiModelProperty(value = "发货方式编码")
+    private String shippingMethodCode;
+
     @ApiModelProperty(value = "发货方式")
     @Excel(name = "发货方式")
     private String shippingMethod;
+
+    @ApiModelProperty(value = "发货服务编码")
+    private String shippingServiceCode;
 
     @ApiModelProperty(value = "发货服务")
     @Excel(name = "发货服务")

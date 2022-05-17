@@ -30,5 +30,11 @@ public interface ICommonOrderService extends IService<CommonOrder> {
     List<LabelCountDTO> getCountByStatus(Wrapper<CommonOrder> queryWrapper);
 
     void transferWarehouseOrder(CommonOrderDTO commonOrderDTO);
+
+    /**
+     * 发货
+     * @param ids
+     */
+    void orderShipping(List<Long> ids);
 }
 

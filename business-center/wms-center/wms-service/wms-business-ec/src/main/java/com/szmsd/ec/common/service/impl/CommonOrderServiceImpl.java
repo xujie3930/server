@@ -7,8 +7,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.feign.BasSkuRuleMatchingFeignService;
+import com.szmsd.bas.domain.BasDeliveryServiceMatching;
+import com.szmsd.bas.domain.BasOtherRules;
+import com.szmsd.bas.dto.BasDeliveryServiceMatchingDto;
+import com.szmsd.common.core.constant.Constants;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.ec.common.mapper.CommonOrderItemMapper;
 import com.szmsd.ec.common.mapper.CommonOrderMapper;
 import com.szmsd.ec.common.service.ICommonOrderService;
@@ -21,6 +28,7 @@ import com.szmsd.ec.enums.OrderStatusEnum;
 import com.szmsd.ec.shopify.config.ShopifyConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +40,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -47,7 +56,10 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
 
     @Autowired
     private CommonOrderItemMapper commonOrderItemMapper;
-
+    @Autowired
+    private BasSkuRuleMatchingFeignService basSkuRuleMatchingFeignService;
+    @Autowired
+    private DelOutboundFeignService delOutboundFeignService;
 //    @Autowired
 //    private OrdOrderFeignService orderFeignService;
 
@@ -88,11 +100,40 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
 //        pushCenterOrder(false, order, bufferDto);
     }
 
+    @Override
+    public void orderShipping(List<Long> ids) {
+        List<CommonOrder> commonOrderList = this.listByIds(ids);
+
+    }
+
     /**
      * 保存订单
      * @param commonOrder
      */
     private void saveOrder(CommonOrder commonOrder){
+        List<CommonOrderItem> orderItemList = commonOrder.getCommonOrderItemList();
+        if (CollectionUtils.isNotEmpty(orderItemList)) {
+            List<String> skuList = orderItemList.stream().map(CommonOrderItem::getPlatformSku).collect(Collectors.toList());
+            BasDeliveryServiceMatchingDto matchingDto = new BasDeliveryServiceMatchingDto();
+            matchingDto.setSkuList(skuList);
+            matchingDto.setSellerCode(commonOrder.getCusCode());
+            R<List<BasDeliveryServiceMatching>> deliveryServiceMatchingR = basSkuRuleMatchingFeignService.getList(matchingDto);
+            if (Constants.SUCCESS.equals(deliveryServiceMatchingR.getCode()) && CollectionUtils.isNotEmpty(deliveryServiceMatchingR.getData())) {
+                List<BasDeliveryServiceMatching> matchingList = deliveryServiceMatchingR.getData();
+                // 如果查出多种规则 不自动匹配, 查出一种才匹配
+                if (matchingList.size() == 1) {
+                    BasDeliveryServiceMatching serviceMatching = matchingList.get(0);
+                    commonOrder.setWarehouseCode(serviceMatching.getWarehouseCode());
+                    commonOrder.setWarehouseName(serviceMatching.getWarehouseName());
+                    commonOrder.setShippingService(serviceMatching.getShipmentService());
+                }
+            }
+        }
+        R<BasOtherRules> info = basSkuRuleMatchingFeignService.getInfo(commonOrder.getCusCode());
+        if (Constants.SUCCESS.equals(info.getCode()) && info.getData() != null) {
+            BasOtherRules rules = info.getData();
+            commonOrder.setShippingMethod(rules.getDeliveryMethod());
+        }
         LambdaQueryWrapper<CommonOrder> queryWrapper =new LambdaQueryWrapper<CommonOrder>()
                 .eq(CommonOrder::getOrderNo, commonOrder.getOrderNo()).last("limit 1");
         CommonOrder co = this.baseMapper.selectOne(queryWrapper);
@@ -278,6 +319,8 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
         commonOrder.setCommonOrderItemList(orderItemList);
 
     }
+
+
 
 }
 

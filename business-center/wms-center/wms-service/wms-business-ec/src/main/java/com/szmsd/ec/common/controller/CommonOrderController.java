@@ -17,15 +17,13 @@ import com.szmsd.ec.common.service.ICommonOrderService;
 import com.szmsd.ec.constant.OrderStatusConstant;
 import com.szmsd.ec.domain.CommonOrder;
 import com.szmsd.ec.domain.CommonOrderItem;
-import com.szmsd.ec.dto.BindWarehouseRequestDTO;
-import com.szmsd.ec.dto.CommonOrderDTO;
-import com.szmsd.ec.dto.LabelCountDTO;
-import com.szmsd.ec.dto.TransferCallbackDTO;
+import com.szmsd.ec.dto.*;
 import com.szmsd.ec.enums.OrderSourceEnum;
 import com.szmsd.ec.enums.OrderStatusEnum;
 import com.szmsd.ec.shopify.task.ShopifyOrderTask;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.*;
@@ -134,10 +132,54 @@ public class CommonOrderController extends BaseController {
     @ApiOperation(value = "绑定发货仓库")
     @PostMapping("bindWarehouse")
     public R bindWarehouse(@RequestBody @Valid BindWarehouseRequestDTO bindWarehouseRequestDTO){
+        List<CommonOrder> commonOrders = ecCommonOrderService.list(new LambdaQueryWrapper<CommonOrder>().in(CommonOrder::getId, bindWarehouseRequestDTO.getIds()).isNotNull(CommonOrder::getTransferNumber));
+        if (CollectionUtils.isNotEmpty(commonOrders)) {
+            List<String> collect = commonOrders.stream().map(CommonOrder::getOrderNo).collect(Collectors.toList());
+            return R.failed("订单号："+String.join(",", collect)+"已有跟踪号，不允许修改");
+        }
         ecCommonOrderService.update(new LambdaUpdateWrapper<CommonOrder>()
                 .set(CommonOrder::getShippingWarehouseId, bindWarehouseRequestDTO.getWarehouseId())
                 .set(CommonOrder::getShippingWarehouseName, bindWarehouseRequestDTO.getWarehouseName())
                 .in(CommonOrder::getId, bindWarehouseRequestDTO.getIds()));
+        return R.ok();
+    }
+
+    @ApiOperation(value = "绑定发货方式")
+    @PostMapping("bindShippingMethod")
+    public R bindShippingMethod(@RequestBody @Valid BindShippingMethodRequestDTO bindShippingMethodRequestDTO){
+        List<CommonOrder> commonOrders = ecCommonOrderService.list(new LambdaQueryWrapper<CommonOrder>().in(CommonOrder::getId, bindShippingMethodRequestDTO.getIds()).isNotNull(CommonOrder::getTransferNumber));
+        if (CollectionUtils.isNotEmpty(commonOrders)) {
+            List<String> collect = commonOrders.stream().map(CommonOrder::getOrderNo).collect(Collectors.toList());
+            return R.failed("订单号："+String.join(",", collect)+"已有跟踪号，不允许修改");
+        }
+        ecCommonOrderService.update(new LambdaUpdateWrapper<CommonOrder>()
+                .set(CommonOrder::getShippingMethod, bindShippingMethodRequestDTO.getShippingMethod())
+                .set(CommonOrder::getShippingMethodCode, bindShippingMethodRequestDTO.getShippingMethodCode())
+                .in(CommonOrder::getId, bindShippingMethodRequestDTO.getIds()));
+        return R.ok();
+    }
+
+    @ApiOperation(value = "绑定发货服务")
+    @PostMapping("bindShippingService")
+    public R bindShippingService(@RequestBody @Valid BindShippingServiceRequestDTO requestDTO){
+        List<CommonOrder> commonOrders = ecCommonOrderService.list(new LambdaQueryWrapper<CommonOrder>().in(CommonOrder::getId, requestDTO.getIds()).isNotNull(CommonOrder::getTransferNumber));
+        if (CollectionUtils.isNotEmpty(commonOrders)) {
+            List<String> collect = commonOrders.stream().map(CommonOrder::getOrderNo).collect(Collectors.toList());
+            return R.failed("订单号："+String.join(",", collect)+"已有跟踪号，不允许修改");
+        }
+        ecCommonOrderService.update(new LambdaUpdateWrapper<CommonOrder>()
+                .set(CommonOrder::getWarehouseCode, requestDTO.getWarehouseCode())
+                .set(CommonOrder::getWarehouseName, requestDTO.getWarehouseName())
+                .set(CommonOrder::getShippingService, requestDTO.getShippingService())
+                .set(CommonOrder::getShippingServiceCode, requestDTO.getShippingServiceCode())
+                .in(CommonOrder::getId, requestDTO.getIds()));
+        return R.ok();
+    }
+
+    @ApiOperation(value = "确认发货")
+    @PostMapping("orderShipping")
+    public R orderShipping(@RequestBody List<Long> ids){
+        ecCommonOrderService.orderShipping(ids);
         return R.ok();
     }
 

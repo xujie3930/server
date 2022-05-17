@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.szmsd.bas.api.feign.BasSellerShopifyPermissionFeignService;
+import com.szmsd.bas.api.feign.BasSkuRuleMatchingFeignService;
+import com.szmsd.bas.domain.BasOtherRules;
 import com.szmsd.bas.domain.BasSellerShopifyPermission;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;

@@ -129,6 +129,10 @@
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-exception-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-delivery-api</artifactId>
+        </dependency>
 
     </dependencies>
 
