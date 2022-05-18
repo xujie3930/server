@@ -20,6 +20,9 @@ public class DelOutboundListQueryRequest implements Serializable {
     @ApiModelProperty(value = "挂号")
     private String trackingNo;
 
+    @ApiModelProperty(value = "RefNo")
+    private String refNo;
+
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
 
