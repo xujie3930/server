@@ -150,7 +150,7 @@ public class ShopifyOrderTask {
             if (lastOrder != null){
                 after = DateUtils.parseDateToStr(ShopifyConfig.TIME_FORMAT_STR, lastOrder.getCreatedAt());
             }else {
-                after = DateUtils.parseDateToStr(ShopifyConfig.TIME_FORMAT_STR, DateUtils.addDays(new Date(), -30));
+                after = DateUtils.parseDateToStr(ShopifyConfig.TIME_FORMAT_STR, DateUtils.addMonths(new Date(), -12));
             }
             log.info("【shopify】店铺：{} 查询订单起始时间：{} - {}", shop.getShop(), after, before);
             Map<String, String> parameters = new HashMap<>();

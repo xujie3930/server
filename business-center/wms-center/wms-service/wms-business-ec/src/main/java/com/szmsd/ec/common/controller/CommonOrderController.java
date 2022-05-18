@@ -67,14 +67,11 @@ public class CommonOrderController extends BaseController {
         if (order == null) {
             return R.failed("电商单不存在");
         }
-        order.setStatus(callbackDTO.getStatus().toString()); // 转单成功 更改状态
-        order.setWarehouseCode(callbackDTO.getWarehouseCode());
-        order.setWarehouseName(callbackDTO.getWarehouseName());
-        order.setWaybillNo(callbackDTO.getWaybillNo());
-        order.setOrderType(callbackDTO.getOrderType());
+        order.setTransferNumber(callbackDTO.getTransferNumber());
+        order.setLogisticsRouteId(callbackDTO.getLogisticsRouteId());
         order.setTransferErrorMsg(callbackDTO.getTransferErrorMsg());
         // 已发货状态调用shopify的履约单接口： https://shopify.dev/api/admin-rest/2021-10/resources/fulfillment#[post]/admin/api/2021-10/fulfillments.json
-        if (OrderSourceEnum.Shopify.toString().equalsIgnoreCase(order.getOrderSource()) && OrderStatusEnum.Shipped.equals(callbackDTO.getStatus())) {
+        if (OrderSourceEnum.Shopify.toString().equalsIgnoreCase(order.getOrderSource()) && StringUtils.isNotBlank(order.getTransferErrorMsg())) {
             applicationContext.publishEvent(new ShopifyFulfillmentEvent(order));
         }
         return ecCommonOrderService.updateById(order) ? R.ok() : R.failed();

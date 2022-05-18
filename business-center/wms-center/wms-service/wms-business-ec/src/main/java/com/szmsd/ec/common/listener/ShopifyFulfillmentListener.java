@@ -41,36 +41,22 @@ public class ShopifyFulfillmentListener {
     @Autowired
     private ShopifyOrderService shopifyOrderService;
 
-//    @Autowired
-//    private ExpressFeignService expressFeignService;
-
     @Async
     @EventListener
     public void onApplicationEvent(ShopifyFulfillmentEvent shopifyFulfillmentEvent){
+        log.info("履约单操作开始!");
         Object source = shopifyFulfillmentEvent.getSource();
         if (source == null) {
             return;
         }
         CommonOrder commonOrder = (CommonOrder) source;
         List<CommonOrderItem> commonOrderItems = commonOrderItemService.list(new LambdaQueryWrapper<CommonOrderItem>().eq(CommonOrderItem::getOrderId, commonOrder.getId()));
-        // 判断该订单是否走了fedex 下单
-//        R<Express> expressR = expressFeignService.getByOrderCode(commonOrder.getOrderNo());
-//        if (expressR == null || !Constants.SUCCESS.equals(expressR.getCode())){
-//            log.info("该订单未通过FedEx 物流下单, 不走创建履约单逻辑");
-//            return;
-//        }
-//        Express express = expressR.getData();
-//        if (!express.getCarrierName().equalsIgnoreCase("Fedex")) {
-//            log.info("该订单未通过FedEx 物流下单, 不走创建履约单逻辑");
-//            return;
-//        }
         CreateFulfillmentReqeust reqeust = new CreateFulfillmentReqeust();
         Fulfillment2 ft = new Fulfillment2();
         ft.setNotifyCustomer(false);
 
-        // todo: 履约快递信息需要更改
-//        ft.setTrackingNumber(express.getExpressCode());
-//        ft.setTrackingCompany("FedEx");
+        ft.setTrackingNumber(commonOrder.getTransferNumber());
+        ft.setTrackingCompany(commonOrder.getLogisticsRouteId());
 
         List<LineItem> items = new ArrayList<>();
         for (CommonOrderItem item : commonOrderItems) {
@@ -80,27 +66,6 @@ public class ShopifyFulfillmentListener {
             items.add(lineItem);
         }
         ft.setLineItemList(items);
-//        Fulfillment fulfillment = new Fulfillment();
-//        fulfillment.setMessage("The package has been shipped.");
-//        fulfillment.setNotifyCustomer(false);
-//        fulfillment.setTrackingInfo(new FulfillmentTrackingInfo(express.getExpressCode(), "", "Fedex"));
-//
-//        // 设置订单信息
-//        List<FulfillmentOrder> orders = new ArrayList<>();
-//        FulfillmentOrder order = new FulfillmentOrder();
-//        order.setFulfillmentOrderId(commonOrder.getOrderNo());
-//
-//        // 设置订单详情
-//        List<LineItem> items = new ArrayList<>();
-//        for (CommonOrderItem item : commonOrderItems) {
-//            LineItem lineItem = new LineItem();
-//            lineItem.setId(item.getItemId());
-//            lineItem.setQuantity(item.getQuantity());
-//            items.add(lineItem);
-//        }
-//        order.setLineItemList(items);
-//        orders.add(order);
-//        fulfillment.setFulfillmentOrders(orders);
         reqeust.setFulfillment(ft);
         JSONObject fulfillmentResult = shopifyOrderService.createFulfillment(commonOrder.getShopName(),commonOrder.getOrderNo(), reqeust);
         if (fulfillmentResult == null || fulfillmentResult.containsKey("error")){
@@ -114,6 +79,6 @@ public class ShopifyFulfillmentListener {
             log.info("履约单创建成功!!");
         }
         commonOrderService.updateById(commonOrder);
-
+        log.info("履约单操作完毕!");
     }
 }

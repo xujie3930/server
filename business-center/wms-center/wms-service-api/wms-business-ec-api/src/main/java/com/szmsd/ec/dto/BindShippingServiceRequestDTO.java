@@ -17,7 +17,7 @@ public class BindShippingServiceRequestDTO {
 
     @NotBlank(message = "发货仓库编码不能为空")
     @ApiModelProperty(value = "发货仓库")
-    private Long WarehouseCode;
+    private String WarehouseCode;
 
     @NotBlank(message = "发货仓库名称不能为空")
     @ApiModelProperty(value = "发货仓库名称")

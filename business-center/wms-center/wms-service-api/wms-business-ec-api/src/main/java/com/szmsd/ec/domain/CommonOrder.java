@@ -187,6 +187,9 @@ public class CommonOrder extends BaseEntity {
     @Excel(name = "物流单号")
     private String transferNumber;
 
+    @ApiModelProperty("物流承运商")
+    private String logisticsRouteId;
+
     @ApiModelProperty(value = "发货方式编码")
     private String shippingMethodCode;
 

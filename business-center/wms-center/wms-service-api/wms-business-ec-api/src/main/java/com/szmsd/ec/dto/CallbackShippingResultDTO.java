@@ -5,11 +5,14 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
+/**
+ * 发货结果回调参数
+ */
 @Data
-public class TransferCallbackDTO {
+public class CallbackShippingResultDTO {
 
-    @ApiModelProperty(value = "电商单号")
-    @NotBlank(message = "电商单号不能为空")
+    @NotBlank(message = "电商订单号不能为空")
+    @ApiModelProperty("电商订单号")
     private String orderNo;
 
     @NotBlank(message = "物流单号不能为空")
@@ -19,10 +22,4 @@ public class TransferCallbackDTO {
     @NotBlank(message = "承运商不能为空")
     @ApiModelProperty("承运商")
     private String logisticsRouteId;
-
-    /**
-     * 发货异常信息  如果发货失败 填入失败原因
-     */
-    private String transferErrorMsg;
-
 }

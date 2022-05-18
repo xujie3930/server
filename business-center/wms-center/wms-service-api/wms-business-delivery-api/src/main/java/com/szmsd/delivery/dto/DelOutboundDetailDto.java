@@ -79,6 +79,9 @@ public class DelOutboundDetailDto implements Serializable {
     @ApiModelProperty(value = "箱标")
     private String boxMark;
 
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
     @ApiModelProperty(value = "sku新标签文件")
     @TableField(exist = false)
     private List<AttachmentDataDTO> skuFile;

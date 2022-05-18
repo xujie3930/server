@@ -10,12 +10,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.feign.BasSkuRuleMatchingFeignService;
 import com.szmsd.bas.domain.BasDeliveryServiceMatching;
 import com.szmsd.bas.domain.BasOtherRules;
+import com.szmsd.bas.domain.BasSkuRuleMatching;
 import com.szmsd.bas.dto.BasDeliveryServiceMatchingDto;
+import com.szmsd.bas.dto.BasSkuRuleMatchingDto;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.dto.DelOutboundAddressDto;
+import com.szmsd.delivery.dto.DelOutboundDetailDto;
+import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.ec.common.mapper.CommonOrderItemMapper;
 import com.szmsd.ec.common.mapper.CommonOrderMapper;
 import com.szmsd.ec.common.service.ICommonOrderService;
@@ -103,6 +110,84 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     @Override
     public void orderShipping(List<Long> ids) {
         List<CommonOrder> commonOrderList = this.listByIds(ids);
+        if (CollectionUtils.isEmpty(commonOrderList)) {
+            throw new BaseException("未查询出订单数据");
+        }
+
+        // verify param
+        List<String> warehouseList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getWarehouseCode())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(warehouseList)) {
+            throw new BaseException("订单："+String.join(",", warehouseList)+"请完善发货仓库");
+        }
+
+        List<String> shippingMethodList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getShippingMethod())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(shippingMethodList)) {
+            throw new BaseException("订单："+String.join(",", shippingMethodList)+"请完善发货方式");
+        }
+
+        List<String> shippingSerivceList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getShippingService())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(shippingSerivceList)) {
+            throw new BaseException("订单："+String.join(",", shippingSerivceList)+"请完善发货服务");
+        }
+
+        commonOrderList.forEach(order -> {
+            DelOutboundDto dto = new DelOutboundDto();
+            dto.setCustomCode(order.getCusCode());
+            dto.setWarehouseCode(order.getWarehouseCode());
+
+            dto.setSellerCode(SecurityUtils.getLoginUser().getSellerCode());
+            dto.setOrderType(order.getShippingMethodCode());
+            dto.setRefNo(order.getOrderNo());
+            dto.setShipmentRule(order.getShippingServiceCode());
+
+            DelOutboundAddressDto address = new DelOutboundAddressDto();
+            address.setConsignee(order.getReceiver());
+            address.setCountryCode(order.getReceiverCountryCode());
+            address.setCountry(order.getReceiverCountryName());
+            address.setStateOrProvince(order.getReceiverProvinceName());
+            address.setCity(order.getReceiverCityName());
+            address.setStreet1(order.getReceiverAddress1());
+            address.setStreet2(order.getReceiverAddress2());
+            address.setPostCode(order.getReceiverPostcode());
+            address.setPhoneNo(order.getReceiverPhone());
+
+            dto.setAddress(address);
+            List<DelOutboundDetailDto> details = new ArrayList<>();
+            // SKU 需根据匹配规则匹配出wms需要得sku
+            List<CommonOrderItem> commonOrderItems = commonOrderItemMapper.selectList(new LambdaQueryWrapper<CommonOrderItem>().eq(CommonOrderItem::getOrderId, order.getId()));
+            if (CollectionUtils.isNotEmpty(commonOrderItems)) {
+                BasSkuRuleMatchingDto requestDto = new BasSkuRuleMatchingDto();
+                requestDto.setSystemType("0");
+                requestDto.setSellerCode(order.getCusCode());
+                requestDto.setSourceSkuList(commonOrderItems.stream().map(CommonOrderItem::getPlatformSku).collect(Collectors.toList()));
+                R<List<BasSkuRuleMatching>> r = basSkuRuleMatchingFeignService.getList(requestDto);
+                List<BasSkuRuleMatching> ruleMatchingList = new ArrayList<>();
+                if (Constants.SUCCESS.equals(r.getCode()) && CollectionUtils.isNotEmpty(r.getData())) {
+                    ruleMatchingList = r.getData();
+                }
+
+                for (CommonOrderItem item : commonOrderItems) {
+                    DelOutboundDetailDto detailDto = new DelOutboundDetailDto();
+                    BasSkuRuleMatching ruleMatching = ruleMatchingList.stream().filter(v -> item.getPlatformSku().equals(v.getSourceSku())).findFirst().orElse(null);
+                    if (ruleMatching != null) {
+                        detailDto.setSku(ruleMatching.getOmsSku());
+                    }else {
+                        detailDto.setSku(item.getPlatformSku());
+                    }
+                    detailDto.setQty(item.getQuantity().longValue());
+                    detailDto.setRemark(item.getPlatformSku());
+                    // 把映射出来的oms sku 存到remark 字段以备查验
+                    item.setRemark(ruleMatching.getOmsSku());
+                    commonOrderItemMapper.updateById(item);
+                    details.add(detailDto);
+                }
+            }
+            dto.setDetails(details);
+            R<DelOutboundAddResponse> outboundAddResponseR = delOutboundFeignService.addShopify(dto);
+            if (Constants.SUCCESS != outboundAddResponseR.getCode() || outboundAddResponseR.getData() == null) {
+                throw new BaseException("订单号："+order.getOrderNo()+"发货异常");
+            }
+        });
 
     }
 
