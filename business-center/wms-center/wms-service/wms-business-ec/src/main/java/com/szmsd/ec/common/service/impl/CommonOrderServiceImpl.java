@@ -108,6 +108,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     }
 
     @Override
+    @Transactional
     public void orderShipping(List<Long> ids) {
         List<CommonOrder> commonOrderList = this.listByIds(ids);
         if (CollectionUtils.isEmpty(commonOrderList)) {
@@ -187,6 +188,9 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             if (Constants.SUCCESS != outboundAddResponseR.getCode() || outboundAddResponseR.getData() == null) {
                 throw new BaseException("订单号："+order.getOrderNo()+"发货异常");
             }
+            // 更新订单状态为已发货
+            order.setStatus(OrderStatusConstant.SHIPPED);
+            this.updateById(order);
         });
 
     }
