@@ -171,6 +171,10 @@
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-returnex-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-ec-api</artifactId>
+        </dependency>
 
     </dependencies>
 

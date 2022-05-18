@@ -14,6 +14,6 @@ import javax.validation.Valid;
 public interface CommonOrderFeignService {
 
     @ApiOperation("转仓库单回调")
-    @PostMapping("transferCallback")
+    @PostMapping("/ec-common-order/transferCallback")
     R transferCallback(@RequestBody @Valid TransferCallbackDTO callbackDTO);
 }
