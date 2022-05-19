@@ -5,6 +5,7 @@ import com.szmsd.bas.api.feign.BasSellerShopifyPermissionFeignService;
 import com.szmsd.bas.domain.BasSellerShopifyPermission;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -77,11 +78,14 @@ public class ShopifyOrderController extends BaseController {
 
     @ApiOperation(value = "根据店铺名称获取Shopify仓库列表")
     @GetMapping("/getShopWarehouseList")
-    public R getShopWarehouseList(@RequestParam String shopName){
+    public R getShopWarehouseList(@RequestParam(required = false) String shopName){
         JSONArray jsonArray = new JSONArray();
         BasSellerShopifyPermission permission = new BasSellerShopifyPermission();
-        permission.setShop(shopName);
+        if (StringUtils.isNotBlank(shopName)) {
+            permission.setShop(shopName);
+        }
         permission.setSellerCode(SecurityUtils.getLoginUser().getSellerCode());
+        log.info("获取店铺仓库, 当前登录客户：{}", SecurityUtils.getLoginUser().getSellerCode());
         R<List<BasSellerShopifyPermission>> shopList = basSellerShopifyPermissionFeignService.list(permission);
         if (Constants.SUCCESS.equals(shopList.getCode()) && shopList.getData() != null) {
             List<BasSellerShopifyPermission> shopListData = shopList.getData();
