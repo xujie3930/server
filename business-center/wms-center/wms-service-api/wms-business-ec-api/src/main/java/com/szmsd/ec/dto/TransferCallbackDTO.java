@@ -12,7 +12,6 @@ public class TransferCallbackDTO {
     @NotBlank(message = "电商单号不能为空")
     private String orderNo;
 
-    @NotBlank(message = "物流单号不能为空")
     @ApiModelProperty("物流单号")
     private String transferNumber;
 
