@@ -71,7 +71,7 @@ public class ShopifyOrderTask {
     /**
      * 任务执行间隔，默认10分钟
      */
-    private static final int  PERIOD_TIME = 1000*60;
+    private static final int  PERIOD_TIME = 1000*60*10;
 
     @PostConstruct
     public void getShopifyList(){

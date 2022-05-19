@@ -184,12 +184,16 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                 }
             }
             dto.setDetails(details);
+            log.info("电商单发货请求参数：{}", JSON.toJSONString(dto));
             R<DelOutboundAddResponse> outboundAddResponseR = delOutboundFeignService.addShopify(dto);
+            log.info("电商单发货响应结果：{}", JSON.toJSONString(outboundAddResponseR));
             if (Constants.SUCCESS != outboundAddResponseR.getCode() || outboundAddResponseR.getData() == null) {
                 throw new BaseException("订单号："+order.getOrderNo()+"发货异常");
             }
             // 更新订单状态为已发货
             order.setStatus(OrderStatusConstant.SHIPPED);
+            order.setPushMethod("addShopify");
+            order.setPushResultMsg(JSON.toJSONString(outboundAddResponseR));
             this.updateById(order);
         });
 
@@ -201,27 +205,32 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
      */
     private void saveOrder(CommonOrder commonOrder){
         List<CommonOrderItem> orderItemList = commonOrder.getCommonOrderItemList();
-        if (CollectionUtils.isNotEmpty(orderItemList)) {
-            List<String> skuList = orderItemList.stream().map(CommonOrderItem::getPlatformSku).collect(Collectors.toList());
-            BasDeliveryServiceMatchingDto matchingDto = new BasDeliveryServiceMatchingDto();
-            matchingDto.setSkuList(skuList);
-            matchingDto.setSellerCode(commonOrder.getCusCode());
-            R<List<BasDeliveryServiceMatching>> deliveryServiceMatchingR = basSkuRuleMatchingFeignService.getList(matchingDto);
-            if (Constants.SUCCESS.equals(deliveryServiceMatchingR.getCode()) && CollectionUtils.isNotEmpty(deliveryServiceMatchingR.getData())) {
-                List<BasDeliveryServiceMatching> matchingList = deliveryServiceMatchingR.getData();
-                // 如果查出多种规则 不自动匹配, 查出一种才匹配
-                if (matchingList.size() == 1) {
-                    BasDeliveryServiceMatching serviceMatching = matchingList.get(0);
-                    commonOrder.setWarehouseCode(serviceMatching.getWarehouseCode());
-                    commonOrder.setWarehouseName(serviceMatching.getWarehouseName());
-                    commonOrder.setShippingService(serviceMatching.getShipmentService());
+        // 自动匹配各种规则
+        if (StringUtils.isNotBlank(commonOrder.getShippingServiceCode())) {
+            if (CollectionUtils.isNotEmpty(orderItemList)) {
+                List<String> skuList = orderItemList.stream().map(CommonOrderItem::getPlatformSku).collect(Collectors.toList());
+                BasDeliveryServiceMatchingDto matchingDto = new BasDeliveryServiceMatchingDto();
+                matchingDto.setSkuList(skuList);
+                matchingDto.setSellerCode(commonOrder.getCusCode());
+                R<List<BasDeliveryServiceMatching>> deliveryServiceMatchingR = basSkuRuleMatchingFeignService.getList(matchingDto);
+                if (Constants.SUCCESS.equals(deliveryServiceMatchingR.getCode()) && CollectionUtils.isNotEmpty(deliveryServiceMatchingR.getData())) {
+                    List<BasDeliveryServiceMatching> matchingList = deliveryServiceMatchingR.getData();
+                    // 如果查出多种规则 不自动匹配, 查出一种才匹配
+                    if (matchingList.size() == 1) {
+                        BasDeliveryServiceMatching serviceMatching = matchingList.get(0);
+                        commonOrder.setWarehouseCode(serviceMatching.getWarehouseCode());
+                        commonOrder.setWarehouseName(serviceMatching.getWarehouseName());
+                        commonOrder.setShippingServiceCode(serviceMatching.getShipmentService());
+                    }
                 }
             }
         }
-        R<BasOtherRules> info = basSkuRuleMatchingFeignService.getInfo(commonOrder.getCusCode());
-        if (Constants.SUCCESS.equals(info.getCode()) && info.getData() != null) {
-            BasOtherRules rules = info.getData();
-            commonOrder.setShippingMethod(rules.getDeliveryMethod());
+        if (StringUtils.isNotBlank(commonOrder.getShippingMethodCode())) {
+            R<BasOtherRules> info = basSkuRuleMatchingFeignService.getInfo(commonOrder.getCusCode());
+            if (Constants.SUCCESS.equals(info.getCode()) && info.getData() != null) {
+                BasOtherRules rules = info.getData();
+                commonOrder.setShippingMethodCode(rules.getDeliveryMethod());
+            }
         }
         LambdaQueryWrapper<CommonOrder> queryWrapper =new LambdaQueryWrapper<CommonOrder>()
                 .eq(CommonOrder::getOrderNo, commonOrder.getOrderNo()).last("limit 1");
