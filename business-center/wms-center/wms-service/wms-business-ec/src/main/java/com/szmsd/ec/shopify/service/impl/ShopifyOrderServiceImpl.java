@@ -238,10 +238,13 @@ public class ShopifyOrderServiceImpl extends ServiceImpl<ShopifyOrderMapper, Sho
         // 复制locationId
         Fulfillment2 fulfillment = (Fulfillment2)createFulfillmentReqeust.getFulfillment();
 //        fulfillment.setLocationId(ShopifyConfig.getLocationId(shopifyPermission.getShop(), shopifyPermission.getAccessToken()));
-        String locations = shopifyPermission.getLocations();
-        if (StringUtils.isNotBlank(locations)) {
-            String[] splitLocationIds = locations.split(",");
-            fulfillment.setLocationId(splitLocationIds[0]); // 取一个
+        // 如果locationId为空则选择店铺默认的locationId
+        if (StringUtils.isBlank(fulfillment.getLocationId())) {
+            String locations = shopifyPermission.getLocations();
+            if (StringUtils.isNotBlank(locations)) {
+                String[] splitLocationIds = locations.split(",");
+                fulfillment.setLocationId(splitLocationIds[0]); // 取一个
+            }
         }
         data = JSON.toJSONString(createFulfillmentReqeust);
         log.info("【Shopify 创建履约单】请求URL: {}", url);

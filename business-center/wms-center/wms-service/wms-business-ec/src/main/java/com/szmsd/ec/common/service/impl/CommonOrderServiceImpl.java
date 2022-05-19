@@ -172,14 +172,14 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                     BasSkuRuleMatching ruleMatching = ruleMatchingList.stream().filter(v -> item.getPlatformSku().equals(v.getSourceSku())).findFirst().orElse(null);
                     if (ruleMatching != null) {
                         detailDto.setSku(ruleMatching.getOmsSku());
+                        // 把映射出来的oms sku 存到remark 字段以备查验
+                        item.setRemark(ruleMatching.getOmsSku());
+                        commonOrderItemMapper.updateById(item);
                     }else {
                         detailDto.setSku(item.getPlatformSku());
                     }
                     detailDto.setQty(item.getQuantity().longValue());
                     detailDto.setRemark(item.getPlatformSku());
-                    // 把映射出来的oms sku 存到remark 字段以备查验
-                    item.setRemark(ruleMatching.getOmsSku());
-                    commonOrderItemMapper.updateById(item);
                     details.add(detailDto);
                 }
             }

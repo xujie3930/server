@@ -65,6 +65,7 @@ public class ShopifyFulfillmentListener {
             lineItem.setQuantity(item.getQuantity());
             items.add(lineItem);
         }
+        ft.setLocationId(commonOrder.getShippingWarehouseId() + "");
         ft.setLineItemList(items);
         reqeust.setFulfillment(ft);
         JSONObject fulfillmentResult = shopifyOrderService.createFulfillment(commonOrder.getShopName(),commonOrder.getOrderNo(), reqeust);
