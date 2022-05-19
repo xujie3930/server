@@ -81,6 +81,7 @@ public class ShopifyOrderController extends BaseController {
         JSONArray jsonArray = new JSONArray();
         BasSellerShopifyPermission permission = new BasSellerShopifyPermission();
         permission.setShop(shopName);
+        permission.setSellerCode(SecurityUtils.getLoginUser().getSellerCode());
         R<List<BasSellerShopifyPermission>> shopList = basSellerShopifyPermissionFeignService.list(permission);
         if (Constants.SUCCESS.equals(shopList.getCode()) && shopList.getData() != null) {
             List<BasSellerShopifyPermission> shopListData = shopList.getData();
