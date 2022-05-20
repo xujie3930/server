@@ -312,6 +312,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         if (!"070003".equals(returnExpressAddDTO.getReturnType())) {
             DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
             delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
+            delOutboundListQueryDto.setQueryAll(true);
             TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);
             if (page != null && page.getCode() == 200) {
                 List<DelOutboundListVO> rows = page.getRows();

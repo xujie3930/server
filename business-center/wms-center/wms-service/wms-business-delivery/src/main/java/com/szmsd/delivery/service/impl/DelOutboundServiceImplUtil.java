@@ -288,7 +288,11 @@ public final class DelOutboundServiceImplUtil {
             // 如果没有传重派订单的逻辑，默认就查询不是重派订单
             reassignType = DelOutboundConstant.REASSIGN_TYPE_N;
         }
-        queryWrapper.eq("o.reassign_type", reassignType);
+        // 后端接口查询重派和非重派订单
+        if (queryDto.getQueryAll() != null && queryDto.getQueryAll()) {
+            reassignType = null;
+        }
+        queryWrapper.eq(StringUtils.isNotBlank(reassignType), "o.reassign_type", reassignType);
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.tracking_status", queryDto.getTrackingStatus());
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
