@@ -1,11 +1,14 @@
 package com.szmsd.bas.controller;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.event.SyncReadListener;
+import com.szmsd.bas.dto.BasDeliveryServiceMatchingDto;
+import com.szmsd.bas.dto.BasSkuRuleMatchingDto;
 import com.szmsd.bas.dto.BasSkuRuleMatchingImportDto;
 import com.szmsd.bas.dto.BaseProductImportDto;
 import com.szmsd.bas.enums.SkuRuleMatchingEnum;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -70,6 +73,24 @@ public class BasSkuRuleMatchingController extends BaseController{
             List<BasSkuRuleMatching> list = basSkuRuleMatchingService.selectBasSkuRuleMatchingList(basSkuRuleMatching);
             return getDataTable(list);
       }
+
+    /**
+     * 获取sku规则匹配表模块详细信息List
+     */
+    @PreAuthorize("@ss.hasPermi('BasSkuRuleMatching:BasSkuRuleMatching:getList')")
+    @PostMapping(value = "getList")
+    @ApiOperation(value = "获取sku规则匹配表模块详细信息List",notes = "获取sku规则匹配表模块详细信息List")
+    public R<List<BasSkuRuleMatching>> getList(@RequestBody BasSkuRuleMatchingDto dto)
+    {
+
+        if(StringUtils.isEmpty(dto.getSellerCode())){
+            throw new CommonException("400", "sellerCode 不能空");
+        }
+        if(StringUtils.isEmpty(dto.getSourceSkuList())){
+            throw new CommonException("400", "sourceSkuList 不能空");
+        }
+        return R.ok(basSkuRuleMatchingService.getList(dto));
+    }
 
 
     /**

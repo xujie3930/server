@@ -32,6 +32,11 @@ public class DelOutboundConstant {
     public static final String SOURCE_TYPE_DOC = "DOC";
 
     /**
+     * Shopify
+     */
+    public static final String SOURCE_TYPE_SHOPIFY = "SHOPIFY";
+
+    /**
      * Y        是重派
      * N        不是重派
      * 默认值N

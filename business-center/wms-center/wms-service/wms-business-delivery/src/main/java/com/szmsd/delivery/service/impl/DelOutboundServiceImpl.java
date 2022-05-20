@@ -387,6 +387,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return this.createDelOutbound(dto);
     }
 
+    @Transactional
+    @Override
+    public DelOutboundAddResponse insertDelOutboundShopify(DelOutboundDto dto) {
+        if (!DelOutboundOrderTypeEnum.has(dto.getOrderType())) {
+            throw new CommonException("400", "订单类型不存在");
+        }
+        // 来源为Shopify
+        dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_SHOPIFY);
+        return this.createDelOutbound(dto);
+    }
+
     private void docValid(DelOutboundDto dto) {
         if (DelOutboundConstant.SOURCE_TYPE_DOC.equals(dto.getSourceType())) {
             List<DelOutboundDetailDto> details = dto.getDetails();

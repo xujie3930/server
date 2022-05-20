@@ -1,6 +1,7 @@
 package com.szmsd.bas.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -22,7 +23,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value = "客户shopify授权信息", description = "BasSellerShopifyPermission对象")
+@ApiModel(value = "BasSellerShopifyPermission", description = "BasSellerShopifyPermission对象")
 public class BasSellerShopifyPermission extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -66,4 +67,12 @@ public class BasSellerShopifyPermission extends BaseEntity {
 
     @ApiModelProperty(value = "locations")
     private String locations;
+
+    @ApiModelProperty("当前页，从1开始，默认为1")
+    @TableField(exist = false)
+    private int pageNum = 1;
+
+    @ApiModelProperty("每页的数量，默认为10")
+    @TableField(exist = false)
+    private int pageSize = 10;
 }

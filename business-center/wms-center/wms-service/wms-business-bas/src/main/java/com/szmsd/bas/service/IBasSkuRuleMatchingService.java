@@ -2,6 +2,7 @@ package com.szmsd.bas.service;
 
 import com.szmsd.bas.domain.BasSkuRuleMatching;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.bas.dto.BasSkuRuleMatchingDto;
 import com.szmsd.bas.dto.BasSkuRuleMatchingImportDto;
 
 import java.util.List;
@@ -41,5 +42,7 @@ public interface IBasSkuRuleMatchingService extends IService<BasSkuRuleMatching>
         int deleteBasSkuRuleMatchingByIds(List<BasSkuRuleMatching>  list);
 
     void importBaseProduct(List<BasSkuRuleMatchingImportDto> userList, String sellerCode);
+
+    List<BasSkuRuleMatching> getList(BasSkuRuleMatchingDto dto);
 }
 

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.mapper.BasDeliveryServiceMatchingMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasDeliveryServiceMatching">
+                    <id column="id" property="id"/>
+                    <result column="create_by_name" property="createByName"/>
+                    <result column="create_time" property="createTime"/>
+                    <result column="update_by_name" property="updateByName"/>
+                    <result column="update_time" property="updateTime"/>
+                    <result column="remark" property="remark"/>
+                    <result column="create_by" property="createBy"/>
+                    <result column="update_by" property="updateBy"/>
+                    <result column="version" property="version"/>
+                    <result column="del_flag" property="delFlag"/>
+                    <result column="sku" property="sku"/>
+                    <result column="country_code" property="countryCode"/>
+                    <result column="country" property="country"/>
+                    <result column="buyer_service" property="buyerService"/>
+                    <result column="start_weight" property="startWeight"/>
+                    <result column="end_weight" property="endWeight"/>
+                    <result column="size" property="size"/>
+                    <result column="volume" property="volume"/>
+                    <result column="perimeter" property="perimeter"/>
+                    <result column="lwh_sum" property="lwhSum"/>
+                    <result column="warehouse_code" property="warehouseCode"/>
+                    <result column="warehouse_name" property="warehouseName"/>
+
+
+                    <result column="shipment_rule" property="shipmentRule"/>
+                    <result column="shipment_service" property="shipmentService"/>
+                    <result column="seller_code" property="sellerCode"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+                create_by_name,
+                create_time,
+                update_by_name,
+                update_time,
+                remark,
+            id, create_by, update_by, version, del_flag, sku, country_code, country, buyer_service, start_weight, end_weight, size, volume, perimeter, lwh_sum, warehouse_code, warehouse_name, shipment_rule, shipment_service, seller_code
+        </sql>
+
+
+</mapper>

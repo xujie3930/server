@@ -28,6 +28,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private UserDetailsService userDetailsService;
     private final DocCodeAuthConfiguration docCodeAuthConfiguration;
+    @Resource
+    private ThirdLoginAuthenticationProvider thirdLoginAuthenticationProvider;
 
     @SuppressWarnings({"all"})
     public WebSecurityConfig(DocCodeAuthConfiguration docCodeAuthConfiguration) {
@@ -47,7 +49,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        auth.authenticationProvider(thirdLoginAuthenticationProvider).userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
     @Bean

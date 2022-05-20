@@ -62,4 +62,7 @@ public class DelOutboundListQueryDto extends QueryDto {
 
     @ApiModelProperty(value = "refno")
     private String refNo;
+
+    @ApiModelProperty(value = "查询所有订单类型（重派和非重派）")
+    private Boolean queryAll;
 }

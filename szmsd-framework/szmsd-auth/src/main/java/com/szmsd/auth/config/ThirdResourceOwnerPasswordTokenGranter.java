@@ -8,8 +8,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -23,6 +27,7 @@ public class ThirdResourceOwnerPasswordTokenGranter extends ResourceOwnerPasswor
 
     private ThirdAuthenticationConfig thirdAuthenticationConfig;
     private RestTemplate restTemplate;
+    private AuthenticationManager authenticationManager;
 
     public ThirdResourceOwnerPasswordTokenGranter(AuthenticationManager authenticationManager, AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
         super(authenticationManager, tokenServices, clientDetailsService, requestFactory);
@@ -32,6 +37,23 @@ public class ThirdResourceOwnerPasswordTokenGranter extends ResourceOwnerPasswor
     protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
         // 验证自定义规则
         Map<String, String> requestParameters = tokenRequest.getRequestParameters();
+        String thirdToken = requestParameters.get("thirdToken");
+        if (null != thirdToken) {
+            Authentication userAuth = new ThirdLoginAuthenticationToken(thirdToken);
+            ((AbstractAuthenticationToken) userAuth).setDetails(requestParameters);
+            try {
+                userAuth = authenticationManager.authenticate(userAuth);
+            } catch (AccountStatusException | BadCredentialsException ase) {
+                // covers expired, locked, disabled cases (mentioned in section 5.2, draft 31)
+                // If the username/password are wrong the spec says we should send 400/invalid grant
+                throw new InvalidGrantException(ase.getMessage());
+            }
+            if (userAuth == null || !userAuth.isAuthenticated()) {
+                throw new InvalidGrantException("Could not authenticate user: " + thirdToken);
+            }
+            OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);
+            return new OAuth2Authentication(storedOAuth2Request, userAuth);
+        }
         if (null != thirdAuthenticationConfig) {
             List<ThirdAuthenticationConfig.DataConfig> values = thirdAuthenticationConfig.getValues();
             if (CollectionUtils.isNotEmpty(values)) {
@@ -76,5 +98,9 @@ public class ThirdResourceOwnerPasswordTokenGranter extends ResourceOwnerPasswor
 
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 }

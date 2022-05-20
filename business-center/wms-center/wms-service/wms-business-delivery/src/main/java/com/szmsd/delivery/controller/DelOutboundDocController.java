@@ -5,9 +5,11 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
 import com.szmsd.delivery.service.IDelOutboundDocService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
+import com.szmsd.http.vo.PricedProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -56,6 +58,13 @@ public class DelOutboundDocController extends BaseController {
     public R updateShipmentLabel(@RequestBody List<String> idList) {
         iDelOutboundBringVerifyService.updateShipmentLabel(idList);
         return R.ok(1);
+    }
+
+    @Log(title = "根据仓库获取发货服务", businessType = BusinessType.OTHER)
+    @PostMapping("/getShippingService")
+    @ApiOperation(value = "根据仓库获取发货服务", position = 100)
+    public R<List<PricedProduct>> getShippingService(DelOutboundOtherInServiceDto delOutboundOtherInServiceDto){
+        return R.ok(delOutboundDocService.inService2(delOutboundOtherInServiceDto));
     }
 
 }

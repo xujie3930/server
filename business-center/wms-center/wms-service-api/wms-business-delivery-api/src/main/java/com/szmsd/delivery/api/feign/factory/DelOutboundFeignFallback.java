@@ -176,6 +176,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<DelOutboundAddResponse> reassign(DelOutboundDto dto) {
                 throw new RuntimeException(throwable.getMessage());
             }
+
+            @Override
+            public R<DelOutboundAddResponse> addShopify(DelOutboundDto dto) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

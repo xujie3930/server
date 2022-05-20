@@ -129,4 +129,9 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     public void updateShipmentLabel(List<String> idList) {
         R.getDataAndException(this.delOutboundFeignService.updateShipmentLabel(idList));
     }
+
+    @Override
+    public DelOutboundAddResponse addShopify(DelOutboundDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.addShopify(dto));
+    }
 }

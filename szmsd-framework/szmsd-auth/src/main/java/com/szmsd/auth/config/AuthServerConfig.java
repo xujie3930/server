@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -98,6 +100,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter
         ThirdResourceOwnerPasswordTokenGranter thirdResourceOwnerPasswordTokenGranter = new ThirdResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices, clientDetails, requestFactory);
         thirdResourceOwnerPasswordTokenGranter.setThirdAuthenticationConfig(thirdAuthenticationConfig);
         thirdResourceOwnerPasswordTokenGranter.setRestTemplate(restTemplate());
+        thirdResourceOwnerPasswordTokenGranter.setAuthenticationManager(authenticationManager);
         tokenGranters.add(thirdResourceOwnerPasswordTokenGranter);
         if (authenticationManager != null) {
             tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
@@ -178,18 +181,27 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter
                 if (accessToken instanceof DefaultOAuth2AccessToken)
                 {
                     DefaultOAuth2AccessToken token = (DefaultOAuth2AccessToken) accessToken;
-                    LoginUser user = (LoginUser) authentication.getUserAuthentication().getPrincipal();
-                    Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
-                    additionalInformation.put(SecurityConstants.DETAILS_USERNAME, authentication.getName());
-                    additionalInformation.put(SecurityConstants.DETAILS_USER_ID, user.getUserId());
-                    additionalInformation.put("code", HttpStatus.SUCCESS);
-                    additionalInformation.put("sellerCode", user.getSellerCode());
-                    additionalInformation.put("allDataScope", user.isAllDataScope());
-                    additionalInformation.put("permissions", user.getPermissions());
-                    token.setAdditionalInformation(additionalInformation);
+                    Authentication userAuthentication = authentication.getUserAuthentication();
+                    if (userAuthentication instanceof UsernamePasswordAuthenticationToken) {
+                        LoginUser user = (LoginUser) userAuthentication.getPrincipal();
+                        Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
+                        additionalInformation.put(SecurityConstants.DETAILS_USERNAME, authentication.getName());
+                        additionalInformation.put(SecurityConstants.DETAILS_USER_ID, user.getUserId());
+                        additionalInformation.put("code", HttpStatus.SUCCESS);
+                        additionalInformation.put("sellerCode", user.getSellerCode());
+                        additionalInformation.put("allDataScope", user.isAllDataScope());
+                        additionalInformation.put("permissions", user.getPermissions());
+                        token.setAdditionalInformation(additionalInformation);
+                    } else if (userAuthentication instanceof ThirdLoginAuthenticationToken) {
+                        Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
+                        additionalInformation.put(SecurityConstants.DETAILS_USERNAME, authentication.getPrincipal());
+                        additionalInformation.put(SecurityConstants.DETAILS_USER_ID, 0);
+                        additionalInformation.put("code", HttpStatus.SUCCESS);
+                        token.setAdditionalInformation(additionalInformation);
+                    }
                 }
                 return accessToken;
-            };
+            }
         };
     }
 }

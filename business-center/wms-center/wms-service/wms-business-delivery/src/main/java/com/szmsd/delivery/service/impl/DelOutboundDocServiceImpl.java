@@ -153,6 +153,40 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         return this._inService(criteria);
     }
 
+    @Override
+    public List<PricedProduct> inService2(DelOutboundOtherInServiceDto dto) {
+        // 查询仓库信息
+        String warehouseCode = dto.getWarehouseCode();
+        BasWarehouse warehouse = null;
+        if (StringUtils.isNotEmpty(warehouseCode)) {
+            warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
+            if (null == warehouse) {
+                throw new CommonException("400", "仓库信息不存在");
+            }
+        }
+        // 传入参数：仓库，SKU
+        PricedProductInServiceCriteria criteria = new PricedProductInServiceCriteria();
+        criteria.setClientCode(dto.getClientCode());
+        CountryInfo countryInfo = null;
+        if (null != warehouse.getCountryCode()) {
+            criteria.setCountryName(warehouse.getCountryName());
+            countryInfo = new CountryInfo(warehouse.getCountryCode(), null, warehouse.getCountryName(), warehouse.getCountryChineseName());
+        }
+        Address fromAddress = null;
+        if (null != warehouse) {
+            fromAddress = new Address(warehouse.getStreet1(),
+                    warehouse.getStreet2(),
+                    null,
+                    warehouse.getPostcode(),
+                    warehouse.getCity(),
+                    warehouse.getProvince(),
+                    countryInfo
+            );
+        }
+        criteria.setFromAddress(fromAddress);
+        return this._inService(criteria);
+    }
+
     private List<PricedProduct> _inService(PricedProductInServiceCriteria criteria) {
         return this.htpPricedProductClientService.inService(criteria);
     }

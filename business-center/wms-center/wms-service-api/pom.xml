@@ -34,6 +34,7 @@
         <module>wms-business-exception-api</module>
         <module>wms-business-package-api</module>
         <module>wms-business-report-api</module>
+        <module>wms-business-ec-api</module>
     </modules>
 
     <dependencyManagement>
@@ -101,6 +102,11 @@
             <dependency>
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-inventory-api</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-ec-api</artifactId>
                 <version>1.0.0</version>
             </dependency>
         </dependencies>

@@ -34,6 +34,8 @@ import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.delivery.vo.DelOutboundCombinationVO;
 import com.szmsd.delivery.vo.DelOutboundPackingDetailVO;
 import com.szmsd.delivery.vo.DelOutboundPackingVO;
+import com.szmsd.ec.dto.TransferCallbackDTO;
+import com.szmsd.ec.feign.CommonOrderFeignService;
 import com.szmsd.exception.api.service.ExceptionInfoClientService;
 import com.szmsd.http.api.service.IHtpCarrierClientService;
 import com.szmsd.http.api.service.IHtpIBasClientService;
@@ -106,6 +108,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     @SuppressWarnings({"all"})
     @Autowired
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
+    @Autowired
+    private CommonOrderFeignService commonOrderFeignService;
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -436,6 +440,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     @Override
     public ShipmentOrderResult shipmentOrder(DelOutboundWrapperContext delOutboundWrapperContext) {
         DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+        String orderNo = delOutbound.getOrderNo();
+        String shipmentService = delOutbound.getShipmentService();
+        if (StringUtils.isEmpty(shipmentService)) {
+            throw new CommonException("400", "发货服务名称为空");
+        }
         // 查询地址信息
         DelOutboundAddress address = delOutboundWrapperContext.getAddress();
         // 查询sku信息
@@ -453,7 +462,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
             createShipmentOrderCommand.setOrderNumber(delOutbound.getRefNo());
         } else {
-            createShipmentOrderCommand.setOrderNumber(delOutbound.getOrderNo());
+            createShipmentOrderCommand.setOrderNumber(orderNo);
         }
         createShipmentOrderCommand.setClientNumber(delOutbound.getSellerCode());
         createShipmentOrderCommand.setReceiverAddress(new AddressCommand(address.getConsignee(),
@@ -546,13 +555,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
             packageNumber = delOutbound.getRefNo();
         } else {
-            packageNumber = delOutbound.getOrderNo();
+            packageNumber = orderNo;
         }
-        packages.add(new Package(packageNumber, delOutbound.getRemark() + "|" + delOutbound.getOrderNo(),
+        packages.add(new Package(packageNumber, delOutbound.getRemark() + "|" + orderNo,
                 new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                 weightInGram, packageItems));
         createShipmentOrderCommand.setPackages(packages);
-        createShipmentOrderCommand.setCarrier(new Carrier(delOutbound.getShipmentService()));
+        createShipmentOrderCommand.setCarrier(new Carrier(shipmentService));
         ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
         if (null == responseObjectWrapper) {
             throw new CommonException("400", "创建承运商物流订单失败，调用承运商系统无响应");
@@ -562,6 +571,15 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             // 判断结果集是不是正确的
             ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
             if (null == shipmentOrderResult) {
+                try {
+                    TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
+                    transferCallbackDTO.setOrderNo(delOutbound.getRefNo());
+                    transferCallbackDTO.setLogisticsRouteId(shipmentService);
+                    transferCallbackDTO.setTransferErrorMsg("创建承运商物流订单失败，调用承运商系统返回数据为空");
+                    commonOrderFeignService.transferCallback(transferCallbackDTO);
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
                 throw new CommonException("400", "创建承运商物流订单失败，调用承运商系统返回数据为空");
             }
             if (null == shipmentOrderResult.getSuccess() || !shipmentOrderResult.getSuccess()) {
@@ -578,11 +596,38 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 } else {
                     builder.append("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空");
                 }
+                try {
+                    TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
+                    transferCallbackDTO.setOrderNo(delOutbound.getRefNo());
+                    transferCallbackDTO.setLogisticsRouteId(shipmentService);
+                    transferCallbackDTO.setTransferErrorMsg(builder.toString());
+                    commonOrderFeignService.transferCallback(transferCallbackDTO);
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
                 throw new CommonException("400", builder.toString());
+            }
+            try {
+                TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
+                transferCallbackDTO.setOrderNo(delOutbound.getRefNo());
+                transferCallbackDTO.setLogisticsRouteId(shipmentService);
+                transferCallbackDTO.setTransferNumber(shipmentOrderResult.getOrderNumber());
+                commonOrderFeignService.transferCallback(transferCallbackDTO);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
             return shipmentOrderResult;
         } else {
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
+            try {
+                TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
+                transferCallbackDTO.setOrderNo(delOutbound.getRefNo());
+                transferCallbackDTO.setLogisticsRouteId(shipmentService);
+                transferCallbackDTO.setTransferErrorMsg(exceptionMessage);
+                commonOrderFeignService.transferCallback(transferCallbackDTO);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
             throw new CommonException("400", exceptionMessage);
         }
     }
