@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -121,6 +122,11 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             throw new BaseException("订单："+String.join(",", warehouseList)+"请完善发货仓库");
         }
 
+        List<String> shipWarehouseList = commonOrderList.stream().filter(v -> v.getShippingWarehouseId() == null).map(CommonOrder::getOrderNo).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(shipWarehouseList)) {
+            throw new BaseException("订单："+String.join(",", shipWarehouseList)+"请完善Shopify发货仓库");
+        }
+
         List<String> shippingMethodList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getShippingMethod())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(shippingMethodList)) {
             throw new BaseException("订单："+String.join(",", shippingMethodList)+"请完善发货方式");
@@ -166,29 +172,40 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                 if (Constants.SUCCESS.equals(r.getCode()) && CollectionUtils.isNotEmpty(r.getData())) {
                     ruleMatchingList = r.getData();
                 }
-
                 for (CommonOrderItem item : commonOrderItems) {
-                    DelOutboundDetailDto detailDto = new DelOutboundDetailDto();
                     BasSkuRuleMatching ruleMatching = ruleMatchingList.stream().filter(v -> item.getPlatformSku().equals(v.getSourceSku())).findFirst().orElse(null);
                     if (ruleMatching != null) {
-                        detailDto.setSku(ruleMatching.getOmsSku());
+                        String omsSku = ruleMatching.getOmsSku();
+                        if (StringUtils.isNotBlank(omsSku)) {
+                            String[] skuArr = omsSku.split(",");
+                            for (String sku : skuArr) {
+                                DelOutboundDetailDto detail = new DelOutboundDetailDto();
+                                detail.setSku(sku);
+                                detail.setProductName(item.getTitle());
+                                detail.setQty(item.getQuantity().longValue());
+                                detail.setRemark(item.getPlatformSku());
+                                details.add(detail);
+                            }
+                        }
                         // 把映射出来的oms sku 存到remark 字段以备查验
                         item.setRemark(ruleMatching.getOmsSku());
                         commonOrderItemMapper.updateById(item);
                     }else {
+                        DelOutboundDetailDto detailDto = new DelOutboundDetailDto();
                         detailDto.setSku(item.getPlatformSku());
+                        detailDto.setProductName(item.getTitle());
+                        detailDto.setQty(item.getQuantity().longValue());
+                        detailDto.setRemark(item.getPlatformSku());
+                        details.add(detailDto);
                     }
-                    detailDto.setQty(item.getQuantity().longValue());
-                    detailDto.setRemark(item.getPlatformSku());
-                    details.add(detailDto);
                 }
             }
             dto.setDetails(details);
             log.info("电商单发货请求参数：{}", JSON.toJSONString(dto));
             R<DelOutboundAddResponse> outboundAddResponseR = delOutboundFeignService.addShopify(dto);
             log.info("电商单发货响应结果：{}", JSON.toJSONString(outboundAddResponseR));
-            if (Constants.SUCCESS != outboundAddResponseR.getCode() || outboundAddResponseR.getData() == null) {
-                throw new BaseException("订单号："+order.getOrderNo()+"发货异常");
+            if (Constants.SUCCESS != outboundAddResponseR.getCode() || outboundAddResponseR.getData() == null || !outboundAddResponseR.getData().getStatus()) {
+                throw new BaseException("订单号："+order.getOrderNo()+"发货异常："+outboundAddResponseR.getData().getMessage());
             }
             // 更新订单状态为已发货
             order.setStatus(OrderStatusConstant.SHIPPED);
