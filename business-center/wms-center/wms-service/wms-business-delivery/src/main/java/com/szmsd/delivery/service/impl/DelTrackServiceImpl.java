@@ -292,7 +292,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
     @Override
     public List<TrackAnalysisDto> getTrackAnalysis(TrackAnalysisRequestDto requestDto) {
-        List<TrackAnalysisDto> trackAnalysis = baseMapper.getTrackAnalysis(queryWrapper(requestDto));
+        List<TrackAnalysisDto> trackAnalysis = baseMapper.getTrackAnalysis(queryWrapper(requestDto).eq(StringUtils.isNotBlank(requestDto.getCountryCode()), "b.country_code", requestDto.getCountryCode()));
         List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
         Map<String, String> subList = basSubClientService.getSubListByLang("099", requestDto.getLang()); // 099为轨迹状态
         subList.forEach((k, v) -> {
@@ -318,7 +318,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         }
         List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
         List<PricedProduct> products = htpPricedProductClientService.inService(serviceCriteria);
-        List<TrackAnalysisDto> serviceAnalysis = baseMapper.getProductServiceAnalysis(queryWrapper(requestDto));
+        List<TrackAnalysisDto> serviceAnalysis = baseMapper.getProductServiceAnalysis(queryWrapper(requestDto).eq(StringUtils.isNotBlank(requestDto.getCountryCode()), "b.country_code", requestDto.getCountryCode()));
         products.forEach(p -> {
             TrackAnalysisDto analysisDto = new TrackAnalysisDto();
             analysisDto.setKeyName(p.getName());
@@ -343,7 +343,15 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
         List<PricedProduct> products = htpPricedProductClientService.inService(serviceCriteria);
         Map<String, String> subList = basSubClientService.getSubListByLang("099", requestDto.getLang());
-        List<TrackAnalysisExportDto> exportData = baseMapper.getAnalysisExportData(queryWrapper(requestDto).ne("a.order_no", ""));
+
+        QueryWrapper<TrackAnalysisRequestDto> wrapper = queryWrapper(requestDto)
+                .ne("a.order_no", "");
+        if (requestDto.getDateType() != null && requestDto.getDateType() == 3) {
+            wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()), "b.tracking_time", DateUtils.parseDate(requestDto.getStartTime()));
+            wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()), "b.tracking_time", DateUtils.parseDate(requestDto.getEndTime()));
+        }
+        wrapper.eq(StringUtils.isNotBlank(requestDto.getCountryCode()), "c.country_code", requestDto.getCountryCode());
+        List<TrackAnalysisExportDto> exportData = baseMapper.getAnalysisExportData(wrapper);
         Date now = new Date();
         exportData.forEach(data -> {
             // 发货天数（导出当天-发货时间的天数）、轨迹天数（导出当天-最新轨迹时间的天数）
@@ -381,7 +389,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     private QueryWrapper<TrackAnalysisRequestDto> queryWrapper(TrackAnalysisRequestDto requestDto) {
         QueryWrapper<TrackAnalysisRequestDto> wrapper = new QueryWrapper<>();
         wrapper.eq(StringUtils.isNotBlank(requestDto.getShipmentService()), "a.shipment_rule", requestDto.getShipmentService());
-        wrapper.eq(StringUtils.isNotBlank(requestDto.getCountryCode()), "b.country_code", requestDto.getCountryCode());
+//        wrapper.eq(StringUtils.isNotBlank(requestDto.getCountryCode()), "b.country_code", requestDto.getCountryCode());
         wrapper.eq(StringUtils.isNotBlank(requestDto.getWarehouseCode()), "a.warehouse_code", requestDto.getWarehouseCode());
         wrapper.eq(StringUtils.isNotBlank(requestDto.getTrackingStatus()), "a.tracking_status", requestDto.getTrackingStatus());
         if (requestDto.getDateType() != null) {
@@ -391,9 +399,6 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             } else if (requestDto.getDateType() == 2) {
                 wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()), "a.shipments_time", DateUtils.parseDate(requestDto.getStartTime()));
                 wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()), "a.shipments_time", DateUtils.parseDate(requestDto.getEndTime()));
-            } else if (requestDto.getDateType() == 3) {
-                wrapper.ge(StringUtils.isNotBlank(requestDto.getStartTime()), "b.tracking_time", DateUtils.parseDate(requestDto.getStartTime()));
-                wrapper.le(StringUtils.isNotBlank(requestDto.getEndTime()), "b.tracking_time", DateUtils.parseDate(requestDto.getEndTime()));
             }
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
