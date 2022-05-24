@@ -281,6 +281,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             // 跟一件代发的逻辑一样
             // 这里明细的重量尺寸是定死的1*1*1 10g
             if (PricingEnum.SKU.equals(pricingEnum)) {
+                int index = 0;
                 for (DelOutboundDetail detail : detailList) {
                     BigDecimal declaredValue;
                     if (null != detail.getDeclaredValue()) {
@@ -288,9 +289,16 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     } else {
                         declaredValue = BigDecimal.ZERO;
                     }
-                    packageInfos.add(new PackageInfo(new Weight(BigDecimal.TEN, "g"),
-                            new Packing(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, "cm"),
-                            Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, ""));
+                    if (index == 0) {
+                        packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
+                                new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm"),
+                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, ""));
+                    } else {
+                        packageInfos.add(new PackageInfo(new Weight(BigDecimal.TEN, "g"),
+                                new Packing(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, "cm"),
+                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, ""));
+                    }
+                    index++;
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 BigDecimal declareValue = BigDecimal.ZERO;
