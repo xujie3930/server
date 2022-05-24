@@ -1281,6 +1281,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getWeight, weight);
         // 规格，长*宽*高
         updateWrapper.set(DelOutbound::getSpecifications, length + "*" + width + "*" + height);
+        // 修改状态为处理中
+        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
         return this.baseMapper.update(null, updateWrapper);
     }
 
