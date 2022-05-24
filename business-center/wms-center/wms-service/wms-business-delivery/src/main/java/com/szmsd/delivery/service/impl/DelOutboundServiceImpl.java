@@ -684,7 +684,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 返回异常错误信息
             response.setStatus(false);
             response.setMessage(e.getMessage());
-            return response;
+            // return response;
+            // 返回错误，事务回滚
+            throw e;
         }
     }
 
