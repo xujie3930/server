@@ -71,7 +71,7 @@ public class ShopifyOrderTask {
     /**
      * 任务执行间隔，默认10分钟
      */
-    private static final int  PERIOD_TIME = 1000*60*10;
+    private static final int  PERIOD_TIME = 1000*60*1;
 
     @PostConstruct
     public void getShopifyList(){
@@ -144,13 +144,13 @@ public class ShopifyOrderTask {
         shopifyPermissionList.forEach(shop -> {
             // 获取当前店铺最后的一个订单
             ShopifyOrder lastOrder = shopifyOrderService.getOne(new LambdaQueryWrapper<ShopifyOrder>().select(ShopifyOrder::getCreatedAt)
-                    .eq(ShopifyOrder::getShopId, shop.getId())
+                    .eq(ShopifyOrder::getShopName, shop.getShop())
                     .orderByDesc(ShopifyOrder::getCreatedAt).last("limit 1"));
             String after = "";
             if (lastOrder != null){
                 after = DateUtils.parseDateToStr(ShopifyConfig.TIME_FORMAT_STR, lastOrder.getCreatedAt());
             }else {
-                after = DateUtils.parseDateToStr(ShopifyConfig.TIME_FORMAT_STR, DateUtils.addMonths(new Date(), -12));
+                after = DateUtils.parseDateToStr(ShopifyConfig.TIME_FORMAT_STR, DateUtils.addYears(new Date(), -1));
             }
             log.info("【shopify】店铺：{} 查询订单起始时间：{} - {}", shop.getShop(), after, before);
             Map<String, String> parameters = new HashMap<>();
