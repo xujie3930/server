@@ -27,10 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -54,11 +51,42 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
     @Autowired
     private BaseProductClientService baseProductClientService;
 
+    private List<DelOutboundAddResponse> addResponseList(List<DelOutboundDto> dtoList) {
+        List<DelOutboundAddResponse> result = new ArrayList<>();
+        int index = 1;
+        List<String> refNoList = new ArrayList<String>();
+        for (DelOutboundDto dto : dtoList) {
+            DelOutboundAddResponse delOutbound = null;
+            if (StringUtils.isNotEmpty(dto.getRefNo()) && refNoList.contains(dto.getRefNo())) {
+                delOutbound = new DelOutboundAddResponse();
+                // 返回异常错误信息
+                delOutbound.setStatus(false);
+                delOutbound.setMessage("本次操作数据中Refno 必须唯一值" + dto.getRefNo());
+            } else {
+                refNoList.add(dto.getRefNo());
+                try {
+                    delOutbound = this.delOutboundService.insertDelOutbound(dto);
+                } catch (Exception e) {
+                    delOutbound = new DelOutboundAddResponse();
+                    // 返回异常错误信息
+                    delOutbound.setStatus(false);
+                    delOutbound.setMessage(e.getMessage());
+                }
+            }
+            delOutbound.setIndex(index);
+            result.add(delOutbound);
+            index++;
+        }
+        return result;
+    }
+
     @Override
     public List<DelOutboundAddResponse> add(List<DelOutboundDto> list) {
 
         // 批量创建出库单
-        List<DelOutboundAddResponse> responses = this.delOutboundService.insertDelOutbounds(list);
+        // List<DelOutboundAddResponse> responses = this.delOutboundService.insertDelOutbounds(list);
+        // 处理异常信息，出现异常让事务回滚
+        List<DelOutboundAddResponse> responses = this.addResponseList(list);
 
         // 获取出库单ID
         List<Long> ids = responses.stream().map(DelOutboundAddResponse::getId).filter(Objects::nonNull).collect(Collectors.toList());
