@@ -253,7 +253,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             // 创建承运商物流订单
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+            logger.info(">>>>>{}-开始创建承运商订单", delOutbound.getOrderNo());
             ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
+            logger.info(">>>>>{}-承运商订单创建完成", delOutbound.getOrderNo());
             String trackingNo = shipmentOrderResult.getMainTrackingNumber();
             String orderNumber = shipmentOrderResult.getOrderNumber();
             // 返回值
