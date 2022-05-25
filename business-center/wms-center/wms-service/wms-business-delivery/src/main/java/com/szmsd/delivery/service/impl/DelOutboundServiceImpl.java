@@ -1,5 +1,7 @@
 package com.szmsd.delivery.service.impl;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.TimeInterval;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -519,38 +521,42 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (StringUtils.isNotEmpty(dto.getRefNo())) {
             LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
             queryWrapper.eq(DelOutbound::getRefNo, dto.getRefNo());
-            if(id != null){
+            if (id != null) {
                 queryWrapper.ne(DelOutbound::getId, dto.getId());
             }
             queryWrapper.ne(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
-
-            List<DelOutbound> data = baseMapper.selectList(queryWrapper);
-            if (data.size() > 0) {
+            Integer size = baseMapper.selectCount(queryWrapper);
+            if (size > 0) {
                 throw new CommonException("400", "Refno 必须唯一值" + dto.getRefNo());
             }
         }
     }
 
     private DelOutboundAddResponse createDelOutbound(DelOutboundDto dto) {
+        logger.info(">>>>>[创建出库单]1.0 开始创建出库单");
+        TimeInterval timer = DateUtil.timer();
         DelOutboundAddResponse response = new DelOutboundAddResponse();
         String orderNo;
-
         if (StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)) {
             //单数据处理直接抛异常
+            logger.info(">>>>>[创建出库单]1.1 校验Refno");
             this.checkRefNo(dto, null);
+            logger.info(">>>>>[创建出库单]1.2 校验Refno完成，{}", timer.intervalRestart());
         }
-
         // 创建出库单
         try {
             // DOC的验证SKU
+            logger.info(">>>>>[创建出库单]2.0 doc校验");
             this.docValid(dto);
-
+            logger.info(">>>>>[创建出库单]2.1 doc校验完成，{}", timer.intervalRestart());
 
             if (!StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)) {
                 //批量数据处理记录异常
+                logger.info(">>>>>[创建出库单]2.2 校验Refno");
                 this.checkRefNo(dto, null);
+                logger.info(">>>>>[创建出库单]2.3 校验Refno完成，{}", timer.intervalRestart());
             }
-
+            logger.info(">>>>>[创建出库单]3.0 开始初始化出库单属性");
             DelOutbound delOutbound = BeanMapperUtil.map(dto, DelOutbound.class);
             if (null == delOutbound.getCodAmount()) {
                 delOutbound.setCodAmount(BigDecimal.ZERO);
@@ -577,18 +583,23 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
             // 默认异常状态
             delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
+            logger.info(">>>>>[创建出库单]3.1 出库单对象赋值，生成流水号，{}", timer.intervalRestart());
             // 计算发货类型
             delOutbound.setShipmentType(this.buildShipmentType(dto));
+            logger.info(">>>>>[创建出库单]3.2 计算发货类型，{}", timer.intervalRestart());
             // 计算包裹大小
             this.countPackageSize(delOutbound, dto);
+            logger.info(">>>>>[创建出库单]3.3 计算包裹大小，{}", timer.intervalRestart());
             // 保存出库单
             int insert = baseMapper.insert(delOutbound);
+            logger.info(">>>>>[创建出库单]3.4 保存出库单，{}", timer.intervalRestart());
             if (insert == 0) {
                 throw new CommonException("400", "保存出库单失败！");
             }
             DelOutboundOperationLogEnum.CREATE.listener(delOutbound);
             // 保存地址
             this.saveAddress(dto, delOutbound.getOrderNo());
+            logger.info(">>>>>[创建出库单]3.5 保存地址信息，{}", timer.intervalRestart());
 
             if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
                 //如果明细中商标为空，系统自动生成
@@ -600,17 +611,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
             }
 
-
             // 保存明细
             this.saveDetail(dto, delOutbound.getOrderNo());
+            logger.info(">>>>>[创建出库单]3.6 保存明细信息，{}", timer.intervalRestart());
 
             // 附件信息
-
             if (!DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
                 this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
             }
-
+            logger.info(">>>>>[创建出库单]3.7 保存附件信息，{}", timer.intervalRestart());
 
             // 批量出库保存装箱信息
             if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
@@ -620,16 +630,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 箱标文件
                 AttachmentDTO batchLabel = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL).build();
                 this.remoteAttachmentService.saveAndUpdate(batchLabel);
+                logger.info(">>>>>[创建出库单]3.8 保存批量出库相关信息，{}", timer.intervalRestart());
             }
             if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())
                     || DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
                 // 组合信息
                 this.delOutboundCombinationService.save(orderNo, dto.getCombinations());
+                logger.info(">>>>>[创建出库单]3.9 保存NEW_SKU/SPLIT_SKU相关信息，{}", timer.intervalRestart());
             }
 
             if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
                 //一票多件出库
-
                 //箱标
                 List<AttachmentDataDTO> batchLabels = new ArrayList();
                 //发货单
@@ -674,6 +685,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     }
 
                 }
+                logger.info(">>>>>[创建出库单]3.10 保存一票多件相关信息，{}", timer.intervalRestart());
             }
             response.setStatus(true);
             response.setId(delOutbound.getId());
