@@ -225,6 +225,7 @@ public class BasShopifyHelperController extends BaseController {
         parameterMap.put("shop", new String[]{shop = jsonObject.getString("shop")});
         parameterMap.put("state", new String[]{state = jsonObject.getString("state")});
         parameterMap.put("timestamp", new String[]{timestamp = jsonObject.getString("timestamp")});
+        parameterMap.put("username", new String[]{map.get("username")});
         // replace .myshopify.com
         String shopName = shop.replace(".myshopify.com", "");
         String key = "shopify:app:" + shopName;
