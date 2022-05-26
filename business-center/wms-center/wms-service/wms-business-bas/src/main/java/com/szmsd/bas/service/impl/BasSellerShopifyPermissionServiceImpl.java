@@ -57,7 +57,7 @@ public class BasSellerShopifyPermissionServiceImpl extends ServiceImpl<BasSeller
         String shop = jsonObject.getString("shop");
         // 查询是否要去获取永久token
         LambdaQueryWrapper<BasSellerShopifyPermission> sellerShopifyPermissionLambdaQueryWrapper = Wrappers.lambdaQuery();
-        sellerShopifyPermissionLambdaQueryWrapper.eq(BasSellerShopifyPermission::getSellerCode, username);
+        sellerShopifyPermissionLambdaQueryWrapper.eq(BasSellerShopifyPermission::getSellerName, username);
         sellerShopifyPermissionLambdaQueryWrapper.eq(BasSellerShopifyPermission::getShop, shop);
         sellerShopifyPermissionLambdaQueryWrapper.last("LIMIT 1");
         BasSellerShopifyPermission basSellerShopifyPermission = super.getOne(sellerShopifyPermissionLambdaQueryWrapper);
