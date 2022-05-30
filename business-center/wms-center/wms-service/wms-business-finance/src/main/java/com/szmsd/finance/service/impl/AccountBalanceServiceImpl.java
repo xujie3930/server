@@ -229,13 +229,28 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
     }
 
+    /**
+     * 幂等校验 校验重复扣费 ： 单号—发生额-业务类型
+     *
+     * @param dto
+     * @return true : 已存在
+     */
+    public boolean checkForDuplicateCharges(CustPayDTO dto){
+        return accountSerialBillService.checkForDuplicateCharges(dto);
+    }
+
     @Transactional
     @Override
     public R feeDeductions(CustPayDTO dto) {
         if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0) return R.ok();
+        // 校验
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
+
+        boolean b = checkForDuplicateCharges(dto);
+        if (b) return R.ok();
+
         setCurrencyName(dto);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
         dto.setPayType(BillEnum.PayType.PAYMENT);

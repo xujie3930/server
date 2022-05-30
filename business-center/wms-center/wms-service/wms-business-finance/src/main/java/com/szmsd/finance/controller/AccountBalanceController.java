@@ -101,6 +101,11 @@ public class AccountBalanceController extends FssBaseController {
         return accountBalanceService.warehouseFeeDeductions(dto);
     }
 
+    /**
+     * 出库时 扣除 基本费用/扣除物料费用 接口
+     * @param dto
+     * @return
+     */
     @PreAuthorize("@ss.hasPermi('ExchangeRate:feeDeductions')")
     @ApiOperation(value = "费用扣除")
     @PostMapping("/feeDeductions")
