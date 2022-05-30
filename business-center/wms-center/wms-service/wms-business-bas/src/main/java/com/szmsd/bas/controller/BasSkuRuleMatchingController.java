@@ -69,7 +69,7 @@ public class BasSkuRuleMatchingController extends BaseController{
 
          basSkuRuleMatching.setSellerCode(sellerCode);
          basSkuRuleMatching.setSystemType(SkuRuleMatchingEnum.SHOPIFY.getCode());
-
+         startPage();
             List<BasSkuRuleMatching> list = basSkuRuleMatchingService.selectBasSkuRuleMatchingList(basSkuRuleMatching);
             return getDataTable(list);
       }

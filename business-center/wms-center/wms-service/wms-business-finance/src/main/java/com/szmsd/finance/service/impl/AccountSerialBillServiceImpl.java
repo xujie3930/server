@@ -14,6 +14,7 @@ import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
+import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
@@ -216,4 +217,21 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         return b;
     }
 
+    /**
+     * 幂等校验 校验重复扣费 ： 单号—发生额-业务类型
+     *
+     * @param dto
+     * @return true : 已存在
+     */
+    @Override
+    public boolean checkForDuplicateCharges(CustPayDTO dto) {
+        List<AccountSerialBillDTO> serialBillInfoList = dto.getSerialBillInfoList();
+        if (CollectionUtils.isEmpty(serialBillInfoList)) return false;
+        AccountSerialBillDTO accountSerialBillDTO = serialBillInfoList.get(0);
+        return baseMapper.selectCount(Wrappers.<AccountSerialBill>lambdaQuery()
+                .eq(AccountSerialBill::getNo, dto.getNo())
+                .eq(AccountSerialBill::getAmount, accountSerialBillDTO.getAmount())
+                .eq(AccountSerialBill::getChargeCategory, accountSerialBillDTO.getChargeCategory())
+        ) != 0;
+    }
 }

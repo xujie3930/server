@@ -187,6 +187,11 @@ public class OperationController extends BaseController {
         }
     }
 
+    /**
+     * 扣除 扣除物料费用
+     * @param delOutboundVO
+     * @return
+     */
     @PreAuthorize("@ss.hasPermi('Operation:Operation:delOutboundCharge')")
     @ApiOperation(value = "业务计费 - 出库扣款")
     @PostMapping("/delOutboundCharge")

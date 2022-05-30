@@ -129,16 +129,6 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
 
     @Override
     public List<PricedProduct> inService(DelOutboundOtherInServiceDto dto) {
-        // 查询国家信息
-        String countryCode = dto.getCountryCode();
-        BasRegionSelectListVO country = null;
-        if (StringUtils.isNotEmpty(countryCode)) {
-            R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(countryCode);
-            country = R.getDataAndException(countryR);
-            if (null == country) {
-                throw new CommonException("400", "国家信息不存在");
-            }
-        }
         // 查询仓库信息
         String warehouseCode = dto.getWarehouseCode();
         BasWarehouse warehouse = null;
@@ -146,6 +136,21 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
             warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
             if (null == warehouse) {
                 throw new CommonException("400", "仓库信息不存在");
+            }
+        }
+        // 查询国家信息
+        // String countryCode = dto.getCountryCode();
+        // 从仓库上获取国家信息
+        String countryCode = null;
+        if (null != warehouse) {
+            countryCode = warehouse.getCountryCode();
+        }
+        BasRegionSelectListVO country = null;
+        if (StringUtils.isNotEmpty(countryCode)) {
+            R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(countryCode);
+            country = R.getDataAndException(countryR);
+            if (null == country) {
+                throw new CommonException("400", "国家信息不存在");
             }
         }
         // 传入参数：仓库，SKU
