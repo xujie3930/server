@@ -190,7 +190,7 @@ public class ShopifyOrderTask {
             log.info("【Shopify】店铺{}获取订单返回结果{}",shop.getShop(),result);
             OrderResponse orderResponse = JSON.parseObject (result, OrderResponse.class, new ParserConfig() , JSONObject.DEFAULT_PARSER_FEATURE);
             final String  orderStateFinal = orderState;
-            if (orderResponse!=null&&orderResponse.getOrders()!=null){
+            if (orderResponse!=null && CollectionUtils.isNotEmpty(orderResponse.getOrders())){
                 orderResponse.getOrders().stream().forEach(order -> {
                     try {
                         ShopifyOrderDTO shopifyOrderDTO =getShopifyOrderDTO(order,orderStateFinal,shop);
