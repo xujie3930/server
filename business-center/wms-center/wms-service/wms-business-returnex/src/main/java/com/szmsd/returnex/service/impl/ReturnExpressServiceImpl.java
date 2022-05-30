@@ -954,7 +954,13 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             SecurityContextHolder.setContext(context);
             List<String> errorMsgList = new ArrayList<>();
             importBOList.forEach(x -> {
-                String errorMsg = executeReal(x);
+                String errorMsg = null;
+                try {
+                    errorMsg = executeReal(x);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    errorMsgList.add(e.getMessage());
+                }
                 if (StringUtils.isNotBlank(errorMsg))
                     errorMsgList.add(errorMsg);
             });

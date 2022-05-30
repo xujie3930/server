@@ -5,12 +5,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageInfo;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.ec.common.event.ShopifyFulfillmentEvent;
 import com.szmsd.ec.common.service.ICommonOrderItemService;
 import com.szmsd.ec.common.service.ICommonOrderService;
@@ -59,6 +64,9 @@ public class CommonOrderController extends BaseController {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private DelOutboundFeignService delOutboundFeignService;
 
     @ApiOperation("转仓库单回调")
     @PostMapping("transferCallback")
@@ -149,6 +157,17 @@ public class CommonOrderController extends BaseController {
             List<String> collect = commonOrders.stream().map(CommonOrder::getOrderNo).collect(Collectors.toList());
             return R.failed("订单号："+String.join(",", collect)+"已有跟踪号，不允许修改");
         }
+        commonOrders.forEach(order -> {
+            // 已下单
+            if (OrderStatusConstant.SHIPPED.equalsIgnoreCase(order.getStatus())) {
+                R<DelOutboundVO> statusByOrderNoR = delOutboundFeignService.getStatusByOrderNo(order.getWmsOrderNo());
+                if (Constants.SUCCESS.equals(statusByOrderNoR) && statusByOrderNoR.getData() != null
+                        && DelOutboundStateEnum.REVIEWED_DOING.getCode().equalsIgnoreCase(statusByOrderNoR.getData().getState())){
+                    throw new BaseException("订单提审中，无法修改");
+                }
+            }
+        });
+        // 校验订单
         ecCommonOrderService.update(new LambdaUpdateWrapper<CommonOrder>()
                 .set(CommonOrder::getShippingMethod, bindShippingMethodRequestDTO.getShippingMethod())
                 .set(CommonOrder::getShippingMethodCode, bindShippingMethodRequestDTO.getShippingMethodCode())

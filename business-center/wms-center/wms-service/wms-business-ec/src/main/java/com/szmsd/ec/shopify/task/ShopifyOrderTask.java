@@ -204,6 +204,7 @@ public class ShopifyOrderTask {
                 });
             }else {
                 log.info("【Shopify】店铺{}获取订单返回结果无返回数据",shop.getShop());
+                throw new BaseException("没有最新的订单");
             }
 
         }

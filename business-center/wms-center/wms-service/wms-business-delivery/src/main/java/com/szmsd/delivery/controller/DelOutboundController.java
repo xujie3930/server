@@ -185,6 +185,13 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.selectDelOutboundByOrderId(orderId));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:query')")
+    @GetMapping(value = "/getStatusByOrderNo")
+    @ApiOperation(value = "出库管理 - 根据订单号查询订单信息", position = 202)
+    public R<DelOutbound> getStatusByOrderNo(@RequestParam("orderNo") String orderNo) {
+        return R.ok(delOutboundService.getByOrderNo(orderNo));
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:add')")
     @Log(title = "出库单模块", businessType = BusinessType.INSERT)
     @PostMapping("/shipment")

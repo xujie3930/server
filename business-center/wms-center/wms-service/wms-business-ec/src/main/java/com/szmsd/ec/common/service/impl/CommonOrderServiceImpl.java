@@ -181,7 +181,8 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                             for (String sku : skuArr) {
                                 DelOutboundDetailDto detail = new DelOutboundDetailDto();
                                 detail.setSku(sku);
-                                detail.setProductName(item.getTitle());
+                                detail.setProductName(item.getTitle()); // shopify 商品名称就一个字段 不区分中英文
+                                detail.setProductNameChinese(item.getTitle());
                                 detail.setQty(item.getQuantity().longValue());
                                 detail.setRemark(item.getPlatformSku());
                                 details.add(detail);
@@ -191,12 +192,13 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                         item.setRemark(ruleMatching.getOmsSku());
                         commonOrderItemMapper.updateById(item);
                     }else {
-                        DelOutboundDetailDto detailDto = new DelOutboundDetailDto();
-                        detailDto.setSku(item.getPlatformSku());
-                        detailDto.setProductName(item.getTitle());
-                        detailDto.setQty(item.getQuantity().longValue());
-                        detailDto.setRemark(item.getPlatformSku());
-                        details.add(detailDto);
+//                        DelOutboundDetailDto detailDto = new DelOutboundDetailDto();
+//                        detailDto.setSku(item.getPlatformSku());
+//                        detailDto.setProductName(item.getTitle());
+//                        detailDto.setQty(item.getQuantity().longValue());
+//                        detailDto.setRemark(item.getPlatformSku());
+//                        details.add(detailDto);
+                        throw new BaseException(order.getOrderNo() + " 未进行SKU匹配");
                     }
                 }
             }
@@ -208,6 +210,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                 throw new BaseException("订单号："+order.getOrderNo()+"发货异常："+outboundAddResponseR.getData().getMessage());
             }
             // 更新订单状态为已发货
+            order.setWmsOrderNo(outboundAddResponseR.getData().getOrderNo());
             order.setStatus(OrderStatusConstant.SHIPPED);
             order.setPushMethod("addShopify");
             order.setPushResultMsg(JSON.toJSONString(outboundAddResponseR));
