@@ -83,6 +83,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
     @Override
     public void bringVerifyAsync(DelOutbound delOutbound, AsyncThreadObject asyncThreadObject) {
         Thread thread = Thread.currentThread();
+        // 开始时间
+        long startTime = System.currentTimeMillis();
         boolean isAsyncThread = !asyncThreadObject.isAsyncThread();
         logger.info("(1)任务开始执行，当前任务名称：{}，当前任务ID：{}，是否为异步任务：{}，任务相关参数：{}", thread.getName(), thread.getId(), isAsyncThread, JSON.toJSONString(asyncThreadObject));
         if (isAsyncThread) {
@@ -208,6 +210,7 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 asyncThreadObject.unloadTid();
             }
         }
+        this.logger.info("(5)提审操作完成，出库单号：{}，执行耗时：{}", delOutbound.getOrderNo(), (System.currentTimeMillis() - startTime));
     }
 
 }
