@@ -17,10 +17,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -202,6 +199,10 @@ public interface DelOutboundFeignService {
     @GetMapping(value = "/api/outbound/getInfoByOrderNo/{orderNo}")
     @ApiOperation(value = "出库管理 - 详情", position = 201)
     R<DelOutboundVO> getInfoByOrderNo(@PathVariable("orderNo") String orderNo);
+
+    @GetMapping(value = "/api/outbound/getStatusByOrderNo")
+    @ApiOperation(value = "出库管理 - 根据订单号查询订单信息", position = 202)
+    R<DelOutboundVO> getStatusByOrderNo(@RequestParam("orderNo") String orderNo);
 
     @PostMapping("/api/outbound/queryFinishList")
     @ApiOperation(value = "查询已完成的单号", notes = "查询已完成的单号")
