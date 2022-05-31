@@ -29,6 +29,8 @@ import com.szmsd.ec.shopify.util.ShopifyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -71,7 +73,7 @@ public class ShopifyOrderTask {
     /**
      * 任务执行间隔，默认10分钟
      */
-    private static final int  PERIOD_TIME = 1000*60*10;
+    private static final int  PERIOD_TIME = 1000*60*2;
 
     @PostConstruct
     public void getShopifyList(){
@@ -140,7 +142,7 @@ public class ShopifyOrderTask {
      * @param shopifyPermissionList
      */
     private void pullShopifyOrder(List<BasSellerShopifyPermission> shopifyPermissionList){
-        String before = DateUtils.parseDateToStr(ShopifyConfig.TIME_FORMAT_STR, new Date());
+        String before = new DateTime(new Date(), DateTimeZone.UTC).toString(ShopifyConfig.TIME_FORMAT_STR);
         shopifyPermissionList.forEach(shop -> {
             // 获取当前店铺最后的一个订单
             ShopifyOrder lastOrder = shopifyOrderService.getOne(new LambdaQueryWrapper<ShopifyOrder>().select(ShopifyOrder::getCreatedAt)
@@ -148,9 +150,9 @@ public class ShopifyOrderTask {
                     .orderByDesc(ShopifyOrder::getCreatedAt).last("limit 1"));
             String after = "";
             if (lastOrder != null){
-                after = DateUtils.parseDateToStr(ShopifyConfig.TIME_FORMAT_STR, lastOrder.getCreatedAt());
+                after = new DateTime(lastOrder.getCreatedAt(), DateTimeZone.UTC).toString(ShopifyConfig.TIME_FORMAT_STR);
             }else {
-                after = DateUtils.parseDateToStr(ShopifyConfig.TIME_FORMAT_STR, DateUtils.addYears(new Date(), -1));
+                after = new DateTime(DateUtils.addYears(new Date(), -1), DateTimeZone.UTC).toString(ShopifyConfig.TIME_FORMAT_STR);
             }
             log.info("【shopify】店铺：{} 查询订单起始时间：{} - {}", shop.getShop(), after, before);
             Map<String, String> parameters = new HashMap<>();
@@ -188,7 +190,7 @@ public class ShopifyOrderTask {
             log.info("【Shopify】店铺{}获取订单返回结果{}",shop.getShop(),result);
             OrderResponse orderResponse = JSON.parseObject (result, OrderResponse.class, new ParserConfig() , JSONObject.DEFAULT_PARSER_FEATURE);
             final String  orderStateFinal = orderState;
-            if (orderResponse!=null&&orderResponse.getOrders()!=null){
+            if (orderResponse!=null && CollectionUtils.isNotEmpty(orderResponse.getOrders())){
                 orderResponse.getOrders().stream().forEach(order -> {
                     try {
                         ShopifyOrderDTO shopifyOrderDTO =getShopifyOrderDTO(order,orderStateFinal,shop);
