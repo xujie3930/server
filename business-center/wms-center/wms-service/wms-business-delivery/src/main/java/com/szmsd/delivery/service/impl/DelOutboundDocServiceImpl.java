@@ -156,9 +156,11 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         // 传入参数：仓库，SKU
         PricedProductInServiceCriteria criteria = new PricedProductInServiceCriteria();
         criteria.setClientCode(dto.getClientCode());
+        // 目的地国家
+        criteria.setCountryName(dto.getCountryCode());
         CountryInfo countryInfo = null;
         if (null != country) {
-            criteria.setCountryName(country.getName());
+            // 仓库上的国家
             countryInfo = new CountryInfo(country.getAddressCode(), null, country.getEnName(), country.getName());
         }
         Address fromAddress = null;
