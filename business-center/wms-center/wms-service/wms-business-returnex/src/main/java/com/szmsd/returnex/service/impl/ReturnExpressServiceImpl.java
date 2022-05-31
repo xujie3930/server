@@ -256,6 +256,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         if (StringUtils.isNotBlank(returnExpressAddDTO.getRefNo())) return;
         DelOutboundListQueryDto delOutboundListQueryDto = new DelOutboundListQueryDto();
         delOutboundListQueryDto.setOrderNo(returnExpressAddDTO.getFromOrderNo());
+        delOutboundListQueryDto.setQueryAll(true);
         TableDataInfo<DelOutboundListVO> page = delOutboundFeignService.page(delOutboundListQueryDto);
         List<DelOutboundListVO> rows = page.getRows();
         if (CollectionUtils.isNotEmpty(rows)) {
