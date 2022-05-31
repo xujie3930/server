@@ -26,13 +26,13 @@ public class HttpFeignServiceFallback implements FallbackFactory<IHttpFeignServi
             @Override
             public R<CreateExpectedRespVO> expectedCreate(CreateExpectedReqDTO expectedReqDTO) {
                 log.error("创建退件预报 req:{} 【{}】", expectedReqDTO, throwable);
-                throw new BaseException(String.format("创建退件预报异常%s", throwable.getMessage()));
+                throw new RuntimeException(String.format("创建退件预报异常%s", throwable.getMessage()));
             }
 
             @Override
             public R<ProcessingUpdateRespVO> processingUpdate(ProcessingUpdateReqDTO processingUpdateReqDTO) {
                 log.error("接收客户提供的处理方式 req:{} 【{}】", processingUpdateReqDTO, throwable);
-                throw new BaseException(String.format("接收客户提供的处理方式%s", throwable.getMessage()));
+                throw new RuntimeException(String.format("接收客户提供的处理方式%s", throwable.getMessage()));
             }
         };
     }

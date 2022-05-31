@@ -53,11 +53,11 @@ public class IHttpFeignClientServiceImpl implements IHttpFeignClientService {
         boolean present = responseOpt.map(ResponseVO::getErrors).filter(StringUtils::isNotBlank).isPresent();
         boolean present1 = responseOpt.map(ResponseVO::getSuccess).orElse(true);
         if (present) {
-            throw new BaseException(checkVo.getData().getErrors());
+            throw new RuntimeException(checkVo.getData().getErrors());
         }
         if (!present1) {
             String message = responseOpt.map(ResponseVO::getMessage).orElse("调用WMS返回异常");
-            throw new BaseException(message);
+            throw new RuntimeException(message);
         }
     }
 }
