@@ -175,11 +175,11 @@ public class ShopifyOrderTask {
             String orderState = OrderStatusConstant.UNSHIPPED;
             if (i==0){
                 //未发货订单
-                url="&"+ url + "created_at_min="+parameters.get("created_at_min")+"&created_at_max="+parameters.get("created_at_max") + "&fulfillment_status=null&financial_status=paid";
+                url= url + "&created_at_min="+parameters.get("created_at_min")+"&created_at_max="+parameters.get("created_at_max") + "&fulfillment_status=null&financial_status=paid";
             }
             if (i==1){
                 orderState = OrderStatusConstant.CANCEL;
-                url= "&"+ url + "updated_at_min="+parameters.get("updated_at_min")+"&updated_at_max="+parameters.get("updated_at_max") +"&status=cancelled";
+                url= url + "&updated_at_min="+parameters.get("updated_at_min")+"&updated_at_max="+parameters.get("updated_at_max") +"&status=cancelled";
             }
             log.info("【Shopify】店铺{}获取订单请求地址{}",shop.getShop(), url);
             System.out.println(url);
