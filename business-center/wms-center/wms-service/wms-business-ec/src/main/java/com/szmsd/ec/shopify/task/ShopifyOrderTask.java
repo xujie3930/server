@@ -149,8 +149,11 @@ public class ShopifyOrderTask {
                     .eq(ShopifyOrder::getShopName, shop.getShop())
                     .orderByDesc(ShopifyOrder::getCreatedAt).last("limit 1"));
             String after = "";
+            String createAfter = "";
             if (lastOrder != null){
                 after = new DateTime(lastOrder.getCreatedAt(), DateTimeZone.UTC).toString(ShopifyConfig.TIME_FORMAT_STR);
+                // 拉单的时候起始时间需要加一秒 不然订单重叠情况 没有最新的订单异常无法抛出
+                createAfter = new DateTime(DateUtils.addSeconds(lastOrder.getCreatedAt(), 1), DateTimeZone.UTC).toString(ShopifyConfig.TIME_FORMAT_STR);
             }else {
                 after = new DateTime(DateUtils.addYears(new Date(), -1), DateTimeZone.UTC).toString(ShopifyConfig.TIME_FORMAT_STR);
             }
@@ -158,23 +161,25 @@ public class ShopifyOrderTask {
             Map<String, String> parameters = new HashMap<>();
             parameters.put("updated_at_min", after);
             parameters.put("updated_at_max", before);
+            parameters.put("created_at_min", createAfter);
+            parameters.put("created_at_max", before);
             listOrder(shop,parameters);
         });
     }
 
     public void listOrder(BasSellerShopifyPermission shop, Map<String, String> parameters){
         String orderUrl = ShopifyConfig.orderUrl;
-        String url = ShopifyConfig.HTTPS + shop.getShop() + orderUrl+ "?updated_at_min="+parameters.get("updated_at_min")+"&updated_at_max="+parameters.get("updated_at_max")+"&limit=200";
+        String url = ShopifyConfig.HTTPS + shop.getShop() + orderUrl+ "?limit=200";
         //获取取消的订单和未发货的订单
         for (int i = 0; i < 2; i++) {
             String orderState = OrderStatusConstant.UNSHIPPED;
             if (i==0){
                 //未发货订单
-                url=url+"&fulfillment_status=null&financial_status=paid";
+                url="&"+ url + "created_at_min="+parameters.get("created_at_min")+"&created_at_max="+parameters.get("created_at_max") + "&fulfillment_status=null&financial_status=paid";
             }
             if (i==1){
                 orderState = OrderStatusConstant.CANCEL;
-                url=url+"&status=cancelled";
+                url= "&"+ url + "updated_at_min="+parameters.get("updated_at_min")+"&updated_at_max="+parameters.get("updated_at_max") +"&status=cancelled";
             }
             log.info("【Shopify】店铺{}获取订单请求地址{}",shop.getShop(), url);
             System.out.println(url);
