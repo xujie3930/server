@@ -79,7 +79,7 @@ public class CommonOrderController extends BaseController {
         order.setLogisticsRouteId(callbackDTO.getLogisticsRouteId());
         order.setTransferErrorMsg(callbackDTO.getTransferErrorMsg());
         // 已发货状态调用shopify的履约单接口： https://shopify.dev/api/admin-rest/2021-10/resources/fulfillment#[post]/admin/api/2021-10/fulfillments.json
-        if (OrderSourceEnum.Shopify.toString().equalsIgnoreCase(order.getOrderSource()) && StringUtils.isNotBlank(order.getTransferErrorMsg())) {
+        if (OrderSourceEnum.Shopify.toString().equalsIgnoreCase(order.getOrderSource()) && StringUtils.isBlank(order.getTransferErrorMsg())) {
             applicationContext.publishEvent(new ShopifyFulfillmentEvent(order));
         }
         return ecCommonOrderService.updateById(order) ? R.ok() : R.failed();
@@ -160,7 +160,7 @@ public class CommonOrderController extends BaseController {
         commonOrders.forEach(order -> {
             // 已下单
             if (OrderStatusConstant.SHIPPED.equalsIgnoreCase(order.getStatus())) {
-                R<DelOutboundVO> statusByOrderNoR = delOutboundFeignService.getStatusByOrderNo(order.getWmsOrderNo());
+                R<DelOutboundVO> statusByOrderNoR = delOutboundFeignService.getStatusByOrderNo(order.getOmsOrderNo());
                 if (Constants.SUCCESS.equals(statusByOrderNoR) && statusByOrderNoR.getData() != null
                         && DelOutboundStateEnum.REVIEWED_DOING.getCode().equalsIgnoreCase(statusByOrderNoR.getData().getState())){
                     throw new BaseException("订单提审中，无法修改");

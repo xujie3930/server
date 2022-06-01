@@ -84,6 +84,14 @@ public class DelTrackController extends BaseController {
 
     }
 
+    @PreAuthorize("@ss.hasPermi('DelTrack:DelTrack:addOrUpdate')")
+    @Log(title = "模块", businessType = BusinessType.INSERT)
+    @PostMapping("addOrUpdate")
+    public R addOrUpdate(@RequestBody DelTrack delTrack){
+        delTrackService.saveOrUpdate(delTrack);
+        return R.ok();
+    }
+
     /**
      * 删除模块
      */

@@ -212,7 +212,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                 throw new RuntimeException("订单号："+order.getOrderNo()+"发货异常："+outboundAddResponseR.getData().getMessage());
             }
             // 更新订单状态为已发货
-            order.setWmsOrderNo(outboundAddResponseR.getData().getOrderNo());
+            order.setOmsOrderNo(outboundAddResponseR.getData().getOrderNo());
             order.setStatus(OrderStatusConstant.SHIPPED);
             order.setPushMethod("addShopify");
             order.setPushResultMsg(JSON.toJSONString(outboundAddResponseR));
