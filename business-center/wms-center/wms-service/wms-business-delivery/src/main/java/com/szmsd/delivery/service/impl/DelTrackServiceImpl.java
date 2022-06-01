@@ -283,6 +283,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                     DelOutbound updateDelOutbound = new DelOutbound();
                     updateDelOutbound.setId(delOutbound.getId());
                     updateDelOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
+                    // 最新时间
+                    Date latestDate = trackList.stream().map(DelTrack::getTrackingTime).max((d1, d2) -> d1.compareTo(d2)).orElse(null);
+                    updateDelOutbound.setTrackingTime(latestDate);
                     updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
                     delOutboundMapper.updateById(updateDelOutbound);
                 }

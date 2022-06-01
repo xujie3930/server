@@ -206,12 +206,15 @@ public class CommonOrderController extends BaseController {
      */
     private LambdaQueryWrapper<CommonOrder> commonSearchWrapper(CommonOrderDTO queryDTO){
         LambdaQueryWrapper<CommonOrder> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(StringUtils.isNotEmpty(queryDTO.getOrderNo()), CommonOrder::getOrderNo, queryDTO.getOrderNo())
-                .eq(StringUtils.isNotEmpty(queryDTO.getStatus()), CommonOrder::getStatus, queryDTO.getStatus())
+        queryWrapper.eq(StringUtils.isNotEmpty(queryDTO.getStatus()), CommonOrder::getStatus, queryDTO.getStatus())
                 .eq(StringUtils.isNotEmpty(queryDTO.getOrderSource()), CommonOrder::getOrderSource, queryDTO.getOrderSource())
                 .eq(StringUtils.isNotEmpty(queryDTO.getShopName()), CommonOrder::getShopName, queryDTO.getShopName())
                 .eq(StringUtils.isNotEmpty(queryDTO.getPlatformOrderNumber()), CommonOrder::getPlatformOrderNumber, queryDTO.getPlatformOrderNumber())
                 .eq(StringUtils.isNotEmpty(queryDTO.getPlatformOrderStatus()), CommonOrder::getPlatformOrderStatus, queryDTO.getPlatformOrderStatus());
+        if (StringUtils.isNotBlank(queryDTO.getOrderNo())) {
+            List<String> orderNoArray = StringToolkit.getCodeByArray(queryDTO.getOrderNo());
+            queryWrapper.in(CommonOrder::getOrderNo, orderNoArray);
+        }
         if (StringUtils.isNotBlank(queryDTO.getOrderNo())) {
             List<String> orderNoArray = StringToolkit.getCodeByArray(queryDTO.getOrderNo());
             queryWrapper.in(CommonOrder::getOrderNo, orderNoArray);
