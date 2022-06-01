@@ -73,8 +73,10 @@ public class BasSellerShopifyPermissionServiceImpl extends ServiceImpl<BasSeller
             String state = basSellerShopifyPermission.getState();
             if ("1".equals(state)) {
                 // 获取到授权码信息
-                accessToken = basSellerShopifyPermission.getAccessToken();
+                // accessToken = basSellerShopifyPermission.getAccessToken();
                 id = basSellerShopifyPermission.getId();
+                // 只要登录，就重新去获取token信息
+                queryAccessToken = true;
             } else {
                 // 授权信息是无效的，需要去查询
                 queryAccessToken = true;
