@@ -113,28 +113,28 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     public void orderShipping(List<Long> ids) {
         List<CommonOrder> commonOrderList = this.listByIds(ids);
         if (CollectionUtils.isEmpty(commonOrderList)) {
-            throw new BaseException("未查询出订单数据");
+            throw new RuntimeException("未查询出订单数据");
         }
 
         // verify param
         List<String> warehouseList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getWarehouseCode())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(warehouseList)) {
-            throw new BaseException("订单："+String.join(",", warehouseList)+"请完善发货仓库");
+            throw new RuntimeException("订单："+String.join(",", warehouseList)+"请完善发货仓库");
         }
 
         List<String> shipWarehouseList = commonOrderList.stream().filter(v -> v.getShippingWarehouseId() == null).map(CommonOrder::getOrderNo).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(shipWarehouseList)) {
-            throw new BaseException("订单："+String.join(",", shipWarehouseList)+"请完善Shopify发货仓库");
+            throw new RuntimeException("订单："+String.join(",", shipWarehouseList)+"请完善Shopify发货仓库");
         }
 
         List<String> shippingMethodList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getShippingMethod())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(shippingMethodList)) {
-            throw new BaseException("订单："+String.join(",", shippingMethodList)+"请完善发货方式");
+            throw new RuntimeException("订单："+String.join(",", shippingMethodList)+"请完善发货方式");
         }
 
         List<String> shippingSerivceList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getShippingService())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(shippingSerivceList)) {
-            throw new BaseException("订单："+String.join(",", shippingSerivceList)+"请完善发货服务");
+            throw new RuntimeException("订单："+String.join(",", shippingSerivceList)+"请完善发货服务");
         }
 
         commonOrderList.forEach(order -> {
@@ -198,7 +198,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
 //                        detailDto.setQty(item.getQuantity().longValue());
 //                        detailDto.setRemark(item.getPlatformSku());
 //                        details.add(detailDto);
-                        throw new BaseException(order.getOrderNo() + " 未进行SKU匹配");
+                        throw new RuntimeException(order.getOrderNo() + " 未进行SKU匹配");
                     }
                 }
             }
@@ -207,7 +207,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             R<DelOutboundAddResponse> outboundAddResponseR = delOutboundFeignService.addShopify(dto);
             log.info("电商单发货响应结果：{}", JSON.toJSONString(outboundAddResponseR));
             if (Constants.SUCCESS != outboundAddResponseR.getCode() || outboundAddResponseR.getData() == null || !outboundAddResponseR.getData().getStatus()) {
-                throw new BaseException("订单号："+order.getOrderNo()+"发货异常："+outboundAddResponseR.getData().getMessage());
+                throw new RuntimeException("订单号："+order.getOrderNo()+"发货异常："+outboundAddResponseR.getData().getMessage());
             }
             // 更新订单状态为已发货
             order.setWmsOrderNo(outboundAddResponseR.getData().getOrderNo());
