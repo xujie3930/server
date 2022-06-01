@@ -206,7 +206,9 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             log.info("电商单发货请求参数：{}", JSON.toJSONString(dto));
             R<DelOutboundAddResponse> outboundAddResponseR = delOutboundFeignService.addShopify(dto);
             log.info("电商单发货响应结果：{}", JSON.toJSONString(outboundAddResponseR));
-            if (Constants.SUCCESS != outboundAddResponseR.getCode() || outboundAddResponseR.getData() == null || !outboundAddResponseR.getData().getStatus()) {
+            if (Constants.SUCCESS != outboundAddResponseR.getCode() || outboundAddResponseR.getData() == null) {
+                throw new RuntimeException("订单号："+order.getOrderNo()+"发货异常："+outboundAddResponseR.getMsg());
+            }else if (outboundAddResponseR.getData() != null && !outboundAddResponseR.getData().getStatus()) {
                 throw new RuntimeException("订单号："+order.getOrderNo()+"发货异常："+outboundAddResponseR.getData().getMessage());
             }
             // 更新订单状态为已发货
