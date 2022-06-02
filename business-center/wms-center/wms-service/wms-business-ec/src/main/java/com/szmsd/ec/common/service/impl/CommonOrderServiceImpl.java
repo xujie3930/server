@@ -256,8 +256,11 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             R<BasOtherRules> info = basSkuRuleMatchingFeignService.getInfo(commonOrder.getCusCode());
             if (Constants.SUCCESS.equals(info.getCode()) && info.getData() != null) {
                 BasOtherRules rules = info.getData();
-                commonOrder.setShippingMethodCode(rules.getDeliveryMethod());
-                commonOrder.setShippingMethod(getSubNameByCode(rules.getDeliveryMethod()));
+                BasSub sub = getSubByCode(rules.getDeliveryMethod());
+                if (sub != null) {
+                    commonOrder.setShippingMethodCode(sub.getSubValue());
+                    commonOrder.setShippingMethod(sub.getSubName());
+                }
             }
         }
         LambdaQueryWrapper<CommonOrder> queryWrapper =new LambdaQueryWrapper<CommonOrder>()
@@ -452,17 +455,17 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
      * @param code
      * @return
      */
-    private String getSubNameByCode(String code) {
+    private BasSub getSubByCode(String code) {
         BasSub basSub = new BasSub();
         basSub.setSubCode(code);
         R<List<BasSub>> feignServiceSub = basFeignService.getsub(basSub);
         if (Constants.SUCCESS.equals(feignServiceSub.getCode()) && feignServiceSub.getData() != null) {
             List<BasSub> data = feignServiceSub.getData();
             if (CollectionUtils.isNotEmpty(data)) {
-                return data.get(0).getSubName();
+                return data.get(0);
             }
         }
-        return "";
+        return null;
     }
 
 }
