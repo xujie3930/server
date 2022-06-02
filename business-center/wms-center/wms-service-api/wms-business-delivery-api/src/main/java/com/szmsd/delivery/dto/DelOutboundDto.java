@@ -130,6 +130,9 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "邮箱")
     private String email;
 
+    @ApiModelProperty(value = "shopify订单号")
+    private String shopifyOrderNo;
+
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;

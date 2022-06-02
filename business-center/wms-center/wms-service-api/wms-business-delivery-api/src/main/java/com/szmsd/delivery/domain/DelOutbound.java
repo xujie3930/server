@@ -250,6 +250,9 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "邮箱")
     private String email;
 
+    @ApiModelProperty(value = "shopify订单号")
+    private String shopifyOrderNo;
+
     @ApiModelProperty(value = "临时字段")
     @TableField(exist = false)
     private String prcProductCode;
