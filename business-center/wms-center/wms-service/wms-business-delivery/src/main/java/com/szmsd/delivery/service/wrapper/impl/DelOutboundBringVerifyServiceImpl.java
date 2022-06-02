@@ -581,7 +581,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             if (null == shipmentOrderResult) {
                 try {
                     TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
-                    transferCallbackDTO.setOrderNo(delOutbound.getRefNo());
+                    transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
                     transferCallbackDTO.setLogisticsRouteId(shipmentService);
                     transferCallbackDTO.setTransferErrorMsg("创建承运商物流订单失败，调用承运商系统返回数据为空");
                     commonOrderFeignService.transferCallback(transferCallbackDTO);
@@ -606,7 +606,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 try {
                     TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
-                    transferCallbackDTO.setOrderNo(delOutbound.getRefNo());
+                    transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
                     transferCallbackDTO.setLogisticsRouteId(shipmentService);
                     transferCallbackDTO.setTransferErrorMsg(builder.toString());
                     commonOrderFeignService.transferCallback(transferCallbackDTO);
@@ -617,9 +617,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
             try {
                 TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
-                transferCallbackDTO.setOrderNo(delOutbound.getRefNo());
+                transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
                 transferCallbackDTO.setLogisticsRouteId(shipmentService);
-                transferCallbackDTO.setTransferNumber(shipmentOrderResult.getOrderNumber());
+                transferCallbackDTO.setTransferNumber(shipmentOrderResult.getMainTrackingNumber());
                 commonOrderFeignService.transferCallback(transferCallbackDTO);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -629,7 +629,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
             try {
                 TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
-                transferCallbackDTO.setOrderNo(delOutbound.getRefNo());
+                transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
                 transferCallbackDTO.setLogisticsRouteId(shipmentService);
                 transferCallbackDTO.setTransferErrorMsg(exceptionMessage);
                 commonOrderFeignService.transferCallback(transferCallbackDTO);

@@ -8,11 +8,13 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.feign.BasSkuRuleMatchingFeignService;
+import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.domain.BasDeliveryServiceMatching;
 import com.szmsd.bas.domain.BasOtherRules;
 import com.szmsd.bas.domain.BasSkuRuleMatching;
 import com.szmsd.bas.dto.BasDeliveryServiceMatchingDto;
 import com.szmsd.bas.dto.BasSkuRuleMatchingDto;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
@@ -43,11 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,6 +68,9 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     private DelOutboundFeignService delOutboundFeignService;
 //    @Autowired
 //    private OrdOrderFeignService orderFeignService;
+
+    @Autowired
+    private BasSubFeignService basSubFeignService;
 
     @Override
     @Transactional
@@ -144,7 +145,8 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
 
             dto.setSellerCode(SecurityUtils.getLoginUser().getSellerCode());
             dto.setOrderType(order.getShippingMethodCode());
-            dto.setRefNo(order.getOrderNo());
+            dto.setShopifyOrderNo(order.getOrderNo());
+            dto.setRefNo(order.getOrderNo()); // todo refNo 后续根据自定义规则匹配传参  目前先按照订单号
             dto.setShipmentRule(order.getShippingServiceCode());
 
             DelOutboundAddressDto address = new DelOutboundAddressDto();
@@ -242,6 +244,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                         BasDeliveryServiceMatching serviceMatching = matchingList.get(0);
                         commonOrder.setWarehouseCode(serviceMatching.getWarehouseCode());
                         commonOrder.setWarehouseName(serviceMatching.getWarehouseName());
+                        commonOrder.setShippingService(serviceMatching.getShipmentRule());
                         commonOrder.setShippingServiceCode(serviceMatching.getShipmentService());
                     }
                 }
@@ -252,6 +255,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             if (Constants.SUCCESS.equals(info.getCode()) && info.getData() != null) {
                 BasOtherRules rules = info.getData();
                 commonOrder.setShippingMethodCode(rules.getDeliveryMethod());
+                commonOrder.setShippingMethod(getSubNameByCode(rules.getDeliveryMethod()));
             }
         }
         LambdaQueryWrapper<CommonOrder> queryWrapper =new LambdaQueryWrapper<CommonOrder>()
@@ -441,6 +445,22 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     }
 
 
+    /**
+     * 根据code获取主子类别名称
+     * @param code
+     * @return
+     */
+    private String getSubNameByCode(String code) {
+        R<Map<String, List<BasSubWrapperVO>>> feignServiceSub = basSubFeignService.getSub(code);
+        if (Constants.SUCCESS.equals(feignServiceSub.getCode()) && feignServiceSub.getData() != null) {
+            Map<String, List<BasSubWrapperVO>> data = feignServiceSub.getData();
+            List<BasSubWrapperVO> basSubWrapperVOS = data.get(code);
+            if (CollectionUtils.isNotEmpty(basSubWrapperVOS)) {
+                return basSubWrapperVOS.get(0).getSubName();
+            }
+        }
+        return "";
+    }
 
 }
 

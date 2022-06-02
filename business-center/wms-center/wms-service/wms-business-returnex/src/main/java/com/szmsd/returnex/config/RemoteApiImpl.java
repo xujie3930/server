@@ -118,12 +118,12 @@ public class RemoteApiImpl implements IRemoteApi {
     public List<String> genNo(Integer count) {
         String code = FssRefundConstant.GENERATE_CODE;
         String appId = FssRefundConstant.GENERATE_APP_ID;
-        log.info("调用自动生成单号：code={}", code);
+//        log.info("调用自动生成单号：code={}", code);
         R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId(appId).setCode(code).setCount(count));
         AssertUtil.notNull(r, "单号生成失败");
         AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
         List<String> data = r.getData();
-        log.info("调用自动生成单号：调用完成, {}-{}", code, data);
+//        log.info("调用自动生成单号：调用完成, {}-{}", code, data);
         return data;
     }
 

@@ -77,7 +77,7 @@ public class ShopifyFulfillmentListener {
             BasOtherRules rules = info.getData();
             returnRule = rules.getReturnRule();
         }
-
+        log.info("物流号填充规则：{}", returnRule);
         if (RETURN_RULE_105002.equalsIgnoreCase(returnRule)) {
             ft.setTrackingNumber(commonOrder.getTransferNumber());
         }else if (RETURN_RULE_105001.equalsIgnoreCase(returnRule)){
