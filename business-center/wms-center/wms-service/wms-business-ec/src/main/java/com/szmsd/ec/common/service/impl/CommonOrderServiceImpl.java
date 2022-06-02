@@ -26,6 +26,7 @@ import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.dto.DelOutboundAddressDto;
 import com.szmsd.delivery.dto.DelOutboundDetailDto;
 import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.ec.common.mapper.CommonOrderItemMapper;
 import com.szmsd.ec.common.mapper.CommonOrderMapper;
@@ -164,45 +165,59 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
 
             dto.setAddress(address);
             List<DelOutboundDetailDto> details = new ArrayList<>();
+
             // SKU 需根据匹配规则匹配出wms需要得sku
             List<CommonOrderItem> commonOrderItems = commonOrderItemMapper.selectList(new LambdaQueryWrapper<CommonOrderItem>().eq(CommonOrderItem::getOrderId, order.getId()));
             if (CollectionUtils.isNotEmpty(commonOrderItems)) {
-                BasSkuRuleMatchingDto requestDto = new BasSkuRuleMatchingDto();
-                requestDto.setSystemType("0");
-                requestDto.setSellerCode(order.getCusCode());
-                requestDto.setSourceSkuList(commonOrderItems.stream().map(CommonOrderItem::getPlatformSku).collect(Collectors.toList()));
-                R<List<BasSkuRuleMatching>> r = basSkuRuleMatchingFeignService.getList(requestDto);
-                List<BasSkuRuleMatching> ruleMatchingList = new ArrayList<>();
-                if (Constants.SUCCESS.equals(r.getCode()) && CollectionUtils.isNotEmpty(r.getData())) {
-                    ruleMatchingList = r.getData();
-                }
-                for (CommonOrderItem item : commonOrderItems) {
-                    BasSkuRuleMatching ruleMatching = ruleMatchingList.stream().filter(v -> item.getPlatformSku().equals(v.getSourceSku())).findFirst().orElse(null);
-                    if (ruleMatching != null) {
-                        String omsSku = ruleMatching.getOmsSku();
-                        if (StringUtils.isNotBlank(omsSku)) {
-                            String[] skuArr = omsSku.split(",");
-                            for (String sku : skuArr) {
-                                DelOutboundDetailDto detail = new DelOutboundDetailDto();
-                                detail.setSku(sku);
-                                detail.setProductName(item.getTitle()); // shopify 商品名称就一个字段 不区分中英文
-                                detail.setProductNameChinese(item.getTitle());
-                                detail.setQty(item.getQuantity().longValue());
-                                detail.setRemark(item.getPlatformSku());
-                                details.add(detail);
+                // 转运类型不需要匹配SKU
+                if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(order.getShippingServiceCode())) {
+                    for (CommonOrderItem item : commonOrderItems) {
+                        DelOutboundDetailDto detail = new DelOutboundDetailDto();
+                        detail.setSku(item.getPlatformSku());
+                        detail.setProductName(item.getTitle());
+                        detail.setProductNameChinese(item.getTitle());
+                        detail.setQty(item.getQuantity() != null ? item.getQuantity().longValue() : 0L);
+                        detail.setRemark(item.getPlatformSku());
+                        details.add(detail);
+                    }
+                }else {
+                    BasSkuRuleMatchingDto requestDto = new BasSkuRuleMatchingDto();
+                    requestDto.setSystemType("0");
+                    requestDto.setSellerCode(order.getCusCode());
+                    requestDto.setSourceSkuList(commonOrderItems.stream().map(CommonOrderItem::getPlatformSku).collect(Collectors.toList()));
+                    R<List<BasSkuRuleMatching>> r = basSkuRuleMatchingFeignService.getList(requestDto);
+                    List<BasSkuRuleMatching> ruleMatchingList = new ArrayList<>();
+                    if (Constants.SUCCESS.equals(r.getCode()) && CollectionUtils.isNotEmpty(r.getData())) {
+                        ruleMatchingList = r.getData();
+                    }
+                    for (CommonOrderItem item : commonOrderItems) {
+                        BasSkuRuleMatching ruleMatching = ruleMatchingList.stream().filter(v -> item.getPlatformSku().equals(v.getSourceSku())).findFirst().orElse(null);
+                        if (ruleMatching != null) {
+                            String omsSku = ruleMatching.getOmsSku();
+                            if (StringUtils.isNotBlank(omsSku)) {
+                                String[] skuArr = omsSku.split(",");
+                                for (String sku : skuArr) {
+                                    DelOutboundDetailDto detail = new DelOutboundDetailDto();
+                                    detail.setSku(sku);
+                                    detail.setProductName(item.getTitle()); // shopify 商品名称就一个字段 不区分中英文
+                                    detail.setProductNameChinese(item.getTitle());
+                                    detail.setQty(item.getQuantity() != null ? item.getQuantity().longValue() : 0L);
+                                    detail.setRemark(item.getPlatformSku());
+                                    details.add(detail);
+                                }
                             }
+                            // 把映射出来的oms sku 存到remark 字段以备查验
+                            item.setRemark(ruleMatching.getOmsSku());
+                            commonOrderItemMapper.updateById(item);
+                        }else {
+    //                        DelOutboundDetailDto detailDto = new DelOutboundDetailDto();
+    //                        detailDto.setSku(item.getPlatformSku());
+    //                        detailDto.setProductName(item.getTitle());
+    //                        detailDto.setQty(item.getQuantity().longValue());
+    //                        detailDto.setRemark(item.getPlatformSku());
+    //                        details.add(detailDto);
+                            throw new RuntimeException(order.getOrderNo() + " 未进行SKU匹配");
                         }
-                        // 把映射出来的oms sku 存到remark 字段以备查验
-                        item.setRemark(ruleMatching.getOmsSku());
-                        commonOrderItemMapper.updateById(item);
-                    }else {
-//                        DelOutboundDetailDto detailDto = new DelOutboundDetailDto();
-//                        detailDto.setSku(item.getPlatformSku());
-//                        detailDto.setProductName(item.getTitle());
-//                        detailDto.setQty(item.getQuantity().longValue());
-//                        detailDto.setRemark(item.getPlatformSku());
-//                        details.add(detailDto);
-                        throw new RuntimeException(order.getOrderNo() + " 未进行SKU匹配");
                     }
                 }
             }
