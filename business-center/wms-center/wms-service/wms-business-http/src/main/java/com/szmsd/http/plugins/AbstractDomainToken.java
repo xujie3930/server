@@ -54,6 +54,10 @@ public abstract class AbstractDomainToken implements DomainToken {
                 String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
                 Object refreshTokenObject = this.redisTemplate.opsForValue().get(wrapRefreshTokenKey);
                 logger.info(">>>[获取Token]，5.获取RefreshToken值：{}，Redis键值：{}", refreshTokenObject, wrapRefreshTokenKey);
+                if (null == refreshTokenObject) {
+                    refreshTokenObject = this.getRefreshToken();
+                    logger.info(">>>[获取Token]，5.1获取RefreshToken值：{}", refreshTokenObject);
+                }
                 if (null != refreshTokenObject) {
                     String refreshToken = String.valueOf(refreshTokenObject);
                     TokenValue tokenValue = this.internalGetTokenValueByRefreshToken(refreshToken);
@@ -117,6 +121,15 @@ public abstract class AbstractDomainToken implements DomainToken {
     @Override
     public String refreshTokenKey() {
         return this.domainTokenValue.getDomainToken();
+    }
+
+    /**
+     * 获取refreshToken
+     *
+     * @return refreshToken
+     */
+    public String getRefreshToken() {
+        return null;
     }
 
     /**

@@ -8,7 +8,6 @@ import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.http.config.DomainTokenValue;
 import com.szmsd.http.utils.RedirectUriUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -24,9 +23,10 @@ public class TrackingYeeToken extends AbstractDomainToken {
     TokenValue internalGetTokenValue() {
         DomainTokenValue domainTokenValue = super.getDomainTokenValue();
         // 处理默认token
-        String defaultAccessToken = domainTokenValue.getDefaultAccessToken();
-        String defaultRefreshToken = domainTokenValue.getDefaultRefreshToken();
-        if (StringUtils.isNotEmpty(defaultAccessToken) && StringUtils.isNotEmpty(defaultRefreshToken)) {
+        // 这里逻辑修改，手动配置refresh_token，access_token配置默认为无效
+        // String defaultAccessToken = domainTokenValue.getDefaultAccessToken();
+        // String defaultRefreshToken = domainTokenValue.getDefaultRefreshToken();
+        /*if (StringUtils.isNotEmpty(defaultAccessToken) && StringUtils.isNotEmpty(defaultRefreshToken)) {
             // 直接返回
             TokenValue tokenValue = new TokenValue();
             // 前缀
@@ -34,7 +34,7 @@ public class TrackingYeeToken extends AbstractDomainToken {
             tokenValue.setExpiresIn(domainTokenValue.getAccessTokenExpiresIn());
             tokenValue.setRefreshToken(defaultRefreshToken);
             return tokenValue;
-        }
+        }*/
         String authorizeUrl = domainTokenValue.getAuthorizeUrl();
         HttpMethod authorizeHttpMethod = domainTokenValue.getAuthorizeHttpMethod();
         String stateKey = UUIDUtil.uuid();
@@ -97,6 +97,11 @@ public class TrackingYeeToken extends AbstractDomainToken {
         }
         // 根据授权码获取token信息
         return this.tokenRequest("authorization_code", authorizationCode, null);
+    }
+
+    @Override
+    public String getRefreshToken() {
+        return this.domainTokenValue.getDefaultRefreshToken();
     }
 
     @Override

@@ -238,7 +238,9 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                 BasDeliveryServiceMatchingDto matchingDto = new BasDeliveryServiceMatchingDto();
                 matchingDto.setSkuList(skuList);
                 matchingDto.setSellerCode(commonOrder.getCusCode());
+                log.info("查询发货服务匹配请求参数：{}", JSON.toJSONString(matchingDto));
                 R<List<BasDeliveryServiceMatching>> deliveryServiceMatchingR = basSkuRuleMatchingFeignService.getList(matchingDto);
+                log.info("查询到的发货服务匹配：{}", JSON.toJSONString(deliveryServiceMatchingR));
                 if (Constants.SUCCESS.equals(deliveryServiceMatchingR.getCode()) && CollectionUtils.isNotEmpty(deliveryServiceMatchingR.getData())) {
                     List<BasDeliveryServiceMatching> matchingList = deliveryServiceMatchingR.getData();
                     // 如果查出多种规则 不自动匹配, 查出一种才匹配
