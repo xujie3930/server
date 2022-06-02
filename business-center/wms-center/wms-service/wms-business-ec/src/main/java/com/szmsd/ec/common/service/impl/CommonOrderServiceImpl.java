@@ -7,6 +7,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.domain.BasSub;
+import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.bas.api.feign.BasSkuRuleMatchingFeignService;
 import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.domain.BasDeliveryServiceMatching;
@@ -70,7 +72,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
 //    private OrdOrderFeignService orderFeignService;
 
     @Autowired
-    private BasSubFeignService basSubFeignService;
+    private BasFeignService basFeignService;
 
     @Override
     @Transactional
@@ -230,7 +232,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     private void saveOrder(CommonOrder commonOrder){
         List<CommonOrderItem> orderItemList = commonOrder.getCommonOrderItemList();
         // 自动匹配各种规则
-        if (StringUtils.isNotBlank(commonOrder.getShippingServiceCode())) {
+        if (StringUtils.isBlank(commonOrder.getShippingServiceCode())) {
             if (CollectionUtils.isNotEmpty(orderItemList)) {
                 List<String> skuList = orderItemList.stream().map(CommonOrderItem::getPlatformSku).collect(Collectors.toList());
                 BasDeliveryServiceMatchingDto matchingDto = new BasDeliveryServiceMatchingDto();
@@ -250,7 +252,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                 }
             }
         }
-        if (StringUtils.isNotBlank(commonOrder.getShippingMethodCode())) {
+        if (StringUtils.isBlank(commonOrder.getShippingMethodCode())) {
             R<BasOtherRules> info = basSkuRuleMatchingFeignService.getInfo(commonOrder.getCusCode());
             if (Constants.SUCCESS.equals(info.getCode()) && info.getData() != null) {
                 BasOtherRules rules = info.getData();
@@ -269,9 +271,9 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                 return;
             }
             this.baseMapper.update(commonOrder, queryWrapper);
-            commonOrderItemMapper.delete(new LambdaQueryWrapper<CommonOrderItem>().eq(CommonOrderItem::getOrderId, commonOrder.getId()));
+            commonOrderItemMapper.delete(new LambdaQueryWrapper<CommonOrderItem>().eq(CommonOrderItem::getOrderId, co.getId()));
             commonOrder.getCommonOrderItemList().forEach(item -> {
-                item.setOrderId(commonOrder.getId());
+                item.setOrderId(co.getId());
                 commonOrderItemMapper.insert(item);
             });
             // 暂时关闭自动转单
@@ -451,12 +453,13 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
      * @return
      */
     private String getSubNameByCode(String code) {
-        R<Map<String, List<BasSubWrapperVO>>> feignServiceSub = basSubFeignService.getSub(code);
+        BasSub basSub = new BasSub();
+        basSub.setSubCode(code);
+        R<List<BasSub>> feignServiceSub = basFeignService.getsub(basSub);
         if (Constants.SUCCESS.equals(feignServiceSub.getCode()) && feignServiceSub.getData() != null) {
-            Map<String, List<BasSubWrapperVO>> data = feignServiceSub.getData();
-            List<BasSubWrapperVO> basSubWrapperVOS = data.get(code);
-            if (CollectionUtils.isNotEmpty(basSubWrapperVOS)) {
-                return basSubWrapperVOS.get(0).getSubName();
+            List<BasSub> data = feignServiceSub.getData();
+            if (CollectionUtils.isNotEmpty(data)) {
+                return data.get(0).getSubName();
             }
         }
         return "";
