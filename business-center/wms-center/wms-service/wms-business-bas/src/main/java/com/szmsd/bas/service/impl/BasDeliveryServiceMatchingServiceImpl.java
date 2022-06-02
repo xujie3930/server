@@ -146,6 +146,7 @@ public class BasDeliveryServiceMatchingServiceImpl extends ServiceImpl<BasDelive
         LambdaQueryWrapper<BasDeliveryServiceMatching> queryWrapper = new LambdaQueryWrapper<BasDeliveryServiceMatching>();
         queryWrapper.eq(BasDeliveryServiceMatching::getSellerCode, dto.getSellerCode());
         queryWrapper.in(BasDeliveryServiceMatching::getSku, dto.getSkuList());
+        queryWrapper.eq(BasDeliveryServiceMatching::getDelFlag, "0");
         List<BasDeliveryServiceMatching> list = baseMapper.selectList(queryWrapper);
         return list;
     }
