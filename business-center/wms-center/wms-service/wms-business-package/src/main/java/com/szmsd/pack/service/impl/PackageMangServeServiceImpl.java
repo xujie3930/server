@@ -65,13 +65,13 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
     public String genNo() {
         String code = PackageConstant.GENERATE_CODE;
         String appId = PackageConstant.GENERATE_APP_ID;
-        log.info("调用自动生成单号：code={}", code);
+//        log.info("调用自动生成单号：code={}", code);
         R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId(appId).setCode(code));
         AssertUtil.notNull(r, "单号生成失败");
         AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
         String s = r.getData().get(0);
         s = PackageConstant.LS_PREFIX + getSellCode() + s;
-        log.info("调用自动生成单号：调用完成, {}-{}", code, s);
+//        log.info("调用自动生成单号：调用完成, {}-{}", code, s);
         return s;
     }
 

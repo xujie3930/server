@@ -59,6 +59,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -122,6 +123,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Resource
     private IRemoteApi iRemoteApi;
 
+    @Resource
+    private ThreadPoolTaskExecutor returnThreadTaskPool;
+
     /**
      * 获取用户sellerCode
      *
@@ -139,12 +143,12 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     public String genNo() {
         String code = ReturnExpressConstant.GENERATE_CODE;
         String appId = ReturnExpressConstant.GENERATE_APP_ID;
-        log.info("调用自动生成单号：code={}", code);
+//        log.info("调用自动生成单号：code={}", code);
         R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId(appId).setCode(code));
         AssertUtil.notNull(r, "单号生成失败");
         AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
         String s = r.getData().get(0);
-        log.info("调用自动生成单号：调用完成, {}-{}", code, s);
+//        log.info("调用自动生成单号：调用完成, {}-{}", code, s);
         return s;
     }
 
@@ -967,7 +971,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     errorMsgList.add(errorMsg);
             });
             return errorMsgList;
-        });
+        }, returnThreadTaskPool);
     }
 
     private static final String EMPTY_STR = "\\";
