@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageInfo;
+import com.szmsd.bas.api.feign.BasSellerShopifyPermissionFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
@@ -14,6 +15,7 @@ import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.vo.DelOutboundVO;
@@ -68,6 +70,9 @@ public class CommonOrderController extends BaseController {
     @Autowired
     private DelOutboundFeignService delOutboundFeignService;
 
+    @Autowired
+    BasSellerShopifyPermissionFeignService basSellerShopifyPermissionFeignService;
+
     @ApiOperation("转仓库单回调")
     @PostMapping("transferCallback")
     public R transferCallback(@RequestBody @Valid TransferCallbackDTO callbackDTO){
@@ -90,6 +95,7 @@ public class CommonOrderController extends BaseController {
     public TableDataInfo listPage(CommonOrderDTO queryDTO) {
         startPage();
         LambdaQueryWrapper<CommonOrder> queryWrapper = commonSearchWrapper(queryDTO);
+
         queryWrapper.orderByDesc(CommonOrder::getOrderDate);
         List<CommonOrder> commonOrders = this.ecCommonOrderService.list(queryWrapper);
         commonOrders.forEach(item -> {
@@ -206,11 +212,11 @@ public class CommonOrderController extends BaseController {
      */
     private LambdaQueryWrapper<CommonOrder> commonSearchWrapper(CommonOrderDTO queryDTO){
         LambdaQueryWrapper<CommonOrder> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(StringUtils.isNotEmpty(queryDTO.getStatus()), CommonOrder::getStatus, queryDTO.getStatus())
-                .eq(StringUtils.isNotEmpty(queryDTO.getOrderSource()), CommonOrder::getOrderSource, queryDTO.getOrderSource())
-                .eq(StringUtils.isNotEmpty(queryDTO.getShopName()), CommonOrder::getShopName, queryDTO.getShopName())
-                .eq(StringUtils.isNotEmpty(queryDTO.getPlatformOrderNumber()), CommonOrder::getPlatformOrderNumber, queryDTO.getPlatformOrderNumber())
-                .eq(StringUtils.isNotEmpty(queryDTO.getPlatformOrderStatus()), CommonOrder::getPlatformOrderStatus, queryDTO.getPlatformOrderStatus());
+        queryWrapper.eq(StringUtils.isNotBlank(queryDTO.getStatus()), CommonOrder::getStatus, queryDTO.getStatus())
+                .eq(StringUtils.isNotBlank(queryDTO.getOrderSource()), CommonOrder::getOrderSource, queryDTO.getOrderSource())
+                .eq(StringUtils.isNotBlank(queryDTO.getShopName()), CommonOrder::getShopName, queryDTO.getShopName())
+                .eq(StringUtils.isNotBlank(queryDTO.getPlatformOrderNumber()), CommonOrder::getPlatformOrderNumber, queryDTO.getPlatformOrderNumber())
+                .eq(StringUtils.isNotBlank(queryDTO.getPlatformOrderStatus()), CommonOrder::getPlatformOrderStatus, queryDTO.getPlatformOrderStatus());
         if (StringUtils.isNotBlank(queryDTO.getOrderNo())) {
             List<String> orderNoArray = StringToolkit.getCodeByArray(queryDTO.getOrderNo());
             queryWrapper.in(CommonOrder::getOrderNo, orderNoArray);
@@ -222,6 +228,9 @@ public class CommonOrderController extends BaseController {
         if (StringUtils.isNotEmpty(queryDTO.getCreateDates()) && queryDTO.getCreateDates().length > 1) {
             queryWrapper.between(CommonOrder::getOrderDate, DateUtils.parseDate(queryDTO.getCreateDates()[0]), DateUtils.addDays(DateUtils.parseDate(queryDTO.getCreateDates()[1]), 1));
         }
+        String sellerCode = SecurityUtils.getLoginUser().getSellerCode();
+        // 根据客户过滤数据
+        queryWrapper.eq(StringUtils.isNotBlank(sellerCode), CommonOrder::getCusCode, sellerCode);
         return queryWrapper;
     }
 }
