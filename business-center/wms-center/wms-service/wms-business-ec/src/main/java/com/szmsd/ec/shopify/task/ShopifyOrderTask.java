@@ -5,19 +5,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.szmsd.bas.api.feign.BasSellerShopifyPermissionFeignService;
-import com.szmsd.bas.api.feign.BasSkuRuleMatchingFeignService;
-import com.szmsd.bas.domain.BasOtherRules;
 import com.szmsd.bas.domain.BasSellerShopifyPermission;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.ec.common.service.ICommonOrderService;
 import com.szmsd.ec.constant.OrderStatusConstant;
 import com.szmsd.ec.domain.ShopifyOrder;
-import com.szmsd.ec.dto.ShopDTO;
 import com.szmsd.ec.dto.ShopifyOrderDTO;
 import com.szmsd.ec.dto.ShopifyOrderItemDTO;
 import com.szmsd.ec.enums.OrderSourceEnum;
@@ -28,7 +24,6 @@ import com.szmsd.ec.shopify.util.GenericPropertyConverter;
 import com.szmsd.ec.shopify.util.ShopifyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +31,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -163,11 +157,11 @@ public class ShopifyOrderTask {
             parameters.put("updated_at_max", before);
             parameters.put("created_at_min", createAfter);
             parameters.put("created_at_max", before);
-            listOrder(shop,parameters);
+            listOrder(shop,parameters, shopifyPermissionList.size());
         });
     }
 
-    public void listOrder(BasSellerShopifyPermission shop, Map<String, String> parameters){
+    public void listOrder(BasSellerShopifyPermission shop, Map<String, String> parameters, Integer shopNum){
         String orderUrl = ShopifyConfig.orderUrl;
         String url = ShopifyConfig.HTTPS + shop.getShop() + orderUrl+ "?limit=200";
         //获取取消的订单和未发货的订单
@@ -211,8 +205,8 @@ public class ShopifyOrderTask {
                 });
             }else {
                 log.info("【Shopify】店铺{}获取订单返回结果无返回数据",shop.getShop());
-                // 手动拉不到单的情况下
-                if (i == 0){
+                // 手动拉不到单的情况下  因为手动拉单只能选择一个店铺进行操作 所以这里判断 shopNum 为了防止影响自动拉单情况
+                if (i == 0 && shopNum == 1){
                     throw new BaseException("没有最新的订单");
                 }
             }

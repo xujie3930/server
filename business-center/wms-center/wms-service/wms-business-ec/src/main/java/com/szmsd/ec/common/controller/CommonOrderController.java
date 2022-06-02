@@ -1,5 +1,6 @@
 package com.szmsd.ec.common.controller;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -24,7 +25,6 @@ import com.szmsd.ec.domain.CommonOrder;
 import com.szmsd.ec.domain.CommonOrderItem;
 import com.szmsd.ec.dto.*;
 import com.szmsd.ec.enums.OrderSourceEnum;
-import com.szmsd.ec.enums.OrderStatusEnum;
 import com.szmsd.ec.shopify.task.ShopifyOrderTask;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -215,16 +215,12 @@ public class CommonOrderController extends BaseController {
             List<String> orderNoArray = StringToolkit.getCodeByArray(queryDTO.getOrderNo());
             queryWrapper.in(CommonOrder::getOrderNo, orderNoArray);
         }
-        if (StringUtils.isNotBlank(queryDTO.getOrderNo())) {
-            List<String> orderNoArray = StringToolkit.getCodeByArray(queryDTO.getOrderNo());
-            queryWrapper.in(CommonOrder::getOrderNo, orderNoArray);
-        }
         if (StringUtils.isNotBlank(queryDTO.getTransferNumber())) {
             List<String> transferNumberArray = StringToolkit.getCodeByArray(queryDTO.getTransferNumber());
             queryWrapper.in(CommonOrder::getTransferNumber, transferNumberArray);
         }
         if (StringUtils.isNotEmpty(queryDTO.getCreateDates()) && queryDTO.getCreateDates().length > 1) {
-            queryWrapper.between(CommonOrder::getOrderDate, queryDTO.getCreateDates()[0] + " 00:00:00", queryDTO.getCreateDates()[1] + " 23:59:59");
+            queryWrapper.between(CommonOrder::getOrderDate, DateUtils.parseDate(queryDTO.getCreateDates()[0]), DateUtils.addDays(DateUtils.parseDate(queryDTO.getCreateDates()[1]), 1));
         }
         return queryWrapper;
     }
