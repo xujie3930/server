@@ -619,7 +619,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
                 transferCallbackDTO.setOrderNo(delOutbound.getRefNo());
                 transferCallbackDTO.setLogisticsRouteId(shipmentService);
-                transferCallbackDTO.setTransferNumber(shipmentOrderResult.getOrderNumber());
+                transferCallbackDTO.setTransferNumber(shipmentOrderResult.getMainTrackingNumber());
                 commonOrderFeignService.transferCallback(transferCallbackDTO);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
