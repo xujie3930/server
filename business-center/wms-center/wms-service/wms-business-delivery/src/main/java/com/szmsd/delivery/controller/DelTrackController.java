@@ -1,56 +1,52 @@
 package com.szmsd.delivery.controller;
 
 import cn.hutool.core.io.IoUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
+import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.log.annotation.Log;
+import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
-import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.domain.DelTrack;
+import com.szmsd.delivery.dto.ImportTrackDto;
+import com.szmsd.delivery.dto.TrackAnalysisExportDto;
+import com.szmsd.delivery.dto.TrackAnalysisRequestDto;
+import com.szmsd.delivery.dto.TrackingYeeTraceDto;
+import com.szmsd.delivery.event.ChangeDelOutboundLatestTrackEvent;
 import com.szmsd.delivery.imported.DefaultAnalysisEventListener;
 import com.szmsd.delivery.imported.EasyExcelFactoryUtil;
 import com.szmsd.delivery.imported.ImportMessage;
 import com.szmsd.delivery.imported.ImportResult;
+import com.szmsd.delivery.service.IDelTrackService;
 import com.szmsd.delivery.util.SHA256Util;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
-import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
-import com.szmsd.delivery.service.IDelTrackService;
-import com.szmsd.delivery.domain.DelTrack;
-import com.szmsd.common.log.annotation.Log;
-import com.szmsd.common.core.web.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.szmsd.common.core.utils.poi.ExcelUtil;
-import com.szmsd.common.log.enums.BusinessType;
-import io.swagger.annotations.Api;
-
 import java.io.*;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Date;
 import java.util.List;
-
-import org.springframework.web.bind.annotation.RestController;
-import io.swagger.annotations.ApiOperation;
-import com.szmsd.common.core.web.controller.BaseController;
-import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -73,6 +69,9 @@ public class DelTrackController extends BaseController {
 
     @Value("${webhook.secret}")
     private String webhookSecret;
+
+    @Resource
+    private ApplicationContext applicationContext;
 
     /**
      * 查询模块列表
@@ -139,10 +138,16 @@ public class DelTrackController extends BaseController {
                     messageList.add(new ImportMessage(i, 1, null ,"轨迹状态不能为空" ));
                 }
                 i++;
+
             }
             if (CollectionUtils.isNotEmpty(messageList)) {
                 return R.ok(ImportResult.buildFail(messageList));
             }
+            tracks.forEach(track -> {
+                track.setSource("2");
+                track.setTrackingTime(new Date());
+                applicationContext.publishEvent(new ChangeDelOutboundLatestTrackEvent(track));
+            });
             delTrackService.saveBatch(tracks);
             return R.ok();
         } catch (IOException e) {
@@ -155,7 +160,10 @@ public class DelTrackController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("addOrUpdate")
     public R addOrUpdate(@RequestBody DelTrack delTrack){
+        delTrack.setSource("2"); // 手动新增
+        delTrack.setTrackingTime(new Date());
         delTrackService.saveOrUpdate(delTrack);
+        applicationContext.publishEvent(new ChangeDelOutboundLatestTrackEvent(delTrack));
         return R.ok();
     }
 

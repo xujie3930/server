@@ -135,6 +135,10 @@ public class DelTrack extends BaseEntity {
     @Excel(name = "街道3")
     private String street3;
 
+    @ApiModelProperty(value = "来源 1 自动拉取 2 手动添加")
+    @Excel(name = "来源 1 自动拉取 2 手动添加")
+    private String source;
+
     @ApiModelProperty(value = "过滤关键词，Y过滤，N不过滤，默认Y")
     @TableField(exist = false)
     private String filterKeyword;

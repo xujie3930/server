@@ -94,6 +94,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
         boolean orderNoNotEmpty = StringUtils.isNotEmpty(delTrack.getOrderNo());
         delTrackLambdaQueryWrapper.eq(orderNoNotEmpty, DelTrack::getOrderNo, delTrack.getOrderNo());
+        delTrackLambdaQueryWrapper.eq(StringUtils.isNotBlank(delTrack.getSource()), DelTrack::getSource, delTrack.getSource());
         List<DelTrack> selectList = baseMapper.selectList(delTrackLambdaQueryWrapper);
         if (CollectionUtils.isNotEmpty(selectList) && orderNoNotEmpty) {
             String carrierCode = "";
