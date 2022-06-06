@@ -14,10 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,6 +87,40 @@ public class RedirectUriController {
             Map<String, Object> map = new HashMap<>();
             map.put("accessTokenKey", aBoolean);
             map.put("refreshTokenKey", aBoolean1);
+            return R.ok(map);
+        } catch (Exception e) {
+            return R.failed("执行失败，错误信息：" + e.getMessage());
+        }
+    }
+
+    @PostMapping(value = {"/token/setRefreshToken"})
+    @ApiOperation(value = "HTTP回调接收接口 - #21", position = 210)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "domain", value = "domain")
+    })
+    public R<Object> setRefreshToken(@RequestParam(value = "domain") String domain,
+                                     @RequestParam(value = "refreshToken") String refreshToken) {
+        if (StringUtils.isEmpty(domain)) {
+            return R.failed("domain不能为空");
+        }
+        this.logger.info("请求参数：{}", domain);
+        DomainTokenValue domainTokenValue = domainTokenConfig.getToken(domain);
+        if (null == domainTokenValue) {
+            return R.failed("没有配置，" + domain);
+        }
+        String domainToken = domainTokenValue.getDomainToken();
+        try {
+            DomainToken bean = this.applicationContext.getBean(domainToken, DomainToken.class);
+
+            String refreshTokenKey = bean.refreshTokenKey();
+            this.logger.info("refreshTokenKey: {}", refreshTokenKey);
+            String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
+            this.logger.info("wrapRefreshTokenKey: {}", wrapRefreshTokenKey);
+            this.redisTemplate.opsForValue().set(wrapRefreshTokenKey, refreshToken);
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("refreshTokenKey", refreshTokenKey);
+            map.put("wrapRefreshTokenKey", wrapRefreshTokenKey);
             return R.ok(map);
         } catch (Exception e) {
             return R.failed("执行失败，错误信息：" + e.getMessage());
