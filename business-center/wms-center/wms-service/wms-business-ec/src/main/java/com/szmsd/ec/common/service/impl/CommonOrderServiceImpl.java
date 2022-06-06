@@ -170,7 +170,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             List<CommonOrderItem> commonOrderItems = commonOrderItemMapper.selectList(new LambdaQueryWrapper<CommonOrderItem>().eq(CommonOrderItem::getOrderId, order.getId()));
             if (CollectionUtils.isNotEmpty(commonOrderItems)) {
                 // 转运类型不需要匹配SKU
-                if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(order.getShippingServiceCode())) {
+                if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equalsIgnoreCase(order.getShippingMethodCode())) {
                     for (CommonOrderItem item : commonOrderItems) {
                         DelOutboundDetailDto detail = new DelOutboundDetailDto();
                         detail.setSku(item.getPlatformSku());
