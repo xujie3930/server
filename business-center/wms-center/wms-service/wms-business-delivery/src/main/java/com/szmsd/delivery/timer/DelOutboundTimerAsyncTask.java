@@ -43,6 +43,11 @@ public class DelOutboundTimerAsyncTask {
         this.handle(s -> delOutboundBringVerifyAsyncService.bringVerifyAsync(orderNo), id);
     }
 
+    @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED2)
+    public void asyncBringVerify2(String orderNo, Long id) {
+        this.handle(s -> delOutboundBringVerifyAsyncService.bringVerifyAsync(orderNo), id);
+    }
+
     @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_SHIPMENTPACKINGEVENT)
     public void asyncShipmentPacking(String orderNo, Long id) {
         this.handle(s -> delOutboundAsyncService.shipmentPacking(orderNo), id);

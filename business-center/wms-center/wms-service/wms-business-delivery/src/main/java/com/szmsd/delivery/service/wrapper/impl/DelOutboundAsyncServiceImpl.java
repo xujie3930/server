@@ -3,6 +3,7 @@ package com.szmsd.delivery.service.wrapper.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TimeInterval;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
@@ -733,6 +734,20 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 lock.unlock();
             }
         }
+    }
+
+    @Override
+    public String getReassignType(String orderNo) {
+        // 查询出库单的重派类型
+        LambdaQueryWrapper<DelOutbound> lambdaQueryWrapper = Wrappers.lambdaQuery();
+        lambdaQueryWrapper.select(DelOutbound::getReassignType);
+        lambdaQueryWrapper.eq(DelOutbound::getOrderNo, orderNo);
+        lambdaQueryWrapper.last("LIMIT 1");
+        DelOutbound delOutbound = this.delOutboundService.getOne(lambdaQueryWrapper);
+        if (null != delOutbound) {
+            return delOutbound.getReassignType();
+        }
+        return null;
     }
 
     private String defaultValue(String str) {
