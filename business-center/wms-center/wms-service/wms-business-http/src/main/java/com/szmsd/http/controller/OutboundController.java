@@ -61,4 +61,12 @@ public class OutboundController extends BaseController {
         return R.ok(outboundService.shipmentShipping(dto));
     }
 
+
+    @PutMapping("/shipment/multiboxrelation")
+    @ApiOperation(value = "出库管理 - HTTP - #D3 更新出库单一件多票的单据匹配关系", position = 500)
+    @ApiImplicitParam(name = "dto", value = "ShipmentMultiboxrelationRequestDto", dataType = "ShipmentMultiboxrelationRequestDto")
+    public R<ResponseVO> shipmentMultiboxrelation(@RequestBody ShipmentMultiboxrelationRequestDto dto) {
+        return R.ok(outboundService.shipmentMultiboxrelation(dto));
+    }
+
 }

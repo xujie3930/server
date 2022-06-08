@@ -247,6 +247,8 @@ public class WmsApiConfig implements ApiConfig {
         private String label;
         // D2 更新出库单发货指令
         private String shipping;
+        // D3 更新出库单一件多票的单据匹配关系
+        private String multiboxrelation;
 
         public String getCreate() {
             return create;
@@ -287,6 +289,16 @@ public class WmsApiConfig implements ApiConfig {
         public void setShipping(String shipping) {
             this.shipping = shipping;
         }
+
+        public String getMultiboxrelation() {
+            return multiboxrelation;
+        }
+
+        public void setMultiboxrelation(String multiboxrelation) {
+            this.multiboxrelation = multiboxrelation;
+        }
+
+
     }
 
     static class Returned {

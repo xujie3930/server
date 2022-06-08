@@ -43,4 +43,9 @@ public class HtpOutboundClientServiceImpl implements IHtpOutboundClientService {
     public ResponseVO shipmentShipping(ShipmentUpdateRequestDto dto) {
         return R.getDataAndException(this.htpOutboundFeignService.shipmentShipping(dto));
     }
+
+    @Override
+    public ResponseVO shipmentMultiboxrelation(ShipmentMultiboxrelationRequestDto dto) {
+        return R.getDataAndException(this.htpOutboundFeignService.shipmentMultiboxrelation(dto));
+    }
 }
