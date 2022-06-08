@@ -61,4 +61,10 @@ public class OutboundServiceImpl extends WmsRequest implements IOutboundService 
         String text = httpPut(dto.getWarehouseCode(), "outbound.shipping", dto);
         return ResponseVO.build(text);
     }
+
+    @Override
+    public ResponseVO shipmentMultiboxrelation(ShipmentMultiboxrelationRequestDto dto) {
+        String text = httpPut(dto.getWarehouseCode(), "outbound.multiboxrelation", dto);
+        return ResponseVO.build(text);
+    }
 }

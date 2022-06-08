@@ -33,4 +33,8 @@ public interface HtpOutboundFeignService {
 
     @PutMapping("/api/outbound/http/shipment/shipping")
     R<ResponseVO> shipmentShipping(@RequestBody ShipmentUpdateRequestDto dto);
+
+
+    @PutMapping("/api/outbound/http/shipment/multiboxrelation")
+    R<ResponseVO> shipmentMultiboxrelation(@RequestBody ShipmentMultiboxrelationRequestDto dto);
 }

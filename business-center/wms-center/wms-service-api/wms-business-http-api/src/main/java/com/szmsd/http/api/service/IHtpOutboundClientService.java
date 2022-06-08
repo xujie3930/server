@@ -49,4 +49,13 @@ public interface IHtpOutboundClientService {
      * @return ResponseVO
      */
     ResponseVO shipmentShipping(ShipmentUpdateRequestDto dto);
+
+
+    /**
+     * 更新出库单发货指令
+     *
+     * @param dto dto
+     * @return ResponseVO
+     */
+    ResponseVO shipmentMultiboxrelation(ShipmentMultiboxrelationRequestDto dto);
 }
