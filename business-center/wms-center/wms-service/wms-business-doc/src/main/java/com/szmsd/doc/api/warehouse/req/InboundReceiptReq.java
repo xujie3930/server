@@ -66,6 +66,9 @@ public class InboundReceiptReq {
     @ApiModelProperty(value = "送货单号（快递单号） 可支持多个", example = "1121,22")
     private String deliveryNo;
 
+    @ApiModelProperty(value = "伙伴编码")
+    private String partnerCode;
+
     public InboundReceiptReq setDeliveryNo(String deliveryNo) {
         this.deliveryNo = deliveryNo;
         this.deliveryNoList = StringToolkit.getCodeByArray(deliveryNo);

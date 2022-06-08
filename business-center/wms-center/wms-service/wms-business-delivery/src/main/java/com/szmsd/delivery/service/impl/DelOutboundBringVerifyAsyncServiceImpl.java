@@ -1,7 +1,10 @@
 package com.szmsd.delivery.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.szmsd.bas.api.feign.BasPartnerFeignService;
+import com.szmsd.bas.domain.BasPartner;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.DelCk1RequestLog;
@@ -55,6 +58,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
     private IDelOutboundCompletedService delOutboundCompletedService;
     @Autowired
     private IDelOutboundRetryLabelService delOutboundRetryLabelService;
+    @Autowired
+    private BasPartnerFeignService partnerFeignService;
 
     @Override
     public void bringVerifyAsync(String orderNo) {
@@ -205,12 +210,35 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
             // 抛出异常
             // 这里是异步执行，不抛出异常
             // throw e;
+            boolean partnerDeleteOrderFlag = false;
+            String partnerCode = delOutbound.getPartnerCode();
+            if (StringUtils.isNotEmpty(partnerCode)) {
+                try {
+                    BasPartner queryBasPartner = new BasPartner();
+                    queryBasPartner.setPartnerCode(partnerCode);
+                    R<BasPartner> basPartnerR = this.partnerFeignService.getByCode(queryBasPartner);
+                    if (null != basPartnerR) {
+                        BasPartner basPartner = basPartnerR.getData();
+                        if (null != basPartner && (partnerDeleteOrderFlag = isTrue(basPartner.getDeleteOrderFlag()))) {
+                            // 修改订单标识为已删除
+                            this.delOutboundService.deleteFlag(delOutbound);
+                        }
+                    }
+                } catch (Exception e2) {
+                    logger.error(e2.getMessage(), e2);
+                }
+            }
+            logger.info("(5)出库单提审失败，判断是否删除出库单。partnerCode: {}, partnerDeleteOrderFlag: {}", partnerCode, partnerDeleteOrderFlag);
         } finally {
             if (isAsyncThread) {
                 asyncThreadObject.unloadTid();
             }
         }
         this.logger.info("(5)提审操作完成，出库单号：{}，执行耗时：{}", delOutbound.getOrderNo(), (System.currentTimeMillis() - startTime));
+    }
+
+    private boolean isTrue(Boolean value) {
+        return null != value && value;
     }
 
 }

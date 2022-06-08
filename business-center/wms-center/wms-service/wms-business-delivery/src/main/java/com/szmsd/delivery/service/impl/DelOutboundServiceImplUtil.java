@@ -294,6 +294,13 @@ public final class DelOutboundServiceImplUtil {
         }
         queryWrapper.eq(StringUtils.isNotBlank(reassignType), "o.reassign_type", reassignType);
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "o.tracking_status", queryDto.getTrackingStatus());
+        // 删除标识
+        String delFlag = queryDto.getDelFlag();
+        if (StringUtils.isEmpty(delFlag)) {
+            // 2已删除，0未删除
+            delFlag = "0";
+        }
+        queryWrapper.eq("o.del_flag", delFlag);
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
     }

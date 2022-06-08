@@ -69,6 +69,9 @@ public class InboundReceiptDTO {
     @ApiModelProperty(value = "送货单号 可支持多个 送货方式为快递到仓时,送货单号必填")
     private String deliveryNo;
 
+    @ApiModelProperty(value = "伙伴编码")
+    private String partnerCode;
+
     public InboundReceiptDTO setDeliveryNo(String deliveryNo) {
         this.deliveryNo = deliveryNo;
         this.deliveryNoList = Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>()).stream().distinct().collect(Collectors.toList());

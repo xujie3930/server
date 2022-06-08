@@ -33,7 +33,6 @@ import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
 import com.szmsd.delivery.imported.*;
-import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -98,8 +97,6 @@ public class DelOutboundController extends BaseController {
     private IDelOutboundDetailService delOutboundDetailService;
     @Autowired
     private BaseProductClientService baseProductClientService;
-    @Autowired
-    private IDelOutboundBringVerifyAsyncService delOutboundBringVerifyAsyncService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
 

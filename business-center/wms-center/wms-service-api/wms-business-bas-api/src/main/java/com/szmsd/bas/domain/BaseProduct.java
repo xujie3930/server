@@ -260,4 +260,7 @@ public class BaseProduct extends BaseEntity {
 
     @ApiModelProperty(value = "是否一票多件(0:否,1:是)")
     private Integer multipleTicketFlag;
+
+    @ApiModelProperty(value = "伙伴编码")
+    private String partnerCode;
 }
