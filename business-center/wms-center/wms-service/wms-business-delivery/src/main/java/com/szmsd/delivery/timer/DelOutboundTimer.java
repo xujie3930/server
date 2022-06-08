@@ -40,6 +40,8 @@ public class DelOutboundTimer {
     private IDelOutboundCompletedService delOutboundCompletedService;
     @Autowired
     private DelOutboundTimerAsyncTask delOutboundTimerAsyncTask;
+    @Autowired
+    private DelOutboundTimerAsyncTaskAdapter delOutboundTimerAsyncTaskAdapter;
 
     /**
      * 单据状态处理中
@@ -254,7 +256,7 @@ public class DelOutboundTimer {
     }
 
     public void handleBringVerify(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTask.asyncBringVerify(orderNo, id), 100);
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTaskAdapter.asyncBringVerify(orderNo, id), 150);
     }
 
     public void handleShipmentPacking(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {

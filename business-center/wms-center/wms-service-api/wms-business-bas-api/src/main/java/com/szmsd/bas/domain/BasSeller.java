@@ -25,7 +25,7 @@ import java.util.Optional;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value = "", description = "BasSeller对象")
+@ApiModel(value = "BasSeller", description = "BasSeller对象")
 public class BasSeller extends BaseEntity {
 
     private static final long serialVersionUID = 1L;

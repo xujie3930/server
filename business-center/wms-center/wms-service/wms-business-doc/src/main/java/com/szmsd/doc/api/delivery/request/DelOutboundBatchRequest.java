@@ -93,6 +93,9 @@ public class DelOutboundBatchRequest implements Serializable {
     @ApiModelProperty(value = "备注", dataType = "String", position = 15, example = "")
     private String remark;
 
+    @ApiModelProperty(value = "伙伴编码")
+    private String partnerCode;
+
 //    @NotBlank(message = "面单文件不能为空", groups = {DelOutboundGroup.Batch.class})
     @ApiModelProperty(value = "物流面单文件-base64 自提出库需要上传", dataType = "String", required = true, position= 16, example = "")
     private String file;

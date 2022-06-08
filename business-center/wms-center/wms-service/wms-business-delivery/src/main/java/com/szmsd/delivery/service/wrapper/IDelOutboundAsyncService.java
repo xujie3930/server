@@ -51,4 +51,12 @@ public interface IDelOutboundAsyncService {
      * @param orderNo orderNo
      */
     void cancelled(String orderNo);
+
+    /**
+     * 查询出库单的重派类型
+     *
+     * @param orderNo orderNo
+     * @return String
+     */
+    String getReassignType(String orderNo);
 }
