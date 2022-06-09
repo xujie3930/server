@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service.impl;
 
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelQuerySettings;
 import com.szmsd.delivery.mapper.DelQuerySettingsMapper;
 import com.szmsd.delivery.service.IDelQuerySettingsService;
@@ -43,9 +44,11 @@ public class DelQuerySettingsServiceImpl extends ServiceImpl<DelQuerySettingsMap
         @Override
         public List<DelQuerySettings> selectDelQuerySettingsList(DelQuerySettings delQuerySettings)
         {
-        QueryWrapper<DelQuerySettings> where = new QueryWrapper<DelQuerySettings>();
-            where.eq("shipment_rule", delQuerySettings.getShipmentRule());
-        return baseMapper.selectList(where);
+            QueryWrapper<DelQuerySettings> where = new QueryWrapper<DelQuerySettings>();
+            if(StringUtils.isNotEmpty(delQuerySettings.getShipmentRule())){
+                where.eq("shipment_rule", delQuerySettings.getShipmentRule());
+            }
+            return baseMapper.selectList(where);
         }
 
         /**
