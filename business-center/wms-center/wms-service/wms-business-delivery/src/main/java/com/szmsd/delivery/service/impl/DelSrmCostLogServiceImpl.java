@@ -9,18 +9,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
-import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.domain.DelOutboundAddress;
-import com.szmsd.delivery.domain.DelSrmCostDetail;
-import com.szmsd.delivery.domain.DelSrmCostLog;
+import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelSrmCostLogEnum;
 import com.szmsd.delivery.mapper.DelSrmCostLogMapper;
-import com.szmsd.delivery.service.IDelOutboundAddressService;
-import com.szmsd.delivery.service.IDelOutboundService;
-import com.szmsd.delivery.service.IDelSrmCostDetailService;
-import com.szmsd.delivery.service.IDelSrmCostLogService;
+import com.szmsd.delivery.service.*;
 import com.szmsd.http.api.feign.HtpWarMappingFeignService;
+import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpSrmClientService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.*;
@@ -66,6 +61,11 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
     private IDelOutboundAddressService delOutboundAddressService;
     @Resource
     private HtpWarMappingFeignService htpWarMappingFeignService;
+    @Autowired
+    private IHtpOutboundClientService htpOutboundClientService;
+
+    @Autowired
+    private IDelOutboundDetailService delOutboundDetailService;
     //                                            0   1   2   3   4   5   6   7   8    9    10   11
     private final int[] retryTimeConfiguration = {30, 30, 60, 60, 60, 60, 60, 60, 180, 180, 180, 180};
     public static final int retryCount = 10;
@@ -347,9 +347,16 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                     responseBodyMap.put("currencyCode", delSrmCostDetail.getCurrencyCode());
                     responseBody = (String) JSON.toJSONString(responseBody);
                     delSrmCostDetailService.insertDelSrmCostDetail(delSrmCostDetail);
-                    
-                    
+
+					if(type == DelSrmCostLogEnum.Type.create) {
+                        //D3 更新出库单一件多票的单据匹配关系
+                        this.updateShipmentMultiboxrelation(delOutbound);
+                    }
+
+
+
                 } else {
+                    
                     failCount++;
                     if (failCount >= retryCount) {
                         state = DelSrmCostLogEnum.State.FAIL.name();
@@ -376,6 +383,29 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                 lock.unlock();
             }
         }
+    }
+
+    private void updateShipmentMultiboxrelation(DelOutbound delOutbound){
+        ShipmentMultiboxrelationRequestDto dto = new ShipmentMultiboxrelationRequestDto();
+        List<ShipmentMultiboxrelationDetailDto> details = new ArrayList<ShipmentMultiboxrelationDetailDto>();
+
+        dto.setOrderNo(delOutbound.getOrderNo());
+        dto.setWarehouseCode(delOutbound.getWarehouseCode());
+        dto.setDetails(details);
+        List<DelOutboundDetail> delOutboundDetailList = delOutboundDetailService.listByOrderNo(delOutbound.getOrderNo());
+
+        for (DelOutboundDetail detail: delOutboundDetailList){
+            ShipmentMultiboxrelationDetailDto detailDto = new ShipmentMultiboxrelationDetailDto();
+            detailDto.setSku(detail.getSku());
+            detailDto.setBoxNo(detail.getBoxMark());
+            detailDto.setTrackingNo(detail.getTraceId());
+            details.add(detailDto);
+
+        }
+
+        htpOutboundClientService.shipmentMultiboxrelation(dto);
+
+
     }
         /**
         * 查询出库单SRC成本调用日志模块

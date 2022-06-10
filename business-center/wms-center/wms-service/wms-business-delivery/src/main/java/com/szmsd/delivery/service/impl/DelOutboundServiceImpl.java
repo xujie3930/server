@@ -299,6 +299,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         List<DelOutbound> delOutbounds = baseMapper.selectList(Wrappers.<DelOutbound>lambdaQuery()
                 .in(DelOutbound::getId, idList)
                 .eq(DelOutbound::getOrderType, typeEnum.getCode())
+                .eq(DelOutbound::getDelFlag, "0")
         );
         if (CollectionUtils.isEmpty(delOutbounds)) {
             return new ArrayList<DelOutboundDetailVO>();
@@ -1934,6 +1935,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_ADD);
         dto.setReassignType(DelOutboundConstant.REASSIGN_TYPE_Y);
         return this.createDelOutbound(dto);
+    }
+
+    @Override
+    public void deleteFlag(DelOutbound delOutbound) {
+        DelOutbound updateDelOutbound = new DelOutbound();
+        updateDelOutbound.setId(delOutbound.getId());
+        updateDelOutbound.setDelFlag("2");
+        super.updateById(updateDelOutbound);
     }
 }
 

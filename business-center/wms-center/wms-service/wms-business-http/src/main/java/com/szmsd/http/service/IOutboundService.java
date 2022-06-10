@@ -49,4 +49,6 @@ public interface IOutboundService {
      * @return ResponseVO
      */
     ResponseVO shipmentShipping(ShipmentUpdateRequestDto dto);
+
+    ResponseVO shipmentMultiboxrelation(ShipmentMultiboxrelationRequestDto dto);
 }

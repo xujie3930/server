@@ -415,5 +415,12 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @return 结果
      */
     DelOutboundAddResponse reassign(DelOutboundDto dto);
+
+    /**
+     * 删除出库单
+     *
+     * @param delOutbound delOutbound
+     */
+    void deleteFlag(DelOutbound delOutbound);
 }
 

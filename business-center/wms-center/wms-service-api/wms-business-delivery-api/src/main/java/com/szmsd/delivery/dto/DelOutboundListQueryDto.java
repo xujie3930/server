@@ -56,7 +56,6 @@ public class DelOutboundListQueryDto extends QueryDto {
     @ApiModelProperty(value = "轨迹状态")
     private String trackingStatus;
 
-
     @ApiModelProperty(value = "当前语言")
     private String len;
 
@@ -65,4 +64,7 @@ public class DelOutboundListQueryDto extends QueryDto {
 
     @ApiModelProperty(value = "查询所有订单类型（重派和非重派）")
     private Boolean queryAll;
+
+    @ApiModelProperty(value = "逻辑删除标识；2-已删除，0-未删除")
+    private String delFlag;
 }

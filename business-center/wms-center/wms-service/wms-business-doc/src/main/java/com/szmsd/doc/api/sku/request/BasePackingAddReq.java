@@ -81,6 +81,9 @@ public class BasePackingAddReq {
     @Size(max = 20)
     private String category = "包材";
 
+    @ApiModelProperty(value = "伙伴编码")
+    private String partnerCode;
+
 
     @ApiModelProperty(value = "来源", hidden = true)
     private String source = SourceTypeEnum.DOC.name();

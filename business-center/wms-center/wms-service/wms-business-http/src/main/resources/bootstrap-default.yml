@@ -76,6 +76,7 @@ com:
             tracking: /api/outbound/shipment/tracking
             label: /api/outbound/shipment/label
             shipping: /api/outbound/shipment/shipping
+            multiboxrelation: /api/outbound/shipment/multiboxrelation
           returned:
             expected: /api/return/expected
             processing: /api/return/processing

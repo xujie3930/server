@@ -24,6 +24,11 @@ public class ThreadPoolExecutorConfiguration {
     public static final String THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED = "ThreadPoolExecutor-DelOutbound-Reviewed";
 
     /**
+     * 提审操作后台执行 - 重派出库单
+     */
+    public static final String THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED2 = "ThreadPoolExecutor-DelOutbound-Reviewed2";
+
+    /**
      * #D2 接收出库包裹信息
      * ShipmentPackingEvent
      */
@@ -100,6 +105,23 @@ public class ThreadPoolExecutorConfiguration {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Reviewed", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
+    @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED2)
+    public ThreadPoolExecutor threadPoolExecutorDelOutboundReviewed2() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 4;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Reviewed2", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
         // 丢弃任务并抛出RejectedExecutionException异常
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());

@@ -41,6 +41,11 @@ public class HtpOutboundFeignFallback implements FallbackFactory<HtpOutboundFeig
             public R<ResponseVO> shipmentShipping(ShipmentUpdateRequestDto dto) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<ResponseVO> shipmentMultiboxrelation(ShipmentMultiboxrelationRequestDto dto) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

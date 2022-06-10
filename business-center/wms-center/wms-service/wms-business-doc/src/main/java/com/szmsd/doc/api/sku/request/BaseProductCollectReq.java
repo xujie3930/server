@@ -170,6 +170,9 @@ public class BaseProductCollectReq {
     @Size(max = 100, message = "类别编码不支持100字符")
     private String categoryCode;
 
+    @ApiModelProperty(value = "伙伴编码")
+    private String partnerCode;
+
 //    @ApiModelProperty(value = "是否仓库验收")
 //    private Boolean warehouseAcceptance;
 
