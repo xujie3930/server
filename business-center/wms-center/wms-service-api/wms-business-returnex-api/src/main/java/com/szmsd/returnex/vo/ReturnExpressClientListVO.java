@@ -42,6 +42,17 @@ public class ReturnExpressClientListVO implements Serializable {
     @Excel(name = "原跟踪号")
     @ApiModelProperty(value = "退件可扫描编码 原跟踪号")
     private String scanCode;
+
+    @ApiModelProperty(value = "国家名称")
+    @Excel(name = "国家")
+    private String country;
+    @ApiModelProperty(value = "refNo")
+    @Excel(name = "refNo")
+    private String refNo;
+
+
+
+
     @Excel(name = "类型")
     @ApiModelProperty(value = "退件单来源[默认：1：退件预报2：VMS通知退件]", hidden = true)
     private String returnSourceStr;
@@ -90,8 +101,12 @@ public class ReturnExpressClientListVO implements Serializable {
     @Excel(name = "备注")
     @ApiModelProperty(value = "备注")
     private String remark;
-    @ApiModelProperty(value = "refNo")
-    private String refNo;
+
+    @ApiModelProperty(value = "到期时长")
+    private Integer expirationDuration;
+
+    @ApiModelProperty(value = "国家代码")
+    private String countryCode;
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

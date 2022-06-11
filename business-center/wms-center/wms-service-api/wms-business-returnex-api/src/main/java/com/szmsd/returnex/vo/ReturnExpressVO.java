@@ -185,6 +185,18 @@ public class ReturnExpressVO {
     private String scanCodeNew;
     @ApiModelProperty(value = "refNo")
     private String refNo;
+
+
+    @ApiModelProperty(value = "国家代码")
+    private String countryCode;
+
+
+    @ApiModelProperty(value = "国家名称")
+    private String country;
+
+    @ApiModelProperty(value = "到期时长")
+    private Integer expirationDuration;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

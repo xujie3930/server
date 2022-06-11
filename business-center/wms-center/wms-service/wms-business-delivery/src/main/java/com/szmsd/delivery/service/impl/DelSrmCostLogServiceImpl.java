@@ -347,16 +347,16 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                     responseBodyMap.put("currencyCode", delSrmCostDetail.getCurrencyCode());
                     responseBody = (String) JSON.toJSONString(responseBody);
                     delSrmCostDetailService.insertDelSrmCostDetail(delSrmCostDetail);
-
-					if(type == DelSrmCostLogEnum.Type.create) {
+                    if(type == DelSrmCostLogEnum.Type.create) {
                         //D3 更新出库单一件多票的单据匹配关系
                         this.updateShipmentMultiboxrelation(delOutbound);
                     }
 
 
 
+
                 } else {
-                    
+
                     failCount++;
                     if (failCount >= retryCount) {
                         state = DelSrmCostLogEnum.State.FAIL.name();
