@@ -72,7 +72,7 @@ public class BasSellerShopifyPermission extends BaseEntity {
     @ApiModelProperty(value = "locations")
     private String locations;
 
-    @NotEmpty(message = "默认发货仓库不能为空")
+    @NotNull(message = "默认发货仓库不能为空")
     @ApiModelProperty(value = "默认仓库id")
     private Long defaultLocationId;
 
