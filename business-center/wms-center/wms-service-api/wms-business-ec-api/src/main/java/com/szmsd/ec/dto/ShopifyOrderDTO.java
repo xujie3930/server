@@ -790,6 +790,11 @@ public class ShopifyOrderDTO {
     @ApiModelProperty(value = "仓库名称")
     private String warehouseName;
 
+    @ApiModelProperty(value = "发货仓库id")
+    private Long shippingWarehouseId;
+
+    @ApiModelProperty(value = "发货仓库名称")
+    private String shippingWarehouseName;
 
     /**
      * 客户提交销售订单的日期(查询条件集合)
