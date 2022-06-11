@@ -386,6 +386,8 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
         commonOrder.setCreateTime(shopifyOrderDTO.getCreatedAt());
         commonOrder.setUpdateTime(shopifyOrderDTO.getUpdatedAt());
         commonOrder.setPlatformOrderStatus(OrderStatusConstant.OrderPlatformStatusConstant.APPROVED);
+        commonOrder.setShippingWarehouseId(shopifyOrderDTO.getShippingWarehouseId());
+        commonOrder.setShippingWarehouseName(shopifyOrderDTO.getShippingWarehouseName());
 
         List<CommonOrderItem> orderItemList = new ArrayList<>();
         List<ShopifyOrderItemDTO> itemDTOList = shopifyOrderDTO.getShopifyOrderItemDTOList();

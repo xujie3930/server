@@ -12,6 +12,7 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -47,6 +49,14 @@ public class BasSellerShopifyPermissionController extends BaseController {
         lambdaQueryWrapper.eq(BasSellerShopifyPermission::getState, "1");
         return R.ok(this.basSellerShopifyPermissionService.list(lambdaQueryWrapper));
     }
+
+    @PostMapping(value = "/update")
+    @ApiOperation("修改店铺")
+    public R update(@RequestBody @Valid BasSellerShopifyPermission basSellerShopifyPermission){
+        this.basSellerShopifyPermissionService.updateById(basSellerShopifyPermission);
+        return R.ok();
+    }
+
 
     @PostMapping(value = "/page")
     @ApiImplicitParam(name = "entity", value = "参数", dataType = "BasSellerShopifyPermission")
