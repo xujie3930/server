@@ -66,6 +66,14 @@ public class ReturnExpressServiceAddDTO extends ReturnExpressAddDTO {
     private String scanCodeNew;
 
 
+    @ApiModelProperty(value = "国家代码")
+    private String countryCode;
+
+
+    @ApiModelProperty(value = "国家名称")
+    private String country;
+
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

@@ -3,6 +3,7 @@ package com.szmsd.returnex.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasCodeDto;
@@ -765,11 +766,18 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         if (StringUtils.isBlank(expectedNo))
             return null;
         String sellerCode = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+
         ReturnExpressDetail returnExpressDetail = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaQuery()
-                .eq(ReturnExpressDetail::getExpectedNo, expectedNo)
-                .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
                 .eq(StringUtils.isNotBlank(sellerCode), ReturnExpressDetail::getSellerCode, sellerCode)
-                .last("LIMIT 1"));
+                .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
+                .and(query ->
+                        query.eq(ReturnExpressDetail::getExpectedNo, expectedNo)
+                                .or().eq(ReturnExpressDetail::getFromOrderNo, expectedNo)
+                                .or().eq(ReturnExpressDetail::getScanCode, expectedNo)
+                                .or().eq(ReturnExpressDetail::getRefNo, expectedNo)
+
+
+                ).last("LIMIT 1"));
         if (Objects.isNull(returnExpressDetail))
             return null;
         return getReturnExpressVO(returnExpressDetail);

@@ -44,6 +44,13 @@ public class ReturnExpressListVO implements Serializable {
     @Excel(name = "原跟踪号")
     @ApiModelProperty(value = "退件可扫描编码 原跟踪号")
     private String scanCode;
+
+    @ApiModelProperty(value = "国家名称")
+    @Excel(name = "国家")
+    private String country;
+    @ApiModelProperty(value = "refNo")
+    @Excel(name = "refNo")
+    private String refNo;
     @Excel(name = "退回原因")
     @ApiModelProperty(value = "处理备注 退回原因")
     private String processRemark;
@@ -147,12 +154,19 @@ public class ReturnExpressListVO implements Serializable {
     @ApiModelProperty(value = "目的仓库名称")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "refNo")
-    private String refNo;
 
     @FieldJsonI18n(type = RedisLanguageTable.BAS_WAREHOUSE)
     @ApiModelProperty(value = "目的仓库名称", hidden = true)
     private String warehouseCodeStr;
+
+    @ApiModelProperty(value = "到期时长")
+    private Integer expirationDuration;
+
+
+    @ApiModelProperty(value = "国家代码")
+    private String countryCode;
+
+
 
     @Override
     public String toString() {
