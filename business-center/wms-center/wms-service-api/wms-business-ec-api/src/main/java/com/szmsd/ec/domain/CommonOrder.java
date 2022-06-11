@@ -204,11 +204,11 @@ public class CommonOrder extends BaseEntity {
     @Excel(name = "发货服务")
     private String shippingService;
 
-    @ApiModelProperty(value = "发货仓库id")
+    @ApiModelProperty(value = "shopify发货仓库id")
     private Long shippingWarehouseId;
 
-    @ApiModelProperty(value = "发货仓库名称")
-    @Excel(name = "发货仓库名称")
+    @ApiModelProperty(value = "shopify发货仓库名称")
+    @Excel(name = "shopify发货仓库名称")
     private String shippingWarehouseName;
 
     @ApiModelProperty(value = "发货后wms返回的订单号")

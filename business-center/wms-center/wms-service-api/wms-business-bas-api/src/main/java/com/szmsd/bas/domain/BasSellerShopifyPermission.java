@@ -11,6 +11,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 
 /**
  * <p>
@@ -28,6 +31,7 @@ public class BasSellerShopifyPermission extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull(message = "id不能为空")
     @ApiModelProperty(value = "id")
     @TableId(value = "id", type = IdType.AUTO)
     @Excel(name = "id")
@@ -67,6 +71,14 @@ public class BasSellerShopifyPermission extends BaseEntity {
 
     @ApiModelProperty(value = "locations")
     private String locations;
+
+    @NotEmpty(message = "默认发货仓库不能为空")
+    @ApiModelProperty(value = "默认仓库id")
+    private Long defaultLocationId;
+
+    @NotEmpty(message = "默认发货仓库不能为空")
+    @ApiModelProperty(value = "默认仓库地址")
+    private String defaultLocation;
 
     @ApiModelProperty("当前页，从1开始，默认为1")
     @TableField(exist = false)

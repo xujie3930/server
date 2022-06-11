@@ -229,6 +229,8 @@ public class ShopifyOrderTask {
     public ShopifyOrderDTO getShopifyOrderDTO(ShopifyOrders order, String orderState, BasSellerShopifyPermission shop){
         ShopifyOrderDTO shopifyOrderDTO = GenericPropertyConverter.baseConvertObject(order, false,ShopifyOrderDTO.class,new HashMap<>(),new ArrayList<>());
         shopifyOrderDTO.setShopifyId(order.getId()+"");
+        shopifyOrderDTO.setShippingWarehouseId(shop.getDefaultLocationId());
+        shopifyOrderDTO.setShippingWarehouseName(shop.getDefaultLocation());
         shopifyOrderDTO.setId(null);
         shopifyOrderDTO.setOrderStatus(orderState);
         ShopifyUtil.getTotalPrice(shopifyOrderDTO,order);
