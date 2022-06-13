@@ -46,4 +46,8 @@ public class DelOutboundThirdPartyVO implements Serializable {
     @ApiModelProperty(value = "异常描述")
     private String exceptionMessage;
 
+
+    @ApiModelProperty(value = "跟踪号")
+    private String trackingNo;
+
 }
