@@ -37,8 +37,9 @@ public class DelOutboundThirdPartyVO implements Serializable {
     @ApiModelProperty(value = "高 CM")
     private Double height;
 
-    @ApiModelProperty(value = "重量 g")
-    private Double weight;
+
+    @ApiModelProperty(value = "计费重")
+    private Double calcWeight;
 
     @ApiModelProperty(value = "规格")
     private String specifications;
