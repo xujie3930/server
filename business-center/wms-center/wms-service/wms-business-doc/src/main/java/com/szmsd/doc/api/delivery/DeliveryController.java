@@ -672,6 +672,10 @@ public class DeliveryController {
     @GetMapping(value = "/getInfoForThirdParty/{orderNo}")
     @ApiOperation(value = "#20 出库管理 - 第三方订单查看专用接口", position = 901)
     public R<DelOutboundThirdPartyVO> getInfoForThirdParty(@PathVariable("orderNo") String orderNo) {
-        return R.ok(delOutboundClientService.getInfoForThirdParty(orderNo));
+        DelOutboundVO vo = new DelOutboundVO();
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        vo.setSellerCode(sellerCode);
+        vo.setOrderNo(orderNo);
+        return R.ok(delOutboundClientService.getInfoForThirdParty(vo));
     }
 }

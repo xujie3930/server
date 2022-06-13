@@ -72,7 +72,7 @@ public interface DelOutboundClientService {
      */
     int canceled(DelOutboundCanceledDto dto);
 
-    DelOutboundThirdPartyVO getInfoForThirdParty(String orderNo);
+    DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo);
 
     /**
      * 物流服务

@@ -151,11 +151,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
-    public DelOutboundThirdPartyVO getInfoForThirdParty(String orderNo) {
+    public DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo) {
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
+        queryWrapper.eq(DelOutbound::getSellerCode, vo.getSellerCode());
+        queryWrapper.eq(DelOutbound::getOrderNo, vo.getOrderNo());
         DelOutbound delOutbound = super.getOne(queryWrapper);
-
+        if(delOutbound == null){
+            throw new CommonException("400", "单据不存在");
+        }
         DelOutboundThirdPartyVO delOutboundThirdPartyVO =
                 BeanMapperUtil.map(delOutbound, DelOutboundThirdPartyVO.class);
 
