@@ -35,7 +35,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
     DelOutboundVO selectDelOutboundByOrderNo(String orderNo);
 
-    DelOutboundThirdPartyVO getInfoForThirdParty(String orderNo);
+    DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo);
 
 
 
