@@ -49,24 +49,30 @@ public class ReturnExpressTimer {
     public void processing() {
         String key = applicationName + ":ReturnExpressTimer:processing";
         this.doWorker(key, () -> {
-           LambdaQueryWrapper<ReturnExpressDetail> queryWrapper = Wrappers.lambdaQuery();
-            queryWrapper.ne(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsFinish());
-            queryWrapper.last("limit 500");
-            List<ReturnExpressDetail> list = returnExpressService.list(queryWrapper);
-            if(list.size() == 0){
-                return;
-            }
-            Date nowDate = clearSFM(new Date());
-            for (ReturnExpressDetail detail: list){
-                if(detail.getExpireTime() == null){
-                    detail.setExpirationDuration(0);
-                }else{
-
-                            detail.setExpirationDuration(dateCalculation(nowDate, clearSFM(detail.getExpireTime())));
-                }
-            }
-            returnExpressService.updateBatchById(list);
+            process();
         });
+    }
+    private void process(){
+
+        LambdaQueryWrapper<ReturnExpressDetail> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.ne(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsFinish());
+        queryWrapper.last("limit 500");
+        List<ReturnExpressDetail> list = returnExpressService.list(queryWrapper);
+        if(list.size() == 0){
+            return;
+        }
+        Date nowDate = clearSFM(new Date());
+        for (ReturnExpressDetail detail: list){
+            if(detail.getExpireTime() == null){
+                detail.setExpirationDuration(0);
+            }else{
+
+                detail.setExpirationDuration(dateCalculation(nowDate, clearSFM(detail.getExpireTime())));
+            }
+        }
+        returnExpressService.updateBatchById(list);
+        //处理到无数据
+        this.process();
     }
     private Date clearSFM(Date now){
         Calendar cal1 = Calendar.getInstance();
