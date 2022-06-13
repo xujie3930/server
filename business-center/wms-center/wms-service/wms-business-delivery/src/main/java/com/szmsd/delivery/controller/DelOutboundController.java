@@ -135,11 +135,11 @@ public class DelOutboundController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:getInfoForThirdParty')")
-    @GetMapping(value = "getInfoForThirdParty/{orderNo}")
+    @PostMapping(value = "getInfoForThirdParty")
     @ApiOperation(value = "出库管理 - 第三方订单查看专用接口", position = 201)
     @AutoValue
-    public R<DelOutboundThirdPartyVO> getInfoForThirdParty(@PathVariable("orderNo") String orderNo) {
-        return R.ok(delOutboundService.getInfoForThirdParty(orderNo));
+    public R<DelOutboundThirdPartyVO> getInfoForThirdParty(@RequestBody DelOutboundVO vo) {
+        return R.ok(delOutboundService.getInfoForThirdParty(vo));
     }
 
     /**
