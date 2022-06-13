@@ -14,6 +14,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.domain.DelOutboundPacking;
@@ -21,10 +22,7 @@ import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.vo.DelOutboundAddResponse;
-import com.szmsd.delivery.vo.DelOutboundLabelResponse;
-import com.szmsd.delivery.vo.DelOutboundListVO;
-import com.szmsd.delivery.vo.DelOutboundPackingVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.CountryCache;
 import com.szmsd.doc.api.delivery.request.*;
@@ -668,5 +666,12 @@ public class DeliveryController {
         String sellerCode = AuthenticationUtil.getSellerCode();
         canceledDto.setSellerCode(sellerCode);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
+    }
+
+    @PreAuthorize("hasAuthority('client')")
+    @GetMapping(value = "/getInfoForThirdParty/{orderNo}")
+    @ApiOperation(value = "#20 出库管理 - 第三方订单查看专用接口", position = 901)
+    public R<DelOutboundThirdPartyVO> getInfoForThirdParty(@PathVariable("orderNo") String orderNo) {
+        return R.ok(delOutboundClientService.getInfoForThirdParty(orderNo));
     }
 }
