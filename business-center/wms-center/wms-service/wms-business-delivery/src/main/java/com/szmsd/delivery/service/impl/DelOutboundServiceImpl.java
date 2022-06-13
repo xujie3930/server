@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
@@ -22,6 +23,7 @@ import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -35,6 +37,7 @@ import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
+import com.szmsd.delivery.exported.DelOutboundReassignExportContext;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
@@ -124,6 +127,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Autowired
     private IDelOutboundDocService delOutboundDocService;
 
+    @Autowired
+    private BasSubClientService basSubClientService;
+
     /**
      * 查询出库单模块
      *
@@ -153,6 +159,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         DelOutboundThirdPartyVO delOutboundThirdPartyVO =
                 BeanMapperUtil.map(delOutbound, DelOutboundThirdPartyVO.class);
 
+        Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("065");
+        Map<String, String> map = listMap.get("065").stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue,
+                BasSubWrapperVO::getSubName, (key1, key2) -> key2));
+        delOutboundThirdPartyVO.setStateName(map.get(delOutboundThirdPartyVO.getState()));
         return delOutboundThirdPartyVO;
     }
 

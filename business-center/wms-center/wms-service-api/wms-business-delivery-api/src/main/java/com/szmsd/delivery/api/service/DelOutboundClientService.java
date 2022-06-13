@@ -1,5 +1,6 @@
 package com.szmsd.delivery.api.service;
 
+import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.*;
@@ -70,6 +71,8 @@ public interface DelOutboundClientService {
      * @return int
      */
     int canceled(DelOutboundCanceledDto dto);
+
+    DelOutboundThirdPartyVO getInfoForThirdParty(String orderNo);
 
     /**
      * 物流服务
