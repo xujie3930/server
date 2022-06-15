@@ -14,7 +14,6 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.domain.DelOutboundPacking;
@@ -70,6 +69,7 @@ public class DeliveryController {
 
     @Autowired
     private DelOutboundClientService delOutboundClientService;
+
     @Autowired
     private DelOutboundFeignService delOutboundFeignService;
     @Autowired
@@ -677,5 +677,12 @@ public class DeliveryController {
         vo.setSellerCode(sellerCode);
         vo.setOrderNo(orderNo);
         return R.ok(delOutboundClientService.getInfoForThirdParty(vo));
+    }
+
+
+    @PostMapping(value = "/commonTrackList")
+    @ApiOperation(value = "#21 轨迹管理 - 第三方轨迹查看专用接口", position = 902)
+    public R<List<DelTrackCommonDto>> commonTrackList(@RequestBody @Validated DelTrackRequest request) {
+        return R.ok(delOutboundClientService.commonTrackList(request.getOrderNos()));
     }
 }

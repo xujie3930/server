@@ -178,4 +178,13 @@ public interface DelOutboundClientService {
      * @return DelOutboundAddResponse
      */
     DelOutboundAddResponse addShopify(DelOutboundDto dto);
+
+
+    /**
+     * 轨迹查询
+     *
+     * @param queryDto queryDto
+     * @return List<DelOutboundReportListVO>
+     */
+    List<DelTrackCommonDto> commonTrackList(List<String> orderNos) ;
 }

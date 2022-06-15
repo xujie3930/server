@@ -16,10 +16,7 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelTrack;
-import com.szmsd.delivery.dto.ImportTrackDto;
-import com.szmsd.delivery.dto.TrackAnalysisExportDto;
-import com.szmsd.delivery.dto.TrackAnalysisRequestDto;
-import com.szmsd.delivery.dto.TrackingYeeTraceDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.event.ChangeDelOutboundLatestTrackEvent;
 import com.szmsd.delivery.imported.DefaultAnalysisEventListener;
 import com.szmsd.delivery.imported.EasyExcelFactoryUtil;
@@ -84,6 +81,16 @@ public class DelTrackController extends BaseController {
         startPage();
         List<DelTrack> list = delTrackService.selectDelTrackList(delTrack);
         return getDataTable(list);
+    }
+
+
+    @PostMapping("/commonTrackList")
+    @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
+    @AutoValue
+    public R<List<DelTrackCommonDto>> commonTrackList(@RequestBody List<String> orderNos) {
+        List<DelTrack> list = delTrackService.commonTrackList(orderNos);
+        List<DelTrackCommonDto> newList = BeanMapperUtil.mapList(list, DelTrackCommonDto.class);
+        return R.ok(newList);
     }
 
     /**

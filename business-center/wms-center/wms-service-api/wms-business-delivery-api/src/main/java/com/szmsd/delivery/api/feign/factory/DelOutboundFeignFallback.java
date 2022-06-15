@@ -191,6 +191,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<DelOutboundAddResponse> addShopify(DelOutboundDto dto) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<List<DelTrackCommonDto>> commonTrackList(List<String> orders) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }
