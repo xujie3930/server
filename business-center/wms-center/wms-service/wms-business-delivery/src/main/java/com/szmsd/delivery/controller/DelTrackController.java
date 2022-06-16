@@ -4,6 +4,7 @@ import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
@@ -13,12 +14,14 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelTrack;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.event.ChangeDelOutboundLatestTrackEvent;
@@ -26,6 +29,7 @@ import com.szmsd.delivery.imported.DefaultAnalysisEventListener;
 import com.szmsd.delivery.imported.EasyExcelFactoryUtil;
 import com.szmsd.delivery.imported.ImportMessage;
 import com.szmsd.delivery.imported.ImportResult;
+import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelTrackService;
 import com.szmsd.delivery.util.SHA256Util;
 import io.swagger.annotations.Api;
@@ -78,6 +82,8 @@ public class DelTrackController extends BaseController {
     @Autowired
     private BasSubClientService basSubClientService;
 
+    @Autowired
+    private IDelOutboundAddressService delOutboundAddressService;
 
     /**
      * 查询模块列表
@@ -101,10 +107,8 @@ public class DelTrackController extends BaseController {
         List<BasSubWrapperVO> delTrackStateTypeList = listMap.get("099");
         Map<String, BasSubWrapperVO> delTrackStateTypeMap
                 = delTrackStateTypeList.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue, Function.identity()));
-
         List<DelTrack> list = delTrackService.commonTrackList(orderNos);
         List<DelTrackCommonDto> newList = BeanMapperUtil.mapList(list, DelTrackCommonDto.class);
-
         for (DelTrackCommonDto dto: newList){
             BasSubWrapperVO vo  = delTrackStateTypeMap.get(dto.getTrackingStatus());
             if (vo != null) {
@@ -112,13 +116,12 @@ public class DelTrackController extends BaseController {
             }
         }
 
+        //处理轨迹状态数量
         java.util.Map<String, List<DelTrackCommonDto>> groupBy = newList.stream().collect(Collectors.groupingBy(DelTrackCommonDto::getOrderNo));
         Map<String, Integer> delTrackStateDto = new HashMap();
-        List<List<DelTrackCommonDto>> mainDataList = new ArrayList();
         for (String ordersNo: orderNos){
             List<DelTrackCommonDto> detailList = groupBy.get(ordersNo);
             if(detailList != null){
-                mainDataList.add(detailList);
                 String trackingStatus = detailList.get(0).getTrackingStatus();
                 if(delTrackStateDto.containsKey(trackingStatus)){
                     delTrackStateDto.put(trackingStatus, delTrackStateDto.get(trackingStatus) + 1);
@@ -127,9 +130,40 @@ public class DelTrackController extends BaseController {
                 }
             }
         }
+
+        //封装主表
+        List<DelTrackDetailDto> mainDetailDataList = new ArrayList();
+        for (String ordersNo: orderNos){
+            List<DelTrackCommonDto> detailList = groupBy.get(ordersNo);
+            if(detailList != null){
+                DelTrackDetailDto detailDto = new DelTrackDetailDto();
+                mainDetailDataList.add(detailDto);
+                BeanUtils.copyProperties(detailList.get(0), detailDto);
+                detailDto.setTrackingList(detailList);
+            }
+        }
+
+        //地址信息处理
+        List<String> orders = mainDetailDataList.stream().map(e -> e.getOrderNo()).collect(Collectors.toList());
+        if(orders.size() > 0){
+            LambdaQueryWrapper<DelOutboundAddress> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.in(DelOutboundAddress::getOrderNo, orders);
+            List<DelOutboundAddress> addressList = delOutboundAddressService.list(queryWrapper);
+            java.util.Map<String, DelOutboundAddress> addressMap =
+                    addressList.stream().collect(Collectors.toMap(DelOutboundAddress::getOrderNo, account -> account));
+            for (DelTrackDetailDto dto: mainDetailDataList){
+                DelOutboundAddress address = addressMap.get(dto.getOrderNo());
+                if(address != null){
+                    BeanUtils.copyProperties(address, dto);
+                }
+            }
+
+        }
+
+
         DelTrackMainCommonDto mainDto = new DelTrackMainCommonDto();
         mainDto.setDelTrackStateDto(delTrackStateDto);
-        mainDto.setTrackingList(mainDataList);
+        mainDto.setTrackingList(mainDetailDataList);
         mainDto.setDelTrackStateTypeList(delTrackStateTypeList);
         return R.ok(mainDto);
     }
