@@ -3,6 +3,10 @@ package com.szmsd.delivery.controller;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.api.feign.BasSubFeignService;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -29,6 +33,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -41,9 +46,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -70,6 +74,10 @@ public class DelTrackController extends BaseController {
     @Resource
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private BasSubClientService basSubClientService;
+
+
     /**
      * 查询模块列表
      */
@@ -87,10 +95,33 @@ public class DelTrackController extends BaseController {
     @PostMapping("/commonTrackList")
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
     @AutoValue
-    public R<List<DelTrackCommonDto>> commonTrackList(@RequestBody List<String> orderNos) {
+    public R<DelTrackMainCommonDto> commonTrackList(@RequestBody List<String> orderNos) {
+        Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("099");
+        List<BasSubWrapperVO> delTrackStateTypeList = listMap.get("099");
+
         List<DelTrack> list = delTrackService.commonTrackList(orderNos);
         List<DelTrackCommonDto> newList = BeanMapperUtil.mapList(list, DelTrackCommonDto.class);
-        return R.ok(newList);
+
+        java.util.Map<String, List<DelTrackCommonDto>> groupBy = newList.stream().collect(Collectors.groupingBy(DelTrackCommonDto::getOrderNo));
+        Map<String, Integer> delTrackStateDto = new HashMap();
+        List<List<DelTrackCommonDto>> mainDataList = new ArrayList();
+        for (String ordersNo: orderNos){
+            List<DelTrackCommonDto> detailList = groupBy.get(ordersNo);
+            if(detailList != null){
+                mainDataList.add(detailList);
+                String trackingStatus = detailList.get(0).getTrackingStatus();
+                if(delTrackStateDto.containsKey(trackingStatus)){
+                    delTrackStateDto.put(trackingStatus, delTrackStateDto.get(trackingStatus) + 1);
+                }else{
+                    delTrackStateDto.put(trackingStatus, 1);
+                }
+            }
+        }
+        DelTrackMainCommonDto mainDto = new DelTrackMainCommonDto();
+        mainDto.setDelTrackStateDto(delTrackStateDto);
+        mainDto.setTrackingList(mainDataList);
+        mainDto.setDelTrackStateTypeList(delTrackStateTypeList);
+        return R.ok(mainDto);
     }
 
     /**
