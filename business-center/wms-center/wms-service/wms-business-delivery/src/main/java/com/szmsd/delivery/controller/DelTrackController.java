@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -98,9 +99,18 @@ public class DelTrackController extends BaseController {
     public R<DelTrackMainCommonDto> commonTrackList(@RequestBody List<String> orderNos) {
         Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("099");
         List<BasSubWrapperVO> delTrackStateTypeList = listMap.get("099");
+        Map<String, BasSubWrapperVO> delTrackStateTypeMap
+                = delTrackStateTypeList.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue, Function.identity()));
 
         List<DelTrack> list = delTrackService.commonTrackList(orderNos);
         List<DelTrackCommonDto> newList = BeanMapperUtil.mapList(list, DelTrackCommonDto.class);
+
+        for (DelTrackCommonDto dto: newList){
+            BasSubWrapperVO vo  = delTrackStateTypeMap.get(dto.getTrackingStatus());
+            if (vo != null) {
+                dto.setTrackingStatusName(vo.getSubName());
+            }
+        }
 
         java.util.Map<String, List<DelTrackCommonDto>> groupBy = newList.stream().collect(Collectors.groupingBy(DelTrackCommonDto::getOrderNo));
         Map<String, Integer> delTrackStateDto = new HashMap();
