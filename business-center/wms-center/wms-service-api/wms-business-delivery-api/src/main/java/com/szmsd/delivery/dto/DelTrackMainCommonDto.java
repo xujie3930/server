@@ -38,7 +38,7 @@ public class DelTrackMainCommonDto extends BaseEntity {
     private Map<String, Integer> delTrackStateDto;
 
     @ApiModelProperty(value = "物流数据集合")
-    private List<List<DelTrackCommonDto>> trackingList;
+    private List<DelTrackDetailDto> trackingList;
 
     @ApiModelProperty(value = "状态类型")
     private List<BasSubWrapperVO> delTrackStateTypeList;
