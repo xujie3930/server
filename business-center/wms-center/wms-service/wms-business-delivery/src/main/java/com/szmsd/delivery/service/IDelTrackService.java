@@ -1,7 +1,5 @@
 package com.szmsd.delivery.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.szmsd.delivery.domain.DelTrack;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.dto.*;
@@ -94,5 +92,6 @@ public interface IDelTrackService extends IService<DelTrack> {
     List<TrackAnalysisExportDto> getAnalysisExportData(TrackAnalysisRequestDto requestDto);
 
 
+    List<DelTrack> commonTrackList(List<String> orderNos);
 }
 

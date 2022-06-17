@@ -139,4 +139,11 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     public DelOutboundAddResponse addShopify(DelOutboundDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.addShopify(dto));
     }
+
+
+
+    @Override
+    public List<DelTrackCommonDto> commonTrackList(List<String> orderNos) {
+        return R.getDataAndException(this.delOutboundFeignService.commonTrackList(orderNos));
+    }
 }

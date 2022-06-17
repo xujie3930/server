@@ -10,6 +10,7 @@ import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.feign.BasCarrierKeywordFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -81,6 +82,24 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     @Override
     public DelTrack selectDelTrackById(String id) {
         return baseMapper.selectById(id);
+    }
+
+
+    /**
+     * 查询模块列表
+     *
+     * @param delTrack 模块
+     * @return 模块
+     */
+    @Override
+    public List<DelTrack> commonTrackList(List<String> orderNos) {
+        LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+        delTrackLambdaQueryWrapper.in(DelTrack::getOrderNo, orderNos);
+        delTrackLambdaQueryWrapper.or();
+        delTrackLambdaQueryWrapper.in(DelTrack::getTrackingNo, orderNos);
+        delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
+        List<DelTrack> selectList = baseMapper.selectList(delTrackLambdaQueryWrapper);
+        return selectList;
     }
 
     /**
