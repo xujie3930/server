@@ -142,15 +142,15 @@ public class DelTrackController extends BaseController {
                 detailDto.setTrackingList(detailList);
 
                 //计算每一条数据轨迹天数
-
-                if(detailDto.getTrackingTime() == null || detailList.get(detailList.size() - 1).getTrackingTime() == null){
-                    long day = DateUtil.betweenDay(detailDto.getTrackingTime(), detailList.get(detailList.size() - 1).getTrackingTime(),  true);
+                long day = 0;
+                if(detailDto.getTrackingTime() != null && detailList.get(detailList.size() - 1).getTrackingTime() != null){
+                    day = DateUtil.betweenDay(detailDto.getTrackingTime(), detailList.get(detailList.size() - 1).getTrackingTime(),  true);
                     if(day < 0){
                         day = 0;
                     }
-                    detailDto.setTrackDays(day);
                 }
 
+                detailDto.setTrackDays(day);
 
             }
         }

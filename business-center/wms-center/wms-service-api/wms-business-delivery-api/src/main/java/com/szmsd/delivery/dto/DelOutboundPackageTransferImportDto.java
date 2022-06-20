@@ -45,8 +45,18 @@ public class DelOutboundPackageTransferImportDto implements Serializable {
     @ApiModelProperty(value = "国家")
     private String country;
 
+    @ApiModelProperty(value = "电子邮箱")
+    private String email;
+
     @ApiModelProperty(value = "联系方式")
     private String phoneNo;
+
+    @ApiModelProperty(value = "收件人税号")
+    private String ioss;
+
+    @ApiModelProperty(value = "COD金额")
+    private BigDecimal codAmount;
+
 
     @ApiModelProperty(value = "重量 g")
     private Double weight;
@@ -72,14 +82,5 @@ public class DelOutboundPackageTransferImportDto implements Serializable {
     @ApiModelProperty(value = "备注")
     private String remark;
 
-
-    @ApiModelProperty(value = "电子邮箱")
-    private String email;
-
-    @ApiModelProperty(value = "收件人税号")
-    private String ioss;
-
-    @ApiModelProperty(value = "COD金额")
-    private BigDecimal codAmount;
 
 }
