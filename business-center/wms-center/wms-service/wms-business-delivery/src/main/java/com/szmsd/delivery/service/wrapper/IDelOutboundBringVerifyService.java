@@ -71,7 +71,7 @@ public interface IDelOutboundBringVerifyService {
      * @param delOutbound delOutbound
      * @return boolean，true获取成功，false获取失败
      */
-    boolean getShipmentLabel(DelOutbound delOutbound);
+    String getShipmentLabel(DelOutbound delOutbound);
 
     /**
      * 传输标签文件给WMS

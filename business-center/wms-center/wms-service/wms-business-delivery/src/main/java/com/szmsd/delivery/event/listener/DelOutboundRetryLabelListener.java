@@ -62,6 +62,7 @@ public class DelOutboundRetryLabelListener {
                     logger.info("(4)查询记录失败，id：{}", id);
                     return;
                 }
+                String path = null;
                 // 只推送标签
                 boolean pushLabel = "pushLabel".equals(retryLabel.getRemark());
                 logger.info("(5)查询记录成功，id：{}，state：{}，对象JSON：{}", id, retryLabel.getState(), JSON.toJSONString(retryLabel));
@@ -80,7 +81,7 @@ public class DelOutboundRetryLabelListener {
                             // 1.下单后供应商获取
                             // 2.核重后供应商获取
                             if (!DelOutboundTrackingAcquireTypeEnum.NONE.getCode().equals(delOutbound.getTrackingAcquireType())) {
-                                delOutboundBringVerifyService.getShipmentLabel(delOutbound);
+                                path = delOutboundBringVerifyService.getShipmentLabel(delOutbound);
                                 logger.info("(7)获取标签完成，id：{}", id);
                             }
                             // 推送标签，处理那种存在自己上传文件的逻辑，自己上传的文件也需要推送给WMS
@@ -132,6 +133,14 @@ public class DelOutboundRetryLabelListener {
                     updateWrapper.set(DelOutboundRetryLabel::getNextRetryTime, nextRetryTime);
                     updateWrapper.eq(DelOutboundRetryLabel::getId, retryLabel.getId());
                     this.delOutboundRetryLabelService.update(updateWrapper);
+
+                    if(path != null){
+                        delOutbound.setShipmentRetryLabel(path);
+                        LambdaUpdateWrapper<DelOutbound> delUpdateWrapper = Wrappers.lambdaUpdate();
+                        delUpdateWrapper.set(DelOutbound::getShipmentRetryLabel, path);
+                        delUpdateWrapper.eq(DelOutbound::getId, delOutbound.getId());
+                        delOutboundService.update(delUpdateWrapper);
+                    }
                 } else {
                     logger.info("(6)状态不正确不处理，id：{}", id);
                 }
