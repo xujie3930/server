@@ -59,7 +59,8 @@
             o.tracking_status,
             o.tracking_description,
             o.cod_amount,
-            o.ref_no
+            o.ref_no,
+            o.shipment_retry_label
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
