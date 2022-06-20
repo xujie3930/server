@@ -1,10 +1,14 @@
 package com.szmsd.bas.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.szmsd.bas.config.HMacSHA256;
+import com.szmsd.bas.config.ShopifyAppConfig;
 import com.szmsd.bas.domain.BasCk1ShopifyWebhooksLog;
 import com.szmsd.bas.service.IBasCk1ShopifyWebhooksLogService;
 import com.szmsd.bas.service.IBasSellerShopifyPermissionService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.web.controller.BaseController;
 import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +25,8 @@ import java.util.Map;
 @RequestMapping("/bas-shopify-webhooks")
 public class BasShopifyWebhooksController extends BaseController {
 
+    @Autowired
+    private ShopifyAppConfig shopifyAppConfig;
     @Autowired
     private IBasCk1ShopifyWebhooksLogService ck1ShopifyWebhooksLogService;
     @Autowired
@@ -40,6 +46,10 @@ public class BasShopifyWebhooksController extends BaseController {
         map.put("header", headerInfo(request));
         String payload = JSONObject.toJSONString(map);
         this.saveLog(type, payload, request);
+        boolean verified = verifyWebhook(map, hmac);
+        if (!verified) {
+            throw new CommonException("401", "签名验证失败");
+        }
         return R.ok();
     }
 
@@ -55,7 +65,20 @@ public class BasShopifyWebhooksController extends BaseController {
         map.put("header", headerInfo(request));
         String payload = JSONObject.toJSONString(map);
         this.saveLog(type, payload, request);
+        boolean verified = verifyWebhook(map, hmac);
+        if (!verified) {
+            throw new CommonException("401", "签名验证失败");
+        }
         return R.ok();
+    }
+
+    public boolean verifyWebhook(Map<String, Object> map, String hmac) {
+        if (null == hmac) {
+            return false;
+        }
+        String jsonData = JSON.toJSONString(map);
+        String encryptBase64 = HMacSHA256.encryptBase64(this.shopifyAppConfig.getClientSecret(), jsonData);
+        return hmac.equals(encryptBase64);
     }
 
     public Map<String, Object> headerInfo(HttpServletRequest request) {
@@ -82,6 +105,10 @@ public class BasShopifyWebhooksController extends BaseController {
         map.put("header", headerInfo(request));
         String payload = JSONObject.toJSONString(map);
         this.saveLog(type, payload, request);
+        boolean verified = verifyWebhook(map, hmac);
+        if (!verified) {
+            throw new CommonException("401", "签名验证失败");
+        }
         /*
         {
           "shop_id": 954889,
