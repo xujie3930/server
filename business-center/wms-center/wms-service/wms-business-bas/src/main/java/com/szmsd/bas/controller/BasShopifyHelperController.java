@@ -6,6 +6,7 @@ import com.szmsd.bas.config.ShopifyAppConfig;
 import com.szmsd.bas.domain.BasCk1ShopifyLog;
 import com.szmsd.bas.service.IBasCk1ShopifyLogService;
 import com.szmsd.bas.service.IBasSellerShopifyPermissionService;
+import com.szmsd.bas.util.ShopifyUtil;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
@@ -21,7 +22,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Api(tags = {"Shopify接口"})
@@ -82,7 +86,7 @@ public class BasShopifyHelperController extends BaseController {
                                    @RequestParam(value = "shop", required = false) String shop,
                                    @RequestParam(value = "timestamp", required = false) String timestamp) {
         Map<String, String[]> parameterMap = request.getParameterMap();
-        String encryptHex = this.encyptParameter(parameterMap);
+        String encryptHex = ShopifyUtil.encryptParameter(parameterMap, this.shopifyAppConfig.getClientSecret());
         // https://{shop}.myshopify.com/admin/oauth/authorize?client_id={api_key}&scope={scopes}&redirect_uri={redirect_uri}&state={nonce}&grant_options[]={access_mode}
         String oauthAuthorize = this.shopifyAppConfig.getOauthAuthorize();
         Map<String, String> variableMap = new HashMap<>();
@@ -118,39 +122,13 @@ public class BasShopifyHelperController extends BaseController {
             this.redisTemplate.opsForHash().put(key, "state", nonce);
             this.redisTemplate.opsForHash().put(key, "scope", variableMap.get("scopes"));
             this.redisTemplate.expire(key, 10, TimeUnit.MINUTES);
+            response.setHeader("content-security-policy", "frame-ancestors " + shop + " https://admin.shopify.com;");
             // 重定向
             response.sendRedirect(oauthAuthorize);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
         return R.ok(oauthAuthorize);
-    }
-
-    private String encyptParameter(Map<String, String[]> parameterMap) {
-        StringJoiner joiner = new StringJoiner("&");
-        for (String key : parameterMap.keySet()) {
-            // ignore hmac
-            if ("hmac".equals(key)) {
-                continue;
-            }
-            String text = key + "=";
-            String[] valueArr = parameterMap.get(key);
-            if (valueArr.length == 1) {
-                text += valueArr[0];
-            } else {
-                StringJoiner valueJoiner = new StringJoiner(", ", "[", "]");
-                for (String value : valueArr) {
-                    valueJoiner.add(value);
-                }
-                text += valueJoiner.toString();
-            }
-            joiner.add(text);
-        }
-        String encryptHex = HMacSHA256.encryptHex(this.shopifyAppConfig.getClientSecret(), joiner.toString());
-        if (null == encryptHex) {
-            encryptHex = "-";
-        }
-        return encryptHex;
     }
 
     // code=dfa03ea98ce4679b4cb5b4fc67d319d0
@@ -173,7 +151,7 @@ public class BasShopifyHelperController extends BaseController {
         parameterMap.put("shop", new String[]{shop = map.get("shop")});
         parameterMap.put("state", new String[]{state = map.get("state")});
         parameterMap.put("timestamp", new String[]{timestamp = map.get("timestamp")});
-        String encryptHex = this.encyptParameter(parameterMap);
+        String encryptHex = ShopifyUtil.encryptParameter(parameterMap, this.shopifyAppConfig.getClientSecret());
         // 记录日志
         BasCk1ShopifyLog ck1ShopifyLog = new BasCk1ShopifyLog();
         ck1ShopifyLog.setType("2");
@@ -237,7 +215,7 @@ public class BasShopifyHelperController extends BaseController {
             throw new CommonException("500", "校验失败，state错误");
         }
         Object cacheScope = this.redisTemplate.opsForHash().get(key, "scope");
-        String encryptHex = this.encyptParameter(parameterMap);
+        String encryptHex = ShopifyUtil.encryptParameter(parameterMap, this.shopifyAppConfig.getClientSecret());
         jsonObject.put("scope", String.valueOf(cacheScope));
         // 记录日志
         BasCk1ShopifyLog ck1ShopifyLog = new BasCk1ShopifyLog();
