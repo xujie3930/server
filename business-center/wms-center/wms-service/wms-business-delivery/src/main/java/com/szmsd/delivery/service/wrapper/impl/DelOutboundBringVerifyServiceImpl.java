@@ -699,13 +699,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     @Override
-    public boolean getShipmentLabel(DelOutbound delOutbound) {
+    public String getShipmentLabel(DelOutbound delOutbound) {
         if (null == delOutbound) {
             throw new CommonException("500", "出库单信息不能为空");
         }
         String orderNumber = delOutbound.getShipmentOrderNumber();
         if (StringUtils.isEmpty(orderNumber)) {
-            return false;
+            return null;
         }
         // 获取标签
         CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
@@ -730,6 +730,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 byte[] inputStream;
                 if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
+                    String path  = file.getPath() + "/" + orderNumber + ".pdf";
                     File labelFile = new File(file.getPath() + "/" + orderNumber + ".pdf");
                     if (labelFile.exists()) {
                         File destFile = new File(file.getPath() + "/" + orderNumber + "_" + DateFormatUtils.format(new Date(), "yyyyMMdd_HHmmss") + ".pdf");
@@ -741,7 +742,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     try {
                         FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
-                        return true;
+                        return path;
                     } catch (IOException e) {
                         // 内部异常，不再重试，直接抛出去
                         throw new CommonException("500", "保存标签文件失败，Error：" + e.getMessage());
@@ -758,7 +759,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             logger.error("获取标签文件流失败");
             throw new CommonException("500", "获取标签文件流失败");
         }
-        return false;
+        return null;
     }
 
     @Override

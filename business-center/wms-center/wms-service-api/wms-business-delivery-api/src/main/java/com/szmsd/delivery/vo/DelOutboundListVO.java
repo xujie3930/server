@@ -152,4 +152,8 @@ public class DelOutboundListVO implements Serializable {
     private BigDecimal codAmount;
     @ApiModelProperty(value = "RefNo")
     private String refNo;
+
+
+    @ApiModelProperty(value = "转运出库标签图片")
+    private String shipmentRetryLabel;
 }
