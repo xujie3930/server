@@ -756,7 +756,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
 
                         if(path != null){
-                            path = com.szmsd.common.core.utils.StringUtils.replace(pathname, "/u01/www/", env.getProperty("file.mainUrl")+"/");
+                            path = com.szmsd.common.core.utils.StringUtils.replace(path, "/u01/www/", env.getProperty("file.mainUrl")+"/");
 
                         }
                         return path;
