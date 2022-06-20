@@ -55,6 +55,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -110,6 +111,15 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
     @Autowired
     private CommonOrderFeignService commonOrderFeignService;
+
+
+    private final Environment env;
+
+    @Autowired
+    public DelOutboundBringVerifyServiceImpl(Environment env) {
+        this.env = env;
+    }
+
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -743,6 +753,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     try {
                         FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
+
+
+                        if(path != null){
+                            path = com.szmsd.common.core.utils.StringUtils.replace(pathname, "/u01/www/", env.getProperty("file.mainUrl")+"/");
+
+                        }
                         return path;
                     } catch (IOException e) {
                         // 内部异常，不再重试，直接抛出去
