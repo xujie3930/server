@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author zhangyuyuan
@@ -70,4 +71,15 @@ public class DelOutboundPackageTransferImportDto implements Serializable {
 
     @ApiModelProperty(value = "备注")
     private String remark;
+
+
+    @ApiModelProperty(value = "电子邮箱")
+    private String email;
+
+    @ApiModelProperty(value = "收件人税号")
+    private String ioss;
+
+    @ApiModelProperty(value = "COD金额")
+    private BigDecimal codAmount;
+
 }

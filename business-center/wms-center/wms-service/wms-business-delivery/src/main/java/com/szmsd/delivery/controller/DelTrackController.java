@@ -1,5 +1,6 @@
 package com.szmsd.delivery.controller;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -98,7 +99,6 @@ public class DelTrackController extends BaseController {
         return getDataTable(list);
     }
 
-
     @PostMapping("/commonTrackList")
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
     @AutoValue
@@ -140,6 +140,18 @@ public class DelTrackController extends BaseController {
                 mainDetailDataList.add(detailDto);
                 BeanUtils.copyProperties(detailList.get(0), detailDto);
                 detailDto.setTrackingList(detailList);
+
+                //计算每一条数据轨迹天数
+
+                if(detailDto.getTrackingTime() == null || detailList.get(detailList.size() - 1).getTrackingTime() == null){
+                    long day = DateUtil.betweenDay(detailDto.getTrackingTime(), detailList.get(detailList.size() - 1).getTrackingTime(),  true);
+                    if(day < 0){
+                        day = 0;
+                    }
+                    detailDto.setTrackDays(day);
+                }
+
+
             }
         }
 

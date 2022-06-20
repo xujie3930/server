@@ -55,6 +55,9 @@ public class DelOutboundPackageTransferImportContainer extends DelOutboundPackag
             outboundDto.setSourceType(DelOutboundConstant.SOURCE_TYPE_IMP);
             outboundDto.setRefNo(dto.getRefNo());
             outboundDto.setRemark(dto.getRemark());
+            outboundDto.setEmail(dto.getEmail());
+            outboundDto.setCodAmount(dto.getCodAmount());
+            outboundDto.setIoss(dto.getIoss());
             outboundDtoList.add(outboundDto);
         }
         return outboundDtoList;

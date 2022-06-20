@@ -135,7 +135,6 @@ public class DelOutboundRetryLabelListener {
                     this.delOutboundRetryLabelService.update(updateWrapper);
 
                     if(path != null){
-                        delOutbound.setShipmentRetryLabel(path);
                         LambdaUpdateWrapper<DelOutbound> delUpdateWrapper = Wrappers.lambdaUpdate();
                         delUpdateWrapper.set(DelOutbound::getShipmentRetryLabel, path);
                         delUpdateWrapper.eq(DelOutbound::getId, delOutbound.getId());

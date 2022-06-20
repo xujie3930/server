@@ -115,4 +115,7 @@ public class DelTrackDetailDto extends BaseEntity {
     @ApiModelProperty(value = "轨迹数据集合")
     private List<DelTrackCommonDto> trackingList;
 
+
+    @ApiModelProperty(value = "轨迹天数")
+    private Long trackDays;
 }
