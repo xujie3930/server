@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 
 @Api(tags = {"Shopify-Webhooks接口"})
@@ -27,7 +29,7 @@ public class BasShopifyWebhooksController extends BaseController {
     // 接口文档：https://shopify.dev/apps/webhooks/configuration/mandatory-webhooks
     // webhook相关文档：https://shopify.dev/apps/webhooks
     @PostMapping(value = "/data_request")
-    public R<?> dataRequest(@RequestBody Map<String, String> map,
+    public R<?> dataRequest(@RequestBody Map<String, Object> map,
                             @RequestHeader(value = "X-Shopify-Topic", required = false) String topic,
                             @RequestHeader(value = "X-Shopify-Hmac-Sha256", required = false) String hmac,
                             @RequestHeader(value = "X-Shopify-Webhook-Id", required = false) String webhookId,
@@ -35,13 +37,14 @@ public class BasShopifyWebhooksController extends BaseController {
                             @RequestHeader(value = "X-Shopify-API-Version", required = false) String apiVersion,
                             HttpServletRequest request) {
         String type = "customers/data_request";
+        map.put("header", headerInfo(request));
         String payload = JSONObject.toJSONString(map);
         this.saveLog(type, payload, request);
         return R.ok();
     }
 
     @PostMapping(value = "/redact")
-    public R<?> redact(@RequestBody Map<String, String> map,
+    public R<?> redact(@RequestBody Map<String, Object> map,
                        @RequestHeader(value = "X-Shopify-Topic", required = false) String topic,
                        @RequestHeader(value = "X-Shopify-Hmac-Sha256", required = false) String hmac,
                        @RequestHeader(value = "X-Shopify-Webhook-Id", required = false) String webhookId,
@@ -49,14 +52,26 @@ public class BasShopifyWebhooksController extends BaseController {
                        @RequestHeader(value = "X-Shopify-API-Version", required = false) String apiVersion,
                        HttpServletRequest request) {
         String type = "customers/redact";
+        map.put("header", headerInfo(request));
         String payload = JSONObject.toJSONString(map);
         this.saveLog(type, payload, request);
         return R.ok();
     }
 
+    public Map<String, Object> headerInfo(HttpServletRequest request) {
+        Map<String, Object> headerMap = new HashMap<>();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String element = headerNames.nextElement();
+            String header = request.getHeader(element);
+            headerMap.put(element, header);
+        }
+        return headerMap;
+    }
+
     // 客户卸载应用48小时后，shopify会推送该接口
     @PostMapping(value = "/shop/redact")
-    public R<?> shopRedact(@RequestBody Map<String, String> map,
+    public R<?> shopRedact(@RequestBody Map<String, Object> map,
                            @RequestHeader(value = "X-Shopify-Topic", required = false) String topic,
                            @RequestHeader(value = "X-Shopify-Hmac-Sha256", required = false) String hmac,
                            @RequestHeader(value = "X-Shopify-Webhook-Id", required = false) String webhookId,
@@ -64,6 +79,7 @@ public class BasShopifyWebhooksController extends BaseController {
                            @RequestHeader(value = "X-Shopify-API-Version", required = false) String apiVersion,
                            HttpServletRequest request) {
         String type = "shop/redact";
+        map.put("header", headerInfo(request));
         String payload = JSONObject.toJSONString(map);
         this.saveLog(type, payload, request);
         /*
@@ -72,7 +88,7 @@ public class BasShopifyWebhooksController extends BaseController {
           "shop_domain": "{shop}.myshopify.com"
         }
          */
-        String shopDomain = map.get("shop_domain");
+        String shopDomain = (String) map.get("shop_domain");
         if (StringUtils.isNotEmpty(shopDomain)) {
             this.sellerShopifyPermissionService.disabledByShop(shopDomain);
         }
