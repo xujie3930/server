@@ -11,7 +11,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.ApiException;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.com.SystemException;
-import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.exception.com.UnauthorizedException;
 import com.szmsd.common.core.utils.*;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.sql.SqlUtil;
@@ -198,6 +198,14 @@ public class BaseController {
         log.error("系统异常拦截 MethodArgumentNotValidException: {}", e.getMessage(), e);
         int httpStatus = org.springframework.http.HttpStatus.BAD_REQUEST.value();
         return R.failed(httpStatus, ExceptionUtil.getRootErrorMseeage(e));
+    }
+
+    @ResponseStatus(org.springframework.http.HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler({UnauthorizedException.class})
+    @ResponseBody
+    public R<?> handleUnauthorizedException(Exception e) {
+        log.error("系统异常拦截 UnauthorizedException: {}", e.getMessage(), e);
+        return R.failed(HttpStatus.UNAUTHORIZED, ExceptionUtil.getRootErrorMseeage(e));
     }
 
     //全局系统异常拦截
