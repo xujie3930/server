@@ -8,7 +8,7 @@ import com.szmsd.bas.domain.BasCk1ShopifyWebhooksLog;
 import com.szmsd.bas.service.IBasCk1ShopifyWebhooksLogService;
 import com.szmsd.bas.service.IBasSellerShopifyPermissionService;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.exception.com.UnauthorizedException;
 import com.szmsd.common.core.web.controller.BaseController;
 import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +48,7 @@ public class BasShopifyWebhooksController extends BaseController {
         this.saveLog(type, payload, request);
         boolean verified = verifyWebhook(map, hmac);
         if (!verified) {
-            throw new CommonException("401", "签名验证失败");
+            throw new UnauthorizedException("签名验证失败");
         }
         return R.ok();
     }
@@ -67,7 +67,7 @@ public class BasShopifyWebhooksController extends BaseController {
         this.saveLog(type, payload, request);
         boolean verified = verifyWebhook(map, hmac);
         if (!verified) {
-            throw new CommonException("401", "签名验证失败");
+            throw new UnauthorizedException("签名验证失败");
         }
         return R.ok();
     }
@@ -107,7 +107,7 @@ public class BasShopifyWebhooksController extends BaseController {
         this.saveLog(type, payload, request);
         boolean verified = verifyWebhook(map, hmac);
         if (!verified) {
-            throw new CommonException("401", "签名验证失败");
+            throw new UnauthorizedException("签名验证失败");
         }
         /*
         {
