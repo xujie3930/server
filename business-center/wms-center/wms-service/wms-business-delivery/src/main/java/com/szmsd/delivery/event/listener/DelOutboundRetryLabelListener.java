@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,7 @@ public class DelOutboundRetryLabelListener {
     @Autowired
     private IDelOutboundRetryLabelService delOutboundRetryLabelService;
     @Autowired
+    @Lazy
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
     @Autowired
     private IDelOutboundService delOutboundService;

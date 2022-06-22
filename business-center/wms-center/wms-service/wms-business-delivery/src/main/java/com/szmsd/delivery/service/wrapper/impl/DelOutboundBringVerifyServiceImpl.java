@@ -113,12 +113,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private CommonOrderFeignService commonOrderFeignService;
 
 
-    private final Environment env;
-
     @Autowired
-    public DelOutboundBringVerifyServiceImpl(Environment env) {
-        this.env = env;
-    }
+    private Environment env;
+
 
 
     @Override

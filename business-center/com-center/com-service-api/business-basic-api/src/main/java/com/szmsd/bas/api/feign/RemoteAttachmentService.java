@@ -32,6 +32,10 @@ public interface RemoteAttachmentService {
     @RequestMapping(value = "/bas-attachment/list4Feign", method = RequestMethod.GET)
     R<List<BasAttachment>> list(@RequestBody BasAttachmentQueryDTO queryDTO);
 
+
+    @PostMapping(value = "/bas-attachment/update")
+    R update(@RequestBody List<BasAttachment> list);
+
     /**
      * 保存
      *
