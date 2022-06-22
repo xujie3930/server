@@ -35,6 +35,10 @@ public interface IBasAttachmentService extends IService<BasAttachment> {
      */
     List<BasAttachment> selectList(BasAttachmentQueryDTO queryDto);
 
+    List<BasAttachment> selectPageList(BasAttachmentQueryDTO queryDto);
+
+
+
     /**
      * 新增
      *
@@ -43,7 +47,7 @@ public interface IBasAttachmentService extends IService<BasAttachment> {
      * @param filesUrl              文件路径 - 多文件 非空
      * @param attachmentTypeEnum 文件上传业务枚举 非空
      */
-    void insert(String businessNo, String businessItemNo, List<String> filesUrl, AttachmentTypeEnum attachmentTypeEnum);
+    void insert(String businessNo, String businessItemNo, List<String> filesUrl, AttachmentTypeEnum attachmentTypeEnum, String remark);
 
     void insertList(String businessNo, String businessItemNo, List<BasAttachmentDataDTO> filesUrl, AttachmentTypeEnum attachmentTypeEnum);
 

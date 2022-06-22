@@ -1,7 +1,9 @@
 package com.szmsd.delivery.controller;
 
 import cn.hutool.core.io.IoUtil;
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.szmsd.bas.api.client.BasSubClientService;
@@ -10,10 +12,12 @@ import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
+import com.szmsd.bas.dto.BaseProductImportDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.ExcelUtils;
 import com.szmsd.common.core.utils.QueryPage;
 import com.szmsd.common.core.utils.SpringUtils;
@@ -50,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -83,6 +88,7 @@ public class DelOutboundController extends BaseController {
     @Autowired
     private IDelOutboundService delOutboundService;
     @Autowired
+    @Lazy
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
     @Autowired
     private BasSubClientService basSubClientService;
@@ -333,6 +339,16 @@ public class DelOutboundController extends BaseController {
 
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:boxLabelImportTemplate')")
+    @GetMapping("/boxLabelImportTemplate")
+    @ApiOperation(value = "出库管理 - 列表 - 一件代发、转运出库箱标导入模板", position = 1000)
+    public void boxLabelImportTemplate(HttpServletRequest request, HttpServletResponse response) {
+        String filePath = "/template/boxLabelImportTemplate.xls";
+        String fileName = "BoxLabel";
+        this.downloadTemplate(response, filePath, fileName);
+
+    }
+
     /**
      * 下载模板
      *
@@ -387,6 +403,21 @@ public class DelOutboundController extends BaseController {
             IoUtil.close(inputStream);
         }
     }
+
+    @PreAuthorize("@ss.hasPermi('BaseProduct:BaseProduct:importBoxLabel')")
+    @Log(title = "模块", businessType = BusinessType.INSERT)
+    @PostMapping("importBoxLabel")
+    @ApiOperation(value = "导入箱标", notes = "导入箱标")
+    public R importBoxLabel(MultipartFile file, @RequestParam("sellerCode") String sellerCode, @RequestParam("attachmentType")  String attachmentType) throws Exception {
+        List<DelOutboundBoxLabelDto> userList = EasyExcel.read(file.getInputStream(), DelOutboundBoxLabelDto.class, new SyncReadListener()).sheet().doReadSync();
+        if (CollectionUtils.isEmpty(userList)) {
+            throw new BaseException("导入内容为空");
+        }
+        delOutboundService.importBoxLabel(userList, sellerCode, attachmentType);
+        return R.ok();
+    }
+
+
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundImport')")
     @PostMapping("/delOutboundImport")

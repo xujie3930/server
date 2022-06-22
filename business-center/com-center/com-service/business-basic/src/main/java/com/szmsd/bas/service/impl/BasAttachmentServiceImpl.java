@@ -1,8 +1,11 @@
 package com.szmsd.bas.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.BasRegion;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
@@ -14,6 +17,7 @@ import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.text.UUID;
 import com.szmsd.common.core.utils.StringToolkit;
+import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -63,6 +67,14 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
         return baseMapper.selectList(queryDto);
     }
 
+    @Override
+    public List<BasAttachment> selectPageList(BasAttachmentQueryDTO queryDto) {
+        QueryWrapper<BasRegion> queryWrapper = new QueryWrapper<>();
+        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "businessCode", queryDto.getBusinessCode());
+        queryWrapper.orderByDesc("create_time");
+        return baseMapper.selectList(queryDto);
+    }
+
     /**
      * 新增
      *
@@ -71,7 +83,7 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
      * @param attachmentTypeEnum 文件上传业务枚举
      */
     @Override
-    public void insert(String businessNo, String businessItemNo, List<String> filesUrl, AttachmentTypeEnum attachmentTypeEnum) {
+    public void insert(String businessNo, String businessItemNo, List<String> filesUrl, AttachmentTypeEnum attachmentTypeEnum, String remark) {
         log.info("保存附件：{}, {}, {}, {}", businessNo, businessItemNo, filesUrl, attachmentTypeEnum);
         if (CollectionUtils.isEmpty(filesUrl)) {
             log.info("保存附件：附件地址为空");
@@ -89,6 +101,7 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
             basAttachment.setAttachmentPath(env.getProperty("file.mainUploadFolder") + FileUtil.getFileRelativePath(fileUrl));
             basAttachment.setAttachmentUrl(fileUrl);
             basAttachment.setAttachmentFormat(FileUtil.getFileSuffix(fileUrl));
+            basAttachment.setRemark(remark);
             baseMapper.insert(basAttachment);
         });
         log.info("保存附件：保存成功");
@@ -97,7 +110,7 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
     @Override
     public void insertList(String businessNo, String businessItemNo, List<BasAttachmentDataDTO> fileList, AttachmentTypeEnum attachmentTypeEnum) {
         List<String> filesUrl = fileList.stream().map(BasAttachmentDataDTO::getAttachmentUrl).collect(Collectors.toList());
-        insert(businessNo, businessItemNo, filesUrl, attachmentTypeEnum);
+        insert(businessNo, businessItemNo, filesUrl, attachmentTypeEnum, null);
     }
 
     /**
@@ -142,7 +155,7 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
         //传值为空的 就进行新增操作
         List<String> collect = ListUtils.emptyIfNull(fileList).stream().filter(e -> e.getId() == null).map(BasAttachmentDataDTO::getAttachmentUrl).collect(Collectors.toList());
         if (CollectionUtil.isNotEmpty(collect)) {
-            insert(businessNo, basAttachmentDto.getBusinessItemNo(), collect, attachmentTypeEnum);
+            insert(businessNo, basAttachmentDto.getBusinessItemNo(), collect, attachmentTypeEnum, null);
         }
 
     }
