@@ -37,7 +37,6 @@ import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
-import com.szmsd.delivery.exported.DelOutboundReassignExportContext;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
@@ -1968,6 +1967,34 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateDelOutbound.setId(delOutbound.getId());
         updateDelOutbound.setDelFlag("2");
         super.updateById(updateDelOutbound);
+    }
+
+    @Override
+    public void importBoxLabel(List<DelOutboundBoxLabelDto> list, String sellerCode, String attachmentType) {
+        List<String> businessNos = list.stream().map(vo -> vo.getBusinessNo()).collect(Collectors.toList());
+        List<String> orders = list.stream().map(vo -> vo.getRemark()).collect(Collectors.toList());
+
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutbound::getSellerCode, sellerCode);
+        queryWrapper.in(DelOutbound::getOrderNo, orders);
+        if(this.list(queryWrapper).size() != orders.size()){
+            throw new CommonException("400", "存在无效的出库单数据");
+        }
+
+        BasAttachmentQueryDTO queryDTO = new BasAttachmentQueryDTO();
+        queryDTO.setBusinessNoList(businessNos);
+        queryDTO.setBusinessCode(attachmentType);
+        List<BasAttachment> basAttachmentList = ListUtils.emptyIfNull(remoteAttachmentService.list(queryDTO).getData());
+
+        Map<String, BasAttachment> uuidNameMap = basAttachmentList.stream().collect(Collectors.toMap(BasAttachment::getBusinessNo, account -> account));
+        for (DelOutboundBoxLabelDto dto: list){
+            BasAttachment data = uuidNameMap.get(dto.getBusinessNo());
+            if(data == null){
+                throw new CommonException("400", "未找到上传的项标");
+            }
+            data.setRemark(dto.getRemark());
+        }
+        remoteAttachmentService.update(basAttachmentList);
     }
 }
 
