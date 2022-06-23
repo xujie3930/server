@@ -37,4 +37,10 @@ public class BasAttachmentQueryDTO extends QueryDto {
     @ApiModelProperty(value = "附件类型")
     private String attachmentType;
 
+    @ApiModelProperty(value = "标识")
+    private String remark;
+
+    @ApiModelProperty(value = "urls")
+    private List<String> attachmentUrl;
+
 }

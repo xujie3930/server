@@ -4,7 +4,13 @@ import cn.hutool.extra.qrcode.BufferedImageLuminanceSource;
 import com.google.zxing.*;
 import com.google.zxing.common.HybridBinarizer;
 import org.apache.commons.io.IOUtils;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,10 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +69,73 @@ public class PdfUtil {
 
     }
 
+
+    public static ByteArrayOutputStream convertImgToPDF(String imagePath) throws IOException {
+        PDDocument document = new PDDocument();
+        InputStream in = new FileInputStream(imagePath);
+        BufferedImage bimg = ImageIO.read(in);
+        float width = bimg.getWidth();
+        float height = bimg.getHeight();
+        PDPage page = new PDPage(new PDRectangle(width, height));
+        document.addPage(page);
+        PDImageXObject img = PDImageXObject.createFromFile(imagePath, document);
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+        contentStream.drawImage(img, 0, 0);
+        contentStream.close();
+        in.close();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        document.save(outputStream);
+        document.close();
+        return outputStream;
+    }
+
+    /**
+     * 获取文件扩展名，不包含"."点
+     *
+     * @param fileName 文件名
+     * @return 文件扩展名
+     */
+    public static String getFileExtName(String fileName) {
+        if (fileName.lastIndexOf(".") != -1) {
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+        }
+        return "";
+    }
+    public static boolean merge(OutputStream ops, String... sourcePath) throws IOException {
+        PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
+        int mergeSize = 0;
+        for (String source : sourcePath) {
+            if (null == source || "".equals(source)) {
+                continue;
+            }
+            String fileExtName = getFileExtName(source);
+            if ("pdf".equals(fileExtName)) {
+                File file = new File(source);
+                if (file.exists()) {
+                    pdfMergerUtility.addSource(file);
+                    mergeSize++;
+                }
+            } else {
+                ByteArrayOutputStream byteArrayOutputStream = convertImgToPDF(source);
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                pdfMergerUtility.addSource(byteArrayInputStream);
+                mergeSize++;
+            }
+        }
+        if (mergeSize == 0) {
+            return false;
+        }
+        OutputStream outputStream = new ByteArrayOutputStream();
+        // 指定目标文件输出流
+        pdfMergerUtility.setDestinationStream(outputStream);
+        pdfMergerUtility.mergeDocuments(null);
+        // 获取合并后的目标数据流
+        ByteArrayOutputStream mergerUtilityDestinationStream = (ByteArrayOutputStream) pdfMergerUtility.getDestinationStream();
+        mergerUtilityDestinationStream.writeTo(ops);
+        outputStream.close();
+        ops.close();
+        return true;
+    }
     /**
      * 解析pdf二维码内容
      * @param file
