@@ -68,26 +68,34 @@ public class BasAttachmentDownloadController extends BaseController {
         if(url.size() == 0){
             throw new CommonException("999", "数据异常，附件信息不能控");
         }
-
+        boolean bool = false;
         for(int i = 0; i < url.size(); i++){
             String str = url.get(i);
             int index = str.indexOf("/upload/ck1");
             if(index > -1){
                 url.set(i, "/u01/www"+str.substring(index+7));
+                bool = true;
             }
 
         }
-        BasAttachmentQueryDTO queryDTO = new BasAttachmentQueryDTO();
-        queryDTO.setAttachmentUrl(url);
-        List<BasAttachment> list = basAttachmentService.selectList(queryDTO);
-        if(list.size() == 0){
-            throw new CommonException("999", "数据异常，无效的附件信息");
-        }
-        List<String> newPath = new ArrayList<String>();
-        for(BasAttachment item: list){
-            newPath.add(item.getAttachmentPath() + "/" + item.getAttachmentName() + item.getAttachmentFormat());
 
+        List<String> newPath = new ArrayList<String>();
+
+        if(bool){
+            newPath.addAll(url);
+        }else{
+            BasAttachmentQueryDTO queryDTO = new BasAttachmentQueryDTO();
+            queryDTO.setAttachmentUrl(url);
+            List<BasAttachment> list = basAttachmentService.selectList(queryDTO);
+            if(list.size() == 0){
+                throw new CommonException("999", "数据异常，无效的附件信息");
+            }
+            for(BasAttachment item: list){
+                newPath.add(item.getAttachmentPath() + "/" + item.getAttachmentName() + item.getAttachmentFormat());
+
+            }
         }
+
         response.setContentType("application/pdf");
         response.setCharacterEncoding("utf-8");
         response.setHeader("Content-disposition", "attachment; filename=" +
