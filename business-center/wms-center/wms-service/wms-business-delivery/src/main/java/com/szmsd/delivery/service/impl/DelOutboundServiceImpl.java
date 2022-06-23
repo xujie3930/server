@@ -1977,9 +1977,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(DelOutbound::getSellerCode, sellerCode);
         queryWrapper.in(DelOutbound::getOrderNo, orders);
-        if(this.list(queryWrapper).size() != orders.size()){
+        List<DelOutbound> delOutboundList = this.list(queryWrapper);
+        if(delOutboundList.size() != orders.size()){
             throw new CommonException("400", "存在无效的出库单数据");
         }
+
 
         BasAttachmentQueryDTO queryDTO = new BasAttachmentQueryDTO();
         queryDTO.setBusinessNoList(businessNos);
@@ -1987,14 +1989,34 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         List<BasAttachment> basAttachmentList = ListUtils.emptyIfNull(remoteAttachmentService.list(queryDTO).getData());
 
         Map<String, BasAttachment> uuidNameMap = basAttachmentList.stream().collect(Collectors.toMap(BasAttachment::getBusinessNo, account -> account));
+
+        List<String> oldOrders = new ArrayList<String>();
         for (DelOutboundBoxLabelDto dto: list){
             BasAttachment data = uuidNameMap.get(dto.getBusinessNo());
             if(data == null){
                 throw new CommonException("400", "未找到上传的项标");
             }
+            if(!orders.contains(data.getRemark())){
+                oldOrders.add(data.getRemark());
+            }
             data.setRemark(dto.getRemark());
+
         }
-        remoteAttachmentService.update(basAttachmentList);
+        R r = remoteAttachmentService.update(basAttachmentList);
+        if(r != null && r.getCode() == 200){
+            if(oldOrders.size() > 0){
+                LambdaUpdateWrapper<DelOutbound> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+                lambdaUpdateWrapper.set(DelOutbound::getUploadBoxLabel, "N");
+                lambdaUpdateWrapper.in(DelOutbound::getOrderNo, oldOrders);
+                this.update(lambdaUpdateWrapper);
+            }
+
+
+            LambdaUpdateWrapper<DelOutbound> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+            lambdaUpdateWrapper.set(DelOutbound::getUploadBoxLabel, "Y");
+            lambdaUpdateWrapper.in(DelOutbound::getOrderNo, orders);
+            this.update(lambdaUpdateWrapper);
+        }
     }
 }
 

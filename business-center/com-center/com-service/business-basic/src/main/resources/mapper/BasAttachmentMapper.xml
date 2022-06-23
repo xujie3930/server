@@ -59,6 +59,11 @@
                 </foreach></if>
             <if test="businessItemNo != null and businessItemNo != ''">AND t.business_item_no = #{businessItemNo}</if>
             <if test="attachmentType != null and attachmentType != ''">AND t.attachment_type = #{attachmentType}</if>
+            <if test="remark != null and remark != ''">AND t.remark = #{remark}</if>
+            <if test="attachmentUrl != null and attachmentUrl.size >0">AND t.attachment_url in
+                <foreach collection="attachmentUrl" open="(" separator="," close=")" item="item">
+                    #{item}
+                </foreach></if>
         </where>
     </select>
 
