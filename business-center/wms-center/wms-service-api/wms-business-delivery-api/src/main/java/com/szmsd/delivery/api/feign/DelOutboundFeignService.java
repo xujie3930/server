@@ -91,6 +91,8 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/getDelOutboundDetailsList")
     R<List<DelOutboundDetailListVO>> getDelOutboundDetailsList(@RequestBody DelOutboundListQueryDto queryDto);
 
+    @PostMapping(value = "/api/outbound/getInfoForThirdParty")
+    R<DelOutboundThirdPartyVO> getInfoForThirdParty(@RequestBody DelOutboundVO vo);
     /**
      * 出库费用查询
      *
@@ -217,4 +219,11 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - 创建Shopify出库单", position = 2300)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     R<DelOutboundAddResponse> addShopify(@RequestBody DelOutboundDto dto);
+
+
+
+    @PostMapping("/del-track/commonTrackList")
+    @ApiOperation(value = "出库管理 - 轨迹查询", position = 2300)
+    @ApiImplicitParam(name = "dto", value = "轨迹", dataType = "orders")
+    R<List<DelTrackCommonDto>> commonTrackList(@RequestBody List<String> orders);
 }

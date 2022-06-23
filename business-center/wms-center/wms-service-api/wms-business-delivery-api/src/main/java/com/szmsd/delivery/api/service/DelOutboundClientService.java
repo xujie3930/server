@@ -1,5 +1,6 @@
 package com.szmsd.delivery.api.service;
 
+import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.*;
@@ -70,6 +71,8 @@ public interface DelOutboundClientService {
      * @return int
      */
     int canceled(DelOutboundCanceledDto dto);
+
+    DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo);
 
     /**
      * 物流服务
@@ -175,4 +178,13 @@ public interface DelOutboundClientService {
      * @return DelOutboundAddResponse
      */
     DelOutboundAddResponse addShopify(DelOutboundDto dto);
+
+
+    /**
+     * 轨迹查询
+     *
+     * @param queryDto queryDto
+     * @return List<DelOutboundReportListVO>
+     */
+    List<DelTrackCommonDto> commonTrackList(List<String> orderNos) ;
 }

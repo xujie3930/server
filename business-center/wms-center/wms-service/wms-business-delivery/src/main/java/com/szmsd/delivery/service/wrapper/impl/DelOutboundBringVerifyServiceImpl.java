@@ -55,6 +55,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -110,6 +111,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
     @Autowired
     private CommonOrderFeignService commonOrderFeignService;
+
+
+    @Autowired
+    private Environment env;
+
+
 
     @Override
     public void updateShipmentLabel(List<String> ids) {
@@ -699,13 +706,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     @Override
-    public boolean getShipmentLabel(DelOutbound delOutbound) {
+    public String getShipmentLabel(DelOutbound delOutbound) {
         if (null == delOutbound) {
             throw new CommonException("500", "出库单信息不能为空");
         }
         String orderNumber = delOutbound.getShipmentOrderNumber();
         if (StringUtils.isEmpty(orderNumber)) {
-            return false;
+            return null;
         }
         // 获取标签
         CreateShipmentOrderCommand command = new CreateShipmentOrderCommand();
@@ -719,6 +726,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             if (responseObject.isSuccess()) {
                 FileStream fileStream = responseObject.getObject();
                 String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound);
+                pathname = com.szmsd.common.core.utils.StringUtils.replace(pathname, "/u01/www/ck1", "/u01/www/upload/ck1");
                 File file = new File(pathname);
                 if (!file.exists()) {
                     try {
@@ -730,6 +738,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 byte[] inputStream;
                 if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
+                    String path  = file.getPath() + "/" + orderNumber + ".pdf";
                     File labelFile = new File(file.getPath() + "/" + orderNumber + ".pdf");
                     if (labelFile.exists()) {
                         File destFile = new File(file.getPath() + "/" + orderNumber + "_" + DateFormatUtils.format(new Date(), "yyyyMMdd_HHmmss") + ".pdf");
@@ -741,7 +750,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     try {
                         FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
-                        return true;
+
+
+                        if(path != null){
+                            path = com.szmsd.common.core.utils.StringUtils.replace(path, "/u01/www/", env.getProperty("file.mainUrl")+"/");
+
+                        }
+                        return path;
                     } catch (IOException e) {
                         // 内部异常，不再重试，直接抛出去
                         throw new CommonException("500", "保存标签文件失败，Error：" + e.getMessage());
@@ -758,7 +773,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             logger.error("获取标签文件流失败");
             throw new CommonException("500", "获取标签文件流失败");
         }
-        return false;
+        return null;
     }
 
     @Override

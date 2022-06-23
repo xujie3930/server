@@ -21,10 +21,7 @@ import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.vo.DelOutboundAddResponse;
-import com.szmsd.delivery.vo.DelOutboundLabelResponse;
-import com.szmsd.delivery.vo.DelOutboundListVO;
-import com.szmsd.delivery.vo.DelOutboundPackingVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.doc.api.AssertUtil400;
 import com.szmsd.doc.api.CountryCache;
 import com.szmsd.doc.api.delivery.request.*;
@@ -72,6 +69,7 @@ public class DeliveryController {
 
     @Autowired
     private DelOutboundClientService delOutboundClientService;
+
     @Autowired
     private DelOutboundFeignService delOutboundFeignService;
     @Autowired
@@ -669,4 +667,22 @@ public class DeliveryController {
         canceledDto.setSellerCode(sellerCode);
         return R.ok(this.delOutboundClientService.canceled(canceledDto));
     }
+
+    @PreAuthorize("hasAuthority('client')")
+    @GetMapping(value = "/getInfoForThirdParty/{orderNo}")
+    @ApiOperation(value = "#20 出库管理 - 第三方订单查看专用接口", position = 901)
+    public R<DelOutboundThirdPartyVO> getInfoForThirdParty(@PathVariable("orderNo") String orderNo) {
+        DelOutboundVO vo = new DelOutboundVO();
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        vo.setSellerCode(sellerCode);
+        vo.setOrderNo(orderNo);
+        return R.ok(delOutboundClientService.getInfoForThirdParty(vo));
+    }
+
+
+   /* @PostMapping(value = "/commonTrackList")
+    @ApiOperation(value = "#21 轨迹管理 - 第三方轨迹查看专用接口", position = 902)
+    public R<List<DelTrackCommonDto>> commonTrackList(@RequestBody @Validated DelTrackRequest request) {
+        return R.ok(delOutboundClientService.commonTrackList(request.getOrderNos()));
+    }*/
 }

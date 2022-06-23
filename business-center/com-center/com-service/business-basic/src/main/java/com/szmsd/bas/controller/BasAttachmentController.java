@@ -5,6 +5,7 @@ import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.dto.BasMultiplePiecesDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.domain.BasArea;
 import com.szmsd.bas.domain.dto.BasAttachmentDTO;
 import com.szmsd.bas.domain.dto.FileDTO;
 import com.szmsd.bas.service.IBasAttachmentService;
@@ -15,6 +16,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -60,6 +62,14 @@ public class BasAttachmentController extends BaseController {
         List<BasAttachment> list = basAttachmentService.selectList(queryDTO);
         return R.ok(list);
     }
+    @PreAuthorize("@ss.hasPermi('bas:attachment:page')")
+    @GetMapping("/page")
+    @ApiOperation(value = "分页查询 - bas:attachment:page", notes = "分页查询")
+    public TableDataInfo page(BasAttachmentQueryDTO queryDTO) {
+        startPage(queryDTO);
+        List<BasAttachment> list = basAttachmentService.selectPageList(queryDTO);
+        return getDataTable(list);
+    }
 
     @PreAuthorize("@ss.hasPermi('bas:attachment:list4feign')")
     @RequestMapping("/list4Feign")
@@ -74,6 +84,14 @@ public class BasAttachmentController extends BaseController {
     @ApiOperation(value = "保存附件表 - bas:attachment:saveAndUpdate", notes = "保存附件表")
     public R saveAndUpdate(@RequestBody BasAttachmentDTO basAttachmentDTO) {
         basAttachmentService.saveAndUpdate(basAttachmentDTO);
+        return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('bas:attachment:update')")
+    @PostMapping("/update")
+    @ApiOperation(value = "修改附件表 - bas:attachment:update", notes = "修改附件表")
+    public R update(@RequestBody List<BasAttachment> list) {
+        basAttachmentService.updateBatchById(list);
         return R.ok();
     }
 
@@ -134,7 +152,7 @@ public class BasAttachmentController extends BaseController {
         return R.ok(filesUrl);
     }
 
-    private List<BasAttachmentDataDTO> processBoxMark(MultipartFile multipartFile){
+    private List<BasAttachmentDataDTO> processBoxMark(MultipartFile multipartFile, AttachmentTypeEnum attachmentTypeEnum){
         List<BasAttachmentDataDTO> filesUrl = new ArrayList<>();
         PdfUtil.toMonyFile(multipartFile).forEach(map -> {
             MultipartFile myFile = (MultipartFile)map.get("multipartFile");
@@ -143,11 +161,11 @@ public class BasAttachmentController extends BaseController {
                     .setUrl(env.getProperty("file.url"))
                     .setMyFile(myFile)
                     .setUploadFolder(env.getProperty("file.uploadFolder"))
-                    .setType(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL)
+                    .setType(attachmentTypeEnum)
                     .setMainUploadFolder(env.getProperty("file.mainUploadFolder")));
             String url = files.getUrl();
 
-            filesUrl.add(new BasAttachmentDataDTO().setAttachmentName(files.getFileName()).setAttachmentType(AttachmentTypeEnum.MULTIPLE_PIECES_BOX_DETAIL.getAttachmentType()).setAttachmentUrl(url)
+            filesUrl.add(new BasAttachmentDataDTO().setAttachmentName(files.getFileName()).setAttachmentType(attachmentTypeEnum.getAttachmentType()).setAttachmentUrl(url)
                     .setRemark(barCode));
         });
         return filesUrl;
@@ -159,7 +177,6 @@ public class BasAttachmentController extends BaseController {
     @ApiImplicitParams({@ApiImplicitParam(name = "attachmentTypeEnum", value = "附件类型", required = true)})
     public R<List<BasMultiplePiecesDataDTO>> uploadMultiplePieces(@RequestParam("attachmentUrl") MultipartFile[] myFiles,
                                                                   @RequestParam("attachmentTypeEnum") AttachmentTypeEnum attachmentTypeEnum) {
-
 
         if(attachmentTypeEnum == AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK){
 
@@ -180,7 +197,7 @@ public class BasAttachmentController extends BaseController {
                 BasMultiplePiecesDataDTO dto = new BasMultiplePiecesDataDTO();
                 filesUrl.add(dto.setAttachmentName(files.getFileName()).setAttachmentType(attachmentTypeEnum.getAttachmentType()).setAttachmentUrl(url));
                 //处理箱标数据
-                dto.setList(this.processBoxMark(myFile));
+                dto.setList(this.processBoxMark(myFile, attachmentTypeEnum));
             });
             return R.ok(filesUrl);
         }else{
@@ -201,6 +218,33 @@ public class BasAttachmentController extends BaseController {
             });
             return R.ok(filesUrl);
         }
+
+    }
+
+
+    @PreAuthorize("@ss.hasPermi('bas:attachment:uploadMultiplePiecesSave')")
+    @ApiOperation(httpMethod = "POST", value = "附件上传及保存 - bas:uploadMultiplePiecesSave:uploadMultiplePieces - swagger接收不到文件", notes = "附件上传及保存")
+    @PostMapping(value = "/uploadMultiplePiecesSave", headers = "content-type=multipart/form-data")
+    @ApiImplicitParams({@ApiImplicitParam(name = "attachmentTypeEnum", value = "附件类型", required = true)})
+    public R<List<BasAttachmentDataDTO>> uploadMultiplePiecesSave(@RequestParam("attachmentUrl") MultipartFile[] myFiles,
+                                                                  @RequestParam("attachmentTypeEnum") AttachmentTypeEnum attachmentTypeEnum) {
+        List<BasAttachmentDataDTO> filesUrl = new ArrayList<>();
+        List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
+        if (CollectionUtils.isEmpty(multipartFiles)) {
+            throw new CommonException("999", "附件不能为空！");
+        }
+        multipartFiles.forEach(myFile -> {
+            List<BasAttachmentDataDTO> list = this.processBoxMark(myFile, attachmentTypeEnum);
+            for(int i = 0; i < list.size(); i++){
+                BasAttachmentDataDTO dto = list.get(i);
+                basAttachmentService.insert(dto.getRemark(), ""+(i+1), Arrays.asList(dto.getAttachmentUrl()), attachmentTypeEnum, "");
+            }
+            filesUrl.addAll(list);
+        });
+
+
+
+        return R.ok(filesUrl);
 
     }
 

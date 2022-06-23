@@ -60,6 +60,11 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     }
 
     @Override
+    public DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo) {
+        return R.getDataAndException(this.delOutboundFeignService.getInfoForThirdParty(vo));
+    }
+
+    @Override
     public List<PricedProduct> inService(DelOutboundOtherInServiceDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.inService(dto));
     }
@@ -133,5 +138,12 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     @Override
     public DelOutboundAddResponse addShopify(DelOutboundDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.addShopify(dto));
+    }
+
+
+
+    @Override
+    public List<DelTrackCommonDto> commonTrackList(List<String> orderNos) {
+        return R.getDataAndException(this.delOutboundFeignService.commonTrackList(orderNos));
     }
 }

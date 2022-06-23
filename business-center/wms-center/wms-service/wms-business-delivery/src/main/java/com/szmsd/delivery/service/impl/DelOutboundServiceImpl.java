@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
@@ -22,6 +23,7 @@ import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -124,6 +126,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Autowired
     private IDelOutboundDocService delOutboundDocService;
 
+    @Autowired
+    private BasSubClientService basSubClientService;
+
     /**
      * 查询出库单模块
      *
@@ -142,6 +147,25 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
         DelOutbound delOutbound = super.getOne(queryWrapper);
         return this.selectDelOutboundVO(delOutbound);
+    }
+
+    @Override
+    public DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo) {
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutbound::getSellerCode, vo.getSellerCode());
+        queryWrapper.eq(DelOutbound::getOrderNo, vo.getOrderNo());
+        DelOutbound delOutbound = super.getOne(queryWrapper);
+        if(delOutbound == null){
+            throw new CommonException("400", "单据不存在");
+        }
+        DelOutboundThirdPartyVO delOutboundThirdPartyVO =
+                BeanMapperUtil.map(delOutbound, DelOutboundThirdPartyVO.class);
+
+        Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("065");
+        Map<String, String> map = listMap.get("065").stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue,
+                BasSubWrapperVO::getSubName, (key1, key2) -> key2));
+        delOutboundThirdPartyVO.setStateName(map.get(delOutboundThirdPartyVO.getState()));
+        return delOutboundThirdPartyVO;
     }
 
     private DelOutboundVO selectDelOutboundVO(DelOutbound delOutbound) {
@@ -1943,6 +1967,34 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateDelOutbound.setId(delOutbound.getId());
         updateDelOutbound.setDelFlag("2");
         super.updateById(updateDelOutbound);
+    }
+
+    @Override
+    public void importBoxLabel(List<DelOutboundBoxLabelDto> list, String sellerCode, String attachmentType) {
+        List<String> businessNos = list.stream().map(vo -> vo.getBusinessNo()).collect(Collectors.toList());
+        List<String> orders = list.stream().map(vo -> vo.getRemark()).collect(Collectors.toList());
+
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutbound::getSellerCode, sellerCode);
+        queryWrapper.in(DelOutbound::getOrderNo, orders);
+        if(this.list(queryWrapper).size() != orders.size()){
+            throw new CommonException("400", "存在无效的出库单数据");
+        }
+
+        BasAttachmentQueryDTO queryDTO = new BasAttachmentQueryDTO();
+        queryDTO.setBusinessNoList(businessNos);
+        queryDTO.setBusinessCode(attachmentType);
+        List<BasAttachment> basAttachmentList = ListUtils.emptyIfNull(remoteAttachmentService.list(queryDTO).getData());
+
+        Map<String, BasAttachment> uuidNameMap = basAttachmentList.stream().collect(Collectors.toMap(BasAttachment::getBusinessNo, account -> account));
+        for (DelOutboundBoxLabelDto dto: list){
+            BasAttachment data = uuidNameMap.get(dto.getBusinessNo());
+            if(data == null){
+                throw new CommonException("400", "未找到上传的项标");
+            }
+            data.setRemark(dto.getRemark());
+        }
+        remoteAttachmentService.update(basAttachmentList);
     }
 }
 

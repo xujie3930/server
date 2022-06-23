@@ -259,4 +259,8 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "临时字段")
     @TableField(exist = false)
     private String prcProductCode;
+
+    @ApiModelProperty(value = "转运出库标签图片")
+    private String shipmentRetryLabel;
+
 }

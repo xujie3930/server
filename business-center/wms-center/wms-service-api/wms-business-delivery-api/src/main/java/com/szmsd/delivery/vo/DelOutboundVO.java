@@ -152,4 +152,10 @@ public class DelOutboundVO implements Serializable {
 
     @ApiModelProperty(value = "文件信息,用于一票多件")
     private List<AttachmentDataDTO> documentsFiles;
+
+    @ApiModelProperty(value = "计费重")
+    private BigDecimal calcWeight;
+
+    @ApiModelProperty(value = "转运出库标签图片")
+    private String shipmentRetryLabel;
 }

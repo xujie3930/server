@@ -1,5 +1,6 @@
 package com.szmsd.bas.api.domain.dto;
 
+import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -17,7 +18,7 @@ import java.util.List;
  */
 @Data
 @Accessors(chain = true)
-public class BasAttachmentQueryDTO {
+public class BasAttachmentQueryDTO extends QueryDto {
 
     private static final long serialVersionUID = 1L;
 

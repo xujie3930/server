@@ -32,6 +32,10 @@ public enum AttachmentTypeEnum {
     MULTIPLE_PIECES_BOX_DETAIL("MULTIPLE_PIECES_BOX_DETAIL","出库箱标明细","出库箱标明细","multiplePiecesBoxDetail"),
     MULTIPLE_PIECES_SKU("MULTIPLE_PIECES_SKU","出库箱标SKU","出库箱标SKU","multiplePiecesSku"),
 
+    ONE_PIECE_ISSUED_ON_BEHALF("ONE_PIECE_ISSUED_ON_BEHALF","一件代发","一件代发pdf","onePieceIssuedOnBehalf"),
+    TRANSSHIPMENT_OUTBOUND("TRANSSHIPMENT_OUTBOUND","转运出库","转运出库pdf","transshipmentOutbound"),
+
+
 
     ;
 

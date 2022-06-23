@@ -35,6 +35,10 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
     DelOutboundVO selectDelOutboundByOrderNo(String orderNo);
 
+    DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo);
+
+
+
 
     /**
      * 出库-创建采购单
@@ -422,5 +426,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param delOutbound delOutbound
      */
     void deleteFlag(DelOutbound delOutbound);
+
+    void importBoxLabel(List<DelOutboundBoxLabelDto> userList, String sellerCode, String attachmentType);
 }
 
