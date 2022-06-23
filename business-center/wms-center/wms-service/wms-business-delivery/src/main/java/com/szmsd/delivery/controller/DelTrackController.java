@@ -116,6 +116,9 @@ public class DelTrackController extends BaseController {
             }
         }
 
+        orderNos = list.stream().map(e -> e.getOrderNo()).collect(Collectors.toList());
+
+
         //处理轨迹状态数量
         java.util.Map<String, List<DelTrackCommonDto>> groupBy = newList.stream().collect(Collectors.groupingBy(DelTrackCommonDto::getOrderNo));
         Map<String, Integer> delTrackStateDto = new HashMap();
