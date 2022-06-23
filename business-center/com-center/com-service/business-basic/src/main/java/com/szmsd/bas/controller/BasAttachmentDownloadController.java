@@ -69,6 +69,14 @@ public class BasAttachmentDownloadController extends BaseController {
             throw new CommonException("999", "数据异常，附件信息不能控");
         }
 
+        for(int i = 0; i < url.size(); i++){
+            String str = url.get(i);
+            int index = str.indexOf("/upload/ck1");
+            if(index > -1){
+                url.set(i, "/u01/www"+str.substring(index+7));
+            }
+
+        }
         BasAttachmentQueryDTO queryDTO = new BasAttachmentQueryDTO();
         queryDTO.setAttachmentUrl(url);
         List<BasAttachment> list = basAttachmentService.selectList(queryDTO);
