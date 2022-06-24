@@ -65,44 +65,15 @@ public class BasAttachmentDownloadController extends BaseController {
     @PostMapping("/downloadByParam")
     @ApiOperation(value = "下载 - bas:attachment:downloadByParam", notes = "下载")
     public void downloadByParam(@RequestBody List<String> url, HttpServletResponse response) throws IOException {
-        if(url.size() == 0){
-            throw new CommonException("999", "数据异常，附件信息不能控");
-        }
-        boolean bool = false;
-        for(int i = 0; i < url.size(); i++){
-            String str = url.get(i);
-            int index = str.indexOf("/upload/ck1");
-            if(index > -1){
-                url.set(i, "/u01/www"+str.substring(index));
-                bool = true;
-
-                log.info(url.get(i));
-            }
-
-        }
-
-        List<String> newPath = new ArrayList<String>();
-
-        if(bool){
-            newPath.addAll(url);
-        }else{
-            BasAttachmentQueryDTO queryDTO = new BasAttachmentQueryDTO();
-            queryDTO.setAttachmentUrl(url);
-            List<BasAttachment> list = basAttachmentService.selectList(queryDTO);
-            if(list.size() == 0){
-                throw new CommonException("999", "数据异常，无效的附件信息");
-            }
-            for(BasAttachment item: list){
-                newPath.add(item.getAttachmentPath() + "/" + item.getAttachmentName() + item.getAttachmentFormat());
-
-            }
+        if(url.size() == 0 || StringUtils.isEmpty(url.get(0))){
+            throw new CommonException("999", "数据异常，附件信息不能为空");
         }
 
         response.setContentType("application/pdf");
         response.setCharacterEncoding("utf-8");
         response.setHeader("Content-disposition", "attachment; filename=" +
                 new String("merge.pdf".getBytes("gb2312"), "iso8859-1"));
-        PdfUtil.merge(response.getOutputStream(), newPath.toArray(new String[newPath.size()]));
+        PdfUtil.merge(response.getOutputStream(), url.toArray(new String[url.size()]));
 
     }
 
