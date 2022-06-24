@@ -750,12 +750,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     try {
                         FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
-
-
-                        if(path != null){
-                            path = com.szmsd.common.core.utils.StringUtils.replace(path, "/u01/www/", env.getProperty("file.mainUrl")+"/");
-
-                        }
                         return path;
                     } catch (IOException e) {
                         // 内部异常，不再重试，直接抛出去
