@@ -186,5 +186,5 @@ public interface DelOutboundClientService {
      * @param queryDto queryDto
      * @return List<DelOutboundReportListVO>
      */
-    List<DelTrackCommonDto> commonTrackList(List<String> orderNos) ;
+    DelTrackMainCommonDto commonTrackList(List<String> orderNos) ;
 }

@@ -79,6 +79,11 @@ public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper,
      */
     @Override
     public int updateDelTrackRemark(DelTrackRemark delTrackRemark) {
+        // 更新时需要删除原始数据缓存 再添加新缓存
+        DelTrackRemark trackRemark = baseMapper.selectById(delTrackRemark.getId());
+        if (trackRemark != null) {
+            redisTemplate.opsForHash().delete(TRACK_REMARK_KEY, trackRemark.getTrackDescription());
+        }
         redisTemplate.opsForHash().put(TRACK_REMARK_KEY, delTrackRemark.getTrackDescription(), delTrackRemark.getTrackRemark());
         return baseMapper.updateById(delTrackRemark);
     }

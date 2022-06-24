@@ -58,6 +58,44 @@ public final class PdfUtil {
         return true;
     }
 
+    /**
+     * pdf合并
+     *
+     * @param targetPath 合并之后的路径
+     * @param sourcePath 合并的pdf路径
+     * @return boolean
+     */
+    public static boolean merge(OutputStream ops, String... sourcePath) throws IOException {
+        PDFMergerUtility pdfMergerUtility = new PDFMergerUtility();
+        int mergeSize = 0;
+        for (String source : sourcePath) {
+            if (null == source || "".equals(source)) {
+                continue;
+            }
+            String fileExtName = getFileExtName(source);
+            if ("pdf".equals(fileExtName)) {
+                File file = new File(source);
+                if (file.exists()) {
+                    pdfMergerUtility.addSource(file);
+                    mergeSize++;
+                }
+            } else {
+                ByteArrayOutputStream byteArrayOutputStream = convertImgToPDF(source);
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                pdfMergerUtility.addSource(byteArrayInputStream);
+                mergeSize++;
+            }
+        }
+        if (mergeSize == 0) {
+            return false;
+        }
+        pdfMergerUtility.setDestinationStream(ops);
+        // 文件太多，太大会失败，内存异常，IO异常等等
+        pdfMergerUtility.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+        return true;
+    }
+
+
     public static ByteArrayOutputStream convertImgToPDF(String imagePath) throws IOException {
         PDDocument document = new PDDocument();
         InputStream in = new FileInputStream(imagePath);

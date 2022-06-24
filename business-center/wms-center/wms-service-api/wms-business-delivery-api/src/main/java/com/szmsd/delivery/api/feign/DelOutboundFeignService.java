@@ -225,5 +225,5 @@ public interface DelOutboundFeignService {
     @PostMapping("/del-track/commonTrackList")
     @ApiOperation(value = "出库管理 - 轨迹查询", position = 2300)
     @ApiImplicitParam(name = "dto", value = "轨迹", dataType = "orders")
-    R<List<DelTrackCommonDto>> commonTrackList(@RequestBody List<String> orders);
+    R<DelTrackMainCommonDto> commonTrackList(@RequestBody List<String> orders);
 }
