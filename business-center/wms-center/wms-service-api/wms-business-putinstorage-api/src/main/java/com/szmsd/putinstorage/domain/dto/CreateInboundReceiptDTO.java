@@ -23,6 +23,8 @@ public class CreateInboundReceiptDTO extends InboundReceiptDTO {
     @ApiModelProperty(value = "要删除的入库明细id")
     private List<String> receiptDetailIds;
 
+    private Boolean isAsync;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
