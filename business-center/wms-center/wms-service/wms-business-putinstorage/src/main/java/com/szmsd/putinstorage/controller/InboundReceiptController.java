@@ -38,8 +38,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -122,7 +126,19 @@ public class InboundReceiptController extends BaseController {
         try {
             if (lock.tryLock(LOCK_TIME, TimeUnit.SECONDS)) {
                 try {
-                    return R.ok(iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO));
+                    if (createInboundReceiptDTO.getIsAsync() != null && createInboundReceiptDTO.getIsAsync()) {
+                        SecurityContext context = SecurityContextHolder.getContext();
+                        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+                        CompletableFuture.runAsync(() -> {
+                            SecurityContextHolder.setContext(context);
+                            RequestContextHolder.setRequestAttributes(requestAttributes);
+                            iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
+                        });
+                        return R.ok();
+                    } else {
+                        return R.ok(iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO));
+                    }
+
                 } finally {
                     CheckTag.remove();
                 }

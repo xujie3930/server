@@ -101,6 +101,7 @@ public class RemoteComponent {
      * 采购单 [入库 - 新增/创建]
      */
     public InboundReceiptInfoVO orderStorage(CreateInboundReceiptDTO createInboundReceiptDTO) {
+        createInboundReceiptDTO.setIsAsync(true);
         log.info("入库开始 请求参数 {}", JSONObject.toJSONString(createInboundReceiptDTO));
         R<InboundReceiptInfoVO> inboundReceiptInfoVO = inboundReceiptFeignService.saveOrUpdate(createInboundReceiptDTO);
         InboundReceiptInfoVO resultData = R.getDataAndException(inboundReceiptInfoVO);
