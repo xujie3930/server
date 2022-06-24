@@ -324,16 +324,16 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int transportWarehousingSubmit(TransportWarehousingAddDTO transportWarehousingAddDTO) {
-        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
-        String sellerCode = loginUserInfo.getSellerCode();
-        //获取sku信息
-        List<DelOutboundDetailVO> transshipmentProductData = remoteComponent.getTransshipmentProductData(transportWarehousingAddDTO.getIdList());
-        if (CollectionUtils.isEmpty(transshipmentProductData)) {
-            throw new RuntimeException("无相关数据");
-        }
         SecurityContext context = SecurityContextHolder.getContext();
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         CompletableFuture.runAsync(() -> {
+            SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+            String sellerCode = loginUserInfo.getSellerCode();
+            //获取sku信息
+            List<DelOutboundDetailVO> transshipmentProductData = remoteComponent.getTransshipmentProductData(transportWarehousingAddDTO.getIdList());
+            if (CollectionUtils.isEmpty(transshipmentProductData)) {
+                throw new RuntimeException("无相关数据");
+            }
             RequestContextHolder.setRequestAttributes(requestAttributes);
             SecurityContextHolder.setContext(context);
             //合并相同sku数据
