@@ -60,13 +60,7 @@ public class BasAttachmentDownloadController extends BaseController {
     public BasAttachmentDownloadController(Environment env) {
         this.env = env;
     }
-   /* public static void main(String[] args) {
-        String str = "https://web-client-1.dsloco.com/upload/ck1/wms-business-delivery/shipment/label/PackageTransfer/2022/06/22/CKCNY37322062200000008.pdf";
-        int index = str.indexOf("/upload/ck1");
-        if(index > -1){
-            System.out.println("/u01/www"+str.substring(index+7));
-        }
-    }*/
+
     @PreAuthorize("@ss.hasPermi('bas:attachment:downloadByUrl')")
     @PostMapping("/downloadByParam")
     @ApiOperation(value = "下载 - bas:attachment:downloadByParam", notes = "下载")
@@ -79,7 +73,7 @@ public class BasAttachmentDownloadController extends BaseController {
             String str = url.get(i);
             int index = str.indexOf("/upload/ck1");
             if(index > -1){
-                url.set(i, "/u01/www"+str.substring(index+7));
+                url.set(i, "/u01/www"+str.substring(index));
                 bool = true;
 
                 log.info(url.get(i));
