@@ -11,6 +11,8 @@ com:
             url: https://wms-open-api.dsloco.com
           priced-product:
             url: https://wms-open-api.dsloco.com
+          priced:
+            url: https://pricedproduct-api.ck1info.com
           carrier-service:
             url: https://carrierservice-api-admin-external.dsloco.com
           product-remote-area:
@@ -28,6 +30,8 @@ com:
             url: https://wms-open-api.dsloco.com
           priced-product:
             url: https://wms-open-api.dsloco.com
+          priced:
+            url: https://pricedproduct-api.ck1info.com
           carrier-service:
             url: https://carrierservice-api-admin-external.dsloco.com
           product-remote-area:
@@ -128,6 +132,14 @@ com:
             recharges: /msd/v1/recharges
           callback:
             notify-url: http://183.3.221.136:22220/wms-open/api/recharge/rechargeCallback
+        priced:
+          priced-grade:
+            create: /api/grades
+            page-result: /api/grades/pageResult
+            update: /api/grades/{0}
+            delete: /api/grades/{0}
+            get: /api/grades/{0}
+
       # 多通道url配置
       multiple-channel-url-set:
         - base-info.packings
@@ -139,3 +151,4 @@ com:
         CARRIER_SERVICE: true
         PRODUCT_REMOTE_AREA: true
         THIRD_PAYMENT: true
+        PRICED: true

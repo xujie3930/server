@@ -32,4 +32,11 @@ public class PricedProductSheetVO {
     @ApiModelProperty("生效结束时间")
     private String effectiveEndTime;
 
+
+    @ApiModelProperty(value = "等级编码")
+    private String gradeCode;
+
+    @ApiModelProperty(value = "等级名称")
+    private String gradeName;
+
 }

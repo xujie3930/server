@@ -1,5 +1,6 @@
 package com.szmsd.http.vo;
 
+import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -20,7 +21,7 @@ public class PricedProductSheet {
     @ApiModelProperty("备注")
     private String remark;
 
-    @ApiModelProperty("等级")
+    @ApiModelProperty("等级(弃用)")
     private String grade;
 
     @ApiModelProperty("生效开始时间")
@@ -28,5 +29,12 @@ public class PricedProductSheet {
 
     @ApiModelProperty("生效结束时间")
     private String effectiveEndTime;
+
+
+    @ApiModelProperty(value = "等级编码")
+    private String gradeCode;
+
+    @ApiModelProperty(value = "等级名称")
+    private String gradeName;
 
 }
