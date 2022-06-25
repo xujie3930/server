@@ -957,7 +957,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 计算包裹大小
             this.countPackageSize(inputDelOutbound, dto);
             // 批量出库保存装箱信息
-            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
+                    || DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
                 // 装箱信息
                 List<DelOutboundPackingDto> packings = dto.getPackings();
                 this.delOutboundPackingService.save(orderNo, packings, true);
