@@ -76,7 +76,7 @@ public class ChaLevelMaintenanceController extends BaseController{
     @Log(title = "模块", businessType = BusinessType.DELETE)
     @DeleteMapping("remove")
     @ApiOperation(value = "删除模块",notes = "删除模块")
-    public R remove(@RequestParam("id") String id)
+    public R remove(@RequestBody String id)
     {
     return chaLevelMaintenanceService.deleteChaLevelMaintenanceById(id);
     }

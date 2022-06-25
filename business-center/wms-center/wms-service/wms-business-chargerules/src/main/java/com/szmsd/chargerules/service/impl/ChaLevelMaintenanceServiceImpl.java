@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.szmsd.chargerules.domain.ChaLevelMaintenanceDtoQuery;
 import com.szmsd.chargerules.service.IChaLevelMaintenanceService;
 import com.szmsd.common.core.domain.R;
@@ -7,12 +8,17 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpChaLevelMaintenanceFeignService;
 import com.szmsd.http.dto.chaLevel.ChaLevelMaintenanceDto;
 import com.szmsd.http.dto.chaLevel.ChaLevelMaintenancePageRequest;
+import com.szmsd.http.vo.Operation;
+import com.szmsd.http.vo.Operator;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 /**
 * <p>
@@ -51,6 +57,12 @@ public class ChaLevelMaintenanceServiceImpl  implements IChaLevelMaintenanceServ
 
     @Override
     public R insertChaLevelMaintenance(ChaLevelMaintenanceDto chaLevelMaintenance) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        Operation creation = new Operation();
+        creation.setTime(DateUtil.formatTime(new Date()));
+        creation.setOperator(new Operator()
+                .setCode(loginUser.getUserId().toString()).
+                setName(loginUser.getUsername()));
         return htpChaLevelMaintenanceFeignService.create(chaLevelMaintenance);
     }
 
