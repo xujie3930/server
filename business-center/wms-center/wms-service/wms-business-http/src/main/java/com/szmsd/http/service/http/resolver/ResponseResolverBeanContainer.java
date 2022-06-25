@@ -38,6 +38,8 @@ public class ResponseResolverBeanContainer implements InitializingBean {
         this.initMapBean(HttpUrlType.PRODUCT_REMOTE_AREA, ProductRemoteAreaResponseResolver.class, rr);
         this.initMapBean(HttpUrlType.THIRD_PAYMENT, ThirdPaymentResponseResolver.class, rr);
         this.initMapBean(HttpUrlType.SRM, SrmResponseResolver.class, rr);
+        this.initMapBean(HttpUrlType.PRICED, PricedProductApiResponseResolver.class, rr);
+
     }
 
     private void initMapBean(HttpUrlType httpUrlType, Class<? extends ResponseResolver> clazz, ResponseResolver rr) {

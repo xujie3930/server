@@ -116,6 +116,9 @@ abstract class AbstractRequest extends BaseRequest {
             case SRM:
                 urlConfig = urlGroupConfig.getSrm();
                 break;
+            case PRICED:
+                urlConfig = urlGroupConfig.getPriced();
+                break;
         }
         return urlConfig;
     }
@@ -141,6 +144,8 @@ abstract class AbstractRequest extends BaseRequest {
                     return defaultApiConfig.getProductRemoteArea();
                 case SRM:
                     return defaultApiConfig.getSrm();
+                case PRICED:
+                    return defaultApiConfig.getPriced();
             }
         }
         return apiConfig;
@@ -187,7 +192,9 @@ abstract class AbstractRequest extends BaseRequest {
             responseBody = HttpClientHelper.httpPut(url, requestBody, headerMap);
         } else if (HttpMethod.DELETE.equals(httpMethod)) {
             responseBody = HttpClientHelper.httpDelete(url, requestBody, headerMap);
-        } else {
+        } else if (HttpMethod.GET.equals(httpMethod)) {
+            responseBody = HttpClientHelper.httpGet(url, requestBody, headerMap);
+        }else {
             throw new CommonException("999", "未处理的请求方式");
         }
         String logRequestBody;
@@ -302,12 +309,16 @@ abstract class AbstractRequest extends BaseRequest {
         return this.httpRequestBody(warehouseCode, api, object, HttpMethod.POST);
     }
 
-    protected HttpResponseBody httpPutBody(String warehouseCode, String api, Object object) {
-        return this.httpRequestBody(warehouseCode, api, object, HttpMethod.PUT);
+    protected HttpResponseBody httpGetBody(String warehouseCode, String api, Object object,  Object... pathVariable) {
+        return this.httpRequestBody(warehouseCode, api, object, HttpMethod.GET, pathVariable);
     }
 
-    protected HttpResponseBody httpDeleteBody(String warehouseCode, String api, Object object) {
-        return this.httpRequestBody(warehouseCode, api, object, HttpMethod.DELETE);
+    protected HttpResponseBody httpPutBody(String warehouseCode, String api, Object object,  Object... pathVariable) {
+        return this.httpRequestBody(warehouseCode, api, object, HttpMethod.PUT, pathVariable);
+    }
+
+    protected HttpResponseBody httpDeleteBody(String warehouseCode, String api, Object object,  Object... pathVariable) {
+        return this.httpRequestBody(warehouseCode, api, object, HttpMethod.DELETE, pathVariable);
     }
 
     protected FileStream httpPostFile(String warehouseCode, String api, Object object) {

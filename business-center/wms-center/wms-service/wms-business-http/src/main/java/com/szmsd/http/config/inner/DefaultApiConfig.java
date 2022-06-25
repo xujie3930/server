@@ -15,6 +15,19 @@ public class DefaultApiConfig {
     private ThirdPaymentApiConfig thirdPayment;
     private SrmApiConfig srm;
 
+    private SaaSPricedApiConfig priced;
+    public SaaSPricedApiConfig getPriced() {
+        return priced;
+    }
+
+    public void setPriced(SaaSPricedApiConfig priced) {
+        this.priced = priced;
+    }
+
+
+
+
+
     public WmsApiConfig getWms() {
         return wms;
     }
@@ -62,4 +75,5 @@ public class DefaultApiConfig {
     public void setSrm(SrmApiConfig srm) {
         this.srm = srm;
     }
+
 }

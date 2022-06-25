@@ -35,8 +35,13 @@ public class HttpConfig {
     private Map<String, String> mapperGroup;
     // 默认映射组
     private String defaultUrlGroup;
+
+
+
     // 默认api配置
     private DefaultApiConfig defaultApiConfig;
+
+
 
     // 多通道url配置
     private Set<String> multipleChannelUrlSet;
