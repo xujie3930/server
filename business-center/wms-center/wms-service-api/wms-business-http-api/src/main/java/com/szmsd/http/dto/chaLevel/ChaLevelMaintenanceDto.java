@@ -1,5 +1,6 @@
 package com.szmsd.http.dto.chaLevel;
 
+import com.szmsd.http.vo.Operation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -18,4 +19,7 @@ public class ChaLevelMaintenanceDto {
 
     @ApiModelProperty("等级描述")
     private String description;
+
+    @ApiModelProperty(value = "Creation")
+    private Operation creation;
 }
