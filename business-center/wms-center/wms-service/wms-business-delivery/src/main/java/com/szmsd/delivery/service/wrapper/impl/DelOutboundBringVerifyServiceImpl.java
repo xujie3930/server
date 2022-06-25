@@ -299,11 +299,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     if (index == 0) {
                         packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                                 new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm"),
-                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, ""));
+                                1, delOutbound.getOrderNo(), declaredValue, ""));
                     } else {
-                        packageInfos.add(new PackageInfo(new Weight(BigDecimal.TEN, "g"),
+                        packageInfos.add(new PackageInfo(new Weight(BigDecimal.ONE, "g"),
                                 new Packing(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, "cm"),
-                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, ""));
+                                1, delOutbound.getOrderNo(), declaredValue, ""));
                     }
                     index++;
                 }

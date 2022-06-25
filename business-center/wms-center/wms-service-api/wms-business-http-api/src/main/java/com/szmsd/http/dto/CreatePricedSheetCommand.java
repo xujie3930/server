@@ -48,4 +48,11 @@ public class CreatePricedSheetCommand {
     @ApiModelProperty("VolumeWeights")
     private List<PricedVolumeWeight> volumeWeights;
 
+
+    @ApiModelProperty(value = "等级编码")
+    private String gradeCode;
+
+    @ApiModelProperty(value = "等级名称")
+    private String gradeName;
+
 }

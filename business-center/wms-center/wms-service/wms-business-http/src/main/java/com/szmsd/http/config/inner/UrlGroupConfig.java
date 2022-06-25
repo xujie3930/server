@@ -9,11 +9,14 @@ import com.szmsd.http.config.inner.url.*;
 public class UrlGroupConfig {
 
     private WmsUrlConfig wms;
-    private SaaSPricedProductUrlConfig pricedProduct;
+    private SaaSPricedProductUrlConfig pricedProduct2;
     private SaaSCarrierServiceAdminUrlConfig carrierService;
     private SaaSProductRemoteAreaUrlConfig productRemoteArea;
     private ThirdPaymentUrlConfig thirdPayment;
     private SrmUrlConfig srm;
+
+
+    private SaaSPricedUrlConfig priced;
 
     public WmsUrlConfig getWms() {
         return wms;
@@ -24,11 +27,11 @@ public class UrlGroupConfig {
     }
 
     public SaaSPricedProductUrlConfig getPricedProduct() {
-        return pricedProduct;
+        return pricedProduct2;
     }
 
     public void setPricedProduct(SaaSPricedProductUrlConfig pricedProduct) {
-        this.pricedProduct = pricedProduct;
+        this.pricedProduct2 = pricedProduct;
     }
 
     public SaaSCarrierServiceAdminUrlConfig getCarrierService() {
@@ -61,5 +64,14 @@ public class UrlGroupConfig {
 
     public void setSrm(SrmUrlConfig srm) {
         this.srm = srm;
+    }
+
+
+    public SaaSPricedUrlConfig getPriced() {
+        return priced;
+    }
+
+    public void setPriced(SaaSPricedUrlConfig priced) {
+        this.priced = priced;
     }
 }

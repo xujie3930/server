@@ -17,6 +17,9 @@ public enum HttpUrlType {
     PRODUCT_REMOTE_AREA("productRemoteArea"),
     THIRD_PAYMENT("thirdPayment"),
     SRM("srm"),
+
+    PRICED("priced"),
+
     ;
     private final String key;
 }
