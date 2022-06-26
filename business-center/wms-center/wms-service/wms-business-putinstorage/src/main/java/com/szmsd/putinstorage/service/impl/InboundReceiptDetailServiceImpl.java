@@ -1,5 +1,8 @@
 package com.szmsd.putinstorage.service.impl;
 
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.FIFOCache;
+import cn.hutool.cache.impl.TimedCache;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
@@ -26,11 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,6 +51,8 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         return selectList(queryDto, true);
     }
 
+    private TimedCache<String, List<BasAttachment>> attachmentCache = CacheUtil.newTimedCache(TimeUnit.MINUTES.toSeconds(10));
+
     /**
      * 查询入库单明细信息
      * @param queryDto
@@ -61,10 +64,17 @@ public class InboundReceiptDetailServiceImpl extends ServiceImpl<InboundReceiptD
         List<InboundReceiptDetailVO> inboundReceiptDetailVOS = baseMapper.selectList(queryDto);
         if (isContainFile) {
             inboundReceiptDetailVOS.forEach(item -> {
-                List<BasAttachment> attachment = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(item.getSku()));
-                if (CollectionUtils.isNotEmpty(attachment)) {
-                    item.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
+                List<BasAttachment> basAttachments = attachmentCache.get(item.getSku());
+                if (CollectionUtils.isEmpty(basAttachments)) {
+                    List<BasAttachment> attachmentRemote = remoteComponent.getAttachment(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SKU_IMAGE.getAttachmentType()).setBusinessNo(item.getSku()));
+                    if (CollectionUtils.isNotEmpty(attachmentRemote)) {
+                        attachmentCache.put(item.getSku(), attachmentRemote);
+                    }
                 }
+                List<BasAttachment> attachment = attachmentCache.get(item.getSku());
+                if (CollectionUtils.isNotEmpty(attachment))
+                    item.setEditionImage(new AttachmentFileDTO().setId(attachment.get(0).getId()).setAttachmentName(attachment.get(0).getAttachmentName()).setAttachmentUrl(attachment.get(0).getAttachmentUrl()));
+
             });
         }
         return inboundReceiptDetailVOS;

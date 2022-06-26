@@ -126,19 +126,7 @@ public class InboundReceiptController extends BaseController {
         try {
             if (lock.tryLock(LOCK_TIME, TimeUnit.SECONDS)) {
                 try {
-                    if (createInboundReceiptDTO.getIsAsync() != null && createInboundReceiptDTO.getIsAsync()) {
-                        SecurityContext context = SecurityContextHolder.getContext();
-                        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-                        CompletableFuture.runAsync(() -> {
-                            SecurityContextHolder.setContext(context);
-                            RequestContextHolder.setRequestAttributes(requestAttributes);
-                            iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO);
-                        });
-                        return R.ok();
-                    } else {
-                        return R.ok(iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO));
-                    }
-
+                    return R.ok(iInboundReceiptService.saveOrUpdate(createInboundReceiptDTO));
                 } finally {
                     CheckTag.remove();
                 }

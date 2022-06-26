@@ -85,7 +85,7 @@ public class DelQuerySettingsServiceImpl extends ServiceImpl<DelQuerySettingsMap
             where.eq("country_code", delQuerySettings.getCountryCode());
             where.eq("shipment_rule", delQuerySettings.getShipmentRule());
             if(baseMapper.selectList(where).size() > 0){
-c            }
+            }
 
         return baseMapper.updateById(delQuerySettings);
         }
