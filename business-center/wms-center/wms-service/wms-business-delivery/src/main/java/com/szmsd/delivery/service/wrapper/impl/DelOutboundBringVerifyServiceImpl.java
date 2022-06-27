@@ -282,31 +282,16 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 包裹信息
         List<PackageInfo> packageInfos = new ArrayList<>();
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
-            /*packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
-                    new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                    , Math.toIntExact(1), delOutbound.getOrderNo(), BigDecimal.ZERO, ""));*/
-            // 跟一件代发的逻辑一样
-            // 这里明细的重量尺寸是定死的1*1*1 10g
             if (PricingEnum.SKU.equals(pricingEnum)) {
-                int index = 0;
+                BigDecimal declaredValue = BigDecimal.ZERO;
                 for (DelOutboundDetail detail : detailList) {
-                    BigDecimal declaredValue;
                     if (null != detail.getDeclaredValue()) {
-                        declaredValue = BigDecimal.valueOf(detail.getDeclaredValue());
-                    } else {
-                        declaredValue = BigDecimal.ZERO;
+                        declaredValue = declaredValue.add(BigDecimal.valueOf(detail.getDeclaredValue()));
                     }
-                    if (index == 0) {
-                        packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
-                                new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm"),
-                                1, delOutbound.getOrderNo(), declaredValue, ""));
-                    } else {
-                        packageInfos.add(new PackageInfo(new Weight(BigDecimal.ONE, "g"),
-                                new Packing(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, "cm"),
-                                1, delOutbound.getOrderNo(), declaredValue, ""));
-                    }
-                    index++;
                 }
+                packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
+                        new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm"),
+                        1, delOutbound.getOrderNo(), declaredValue, ""));
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 BigDecimal declareValue = BigDecimal.ZERO;
                 for (DelOutboundDetail detail : detailList) {
