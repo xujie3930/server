@@ -1095,7 +1095,15 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         DelOutboundAddressDto delOutboundAddressDto = Optional.ofNullable(delOutboundDto.getAddress()).orElse(new DelOutboundAddressDto());
         delOutboundDto.setAddress(delOutboundAddressDto);
         if (null != delOutboundVO.getCalcWeight()) {
-            delOutboundDto.setWeight(delOutboundVO.getCalcWeight().doubleValue());
+            String calcWeightUnit = Optional.ofNullable(delOutboundVO.getCalcWeightUnit()).orElse("g");
+            BigDecimal calcWeight = Optional.ofNullable(delOutboundVO.getCalcWeight()).orElse(BigDecimal.ZERO);
+            // 统一转换成 g
+            if ("KG".equalsIgnoreCase(calcWeightUnit)) {
+                calcWeight = calcWeight.multiply(new BigDecimal("1000"));
+                delOutboundDto.setWeight(calcWeight.doubleValue());
+            } else {
+                delOutboundDto.setWeight(calcWeight.doubleValue());
+            }
         }
         DelOutboundAddressDto addressDTO = delOutboundDto.getAddress();
         DelOutboundAddressVO addressVO = Optional.ofNullable(delOutboundVO.getAddress()).orElse(new DelOutboundAddressVO());
