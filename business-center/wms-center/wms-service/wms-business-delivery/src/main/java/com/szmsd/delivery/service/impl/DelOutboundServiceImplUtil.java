@@ -301,6 +301,10 @@ public final class DelOutboundServiceImplUtil {
             delFlag = "0";
         }
         queryWrapper.eq("o.del_flag", delFlag);
+
+        // 国家查询
+        queryWrapper.eq(StringUtils.isNotEmpty(queryDto.getCountryCode()), "a.country_code", queryDto.getCountryCode());
+
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
     }
