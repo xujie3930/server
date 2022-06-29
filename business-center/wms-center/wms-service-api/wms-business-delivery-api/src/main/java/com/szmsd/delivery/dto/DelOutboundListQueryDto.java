@@ -67,4 +67,7 @@ public class DelOutboundListQueryDto extends QueryDto {
 
     @ApiModelProperty(value = "逻辑删除标识；2-已删除，0-未删除")
     private String delFlag;
+
+    @ApiModelProperty(value = "国家代码")
+    private String countryCode;
 }
