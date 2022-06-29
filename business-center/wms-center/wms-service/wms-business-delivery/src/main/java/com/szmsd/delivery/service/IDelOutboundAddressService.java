@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 
@@ -70,5 +71,7 @@ public interface IDelOutboundAddressService extends IService<DelOutboundAddress>
      * @return DelOutboundAddress
      */
     DelOutboundAddress getByOrderNo(String orderNo);
+
+    int updateReassignImportedData(List<LambdaUpdateWrapper<DelOutboundAddress>> list);
 }
 

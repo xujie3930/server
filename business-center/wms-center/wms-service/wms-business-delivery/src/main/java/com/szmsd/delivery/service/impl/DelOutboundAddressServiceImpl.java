@@ -2,11 +2,15 @@ package com.szmsd.delivery.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlMethod;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.mapper.DelOutboundAddressMapper;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
+import org.apache.ibatis.binding.MapperMethod;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -94,6 +98,26 @@ public class DelOutboundAddressServiceImpl extends ServiceImpl<DelOutboundAddres
         LambdaQueryWrapper<DelOutboundAddress> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(DelOutboundAddress::getOrderNo, orderNo);
         return this.getOne(queryWrapper);
+    }
+
+    @Override
+    public int updateReassignImportedData(List<LambdaUpdateWrapper<DelOutboundAddress>> list) {
+        int size = list.size();
+        String sqlStatement = sqlStatement(SqlMethod.UPDATE);
+        executeBatch(sqlSession -> {
+            int j = 1;
+            for (LambdaUpdateWrapper<DelOutboundAddress> wrapper : list) {
+                MapperMethod.ParamMap<LambdaUpdateWrapper<DelOutboundAddress>> param = new MapperMethod.ParamMap<>();
+                param.put(Constants.ENTITY, null);
+                param.put(Constants.WRAPPER, wrapper);
+                sqlSession.update(sqlStatement, param);
+                if ((j % 100 == 0) || j == size) {
+                    sqlSession.flushStatements();
+                }
+                j++;
+            }
+        });
+        return size;
     }
 }
 
