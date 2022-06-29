@@ -37,6 +37,10 @@ public class ImportResult implements Serializable {
         return new ImportResult(true, null);
     }
 
+    public static ImportResult buildSuccess(List<ImportMessage> messageList) {
+        return new ImportResult(true, messageList);
+    }
+
     public static ImportResult buildFail(List<ImportMessage> messageList) {
         return new ImportResult(false, messageList);
     }

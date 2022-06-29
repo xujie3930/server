@@ -7,6 +7,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlMethod;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.client.BasSubClientService;
@@ -63,6 +65,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.ibatis.binding.MapperMethod;
+import org.apache.ibatis.executor.BatchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +81,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * <p>
@@ -2021,6 +2027,59 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             lambdaUpdateWrapper.in(DelOutbound::getOrderNo, orders);
             this.update(lambdaUpdateWrapper);
         }
+    }
+
+    @Transactional
+    @Override
+    public int updateReassignImportedData(List<DelOutboundReassignExportListVO> list) {
+        List<LambdaUpdateWrapper<DelOutbound>> delOutboundList = new ArrayList<>();
+        List<LambdaUpdateWrapper<DelOutboundAddress>> delOutboundAddressList = new ArrayList<>();
+        for (DelOutboundReassignExportListVO vo : list) {
+            // 修改出库单上的信息
+            LambdaUpdateWrapper<DelOutbound> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+            lambdaUpdateWrapper.set(DelOutbound::getCodAmount, vo.getCodAmount());
+            lambdaUpdateWrapper.set(DelOutbound::getShipmentRule, vo.getShipmentRule());
+            lambdaUpdateWrapper.set(DelOutbound::getIoss, vo.getIoss());
+            lambdaUpdateWrapper.eq(DelOutbound::getOrderNo, vo.getOrderNo());
+            delOutboundList.add(lambdaUpdateWrapper);
+            // 修改地址信息
+            LambdaUpdateWrapper<DelOutboundAddress> addressLambdaUpdateWrapper = Wrappers.lambdaUpdate();
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getCountry, vo.getCountry());
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getCountryCode, vo.getCountryCode());
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getStateOrProvince, vo.getStateOrProvince());
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getCity, vo.getCity());
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getStreet1, vo.getStreet1());
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getStreet2, vo.getStreet1());
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getPostCode, vo.getPostCode());
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getPhoneNo, vo.getPhoneNo());
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getEmail, vo.getEmail());
+            addressLambdaUpdateWrapper.eq(DelOutboundAddress::getOrderNo, vo.getOrderNo());
+            delOutboundAddressList.add(addressLambdaUpdateWrapper);
+        }
+        String sqlStatement = sqlStatement(SqlMethod.UPDATE);
+        AtomicInteger results = new AtomicInteger(0);
+        int size = delOutboundList.size();
+        executeBatch(sqlSession -> {
+            int i = 1;
+            for (LambdaUpdateWrapper<DelOutbound> wrapper : delOutboundList) {
+                MapperMethod.ParamMap<LambdaUpdateWrapper<DelOutbound>> param = new MapperMethod.ParamMap<>();
+                param.put(Constants.ENTITY, null);
+                param.put(Constants.WRAPPER, wrapper);
+                sqlSession.update(sqlStatement, param);
+                if ((i % 100 == 0) || i == size) {
+                    List<BatchResult> batchResults = sqlSession.flushStatements();
+                    if (CollectionUtils.isNotEmpty(batchResults)) {
+                        for (BatchResult batchResult : batchResults) {
+                            int[] updateCounts = batchResult.getUpdateCounts();
+                            results.getAndSet(IntStream.of(updateCounts).sum());
+                        }
+                    }
+                }
+                i++;
+            }
+        });
+        this.delOutboundAddressService.updateReassignImportedData(delOutboundAddressList);
+        return results.get();
     }
 }
 

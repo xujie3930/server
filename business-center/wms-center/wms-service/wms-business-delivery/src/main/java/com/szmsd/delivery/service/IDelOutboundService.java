@@ -428,5 +428,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     void deleteFlag(DelOutbound delOutbound);
 
     void importBoxLabel(List<DelOutboundBoxLabelDto> userList, String sellerCode, String attachmentType);
+
+    int updateReassignImportedData(List<DelOutboundReassignExportListVO> list);
 }
 
