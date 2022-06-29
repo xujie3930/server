@@ -82,6 +82,12 @@ public class DelOutboundReassignExportListDto implements Serializable {
     @ApiModelProperty(value = "最新轨迹")
     private String trackingDescription;
 
+    @ApiModelProperty(value = "异常信息")
+    private String exceptionMessage;
+
+    @ApiModelProperty(value = "增值税号")
+    private String ioss;
+
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 

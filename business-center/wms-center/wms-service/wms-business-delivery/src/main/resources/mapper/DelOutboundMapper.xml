@@ -186,7 +186,9 @@
             o.remark,
             o.tracking_status,
             o.tracking_description,
-            o.create_time
+            o.create_time,
+            o.exception_message,
+            o.ioss
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
