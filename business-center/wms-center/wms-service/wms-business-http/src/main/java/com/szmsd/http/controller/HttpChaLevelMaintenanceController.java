@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.List;
 
-@Api(tags = {"HttpChaLevelMaintenance"})
+@Api(tags = {"等级维护"})
 @RestController
 @RequestMapping("/api/chaLevel/http")
 public class HttpChaLevelMaintenanceController extends BaseController {
