@@ -116,10 +116,11 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         delTrackLambdaQueryWrapper.eq(orderNoNotEmpty, DelTrack::getOrderNo, delTrack.getOrderNo());
         delTrackLambdaQueryWrapper.eq(StringUtils.isNotBlank(delTrack.getSource()), DelTrack::getSource, delTrack.getSource());
         delTrackLambdaQueryWrapper
-                .ge(Objects.nonNull(delTrack.getBeginTime()), BaseEntity::getCreateTime, delTrack.getBeginTime())
-                .le(Objects.nonNull(delTrack.getBeginTime()), BaseEntity::getCreateTime, delTrack.getEndTime())
+                .ge(StringUtils.isNotBlank(delTrack.getBeginTime()), BaseEntity::getCreateTime, delTrack.getBeginTime())
+                .le(StringUtils.isNotBlank(delTrack.getEndTime()), BaseEntity::getCreateTime, delTrack.getEndTime())
                 .eq(StringUtils.isNotBlank(delTrack.getTrackingNo()), DelTrack::getTrackingNo, delTrack.getTrackingNo())
                 .eq(StringUtils.isNotBlank(delTrack.getCreateByName()), DelTrack::getCreateByName, delTrack.getCreateByName())
+                .orderByDesc(BaseEntity::getCreateTime)
         ;
         List<DelTrack> selectList = baseMapper.selectList(delTrackLambdaQueryWrapper);
         if (CollectionUtils.isNotEmpty(selectList) && orderNoNotEmpty) {
