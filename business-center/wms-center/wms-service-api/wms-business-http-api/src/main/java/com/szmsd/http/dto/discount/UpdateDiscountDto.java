@@ -1,4 +1,4 @@
-package com.szmsd.http.dto.grade;
+package com.szmsd.http.dto.discount;
 
 import com.szmsd.http.dto.custom.AssociatedCustomersDto;
 import com.szmsd.http.vo.Operation;
@@ -11,8 +11,8 @@ import java.util.List;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "GradeMainDto", description = "客户方案-修改折扣方案规则")
-public class GradeMainDto {
+@ApiModel(value = "GradeMainDto", description = "修改折扣方案规则")
+public class UpdateDiscountDto {
 
 
     @ApiModelProperty("折扣方案Id")
@@ -35,11 +35,11 @@ public class GradeMainDto {
     @ApiModelProperty("有效结束时间")
     private String effectiveEndTime;
 
-    @ApiModelProperty("关联的产品集合")
-    private List<GradeDetailDto> pricingGradeTemplateRules;
+    @ApiModelProperty("产品等级信息")
+    private List<DiscountDetailDto> pricingDiscountRules;
 
-    @ApiModelProperty("关联的客户集合")
-    private List<AssociatedCustomersDto> associatedCustomers;
+    @ApiModelProperty("主信息")
+    private AssociatedCustomersDto associatedCustomers;
 
     @ApiModelProperty("创建人信息")
     private Operation creation;

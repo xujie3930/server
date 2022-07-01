@@ -4,6 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.HtpCustomPricesFeignService;
 import com.szmsd.http.dto.custom.*;
+import com.szmsd.http.dto.discount.DiscountMainDto;
 import com.szmsd.http.dto.grade.GradeMainDto;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;

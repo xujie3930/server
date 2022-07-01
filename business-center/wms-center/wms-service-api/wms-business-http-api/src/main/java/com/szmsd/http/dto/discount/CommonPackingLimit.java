@@ -1,4 +1,4 @@
-package com.szmsd.http.dto.custom;
+package com.szmsd.http.dto.discount;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
