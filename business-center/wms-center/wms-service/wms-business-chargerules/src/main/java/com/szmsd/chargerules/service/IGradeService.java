@@ -11,7 +11,7 @@ public interface IGradeService {
 
     R<GradeMainDto> detailResult(String id);
 
-    TableDataInfo<ChaLevelMaintenanceDto> page(GradePageRequest pageDTO);
+    TableDataInfo<GradeMainDto> page(GradePageRequest pageDTO);
 
     R detailImport(UpdateGradeDetailDto dto);
 
