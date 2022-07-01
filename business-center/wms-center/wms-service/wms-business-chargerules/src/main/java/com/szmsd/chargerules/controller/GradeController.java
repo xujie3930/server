@@ -60,14 +60,14 @@ public class GradeController extends BaseController{
     @PostMapping("/page")
     @ApiOperation(value = "分页查询等级方案")
     @PreAuthorize("@ss.hasPermi('grade:grade:page')")
-    public TableDataInfo<ChaLevelMaintenanceDto> page(@RequestBody GradePageRequest pageDTO) {
+    public TableDataInfo<GradeMainDto> page(@RequestBody GradePageRequest pageDTO) {
         return gradeService.page(pageDTO);
     }
 
     @PostMapping("/detailResult")
     @ApiOperation(value = "获取等级方案明细信息")
     @PreAuthorize("@ss.hasPermi('grade:grade:detailResult')")
-    public R detailResult(@RequestBody String id) {
+    public R<GradeMainDto> detailResult(@RequestBody String id) {
         return gradeService.detailResult(id);
     }
 

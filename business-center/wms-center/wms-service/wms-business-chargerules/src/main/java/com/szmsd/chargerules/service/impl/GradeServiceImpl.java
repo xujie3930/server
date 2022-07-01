@@ -41,7 +41,7 @@ public class GradeServiceImpl implements IGradeService {
     }
 
     @Override
-    public TableDataInfo<ChaLevelMaintenanceDto> page(GradePageRequest pageDTO) {
+    public TableDataInfo<GradeMainDto> page(GradePageRequest pageDTO) {
 
         R<PageVO> r = htpGradeFeignService.page(pageDTO);
         if(r.getCode() == 200){
