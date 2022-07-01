@@ -139,7 +139,13 @@ com:
             update: /api/grades/{0}
             delete: /api/grades/{0}
             get: /api/grades/{0}
-
+          grade:
+            page: /api/gradeTemplates/pageResult
+            detail-result: /api/gradeTemplates/{0}
+            detail-import: /api/gradeTemplates/{0}/gradeRules
+            custom-update: /api/gradeTemplates/{0}/associatedCustomers
+            create: /api/gradeTemplates
+            update: /api/gradeTemplates/{0}
       # 多通道url配置
       multiple-channel-url-set:
         - base-info.packings

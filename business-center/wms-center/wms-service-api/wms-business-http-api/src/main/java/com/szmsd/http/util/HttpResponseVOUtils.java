@@ -59,6 +59,10 @@ public class HttpResponseVOUtils {
         return transformation(hrb, null);
     }
     public static R transformation(HttpResponseBody hrb, Class cls){
+        return transformation(hrb, cls, null);
+    }
+
+    public static R transformation(HttpResponseBody hrb, Class cls, Class failCls){
         if (HttpStatus.SC_OK == hrb.getStatus()) {
             if(cls == null){
                 return R.ok();
