@@ -1,5 +1,6 @@
 package com.szmsd.http.dto.custom;
 
+import com.szmsd.http.dto.discount.DiscountDetailDto;
 import com.szmsd.http.vo.Operation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,8 +17,8 @@ public class CustomDiscountMainDto {
     @ApiModelProperty("客户编号")
     private String clientCode;
 
-    @ApiModelProperty("pricingDiscountRules")
-    private List<DiscountDto> pricingDiscountRules;
+    @ApiModelProperty("关联产品")
+    private List<DiscountDetailDto> pricingDiscountRules;
 
     @ApiModelProperty("操作人")
     private String operatorName;

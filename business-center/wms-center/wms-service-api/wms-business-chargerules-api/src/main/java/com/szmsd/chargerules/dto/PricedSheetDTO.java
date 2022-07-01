@@ -12,7 +12,6 @@ public class PricedSheetDTO extends PricedSheetInfoVO {
     @ApiModelProperty("产品代码")
     private String productCode;
 
-
     @ApiModelProperty(value = "等级编码")
     private String gradeCode;
 

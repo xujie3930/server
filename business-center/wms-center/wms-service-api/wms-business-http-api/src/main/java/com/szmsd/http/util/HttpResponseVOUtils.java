@@ -84,5 +84,14 @@ public class HttpResponseVOUtils {
         }
 
     }
+
+    public static R transformationList(HttpResponseBody hrb, Class cls){
+        if (HttpStatus.SC_OK == hrb.getStatus()) {
+            return R.ok(JSON.parseArray(hrb.getBody(), cls));
+        } else {
+            return R.failed(getErrorMsg(hrb));
+        }
+
+    }
 }
 

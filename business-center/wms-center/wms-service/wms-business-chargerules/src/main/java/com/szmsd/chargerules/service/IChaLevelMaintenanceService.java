@@ -5,6 +5,8 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.dto.chaLevel.ChaLevelMaintenanceDto;
 
+import java.util.List;
+
 /**
 * <p>
     *  服务类
@@ -23,6 +25,10 @@ public interface IChaLevelMaintenanceService {
         * @return 模块集合
         */
         TableDataInfo<ChaLevelMaintenanceDto> selectChaLevelMaintenanceList(ChaLevelMaintenanceDtoQuery chaLevelMaintenance);
+
+        R<List<ChaLevelMaintenanceDto>> allList(ChaLevelMaintenanceDto chaLevelMaintenance);
+
+
 
         /**
         * 新增模块

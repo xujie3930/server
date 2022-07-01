@@ -1,4 +1,4 @@
-package com.szmsd.http.dto.custom;
+package com.szmsd.http.dto.discount;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -7,8 +7,10 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "DiscountDto", description = "客户方案-修改折扣")
-public class DiscountDto {
+@ApiModel(value = "DiscountDetailDto", description = "折扣方案-关联产品")
+public class DiscountDetailDto {
+
+
 
     @ApiModelProperty("折扣信息Id")
     private String id;
@@ -22,7 +24,7 @@ public class DiscountDto {
     @ApiModelProperty("重量单位")
     private String weightUnit;
 
-    @ApiModelProperty("packageLimit")
+    @ApiModelProperty("包裹限制条件")
     private DiscountDetailPackageLimitDto packageLimit;
 
     @ApiModelProperty("处理点")
@@ -34,7 +36,7 @@ public class DiscountDto {
     @ApiModelProperty("费用类型")
     private String chargeType;
 
-    @ApiModelProperty("formula")
+    @ApiModelProperty("费用计算公式")
     private DiscountDetailFormulaDto formula;
 
     @ApiModelProperty("有效起始时间")

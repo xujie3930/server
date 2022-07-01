@@ -235,6 +235,8 @@ public class SaaSPricedProductApiConfig implements ApiConfig {
         // 导出报价表信息
         private String exportFile;
 
+        private String updateGrade;
+
         public String getSheets() {
             return sheets;
         }
@@ -281,6 +283,14 @@ public class SaaSPricedProductApiConfig implements ApiConfig {
 
         public void setExportFile(String exportFile) {
             this.exportFile = exportFile;
+        }
+
+        public String getUpdateGrade() {
+            return updateGrade;
+        }
+
+        public void setUpdateGrade(String updateGrade) {
+            this.updateGrade = updateGrade;
         }
     }
 }

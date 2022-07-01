@@ -31,6 +31,11 @@ public class HtpChaLevelMaintenanceFeignFallback implements FallbackFactory<HtpC
             }
 
             @Override
+            public R<List<ChaLevelMaintenanceDto>> allList(ChaLevelMaintenanceDto pageDTO) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R create(ChaLevelMaintenanceDto dto) {
                 return R.convertResultJson(throwable);
             }

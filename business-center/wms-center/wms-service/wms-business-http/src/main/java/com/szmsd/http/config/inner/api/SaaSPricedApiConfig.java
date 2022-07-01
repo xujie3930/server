@@ -34,6 +34,13 @@ public class SaaSPricedApiConfig implements ApiConfig {
 
     private CustomPrices customPrices;
 
+    public Discount getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Discount discount) {
+        this.discount = discount;
+    }
 
     static class PricedGrade {
         // 获取单条
@@ -46,6 +53,8 @@ public class SaaSPricedApiConfig implements ApiConfig {
         private String update;
         // 删除报价等级信息
         private String delete;
+
+        private String list;
         public String getGet() {
             return get;
         }
@@ -86,6 +95,13 @@ public class SaaSPricedApiConfig implements ApiConfig {
             this.delete = delete;
         }
 
+        public String getList() {
+            return list;
+        }
+
+        public void setList(String list) {
+            this.list = list;
+        }
     }
 
     static class Grade {
@@ -148,6 +164,15 @@ public class SaaSPricedApiConfig implements ApiConfig {
         }
     }
     static class Discount {
+
+        // 明细查询
+        private String detailResult;
+        private String page;
+        private String detailImport;
+        private String customUpdate;
+        private String create;
+        private String update;
+
         public String getDetailResult() {
             return detailResult;
         }
@@ -156,10 +181,45 @@ public class SaaSPricedApiConfig implements ApiConfig {
             this.detailResult = detailResult;
         }
 
-        // 明细查询
-        private String detailResult;
+        public String getPage() {
+            return page;
+        }
 
+        public void setPage(String page) {
+            this.page = page;
+        }
 
+        public String getDetailImport() {
+            return detailImport;
+        }
+
+        public void setDetailImport(String detailImport) {
+            this.detailImport = detailImport;
+        }
+
+        public String getCustomUpdate() {
+            return customUpdate;
+        }
+
+        public void setCustomUpdate(String customUpdate) {
+            this.customUpdate = customUpdate;
+        }
+
+        public String getCreate() {
+            return create;
+        }
+
+        public void setCreate(String create) {
+            this.create = create;
+        }
+
+        public String getUpdate() {
+            return update;
+        }
+
+        public void setUpdate(String update) {
+            this.update = update;
+        }
     }
     static class CustomPrices {
 

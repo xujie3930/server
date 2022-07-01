@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 
 /**
@@ -41,6 +42,15 @@ public class ChaLevelMaintenanceController extends BaseController{
      {
             return chaLevelMaintenanceService.selectChaLevelMaintenanceList(chaLevelMaintenance);
       }
+
+
+    @PreAuthorize("@ss.hasPermi('ChaLevelMaintenance:ChaLevelMaintenance:allList')")
+    @GetMapping("/allList")
+    @ApiOperation(value = "查询所有模块列表",notes = "查询模块列表")
+    public R<List<ChaLevelMaintenanceDto>> allList(ChaLevelMaintenanceDto chaLevelMaintenance)
+    {
+        return chaLevelMaintenanceService.allList(chaLevelMaintenance);
+    }
 
 
 

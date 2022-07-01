@@ -36,7 +36,7 @@ public class UpdateGradeDto {
     private String effectiveEndTime;
 
     @ApiModelProperty("产品等级信息")
-    private List<GradeDto> pricingGradeTemplateRules;
+    private List<GradeDetailDto> pricingGradeTemplateRules;
 
     @ApiModelProperty("主信息")
     private AssociatedCustomersDto associatedCustomers;

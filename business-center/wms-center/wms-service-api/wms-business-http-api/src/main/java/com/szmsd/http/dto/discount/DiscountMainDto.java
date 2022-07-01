@@ -1,5 +1,7 @@
-package com.szmsd.http.dto.custom;
+package com.szmsd.http.dto.discount;
 
+import com.szmsd.http.dto.custom.AssociatedCustomersDto;
+import com.szmsd.http.dto.grade.GradeDetailDto;
 import com.szmsd.http.vo.Operation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,9 +12,8 @@ import java.util.List;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "UpdatePricesDiscountMainDto", description = "客户方案-修改折扣方案规则")
+@ApiModel(value = "DiscountMainDto", description = "折扣方案主信息")
 public class DiscountMainDto {
-
 
     @ApiModelProperty("折扣方案Id")
     private String id;
@@ -33,17 +34,18 @@ public class DiscountMainDto {
     @ApiModelProperty("有效结束时间")
     private String effectiveEndTime;
 
-    @ApiModelProperty("折扣数据")
-    private List<DiscountDto> pricingDiscountRules;
+    @ApiModelProperty("关联的产品集合")
+    private List<DiscountDetailDto> pricingDiscountRules;
 
-    @ApiModelProperty("关联的客户")
-    private AssociatedCustomersDto associatedCustomers;
+    @ApiModelProperty("关联的客户集合")
+    private List<AssociatedCustomersDto> associatedCustomers;
 
     @ApiModelProperty("创建人信息")
     private Operation creation;
 
     @ApiModelProperty("修改人信息")
     private Operation lastModifyOperation;
+
 
 
 

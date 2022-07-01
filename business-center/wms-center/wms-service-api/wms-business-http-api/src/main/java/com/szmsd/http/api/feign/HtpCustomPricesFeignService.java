@@ -4,6 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.fallback.HtpCustomPricesFeignFallback;
 import com.szmsd.http.dto.custom.*;
+import com.szmsd.http.dto.discount.DiscountMainDto;
 import com.szmsd.http.dto.grade.GradeMainDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
