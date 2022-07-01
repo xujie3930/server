@@ -6,6 +6,7 @@ import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.szmsd.bas.dto.BaseProductImportDto;
+import com.szmsd.bas.vo.BasProductMultipleTicketDTO;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
 import com.szmsd.chargerules.service.ICustomPricesService;
 import com.szmsd.chargerules.service.IGradeService;
@@ -13,6 +14,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -136,7 +138,7 @@ public class GradeController extends BaseController{
         }
         List<GradeDto> list = null;
         try {
-            List<GradeDetailImportDto> dtoList = EasyExcelFactory.read(file.getInputStream(), GradeDetailImportDto.class, null).sheet(0).doReadSync();
+            List<GradeDetailImportDto> dtoList = new ExcelUtil<>(GradeDetailImportDto.class).importExcel(file.getInputStream());
             list = BeanMapperUtil.mapList(dtoList, GradeDto.class);
             if (CollectionUtils.isEmpty(dtoList)) {
                 return R.failed("导入数据不能为空");
@@ -169,9 +171,7 @@ public class GradeController extends BaseController{
         }
         List<AssociatedCustomersDto> list = null;
         try {
-            ExcelReaderSheetBuilder excelReaderSheetBuilder = EasyExcelFactory.read(file.getInputStream(),
-                    GradeCustomImportDto.class, null).sheet(0);
-            List<GradeDetailImportDto> dtoList = excelReaderSheetBuilder.doReadSync();
+            List<GradeCustomImportDto> dtoList = new ExcelUtil<>(GradeCustomImportDto.class).importExcel(file.getInputStream());
             list = BeanMapperUtil.mapList(dtoList, AssociatedCustomersDto.class);
             if (CollectionUtils.isEmpty(dtoList)) {
                 return R.failed("导入数据不能为空");
