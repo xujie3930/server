@@ -11,6 +11,7 @@ import com.szmsd.bas.api.feign.BasCarrierKeywordFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringToolkit;
+import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -114,6 +115,12 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         boolean orderNoNotEmpty = StringUtils.isNotEmpty(delTrack.getOrderNo());
         delTrackLambdaQueryWrapper.eq(orderNoNotEmpty, DelTrack::getOrderNo, delTrack.getOrderNo());
         delTrackLambdaQueryWrapper.eq(StringUtils.isNotBlank(delTrack.getSource()), DelTrack::getSource, delTrack.getSource());
+        delTrackLambdaQueryWrapper
+                .ge(Objects.nonNull(delTrack.getBeginTime()), BaseEntity::getCreateTime, delTrack.getBeginTime())
+                .le(Objects.nonNull(delTrack.getBeginTime()), BaseEntity::getCreateTime, delTrack.getEndTime())
+                .eq(StringUtils.isNotBlank(delTrack.getTrackingNo()), DelTrack::getTrackingNo, delTrack.getTrackingNo())
+                .eq(StringUtils.isNotBlank(delTrack.getCreateByName()), DelTrack::getCreateByName, delTrack.getCreateByName())
+        ;
         List<DelTrack> selectList = baseMapper.selectList(delTrackLambdaQueryWrapper);
         if (CollectionUtils.isNotEmpty(selectList) && orderNoNotEmpty) {
             String carrierCode = "";

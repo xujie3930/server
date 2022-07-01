@@ -26,7 +26,7 @@ import javax.annotation.Resource;
 */
 
 
-@Api(tags = {""})
+@Api(tags = {"等级维护"})
 @RestController
 @RequestMapping("/cha-level-maintenance")
 public class ChaLevelMaintenanceController extends BaseController{
