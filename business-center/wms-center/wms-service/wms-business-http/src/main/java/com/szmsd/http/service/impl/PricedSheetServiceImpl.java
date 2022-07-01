@@ -5,6 +5,7 @@ import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.CreatePricedSheetCommand;
 import com.szmsd.http.dto.PricedSheetCodeCriteria;
+import com.szmsd.http.dto.UpdatePricedGradeDto;
 import com.szmsd.http.dto.UpdatePricedSheetCommand;
 import com.szmsd.http.service.IPricedSheetService;
 import com.szmsd.http.service.http.SaaSPricedProductRequest;
@@ -33,6 +34,11 @@ public class PricedSheetServiceImpl extends SaaSPricedProductRequest implements 
     @Override
     public ResponseVO update(UpdatePricedSheetCommand updatePricedSheetCommand) {
         return JSON.parseObject(httpPut("", "pricedSheet.update", updatePricedSheetCommand, updatePricedSheetCommand.getCode()), ResponseVO.class);
+    }
+
+    @Override
+    public ResponseVO updateGrade(UpdatePricedGradeDto dto) {
+        return JSON.parseObject(httpPut("", "pricedSheet.updateGrade", dto, dto.getProductCode(), dto.getSheetCode()), ResponseVO.class);
     }
 
     @Override

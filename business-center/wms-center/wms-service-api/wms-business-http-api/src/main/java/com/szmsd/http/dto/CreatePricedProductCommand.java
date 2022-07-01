@@ -48,4 +48,6 @@ public class CreatePricedProductCommand  {
     @ApiModelProperty(value = "轨迹官网地址")
     private String trackWebsite;
 
+
+
 }

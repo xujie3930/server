@@ -29,6 +29,12 @@ public class HttpChaLevelMaintenanceController extends BaseController {
         return chaLevelMaintenanceService.page(pageDTO);
     }
 
+    @PostMapping("/list")
+    @ApiOperation(value = "分页查询等级维护")
+    public R<List<ChaLevelMaintenanceDto>> list(@RequestBody ChaLevelMaintenanceDto pageDTO) {
+        return chaLevelMaintenanceService.list(pageDTO);
+    }
+
 
     @PostMapping("/create")
     @ApiOperation(value = "创建等级维护")

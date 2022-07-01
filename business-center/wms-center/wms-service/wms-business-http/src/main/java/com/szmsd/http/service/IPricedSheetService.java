@@ -3,6 +3,7 @@ package com.szmsd.http.service;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.http.dto.CreatePricedSheetCommand;
 import com.szmsd.http.dto.PricedSheetCodeCriteria;
+import com.szmsd.http.dto.UpdatePricedGradeDto;
 import com.szmsd.http.dto.UpdatePricedSheetCommand;
 import com.szmsd.http.vo.PricedSheet;
 import com.szmsd.http.vo.ResponseVO;
@@ -15,6 +16,8 @@ public interface IPricedSheetService {
     ResponseVO create(CreatePricedSheetCommand createPricedSheetCommand);
 
     ResponseVO update(UpdatePricedSheetCommand updatePricedSheetCommand);
+
+    ResponseVO updateGrade(UpdatePricedGradeDto dto);
 
     ResponseVO importFile(String sheetCode, MultipartFile file);
 
