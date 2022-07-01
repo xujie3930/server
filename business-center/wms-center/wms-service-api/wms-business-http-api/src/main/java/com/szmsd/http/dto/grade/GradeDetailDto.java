@@ -9,8 +9,8 @@ import java.util.List;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "GradeDto", description = "客户方案-修改等级")
-public class GradeDto {
+@ApiModel(value = "GradeDetailDto", description = "等级方案-关联产品")
+public class GradeDetailDto {
 
 
     @ApiModelProperty("产品代码")

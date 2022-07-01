@@ -1,6 +1,5 @@
-package com.szmsd.http.dto.custom;
+package com.szmsd.http.dto.discount;
 
-import com.szmsd.http.dto.grade.GradeDetailDto;
 import com.szmsd.http.vo.Operation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -11,11 +10,11 @@ import java.util.List;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "CustomGradeMainDto", description = "客户方案-修改折扣方案规则")
-public class CustomGradeMainDto {
+@ApiModel(value = "CustomGradeMainDto", description = "修改等级方案关联产品")
+public class UpdateDiscountDetailDto {
 
-    @ApiModelProperty("产品等级")
-    private List<GradeDetailDto> pricingGradeRules;
+    @ApiModelProperty("关联产品集合")
+    private List<DiscountDetailDto> pricingDiscountRules;
 
     @ApiModelProperty("操作人")
     private String operatorName;
@@ -23,8 +22,7 @@ public class CustomGradeMainDto {
     @ApiModelProperty("操作人信息")
     private Operation userIdentity;
 
-
-    @ApiModelProperty("客户编号")
-    private String clientCode;
+    @ApiModelProperty("模板id")
+    private String templateId;
 
 }

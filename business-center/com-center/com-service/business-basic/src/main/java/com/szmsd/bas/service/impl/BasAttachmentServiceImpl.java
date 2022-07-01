@@ -69,7 +69,7 @@ public class BasAttachmentServiceImpl extends ServiceImpl<BasAttachmentMapper, B
 
     @Override
     public List<BasAttachment> selectPageList(BasAttachmentQueryDTO queryDto) {
-        QueryWrapper<BasRegion> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<BasAttachment> queryWrapper = new QueryWrapper<>();
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "businessCode", queryDto.getBusinessCode());
         queryWrapper.orderByDesc("create_time");
         return baseMapper.selectList(queryDto);
