@@ -114,6 +114,11 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         refactor(pricedSheetDTO, create);
         R<ResponseVO> responseVOR = htpPricedSheetFeignService.create(create);
         ResponseVO.resultAssert(responseVOR, "创建报价产品报价表详情信息");
+        if(StringUtils.isNotEmpty(pricedSheetDTO.getGradeCode())){
+            UpdatePricedGradeDto dto = new UpdatePricedGradeDto().setGrade(pricedSheetDTO.getGradeCode()).
+                    setProductCode(pricedSheetDTO.getProductCode()).setSheetCode(pricedSheetDTO.getCode());
+            htpPricedSheetFeignService.updateGrade(dto);
+        }
     }
 
     /**
@@ -127,6 +132,13 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         refactor(pricedSheetDTO, update);
         R<ResponseVO> responseVOR = htpPricedSheetFeignService.update(update);
         ResponseVO.resultAssert(responseVOR, "修改报价产品报价表详情信息");
+
+        if(StringUtils.isNotEmpty(pricedSheetDTO.getGradeCode())){
+            UpdatePricedGradeDto dto = new UpdatePricedGradeDto().setGrade(pricedSheetDTO.getGradeCode()).
+                    setProductCode(pricedSheetDTO.getProductCode()).setSheetCode(pricedSheetDTO.getCode());
+            htpPricedSheetFeignService.updateGrade(dto);
+        }
+
     }
 
     /**

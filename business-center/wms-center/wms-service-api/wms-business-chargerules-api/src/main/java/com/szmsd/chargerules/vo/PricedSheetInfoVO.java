@@ -43,4 +43,11 @@ public class PricedSheetInfoVO {
     @ApiModelProperty(value = "limit包裹限制条件")
     private PackageLimitVO limit;
 
+
+    @ApiModelProperty(value = "等级编码")
+    private String gradeCode;
+
+    @ApiModelProperty(value = "等级名称")
+    private String gradeName;
+
 }

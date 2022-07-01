@@ -6,6 +6,7 @@ import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.HtpPricedSheetFeignService;
 import com.szmsd.http.dto.CreatePricedSheetCommand;
 import com.szmsd.http.dto.PricedSheetCodeCriteria;
+import com.szmsd.http.dto.UpdatePricedGradeDto;
 import com.szmsd.http.dto.UpdatePricedSheetCommand;
 import com.szmsd.http.vo.PricedSheet;
 import com.szmsd.http.vo.ResponseVO;
@@ -33,6 +34,11 @@ public class HtpPricedSheetFeignFallback implements FallbackFactory<HtpPricedShe
 
             @Override
             public R<ResponseVO> update(UpdatePricedSheetCommand updatePricedSheetCommand) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<ResponseVO> updateGrade(UpdatePricedGradeDto dto) {
                 return R.convertResultJson(throwable);
             }
 

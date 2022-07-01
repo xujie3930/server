@@ -233,4 +233,8 @@ public class UpdatePricedProductCommand {
     @ApiModelProperty(value = "提货服务名称:serviceName")
     private String pickupPackageServiceName;
 
+
+    @ApiModelProperty(value = "亚马逊挂号服务")
+    private String amazonLogisticsRouteId;
+
 }

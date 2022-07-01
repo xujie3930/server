@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 
 /**
 * <p>
@@ -53,6 +54,12 @@ public class ChaLevelMaintenanceServiceImpl  implements IChaLevelMaintenanceServ
         }else{
             throw new CommonException("400", r.getMsg());
         }
+    }
+
+    @Override
+    public List<ChaLevelMaintenanceDto> allList(ChaLevelMaintenanceDto chaLevelMaintenance) {
+        R<List<ChaLevelMaintenanceDto>> r = htpChaLevelMaintenanceFeignService.allList(chaLevelMaintenance);
+        return r.getData();
     }
 
     @Override

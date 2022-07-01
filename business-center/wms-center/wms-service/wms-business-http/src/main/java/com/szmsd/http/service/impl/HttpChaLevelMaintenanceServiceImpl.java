@@ -17,6 +17,8 @@ import org.apache.http.HttpStatus;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class HttpChaLevelMaintenanceServiceImpl extends SaaSPricedRequest implements IHttpChaLevelMaintenanceService {
 
@@ -49,5 +51,11 @@ public class HttpChaLevelMaintenanceServiceImpl extends SaaSPricedRequest implem
     @Override
     public R delete(String id) {
         return HttpResponseVOUtils.transformation(httpDeleteBody("", "pricedGrade.delete", null, id));
+    }
+
+    @Override
+    public R<List<ChaLevelMaintenanceDto>> list(ChaLevelMaintenanceDto pageDTO) {
+        return HttpResponseVOUtils.transformationList(
+                httpGetBody("", "pricedGrade.list", pageDTO), ChaLevelMaintenanceDto.class);
     }
 }

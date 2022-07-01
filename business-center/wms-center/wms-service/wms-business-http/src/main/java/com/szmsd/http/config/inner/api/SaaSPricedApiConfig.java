@@ -53,6 +53,8 @@ public class SaaSPricedApiConfig implements ApiConfig {
         private String update;
         // 删除报价等级信息
         private String delete;
+
+        private String list;
         public String getGet() {
             return get;
         }
@@ -93,6 +95,13 @@ public class SaaSPricedApiConfig implements ApiConfig {
             this.delete = delete;
         }
 
+        public String getList() {
+            return list;
+        }
+
+        public void setList(String list) {
+            this.list = list;
+        }
     }
 
     static class Grade {

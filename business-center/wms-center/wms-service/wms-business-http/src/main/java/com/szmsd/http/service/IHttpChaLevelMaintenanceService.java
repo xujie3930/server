@@ -7,6 +7,8 @@ import com.szmsd.http.dto.chaLevel.ChaLevelMaintenanceDto;
 import com.szmsd.http.vo.ResponseVO;
 import org.apache.poi.ss.formula.functions.T;
 
+import java.util.List;
+
 public interface IHttpChaLevelMaintenanceService {
 
     R<PageVO> page(ChaLevelMaintenancePageRequest pageDTO);
@@ -20,5 +22,5 @@ public interface IHttpChaLevelMaintenanceService {
     R delete(String id);
 
 
-
+    R<List<ChaLevelMaintenanceDto>> list(ChaLevelMaintenanceDto pageDTO);
 }

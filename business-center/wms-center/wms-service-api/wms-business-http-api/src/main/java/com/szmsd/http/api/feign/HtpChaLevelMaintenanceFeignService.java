@@ -18,11 +18,18 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @FeignClient(contextId = "FeignClient.HtpChaLevelMaintenanceFeignService", name = BusinessHttpInterface.SERVICE_NAME, fallbackFactory = HtpChaLevelMaintenanceFeignFallback.class)
 public interface HtpChaLevelMaintenanceFeignService {
 
     @PostMapping("/api/chaLevel/http/page")
     R<PageVO<ChaLevelMaintenanceDto>> page(@RequestBody ChaLevelMaintenancePageRequest pageDTO);
+
+    @PostMapping("/api/chaLevel/http/list")
+    R<List<ChaLevelMaintenanceDto>> allList(@RequestBody ChaLevelMaintenanceDto chaLevelMaintenance);
+
+
 
     @PostMapping("/api/chaLevel/http/create")
     R create(@RequestBody ChaLevelMaintenanceDto dto);
