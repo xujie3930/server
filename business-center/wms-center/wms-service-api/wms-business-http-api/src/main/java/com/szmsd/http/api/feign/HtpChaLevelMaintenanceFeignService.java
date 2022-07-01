@@ -29,8 +29,6 @@ public interface HtpChaLevelMaintenanceFeignService {
     @PostMapping("/api/chaLevel/http/list")
     R<List<ChaLevelMaintenanceDto>> allList(@RequestBody ChaLevelMaintenanceDto chaLevelMaintenance);
 
-
-
     @PostMapping("/api/chaLevel/http/create")
     R create(@RequestBody ChaLevelMaintenanceDto dto);
 

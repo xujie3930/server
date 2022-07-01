@@ -47,7 +47,7 @@ public class ChaLevelMaintenanceController extends BaseController{
     @PreAuthorize("@ss.hasPermi('ChaLevelMaintenance:ChaLevelMaintenance:allList')")
     @GetMapping("/allList")
     @ApiOperation(value = "查询所有模块列表",notes = "查询模块列表")
-    public List<ChaLevelMaintenanceDto> allList(ChaLevelMaintenanceDto chaLevelMaintenance)
+    public R<List<ChaLevelMaintenanceDto>> allList(ChaLevelMaintenanceDto chaLevelMaintenance)
     {
         return chaLevelMaintenanceService.allList(chaLevelMaintenance);
     }

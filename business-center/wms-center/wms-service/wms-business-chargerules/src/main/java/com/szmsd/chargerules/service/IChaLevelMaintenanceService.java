@@ -26,7 +26,7 @@ public interface IChaLevelMaintenanceService {
         */
         TableDataInfo<ChaLevelMaintenanceDto> selectChaLevelMaintenanceList(ChaLevelMaintenanceDtoQuery chaLevelMaintenance);
 
-        List<ChaLevelMaintenanceDto> allList(ChaLevelMaintenanceDto chaLevelMaintenance);
+        R<List<ChaLevelMaintenanceDto>> allList(ChaLevelMaintenanceDto chaLevelMaintenance);
 
 
 

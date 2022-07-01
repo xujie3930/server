@@ -57,9 +57,8 @@ public class ChaLevelMaintenanceServiceImpl  implements IChaLevelMaintenanceServ
     }
 
     @Override
-    public List<ChaLevelMaintenanceDto> allList(ChaLevelMaintenanceDto chaLevelMaintenance) {
-        R<List<ChaLevelMaintenanceDto>> r = htpChaLevelMaintenanceFeignService.allList(chaLevelMaintenance);
-        return r.getData();
+    public R<List<ChaLevelMaintenanceDto>> allList(ChaLevelMaintenanceDto chaLevelMaintenance) {
+        return htpChaLevelMaintenanceFeignService.allList(chaLevelMaintenance);
     }
 
     @Override
