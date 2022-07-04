@@ -97,12 +97,12 @@ public class CustomPricesServiceImpl implements ICustomPricesService {
 
     @Override
     public R discountDetailResult(String id) {
-        return htpGradeFeignService.detailResult(id);
+        return htpDiscountFeignService.detailResult(id);
     }
 
     @Override
     public R gradeDetailResult(String id) {
-        return htpDiscountFeignService.detailResult(id);
+        return htpGradeFeignService.detailResult(id);
     }
 }
 
