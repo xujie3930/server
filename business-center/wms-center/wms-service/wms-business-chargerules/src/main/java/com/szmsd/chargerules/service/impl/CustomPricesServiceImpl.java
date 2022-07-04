@@ -1,20 +1,14 @@
 package com.szmsd.chargerules.service.impl;
 
 import cn.hutool.core.date.DateUtil;
-import com.szmsd.chargerules.domain.ChaLevelMaintenanceDtoQuery;
-import com.szmsd.chargerules.service.IChaLevelMaintenanceService;
 import com.szmsd.chargerules.service.ICustomPricesService;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.core.utils.bean.BeanUtils;
-import com.szmsd.common.core.web.page.PageVO;
-import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.http.api.feign.HtpChaLevelMaintenanceFeignService;
 import com.szmsd.http.api.feign.HtpCustomPricesFeignService;
-import com.szmsd.http.dto.chaLevel.ChaLevelMaintenanceDto;
-import com.szmsd.http.dto.chaLevel.ChaLevelMaintenancePageRequest;
+import com.szmsd.http.api.feign.HtpDiscountFeignService;
+import com.szmsd.http.api.feign.HtpGradeFeignService;
+import com.szmsd.http.dto.UserIdentity;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.vo.Operation;
 import com.szmsd.http.vo.Operator;
@@ -34,41 +28,81 @@ import java.util.Date;
 @Service
 public class CustomPricesServiceImpl implements ICustomPricesService {
 
+    @Resource
     private HtpCustomPricesFeignService htpCustomPricesFeignService;
+
+
+    @Resource
+    private HtpGradeFeignService htpGradeFeignService;
+
+
+    @Resource
+    private HtpDiscountFeignService htpDiscountFeignService;
 
     @Override
     public R updateDiscountDetail(CustomDiscountMainDto dto) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        Operation userIdentity = new Operation();
+        userIdentity.setTime(DateUtil.formatTime(new Date()));
+        userIdentity.setOperator(new Operator()
+                .setCode(loginUser.getUserId().toString()).
+                setName(loginUser.getUsername()));
+        dto.setUserIdentity(userIdentity);
         return htpCustomPricesFeignService.updateDiscountDetail(dto);
     }
 
     @Override
     public R updateGradeDetail(CustomGradeMainDto dto) {
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        Operation userIdentity = new Operation();
+        userIdentity.setTime(DateUtil.formatTime(new Date()));
+        userIdentity.setOperator(new Operator()
+                .setCode(loginUser.getUserId().toString()).
+                setName(loginUser.getUsername()));
+        dto.setUserIdentity(userIdentity);
         return htpCustomPricesFeignService.updateGradeDetail(dto);
     }
 
     @Override
-    public R<CustomPricesMainDto> result(String clientCode) {
-        return htpCustomPricesFeignService.result(clientCode);
+    public R<CustomPricesPageDto> result(String clientCode) {
+        return htpCustomPricesFeignService.page(clientCode);
     }
 
     @Override
-    public R updateDiscount(UpdateCustomDiscountMainDto dto) {
+    public R updateDiscount(UpdateCustomMainDto dto) {
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setUserId(loginUser.getUserId().toString());
+        userIdentity.setUserName(loginUser.getUsername().toString());
+        userIdentity.setFullName(loginUser.getUsername().toString());
+        dto.setUserIdentity(userIdentity);
         return htpCustomPricesFeignService.updateDiscount(dto);
     }
 
     @Override
-    public R updateGrade(UpdateCustomGradeMainDto dto) {
+    public R updateGrade(UpdateCustomMainDto dto) {
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setUserId(loginUser.getUserId().toString());
+        userIdentity.setUserName(loginUser.getUsername().toString());
+        userIdentity.setFullName(loginUser.getUsername().toString());
+        dto.setUserIdentity(userIdentity);
+
+
         return htpCustomPricesFeignService.updateGrade(dto);
     }
 
     @Override
     public R discountDetailResult(String id) {
-        return htpCustomPricesFeignService.discountDetailResult(id);
+        return htpDiscountFeignService.detailResult(id);
     }
 
     @Override
     public R gradeDetailResult(String id) {
-        return htpCustomPricesFeignService.gradeDetailResult(id);
+        return htpGradeFeignService.detailResult(id);
     }
 }
 

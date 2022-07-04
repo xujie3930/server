@@ -7,11 +7,19 @@ import com.szmsd.chargerules.service.ICustomPricesService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.BeanUtils;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.delivery.dto.CustomPricesDiscountImportDto;
+import com.szmsd.delivery.dto.DiscountCustomImportDto;
+import com.szmsd.delivery.dto.DiscountDetailImportDto;
+import com.szmsd.delivery.dto.GradeDetailImportDto;
 import com.szmsd.http.dto.custom.*;
-import com.szmsd.http.dto.discount.DiscountMainDto;
+import com.szmsd.http.dto.discount.*;
+import com.szmsd.http.dto.grade.GradeDetailDto;
 import com.szmsd.http.dto.grade.GradeMainDto;
+import com.szmsd.http.dto.grade.UpdateGradeDetailDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -38,7 +46,7 @@ import java.util.List;
 */
 
 
-@Api(tags = {"等级维护"})
+@Api(tags = {"客户等级及折扣"})
 @RestController
 @RequestMapping("/custom-prices")
 public class CustomPricesController extends BaseController{
@@ -49,21 +57,21 @@ public class CustomPricesController extends BaseController{
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:result')")
     @PostMapping("/result/{clientCode}")
     @ApiOperation(value = "获取折扣/等级方案数据")
-    public R<CustomPricesMainDto> result(@PathVariable("clientCode") String clientCode) {
+    public R<CustomPricesPageDto> result(@PathVariable("clientCode") String clientCode) {
         return customPricesService.result(clientCode);
     }
 
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:updateDiscount')")
     @PostMapping("/updateDiscount")
     @ApiOperation(value = "修改客户折扣主信息")
-    public R updateDiscount(@RequestBody UpdateCustomDiscountMainDto dto) {
+    public R updateDiscount(@RequestBody UpdateCustomMainDto dto) {
         return customPricesService.updateDiscount(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:updateGrade')")
     @PostMapping("/updateGrade")
     @ApiOperation(value = "修改客户等级主信息")
-    public R updateGrade(@RequestBody UpdateCustomGradeMainDto dto) {
+    public R updateGrade(@RequestBody UpdateCustomMainDto dto) {
         return customPricesService.updateGrade(dto);
     }
 
@@ -95,9 +103,8 @@ public class CustomPricesController extends BaseController{
     @PostMapping("/discountDetailResult/{id}")
     @ApiOperation(value = "获取折扣方案明细信息")
     public R<DiscountMainDto> discountDetailResult(@PathVariable("id") String id) {
-        return customPricesService.gradeDetailResult(id);
+        return customPricesService.discountDetailResult(id);
     }
-
 
 
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:downloadDiscountTemplate')")
@@ -105,7 +112,7 @@ public class CustomPricesController extends BaseController{
     @PostMapping("/downloadDiscountTemplate")
     public void downloadDiscountTemplate(HttpServletResponse httpServletResponse) {
         DownloadTemplateUtil downloadTemplateUtil = DownloadTemplateUtil.getInstance();
-        downloadTemplateUtil.getResourceByName(httpServletResponse, "客户折扣方案模板");
+        downloadTemplateUtil.getResourceByName(httpServletResponse, "discountDetail");
     }
 
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:downloadGradeTemplate')")
@@ -113,23 +120,17 @@ public class CustomPricesController extends BaseController{
     @PostMapping("/downloadGradeTemplate")
     public void downloadGradeTemplate(HttpServletResponse httpServletResponse) {
         DownloadTemplateUtil downloadTemplateUtil = DownloadTemplateUtil.getInstance();
-        downloadTemplateUtil.getResourceByName(httpServletResponse, "客户等级方案模板");
+        downloadTemplateUtil.getResourceByName(httpServletResponse, "custom");
     }
 
-   /* @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:importGradeTemplate')")
-    @PostMapping("/importGradeTemplate")
-    @ApiOperation(value = "等级方案 - 导入", position = 200)
+
+    @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:importGradeDetailTemplate')")
+    @PostMapping("/importGradeDetailTemplate")
+    @ApiOperation(value = "等级方案导入", position = 200)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
-    public R importGradeTemplate(@RequestParam("clientCode") String clientCode, HttpServletRequest request) {*/
-   @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:importDiscountTemplate')")
-   @PostMapping("/importDiscountTemplate")
-   @ApiOperation(value = "折扣方案 - 导入", position = 200)
-   @ApiImplicitParams({
-           @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
-   })
-   public R importDiscountTemplate(@RequestParam("clientCode") String clientCode, HttpServletRequest request) {
+    public R importGradeDetailTemplate(@RequestParam("clientCode") String clientCode, HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile file = multipartHttpServletRequest.getFile("file");
         AssertUtil.notNull(file, "上传文件不存在");
@@ -140,26 +141,68 @@ public class CustomPricesController extends BaseController{
         if (!"xls".equals(suffix) && !"xlsx".equals(suffix)) {
             throw new CommonException("999", "只能上传xls,xlsx文件");
         }
+        List<GradeDetailDto> list = null;
         try {
-            ExcelReaderSheetBuilder excelReaderSheetBuilder = EasyExcelFactory.read(file.getInputStream(),
-                    CustomPricesDiscountImportDto.class, null).sheet(0);
-            List<CustomPricesDiscountImportDto> dtoList = excelReaderSheetBuilder.doReadSync();
+            List<GradeDetailImportDto> dtoList = new ExcelUtil<>(GradeDetailImportDto.class).importExcel(file.getInputStream());
+            list = BeanMapperUtil.mapList(dtoList, GradeDetailDto.class);
             if (CollectionUtils.isEmpty(dtoList)) {
                 return R.failed("导入数据不能为空");
             }
         } catch (Exception e) {
             return R.failed("文件解析异常");
         }
-
-
-       CustomDiscountMainDto dto = new CustomDiscountMainDto();
-
-//       customPricesService.updateDiscountDetail();
-
-
-        return R.ok();
+        CustomGradeMainDto dto = new CustomGradeMainDto();
+        dto.setClientCode(clientCode);
+        dto.setPricingGradeRules(list);
+        return customPricesService.updateGradeDetail(dto);
     }
-    
+
+
+    @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:importDiscountDetailTemplate')")
+    @PostMapping("/importDiscountDetailTemplate")
+    @ApiOperation(value = "折扣方案导入", position = 200)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
+    })
+    public R importDiscountDetailTemplate(@RequestParam("clientCode") String clientCode, HttpServletRequest request) {
+        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
+        MultipartFile file = multipartHttpServletRequest.getFile("file");
+        AssertUtil.notNull(file, "上传文件不存在");
+        String originalFilename = file.getOriginalFilename();
+        AssertUtil.notNull(originalFilename, "导入文件名称不存在");
+        int lastIndexOf = originalFilename.lastIndexOf(".");
+        String suffix = originalFilename.substring(lastIndexOf + 1);
+        if (!"xls".equals(suffix) && !"xlsx".equals(suffix)) {
+            throw new CommonException("999", "只能上传xls,xlsx文件");
+        }
+        List<DiscountDetailDto> list = null;
+        try {
+            List<DiscountDetailImportDto> dtoList = new ExcelUtil<>(DiscountDetailImportDto.class).importExcel(file.getInputStream());
+            list = BeanMapperUtil.mapList(dtoList, DiscountDetailDto.class);
+
+            for(int i = 0; i < dtoList.size(); i++){
+
+                DiscountDetailDto data = list.get(i);
+                DiscountDetailPackageLimitDto dto1 = new DiscountDetailPackageLimitDto();
+                DiscountDetailFormulaDto dto2 = new DiscountDetailFormulaDto();
+                data.setPackageLimit(dto1);
+                data.setFormula(dto2);
+                BeanUtils.copyProperties(dtoList.get(i), dto1);
+                BeanUtils.copyProperties(dtoList.get(i), dto2);
+
+            }
+
+            if (CollectionUtils.isEmpty(dtoList)) {
+                return R.failed("导入数据不能为空");
+            }
+        } catch (Exception e) {
+            return R.failed("文件解析异常");
+        }
+        CustomDiscountMainDto dto = new CustomDiscountMainDto();
+        dto.setClientCode(clientCode);
+        dto.setPricingDiscountRules(list);
+        return customPricesService.updateDiscountDetail(dto);
+    }
 
 
 }

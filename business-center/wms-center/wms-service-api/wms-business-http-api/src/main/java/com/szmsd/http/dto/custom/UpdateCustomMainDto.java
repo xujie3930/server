@@ -1,20 +1,17 @@
 package com.szmsd.http.dto.custom;
 
 import com.szmsd.http.dto.UserIdentity;
-import com.szmsd.http.vo.Operation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.List;
-
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "CustomGradeMainDto", description = "客户方案-修改等级方案")
-public class UpdateCustomGradeMainDto {
+@ApiModel(value = "UpdateCustomMainDto", description = "客户方案-修改主模板信息")
+public class UpdateCustomMainDto {
 
-    @ApiModelProperty("产品等级")
+    @ApiModelProperty("模板id")
     private String templateId;
 
     @ApiModelProperty("有效起始时间")
@@ -32,6 +29,8 @@ public class UpdateCustomGradeMainDto {
 
     @ApiModelProperty("客户编号")
     private String clientCode;
+
+
 
 
 }
