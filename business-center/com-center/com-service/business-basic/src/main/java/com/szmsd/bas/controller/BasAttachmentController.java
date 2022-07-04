@@ -2,6 +2,7 @@ package com.szmsd.bas.controller;
 
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentDataDTO;
+import com.szmsd.bas.api.domain.dto.BasAttachmentExcelDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.dto.BasMultiplePiecesDataDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
@@ -14,7 +15,9 @@ import com.szmsd.bas.util.PdfUtil;
 import com.szmsd.common.core.domain.Files;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import io.swagger.annotations.Api;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -226,9 +230,9 @@ public class BasAttachmentController extends BaseController {
     @ApiOperation(httpMethod = "POST", value = "附件上传及保存 - bas:uploadMultiplePiecesSave:uploadMultiplePieces - swagger接收不到文件", notes = "附件上传及保存")
     @PostMapping(value = "/uploadMultiplePiecesSave", headers = "content-type=multipart/form-data")
     @ApiImplicitParams({@ApiImplicitParam(name = "attachmentTypeEnum", value = "附件类型", required = true)})
-    public R<List<BasAttachmentDataDTO>> uploadMultiplePiecesSave(@RequestParam("attachmentUrl") MultipartFile[] myFiles,
-                                                                  @RequestParam("attachmentTypeEnum") AttachmentTypeEnum attachmentTypeEnum) {
-        List<BasAttachmentDataDTO> filesUrl = new ArrayList<>();
+    public void uploadMultiplePiecesSave(@RequestParam("attachmentUrl") MultipartFile[] myFiles,
+                                         @RequestParam("attachmentTypeEnum") AttachmentTypeEnum attachmentTypeEnum, HttpServletResponse response) {
+        List<BasAttachmentExcelDTO> filesUrl = new ArrayList<>();
         List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
         if (CollectionUtils.isEmpty(multipartFiles)) {
             throw new CommonException("999", "附件不能为空！");
@@ -237,14 +241,21 @@ public class BasAttachmentController extends BaseController {
             List<BasAttachmentDataDTO> list = this.processBoxMark(myFile, attachmentTypeEnum);
             for(int i = 0; i < list.size(); i++){
                 BasAttachmentDataDTO dto = list.get(i);
+                BasAttachmentExcelDTO dto1 = new BasAttachmentExcelDTO();
+                dto1.setBusinessNo(dto.getRemark());
+                dto1.setBusinessItem(""+(i+1));
+
+                filesUrl.add(dto1);
                 basAttachmentService.insert(dto.getRemark(), ""+(i+1), Arrays.asList(dto.getAttachmentUrl()), attachmentTypeEnum, "");
             }
-            filesUrl.addAll(list);
         });
 
 
 
-        return R.ok(filesUrl);
+        ExcelUtil<BasAttachmentExcelDTO> util = new ExcelUtil<BasAttachmentExcelDTO>(BasAttachmentExcelDTO.class);
+        util.exportExcel(response, filesUrl, "attachment");
+
+//        return R.ok(filesUrl);
 
     }
 
