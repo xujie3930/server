@@ -7,7 +7,6 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.client.BasSubClientService;
-import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -116,7 +115,12 @@ public class DelTrackController extends BaseController {
             }
         }
 
-        orderNos = list.stream().map(e -> e.getOrderNo()).collect(Collectors.toList());
+        Set<String> threeSet = new TreeSet<String>();
+        for(DelTrack delTrack: list){
+            threeSet.add(delTrack.getOrderNo());
+        }
+        orderNos.clear();
+        orderNos.addAll(threeSet);
 
 
         //处理轨迹状态数量
