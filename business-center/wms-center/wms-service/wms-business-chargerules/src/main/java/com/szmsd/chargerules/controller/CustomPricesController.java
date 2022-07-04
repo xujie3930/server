@@ -46,7 +46,7 @@ import java.util.List;
 */
 
 
-@Api(tags = {"等级维护"})
+@Api(tags = {"客户等级及折扣"})
 @RestController
 @RequestMapping("/custom-prices")
 public class CustomPricesController extends BaseController{
