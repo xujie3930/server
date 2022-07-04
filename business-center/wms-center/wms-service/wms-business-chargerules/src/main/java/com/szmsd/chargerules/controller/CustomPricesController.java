@@ -103,7 +103,7 @@ public class CustomPricesController extends BaseController{
     @PostMapping("/discountDetailResult/{id}")
     @ApiOperation(value = "获取折扣方案明细信息")
     public R<DiscountMainDto> discountDetailResult(@PathVariable("id") String id) {
-        return customPricesService.gradeDetailResult(id);
+        return customPricesService.discountDetailResult(id);
     }
 
 
