@@ -1,6 +1,5 @@
 package com.szmsd.http.dto.custom;
 
-import com.szmsd.http.vo.Operation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -11,7 +10,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "CustomPricesMainDto", description = "客户方案主类")
-public class CustomPricesMainDto {
+public class CustomPricesPageDto {
 
     @ApiModelProperty("客户编号")
     private String clientCode;

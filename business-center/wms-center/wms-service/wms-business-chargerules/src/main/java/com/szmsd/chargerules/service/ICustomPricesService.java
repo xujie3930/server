@@ -9,11 +9,11 @@ public interface ICustomPricesService {
 
     R updateGradeDetail(CustomGradeMainDto dto);
 
-    R<CustomPricesMainDto> result(String clientCode);
+    R<CustomPricesPageDto> result(String clientCode);
 
-    R updateDiscount(UpdateCustomDiscountMainDto dto);
+    R updateDiscount(UpdateCustomMainDto dto);
 
-    R updateGrade(UpdateCustomGradeMainDto dto);
+    R updateGrade(UpdateCustomMainDto dto);
 
 
     R discountDetailResult(String id);

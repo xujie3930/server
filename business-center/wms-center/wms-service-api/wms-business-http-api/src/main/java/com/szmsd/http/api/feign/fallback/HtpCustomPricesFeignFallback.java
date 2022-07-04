@@ -19,17 +19,17 @@ public class HtpCustomPricesFeignFallback implements FallbackFactory<HtpCustomPr
         return new HtpCustomPricesFeignService() {
 
             @Override
-            public R<CustomPricesMainDto> result(String clientCode) {
+            public R<CustomPricesPageDto> page(String clientCode) {
                 return R.convertResultJson(throwable);
             }
 
             @Override
-            public R updateDiscount(UpdateCustomDiscountMainDto dto) {
+            public R updateDiscount(UpdateCustomMainDto dto) {
                 return R.convertResultJson(throwable);
             }
 
             @Override
-            public R updateGrade(UpdateCustomGradeMainDto dto) {
+            public R updateGrade(UpdateCustomMainDto dto) {
                 return R.convertResultJson(throwable);
             }
 
@@ -43,15 +43,6 @@ public class HtpCustomPricesFeignFallback implements FallbackFactory<HtpCustomPr
                 return R.convertResultJson(throwable);
             }
 
-            @Override
-            public R<GradeMainDto> gradeDetailResult(String id) {
-                return R.convertResultJson(throwable);
-            }
-
-            @Override
-            public R<DiscountMainDto> discountDetailResult(String id) {
-                return R.convertResultJson(throwable);
-            }
         };
     }
 }
