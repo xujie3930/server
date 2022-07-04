@@ -34,6 +34,14 @@ public class SaaSPricedApiConfig implements ApiConfig {
 
     private CustomPrices customPrices;
 
+    public CustomPrices getCustomPrices() {
+        return customPrices;
+    }
+
+    public void setCustomPrices(CustomPrices customPrices) {
+        this.customPrices = customPrices;
+    }
+
     public Discount getDiscount() {
         return discount;
     }
@@ -223,22 +231,51 @@ public class SaaSPricedApiConfig implements ApiConfig {
     }
     static class CustomPrices {
 
-        public String getUpdateDiscountDetail() {
-            return updateDiscountDetail;
-        }
-
-        public void setUpdateDiscountDetail(String updateDiscountDetail) {
-            this.updateDiscountDetail = updateDiscountDetail;
-        }
-
-        private String updateDiscountDetail;
-        private String updateGradeDetail;
-        private String result;
+        private String page;
         private String updateDiscount;
         private String updateGrade;
+        private String updateDetailDiscount;
+        private String updateDetailGrade;
 
+        public String getPage() {
+            return page;
+        }
 
+        public void setPage(String page) {
+            this.page = page;
+        }
 
+        public String getUpdateDiscount() {
+            return updateDiscount;
+        }
+
+        public void setUpdateDiscount(String updateDiscount) {
+            this.updateDiscount = updateDiscount;
+        }
+
+        public String getUpdateGrade() {
+            return updateGrade;
+        }
+
+        public void setUpdateGrade(String updateGrade) {
+            this.updateGrade = updateGrade;
+        }
+
+        public String getUpdateDetailDiscount() {
+            return updateDetailDiscount;
+        }
+
+        public void setUpdateDetailDiscount(String updateDetailDiscount) {
+            this.updateDetailDiscount = updateDetailDiscount;
+        }
+
+        public String getUpdateDetailGrade() {
+            return updateDetailGrade;
+        }
+
+        public void setUpdateDetailGrade(String updateDetailGrade) {
+            this.updateDetailGrade = updateDetailGrade;
+        }
     }
 
 }
