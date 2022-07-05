@@ -34,18 +34,28 @@ public class TrackAnalysisExportDto {
     private String trackingStatus;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @Excel(name = "最新轨迹时间")
     private Date latestTrackTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Excel(name = "最新轨迹时间")
+    private String latestTrackTimeStr;
 
     @Excel(name = "最新轨迹信息")
     private String latestTrackInfo;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @Excel(name = "发货时间")
     private Date shipmentsTime;
+
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Excel(name = "发货时间")
+    private String shipmentsTimeStr;
 
     @Excel(name = "发货天数")
     private Long shipmentsDays;
+
+    @Excel(name = "目的国家")
+    private String country;
 
     @Excel(name = "轨迹天数")
     private Long trackDays;
