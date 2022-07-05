@@ -84,7 +84,7 @@ public class DelOutboundPackageTransferRequest implements Serializable {
     @ApiModelProperty(value = "物流服务", dataType = "String", position = 9, example = "FX")
     private String shipmentRule;
 
-    @Pattern(message = "参考号只能是数字", regexp = "^[A-Za-z0-9]*$", groups = {DelOutboundGroup.Default.class})
+//    @Pattern(message = "参考号只能是数字或英文字母", regexp = "^[A-Za-z0-9]*$", groups = {DelOutboundGroup.Default.class})
     @Size(max = 50, message = "参考号不能超过50个字符", groups = {DelOutboundGroup.PackageTransfer.class})
     @ApiModelProperty(value = "参考号", dataType = "String", position = 10, example = "")
     private String refNo;
