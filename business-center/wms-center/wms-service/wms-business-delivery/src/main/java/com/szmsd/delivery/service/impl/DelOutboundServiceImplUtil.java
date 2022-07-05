@@ -366,7 +366,7 @@ public final class DelOutboundServiceImplUtil {
                 country.setSpacingBefore(0f);
                 country.setSpacingAfter(0f);
                 pdfPCell.addElement(country);
-                pdfPCell.addElement(new Phrase("TEL：" + delOutboundAddress.getPhoneNo()));
+                pdfPCell.addElement(new Phrase("TEL:" + delOutboundAddress.getPhoneNo()));
             } else {
                 pdfPCell.setFixedHeight(40f);
                 font.setSize(12f);
