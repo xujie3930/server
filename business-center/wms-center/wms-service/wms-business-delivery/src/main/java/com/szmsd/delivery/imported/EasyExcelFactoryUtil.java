@@ -22,7 +22,11 @@ public class EasyExcelFactoryUtil {
      * @return DefaultAnalysisEventListener<T>
      */
     public static <T> DefaultAnalysisEventListener<T> read(InputStream inputStream, Class<T> clazz, int sheetNo, int headRowNumber) {
-        DefaultAnalysisEventListener<T> defaultAnalysisEventListener = new DefaultAnalysisEventListener<>();
+        return read(inputStream, clazz, sheetNo, headRowNumber, null);
+    }
+
+    public static <T> DefaultAnalysisEventListener<T> read(InputStream inputStream, Class<T> clazz, int sheetNo, int headRowNumber, DefaultAnalysisFormat<T> defaultAnalysisFormat) {
+        DefaultAnalysisEventListener<T> defaultAnalysisEventListener = new DefaultAnalysisEventListener<>(defaultAnalysisFormat);
         ExcelReaderSheetBuilder excelReaderSheetBuilder = EasyExcelFactory.read(inputStream, clazz, defaultAnalysisEventListener).sheet(sheetNo);
         excelReaderSheetBuilder.build().setHeadRowNumber(headRowNumber);
         excelReaderSheetBuilder.doRead();
