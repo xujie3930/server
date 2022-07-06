@@ -765,7 +765,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             if (responseObject.isSuccess()) {
                 FileStream fileStream = responseObject.getObject();
                 String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound);
-                pathname = com.szmsd.common.core.utils.StringUtils.replace(pathname, "/u01/www/ck1", "/u01/www/upload/ck1");
                 File file = new File(pathname);
                 if (!file.exists()) {
                     try {
