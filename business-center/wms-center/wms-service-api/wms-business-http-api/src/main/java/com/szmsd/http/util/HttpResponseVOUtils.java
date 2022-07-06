@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.HttpResponseBody;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.PageVO;
 import lombok.Data;
@@ -47,6 +48,10 @@ public class HttpResponseVOUtils {
         if (!(hrb.getStatus() == com.szmsd.common.core.constant.HttpStatus.SUCCESS || hrb.getStatus() == com.szmsd.common.core.constant.HttpStatus.CREATED)) {
             try {
                 ErrorInfo errorInfo = JSONObject.parseObject(hrb.getBody(), ErrorInfo.class);
+                if(errorInfo.getErrors() == null || errorInfo.getErrors().size() == 0
+                        || StringUtils.isEmpty(errorInfo.getErrors().get(0).getMessage())){
+                    return hrb.getBody();
+                }
                 return errorInfo.getErrors().stream().map(ErrorMsg::getMessage).collect(Collectors.joining(","));
             } catch (Exception e) {
                 return JSONObject.toJSONString(hrb.getBody());

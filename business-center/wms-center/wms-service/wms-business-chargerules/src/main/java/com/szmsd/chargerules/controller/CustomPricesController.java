@@ -120,7 +120,7 @@ public class CustomPricesController extends BaseController{
     @PostMapping("/downloadGradeTemplate")
     public void downloadGradeTemplate(HttpServletResponse httpServletResponse) {
         DownloadTemplateUtil downloadTemplateUtil = DownloadTemplateUtil.getInstance();
-        downloadTemplateUtil.getResourceByName(httpServletResponse, "custom");
+        downloadTemplateUtil.getResourceByName(httpServletResponse, "product");
     }
 
 
