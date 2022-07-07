@@ -34,7 +34,7 @@ public class HttpCustomPricesServiceImpl extends SaaSPricedRequest implements IH
 
     @Override
     public R updateDiscount(UpdateCustomMainDto dto) {
-        return HttpResponseVOUtils.transformation(httpPutBody("", "customPrices.updateGrade", dto, dto.getClientCode()));
+        return HttpResponseVOUtils.transformation(httpPutBody("", "customPrices.updateDiscount", dto, dto.getClientCode()));
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpChaLevelMaintenanceFeignService;
 import com.szmsd.http.dto.chaLevel.ChaLevelMaintenanceDto;
 import com.szmsd.http.dto.chaLevel.ChaLevelMaintenancePageRequest;
+import com.szmsd.http.vo.DateOperation;
 import com.szmsd.http.vo.Operation;
 import com.szmsd.http.vo.Operator;
 import org.springframework.stereotype.Service;
@@ -64,11 +65,12 @@ public class ChaLevelMaintenanceServiceImpl  implements IChaLevelMaintenanceServ
     @Override
     public R insertChaLevelMaintenance(ChaLevelMaintenanceDto chaLevelMaintenance) {
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        Operation creation = new Operation();
-        creation.setTime(DateUtil.formatTime(new Date()));
+        DateOperation creation = new DateOperation();
+        creation.setTime(new Date());
         creation.setOperator(new Operator()
                 .setCode(loginUser.getUserId().toString()).
                 setName(loginUser.getUsername()));
+        chaLevelMaintenance.setCreation(creation);
         return htpChaLevelMaintenanceFeignService.create(chaLevelMaintenance);
     }
 

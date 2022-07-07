@@ -53,6 +53,9 @@ public class DiscountController extends BaseController{
     @ApiOperation(value = "分页查询折扣方案")
     @PreAuthorize("@ss.hasPermi('Discount:Discount:page')")
     public TableDataInfo<DiscountMainDto> page(@RequestBody DiscountPageRequest pageDTO) {
+        if(pageDTO.getPageNumber() == null){
+            pageDTO.setPageNumber(pageDTO.getPageNum());
+        }
         return DiscountService.page(pageDTO);
     }
 

@@ -20,4 +20,8 @@ public class DiscountPageRequest extends PageDTO {
     @ApiModelProperty("产品编号")
     private String productCode;
 
+
+    @ApiModelProperty(value = "当前页码")
+    private Integer pageNum;
+
 }
