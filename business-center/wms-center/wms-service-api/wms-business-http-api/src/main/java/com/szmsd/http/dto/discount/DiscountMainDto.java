@@ -1,5 +1,6 @@
 package com.szmsd.http.dto.discount;
 
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.http.dto.custom.AssociatedCustomersDto;
 import com.szmsd.http.dto.grade.GradeDetailDto;
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
+
 
 import java.util.Date;
 import java.util.List;

@@ -2,14 +2,17 @@ package com.szmsd.http.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.PageVO;
+import com.szmsd.http.dto.discount.DiscountMainDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.http.HttpStatus;
@@ -81,9 +84,7 @@ public class HttpResponseVOUtils {
     }
     public static R<PageVO> transformationPage(HttpResponseBody hrb, Class cls){
         if (HttpStatus.SC_OK == hrb.getStatus()) {
-            PageVO pageVO = JSON.parseObject(hrb.getBody(), PageVO.class);
-            pageVO.setData(BeanMapperUtil.mapList(pageVO.getData(), cls));
-            return R.ok(pageVO);
+            return R.ok(JSON.parseObject(hrb.getBody(), new TypeReference<PageVO<DiscountMainDto>>(){}));
         } else {
             return R.failed(getErrorMsg(hrb));
         }
