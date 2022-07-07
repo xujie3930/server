@@ -1,12 +1,15 @@
 package com.szmsd.http.dto.grade;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.http.dto.custom.AssociatedCustomersDto;
+import com.szmsd.http.vo.DateOperation;
 import com.szmsd.http.vo.Operation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -30,10 +33,12 @@ public class GradeMainDto {
 
 
     @ApiModelProperty("有效开始时间")
-    private String effectiveBeginTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date effectiveBeginTime;
 
     @ApiModelProperty("有效结束时间")
-    private String effectiveEndTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date effectiveEndTime;
 
     @ApiModelProperty("关联的产品集合")
     private List<GradeDetailDto> pricingGradeTemplateRules;
@@ -42,10 +47,10 @@ public class GradeMainDto {
     private List<AssociatedCustomersDto> associatedCustomers;
 
     @ApiModelProperty("创建人信息")
-    private Operation creation;
+    private DateOperation creation;
 
     @ApiModelProperty("修改人信息")
-    private Operation lastModifyOperation;
+    private DateOperation lastModifyOperation;
 
 
 
