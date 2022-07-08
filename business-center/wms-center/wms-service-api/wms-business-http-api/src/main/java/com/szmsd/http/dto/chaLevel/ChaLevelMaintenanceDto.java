@@ -1,5 +1,6 @@
 package com.szmsd.http.dto.chaLevel;
 
+import com.szmsd.http.vo.DateOperation;
 import com.szmsd.http.vo.Operation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,5 +22,5 @@ public class ChaLevelMaintenanceDto {
     private String description;
 
     @ApiModelProperty(value = "Creation")
-    private Operation creation;
+    private DateOperation creation;
 }

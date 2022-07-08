@@ -1,6 +1,10 @@
 
 package com.szmsd.chargerules.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
 import com.szmsd.chargerules.service.IDiscountService;
 import com.szmsd.common.core.domain.R;
@@ -10,6 +14,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.dto.DiscountCustomImportDto;
 import com.szmsd.delivery.dto.DiscountDetailImportDto;
@@ -28,7 +33,9 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -53,6 +60,9 @@ public class DiscountController extends BaseController{
     @ApiOperation(value = "分页查询折扣方案")
     @PreAuthorize("@ss.hasPermi('Discount:Discount:page')")
     public TableDataInfo<DiscountMainDto> page(@RequestBody DiscountPageRequest pageDTO) {
+        if(pageDTO.getPageNumber() == null){
+            pageDTO.setPageNumber(pageDTO.getPageNum());
+        }
         return DiscountService.page(pageDTO);
     }
 

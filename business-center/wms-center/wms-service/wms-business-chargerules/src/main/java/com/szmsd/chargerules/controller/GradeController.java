@@ -1,17 +1,27 @@
 
 package com.szmsd.chargerules.controller;
 
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
+import com.szmsd.chargerules.export.GradeExportListVO;
 import com.szmsd.chargerules.service.IGradeService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.ExcelUtils;
+import com.szmsd.common.core.utils.QueryPage;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.log.annotation.Log;
+import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.dto.GradeCustomImportDto;
 import com.szmsd.delivery.dto.GradeDetailImportDto;
+import com.szmsd.delivery.vo.DelOutboundExportItemListVO;
+import com.szmsd.delivery.vo.DelOutboundExportListVO;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.dto.grade.*;
 import io.swagger.annotations.Api;
@@ -28,6 +38,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -52,6 +63,9 @@ public class GradeController extends BaseController{
     @ApiOperation(value = "分页查询等级方案")
     @PreAuthorize("@ss.hasPermi('grade:grade:page')")
     public TableDataInfo<GradeMainDto> page(@RequestBody GradePageRequest pageDTO) {
+        if(pageDTO.getPageNumber() == null){
+            pageDTO.setPageNumber(pageDTO.getPageNum());
+        }
         return gradeService.page(pageDTO);
     }
 
@@ -140,6 +154,51 @@ public class GradeController extends BaseController{
         dto.setPricingGradeRules(list);
         return gradeService.detailImport(dto);
     }
+
+    @PreAuthorize("@ss.hasPermi('grade:grade:exportMainInfo')")
+    @PostMapping("/exportMainInfo")
+    @ApiOperation(value = "等级方案 - 导出")
+    public void export(HttpServletResponse response, @RequestBody GradePageRequest pageDTO) {
+        try {
+            TableDataInfo<GradeMainDto> mainList =  gradeService.page(pageDTO);
+            String len = getLen();
+
+            // 查询出库类型数据
+          /*  Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099");
+            DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
+            exportContext.setStateCacheAdapter(listMap.get("065"));
+            exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
+            exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
+            exportContext.setTrackingStatusCache(listMap.get("099"));
+
+            QueryDto queryDto1 = new QueryDto();
+            queryDto1.setPageNum(1);
+            queryDto1.setPageSize(99999);
+            QueryPage<GradeExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
+*/
+
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("等级方案信息", len,  null, new ExcelUtils.ExportSheet<GradeExportListVO>() {
+                @Override
+                public String sheetName() {
+                    return "等级方案信息";
+                }
+
+                @Override
+                public Class<GradeExportListVO> classType() {
+                    return GradeExportListVO.class;
+                }
+
+                @Override
+                public QueryPage<GradeExportListVO> query(ExcelUtils.ExportContext exportContext) {
+//                    return queryPage;
+                    return null;
+                }
+            }));
+        } catch (Exception e) {
+            log.error("导出异常:" + e.getMessage(), e);
+        }
+    }
+
 
     @PreAuthorize("@ss.hasPermi('grade:grade:importCustomTemplate')")
     @PostMapping("/importCustomTemplate")

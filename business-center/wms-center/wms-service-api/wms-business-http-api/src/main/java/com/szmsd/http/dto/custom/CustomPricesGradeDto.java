@@ -1,11 +1,14 @@
 package com.szmsd.http.dto.custom;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.szmsd.http.vo.DateOperation;
 import com.szmsd.http.vo.Operation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -40,14 +43,16 @@ public class CustomPricesGradeDto {
 
 
     @ApiModelProperty("有效起始时间")
-    private String beginTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date beginTime;
 
 
     @ApiModelProperty("有效结束时间")
-    private String endTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date endTime;
 
     @ApiModelProperty("创建人")
-    private Operation creation;
+    private DateOperation creation;
 
     @ApiModelProperty("操作人")
     private String author;
