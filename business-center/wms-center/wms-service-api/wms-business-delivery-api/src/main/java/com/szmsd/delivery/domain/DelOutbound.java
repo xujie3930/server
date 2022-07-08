@@ -266,4 +266,6 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "是否上传箱标")
     private String uploadBoxLabel;
 
+    @ApiModelProperty(value = "是否入库")
+    private Boolean inStock;
 }
