@@ -334,7 +334,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             String sellerCode = loginUserInfo.getSellerCode();
             sellerCode = Optional.ofNullable(sellerCode).orElse(transportWarehousingAddDTO.getCustomCode());
             //获取sku信息
-            List<DelOutboundDetailVO> transshipmentProductData = new ArrayList<>();
+//            List<DelOutboundDetailVO> transshipmentProductData = new ArrayList<>();
             /*List<DelOutboundDetailVO> transshipmentProductData = remoteComponent.getTransshipmentProductData(transportWarehousingAddDTO.getIdList());
             if (CollectionUtils.isEmpty(transshipmentProductData)) {
                 throw new RuntimeException("无相关数据");
@@ -342,7 +342,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             //合并相同sku数据
             //transshipmentProductData = mergeTwo(transshipmentProductData);
             //创建入库单
-            long sum = transshipmentProductData.stream().mapToLong(DelOutboundDetailVO::getQty).sum();
+//            long sum = transshipmentProductData.stream().mapToLong(DelOutboundDetailVO::getQty).sum();
             String deliveryNo = transportWarehousingAddDTO.getDeliveryNo();
             CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
 
