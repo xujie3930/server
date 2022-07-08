@@ -327,6 +327,9 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         SecurityContext context = SecurityContextHolder.getContext();
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         CompletableFuture.runAsync(() -> {
+            RequestContextHolder.setRequestAttributes(requestAttributes);
+            SecurityContextHolder.setContext(context);
+
             SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
             String sellerCode = loginUserInfo.getSellerCode();
             sellerCode = Optional.ofNullable(sellerCode).orElse(transportWarehousingAddDTO.getCustomCode());
@@ -336,8 +339,6 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             if (CollectionUtils.isEmpty(transshipmentProductData)) {
                 throw new RuntimeException("无相关数据");
             }*/
-            RequestContextHolder.setRequestAttributes(requestAttributes);
-            SecurityContextHolder.setContext(context);
             //合并相同sku数据
             //transshipmentProductData = mergeTwo(transshipmentProductData);
             //创建入库单
