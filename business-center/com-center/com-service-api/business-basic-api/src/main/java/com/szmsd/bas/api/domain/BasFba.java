@@ -70,7 +70,7 @@ public class BasFba extends BaseEntity {
     @ApiModelProperty(value = "版本号")
     private Integer version;
 
-    @ApiModelProperty(value = "删除标识：0未删除 1已删除")
+    @ApiModelProperty(value = "删除标识：0未删除 2已删除")
     private String delFlag;
 
 }
