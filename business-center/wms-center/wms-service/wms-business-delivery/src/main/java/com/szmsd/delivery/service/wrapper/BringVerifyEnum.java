@@ -18,7 +18,11 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
-import com.szmsd.delivery.enums.*;
+import com.szmsd.delivery.enums.DelOutboundConstant;
+import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
@@ -31,7 +35,19 @@ import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
-import com.szmsd.http.dto.*;
+import com.szmsd.http.dto.ChargeCategory;
+import com.szmsd.http.dto.ChargeItem;
+import com.szmsd.http.dto.ChargeWrapper;
+import com.szmsd.http.dto.Money;
+import com.szmsd.http.dto.Packing;
+import com.szmsd.http.dto.PricingPackageInfo;
+import com.szmsd.http.dto.ProblemDetails;
+import com.szmsd.http.dto.ResponseObject;
+import com.szmsd.http.dto.ShipmentChargeInfo;
+import com.szmsd.http.dto.ShipmentLabelChangeRequestDto;
+import com.szmsd.http.dto.ShipmentOrderResult;
+import com.szmsd.http.dto.TaskConfigInfo;
+import com.szmsd.http.dto.Weight;
 import com.szmsd.http.vo.PricedProductInfo;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -43,7 +59,13 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -267,7 +289,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             logger.info(">>>>>{}-开始执行Pricing", delOutbound.getOrderNo());
-            ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.SKU);
+            PricingEnum pricingEnum;
+            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                // 核重逻辑处理
+                pricingEnum = PricingEnum.PACKAGE;
+            } else {
+                pricingEnum = PricingEnum.SKU;
+            }
+            ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, pricingEnum);
             logger.info(">>>>>{}-Pricing计算返回结果：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(responseObject));
             if (null == responseObject) {
                 // 返回值是空的
