@@ -42,7 +42,7 @@ public class HttpResponseVOUtils {
 
     }
 
-    private static String getErrorMsg(HttpResponseBody hrb) {
+    public static String getErrorMsg(HttpResponseBody hrb) {
         if (!(hrb.getStatus() == com.szmsd.common.core.constant.HttpStatus.SUCCESS || hrb.getStatus() == com.szmsd.common.core.constant.HttpStatus.CREATED)) {
             try {
                 ErrorInfo errorInfo = JSONObject.parseObject(hrb.getBody(), ErrorInfo.class);
@@ -77,14 +77,7 @@ public class HttpResponseVOUtils {
         }
 
     }
-    public static R<PageVO> transformationPage(HttpResponseBody hrb, Class cls){
-        if (HttpStatus.SC_OK == hrb.getStatus()) {
-            return R.ok(JSON.parseObject(hrb.getBody(), new TypeReference<PageVO<DiscountMainDto>>(){}));
-        } else {
-            return R.failed(getErrorMsg(hrb));
-        }
 
-    }
 
     public static R transformationList(HttpResponseBody hrb, Class cls){
         if (HttpStatus.SC_OK == hrb.getStatus()) {

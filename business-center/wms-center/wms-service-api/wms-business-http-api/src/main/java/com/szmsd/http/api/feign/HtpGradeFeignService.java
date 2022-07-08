@@ -18,7 +18,7 @@ public interface HtpGradeFeignService {
 
 
     @PostMapping("/api/grade/http/page")
-    R<PageVO> page(@RequestBody GradePageRequest pageDTO);
+    R<PageVO<GradeMainDto>> page(@RequestBody GradePageRequest pageDTO);
 
     @PostMapping("/api/grade/http/detailResult")
     R detailResult(@RequestBody String id);

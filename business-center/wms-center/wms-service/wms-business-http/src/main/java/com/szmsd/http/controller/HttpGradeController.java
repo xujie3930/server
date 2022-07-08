@@ -26,7 +26,7 @@ public class HttpGradeController extends BaseController {
 
     @PostMapping("/page")
     @ApiOperation(value = "分页查询等级方案")
-    public R<PageVO> page(@RequestBody GradePageRequest pageDTO) {
+    public R<PageVO<GradeMainDto>> page(@RequestBody GradePageRequest pageDTO) {
         return httpGradeService.page(pageDTO);
     }
 
