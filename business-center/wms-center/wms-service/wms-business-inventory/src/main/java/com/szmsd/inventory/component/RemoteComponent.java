@@ -104,8 +104,8 @@ public class RemoteComponent {
         createInboundReceiptDTO.setIsAsync(true);
         log.info("入库开始 请求参数 {}", JSONObject.toJSONString(createInboundReceiptDTO));
         R<InboundReceiptInfoVO> inboundReceiptInfoVO = inboundReceiptFeignService.saveOrUpdate(createInboundReceiptDTO);
+        log.info("入库完成 {}", JSONObject.toJSONString(inboundReceiptInfoVO));
         InboundReceiptInfoVO resultData = R.getDataAndException(inboundReceiptInfoVO);
-        log.info("入库完成 {}", JSONObject.toJSONString(resultData));
         return resultData;
     }
 
