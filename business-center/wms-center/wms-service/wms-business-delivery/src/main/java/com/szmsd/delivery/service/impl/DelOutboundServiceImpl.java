@@ -556,6 +556,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 queryWrapper.ne(DelOutbound::getId, dto.getId());
             }
             queryWrapper.ne(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
+            queryWrapper.eq(DelOutbound::getDelFlag, "0");
             Integer size = baseMapper.selectCount(queryWrapper);
             if (size > 0) {
                 throw new CommonException("400", "Refno 必须唯一值" + dto.getRefNo());
