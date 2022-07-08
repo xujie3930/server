@@ -12,6 +12,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -52,6 +54,8 @@ public class DiscountMainDto {
 
     @ApiModelProperty("修改人信息")
     private DateOperation lastModifyOperation;
+
+
 
 
 

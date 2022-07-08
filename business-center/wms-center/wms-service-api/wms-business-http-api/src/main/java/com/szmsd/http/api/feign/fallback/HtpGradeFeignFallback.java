@@ -21,7 +21,7 @@ public class HtpGradeFeignFallback implements FallbackFactory<HtpGradeFeignServi
         return new HtpGradeFeignService() {
 
             @Override
-            public R<PageVO> page(GradePageRequest pageDTO) {
+            public R<PageVO<GradeMainDto>> page(GradePageRequest pageDTO) {
                 return R.convertResultJson(throwable);
             }
 

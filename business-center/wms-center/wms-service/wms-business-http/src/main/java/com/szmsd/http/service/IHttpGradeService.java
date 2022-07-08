@@ -8,7 +8,7 @@ public interface IHttpGradeService {
 
         R<GradeMainDto> detailResult(String id);
 
-        R<PageVO> page(GradePageRequest pageDTO);
+        R<PageVO<GradeMainDto>> page(GradePageRequest pageDTO);
 
         R detailImport(UpdateGradeDetailDto dto);
 
