@@ -73,10 +73,10 @@ public class BasFbaController extends BaseController {
     @Log(title = "FBA仓库模块", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     @ApiOperation(value = "导出FBA仓库模块模块列表", notes = "导出FBA仓库模块模块列表")
-    public void export(HttpServletResponse response, BasFbaDTO basFbaDTO) throws IOException {
+    public void export(HttpServletResponse response, @RequestBody BasFbaDTO basFbaDTO) throws IOException {
         List<BasFba> list = iBasFbaService.selectBasFba(basFbaDTO).getData();
         ExcelUtil<BasFba> util = new ExcelUtil<BasFba>(BasFba.class);
-        util.exportExcel(response, list, "BasRegion");
+        util.exportExcel(response, list, "BasFba");
     }
 
 

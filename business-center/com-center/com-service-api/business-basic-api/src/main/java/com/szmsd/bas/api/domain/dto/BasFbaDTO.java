@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -29,14 +30,19 @@ public class BasFbaDTO  extends QueryDto {
     @Excel(name = "fba仓库code")
     private String fbaCode;
 
-    private String provinceName;
     @ApiModelProperty(value = "国家名称")
     @Excel(name = "国家名称")
     private String countryName;
+
+    @ApiModelProperty(value = "国家code")
+    private String countryCode;
 
 
     @ApiModelProperty(value = "邮编")
     @Excel(name = "邮编")
     private String postcode;
+
+    @ApiModelProperty(value = "id集合")
+    private List<Integer> ids;
 
 }
