@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.bas.dao.BasFbaMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasFba" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="fba_code" property="fbaCode" jdbcType="VARCHAR" />
+    <result column="fba_name" property="fbaName" jdbcType="VARCHAR" />
+    <result column="address_name_on" property="addressNameOn" jdbcType="VARCHAR" />
+    <result column="address_name_two" property="addressNameTwo" jdbcType="VARCHAR" />
+    <result column="city_name" property="cityName" jdbcType="VARCHAR" />
+    <result column="province_name" property="provinceName" jdbcType="VARCHAR" />
+    <result column="country_name" property="countryName" jdbcType="VARCHAR" />
+    <result column="country_code" property="countryCode" jdbcType="VARCHAR" />
+    <result column="postcode" property="postcode" jdbcType="VARCHAR" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_by_name" property="createByName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+    <result column="update_by_name" property="updateByName" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="version" property="version" jdbcType="INTEGER" />
+    <result column="del_flag" property="delFlag" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, fba_code, fba_name, address_name_on, address_name_two, city_name, province_name, 
+    country_name, country_code, postcode, create_by, create_by_name, create_time, update_by, 
+    update_by_name, update_time, version, del_flag
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from bas_fba
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectBasFbaList" resultType="com.szmsd.bas.api.domain.BasFba"
+          parameterType="com.szmsd.bas.api.domain.dto.BasFbaDTO">
+    select
+    <include refid="Base_Column_List" />
+    from bas_fba
+    where
+    1=1
+    <if test="fbaCode != null" >
+    AND  fba_code like #{fbaCode}
+    </if>
+    <if test="postcode != null" >
+      AND  postcode like #{postcode}
+    </if>
+    <if test="countryName != null" >
+      AND  country_name = #{countryName}
+    </if>
+
+
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    update bas_fba
+    set  del_flag = '2'
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.bas.api.domain.BasFba" >
+    insert into bas_fba (id, fba_code, fba_name, 
+      address_name_on, address_name_two, city_name, 
+      province_name, country_name, country_code, 
+      postcode, create_by, create_by_name, 
+      create_time, update_by, update_by_name, 
+      update_time, version, del_flag
+      )
+    values (#{id,jdbcType=INTEGER}, #{fbaCode,jdbcType=VARCHAR}, #{fbaName,jdbcType=VARCHAR}, 
+      #{addressNameOn,jdbcType=VARCHAR}, #{addressNameTwo,jdbcType=VARCHAR}, #{cityName,jdbcType=VARCHAR}, 
+      #{provinceName,jdbcType=VARCHAR}, #{countryName,jdbcType=VARCHAR}, #{countryCode,jdbcType=VARCHAR}, 
+      #{postcode,jdbcType=VARCHAR}, #{createBy,jdbcType=VARCHAR}, #{createByName,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{updateByName,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{version,jdbcType=INTEGER}, #{delFlag,jdbcType=CHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.bas.api.domain.BasFba" >
+    insert into bas_fba
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="fbaCode != null" >
+        fba_code,
+      </if>
+      <if test="fbaName != null" >
+        fba_name,
+      </if>
+      <if test="addressNameOn != null" >
+        address_name_on,
+      </if>
+      <if test="addressNameTwo != null" >
+        address_name_two,
+      </if>
+      <if test="cityName != null" >
+        city_name,
+      </if>
+      <if test="provinceName != null" >
+        province_name,
+      </if>
+      <if test="countryName != null" >
+        country_name,
+      </if>
+      <if test="countryCode != null" >
+        country_code,
+      </if>
+      <if test="postcode != null" >
+        postcode,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createByName != null" >
+        create_by_name,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="updateByName != null" >
+        update_by_name,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="version != null" >
+        version,
+      </if>
+      <if test="delFlag != null" >
+        del_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="fbaCode != null" >
+        #{fbaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="fbaName != null" >
+        #{fbaName,jdbcType=VARCHAR},
+      </if>
+      <if test="addressNameOn != null" >
+        #{addressNameOn,jdbcType=VARCHAR},
+      </if>
+      <if test="addressNameTwo != null" >
+        #{addressNameTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null" >
+        #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceName != null" >
+        #{provinceName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryName != null" >
+        #{countryName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCode != null" >
+        #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="postcode != null" >
+        #{postcode,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createByName != null" >
+        #{createByName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateByName != null" >
+        #{updateByName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="version != null" >
+        #{version,jdbcType=INTEGER},
+      </if>
+      <if test="delFlag != null" >
+        #{delFlag,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.api.domain.BasFba" >
+    update bas_fba
+    <set >
+      <if test="fbaCode != null" >
+        fba_code = #{fbaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="fbaName != null" >
+        fba_name = #{fbaName,jdbcType=VARCHAR},
+      </if>
+      <if test="addressNameOn != null" >
+        address_name_on = #{addressNameOn,jdbcType=VARCHAR},
+      </if>
+      <if test="addressNameTwo != null" >
+        address_name_two = #{addressNameTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null" >
+        city_name = #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceName != null" >
+        province_name = #{provinceName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryName != null" >
+        country_name = #{countryName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCode != null" >
+        country_code = #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="postcode != null" >
+        postcode = #{postcode,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createByName != null" >
+        create_by_name = #{createByName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateByName != null" >
+        update_by_name = #{updateByName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="version != null" >
+        version = #{version,jdbcType=INTEGER},
+      </if>
+      <if test="delFlag != null" >
+        del_flag = #{delFlag,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.api.domain.BasFba" >
+    update bas_fba
+    set fba_code = #{fbaCode,jdbcType=VARCHAR},
+      fba_name = #{fbaName,jdbcType=VARCHAR},
+      address_name_on = #{addressNameOn,jdbcType=VARCHAR},
+      address_name_two = #{addressNameTwo,jdbcType=VARCHAR},
+      city_name = #{cityName,jdbcType=VARCHAR},
+      province_name = #{provinceName,jdbcType=VARCHAR},
+      country_name = #{countryName,jdbcType=VARCHAR},
+      country_code = #{countryCode,jdbcType=VARCHAR},
+      postcode = #{postcode,jdbcType=VARCHAR},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_by_name = #{createByName,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=VARCHAR},
+      update_by_name = #{updateByName,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      version = #{version,jdbcType=INTEGER},
+      del_flag = #{delFlag,jdbcType=CHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
