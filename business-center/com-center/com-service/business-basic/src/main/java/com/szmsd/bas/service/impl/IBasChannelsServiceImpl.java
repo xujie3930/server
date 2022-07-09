@@ -40,12 +40,11 @@ public class IBasChannelsServiceImpl extends ServiceImpl<BasChannelsMapper, BasC
                 basChannels.setCreateTime(new Date());
                 basChannels.setCreateBy(SecurityUtils.getUsername());
                 basChannels.setCreateByName(SecurityUtils.getLoginUser().getUsername());
-//                basChannels.setWarehouseCode(String.join(",", basChannels.getWarehouseCodeList()));
-//                basChannels.setWarehouseName(String.join(",", basChannels.getWarehouseNameList()));
                 baseMapper.insertSelective(basChannels);
                 if (basChannels.getBasChannelDateList().size()>0){
                     basChannels.getBasChannelDateList().forEach(x->{
                         x.setChannelId(basChannels.getId());
+                        x.setCreateTime(new Date());
                         //新增从表
                         basChannelDateMapper.insertSelective(x);
                     });
@@ -76,17 +75,18 @@ public class IBasChannelsServiceImpl extends ServiceImpl<BasChannelsMapper, BasC
                     basChannels.getBasChannelDateList().forEach(x->{
                         x.setChannelId(basChannels.getId());
                         //新增从表
+                        x.setCreateTime(new Date());
                         basChannelDateMapper.insertSelective(x);
                     });
 
                 }
 
-                //新增从表时先删除原有中间表数据
+                //新增仓库中间表时先删除原有中间表数据
                 basChannelWarehouseMapper.deleteByPrimaryKey(basChannels.getId());
                 if (basChannels.getWarehouseList().size()>0){
                     basChannels.getWarehouseList().forEach(y->{
                         y.setChannelId(basChannels.getId());
-                        //新增从表
+                        //新增仓库中间表
                         basChannelWarehouseMapper.insertSelective(y);
                     });
 
