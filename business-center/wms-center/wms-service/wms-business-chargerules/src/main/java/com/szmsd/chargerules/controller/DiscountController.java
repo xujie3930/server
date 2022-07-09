@@ -55,7 +55,6 @@ public class DiscountController extends BaseController{
 
     @Resource
     private IDiscountService DiscountService;
-
     @PostMapping("/page")
     @ApiOperation(value = "分页查询折扣方案")
     @PreAuthorize("@ss.hasPermi('Discount:Discount:page')")
@@ -65,7 +64,6 @@ public class DiscountController extends BaseController{
         }
         return DiscountService.page(pageDTO);
     }
-
     @PostMapping("/detailResult")
     @ApiOperation(value = "获取折扣方案明细信息")
     @PreAuthorize("@ss.hasPermi('Discount:Discount:detailResult')")

@@ -1,5 +1,6 @@
 package com.szmsd.delivery.dto;
 
+import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -11,17 +12,16 @@ import lombok.experimental.Accessors;
 public class DiscountCustomImportDto {
 
 
-    @ApiModelProperty("客户编号")
+    @Excel(name = "客户代码")
     private String clientCode;
 
-
-    @ApiModelProperty("有效开始时间")
+    @Excel(name = "生效时间")
     private String beginTime;
 
-    @ApiModelProperty("有效解速时间")
+    @Excel(name = "截止时间")
     private String endTime;
 
-    @ApiModelProperty("是否有效")
+    @Excel(name = "是否有效")
     private Boolean isValid;
 
 
