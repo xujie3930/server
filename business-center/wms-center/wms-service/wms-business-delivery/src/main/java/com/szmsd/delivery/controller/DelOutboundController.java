@@ -6,6 +6,8 @@ import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.client.BasSubClientService;
@@ -32,23 +34,7 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.dto.DelOutboundAgainTrackingNoDto;
-import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
-import com.szmsd.delivery.dto.DelOutboundBoxLabelDto;
-import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
-import com.szmsd.delivery.dto.DelOutboundCanceledDto;
-import com.szmsd.delivery.dto.DelOutboundDetailEnImportDto2;
-import com.szmsd.delivery.dto.DelOutboundDetailImportDto;
-import com.szmsd.delivery.dto.DelOutboundDetailImportDto2;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.dto.DelOutboundEnImportDto;
-import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
-import com.szmsd.delivery.dto.DelOutboundHandlerDto;
-import com.szmsd.delivery.dto.DelOutboundImportDto;
-import com.szmsd.delivery.dto.DelOutboundLabelDto;
-import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.dto.DelOutboundToPrintDto;
-import com.szmsd.delivery.dto.DelOutboundUploadBoxLabelDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
@@ -295,6 +281,23 @@ public class DelOutboundController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<Integer> edit(@RequestBody @Validated(ValidationUpdateGroup.class) DelOutboundDto dto) {
         return R.ok(delOutboundService.updateDelOutbound(dto));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:updateWeightDelOutbound')")
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/updateWeightDelOutbound")
+    @ApiOperation(value = "出库管理 - 修改", position = 400)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
+    public R<Integer> updateWeightDelOutbound(@RequestBody @Validated(ValidationUpdateGroup.class) UpdateWeightDelOutboundDto dto) {
+        LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
+        queryWrapper.eq(DelOutbound::getSellerCode, dto.getCustomCode());
+        queryWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
+        DelOutbound data = delOutboundService.getOne(queryWrapper);
+        if(data == null){
+            throw new CommonException("400", "该客户下订单不存在");
+        }
+        BeanUtils.copyProperties(dto, data);
+        return R.ok(delOutboundService.updateById(data) ? 1 : 0);
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:remove')")

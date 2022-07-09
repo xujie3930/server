@@ -20,4 +20,8 @@ public class DelOutboundLabelDto implements Serializable {
 
     @ApiModelProperty(value = "订单号")
     private List<String> orderNos;
+
+
+    @ApiModelProperty(value = "标签类型 0.原 1.供应商尾程标签",dataType = "String", position = 1, example = "0")
+    private String type;
 }

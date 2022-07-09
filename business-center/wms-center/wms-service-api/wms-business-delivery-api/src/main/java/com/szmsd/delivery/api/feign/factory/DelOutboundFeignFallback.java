@@ -201,6 +201,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<Boolean> updateInStockList(List<Long> idList) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<Integer> updateWeightDelOutbound(UpdateWeightDelOutboundDto dto) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

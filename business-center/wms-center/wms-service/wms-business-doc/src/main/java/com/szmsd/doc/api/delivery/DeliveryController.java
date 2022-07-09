@@ -685,4 +685,14 @@ public class DeliveryController {
     public R<DelTrackMainCommonDto> commonTrackList(@RequestBody @Validated DelTrackRequest request) {
         return R.ok(delOutboundClientService.commonTrackList(request.getOrderNos()));
     }
+
+
+    @PreAuthorize("hasAuthority('client')")
+    @PostMapping(value = "/updateWeightDelOutbound")
+    @ApiOperation(value = "#22 出库管理 - 修改重量数据", position = 902)
+    public R<Integer> updateWeightDelOutbound(@RequestBody @Validated UpdateWeightDelOutboundDto dto) {
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        dto.setCustomCode(sellerCode);
+        return R.ok(delOutboundClientService.updateWeightDelOutbound(dto));
+    }
 }
