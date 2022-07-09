@@ -3,16 +3,10 @@ package com.szmsd.chargerules.export;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.szmsd.http.dto.custom.AssociatedCustomersDto;
-import com.szmsd.http.dto.grade.GradeDetailDto;
-import com.szmsd.http.vo.DateOperation;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author zhangyuyuan
@@ -20,7 +14,7 @@ import java.util.List;
  */
 @Data
 @ColumnWidth(15)
-public class GradeExportListVO implements Serializable {
+public class CommonExportListVO implements Serializable {
 
     @ExcelProperty(value = "方案名称")
     private String name;

@@ -1,6 +1,7 @@
 package com.szmsd.http.service;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
 
 public interface IHttpCustomPricesService {
@@ -16,6 +17,5 @@ public interface IHttpCustomPricesService {
         R updateGrade(UpdateCustomMainDto dto);
 
 
-
-
+    R<OperationRecordDto> operationRecord(String id);
 }

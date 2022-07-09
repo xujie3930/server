@@ -9,8 +9,10 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpDiscountFeignService;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.UserIdentity;
 import com.szmsd.http.dto.discount.*;
+import com.szmsd.http.dto.grade.GradeMainDto;
 import com.szmsd.http.vo.Operation;
 import com.szmsd.http.vo.Operator;
 import org.springframework.stereotype.Service;
@@ -37,9 +39,14 @@ public class DiscountServiceImpl implements IDiscountService {
     }
 
     @Override
+    public R<OperationRecordDto> operationRecord(String id) {
+        return htpDiscountFeignService.operationRecord(id);
+    }
+
+    @Override
     public TableDataInfo<DiscountMainDto> page(DiscountPageRequest pageDTO) {
 
-        R<PageVO> r = htpDiscountFeignService.page(pageDTO);
+        R<PageVO<DiscountMainDto>> r = htpDiscountFeignService.page(pageDTO);
         if(r.getCode() == 200){
             TableDataInfo tableDataInfo = new TableDataInfo();
             tableDataInfo.setCode(r.getCode());

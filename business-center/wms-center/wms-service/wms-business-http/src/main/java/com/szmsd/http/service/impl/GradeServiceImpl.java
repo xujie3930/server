@@ -3,12 +3,11 @@ package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.config.HttpConfig;
-import com.szmsd.http.dto.discount.DiscountMainDto;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.grade.*;
 import com.szmsd.http.service.IHttpGradeService;
 import com.szmsd.http.service.http.SaaSPricedRequest;
@@ -59,5 +58,12 @@ public class GradeServiceImpl extends SaaSPricedRequest implements IHttpGradeSer
     @Override
     public R update(MergeGradeDto dto) {
         return HttpResponseVOUtils.transformation(httpPutBody("", "grade.update", dto, dto.getId()));
+    }
+
+
+    @Override
+    public R<OperationRecordDto> operationRecord(String id) {
+        return HttpResponseVOUtils.transformation(httpGetBody("", "grade.operationRecord", null, id), OperationRecordDto.class);
+
     }
 }

@@ -5,6 +5,7 @@ import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.fallback.HtpCustomPricesFeignFallback;
 import com.szmsd.http.api.feign.fallback.HtpGradeFeignFallback;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.dto.grade.*;
 import io.swagger.annotations.ApiOperation;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(contextId = "FeignClient.HtpGradeFeignService", name = BusinessHttpInterface.SERVICE_NAME, fallbackFactory = HtpGradeFeignFallback.class)
 public interface HtpGradeFeignService {
 
+
+    @PostMapping("/api/grade/http/operationRecord")
+    R<OperationRecordDto> operationRecord(@RequestBody String id);
 
     @PostMapping("/api/grade/http/page")
     R<PageVO<GradeMainDto>> page(@RequestBody GradePageRequest pageDTO);

@@ -3,6 +3,7 @@ package com.szmsd.http.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.PageVO;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.discount.DiscountPageRequest;
 import com.szmsd.http.dto.discount.MergeDiscountDto;
 import com.szmsd.http.dto.discount.UpdateDiscountCustomDto;
@@ -10,10 +11,7 @@ import com.szmsd.http.dto.discount.UpdateDiscountDetailDto;
 import com.szmsd.http.service.IHttpDiscountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -26,6 +24,11 @@ public class HttpDiscountController extends BaseController {
     private IHttpDiscountService httpDiscountService;
 
 
+    @PostMapping("/operationRecord")
+    @ApiOperation(value = "获取操作记录")
+    public R<OperationRecordDto> operationRecord(@RequestBody String id) {
+        return httpDiscountService.operationRecord(id);
+    }
     @PostMapping("/page")
     @ApiOperation(value = "分页查询折扣方案")
     public R<PageVO> page(@RequestBody DiscountPageRequest pageDTO) {
