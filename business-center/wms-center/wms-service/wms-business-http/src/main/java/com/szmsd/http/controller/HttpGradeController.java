@@ -3,6 +3,7 @@ package com.szmsd.http.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.PageVO;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.chaLevel.ChaLevelMaintenancePageRequest;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.dto.grade.*;
@@ -38,6 +39,11 @@ public class HttpGradeController extends BaseController {
     }
 
 
+    @PostMapping("/operationRecord")
+    @ApiOperation(value = "获取操作记录")
+    public R<OperationRecordDto> operationRecord(@RequestBody String id) {
+        return httpGradeService.operationRecord(id);
+    }
     @PostMapping("/create")
     @ApiOperation(value = "创建等级方案")
     public R create(@RequestBody MergeGradeDto dto) {

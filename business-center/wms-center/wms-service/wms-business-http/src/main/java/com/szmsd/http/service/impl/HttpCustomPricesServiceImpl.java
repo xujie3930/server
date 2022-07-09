@@ -3,7 +3,9 @@ package com.szmsd.http.service.impl;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.http.config.HttpConfig;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
+import com.szmsd.http.dto.grade.GradeMainDto;
 import com.szmsd.http.service.IHttpCustomPricesService;
 import com.szmsd.http.service.http.SaaSPricedRequest;
 import com.szmsd.http.util.HttpResponseVOUtils;
@@ -40,6 +42,12 @@ public class HttpCustomPricesServiceImpl extends SaaSPricedRequest implements IH
     @Override
     public R updateGrade(UpdateCustomMainDto dto) {
         return HttpResponseVOUtils.transformation(httpPutBody("", "customPrices.updateGrade", dto, dto.getClientCode()));
+    }
+
+    @Override
+    public R<OperationRecordDto> operationRecord(String id) {
+        return HttpResponseVOUtils.transformation(httpGetBody("", "customPrices.operationRecord", null, id), OperationRecordDto.class);
+
     }
 
 }

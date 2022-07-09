@@ -2,6 +2,7 @@ package com.szmsd.http.service;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.PageVO;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.discount.*;
 
 public interface IHttpDiscountService {
@@ -19,5 +20,5 @@ public interface IHttpDiscountService {
         R update(MergeDiscountDto dto);
 
 
-
+    R<OperationRecordDto> operationRecord(String id);
 }

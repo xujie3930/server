@@ -2,6 +2,7 @@ package com.szmsd.http.controller;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.service.IHttpCustomPricesService;
 import io.swagger.annotations.Api;
@@ -19,6 +20,11 @@ public class HttpCustomPricesController extends BaseController {
     private IHttpCustomPricesService httpCustomPricesService;
 
 
+    @PostMapping("/operationRecord")
+    @ApiOperation(value = "获取操作记录")
+    public R<OperationRecordDto> operationRecord(@RequestBody String id) {
+        return httpCustomPricesService.operationRecord(id);
+    }
     @PostMapping("/result/{clientCode}")
     @ApiOperation(value = "获取折扣/等级方案数据")
     public R<CustomPricesPageDto> result(@PathVariable("clientCode") String clientCode) {

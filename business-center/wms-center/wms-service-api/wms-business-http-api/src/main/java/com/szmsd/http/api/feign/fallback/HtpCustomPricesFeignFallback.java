@@ -3,6 +3,7 @@ package com.szmsd.http.api.feign.fallback;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.HtpCustomPricesFeignService;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.dto.discount.DiscountMainDto;
 import com.szmsd.http.dto.grade.GradeMainDto;
@@ -17,7 +18,10 @@ public class HtpCustomPricesFeignFallback implements FallbackFactory<HtpCustomPr
     public HtpCustomPricesFeignService create(Throwable throwable) {
         log.error("{}服务调用失败：{}", BusinessHttpInterface.SERVICE_NAME, throwable.getMessage());
         return new HtpCustomPricesFeignService() {
-
+            @Override
+            public R<OperationRecordDto> operationRecord(String id) {
+                return R.convertResultJson(throwable);
+            }
             @Override
             public R<CustomPricesPageDto> page(String clientCode) {
                 return R.convertResultJson(throwable);

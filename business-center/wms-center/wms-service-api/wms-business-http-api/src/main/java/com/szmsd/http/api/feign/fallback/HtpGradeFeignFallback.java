@@ -5,6 +5,7 @@ import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.HtpCustomPricesFeignService;
 import com.szmsd.http.api.feign.HtpGradeFeignService;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.dto.grade.*;
 import feign.hystrix.FallbackFactory;
@@ -19,6 +20,11 @@ public class HtpGradeFeignFallback implements FallbackFactory<HtpGradeFeignServi
     public HtpGradeFeignService create(Throwable throwable) {
         log.error("{}服务调用失败：{}", BusinessHttpInterface.SERVICE_NAME, throwable.getMessage());
         return new HtpGradeFeignService() {
+
+            @Override
+            public R<OperationRecordDto> operationRecord(String id) {
+                return R.convertResultJson(throwable);
+            }
 
             @Override
             public R<PageVO<GradeMainDto>> page(GradePageRequest pageDTO) {

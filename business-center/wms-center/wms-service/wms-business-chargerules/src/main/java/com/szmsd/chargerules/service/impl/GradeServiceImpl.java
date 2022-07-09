@@ -11,6 +11,7 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpCustomPricesFeignService;
 import com.szmsd.http.api.feign.HtpGradeFeignService;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.UserIdentity;
 import com.szmsd.http.dto.chaLevel.ChaLevelMaintenanceDto;
 import com.szmsd.http.dto.custom.*;
@@ -34,6 +35,11 @@ import java.util.Date;
 public class GradeServiceImpl implements IGradeService {
     @Resource
     private HtpGradeFeignService htpGradeFeignService;
+
+    @Override
+    public R<OperationRecordDto> operationRecord(String id) {
+        return htpGradeFeignService.operationRecord(id);
+    }
 
     @Override
     public R<GradeMainDto> detailResult(String id) {

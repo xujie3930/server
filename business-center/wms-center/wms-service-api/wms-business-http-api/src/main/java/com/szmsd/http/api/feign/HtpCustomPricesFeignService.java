@@ -3,6 +3,7 @@ package com.szmsd.http.api.feign;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.fallback.HtpCustomPricesFeignFallback;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.dto.discount.DiscountMainDto;
 import com.szmsd.http.dto.grade.GradeMainDto;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(contextId = "FeignClient.HtpCustomPricesFeignService", name = BusinessHttpInterface.SERVICE_NAME, fallbackFactory = HtpCustomPricesFeignFallback.class)
 public interface HtpCustomPricesFeignService {
+
+    @PostMapping("/api/discount/http/operationRecord")
+    R<OperationRecordDto> operationRecord(@RequestBody String id);
 
     @PostMapping("/api/customPrices/http/result/{clientCode}")
     R<CustomPricesPageDto> page(@PathVariable("clientCode") String clientCode);

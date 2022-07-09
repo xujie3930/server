@@ -15,6 +15,7 @@ import com.szmsd.delivery.dto.CustomPricesDiscountImportDto;
 import com.szmsd.delivery.dto.DiscountCustomImportDto;
 import com.szmsd.delivery.dto.DiscountDetailImportDto;
 import com.szmsd.delivery.dto.GradeDetailImportDto;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.dto.discount.*;
 import com.szmsd.http.dto.grade.GradeDetailDto;
@@ -59,6 +60,13 @@ public class CustomPricesController extends BaseController{
     @ApiOperation(value = "获取折扣/等级方案数据")
     public R<CustomPricesPageDto> result(@PathVariable("clientCode") String clientCode) {
         return customPricesService.result(clientCode);
+    }
+
+    @PostMapping("/operationRecord")
+    @ApiOperation(value = "获取操作日记")
+    @PreAuthorize("@ss.hasPermi('Discount:Discount:detailResoperationRecordult')")
+    public R<OperationRecordDto> operationRecord(@RequestBody String id) {
+        return customPricesService.operationRecord(id);
     }
 
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:updateDiscount')")

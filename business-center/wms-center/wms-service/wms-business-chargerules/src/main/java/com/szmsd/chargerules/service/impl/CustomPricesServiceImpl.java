@@ -8,6 +8,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpCustomPricesFeignService;
 import com.szmsd.http.api.feign.HtpDiscountFeignService;
 import com.szmsd.http.api.feign.HtpGradeFeignService;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.UserIdentity;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.vo.Operation;
@@ -38,6 +39,11 @@ public class CustomPricesServiceImpl implements ICustomPricesService {
 
     @Resource
     private HtpDiscountFeignService htpDiscountFeignService;
+
+    @Override
+    public R<OperationRecordDto> operationRecord(String id) {
+        return htpCustomPricesFeignService.operationRecord(id);
+    }
 
     @Override
     public R updateDiscountDetail(CustomDiscountMainDto dto) {
