@@ -187,4 +187,6 @@ public interface DelOutboundClientService {
      * @return List<DelOutboundReportListVO>
      */
     DelTrackMainCommonDto commonTrackList(List<String> orderNos) ;
+
+    int updateWeightDelOutbound(UpdateWeightDelOutboundDto dto);
 }
