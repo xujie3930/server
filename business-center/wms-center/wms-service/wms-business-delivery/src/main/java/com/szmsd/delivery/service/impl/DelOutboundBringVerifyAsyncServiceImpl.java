@@ -12,7 +12,11 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.DelCk1OutboundDto;
-import com.szmsd.delivery.enums.*;
+import com.szmsd.delivery.enums.DelCk1RequestLogConstant;
+import com.szmsd.delivery.enums.DelOutboundConstant;
+import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.event.DelCk1RequestLogEvent;
 import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
@@ -174,22 +178,6 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 EventUtil.publishEvent(new DelCk1RequestLogEvent(ck1RequestLog));
             }
             if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
-                // 从原订单上获取信息，将原出库单上核重赋值的信息设置到重派出库单上
-                String oldOrderNo = delOutbound.getOldOrderNo();
-                if (StringUtils.isNotEmpty(oldOrderNo)) {
-                    DelOutbound oldDelOutbound = this.delOutboundService.getByOrderNo(oldOrderNo);
-                    if (null != oldDelOutbound) {
-                        DelOutbound updateDelOutbound = new DelOutbound();
-                        updateDelOutbound.setPackingMaterial(oldDelOutbound.getPackingMaterial());
-                        updateDelOutbound.setLength(oldDelOutbound.getLength());
-                        updateDelOutbound.setWidth(oldDelOutbound.getWidth());
-                        updateDelOutbound.setHeight(oldDelOutbound.getHeight());
-                        updateDelOutbound.setWeight(oldDelOutbound.getWeight());
-                        updateDelOutbound.setSpecifications(oldDelOutbound.getSpecifications());
-                        updateDelOutbound.setId(delOutbound.getId());
-                        this.delOutboundService.updateById(updateDelOutbound);
-                    }
-                }
                 // 增加出库单已取消记录，异步处理，定时任务
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
