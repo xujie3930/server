@@ -123,6 +123,16 @@ public class SaaSPricedApiConfig implements ApiConfig {
         private String create;
         private String update;
 
+        private String operationRecord;
+
+        public String getOperationRecord() {
+            return operationRecord;
+        }
+
+        public void setOperationRecord(String operationRecord) {
+            this.operationRecord = operationRecord;
+        }
+
         public String getDetailResult() {
             return detailResult;
         }
@@ -180,7 +190,15 @@ public class SaaSPricedApiConfig implements ApiConfig {
         private String customUpdate;
         private String create;
         private String update;
+        private String operationRecord;
 
+        public String getOperationRecord() {
+            return operationRecord;
+        }
+
+        public void setOperationRecord(String operationRecord) {
+            this.operationRecord = operationRecord;
+        }
         public String getDetailResult() {
             return detailResult;
         }
@@ -236,7 +254,15 @@ public class SaaSPricedApiConfig implements ApiConfig {
         private String updateGrade;
         private String updateDetailDiscount;
         private String updateDetailGrade;
+        private String operationRecord;
 
+        public String getOperationRecord() {
+            return operationRecord;
+        }
+
+        public void setOperationRecord(String operationRecord) {
+            this.operationRecord = operationRecord;
+        }
         public String getPage() {
             return page;
         }

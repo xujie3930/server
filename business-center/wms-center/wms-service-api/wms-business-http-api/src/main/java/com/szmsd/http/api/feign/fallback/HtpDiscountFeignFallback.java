@@ -4,10 +4,9 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.api.BusinessHttpInterface;
 import com.szmsd.http.api.feign.HtpDiscountFeignService;
-import com.szmsd.http.dto.discount.DiscountPageRequest;
-import com.szmsd.http.dto.discount.MergeDiscountDto;
-import com.szmsd.http.dto.discount.UpdateDiscountCustomDto;
-import com.szmsd.http.dto.discount.UpdateDiscountDetailDto;
+import com.szmsd.http.dto.OperationRecordDto;
+import com.szmsd.http.dto.discount.*;
+import com.szmsd.http.dto.grade.GradeMainDto;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,12 @@ public class HtpDiscountFeignFallback implements FallbackFactory<HtpDiscountFeig
         return new HtpDiscountFeignService() {
 
             @Override
-            public R<PageVO> page(DiscountPageRequest pageDTO) {
+            public R<OperationRecordDto> operationRecord(String id) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<PageVO<DiscountMainDto>> page(DiscountPageRequest pageDTO) {
                 return R.convertResultJson(throwable);
             }
 

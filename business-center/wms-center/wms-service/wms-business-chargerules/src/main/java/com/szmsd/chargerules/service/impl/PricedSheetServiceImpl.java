@@ -67,6 +67,7 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
             return null;
         }
         PricedSheetInfoVO result = BeanMapperUtil.map(data, PricedSheetInfoVO.class);
+        result.setGradeCode(data.getGrade());
         List<PricedVolumeWeightVO> volumeWeights = data.getVolumeWeights() == null ? null : data.getVolumeWeights().stream().map(item -> {
             PricedVolumeWeightVO vo = new PricedVolumeWeightVO();
             vo.setVolumeWeightType(item.getVolumeWeightType());

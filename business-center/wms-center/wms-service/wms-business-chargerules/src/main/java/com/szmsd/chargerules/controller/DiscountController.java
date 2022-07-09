@@ -1,25 +1,25 @@
 
 package com.szmsd.chargerules.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
+import com.szmsd.chargerules.export.*;
 import com.szmsd.chargerules.service.IDiscountService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.ExcelUtils;
+import com.szmsd.common.core.utils.QueryPage;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
-import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.dto.DiscountCustomImportDto;
 import com.szmsd.delivery.dto.DiscountDetailImportDto;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.AssociatedCustomersDto;
 import com.szmsd.http.dto.discount.*;
+import com.szmsd.http.dto.grade.GradeMainDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -33,9 +33,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -69,6 +68,14 @@ public class DiscountController extends BaseController{
     @PreAuthorize("@ss.hasPermi('Discount:Discount:detailResult')")
     public R<DiscountMainDto> detailResult(@RequestBody String id) {
         return DiscountService.detailResult(id);
+    }
+
+
+    @PostMapping("/operationRecord")
+    @ApiOperation(value = "获取操作日记")
+    @PreAuthorize("@ss.hasPermi('Discount:Discount:detailResoperationRecordult')")
+    public R<OperationRecordDto> operationRecord(@RequestBody String id) {
+        return DiscountService.operationRecord(id);
     }
 
 
@@ -196,5 +203,179 @@ public class DiscountController extends BaseController{
         return DiscountService.customUpdate(dto);
     }
 
+
+    @PreAuthorize("@ss.hasPermi('grade:grade:exportDetail')")
+    @PostMapping("/exportDetail")
+    @ApiOperation(value = "折扣方案 - 导出产品")
+    public void exportDetail(HttpServletResponse response, @RequestBody DiscountMainDto dto) {
+        try {
+            List<DiscountDetailExportListVO> gradeDetailDtoList = BeanMapperUtil.mapList(dto.getPricingDiscountRules()
+                    , DiscountDetailExportListVO.class);
+            for(int j = 0; j < gradeDetailDtoList.size(); j++) {
+                gradeDetailDtoList.get(j).setName(dto.getName());
+                //封装明细
+                BeanUtils.copyProperties(dto.getPricingDiscountRules().get(j).getPackageLimit(), gradeDetailDtoList.get(j));
+                BeanUtils.copyProperties(dto.getPricingDiscountRules().get(j).getFormula(), gradeDetailDtoList.get(j));
+            };
+            QueryPage gradeDetailExportQueryPage = new CommonExportQueryPage(gradeDetailDtoList);
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("DiscountDetailInfo", "zh",
+                    null, new ExcelUtils.ExportSheet<DiscountDetailExportListVO>() {
+                        @Override
+                        public String sheetName() {
+                            return "关联产品";
+                        }
+                        @Override
+                        public Class<DiscountDetailExportListVO> classType() {
+                            return DiscountDetailExportListVO.class;
+                        }
+                        @Override
+                        public QueryPage<DiscountDetailExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                            return gradeDetailExportQueryPage;
+                        }
+                    }));
+        } catch (Exception e) {
+            log.error("导出异常:" + e.getMessage(), e);
+        }
+    }
+    @PreAuthorize("@ss.hasPermi('grade:grade:exportCustome')")
+    @PostMapping("/exportCustome")
+    @ApiOperation(value = "折扣方案 - 导出客户")
+    public void exportCustome(HttpServletResponse response,  @RequestBody GradeMainDto dto) {
+        try {
+            List<CustomExportListVO> newGradeCustomExportListVOList
+                    = BeanMapperUtil.mapList(dto.getAssociatedCustomers(), CustomExportListVO.class);
+            for(int j = 0; j < newGradeCustomExportListVOList.size(); j++){
+                newGradeCustomExportListVOList.get(j).setName(dto.getName());
+                Boolean isValid = dto.getAssociatedCustomers().get(j).getIsValid();
+                if(isValid != null && isValid){
+                    newGradeCustomExportListVOList.get(j).setIsValidStr("是");
+                }else{
+                    newGradeCustomExportListVOList.get(j).setIsValidStr("否");
+                }
+            }
+            QueryPage gradeCustomExportQueryPage = new CommonExportQueryPage(newGradeCustomExportListVOList);
+
+
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("DiscountCustomeInfo", "zh",
+                    null, new ExcelUtils.ExportSheet<CustomExportListVO>() {
+                        @Override
+                        public String sheetName() {
+                            return "关联客户";
+                        }
+                        @Override
+                        public Class<CustomExportListVO> classType() {
+                            return CustomExportListVO.class;
+                        }
+                        @Override
+                        public QueryPage<CustomExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                            return gradeCustomExportQueryPage;
+                        }
+                    }));
+        } catch (Exception e) {
+            log.error("导出异常:" + e.getMessage(), e);
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('grade:grade:export')")
+    @PostMapping("/export")
+    @ApiOperation(value = "折扣方案 - 导出")
+    public void export(HttpServletResponse response, @RequestBody DiscountPageRequest pageDTO) {
+        try {
+            pageDTO.setPageNum(1);
+            if(pageDTO.getPageSize() == null){
+                pageDTO.setPageSize(99999);
+
+            }
+            TableDataInfo<DiscountMainDto> mainList =  DiscountService.page(pageDTO);
+
+            List<CommonExportListVO> newList = BeanMapperUtil.mapList(mainList.getRows(), CommonExportListVO.class);
+
+            List<DiscountDetailExportListVO> gradeDetailDtoList = new ArrayList<>();
+            List<CustomExportListVO> gradeCustomExportListVOList = new ArrayList<>();
+            for(int i = 0; i < newList.size(); i++){
+
+                DiscountMainDto dto = mainList.getRows().get(i);
+                newList.get(i).setCreation(dto.getCreation().getOperator().getName());
+                newList.get(i).setTime(mainList.getRows().get(i).getLastModifyOperation().getTime());
+
+                //封装明细
+                List<DiscountDetailExportListVO> newDetailExportListVOList
+                        = BeanMapperUtil.mapList(dto.getPricingDiscountRules(), DiscountDetailExportListVO.class);
+                for(int j = 0; j < newDetailExportListVOList.size(); j++){
+                    newDetailExportListVOList.get(j).setName(dto.getName());
+                    BeanUtils.copyProperties(dto.getPricingDiscountRules().get(j).getPackageLimit(), newDetailExportListVOList.get(j));
+                    BeanUtils.copyProperties(dto.getPricingDiscountRules().get(j).getFormula(), newDetailExportListVOList.get(j));
+                }
+
+                List<CustomExportListVO> newGradeCustomExportListVOList
+                        = BeanMapperUtil.mapList(dto.getAssociatedCustomers(), CustomExportListVO.class);
+
+
+
+                for(int j = 0; j < newGradeCustomExportListVOList.size(); j++){
+                    newGradeCustomExportListVOList.get(j).setName(dto.getName());
+                    Boolean isValid = dto.getAssociatedCustomers().get(j).getIsValid();
+                    if(isValid != null && isValid){
+                        newGradeCustomExportListVOList.get(j).setIsValidStr("是");
+                    }else{
+                        newGradeCustomExportListVOList.get(j).setIsValidStr("否");
+                    }
+                }
+
+
+                gradeDetailDtoList.addAll(newDetailExportListVOList);
+                gradeCustomExportListVOList.addAll(newGradeCustomExportListVOList);
+            }
+            QueryPage gradeExportQueryPage = new CommonExportQueryPage(newList);
+            QueryPage gradeDetailExportQueryPage = new CommonExportQueryPage(gradeDetailDtoList);
+            QueryPage gradeCustomExportQueryPage = new CommonExportQueryPage(gradeCustomExportListVOList);
+
+
+
+            ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("DiscountInfo", "zh",
+                    null, new ExcelUtils.ExportSheet<CommonExportListVO>() {
+                        @Override
+                        public String sheetName() {
+                            return "折扣方案信息";
+                        }
+                        @Override
+                        public Class<CommonExportListVO> classType() {
+                            return CommonExportListVO.class;
+                        }
+                        @Override
+                        public QueryPage<CommonExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                            return gradeExportQueryPage;
+                        }
+                    }, new ExcelUtils.ExportSheet<DiscountDetailExportListVO>() {
+                        @Override
+                        public String sheetName() {
+                            return "关联产品";
+                        }
+                        @Override
+                        public Class<DiscountDetailExportListVO> classType() {
+                            return DiscountDetailExportListVO.class;
+                        }
+                        @Override
+                        public QueryPage<DiscountDetailExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                            return gradeDetailExportQueryPage;
+                        }
+                    }, new ExcelUtils.ExportSheet<CustomExportListVO>() {
+                        @Override
+                        public String sheetName() {
+                            return "关联客户";
+                        }
+                        @Override
+                        public Class<CustomExportListVO> classType() {
+                            return CustomExportListVO.class;
+                        }
+                        @Override
+                        public QueryPage<CustomExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                            return gradeCustomExportQueryPage;
+                        }
+                    }));
+        } catch (Exception e) {
+            log.error("导出异常:" + e.getMessage(), e);
+        }
+    }
 
 }

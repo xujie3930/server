@@ -1,12 +1,11 @@
 
 package com.szmsd.chargerules.controller;
 
-import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
-import com.szmsd.chargerules.export.GradeCustomExportListVO;
+import com.szmsd.chargerules.export.CustomExportListVO;
 import com.szmsd.chargerules.export.GradeDetailExportListVO;
-import com.szmsd.chargerules.export.GradeExportListVO;
-import com.szmsd.chargerules.export.GradeExportQueryPage;
+import com.szmsd.chargerules.export.CommonExportListVO;
+import com.szmsd.chargerules.export.CommonExportQueryPage;
 import com.szmsd.chargerules.service.IGradeService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -16,16 +15,12 @@ import com.szmsd.common.core.utils.QueryPage;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
-import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.common.log.annotation.Log;
-import com.szmsd.common.log.enums.BusinessType;
-import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.dto.GradeCustomImportDto;
 import com.szmsd.delivery.dto.GradeDetailImportDto;
-import com.szmsd.delivery.vo.DelOutboundExportItemListVO;
-import com.szmsd.delivery.vo.DelOutboundExportListVO;
+import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
+import com.szmsd.http.dto.discount.DiscountMainDto;
 import com.szmsd.http.dto.grade.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -42,7 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -169,7 +163,7 @@ public class GradeController extends BaseController{
             for(int j = 0; j < gradeDetailDtoList.size(); j++) {
                 gradeDetailDtoList.get(j).setName(dto.getName());
             };
-            QueryPage gradeDetailExportQueryPage = new GradeExportQueryPage(gradeDetailDtoList);
+            QueryPage gradeDetailExportQueryPage = new CommonExportQueryPage(gradeDetailDtoList);
             ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("GradeDetailInfo", "zh",
                     null, new ExcelUtils.ExportSheet<GradeDetailExportListVO>() {
                         @Override
@@ -189,13 +183,21 @@ public class GradeController extends BaseController{
             log.error("导出异常:" + e.getMessage(), e);
         }
     }
+
+
+    @PostMapping("/operationRecord")
+    @ApiOperation(value = "获取操作日记")
+    @PreAuthorize("@ss.hasPermi('Discount:Discount:detailResoperationRecordult')")
+    public R<OperationRecordDto> operationRecord(@RequestBody String id) {
+        return gradeService.operationRecord(id);
+    }
     @PreAuthorize("@ss.hasPermi('grade:grade:exportCustome')")
     @PostMapping("/exportCustome")
     @ApiOperation(value = "等级方案 - 导出客户")
     public void exportCustome(HttpServletResponse response,  @RequestBody GradeMainDto dto) {
         try {
-            List<GradeCustomExportListVO> newGradeCustomExportListVOList
-                    = BeanMapperUtil.mapList(dto.getAssociatedCustomers(), GradeCustomExportListVO.class);
+            List<CustomExportListVO> newGradeCustomExportListVOList
+                    = BeanMapperUtil.mapList(dto.getAssociatedCustomers(), CustomExportListVO.class);
             for(int j = 0; j < newGradeCustomExportListVOList.size(); j++){
                 newGradeCustomExportListVOList.get(j).setName(dto.getName());
                 Boolean isValid = dto.getAssociatedCustomers().get(j).getIsValid();
@@ -205,21 +207,21 @@ public class GradeController extends BaseController{
                     newGradeCustomExportListVOList.get(j).setIsValidStr("否");
                 }
             }
-            QueryPage gradeCustomExportQueryPage = new GradeExportQueryPage(newGradeCustomExportListVOList);
+            QueryPage gradeCustomExportQueryPage = new CommonExportQueryPage(newGradeCustomExportListVOList);
 
 
             ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("GradetCustomeInfo", "zh",
-                    null, new ExcelUtils.ExportSheet<GradeCustomExportListVO>() {
+                    null, new ExcelUtils.ExportSheet<CustomExportListVO>() {
                         @Override
                         public String sheetName() {
                             return "关联客户";
                         }
                         @Override
-                        public Class<GradeCustomExportListVO> classType() {
-                            return GradeCustomExportListVO.class;
+                        public Class<CustomExportListVO> classType() {
+                            return CustomExportListVO.class;
                         }
                         @Override
-                        public QueryPage<GradeCustomExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                        public QueryPage<CustomExportListVO> query(ExcelUtils.ExportContext exportContext) {
                             return gradeCustomExportQueryPage;
                         }
                     }));
@@ -240,10 +242,10 @@ public class GradeController extends BaseController{
             }
             TableDataInfo<GradeMainDto> mainList =  gradeService.page(pageDTO);
 
-            List<GradeExportListVO> newList = BeanMapperUtil.mapList(mainList.getRows(), GradeExportListVO.class);
+            List<CommonExportListVO> newList = BeanMapperUtil.mapList(mainList.getRows(), CommonExportListVO.class);
 
             List<GradeDetailExportListVO> gradeDetailDtoList = new ArrayList<>();
-            List<GradeCustomExportListVO> gradeCustomExportListVOList = new ArrayList<>();
+            List<CustomExportListVO> gradeCustomExportListVOList = new ArrayList<>();
             for(int i = 0; i < newList.size(); i++){
 
                 GradeMainDto dto = mainList.getRows().get(i);
@@ -258,8 +260,8 @@ public class GradeController extends BaseController{
                     newGradeDetailExportListVOList.get(j).setName(dto.getName());
                 }
 
-                List<GradeCustomExportListVO> newGradeCustomExportListVOList
-                        = BeanMapperUtil.mapList(dto.getAssociatedCustomers(), GradeCustomExportListVO.class);
+                List<CustomExportListVO> newGradeCustomExportListVOList
+                        = BeanMapperUtil.mapList(dto.getAssociatedCustomers(), CustomExportListVO.class);
 
 
 
@@ -277,24 +279,24 @@ public class GradeController extends BaseController{
                 gradeDetailDtoList.addAll(newGradeDetailExportListVOList);
                 gradeCustomExportListVOList.addAll(newGradeCustomExportListVOList);
             }
-            QueryPage gradeExportQueryPage = new GradeExportQueryPage(newList);
-            QueryPage gradeDetailExportQueryPage = new GradeExportQueryPage(gradeDetailDtoList);
-            QueryPage gradeCustomExportQueryPage = new GradeExportQueryPage(gradeCustomExportListVOList);
+            QueryPage gradeExportQueryPage = new CommonExportQueryPage(newList);
+            QueryPage gradeDetailExportQueryPage = new CommonExportQueryPage(gradeDetailDtoList);
+            QueryPage gradeCustomExportQueryPage = new CommonExportQueryPage(gradeCustomExportListVOList);
 
 
 
             ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("GradeInfo", "zh",
-                    null, new ExcelUtils.ExportSheet<GradeExportListVO>() {
+                    null, new ExcelUtils.ExportSheet<CommonExportListVO>() {
                         @Override
                         public String sheetName() {
                             return "等级方案信息";
                         }
                         @Override
-                        public Class<GradeExportListVO> classType() {
-                            return GradeExportListVO.class;
+                        public Class<CommonExportListVO> classType() {
+                            return CommonExportListVO.class;
                         }
                         @Override
-                        public QueryPage<GradeExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                        public QueryPage<CommonExportListVO> query(ExcelUtils.ExportContext exportContext) {
                             return gradeExportQueryPage;
                         }
                     }, new ExcelUtils.ExportSheet<GradeDetailExportListVO>() {
@@ -310,17 +312,17 @@ public class GradeController extends BaseController{
                         public QueryPage<GradeDetailExportListVO> query(ExcelUtils.ExportContext exportContext) {
                             return gradeDetailExportQueryPage;
                         }
-                    }, new ExcelUtils.ExportSheet<GradeCustomExportListVO>() {
+                    }, new ExcelUtils.ExportSheet<CustomExportListVO>() {
                         @Override
                         public String sheetName() {
                             return "关联客户";
                         }
                         @Override
-                        public Class<GradeCustomExportListVO> classType() {
-                            return GradeCustomExportListVO.class;
+                        public Class<CustomExportListVO> classType() {
+                            return CustomExportListVO.class;
                         }
                         @Override
-                        public QueryPage<GradeCustomExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                        public QueryPage<CustomExportListVO> query(ExcelUtils.ExportContext exportContext) {
                             return gradeCustomExportQueryPage;
                         }
                     }));
