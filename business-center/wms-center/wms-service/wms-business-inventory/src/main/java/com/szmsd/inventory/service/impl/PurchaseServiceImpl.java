@@ -1,6 +1,7 @@
 package com.szmsd.inventory.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasAttachment;
@@ -8,8 +9,10 @@ import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.inventory.component.RemoteComponent;
 import com.szmsd.inventory.component.RemoteRequest;
@@ -321,6 +324,9 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         })).values());
     }
 
+    @Resource
+    private DelOutboundFeignService delOutboundFeignService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int transportWarehousingSubmit(TransportWarehousingAddDTO transportWarehousingAddDTO) {
@@ -363,7 +369,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             //当成商品sku使用
             List<String> transferNoList = transportWarehousingAddDTO.getTransferNoList();
             //设置SKU列表数据
-            List<InboundReceiptDetailDTO> inboundReceiptDetailAddList = transferNoList.stream().map(x->{
+            List<InboundReceiptDetailDTO> inboundReceiptDetailAddList = transferNoList.stream().map(x -> {
                 InboundReceiptDetailDTO inboundReceiptDetailDTO = new InboundReceiptDetailDTO();
                 inboundReceiptDetailDTO.setDeliveryNo(x);
                 inboundReceiptDetailDTO.setDeclareQty(1);
@@ -392,6 +398,14 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
             createInboundReceiptDTO.setTotalDeclareQty(integer);
             createInboundReceiptDTO.setTransferNoList(transferNoList);
             InboundReceiptInfoVO inboundReceiptInfoVO = remoteComponent.orderStorage(createInboundReceiptDTO);
+            // 回调修改标记为已转运
+            log.info("回调修改标记为已转运 {}", transportWarehousingAddDTO.getIdList());
+            List<Long> callBackOrderIdList = transportWarehousingAddDTO.getIdList().stream().filter(StringUtils::isNotBlank).map(Long::valueOf).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(callBackOrderIdList)){
+                R<Boolean> booleanR = delOutboundFeignService.updateInStockList(callBackOrderIdList);
+                log.info("回调修改标记为已转运 {}", booleanR);
+            }
+
         });
         return 0;
     }
