@@ -1776,36 +1776,63 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 responseList.add(response);
                 continue;
             }
-            String pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(outbound) + "/" + orderNo + ".pdf";
-            File labelFile = new File(pathname);
+            String pathname = null;
             byte[] fb = null;
-            if (labelFile.exists()) {
-                FileInputStream fileInputStream = null;
-                try {
-                    fileInputStream = new FileInputStream(labelFile);
-                    fb = IOUtils.toByteArray(fileInputStream);
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                    response.setStatus(false);
-                    response.setMessage("获取标签文件失败," + e.getMessage());
-                    responseList.add(response);
-                    continue;
-                } finally {
-                    IOUtils.closeQuietly(fileInputStream);
+            if("1".equals(dto.getType())){
+                pathname = outbound.getShipmentRetryLabel();
+                File labelFile = new File(pathname);
+                if (labelFile.exists()) {
+                    FileInputStream fileInputStream = null;
+                    try {
+                        fileInputStream = new FileInputStream(labelFile);
+                        fb = IOUtils.toByteArray(fileInputStream);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        response.setStatus(false);
+                        response.setMessage("获取标签文件失败," + e.getMessage());
+                        responseList.add(response);
+                        continue;
+                    } finally {
+                        IOUtils.closeQuietly(fileInputStream);
+                    }
                 }
-            } else {
-                // 查询地址信息
-                DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
-                try {
-                    ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress);
-                    FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                    response.setStatus(false);
-                    response.setMessage("生成标签文件失败," + e.getMessage());
-                    responseList.add(response);
-                    continue;
+
+            }else{
+
+                pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(outbound) + "/" + orderNo + ".pdf";
+                File labelFile = new File(pathname);
+
+                if (labelFile.exists()) {
+                    FileInputStream fileInputStream = null;
+                    try {
+                        fileInputStream = new FileInputStream(labelFile);
+                        fb = IOUtils.toByteArray(fileInputStream);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        response.setStatus(false);
+                        response.setMessage("获取标签文件失败," + e.getMessage());
+                        responseList.add(response);
+                        continue;
+                    } finally {
+                        IOUtils.closeQuietly(fileInputStream);
+                    }
+                } else {
+                    // 查询地址信息
+                    DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
+                    try {
+                        ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress);
+                        FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                        response.setStatus(false);
+                        response.setMessage("生成标签文件失败," + e.getMessage());
+                        responseList.add(response);
+                        continue;
+                    }
                 }
+            }
+            if(fb == null){
+                continue;
             }
             String base64Str = Base64Utils.encodeToString(fb);
             response.setBase64(base64Str);

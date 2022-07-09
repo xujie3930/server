@@ -1,24 +1,13 @@
 package com.szmsd.delivery.api.feign;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundPacking;
-import com.szmsd.delivery.dto.DelOutboundAgainTrackingNoDto;
-import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
-import com.szmsd.delivery.dto.DelOutboundCanceledDto;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
-import com.szmsd.delivery.dto.DelOutboundLabelDto;
-import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
-import com.szmsd.delivery.dto.DelOutboundUploadBoxLabelDto;
-import com.szmsd.delivery.dto.DelTrackMainCommonDto;
-import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
-import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
-import com.szmsd.delivery.dto.ShipmentRequestDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
@@ -39,11 +28,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -255,4 +240,10 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - 修改入库状态", position = 2400)
     @ApiImplicitParam(name = "idList", value = "出库单ID", dataType = "Long")
     R<Boolean> updateInStockList(@RequestBody List<Long> idList);
+
+
+    @PostMapping("/api/outbound//updateWeightDelOutbound")
+    @ApiOperation(value = "出库管理 - 修改重量数据", position = 400)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "UpdateWeightDelOutboundDto")
+    R<Integer> updateWeightDelOutbound(@RequestBody UpdateWeightDelOutboundDto dto);
 }
