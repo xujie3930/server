@@ -1,5 +1,6 @@
 package com.szmsd.http.util;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -9,6 +10,7 @@ import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.dto.discount.DiscountMainDto;
+import com.szmsd.http.vo.DateOperation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.http.HttpStatus;
@@ -18,6 +20,11 @@ import java.util.stream.Collectors;
 
 public class HttpResponseVOUtils {
 
+    public static void main(String[] args) {
+        System.out.println(JSON.parseObject("{\"time\":\"9999-12-31 23:59:59\"}", DateOperation.class).getTime().getTime());
+
+
+    }
     @NoArgsConstructor
     @Data
     static class ErrorInfo {
@@ -70,7 +77,8 @@ public class HttpResponseVOUtils {
             if(cls == null){
                 return R.ok();
             }else{
-                return R.ok(JSON.parseObject(hrb.getBody(), cls));
+                String newBody = newBody(hrb.getBody());
+                return R.ok(JSON.parseObject(newBody, cls));
             }
         } else {
             return R.failed(getErrorMsg(hrb));
@@ -78,10 +86,18 @@ public class HttpResponseVOUtils {
 
     }
 
+    public static String newBody(String json){
+        if(StringUtils.isNotEmpty(json)){
+            return json.replaceAll("9999-12-31T23:59:59.9999999Z","9999-12-31 23:59:59");
+        }
+        return json;
+    }
+
 
     public static R transformationList(HttpResponseBody hrb, Class cls){
         if (HttpStatus.SC_OK == hrb.getStatus()) {
-            return R.ok(JSON.parseArray(hrb.getBody(), cls));
+            String newBody = newBody(hrb.getBody());
+            return R.ok(JSON.parseArray(newBody, cls));
         } else {
             return R.failed(getErrorMsg(hrb));
         }
