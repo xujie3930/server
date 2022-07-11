@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.szmsd.bas.dao.BasChannelDateMapper" >
-  <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasChannelDate" >
+<mapper namespace="com.szmsd.bas.mapper.BasChannelDateMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasChannelDate" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="channel_id" property="channelId" jdbcType="INTEGER" />
     <result column="estimate_whole_time" property="estimateWholeTime" jdbcType="VARCHAR" />
@@ -11,7 +11,7 @@
     <result column="shipment_node_code" property="shipmentNodeCode" jdbcType="VARCHAR" />
     <result column="shipment_node_name" property="shipmentNodeName" jdbcType="VARCHAR" />
   </resultMap>
-  <resultMap id="ResultMapWithBLOBs" type="com.szmsd.bas.api.domain.BasChannelDate" extends="BaseResultMap" >
+  <resultMap id="ResultMapWithBLOBs" type="com.szmsd.bas.domain.BasChannelDate" extends="BaseResultMap" >
     <result column="remarks" property="remarks" jdbcType="LONGVARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
@@ -29,7 +29,7 @@
     from bas_channel_date
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <select id="selectListChannelDate" resultType="com.szmsd.bas.api.domain.BasChannelDate"
+  <select id="selectListChannelDate" resultType="com.szmsd.bas.domain.BasChannelDate"
           parameterType="java.lang.Integer">
      SELECT * from bas_channel_date WHERE channel_id=#{id} ORDER BY sort_id ASC
   </select>
@@ -37,7 +37,7 @@
     delete from bas_channel_date
     where channel_id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.szmsd.bas.api.domain.BasChannelDate" >
+  <insert id="insert" parameterType="com.szmsd.bas.domain.BasChannelDate" >
     insert into bas_channel_date (id, channel_id, estimate_whole_time, 
       sort_id, create_time, update_time, 
       shipment_node_code, shipment_node_name, remarks
@@ -47,7 +47,7 @@
       #{shipmentNodeCode,jdbcType=VARCHAR}, #{shipmentNodeName,jdbcType=VARCHAR}, #{remarks,jdbcType=LONGVARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.szmsd.bas.api.domain.BasChannelDate"  >
+  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasChannelDate"  >
     insert into bas_channel_date
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -108,7 +108,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.api.domain.BasChannelDate" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.domain.BasChannelDate" >
     update bas_channel_date
     <set >
       <if test="channelId != null" >
@@ -135,10 +135,11 @@
       <if test="remarks != null" >
         remarks = #{remarks,jdbcType=LONGVARCHAR},
       </if>
+
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.szmsd.bas.api.domain.BasChannelDate" >
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.szmsd.bas.domain.BasChannelDate" >
     update bas_channel_date
     set channel_id = #{channelId,jdbcType=INTEGER},
       estimate_whole_time = #{estimateWholeTime,jdbcType=VARCHAR},
@@ -150,7 +151,7 @@
       remarks = #{remarks,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.api.domain.BasChannelDate" >
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.domain.BasChannelDate" >
     update bas_channel_date
     set channel_id = #{channelId,jdbcType=INTEGER},
       estimate_whole_time = #{estimateWholeTime,jdbcType=VARCHAR},

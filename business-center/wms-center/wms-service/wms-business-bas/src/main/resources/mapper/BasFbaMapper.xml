@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.szmsd.bas.dao.BasFbaMapper" >
-  <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasFba" >
+<mapper namespace="com.szmsd.bas.mapper.BasFbaMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasFba" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="fba_code" property="fbaCode" jdbcType="VARCHAR" />
     <result column="fba_name" property="fbaName" jdbcType="VARCHAR" />
@@ -32,8 +32,8 @@
     from bas_fba
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <select id="selectBasFbaList" resultType="com.szmsd.bas.api.domain.BasFba"
-          parameterType="com.szmsd.bas.api.domain.dto.BasFbaDTO">
+  <select id="selectBasFbaList" resultType="com.szmsd.bas.domain.BasFba"
+          parameterType="com.szmsd.bas.dto.BasFbaDTO">
     select
     <include refid="Base_Column_List" />
     from bas_fba
@@ -64,7 +64,7 @@
     set  del_flag = '2'
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.szmsd.bas.api.domain.BasFba" >
+  <insert id="insert" parameterType="com.szmsd.bas.domain.BasFba" >
     insert into bas_fba (id, fba_code, fba_name, 
       address_name_on, address_name_two, city_name, 
       province_name, country_name, country_code, 
@@ -80,7 +80,7 @@
       #{updateTime,jdbcType=TIMESTAMP}, #{version,jdbcType=INTEGER}, #{delFlag,jdbcType=CHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.szmsd.bas.api.domain.BasFba" >
+  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasFba" >
     insert into bas_fba
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -195,7 +195,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.api.domain.BasFba" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.domain.BasFba" >
     update bas_fba
     <set >
       <if test="fbaCode != null" >
@@ -252,7 +252,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.api.domain.BasFba" >
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.domain.BasFba" >
     update bas_fba
     set fba_code = #{fbaCode,jdbcType=VARCHAR},
       fba_name = #{fbaName,jdbcType=VARCHAR},

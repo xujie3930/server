@@ -1,4 +1,4 @@
-package com.szmsd.bas.api.domain;
+package com.szmsd.bas.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

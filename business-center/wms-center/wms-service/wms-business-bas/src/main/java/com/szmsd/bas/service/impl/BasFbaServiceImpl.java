@@ -1,11 +1,9 @@
 package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szmsd.bas.api.domain.BasEmployees;
-import com.szmsd.bas.api.domain.BasFba;
-import com.szmsd.bas.api.domain.BasRegion;
-import com.szmsd.bas.api.domain.dto.BasFbaDTO;
-import com.szmsd.bas.dao.BasFbaMapper;
+import com.szmsd.bas.domain.BasFba;
+import com.szmsd.bas.dto.BasFbaDTO;
+import com.szmsd.bas.mapper.BasFbaMapper;
 import com.szmsd.bas.service.IBasFbaService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
@@ -13,9 +11,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class BasFbaServiceImpl extends ServiceImpl<BasFbaMapper, BasFba> implements IBasFbaService {

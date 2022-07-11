@@ -1,15 +1,14 @@
 package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szmsd.bas.api.domain.BasChannelWarehouse;
-import com.szmsd.bas.api.domain.BasChannels;
-import com.szmsd.bas.api.domain.dto.BasChannelsDTO;
-import com.szmsd.bas.dao.BasChannelDateMapper;
-import com.szmsd.bas.dao.BasChannelWarehouseMapper;
-import com.szmsd.bas.dao.BasChannelsMapper;
+import com.szmsd.bas.domain.BasChannelWarehouse;
+import com.szmsd.bas.domain.BasChannels;
+import com.szmsd.bas.dto.BasChannelsDTO;
+import com.szmsd.bas.mapper.BasChannelDateMapper;
+import com.szmsd.bas.mapper.BasChannelWarehouseMapper;
+import com.szmsd.bas.mapper.BasChannelsMapper;
 import com.szmsd.bas.service.IBasChannelsService;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service

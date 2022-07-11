@@ -1,7 +1,7 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.bas.api.domain.BasChannels;
-import com.szmsd.bas.api.domain.dto.BasChannelsDTO;
+import com.szmsd.bas.domain.BasChannels;
+import com.szmsd.bas.dto.BasChannelsDTO;
 import com.szmsd.bas.service.IBasChannelsService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;

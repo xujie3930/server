@@ -1,8 +1,7 @@
 package com.szmsd.bas.service;
 
-import com.szmsd.bas.api.domain.BasFba;
-import com.szmsd.bas.api.domain.BasRegion;
-import com.szmsd.bas.api.domain.dto.BasFbaDTO;
+import com.szmsd.bas.domain.BasFba;
+import com.szmsd.bas.dto.BasFbaDTO;
 import com.szmsd.common.core.domain.R;
 
 import java.util.List;

@@ -1,10 +1,10 @@
-package com.szmsd.bas.dao;
+package com.szmsd.bas.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.szmsd.bas.api.domain.BasFba;
-import com.szmsd.bas.api.domain.BasRegion;
-import com.szmsd.bas.api.domain.dto.BasFbaDTO;
+
+import com.szmsd.bas.domain.BasFba;
+import com.szmsd.bas.dto.BasFbaDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

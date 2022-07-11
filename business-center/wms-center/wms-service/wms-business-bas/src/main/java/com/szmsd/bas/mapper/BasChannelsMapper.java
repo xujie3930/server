@@ -1,9 +1,9 @@
-package com.szmsd.bas.dao;
+package com.szmsd.bas.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.szmsd.bas.api.domain.BasChannels;
-import com.szmsd.bas.api.domain.dto.BasChannelsDTO;
+import com.szmsd.bas.domain.BasChannels;
+import com.szmsd.bas.dto.BasChannelsDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

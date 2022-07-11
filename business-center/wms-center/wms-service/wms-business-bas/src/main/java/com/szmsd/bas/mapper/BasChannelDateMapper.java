@@ -1,8 +1,8 @@
-package com.szmsd.bas.dao;
+package com.szmsd.bas.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.szmsd.bas.api.domain.BasChannelDate;
+import com.szmsd.bas.domain.BasChannelDate;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

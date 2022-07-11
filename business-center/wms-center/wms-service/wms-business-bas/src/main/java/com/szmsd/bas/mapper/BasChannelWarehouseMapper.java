@@ -1,7 +1,7 @@
-package com.szmsd.bas.dao;
+package com.szmsd.bas.mapper;
 
 
-import com.szmsd.bas.api.domain.BasChannelWarehouse;
+import com.szmsd.bas.domain.BasChannelWarehouse;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

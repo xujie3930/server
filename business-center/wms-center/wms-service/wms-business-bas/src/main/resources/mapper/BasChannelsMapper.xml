@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.szmsd.bas.dao.BasChannelsMapper" >
-  <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasChannels" >
+<mapper namespace="com.szmsd.bas.mapper.BasChannelsMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasChannels" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="country_name" property="countryName" jdbcType="VARCHAR" />
     <result column="country_code" property="countryCode" jdbcType="VARCHAR" />
@@ -28,8 +28,8 @@
     from bas_channels
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <select id="selectBasChannels" resultType="com.szmsd.bas.api.domain.BasChannels"
-          parameterType="com.szmsd.bas.api.domain.dto.BasChannelsDTO">
+  <select id="selectBasChannels" resultType="com.szmsd.bas.domain.BasChannels"
+          parameterType="com.szmsd.bas.dto.BasChannelsDTO">
     select
     a.*
     from bas_channels a
@@ -60,7 +60,7 @@
     delete from bas_channels
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.szmsd.bas.api.domain.BasChannels" >
+  <insert id="insert" parameterType="com.szmsd.bas.domain.BasChannels" >
     insert into bas_channels (id, country_name, country_code, 
       logistics_ervices_code, logistics_ervices_name, 
        estimate_whole_time,
@@ -74,7 +74,7 @@
       #{updateBy,jdbcType=VARCHAR}, #{updateByName,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP}, 
       #{version,jdbcType=INTEGER}, #{delFlag,jdbcType=CHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.szmsd.bas.api.domain.BasChannels" useGeneratedKeys="true" keyProperty="id">
+  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasChannels" useGeneratedKeys="true" keyProperty="id">
     insert into bas_channels
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -166,7 +166,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.api.domain.BasChannels" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.domain.BasChannels" >
     update bas_channels
     <set >
       <if test="countryName != null" >
@@ -211,7 +211,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.api.domain.BasChannels" >
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.domain.BasChannels" >
     update bas_channels
     set country_name = #{countryName,jdbcType=VARCHAR},
       country_code = #{countryCode,jdbcType=VARCHAR},

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.szmsd.bas.dao.BasChannelWarehouseMapper" >
-  <resultMap id="BaseResultMap" type="com.szmsd.bas.api.domain.BasChannelWarehouse" >
+<mapper namespace="com.szmsd.bas.mapper.BasChannelWarehouseMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasChannelWarehouse" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="channel_id" property="channelId" jdbcType="INTEGER" />
     <result column="warehouse_code" property="warehouseCode" jdbcType="VARCHAR" />
@@ -16,7 +16,7 @@
     from bas_channel_warehouse
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <select id="selectListWarehouseList" resultType="com.szmsd.bas.api.domain.BasChannelWarehouse"
+  <select id="selectListWarehouseList" resultType="com.szmsd.bas.domain.BasChannelWarehouse"
           parameterType="java.lang.Integer">
     select
     <include refid="Base_Column_List" />
@@ -27,13 +27,13 @@
     delete from bas_channel_warehouse
     where channel_id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.szmsd.bas.api.domain.BasChannelWarehouse" >
+  <insert id="insert" parameterType="com.szmsd.bas.domain.BasChannelWarehouse" >
     insert into bas_channel_warehouse (id, channel_id, warehouse_code, 
       warehouse_name)
     values (#{id,jdbcType=INTEGER}, #{channelId,jdbcType=INTEGER}, #{warehouseCode,jdbcType=VARCHAR}, 
       #{warehouseName,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.szmsd.bas.api.domain.BasChannelWarehouse" >
+  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasChannelWarehouse" >
     insert into bas_channel_warehouse
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -64,7 +64,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.api.domain.BasChannelWarehouse" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.domain.BasChannelWarehouse" >
     update bas_channel_warehouse
     <set >
       <if test="channelId != null" >
@@ -79,7 +79,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.api.domain.BasChannelWarehouse" >
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.domain.BasChannelWarehouse" >
     update bas_channel_warehouse
     set channel_id = #{channelId,jdbcType=INTEGER},
       warehouse_code = #{warehouseCode,jdbcType=VARCHAR},
