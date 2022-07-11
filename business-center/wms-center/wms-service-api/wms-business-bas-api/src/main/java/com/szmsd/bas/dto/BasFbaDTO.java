@@ -1,9 +1,8 @@
-package com.szmsd.bas.api.domain.dto;
+package com.szmsd.bas.dto;
 
 
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.controller.QueryDto;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
