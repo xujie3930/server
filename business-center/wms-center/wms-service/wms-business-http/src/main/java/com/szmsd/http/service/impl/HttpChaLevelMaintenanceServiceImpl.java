@@ -34,7 +34,7 @@ public class HttpChaLevelMaintenanceServiceImpl extends SaaSPricedRequest implem
     public R<PageVO> page(ChaLevelMaintenancePageRequest pageDTO) {
         HttpResponseBody hrb = httpPostBody("", "pricedGrade.pageResult", pageDTO);
         if (HttpStatus.SC_OK == hrb.getStatus()) {
-            return  R.ok(JSON.parseObject(String.valueOf(hrb.getBody()), new TypeReference<PageVO<GradeMainDto>>(){}));
+            return  R.ok(JSON.parseObject(HttpResponseVOUtils.newBody(hrb.getBody()), new TypeReference<PageVO<ChaLevelMaintenanceDto>>(){}));
         }else{
             return R.failed(HttpResponseVOUtils.getErrorMsg(hrb));
 
