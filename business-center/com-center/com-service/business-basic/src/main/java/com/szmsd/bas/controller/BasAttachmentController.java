@@ -230,7 +230,7 @@ public class BasAttachmentController extends BaseController {
     @ApiOperation(httpMethod = "POST", value = "附件上传及保存 - bas:uploadMultiplePiecesSave:uploadMultiplePieces - swagger接收不到文件", notes = "附件上传及保存")
     @PostMapping(value = "/uploadMultiplePiecesSave", headers = "content-type=multipart/form-data")
     @ApiImplicitParams({@ApiImplicitParam(name = "attachmentTypeEnum", value = "附件类型", required = true)})
-    public void uploadMultiplePiecesSave(@RequestParam("attachmentUrl") MultipartFile[] myFiles,
+    public R<List<BasAttachmentExcelDTO>> uploadMultiplePiecesSave(@RequestParam("attachmentUrl") MultipartFile[] myFiles,
                                          @RequestParam("attachmentTypeEnum") AttachmentTypeEnum attachmentTypeEnum, HttpServletResponse response) {
         List<BasAttachmentExcelDTO> filesUrl = new ArrayList<>();
         List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
@@ -252,11 +252,18 @@ public class BasAttachmentController extends BaseController {
 
 
 
+//        ExcelUtil<BasAttachmentExcelDTO> util = new ExcelUtil<BasAttachmentExcelDTO>(BasAttachmentExcelDTO.class);
+//        util.exportExcel(response, filesUrl, "attachment");
+
+        return R.ok(filesUrl);
+    }
+
+    @PreAuthorize("@ss.hasPermi('bas:attachment:downMultiplePieces')")
+    @ApiOperation(httpMethod = "POST", value = "附件Excel下载 - bas:downMultiplePieces:downMultiplePieces ", notes = "附件下载")
+    @PostMapping(value = "/downMultiplePieces")
+    public void downMultiplePieces(@RequestBody List<BasAttachmentExcelDTO> list, HttpServletResponse response) {
         ExcelUtil<BasAttachmentExcelDTO> util = new ExcelUtil<BasAttachmentExcelDTO>(BasAttachmentExcelDTO.class);
-        util.exportExcel(response, filesUrl, "attachment");
-
-//        return R.ok(filesUrl);
-
+        util.exportExcel(response, list, "attachment");
     }
 
 }
