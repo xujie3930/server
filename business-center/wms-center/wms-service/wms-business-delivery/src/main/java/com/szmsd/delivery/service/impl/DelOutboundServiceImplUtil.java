@@ -3,7 +3,13 @@ package com.szmsd.delivery.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.enums.SqlLike;
-import com.itextpdf.text.*;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -230,7 +236,9 @@ public final class DelOutboundServiceImplUtil {
     public static void handlerQueryWrapper(QueryWrapper<DelOutboundListQueryDto> queryWrapper, DelOutboundListQueryDto queryDto) {
         String orderNo = queryDto.getOrderNo();
         if (StringUtils.isNotEmpty(orderNo)) {
-            if (orderNo.contains(",")) {
+            if (orderNo.contains("\n")) {
+                queryWrapper.in("o.order_no", Arrays.asList(orderNo.split("\n")));
+            } else if (orderNo.contains(",")) {
                 queryWrapper.in("o.order_no", Arrays.asList(orderNo.split(",")));
             } else {
                 queryWrapper.likeRight("o.order_no", orderNo);
@@ -238,7 +246,9 @@ public final class DelOutboundServiceImplUtil {
         }
         String purchaseNo = queryDto.getPurchaseNo();
         if (StringUtils.isNotEmpty(purchaseNo)) {
-            if (purchaseNo.contains(",")) {
+            if (purchaseNo.contains("\n")) {
+                queryWrapper.in("o.purchase_no", Arrays.asList(purchaseNo.split("\n")));
+            } else if (purchaseNo.contains(",")) {
                 queryWrapper.in("o.purchase_no", Arrays.asList(purchaseNo.split(",")));
             } else {
                 queryWrapper.likeRight("o.purchase_no", purchaseNo);
@@ -246,7 +256,9 @@ public final class DelOutboundServiceImplUtil {
         }
         String trackingNo = queryDto.getTrackingNo();
         if (StringUtils.isNotEmpty(trackingNo)) {
-            if (trackingNo.contains(",")) {
+            if (trackingNo.contains("\n")) {
+                queryWrapper.in("o.tracking_no", Arrays.asList(trackingNo.split("\n")));
+            } else if (trackingNo.contains(",")) {
                 queryWrapper.in("o.tracking_no", Arrays.asList(trackingNo.split(",")));
             } else {
                 queryWrapper.likeRight("o.tracking_no", trackingNo);
@@ -261,9 +273,10 @@ public final class DelOutboundServiceImplUtil {
 
         String orderType = queryDto.getOrderType();
         if (StringUtils.isNotEmpty(orderType)) {
-            if (orderType.contains(",")) {
-                String[] split = orderType.split(",");
-                queryWrapper.in("o.order_type", Arrays.asList(split));
+            if (orderType.contains("\n")) {
+                queryWrapper.in("o.order_type", Arrays.asList(orderType.split("\n")));
+            } else if (orderType.contains(",")) {
+                queryWrapper.in("o.order_type", Arrays.asList(orderType.split(",")));
             } else {
                 queryWrapper.eq("o.order_type", orderType);
             }
@@ -271,9 +284,10 @@ public final class DelOutboundServiceImplUtil {
 
         String refNo = queryDto.getRefNo();
         if (StringUtils.isNotEmpty(refNo)) {
-            if (refNo.contains(",")) {
-                String[] split = refNo.split(",");
-                queryWrapper.in("o.ref_no", Arrays.asList(split));
+            if (refNo.contains("\n")) {
+                queryWrapper.in("o.ref_no", Arrays.asList(refNo.split("\n")));
+            } else if (refNo.contains(",")) {
+                queryWrapper.in("o.ref_no", Arrays.asList(refNo.split(",")));
             } else {
                 queryWrapper.eq("o.ref_no", refNo);
             }
