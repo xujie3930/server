@@ -63,21 +63,24 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
     @Transactional(rollbackFor = Exception.class)
     public Boolean submit(BasChildParentChild basChildParentChild) {
         // 再次验证
-        BasSeller selectVO = new BasSeller();
+        BasChildParentChildQueryVO selectVO = new BasChildParentChildQueryVO();
         selectVO.setSellerCode(basChildParentChild.getSellerCode());
+        selectVO.setParentSellerCode(basChildParentChild.getParentSellerCode());
         BasSeller basSeller = sellerAdd(selectVO);
-        basSellerService.lambdaUpdate().eq(BasSeller::getId, basSeller.getId()).set(BasSeller::getChildParentStatus, "1").update();
-        boolean save = save(basChildParentChild);
+        basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getSellerCode()).set(BasSeller::getChildParentStatus, "2").update();
+        basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getParentSellerCode()).set(BasSeller::getChildParentStatus, "1").update();
+        basChildParentChild.setState(ChildParentStateEnum.reviewing.getKey());
+        boolean save = saveOrUpdate(basChildParentChild);
         return save;
     }
 
     @Override
-    public BasSeller sellerAdd(BasSeller basSeller) {
+    public BasSeller sellerAdd(BasChildParentChildQueryVO basSeller) {
         String sellerCode = basSeller.getSellerCode();
         if (StringUtils.isEmpty(sellerCode)) {
             throw new BaseException("客户代码不能为空");
         }
-        BasChildParentChild one = lambdaQuery().eq(BasChildParentChild::getSellerCode, sellerCode).last("limit 1").one();
+        BasChildParentChild one = lambdaQuery().eq(BasChildParentChild::getSellerCode, sellerCode).ne(BasChildParentChild::getParentSellerCode, basSeller.getParentSellerCode()).last("limit 1").one();
         if (Objects.nonNull(one)) {
             throw new BaseException("该客户代码已有关联");
         }
@@ -95,7 +98,8 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
         boolean result = false;
         LambdaUpdateChainWrapper<BasChildParentChild> updateChainWrapper = lambdaUpdate().eq(BasChildParentChild::getSellerCode, basChildParentChild.getSellerCode());
         if (Objects.equals(state, ChildParentStateEnum.unbind.getKey())) {
-            int count = lambdaQuery().eq(BasChildParentChild::getSellerCode, basChildParentChild.getSellerCode()).count();
+            int count = lambdaQuery().eq(BasChildParentChild::getParentSellerCode, basChildParentChild.getParentSellerCode()).count();
+            basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getSellerCode()).set(BasSeller::getChildParentStatus, 0).update();
             result = updateChainWrapper.remove();
             if (Objects.equals(count, 1)) {
                 result = basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getParentSellerCode()).set(BasSeller::getChildParentStatus, 0).update();
@@ -115,6 +119,9 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
         basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, sellerCode).set(BasSeller::getChildParentStatus, "1").update();
         List<BasChildParentChild> childList = basSeller.getChildList();
         if (CollectionUtils.isNotEmpty(childList)) {
+            childList.stream().forEach(item -> {
+                item.setState(ChildParentStateEnum.reviewing.getKey());
+            });
             saveBatch(childList);
         }
         return true;

@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.bas.mapper.BasChildParentChildMapper">
 
     <select id="pageList" resultType="com.szmsd.bas.domain.BasChildParentChild">
-        select a.name_cn,a.name_en,a.company,a.state as cert_status,a.phone_number,a.*
+        select a.name_cn,a.name_en,a.company,a.state as cert_status,a.phone_number,b.*
         from bas_seller a
         left join bas_child_parent_child b on a.seller_code = b.seller_code
         <where>
@@ -17,7 +17,7 @@
                 AND b.seller_code = #{sellerCode}
             </if>
             <if test="parentSellerCode != null and parentSellerCode != ''">
-                AND a.seller_code = #{parentSellerCode}
+                AND b.parent_seller_code = #{parentSellerCode}
             </if>
             <if test="childParentStatus != null and childParentStatus != ''">
                 AND a.child_parent_status = #{childParentStatus}

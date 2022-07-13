@@ -55,7 +55,7 @@ public interface IBasChildParentChildService extends IService<BasChildParentChil
      * @author: taoJie
      * @since: 2022-07-13
      */
-    BasSeller sellerAdd(BasSeller basSeller);
+    BasSeller sellerAdd(BasChildParentChildQueryVO basSeller);
 
 
     /**
