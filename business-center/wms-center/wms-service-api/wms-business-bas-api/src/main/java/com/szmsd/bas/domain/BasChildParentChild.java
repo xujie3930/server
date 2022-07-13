@@ -75,10 +75,11 @@ public class BasChildParentChild extends BaseEntity {
     private String nameEn;
 
     @ApiModelProperty(value = "公司")
-    @Excel(name = "公司")
+    @TableField(exist = false)
     private String company;
 
     @ApiModelProperty(value = "认证状态 ")
+    @TableField(exist = false)
     private Boolean certStatus;
 
     @ApiModelProperty(value = "联系电话")
