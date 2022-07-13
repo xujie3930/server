@@ -188,4 +188,10 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "授权码")
     private String authorizationCode;
 
+    @ApiModelProperty(value = "子母状态 0未关联 1母 2子")
+    private String childParentStatus;
+
+    @ApiModelProperty(value = "关联账号信息")
+    @TableField(exist = false)
+    List<BasChildParentChild> childList;
 }
