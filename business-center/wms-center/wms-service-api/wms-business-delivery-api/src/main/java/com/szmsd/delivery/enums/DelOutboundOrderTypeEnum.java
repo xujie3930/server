@@ -18,7 +18,7 @@ public enum DelOutboundOrderTypeEnum {
     BATCH("Batch", "批量出库单"),
     SALES("Sales", "普通销售订单"),
     MULTIPLE_PIECES("MultiplePieces","一票多件出库单"),
-
+    BULK_ORDER("BulkOrder","大货订单"),
 
     ;
 
