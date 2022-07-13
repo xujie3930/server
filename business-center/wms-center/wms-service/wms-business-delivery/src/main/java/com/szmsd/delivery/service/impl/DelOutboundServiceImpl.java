@@ -138,7 +138,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -714,7 +717,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 批量出库保存装箱信息
             if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
                     || DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
-                    || DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+                    || DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())
+
+            ) {
                 // 装箱信息
                 List<DelOutboundPackingDto> packings = dto.getPackings();
                 this.delOutboundPackingService.save(orderNo, packings, false);
@@ -2086,6 +2091,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         queryDTO.setBusinessNoList(businessNos);
         queryDTO.setBusinessCode(attachmentType);
         List<BasAttachment> basAttachmentList = ListUtils.emptyIfNull(remoteAttachmentService.list(queryDTO).getData());
+        basAttachmentList =basAttachmentList.stream().filter(distinctByKey(person -> person.getBusinessNo())).collect(Collectors.toList());
 
         Map<String, BasAttachment> uuidNameMap = basAttachmentList.stream().collect(Collectors.toMap(BasAttachment::getBusinessNo, account -> account));
 
@@ -2116,6 +2122,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             lambdaUpdateWrapper.in(DelOutbound::getOrderNo, orders);
             this.update(lambdaUpdateWrapper);
         }
+    }
+
+    private static <T> Predicate<T> distinctByKey(Function<? super T,?> keyExtractor){
+        Map<Object,Boolean> map=new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t),Boolean.TRUE)==null;
     }
 
     @Transactional
