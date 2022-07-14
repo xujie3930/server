@@ -6,6 +6,7 @@ import com.szmsd.delivery.dto.DelOutboundExportItemListDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -82,6 +83,8 @@ public interface IDelOutboundDetailService extends IService<DelOutboundDetail> {
     List<DelOutboundDetail> listByOrderNos(List<String> orderNos);
 
     List<DelOutboundDetail> queryDetailsByIdList(List<String> idList);
+
+    Map<String, String> queryDetailsLabelByNos(List<String> orderNos);
 
     /**
      * 导出列表查询
