@@ -3,12 +3,14 @@ package com.szmsd.bas.service.impl;
 import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.domain.BasChildParentChild;
+import com.szmsd.bas.domain.BasChildParentLog;
 import com.szmsd.bas.domain.BasCk1ShopifyWebhooksLog;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.enums.ChildParentStateEnum;
 import com.szmsd.bas.mapper.BasChildParentChildMapper;
 import com.szmsd.bas.mapper.BasCk1ShopifyWebhooksLogMapper;
 import com.szmsd.bas.service.IBasChildParentChildService;
+import com.szmsd.bas.service.IBasChildParentLogService;
 import com.szmsd.bas.service.IBasCk1ShopifyWebhooksLogService;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.vo.BasChildParentChildQueryVO;
@@ -38,6 +40,9 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
     @Autowired
     private IBasSellerService basSellerService;
 
+    @Autowired
+    private IBasChildParentLogService basChildParentLogService;
+
     @Override
     public BasSeller detail(BasChildParentChildQueryVO queryVO) {
         String sellerCode = queryVO.getParentSellerCode();
@@ -52,7 +57,12 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
         detailVO.setChildParentStatus("2");
         detailVO.setParentSellerCode(sellerCode);
         List<BasChildParentChild> basChildParentChildren = baseMapper.pageList(detailVO);
-        seller.setChildList(basChildParentChildren);
+        if(CollectionUtils.isNotEmpty(basChildParentChildren)) {
+            seller.setChildList(basChildParentChildren);
+            seller.setApplyName(basChildParentChildren.get(0).getApplyName());
+            seller.setApplyTime(basChildParentChildren.get(0).getApplyTime());
+        }
+
         return seller;
     }
 
@@ -83,12 +93,20 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
         // 再次验证
         BasChildParentChildQueryVO selectVO = new BasChildParentChildQueryVO();
         selectVO.setSellerCode(basChildParentChild.getSellerCode());
+        selectVO.setId(basChildParentChild.getId());
         selectVO.setParentSellerCode(basChildParentChild.getParentSellerCode());
         BasSeller basSeller = sellerAdd(selectVO);
         basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getSellerCode()).set(BasSeller::getChildParentStatus, "2").update();
         basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getParentSellerCode()).set(BasSeller::getChildParentStatus, "1").update();
         basChildParentChild.setState(ChildParentStateEnum.reviewing.getKey());
         boolean save = saveOrUpdate(basChildParentChild);
+
+        // 日志操作
+        BasChildParentLog basChildParentLog = new BasChildParentLog();
+        basChildParentLog.setParentSellerCode(basChildParentChild.getParentSellerCode());
+        basChildParentLog.setSellerCode(basChildParentChild.getSellerCode());
+        basChildParentLog.setState(ChildParentStateEnum.reviewing.getKey());
+        basChildParentLogService.save(basChildParentLog);
         return save;
     }
 
@@ -98,7 +116,18 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
         if (StringUtils.isEmpty(sellerCode)) {
             throw new BaseException("客户代码不能为空");
         }
-        BasChildParentChild one = lambdaQuery().eq(BasChildParentChild::getSellerCode, sellerCode).ne(BasChildParentChild::getParentSellerCode, basSeller.getParentSellerCode()).last("limit 1").one();
+        BasChildParentChild one = null;
+        // 如果没有传主单号
+        if (StringUtils.isEmpty(basSeller.getParentSellerCode())) {
+            one = lambdaQuery().eq(BasChildParentChild::getParentSellerCode, sellerCode).last("limit 1").one();
+        } else {
+            // 如果是编辑就查不是自己的子单
+            if (Objects.nonNull(basSeller.getId())) {
+                one = lambdaQuery().eq(BasChildParentChild::getSellerCode, sellerCode).ne(BasChildParentChild::getId, basSeller.getId()).last("limit 1").one();
+            } else {
+                one = lambdaQuery().eq(BasChildParentChild::getSellerCode, sellerCode).or().eq(BasChildParentChild::getParentSellerCode, sellerCode).last("limit 1").one();
+            }
+        }
         if (Objects.nonNull(one)) {
             throw new BaseException("该客户代码已有关联");
         }
@@ -113,18 +142,32 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
     @Transactional(rollbackFor = Exception.class)
     public Boolean dealOperation(BasChildParentChild basChildParentChild) {
         String state = basChildParentChild.getState();
+        String sellerCode = basChildParentChild.getSellerCode();
+        String parentSellerCode = basChildParentChild.getParentSellerCode();
         boolean result = false;
-        LambdaUpdateChainWrapper<BasChildParentChild> updateChainWrapper = lambdaUpdate().eq(BasChildParentChild::getSellerCode, basChildParentChild.getSellerCode());
-        if (Objects.equals(state, ChildParentStateEnum.unbind.getKey())) {
-            int count = lambdaQuery().eq(BasChildParentChild::getParentSellerCode, basChildParentChild.getParentSellerCode()).count();
-            basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getSellerCode()).set(BasSeller::getChildParentStatus, 0).update();
+
+        // 日志操作
+        BasChildParentLog basChildParentLog = new BasChildParentLog();
+        basChildParentLog.setParentSellerCode(parentSellerCode);
+        basChildParentLog.setSellerCode(sellerCode);
+        basChildParentLog.setState(state);
+        basChildParentLogService.save(basChildParentLog);
+
+
+        LambdaUpdateChainWrapper<BasChildParentChild> updateChainWrapper = lambdaUpdate().eq(BasChildParentChild::getSellerCode, sellerCode);
+        if (Objects.equals(state, ChildParentStateEnum.unbind.getKey())||Objects.equals(state, ChildParentStateEnum.remove.getKey())) {
+            int count = lambdaQuery().eq(BasChildParentChild::getParentSellerCode, parentSellerCode).count();
+            basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, sellerCode).set(BasSeller::getChildParentStatus, 0).update();
             result = updateChainWrapper.remove();
             if (Objects.equals(count, 1)) {
-                result = basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getParentSellerCode()).set(BasSeller::getChildParentStatus, 0).update();
+                basChildParentLogService.lambdaUpdate().eq(BasChildParentLog::getParentSellerCode,parentSellerCode).remove();
+                result = basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode,parentSellerCode).set(BasSeller::getChildParentStatus, 0).update();
             }
         } else {
-            result = updateChainWrapper.set(BasChildParentChild::getState, state).update();
+            result = updateChainWrapper.set(BasChildParentChild::getState, state).set(BasChildParentChild::getDealTime, new Date()).update();
         }
+
+
         return result;
     }
 
@@ -141,12 +184,29 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
             basSellerService.lambdaUpdate().in(BasSeller::getSellerCode, childCodes).set(BasSeller::getChildParentStatus, "2").update();
             childList.stream().forEach(item -> {
                 item.setState(ChildParentStateEnum.reviewing.getKey());
-                item.setApplyTime(basSeller.getApplyTime());
                 item.setParentSellerCode(sellerCode);
+                item.setApplyName(basSeller.getApplyName());
+                item.setApplyCode(basSeller.getApplyCode());
             });
+
             saveBatch(childList);
+
+            // 日志操作
+            List<BasChildParentLog> basChildParentLogList = childList.stream().map(item -> {
+                BasChildParentLog basChildParentLog = new BasChildParentLog();
+                basChildParentLog.setParentSellerCode(sellerCode);
+                basChildParentLog.setSellerCode(item.getSellerCode());
+                basChildParentLog.setState(ChildParentStateEnum.reviewing.getKey());
+                return basChildParentLog;
+            }).collect(Collectors.toList());
+            basChildParentLogService.saveBatch(basChildParentLogList);
         }
         return true;
+    }
+
+    @Override
+    public List<String> getChildCodeList(String sellerCode) {
+        return null;
     }
 }
 
