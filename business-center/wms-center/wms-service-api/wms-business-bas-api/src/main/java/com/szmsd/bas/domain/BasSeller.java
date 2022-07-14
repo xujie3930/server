@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.szmsd.common.core.annotation.Excel;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -194,4 +195,9 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "关联账号信息")
     @TableField(exist = false)
     List<BasChildParentChild> childList;
+
+
+    @ApiModelProperty(value = "申请时间")
+    @TableField(exist = false)
+    private Date applyTime;
 }

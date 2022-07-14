@@ -5,7 +5,14 @@
     <select id="pageList" resultType="com.szmsd.bas.domain.BasChildParentChild">
         select a.name_cn,a.name_en,a.company,a.state as cert_status,a.phone_number,b.*
         from bas_seller a
-        left join bas_child_parent_child b on a.seller_code = b.seller_code
+        left join bas_child_parent_child b on
+
+        <if test="childParentStatus != null and childParentStatus == '1'.toString()">
+            a.seller_code = b.parent_seller_code
+        </if>
+        <if test="childParentStatus != null and childParentStatus == '2'.toString()">
+            a.seller_code = b.seller_code
+        </if>
         <where>
             <if test=" timeType != null and timeType == '1'.toString() and timeArrange !=null and timeArrange.size() >1 ">
                 and b.apply_time BETWEEN #{timeArrange[0]} and  #{timeArrange[1]}
@@ -21,6 +28,9 @@
             </if>
             <if test="childParentStatus != null and childParentStatus != ''">
                 AND a.child_parent_status = #{childParentStatus}
+            </if>
+            <if test="childParentStatus != null and childParentStatus == '1'.toString()">
+                GROUP BY b.parent_seller_code
             </if>
         </where>
         order by b.apply_time desc

@@ -22,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 子母单
@@ -56,7 +58,23 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
 
     @Override
     public List<BasChildParentChild> pageList(BasChildParentChildQueryVO queryVo) {
-        return baseMapper.pageList(queryVo);
+        List<BasChildParentChild> basChildParentChildren = baseMapper.pageList(queryVo);
+        if (queryVo.getChildParentStatus().equals("1")) {
+            if (CollectionUtils.isNotEmpty(basChildParentChildren)) {
+
+                List<String> sellerCodeList = basChildParentChildren.stream().map(BasChildParentChild::getParentSellerCode).collect(Collectors.toList());
+                List<BasChildParentChild> list = lambdaQuery().in(BasChildParentChild::getParentSellerCode, sellerCodeList).list();
+                Map<String, List<BasChildParentChild>> parentMap = list.stream().collect(Collectors.groupingBy(BasChildParentChild::getParentSellerCode));
+                basChildParentChildren.stream().forEach(item -> {
+                    List<BasChildParentChild> childList = parentMap.get(item.getParentSellerCode());
+                    if (CollectionUtils.isNotEmpty(childList)) {
+                        item.setChildCodes(childList.stream().map(BasChildParentChild::getSellerCode).collect(Collectors.joining(",")));
+                    }
+                });
+            }
+
+        }
+        return basChildParentChildren;
     }
 
     @Override
@@ -119,8 +137,12 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
         basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, sellerCode).set(BasSeller::getChildParentStatus, "1").update();
         List<BasChildParentChild> childList = basSeller.getChildList();
         if (CollectionUtils.isNotEmpty(childList)) {
+            List<String> childCodes = childList.stream().map(BasChildParentChild::getSellerCode).collect(Collectors.toList());
+            basSellerService.lambdaUpdate().in(BasSeller::getSellerCode, childCodes).set(BasSeller::getChildParentStatus, "2").update();
             childList.stream().forEach(item -> {
                 item.setState(ChildParentStateEnum.reviewing.getKey());
+                item.setApplyTime(basSeller.getApplyTime());
+                item.setParentSellerCode(sellerCode);
             });
             saveBatch(childList);
         }

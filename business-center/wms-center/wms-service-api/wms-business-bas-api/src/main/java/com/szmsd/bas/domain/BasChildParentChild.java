@@ -90,5 +90,9 @@ public class BasChildParentChild extends BaseEntity {
     @TableField(exist = false)
     private String phoneNumber;
 
+    @ApiModelProperty(value = "关联客户编码")
+    @TableField(exist = false)
+    private String childCodes;
+
 
 }
