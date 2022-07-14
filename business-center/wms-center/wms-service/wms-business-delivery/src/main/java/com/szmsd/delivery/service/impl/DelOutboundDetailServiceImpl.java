@@ -13,7 +13,12 @@ import com.szmsd.delivery.mapper.DelOutboundDetailMapper;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -121,6 +126,29 @@ public class DelOutboundDetailServiceImpl extends ServiceImpl<DelOutboundDetailM
         LambdaQueryWrapper<DelOutboundDetail> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.in(DelOutboundDetail::getId, idList);
         return this.list(queryWrapper);
+    }
+
+    @Override
+    public Map<String, String> queryDetailsLabelByNos(List<String> orderNos) {
+        if (CollectionUtils.isEmpty(orderNos)) {
+            return Collections.emptyMap();
+        }
+        LambdaQueryWrapper<DelOutboundDetail> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.select(DelOutboundDetail::getOrderNo, DelOutboundDetail::getSku, DelOutboundDetail::getQty);
+        queryWrapper.in(DelOutboundDetail::getOrderNo, orderNos);
+        List<DelOutboundDetail> delOutboundDetailList = this.list(queryWrapper);
+        Map<String, String> result = new HashMap<>(orderNos.size());
+        if (CollectionUtils.isNotEmpty(delOutboundDetailList)) {
+            Map<String, List<DelOutboundDetail>> listMap = delOutboundDetailList.stream().collect(Collectors.groupingBy(DelOutboundDetail::getOrderNo));
+            listMap.forEach((orderNo, list) -> {
+                StringJoiner joiner = new StringJoiner(",");
+                for (DelOutboundDetail detail : list) {
+                    joiner.add(detail.getSku() + "*" + detail.getQty());
+                }
+                result.put(orderNo, joiner.toString());
+            });
+        }
+        return result;
     }
 
     @Override

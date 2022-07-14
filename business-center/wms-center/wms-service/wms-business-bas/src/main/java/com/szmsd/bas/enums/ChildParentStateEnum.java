@@ -30,7 +30,12 @@ public enum ChildParentStateEnum {
     /**
      * 解绑
      **/
-    unbind("4", "解绑");
+    unbind("4", "解绑"),
+
+    /**
+     * 删除
+     **/
+    remove("5", "删除");
 
     private final String key;
     private final String desc;

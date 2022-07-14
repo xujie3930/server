@@ -7,7 +7,6 @@ import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.client.BasSubClientService;
@@ -34,7 +33,24 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.dto.DelOutboundAgainTrackingNoDto;
+import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
+import com.szmsd.delivery.dto.DelOutboundBoxLabelDto;
+import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
+import com.szmsd.delivery.dto.DelOutboundCanceledDto;
+import com.szmsd.delivery.dto.DelOutboundDetailEnImportDto2;
+import com.szmsd.delivery.dto.DelOutboundDetailImportDto;
+import com.szmsd.delivery.dto.DelOutboundDetailImportDto2;
+import com.szmsd.delivery.dto.DelOutboundDto;
+import com.szmsd.delivery.dto.DelOutboundEnImportDto;
+import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
+import com.szmsd.delivery.dto.DelOutboundHandlerDto;
+import com.szmsd.delivery.dto.DelOutboundImportDto;
+import com.szmsd.delivery.dto.DelOutboundLabelDto;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.dto.DelOutboundToPrintDto;
+import com.szmsd.delivery.dto.DelOutboundUploadBoxLabelDto;
+import com.szmsd.delivery.dto.UpdateWeightDelOutboundDto;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
@@ -190,10 +206,17 @@ public class DelOutboundController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:getInfoForThirdParty')")
     @PostMapping(value = "getInfoForThirdParty")
-    @ApiOperation(value = "出库管理 - 第三方订单查看专用接口", position = 201)
+    @ApiOperation(value = "出库管理 - 第三方订单查看专用接口", position = 202)
     @AutoValue
     public R<DelOutboundThirdPartyVO> getInfoForThirdParty(@RequestBody DelOutboundVO vo) {
         return R.ok(delOutboundService.getInfoForThirdParty(vo));
+    }
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:queryDetailsLabelByNos')")
+    @GetMapping(value = "queryDetailsLabelByNos")
+    @ApiOperation(value = "出库管理 - 标签SKU详情", position = 203)
+    public R<Map<String, String>> queryDetailsLabelByNos(@RequestBody List<String> nos) {
+        return R.ok(delOutboundDetailService.queryDetailsLabelByNos(nos));
     }
 
     /**

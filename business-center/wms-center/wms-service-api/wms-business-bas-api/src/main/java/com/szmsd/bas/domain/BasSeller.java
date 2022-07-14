@@ -200,4 +200,11 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "申请时间")
     @TableField(exist = false)
     private Date applyTime;
+    @ApiModelProperty(value = "申请人")
+    @TableField(exist = false)
+    private String applyName;
+
+    @ApiModelProperty(value = "申请人编码")
+    @TableField(exist = false)
+    private String applyCode;
 }

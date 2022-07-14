@@ -222,7 +222,11 @@ public class SysUserController extends BaseController {
         Map map = new HashMap<>();
         // todo 此处修改ajax.put返回  R.ok(map)
 
+        SysUser sysUser = userService.selectUserById(userId);
+        String sellerCode = sysUser.getSellerCode();
+        if(StringUtils.isNotEmpty(sellerCode)){
 
+        }
         map.put("user", userService.selectUserById(userId));
         map.put("roles", roles);
         map.put("permissions", permissions);

@@ -77,4 +77,6 @@ public interface IBasChildParentChildService extends IService<BasChildParentChil
      * @since: 2022-07-13
      */
     Boolean submitList(BasSeller basSeller);
+
+    List<String> getChildCodeList(String sellerCode);
 }
