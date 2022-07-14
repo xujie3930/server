@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.mapper.BasChildParentLogMapper">
+
+    <select id="pageList" resultType="com.szmsd.bas.domain.BasChildParentLog">
+        select a.*
+        from bas_child_parent_log a
+        <where>
+            <if test=" timeType != null and timeType == '1'.toString() and timeArrange !=null and timeArrange.size() >1 ">
+                and a.create_time BETWEEN #{timeArrange[0]} and  #{timeArrange[1]}
+            </if>
+
+            <if test="sellerCode != null and sellerCode != ''">
+                AND a.seller_code = #{sellerCode}
+            </if>
+            <if test="parentSellerCode != null and parentSellerCode != ''">
+                AND a.parent_seller_code = #{parentSellerCode}
+            </if>
+        </where>
+        order by a.create_time desc
+    </select>
+</mapper>

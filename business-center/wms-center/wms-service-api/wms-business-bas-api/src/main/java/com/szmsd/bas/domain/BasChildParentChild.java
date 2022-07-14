@@ -47,6 +47,12 @@ public class BasChildParentChild extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date applyTime;
 
+    @ApiModelProperty(value = "申请编号")
+    private String applyCode;
+
+    @ApiModelProperty(value = "申请人")
+    private String applyName;
+
     @ApiModelProperty(value = "处理时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date dealTime;
@@ -62,6 +68,8 @@ public class BasChildParentChild extends BaseEntity {
 
     @ApiModelProperty(value = "修改人编号")
     private String updateBy;
+
+
 
     @ApiModelProperty(value = "版本号")
     private Integer version;
