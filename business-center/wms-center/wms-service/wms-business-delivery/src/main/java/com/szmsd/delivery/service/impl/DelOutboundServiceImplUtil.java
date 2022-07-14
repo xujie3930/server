@@ -436,6 +436,7 @@ public final class DelOutboundServiceImplUtil {
         // 渲染在画布上的宽度只有200，以200作为基础比例
         float scalePercent = 200f / image.getWidth();
         image1.scalePercent(scalePercent * 100f);
+        image1.setSpacingBefore(-10f);
         image1.setAbsolutePosition(10f, 25f);
         document.add(image1);
         if (StringUtils.isNotEmpty(skuLabel)) {
