@@ -41,6 +41,19 @@ public class TestWrappers {
             qw.eq(DelOutbound::getAmount, 4);
         });
 
+        queryWrapper.and(w -> {
+            w.eq(DelOutbound::getTrackingNo, "aaaa").or().eq(DelOutbound::getRefNo, "aaaa");
+            w.or().eq(DelOutbound::getOrderNo, "aaaa");
+        });
+
+        queryWrapper.and(w -> {
+            w.or().eq(DelOutbound::getOrderNo, "aaaa");
+        });
+
+        queryWrapper.and(w -> {
+            w.eq(DelOutbound::getTrackingNo, "aaaa").or().eq(DelOutbound::getRefNo, "aaaa");
+        });
+
         System.out.println(queryWrapper);
         System.out.println(queryWrapper.getCustomSqlSegment());
 
