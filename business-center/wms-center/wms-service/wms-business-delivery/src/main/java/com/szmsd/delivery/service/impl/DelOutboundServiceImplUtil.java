@@ -356,7 +356,7 @@ public final class DelOutboundServiceImplUtil {
         queryWrapper.orderByDesc("o.create_time");
     }
 
-    public static ByteArrayOutputStream renderPackageTransfer(DelOutbound delOutbound, DelOutboundAddress delOutboundAddress) throws Exception {
+    public static ByteArrayOutputStream renderPackageTransfer(DelOutbound delOutbound, DelOutboundAddress delOutboundAddress, String skuLabel) throws Exception {
         Document document = new Document();
         document.top(0f);
         document.left(0f);
@@ -424,8 +424,9 @@ public final class DelOutboundServiceImplUtil {
         document.add(pdfPTable);
         Paragraph country = new Paragraph(delOutbound.getWeight() + " g");
         country.setAlignment(Element.ALIGN_RIGHT);
-        country.setSpacingBefore(0f);
+        country.setSpacingBefore(-5f);
         country.setSpacingAfter(0f);
+        country.setPaddingTop(0f);
         document.add(country);
         String content = delOutbound.getOrderNo();
         BufferedImage bufferedImage = ITextPdfUtil.getBarCode(content);
@@ -435,8 +436,16 @@ public final class DelOutboundServiceImplUtil {
         // 渲染在画布上的宽度只有200，以200作为基础比例
         float scalePercent = 200f / image.getWidth();
         image1.scalePercent(scalePercent * 100f);
-        image1.setAbsolutePosition(20f, 25f);
+        image1.setAbsolutePosition(10f, 25f);
         document.add(image1);
+        if (StringUtils.isNotEmpty(skuLabel)) {
+            Paragraph paragraph_label = new Paragraph(skuLabel, font);
+            paragraph_label.setAlignment(Element.ALIGN_LEFT);
+            paragraph_label.setSpacingBefore(30f);
+            paragraph_label.setSpacingAfter(0f);
+            paragraph_label.setPaddingTop(0f);
+            document.add(paragraph_label);
+        }
         document.close();
         writer.close();
         return byteArrayOutputStream;
