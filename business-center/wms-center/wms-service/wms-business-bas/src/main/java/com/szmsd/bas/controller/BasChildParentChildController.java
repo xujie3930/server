@@ -56,7 +56,7 @@ public class BasChildParentChildController extends BaseController {
      */
     @PostMapping("/sellerAdd")
     @ApiOperation(value = "判断客户是否可以加入", notes = "判断客户是否可以加入")
-    public R<BasSeller> sellerAdd(@RequestBody BasSeller basSeller) {
+    public R<BasSeller> sellerAdd(@RequestBody BasChildParentChildQueryVO basSeller) {
         return R.ok(basChildParentChildService.sellerAdd(basSeller));
     }
 

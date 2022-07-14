@@ -3,6 +3,7 @@ package com.szmsd.bas.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -12,6 +13,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,10 +44,12 @@ public class BasChildParentChild extends BaseEntity {
     private String parentSellerCode;
 
     @ApiModelProperty(value = "申请时间")
-    private String applyTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date applyTime;
 
     @ApiModelProperty(value = "处理时间")
-    private String dealTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date dealTime;
 
     @ApiModelProperty(value = "附件URL")
     private String attachment;
@@ -85,6 +89,10 @@ public class BasChildParentChild extends BaseEntity {
     @ApiModelProperty(value = "联系电话")
     @TableField(exist = false)
     private String phoneNumber;
+
+    @ApiModelProperty(value = "关联客户编码")
+    @TableField(exist = false)
+    private String childCodes;
 
 
 }
