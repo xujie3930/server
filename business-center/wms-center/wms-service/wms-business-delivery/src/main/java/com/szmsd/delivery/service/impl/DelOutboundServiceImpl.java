@@ -1825,7 +1825,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     // 查询地址信息
                     DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
                     try {
-                        ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress);
+                        // 查询SKU信息
+                        List<String> nos = new ArrayList<>();
+                        nos.add(orderNo);
+                        Map<String, String> skuLabelMap = this.delOutboundDetailService.queryDetailsLabelByNos(nos);
+                        String skuLabel = skuLabelMap.get(orderNo);
+                        ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress, skuLabel);
                         FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);

@@ -213,7 +213,7 @@ public class DelOutboundController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:queryDetailsLabelByNos')")
-    @GetMapping(value = "queryDetailsLabelByNos")
+    @PostMapping(value = "/queryDetailsLabelByNos")
     @ApiOperation(value = "出库管理 - 标签SKU详情", position = 203)
     public R<Map<String, String>> queryDetailsLabelByNos(@RequestBody List<String> nos) {
         return R.ok(delOutboundDetailService.queryDetailsLabelByNos(nos));
