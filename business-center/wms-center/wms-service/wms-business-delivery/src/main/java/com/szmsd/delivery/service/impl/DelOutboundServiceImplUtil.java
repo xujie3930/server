@@ -38,7 +38,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -244,67 +244,52 @@ public final class DelOutboundServiceImplUtil {
         // 跟踪号，refNo
         List<String> otherQueryNoList = new ArrayList<>();
         if (StringUtils.isNotEmpty(refNo)) {
-            List<String> nos = new ArrayList<>();
-            if (refNo.contains("\n")) {
-                nos.addAll(Arrays.asList(refNo.split("\n")));
-            } else if (refNo.contains(",")) {
-                nos.addAll(Arrays.asList(refNo.split(",")));
-            } else {
-                nos.add(refNo);
+            List<String> nos = splitToArray(refNo, "[\n,]");
+            if (CollectionUtils.isNotEmpty(nos)) {
+                for (String no : nos) {
+                    // CK/RECK开头的是出库单号
+                    if (no.startsWith("CK") || no.startsWith("RECK")) {
+                        delOutboundNoList.add(no);
+                    } else {
+                        otherQueryNoList.add(no);
+                    }
+                }
+                queryWrapper.and(wrapper -> {
+                    // tracking_no in (xxx) or ref_no in (xxx)
+                    if (CollectionUtils.isNotEmpty(otherQueryNoList)) {
+                        wrapper.in("o.tracking_no", otherQueryNoList)
+                                .or().in("o.ref_no", otherQueryNoList);
+                    }
+                    // [or] order_no in (xxx)
+                    if (CollectionUtils.isNotEmpty(delOutboundNoList)) {
+                        wrapper.or().in("o.order_no", delOutboundNoList);
+                    }
+                });
             }
-            for (String no : nos) {
-                // CK/RECK开头的是出库单号
-                if (no.startsWith("CK") || no.startsWith("RECK")) {
-                    delOutboundNoList.add(no);
-                } else {
-                    otherQueryNoList.add(no);
-                }
-            }
-            queryWrapper.and(wrapper -> {
-                // tracking_no in (xxx) or ref_no in (xxx)
-                if (CollectionUtils.isNotEmpty(otherQueryNoList)) {
-                    wrapper.in("o.tracking_no", otherQueryNoList)
-                            .or().in("o.ref_no", otherQueryNoList);
-                }
-                // [or] order_no in (xxx)
-                if (CollectionUtils.isNotEmpty(delOutboundNoList)) {
-                    wrapper.or().in("o.order_no", delOutboundNoList);
-                }
-            });
-            /*if (refNo.contains("\n")) {
-                queryWrapper.in("o.ref_no", Arrays.asList(refNo.split("\n")));
-            } else if (refNo.contains(",")) {
-                queryWrapper.in("o.ref_no", Arrays.asList(refNo.split(",")));
-            } else {
-                queryWrapper.eq("o.ref_no", refNo);
-            }*/
         }
         String orderNo = queryDto.getOrderNo();
         if (StringUtils.isNotEmpty(orderNo)) {
-            if (orderNo.contains("\n")) {
-                queryWrapper.in("o.order_no", Arrays.asList(orderNo.split("\n")));
-            } else if (orderNo.contains(",")) {
-                queryWrapper.in("o.order_no", Arrays.asList(orderNo.split(",")));
+            if (orderNo.contains("\n") || orderNo.contains(",")) {
+                List<String> list = splitToArray(orderNo, "[\n,]");
+                queryWrapper.in(CollectionUtils.isNotEmpty(list), "o.order_no", list);
             } else {
                 queryWrapper.likeRight("o.order_no", orderNo);
             }
         }
         String purchaseNo = queryDto.getPurchaseNo();
         if (StringUtils.isNotEmpty(purchaseNo)) {
-            if (purchaseNo.contains("\n")) {
-                queryWrapper.in("o.purchase_no", Arrays.asList(purchaseNo.split("\n")));
-            } else if (purchaseNo.contains(",")) {
-                queryWrapper.in("o.purchase_no", Arrays.asList(purchaseNo.split(",")));
+            if (purchaseNo.contains("\n") || purchaseNo.contains(",")) {
+                List<String> list = splitToArray(purchaseNo, "[\n,]");
+                queryWrapper.in(CollectionUtils.isNotEmpty(list), "o.purchase_no", list);
             } else {
                 queryWrapper.likeRight("o.purchase_no", purchaseNo);
             }
         }
         String trackingNo = queryDto.getTrackingNo();
         if (StringUtils.isNotEmpty(trackingNo)) {
-            if (trackingNo.contains("\n")) {
-                queryWrapper.in("o.tracking_no", Arrays.asList(trackingNo.split("\n")));
-            } else if (trackingNo.contains(",")) {
-                queryWrapper.in("o.tracking_no", Arrays.asList(trackingNo.split(",")));
+            if (trackingNo.contains("\n") || trackingNo.contains(",")) {
+                List<String> list = splitToArray(trackingNo, "[\n,]");
+                queryWrapper.in(CollectionUtils.isNotEmpty(list), "o.tracking_no", list);
             } else {
                 queryWrapper.likeRight("o.tracking_no", trackingNo);
             }
@@ -318,10 +303,9 @@ public final class DelOutboundServiceImplUtil {
 
         String orderType = queryDto.getOrderType();
         if (StringUtils.isNotEmpty(orderType)) {
-            if (orderType.contains("\n")) {
-                queryWrapper.in("o.order_type", Arrays.asList(orderType.split("\n")));
-            } else if (orderType.contains(",")) {
-                queryWrapper.in("o.order_type", Arrays.asList(orderType.split(",")));
+            if (orderType.contains("\n") || orderType.contains(",")) {
+                List<String> list = splitToArray(orderType, "[\n,]");
+                queryWrapper.in(CollectionUtils.isNotEmpty(list), "o.order_type", list);
             } else {
                 queryWrapper.eq("o.order_type", orderType);
             }
@@ -354,6 +338,21 @@ public final class DelOutboundServiceImplUtil {
 
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
+    }
+
+    private static List<String> splitToArray(String text, String split) {
+        String[] arr = text.split(split);
+        if (arr.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = new ArrayList<>();
+        for (String s : arr) {
+            if (StringUtils.isEmpty(s)) {
+                continue;
+            }
+            list.add(s);
+        }
+        return list;
     }
 
     public static ByteArrayOutputStream renderPackageTransfer(DelOutbound delOutbound, DelOutboundAddress delOutboundAddress, String skuLabel) throws Exception {
