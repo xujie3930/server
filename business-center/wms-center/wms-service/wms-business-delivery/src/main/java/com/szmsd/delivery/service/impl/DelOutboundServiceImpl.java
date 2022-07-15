@@ -1442,7 +1442,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             updateWrapper.set(DelOutbound::getState, stateEnum.getCode());
         }
         updateWrapper.set(DelOutbound::getPackingMaterial, dto.getPackingMaterial());
-        return this.baseMapper.update(null, updateWrapper);
+        int i = this.baseMapper.update(null, updateWrapper);
+        return i;
     }
 
     @Transactional
