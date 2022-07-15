@@ -1,5 +1,7 @@
 package com.szmsd.doc.api.delivery.request;
 
+import com.szmsd.common.core.validator.ValidationSaveGroup;
+import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import com.szmsd.doc.api.delivery.request.group.DelOutboundGroup;
 import com.szmsd.doc.validator.annotation.PreNotNull;
 import io.swagger.annotations.ApiModel;
@@ -59,4 +61,8 @@ public class DelOutboundPackageTransferDetailRequest implements Serializable {
     @Size(max = 50, message = "海关编码不能超过50个字符", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "海关编码", dataType = "String")
     private String hsCode;
+
+    @Size(max = 50, message = "SKU不能超过50个字符", groups = {DelOutboundGroup.Default.class})
+    @ApiModelProperty(value = "SKU", dataType = "String")
+    private String sku;
 }
