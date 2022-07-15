@@ -181,7 +181,7 @@ public class BasAttachmentController extends BaseController {
     public R<List<BasMultiplePiecesDataDTO>> uploadMultiplePieces(@RequestParam("attachmentUrl") MultipartFile[] myFiles,
                                                                   @RequestParam("attachmentTypeEnum") AttachmentTypeEnum attachmentTypeEnum) {
 
-        if(attachmentTypeEnum == AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK || attachmentTypeEnum == AttachmentTypeEnum.BULK_ORDER_BOX_DETAIL){
+        if(attachmentTypeEnum == AttachmentTypeEnum.MULTIPLE_PIECES_BOX_MARK || attachmentTypeEnum == AttachmentTypeEnum.BULK_ORDER_BOX){
 
             List<BasMultiplePiecesDataDTO> filesUrl = new ArrayList<>();
             List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
