@@ -32,7 +32,7 @@ public class GradeServiceImpl extends SaaSPricedRequest implements IHttpGradeSer
     public R<PageVO<GradeMainDto>> page(GradePageRequest pageDTO) {
         HttpResponseBody hrb = httpPostBody("", "grade.page", pageDTO);
         if (HttpStatus.SC_OK == hrb.getStatus()) {
-            return  R.ok(JSON.parseObject(String.valueOf(hrb.getBody()), new TypeReference<PageVO<GradeMainDto>>(){}));
+            return R.ok(JSON.parseObject(HttpResponseVOUtils.newBody(hrb.getBody()), new TypeReference<PageVO<GradeMainDto>>(){}));
         }else{
             return R.failed(HttpResponseVOUtils.getErrorMsg(hrb));
 

@@ -1,6 +1,9 @@
 package com.szmsd.delivery.service.impl;
 
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -8,18 +11,12 @@ import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
-import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.domain.DelQueryService;
-import com.szmsd.delivery.domain.DelQueryServiceFeedback;
-import com.szmsd.delivery.domain.DelQuerySettings;
+import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.DelQueryServiceDto;
 import com.szmsd.delivery.enums.DelQueryServiceStateEnum;
 import com.szmsd.delivery.mapper.DelQueryServiceMapper;
-import com.szmsd.delivery.service.IDelOutboundService;
-import com.szmsd.delivery.service.IDelQueryServiceFeedbackService;
-import com.szmsd.delivery.service.IDelQueryServiceService;
+import com.szmsd.delivery.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szmsd.delivery.service.IDelQuerySettingsService;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +25,7 @@ import com.szmsd.common.core.domain.R;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,6 +49,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
     private IDelOutboundService delOutboundService;
     @Resource
     private BasSellerFeignService basSellerFeignService;
+    @Resource
+    private IDelTrackService delTrackService;
 
     /**
         * 查询查件服务模块
@@ -152,14 +152,41 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryService.getCountryCode());
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
             List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
-            if(dataDelQuerySettingsList.size() == 0){
-                throw new CommonException("400", "此查件申请不满足查件条件");
+            if(dataDelQuerySettingsList.size() > 0){
+
+                DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0) ;
+                DelOutbound delOutbound = delOutboundService.getByOrderNo(delQueryService.getOrderNo());
+                if(delOutbound == null){
+                    throw new CommonException("400", "无效订单");
+                }
+
+                boolean bool = false;
+
+                if(StringUtils.equals(delOutbound.getState(), delQuerySettings.getState())){
+                    bool = true;
+                }else if(delOutbound.getShipmentsTime() != null && DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(),  true) <= delQuerySettings.getShipmentDays()){
+                    bool = true;
+                }else{
+                    LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+                    delTrackLambdaQueryWrapper.eq(DelTrack::getOrderNo, delQueryService.getOrderNo());
+                    delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
+                    delTrackLambdaQueryWrapper.last("LIMIT 1");
+                    DelTrack dataDelTrack = delTrackService.getOne(delTrackLambdaQueryWrapper);
+                    if(dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(),  true) <= delQuerySettings.getTrackStayDays()){
+                        bool = true;
+                    }
+                }
+                if(!bool){
+                    throw new CommonException("400", "此查件申请不满足查件条件");
+
+                }
             }
 
             delQueryService.setState(DelQueryServiceStateEnum.SUBMITTED.getCode());
             delQueryService.setStateName(DelQueryServiceStateEnum.SUBMITTED.getName());
             return baseMapper.insert(delQueryService);
         }
+
 
         /**
         * 修改查件服务模块

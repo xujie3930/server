@@ -11,6 +11,7 @@ import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.discount.*;
 import com.szmsd.http.dto.discount.*;
+import com.szmsd.http.dto.grade.GradeMainDto;
 import com.szmsd.http.service.IHttpDiscountService;
 import com.szmsd.http.service.http.SaaSPricedRequest;
 import com.szmsd.http.util.HttpResponseVOUtils;
@@ -34,7 +35,7 @@ public class DiscountServiceImpl extends SaaSPricedRequest implements IHttpDisco
     public R<PageVO> page(DiscountPageRequest pageDTO) {
         HttpResponseBody hrb = httpPostBody("", "discount.page", pageDTO);
         if (HttpStatus.SC_OK == hrb.getStatus()) {
-            return  R.ok(JSON.parseObject(String.valueOf(hrb.getBody()), new TypeReference<PageVO<DiscountMainDto>>(){}));
+            return  R.ok(JSON.parseObject(HttpResponseVOUtils.newBody(hrb.getBody()), new TypeReference<PageVO<DiscountMainDto>>(){}));
         }else{
             return R.failed(HttpResponseVOUtils.getErrorMsg(hrb));
 

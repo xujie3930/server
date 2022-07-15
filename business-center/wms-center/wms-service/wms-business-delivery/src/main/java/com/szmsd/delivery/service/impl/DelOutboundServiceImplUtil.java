@@ -3,7 +3,13 @@ package com.szmsd.delivery.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.enums.SqlLike;
-import com.itextpdf.text.*;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -26,12 +32,15 @@ import com.szmsd.delivery.util.ITextPdfFontUtil;
 import com.szmsd.delivery.util.ITextPdfUtil;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -228,26 +237,59 @@ public final class DelOutboundServiceImplUtil {
      * @param queryDto     queryDto
      */
     public static void handlerQueryWrapper(QueryWrapper<DelOutboundListQueryDto> queryWrapper, DelOutboundListQueryDto queryDto) {
+        // 特殊处理，支持输入出库单号、跟踪号、refNO，任一单号进行查询
+        String refNo = queryDto.getRefNo();
+        // 出库单号
+        List<String> delOutboundNoList = new ArrayList<>();
+        // 跟踪号，refNo
+        List<String> otherQueryNoList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(refNo)) {
+            List<String> nos = splitToArray(refNo, "[\n,]");
+            if (CollectionUtils.isNotEmpty(nos)) {
+                for (String no : nos) {
+                    // CK/RECK开头的是出库单号
+                    if (no.startsWith("CK") || no.startsWith("RECK")) {
+                        delOutboundNoList.add(no);
+                    } else {
+                        otherQueryNoList.add(no);
+                    }
+                }
+                queryWrapper.and(wrapper -> {
+                    // tracking_no in (xxx) or ref_no in (xxx)
+                    if (CollectionUtils.isNotEmpty(otherQueryNoList)) {
+                        wrapper.in("o.tracking_no", otherQueryNoList)
+                                .or().in("o.ref_no", otherQueryNoList);
+                    }
+                    // [or] order_no in (xxx)
+                    if (CollectionUtils.isNotEmpty(delOutboundNoList)) {
+                        wrapper.or().in("o.order_no", delOutboundNoList);
+                    }
+                });
+            }
+        }
         String orderNo = queryDto.getOrderNo();
         if (StringUtils.isNotEmpty(orderNo)) {
-            if (orderNo.contains(",")) {
-                queryWrapper.in("o.order_no", Arrays.asList(orderNo.split(",")));
+            if (orderNo.contains("\n") || orderNo.contains(",")) {
+                List<String> list = splitToArray(orderNo, "[\n,]");
+                queryWrapper.in(CollectionUtils.isNotEmpty(list), "o.order_no", list);
             } else {
                 queryWrapper.likeRight("o.order_no", orderNo);
             }
         }
         String purchaseNo = queryDto.getPurchaseNo();
         if (StringUtils.isNotEmpty(purchaseNo)) {
-            if (purchaseNo.contains(",")) {
-                queryWrapper.in("o.purchase_no", Arrays.asList(purchaseNo.split(",")));
+            if (purchaseNo.contains("\n") || purchaseNo.contains(",")) {
+                List<String> list = splitToArray(purchaseNo, "[\n,]");
+                queryWrapper.in(CollectionUtils.isNotEmpty(list), "o.purchase_no", list);
             } else {
                 queryWrapper.likeRight("o.purchase_no", purchaseNo);
             }
         }
         String trackingNo = queryDto.getTrackingNo();
         if (StringUtils.isNotEmpty(trackingNo)) {
-            if (trackingNo.contains(",")) {
-                queryWrapper.in("o.tracking_no", Arrays.asList(trackingNo.split(",")));
+            if (trackingNo.contains("\n") || trackingNo.contains(",")) {
+                List<String> list = splitToArray(trackingNo, "[\n,]");
+                queryWrapper.in(CollectionUtils.isNotEmpty(list), "o.tracking_no", list);
             } else {
                 queryWrapper.likeRight("o.tracking_no", trackingNo);
             }
@@ -261,24 +303,13 @@ public final class DelOutboundServiceImplUtil {
 
         String orderType = queryDto.getOrderType();
         if (StringUtils.isNotEmpty(orderType)) {
-            if (orderType.contains(",")) {
-                String[] split = orderType.split(",");
-                queryWrapper.in("o.order_type", Arrays.asList(split));
+            if (orderType.contains("\n") || orderType.contains(",")) {
+                List<String> list = splitToArray(orderType, "[\n,]");
+                queryWrapper.in(CollectionUtils.isNotEmpty(list), "o.order_type", list);
             } else {
                 queryWrapper.eq("o.order_type", orderType);
             }
         }
-
-        String refNo = queryDto.getRefNo();
-        if (StringUtils.isNotEmpty(refNo)) {
-            if (refNo.contains(",")) {
-                String[] split = refNo.split(",");
-                queryWrapper.in("o.ref_no", Arrays.asList(split));
-            } else {
-                queryWrapper.eq("o.ref_no", refNo);
-            }
-        }
-
 
         QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
         QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
@@ -309,7 +340,22 @@ public final class DelOutboundServiceImplUtil {
         queryWrapper.orderByDesc("o.create_time");
     }
 
-    public static ByteArrayOutputStream renderPackageTransfer(DelOutbound delOutbound, DelOutboundAddress delOutboundAddress) throws Exception {
+    private static List<String> splitToArray(String text, String split) {
+        String[] arr = text.split(split);
+        if (arr.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = new ArrayList<>();
+        for (String s : arr) {
+            if (StringUtils.isEmpty(s)) {
+                continue;
+            }
+            list.add(s);
+        }
+        return list;
+    }
+
+    public static ByteArrayOutputStream renderPackageTransfer(DelOutbound delOutbound, DelOutboundAddress delOutboundAddress, String skuLabel) throws Exception {
         Document document = new Document();
         document.top(0f);
         document.left(0f);
@@ -377,8 +423,9 @@ public final class DelOutboundServiceImplUtil {
         document.add(pdfPTable);
         Paragraph country = new Paragraph(delOutbound.getWeight() + " g");
         country.setAlignment(Element.ALIGN_RIGHT);
-        country.setSpacingBefore(0f);
+        country.setSpacingBefore(-5f);
         country.setSpacingAfter(0f);
+        country.setPaddingTop(0f);
         document.add(country);
         String content = delOutbound.getOrderNo();
         BufferedImage bufferedImage = ITextPdfUtil.getBarCode(content);
@@ -388,8 +435,17 @@ public final class DelOutboundServiceImplUtil {
         // 渲染在画布上的宽度只有200，以200作为基础比例
         float scalePercent = 200f / image.getWidth();
         image1.scalePercent(scalePercent * 100f);
-        image1.setAbsolutePosition(20f, 25f);
+        image1.setSpacingBefore(-10f);
+        image1.setAbsolutePosition(10f, 25f);
         document.add(image1);
+        if (StringUtils.isNotEmpty(skuLabel)) {
+            Paragraph paragraph_label = new Paragraph(skuLabel, font);
+            paragraph_label.setAlignment(Element.ALIGN_LEFT);
+            paragraph_label.setSpacingBefore(30f);
+            paragraph_label.setSpacingAfter(0f);
+            paragraph_label.setPaddingTop(0f);
+            document.add(paragraph_label);
+        }
         document.close();
         writer.close();
         return byteArrayOutputStream;

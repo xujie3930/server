@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.bas.mapper.BasChildParentChildMapper">
+
+    <select id="pageList" resultType="com.szmsd.bas.domain.BasChildParentChild">
+        select a.name_cn,a.name_en,a.company,a.state as cert_status,a.phone_number,b.*
+        from bas_seller a
+        left join bas_child_parent_child b on
+
+        <if test="childParentStatus != null and childParentStatus == '1'.toString()">
+            a.seller_code = b.parent_seller_code
+        </if>
+        <if test="childParentStatus != null and childParentStatus == '2'.toString()">
+            a.seller_code = b.seller_code
+        </if>
+        <where>
+            <if test=" timeType != null and timeType == '1'.toString() and timeArrange !=null and timeArrange.size() >1 ">
+                and b.apply_time BETWEEN #{timeArrange[0]} and  #{timeArrange[1]}
+            </if>
+            <if test="state != null and state != ''">
+                AND b.state = #{state}
+            </if>
+            <if test="sellerCode != null and sellerCode != ''">
+                AND b.seller_code = #{sellerCode}
+            </if>
+            <if test="parentSellerCode != null and parentSellerCode != ''">
+                AND b.parent_seller_code = #{parentSellerCode}
+            </if>
+            <if test="childParentStatus != null and childParentStatus != ''">
+                AND a.child_parent_status = #{childParentStatus}
+            </if>
+            <if test="childParentStatus != null and childParentStatus == '1'.toString()">
+                GROUP BY b.parent_seller_code
+            </if>
+        </where>
+        order by b.apply_time desc
+    </select>
+</mapper>

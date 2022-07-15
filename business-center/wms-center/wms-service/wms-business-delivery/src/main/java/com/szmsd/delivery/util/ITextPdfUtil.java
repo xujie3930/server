@@ -37,7 +37,7 @@ public final class ITextPdfUtil {
         hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         hints.put(EncodeHintType.MARGIN, 0);
-        int realWidth = getBarCodeNoPaddingWidth(400, vaNumber, 400) * 2;
+        int realWidth = getBarCodeNoPaddingWidth(200, vaNumber, 200) * 2;
         BitMatrix bitMatrix = new MultiFormatWriter().encode(vaNumber, BarcodeFormat.CODE_128, realWidth, 60, hints);
         MatrixToImageConfig matrixToImageConfig = new MatrixToImageConfig();
         return MatrixToImageWriter.toBufferedImage(bitMatrix, matrixToImageConfig);

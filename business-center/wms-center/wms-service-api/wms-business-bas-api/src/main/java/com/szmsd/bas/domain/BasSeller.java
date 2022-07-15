@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.szmsd.common.core.annotation.Excel;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -188,4 +189,22 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "授权码")
     private String authorizationCode;
 
+    @ApiModelProperty(value = "子母状态 0未关联 1母 2子")
+    private String childParentStatus;
+
+    @ApiModelProperty(value = "关联账号信息")
+    @TableField(exist = false)
+    List<BasChildParentChild> childList;
+
+
+    @ApiModelProperty(value = "申请时间")
+    @TableField(exist = false)
+    private Date applyTime;
+    @ApiModelProperty(value = "申请人")
+    @TableField(exist = false)
+    private String applyName;
+
+    @ApiModelProperty(value = "申请人编码")
+    @TableField(exist = false)
+    private String applyCode;
 }

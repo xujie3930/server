@@ -138,7 +138,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -325,6 +328,24 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     }
                 }
             }
+        }
+        if (DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())) {
+            BasAttachmentQueryDTO dto = new BasAttachmentQueryDTO();
+            dto.setBusinessNo(delOutbound.getOrderNo());
+            dto.setAttachmentType(AttachmentTypeEnum.BULK_ORDER_DETAIL.getAttachmentType());
+            List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService.list(dto).getData());
+            for (BasAttachment basAttachment : attachment) {
+                for (DelOutboundDetailVO detailVO : delOutboundVO.getDetails()) {
+                    if (StringUtils.equals("" + detailVO.getId(), basAttachment.getBusinessItemNo())) {
+                            detailVO.setSkuFile(Arrays.asList(
+                            new AttachmentFileDTO().setId(basAttachment.getId()).setAttachmentName(basAttachment.getAttachmentName()).
+                                    setAttachmentUrl(basAttachment.getAttachmentUrl())));
+
+                    }
+                }
+            }
+
+
         }
 
         if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
@@ -704,8 +725,29 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.saveDetail(dto, delOutbound.getOrderNo());
             logger.info(">>>>>[创建出库单]3.6 保存明细信息，{}", timer.intervalRestart());
 
+
+            if(DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())){
+                //保存箱标数据
+                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.BULK_ORDER_BOX).build();
+                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+                //保存明细附件数据
+                for (DelOutboundDetailDto detail : dto.getDetails()) {
+                    if (detail.getSkuFile() != null && detail.getSkuFile().size() > 0) {
+                        AttachmentDataDTO attachmentDataDTO = detail.getSkuFile().get(0);
+                        // 箱标明细
+                        AttachmentDTO boxMarkDetailFiels = AttachmentDTO.builder().businessNo(orderNo).businessItemNo("" + detail.getId()).fileList(
+                                        Arrays.asList(new AttachmentDataDTO().setAttachmentUrl(attachmentDataDTO.getAttachmentUrl())
+                                                .setAttachmentName(attachmentDataDTO.getAttachmentName()))).
+                                attachmentTypeEnum(AttachmentTypeEnum.BULK_ORDER_DETAIL).build();
+                        this.remoteAttachmentService.saveAndUpdate(boxMarkDetailFiels);
+
+                    }
+                }
+            }
             // 附件信息
-            if (!DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
+            if (!DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())
+            && !DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())
+            ) {
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
                 this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
             }
@@ -714,7 +756,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 批量出库保存装箱信息
             if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
                     || DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
-                    || DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+                    || DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())
+            ) {
                 // 装箱信息
                 List<DelOutboundPackingDto> packings = dto.getPackings();
                 this.delOutboundPackingService.save(orderNo, packings, false);
@@ -1016,11 +1059,29 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 计算发货类型
             inputDelOutbound.setShipmentType(this.buildShipmentType(dto));
             // 附件信息
-            if (!DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
+            if (!DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType()) && !DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())) {
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(delOutbound.getOrderNo()).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
                 this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
             }
 
+            if(DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())){
+                //保存箱标数据
+                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getBatchLabels()).attachmentTypeEnum(AttachmentTypeEnum.BULK_ORDER_BOX).build();
+                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+                //保存明细附件数据
+                for (DelOutboundDetailDto detail : dto.getDetails()) {
+                    if (detail.getSkuFile() != null && detail.getSkuFile().size() > 0) {
+                        AttachmentDataDTO attachmentDataDTO = detail.getSkuFile().get(0);
+                        // 箱标明细
+                        AttachmentDTO boxMarkDetailFiels = AttachmentDTO.builder().businessNo(orderNo).businessItemNo("" + detail.getId()).fileList(
+                                        Arrays.asList(new AttachmentDataDTO().setAttachmentUrl(attachmentDataDTO.getAttachmentUrl())
+                                                .setAttachmentName(attachmentDataDTO.getAttachmentName()))).
+                                attachmentTypeEnum(AttachmentTypeEnum.BULK_ORDER_DETAIL).build();
+                        this.remoteAttachmentService.saveAndUpdate(boxMarkDetailFiels);
+
+                    }
+                }
+            }
 
             // 计算包裹大小
             this.countPackageSize(inputDelOutbound, dto);
@@ -1820,7 +1881,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     // 查询地址信息
                     DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
                     try {
-                        ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress);
+                        // 查询SKU信息
+                        List<String> nos = new ArrayList<>();
+                        nos.add(orderNo);
+                        Map<String, String> skuLabelMap = this.delOutboundDetailService.queryDetailsLabelByNos(nos);
+                        String skuLabel = skuLabelMap.get(orderNo);
+                        ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress, skuLabel);
                         FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
@@ -2086,6 +2152,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         queryDTO.setBusinessNoList(businessNos);
         queryDTO.setBusinessCode(attachmentType);
         List<BasAttachment> basAttachmentList = ListUtils.emptyIfNull(remoteAttachmentService.list(queryDTO).getData());
+        basAttachmentList =basAttachmentList.stream().filter(distinctByKey(person -> person.getBusinessNo())).collect(Collectors.toList());
 
         Map<String, BasAttachment> uuidNameMap = basAttachmentList.stream().collect(Collectors.toMap(BasAttachment::getBusinessNo, account -> account));
 
@@ -2116,6 +2183,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             lambdaUpdateWrapper.in(DelOutbound::getOrderNo, orders);
             this.update(lambdaUpdateWrapper);
         }
+    }
+
+    private static <T> Predicate<T> distinctByKey(Function<? super T,?> keyExtractor){
+        Map<Object,Boolean> map=new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t),Boolean.TRUE)==null;
     }
 
     @Transactional

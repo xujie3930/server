@@ -34,8 +34,10 @@ public enum AttachmentTypeEnum {
 
     ONE_PIECE_ISSUED_ON_BEHALF("ONE_PIECE_ISSUED_ON_BEHALF","一件代发","一件代发pdf","onePieceIssuedOnBehalf"),
     TRANSSHIPMENT_OUTBOUND("TRANSSHIPMENT_OUTBOUND","转运出库","转运出库pdf","transshipmentOutbound"),
+    BULK_ORDER_BOX("BULK_ORDER_BOX","大货订单箱标","大货订单箱标","BulkOrderBox"),
+    BULK_ORDER_DETAIL("BULK_ORDER_DETAIL","大货订单明细","大货订单明细","BulkOrderDetail"),
 
-
+    CHILD_PARENT("CHILD_PARENT","子母单附件","子母单附件","childParent"),
 
     ;
 
