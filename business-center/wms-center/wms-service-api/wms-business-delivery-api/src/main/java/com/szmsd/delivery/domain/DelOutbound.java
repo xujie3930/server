@@ -281,4 +281,15 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "Amazon Reference ID")
     private String amazonReferenceId;
+
+
+    @ApiModelProperty(value = "送达目的地")
+    private String destinationDelivery;
+
+    @ApiModelProperty(value = "送达目的地名称")
+    private String destinationDeliveryName;
+
+
+    @ApiModelProperty(value = "仓库选择")
+    private String warehouseSelection;
 }

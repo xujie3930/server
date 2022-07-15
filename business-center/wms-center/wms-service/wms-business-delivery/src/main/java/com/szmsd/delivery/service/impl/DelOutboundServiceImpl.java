@@ -906,7 +906,28 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutbound.setWeight(0D);
             // 规格，长*宽*高
             delOutbound.setSpecifications(0 + "*" + 0 + "*" + 0);
-        } else {
+        } else if(DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())){
+            BigDecimal length = BigDecimal.ZERO;
+            BigDecimal width = BigDecimal.ZERO;
+            BigDecimal height = BigDecimal.ZERO;
+            BigDecimal weight = BigDecimal.ZERO;
+            Set<String> set = new HashSet<>();
+
+            for (DelOutboundDetailDto detail : details) {
+                if (!set.contains(detail.getBoxMark())) {
+                    length = length.add(new BigDecimal(detail.getBoxLength()));
+                    width = width.add(new BigDecimal(detail.getBoxWidth()));
+                    height = height.add(new BigDecimal(detail.getBoxHeight()));
+                    weight = weight.add(new BigDecimal(detail.getBoxWeight()));
+                    set.add(detail.getBoxMark());
+                }
+            }
+            delOutbound.setLength(length.doubleValue());
+            delOutbound.setWidth(width.doubleValue());
+            delOutbound.setHeight(height.doubleValue());
+            delOutbound.setWeight(weight.doubleValue());
+
+        }else {
             // 查询包材的信息
             Set<String> skus = new HashSet<>();
             for (DelOutboundDetailDto detail : details) {
