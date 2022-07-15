@@ -109,6 +109,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     @SuppressWarnings({"all"})
     @Autowired
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
+    @Autowired
+    private IDelTrackService delTrackService;
 
     @Override
     public int shipmentPacking(Long id) {
@@ -491,6 +493,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                      * 推送SRM成本计费计算
                      */
                     this.pushSrmCost(delOutbound);
+
+
+                    delTrackService.addData(new DelTrack()
+                            .setOrderNo(delOutbound.getOrderNo())
+                            .setTrackingNo(delOutbound.getTrackingNo())
+                            .setTrackingStatus("InTransit")
+                            .setDescription("DMF, Parcel is being processed at the "+delOutbound.getWarehouseCode()));
 
                 }
             }

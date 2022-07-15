@@ -16,6 +16,8 @@ import java.util.List;
  */
 public interface IDelTrackService extends IService<DelTrack> {
 
+    void addData(DelTrack delTrack);
+
     /**
      * 查询模块
      *

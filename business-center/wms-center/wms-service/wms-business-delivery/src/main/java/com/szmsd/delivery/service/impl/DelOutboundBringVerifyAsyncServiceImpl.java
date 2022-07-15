@@ -7,10 +7,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.config.AsyncThreadObject;
-import com.szmsd.delivery.domain.DelCk1RequestLog;
-import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.domain.DelOutboundAddress;
-import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.DelCk1OutboundDto;
 import com.szmsd.delivery.enums.DelCk1RequestLogConstant;
 import com.szmsd.delivery.enums.DelOutboundConstant;
@@ -19,10 +16,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.event.DelCk1RequestLogEvent;
 import com.szmsd.delivery.event.EventUtil;
-import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
-import com.szmsd.delivery.service.IDelOutboundCompletedService;
-import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
-import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.ApplicationContainer;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
@@ -66,6 +60,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
     private IDelOutboundRetryLabelService delOutboundRetryLabelService;
     @Autowired
     private BasPartnerFeignService partnerFeignService;
+    @Autowired
+    private IDelTrackService delTrackService;
 
     @Override
     public void bringVerifyAsync(String orderNo) {
@@ -183,6 +179,11 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
             }
             // 提交一个获取标签的任务
             delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo());
+            delTrackService.addData(new DelTrack()
+                    .setOrderNo(delOutbound.getOrderNo())
+                    .setTrackingNo(delOutbound.getTrackingNo())
+                    .setTrackingStatus("InTransit")
+                    .setDescription("DMF, Parcel Infomation Received"));
             logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
             // 回滚操作

@@ -20,6 +20,7 @@ import com.szmsd.delivery.dto.TrackAnalysisDto;
 import com.szmsd.delivery.dto.TrackAnalysisExportDto;
 import com.szmsd.delivery.dto.TrackAnalysisRequestDto;
 import com.szmsd.delivery.dto.TrackingYeeTraceDto;
+import com.szmsd.delivery.event.ChangeDelOutboundLatestTrackEvent;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.mapper.DelTrackMapper;
 import com.szmsd.delivery.service.IDelTrackRemarkService;
@@ -34,10 +35,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -71,8 +74,18 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     @Autowired
     private IDelTrackRemarkService trackRemarkService;
 
+    @Resource
+    private ApplicationContext applicationContext;
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Override
+    public void addData(DelTrack track) {
+        track.setSource("2");
+        track.setTrackingTime(new Date());
+        applicationContext.publishEvent(new ChangeDelOutboundLatestTrackEvent(track));
+        baseMapper.insert(track);
+    }
 
     /**
      * 查询模块

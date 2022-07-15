@@ -233,9 +233,9 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             return new DelQueryServiceDto();
         }
         DelQueryServiceDto dto = new DelQueryServiceDto();
-
         BeanUtils.copyProperties(delOutbound, dto);
-
+        dto.setTraceId(delOutbound.getTrackingNo());
+        dto.setShipmentService(dto.getShipmentRule());
         if(delOutbound.getAddress() != null){
             dto.setCountry(delOutbound.getAddress().getCountry());
             dto.setCountryCode(delOutbound.getAddress().getCountryCode());
