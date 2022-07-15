@@ -90,4 +90,11 @@ public class DelOutboundDetail extends BaseEntity {
 
 
 
+    @ApiModelProperty(value = "是否品牌")
+    private String brandFlag;
+
+    @ApiModelProperty(value = "品牌链接")
+    private String brandUrl;
+
+
 }
