@@ -242,7 +242,7 @@ public interface DelOutboundFeignService {
     R<Boolean> updateInStockList(@RequestBody List<Long> idList);
 
 
-    @PostMapping("/api/outbound//updateWeightDelOutbound")
+    @PostMapping("/api/outbound/updateWeightDelOutbound")
     @ApiOperation(value = "出库管理 - 修改重量数据", position = 400)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "UpdateWeightDelOutboundDto")
     R<Integer> updateWeightDelOutbound(@RequestBody UpdateWeightDelOutboundDto dto);

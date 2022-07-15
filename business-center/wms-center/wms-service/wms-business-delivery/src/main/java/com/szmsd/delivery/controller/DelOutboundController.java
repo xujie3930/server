@@ -52,6 +52,7 @@ import com.szmsd.delivery.dto.DelOutboundToPrintDto;
 import com.szmsd.delivery.dto.DelOutboundUploadBoxLabelDto;
 import com.szmsd.delivery.dto.UpdateWeightDelOutboundDto;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
@@ -318,6 +319,15 @@ public class DelOutboundController extends BaseController {
         DelOutbound data = delOutboundService.getOne(queryWrapper);
         if(data == null){
             throw new CommonException("400", "该客户下订单不存在");
+        }
+        if (!(
+                DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(data.getState())
+                || DelOutboundStateEnum.REVIEWED.getCode().equals(data.getState())
+                || DelOutboundStateEnum.DELIVERED.getCode().equals(data.getState())
+                || DelOutboundStateEnum.REVIEWED_DOING.getCode().equals(data.getState())
+
+        )) {
+            throw new CommonException("400", "单据不能修改");
         }
         BeanUtils.copyProperties(dto, data);
         return R.ok(delOutboundService.updateById(data) ? 1 : 0);
