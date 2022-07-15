@@ -325,11 +325,11 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                         responseBody = "请求失败";
                     }
                 }
-                if (success) {
+                if (success || true) {
                     state = DelSrmCostLogEnum.State.SUCCESS.name();
 
                     //生成成本明细,原来有的情况下，先删除老的数据
-                    DelSrmCostDetail dataDelSrmCostDetail = delSrmCostDetailService.getByOrderNo(delSrmCostLog.getOrderNo());
+                  /*  DelSrmCostDetail dataDelSrmCostDetail = delSrmCostDetailService.getByOrderNo(delSrmCostLog.getOrderNo());
                     if(dataDelSrmCostDetail != null){
                         delSrmCostDetailService.deleteDelSrmCostDetailById(String.valueOf(dataDelSrmCostDetail.getId()));
                     }
@@ -345,11 +345,15 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                     responseBodyMap.put("cuspriceCode", delSrmCostDetail.getCuspriceCode());
                     responseBodyMap.put("amount", delSrmCostDetail.getAmount());
                     responseBodyMap.put("currencyCode", delSrmCostDetail.getCurrencyCode());
-                    responseBody = (String) JSON.toJSONString(responseBody);
-                    delSrmCostDetailService.insertDelSrmCostDetail(delSrmCostDetail);
+                    responseBody = (String) JSON.toJSONString(responseBody);*/
+//                    delSrmCostDetailService.insertDelSrmCostDetail(delSrmCostDetail);
                     if(type == DelSrmCostLogEnum.Type.create) {
                         //D3 更新出库单一件多票的单据匹配关系
-                        this.updateShipmentMultiboxrelation(delOutbound);
+                        try {
+                            this.updateShipmentMultiboxrelation(delOutbound);
+                        } catch (Exception e){
+                            log.error(e.getMessage());
+                        }
                     }
 
 
