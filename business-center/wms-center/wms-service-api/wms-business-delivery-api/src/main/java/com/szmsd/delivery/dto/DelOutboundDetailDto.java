@@ -82,6 +82,18 @@ public class DelOutboundDetailDto implements Serializable {
     @ApiModelProperty(value = "备注")
     private String remark;
 
+    @ApiModelProperty(value = "箱长")
+    private Double boxLength;
+
+    @ApiModelProperty(value = "箱宽")
+    private Double boxWidth;
+
+    @ApiModelProperty(value = "箱高")
+    private Double boxHeight;
+
+    @ApiModelProperty(value = "箱重量 ")
+    private Double boxWeight;
+
 
     @ApiModelProperty(value = "是否品牌")
     private String brandFlag;

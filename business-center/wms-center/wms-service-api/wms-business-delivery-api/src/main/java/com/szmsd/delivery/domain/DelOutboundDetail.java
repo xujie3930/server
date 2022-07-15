@@ -97,4 +97,18 @@ public class DelOutboundDetail extends BaseEntity {
     private String brandUrl;
 
 
+    @ApiModelProperty(value = "箱长")
+    private Double boxLength;
+
+    @ApiModelProperty(value = "箱宽")
+    private Double boxWidth;
+
+    @ApiModelProperty(value = "箱高")
+    private Double boxHeight;
+
+    @ApiModelProperty(value = "箱重量")
+    private Double boxWeight;
+
+
+
 }
