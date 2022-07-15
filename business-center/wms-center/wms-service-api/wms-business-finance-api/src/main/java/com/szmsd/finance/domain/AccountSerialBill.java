@@ -1,6 +1,7 @@
 package com.szmsd.finance.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -34,6 +35,16 @@ public class AccountSerialBill extends FssBaseEntity {
     @Excel(name = "跟踪号")
     private String trackingNo;
 
+    @ApiModelProperty(value = "refNo")
+    @Excel(name = "refNo")
+    @TableField(exist = false)
+    private String refNo;
+
+    @ApiModelProperty(value = "物流服务名称")
+    @Excel(name = "物流服务名称")
+    @TableField(exist = false)
+    private String shipmentService;
+
     @ApiModelProperty(value = "客户编码")
     @Excel(name = "客户号")
     private String cusCode;
@@ -46,6 +57,25 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "币种名")
     @Excel(name = "币种")
     private String currencyName;
+
+    @AutoFieldI18n
+    @ApiModelProperty(value = "实重")
+    @Excel(name = "实重")
+    @TableField(exist = false)
+    private BigDecimal weight;
+
+    @AutoFieldI18n
+    @ApiModelProperty(value = "计费重")
+    @Excel(name = "计费重")
+    @TableField(exist = false)
+    private BigDecimal calcWeight;
+
+    @AutoFieldI18n
+    @ApiModelProperty(value = "规格")
+    @Excel(name = "规格")
+    @TableField(exist = false)
+    private String specifications;
+
 
     @ApiModelProperty(value = "发生额")
     @Excel(name = "发生额")
@@ -80,6 +110,13 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "费用类型")
     @Excel(name = "费用类型")
     private String chargeType;
+
+    @AutoFieldI18n
+    @ApiModelProperty(value = "备注")
+    @Excel(name = "备注")
+    private String remark;
+
+
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "下单时间")

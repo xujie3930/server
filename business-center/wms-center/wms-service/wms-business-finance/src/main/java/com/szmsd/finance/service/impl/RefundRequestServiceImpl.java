@@ -327,7 +327,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(refundReviewDTO));
                 throw new RuntimeException("退费业务处理超时,请稍候重试");
             }
-        } catch (InterruptedException  e) {
+        } catch (InterruptedException e) {
             log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(refundReviewDTO));
             log.error("退费业务处理超时,请稍候重试", e);
             throw new RuntimeException("退费业务处理超时,请稍候重试");
@@ -368,8 +368,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 case ADD:
                     log.info("ADD--{}", list);
                     list.forEach(x -> {
-                        CustPayDTO custPayDTO = getCustPayDTO(x);
-                        custPayDTO.setRemark(String.format("退费单%s,余额调增", x.getProcessNo()));
+                        String remark = String.format("退费单%s,余额调增", x.getProcessNo());
+                        CustPayDTO custPayDTO = getCustPayDTO(x, remark);
+                        custPayDTO.setRemark(remark);
                         R r = accountBalanceService.refund(custPayDTO);
                         AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg());
                         log.info("ADD--{}--{}", list, JSONObject.toJSONString(r));
@@ -378,9 +379,10 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 case SUBTRACT:
                     log.info("SUBTRACT--{}", list);
                     list.forEach(x -> {
-                        CustPayDTO custPayDTO = getCustPayDTO(x);
+                        String remark = String.format("退费单%s,余额调减", x.getProcessNo());
+                        CustPayDTO custPayDTO = getCustPayDTO(x, remark);
                         custPayDTO.setAmount(x.getAmount().multiply(new BigDecimal("-1")));
-                        custPayDTO.setRemark(String.format("退费单%s,余额调减", x.getProcessNo()));
+                        custPayDTO.setRemark(remark);
                         R r = accountBalanceService.refund(custPayDTO);
                         AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg() + "请检查该币别账户余额是否充足");
                         log.info("SUBTRACT--{}--{}", list, JSONObject.toJSONString(r));
@@ -393,7 +395,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         });
     }
 
-    private CustPayDTO getCustPayDTO(FssRefundRequest x) {
+    private CustPayDTO getCustPayDTO(FssRefundRequest x, String remark) {
         CustPayDTO custPayDTO = new CustPayDTO();
         custPayDTO.setAmount(x.getAmount());
         custPayDTO.setNo(Optional.ofNullable(x.getOrderNo()).orElse(""));
@@ -406,16 +408,16 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         custPayDTO.setWarehouseName(x.getWarehouseName());
         List<AccountSerialBillDTO> accountSerialBillList = new ArrayList<>();
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
-        accountSerialBillDTO.setChargeCategory(x.getFeeCategoryName());
         accountSerialBillDTO.setChargeType(x.getFeeTypeName());
         accountSerialBillDTO.setPayMethod(BillEnum.PayMethod.REFUND);
-        accountSerialBillDTO.setBusinessCategory(x.getTreatmentProperties());
-        accountSerialBillDTO.setChargeCategory(BillEnum.CostCategoryEnum.REFUND.getName());
+        accountSerialBillDTO.setBusinessCategory(BillEnum.CostCategoryEnum.REFUND.getName());
+        accountSerialBillDTO.setChargeCategory(x.getTreatmentProperties());
         accountSerialBillDTO.setAmount(x.getAmount());
         accountSerialBillDTO.setCusCode(x.getCusCode());
         accountSerialBillDTO.setCusName(x.getCusName());
         accountSerialBillDTO.setCurrencyCode(x.getCurrencyCode());
         accountSerialBillDTO.setCurrencyName(x.getCurrencyName());
+        accountSerialBillDTO.setRemark(remark);
         accountSerialBillList.add(accountSerialBillDTO);
         custPayDTO.setSerialBillInfoList(accountSerialBillList);
         return custPayDTO;
