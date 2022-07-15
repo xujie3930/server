@@ -84,6 +84,11 @@ public class AccountBalance extends FssBaseEntity {
     @Excel(name = "授信结束时间")
     private LocalDateTime creditEndTime;
 
+    @ApiModelProperty(value = "需要偿还金额")
+    @Excel(name = "需要偿还金额")
+    private BigDecimal creditRepaidAmount;
+
+
     @ApiModelProperty(value = "授信时间间隔")
     @Excel(name = "授信时间间隔")
     private Integer creditTimeInterval;

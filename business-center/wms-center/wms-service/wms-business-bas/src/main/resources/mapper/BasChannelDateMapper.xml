@@ -135,6 +135,7 @@
       <if test="remarks != null" >
         remarks = #{remarks,jdbcType=LONGVARCHAR},
       </if>
+
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
