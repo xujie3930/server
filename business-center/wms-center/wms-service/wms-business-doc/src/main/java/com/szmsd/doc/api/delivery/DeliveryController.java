@@ -155,6 +155,7 @@ public class DeliveryController {
         }
         DelOutboundLabelDto labelDto = new DelOutboundLabelDto();
         labelDto.setOrderNos(orderNos);
+        labelDto.setType(request.getType());
         return R.ok(this.delOutboundClientService.labelBase64(labelDto));
     }
 
