@@ -349,7 +349,11 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                     delSrmCostDetailService.insertDelSrmCostDetail(delSrmCostDetail);
                     if(type == DelSrmCostLogEnum.Type.create) {
                         //D3 更新出库单一件多票的单据匹配关系
-                        this.updateShipmentMultiboxrelation(delOutbound);
+                        try {
+                            this.updateShipmentMultiboxrelation(delOutbound);
+                        } catch (Exception e){
+                            log.error(e.getMessage());
+                        }
                     }
 
 
