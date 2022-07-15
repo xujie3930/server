@@ -148,6 +148,17 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "Amazon Reference ID")
     private String amazonReferenceId;
 
+    @ApiModelProperty(value = "送达目的地")
+    private String destinationDelivery;
+
+    @ApiModelProperty(value = "送达目的地名称")
+    private String destinationDeliveryName;
+
+
+    @ApiModelProperty(value = "仓库选择")
+    private String warehouseSelection;
+
+
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")
     private DelOutboundAddressDto address;
