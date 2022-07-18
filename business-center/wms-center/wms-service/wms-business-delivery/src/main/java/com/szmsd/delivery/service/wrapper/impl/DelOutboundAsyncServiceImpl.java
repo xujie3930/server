@@ -151,38 +151,41 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
                     return 0;
                 }
-                logger.info("(1.1.1)开始获取发货计划相关信息，单号：{}", delOutbound.getOrderNo());
-                // 获取发货计划条件
-                TaskConfigInfo taskConfigInfo1 = TaskConfigInfoAdapter.getTaskConfigInfo(delOutbound.getOrderType());
-                String receiveShippingType = "";
-                // 查询 - 接收发货指令类型
-                if (null == taskConfigInfo1
-                        && StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
-                        && StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
-                    PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
-                    packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
-                    packageDeliveryConditions.setProductCode(delOutbound.getShipmentRule());
-                    R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
-                    PackageDeliveryConditions packageDeliveryConditionsRData = null;
-                    if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
-                        packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
-                    }
-                    if (null != packageDeliveryConditionsRData) {
-                        receiveShippingType = packageDeliveryConditionsRData.getCommandNodeCode();
-                    }
+                // 不是重派订单
+                if (!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                    logger.info("(1.1.1)开始获取发货计划相关信息，单号：{}", delOutbound.getOrderNo());
+                    // 获取发货计划条件
+                    TaskConfigInfo taskConfigInfo1 = TaskConfigInfoAdapter.getTaskConfigInfo(delOutbound.getOrderType());
+                    String receiveShippingType = "";
+                    // 查询 - 接收发货指令类型
+                    if (null == taskConfigInfo1
+                            && StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
+                            && StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
+                        PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
+                        packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
+                        packageDeliveryConditions.setProductCode(delOutbound.getShipmentRule());
+                        R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                        PackageDeliveryConditions packageDeliveryConditionsRData = null;
+                        if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
+                            packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
+                        }
+                        if (null != packageDeliveryConditionsRData) {
+                            receiveShippingType = packageDeliveryConditionsRData.getCommandNodeCode();
+                        }
                     /*else {
                         throw new CommonException("500", "产品服务未配置，请联系管理员。仓库：" + delOutbound.getWarehouseCode() + "，产品代码：" + delOutbound.getShipmentRule());
                     }*/
-                } else if (null != taskConfigInfo1) {
-                    receiveShippingType = taskConfigInfo1.getReceiveShippingType();
-                }
-                logger.info("(1.1.2)发货计划结果，单号：{}，结果：{}", delOutbound.getOrderNo(), receiveShippingType);
-                // 不接收发货指令：NotReceive
-                // 出库测量后接收发货指令：AfterMeasured
-                if ("NotReceive".equals(receiveShippingType)) {
-                    // 不处理发货指令信息
-                    logger.info("(1.1.3)发货计划条件，不处理发货指令信息，单号：{}", delOutbound.getOrderNo());
-                    return 10;
+                    } else if (null != taskConfigInfo1) {
+                        receiveShippingType = taskConfigInfo1.getReceiveShippingType();
+                    }
+                    logger.info("(1.1.2)发货计划结果，单号：{}，结果：{}", delOutbound.getOrderNo(), receiveShippingType);
+                    // 不接收发货指令：NotReceive
+                    // 出库测量后接收发货指令：AfterMeasured
+                    if ("NotReceive".equals(receiveShippingType)) {
+                        // 不处理发货指令信息
+                        logger.info("(1.1.3)发货计划条件，不处理发货指令信息，单号：{}", delOutbound.getOrderNo());
+                        return 10;
+                    }
                 }
                 DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
                 logger.info("(2)初始化上下文信息，timer:{}", timer.intervalRestart());
