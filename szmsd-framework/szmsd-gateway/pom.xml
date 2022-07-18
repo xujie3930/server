@@ -72,11 +72,13 @@
             <artifactId>springfox-swagger2</artifactId>
             <version>${swagger.fox.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>swagger-bootstrap-ui</artifactId>
             <version>${swagger-bootstrap-ui.version}</version>
-        </dependency>
+            <scope>system</scope>
+            <systemPath>${project.parent.parent.basedir}/lib/swagger-bootstrap-ui-1.9.6.jar</systemPath>
+        </dependency>-->
         <!-- szmsd Common Core-->
         <dependency>
             <groupId>com.szmsd</groupId>
