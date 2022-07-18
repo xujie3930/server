@@ -48,10 +48,12 @@ import com.szmsd.putinstorage.component.CheckTag;
 import com.szmsd.putinstorage.component.RemoteComponent;
 import com.szmsd.putinstorage.component.RemoteRequest;
 import com.szmsd.putinstorage.domain.InboundReceipt;
+import com.szmsd.putinstorage.domain.InboundReceiptDetail;
 import com.szmsd.putinstorage.domain.InboundTracking;
 import com.szmsd.putinstorage.domain.dto.*;
 import com.szmsd.putinstorage.domain.vo.*;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
+import com.szmsd.putinstorage.mapper.InboundReceiptDetailMapper;
 import com.szmsd.putinstorage.mapper.InboundReceiptMapper;
 import com.szmsd.putinstorage.service.IInboundReceiptDetailService;
 import com.szmsd.putinstorage.service.IInboundReceiptService;
@@ -65,6 +67,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -123,6 +126,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     private PackageCollectionFeignService packageCollectionFeignService;
     @Resource
     private DelOutboundClientService delOutboundClientService;
+    @Autowired
+    private InboundReceiptDetailMapper inboundReceiptDetailMapper;
 
     /**
      * 入库单查询
@@ -435,98 +440,117 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public void receiving(ReceivingRequest receivingRequest) {
-        log.info("#B1 接收入库上架：{}", receivingRequest);
+        InboundReceiptDetailQueryDTO inboundReceiptDetailQueryDTO=new InboundReceiptDetailQueryDTO();
+        inboundReceiptDetailQueryDTO.setWarehouseNo(receivingRequest.getOrderNo());
+        inboundReceiptDetailQueryDTO.setSku(receivingRequest.getSku());
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOSlist= inboundReceiptDetailMapper.selectList(inboundReceiptDetailQueryDTO);
 
-        Integer qty = receivingRequest.getQty();
-        AssertUtil.isTrue(qty != null && qty > 0, "上架数量不能为" + qty);
+        //表示同步过来的sku没有， 做入库单新增绑定
+        if (inboundReceiptDetailVOSlist.size()==0){
+            InboundReceiptDetail inboundReceiptDetail=new InboundReceiptDetail();
+            inboundReceiptDetail.setSku(receivingRequest.getSku());
+            inboundReceiptDetail.setWarehouseNo(receivingRequest.getOrderNo());
+            inboundReceiptDetail.setPutQty(receivingRequest.getQty());
+            inboundReceiptDetail.setSkuName(receivingRequest.getSku());
+            inboundReceiptDetail.setCreateBy(receivingRequest.getOperator());
+            inboundReceiptDetail.setCreateByName(receivingRequest.getOperator());
+            inboundReceiptDetailMapper.insert(inboundReceiptDetail);
 
-        // 修改入库单明细中的上架数量
-        String refOrderNo = receivingRequest.getOrderNo();
-        InboundReceiptVO inboundReceiptVO = selectByWarehouseNo(refOrderNo);
-        AssertUtil.notNull(inboundReceiptVO, "入库单号[" + refOrderNo + "]不存在，请核对");
-        // 之前总上架数量
-        String cusCode = inboundReceiptVO.getCusCode();
-        receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseCode());
-        Integer beforeTotalPutQty = inboundReceiptVO.getTotalPutQty();
-        InboundReceipt inboundReceipt = new InboundReceipt().setId(inboundReceiptVO.getId());
-        inboundReceipt.setTotalPutQty(beforeTotalPutQty + qty);
-        // 第一次入库上架 把状态修改为 3处理中
-        if (beforeTotalPutQty == 0) {
-            inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue());
+        }
+        //表示同步过来的sku是有的 做上架操作
+        if (inboundReceiptDetailVOSlist.size()>0) {
+            log.info("#B1 接收入库上架：{}", receivingRequest);
 
-            // 查询入库单明细
-            // OMS中完成入库单后，当是第一次上架（状态调整为处理中时）向业务系统创建入库单
-            CompletableFuture<InboundReceiptVO> future = CompletableFuture
-                    .supplyAsync(() -> queryInfo(refOrderNo, false))
-                    .thenApplyAsync(inboundReceiptInfoDetailVO -> {
-                        List<InboundReceiptDetailVO> inboundReceiptDetails = inboundReceiptInfoDetailVO.getInboundReceiptDetails();
-                        for (InboundReceiptDetailVO inboundReceiptDetail : inboundReceiptDetails) {
+            Integer qty = receivingRequest.getQty();
+            AssertUtil.isTrue(qty != null && qty > 0, "上架数量不能为" + qty);
+
+            // 修改入库单明细中的上架数量
+            String refOrderNo = receivingRequest.getOrderNo();
+            InboundReceiptVO inboundReceiptVO = selectByWarehouseNo(refOrderNo);
+            AssertUtil.notNull(inboundReceiptVO, "入库单号[" + refOrderNo + "]不存在，请核对");
+            // 之前总上架数量
+            String cusCode = inboundReceiptVO.getCusCode();
+            receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseCode());
+            Integer beforeTotalPutQty = inboundReceiptVO.getTotalPutQty();
+            InboundReceipt inboundReceipt = new InboundReceipt().setId(inboundReceiptVO.getId());
+            inboundReceipt.setTotalPutQty(beforeTotalPutQty + qty);
+            // 第一次入库上架 把状态修改为 3处理中
+            if (beforeTotalPutQty == 0) {
+                inboundReceipt.setStatus(InboundReceiptEnum.InboundReceiptStatus.PROCESSING.getValue());
+
+                // 查询入库单明细
+                // OMS中完成入库单后，当是第一次上架（状态调整为处理中时）向业务系统创建入库单
+                CompletableFuture<InboundReceiptVO> future = CompletableFuture
+                        .supplyAsync(() -> queryInfo(refOrderNo, false))
+                        .thenApplyAsync(inboundReceiptInfoDetailVO -> {
+                            List<InboundReceiptDetailVO> inboundReceiptDetails = inboundReceiptInfoDetailVO.getInboundReceiptDetails();
+                            for (InboundReceiptDetailVO inboundReceiptDetail : inboundReceiptDetails) {
+                                HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
+                                httpRequestDto.setMethod(HttpMethod.GET);
+                                httpRequestDto.setBinary(false);
+                                httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
+                                httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getGenSkuCustomStorageNo()));
+                                httpRequestDto.setBody(CkGenCustomSkuNoDTO.createGenCustomSkuNoDTO(inboundReceiptInfoDetailVO, inboundReceiptDetail));
+                                // 使用相同的sku创建,不然后面的sku创建会没有单号
+                                httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
+                                R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
+                                log.info("【推送CK1】首次接收入库上架,创建入库单后生成自定义编码{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+                                HttpResponseVO dataAndException = R.getDataAndException(rmi);
+                            }
+                            return inboundReceiptInfoDetailVO;
+                        }, ckThreadPool).thenApplyAsync(inboundReceiptInfoDetailVO -> {
                             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
-                            httpRequestDto.setMethod(HttpMethod.GET);
+                            httpRequestDto.setMethod(HttpMethod.POST);
                             httpRequestDto.setBinary(false);
                             httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
-                            httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getGenSkuCustomStorageNo()));
-                            httpRequestDto.setBody(CkGenCustomSkuNoDTO.createGenCustomSkuNoDTO(inboundReceiptInfoDetailVO, inboundReceiptDetail));
+                            httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getCreatePutawayOrderUrl()));
+                            httpRequestDto.setBody(CkCreateIncomingOrderDTO.createIncomingOrderDTO(inboundReceiptInfoDetailVO));
                             // 使用相同的sku创建,不然后面的sku创建会没有单号
                             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
                             R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
-                            log.info("【推送CK1】首次接收入库上架,创建入库单后生成自定义编码{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+                            log.info("【推送CK1】首次接收入库上架,创建入库单{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
                             HttpResponseVO dataAndException = R.getDataAndException(rmi);
-                        }
-                        return inboundReceiptInfoDetailVO;
-                    }, ckThreadPool).thenApplyAsync(inboundReceiptInfoDetailVO -> {
-                        HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
-                        httpRequestDto.setMethod(HttpMethod.POST);
-                        httpRequestDto.setBinary(false);
-                        httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
-                        httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getCreatePutawayOrderUrl()));
-                        httpRequestDto.setBody(CkCreateIncomingOrderDTO.createIncomingOrderDTO(inboundReceiptInfoDetailVO));
-                        // 使用相同的sku创建,不然后面的sku创建会没有单号
-                        httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
-                        R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
-                        log.info("【推送CK1】首次接收入库上架,创建入库单{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
-                        HttpResponseVO dataAndException = R.getDataAndException(rmi);
-                        //dataAndException.checkStatus();
-                        return null;
-                    }, ckThreadPool);
+                            //dataAndException.checkStatus();
+                            return null;
+                        }, ckThreadPool);
+                try {
+                    future.get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e.getMessage());
+                }
+            }
+            this.updateById(inboundReceipt);
+
+            // 修改明细上架数量
+            iInboundReceiptDetailService.receiving(receivingRequest.getOrderNo(), receivingRequest.getSku(), receivingRequest.getQty());
+
+            // 库存 上架入库
+            remoteComponent.inboundInventory(receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseName()));
+
+            log.info("#B1 接收入库上架：操作完成");
+            // 通知ck1 入库信息
+            CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
+                HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
+                httpRequestDto.setMethod(HttpMethod.POST);
+                httpRequestDto.setBinary(false);
+                httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(cusCode));
+                httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getPutawayUrl()));
+                httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest, cusCode));
+                httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
+                R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
+                log.info("【推送CK1】首次接收入库上架,推送上架SKU信息 {} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
+                HttpResponseVO dataAndException = R.getDataAndException(rmi);
+                //dataAndException.checkStatus();
+                return httpRequestDto;
+            }, ckThreadPool);
             try {
-                future.get();
+                HttpRequestDto httpRequestDto = httpRequestDtoCompletableFuture.get();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
             }
         }
-        this.updateById(inboundReceipt);
-
-        // 修改明细上架数量
-        iInboundReceiptDetailService.receiving(receivingRequest.getOrderNo(), receivingRequest.getSku(), receivingRequest.getQty());
-
-        // 库存 上架入库
-        remoteComponent.inboundInventory(receivingRequest.setWarehouseCode(inboundReceiptVO.getWarehouseName()));
-
-        log.info("#B1 接收入库上架：操作完成");
-        // 通知ck1 入库信息
-        CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
-            HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
-            httpRequestDto.setMethod(HttpMethod.POST);
-            httpRequestDto.setBinary(false);
-            httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(cusCode));
-            httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getPutawayUrl()));
-            httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest, cusCode));
-            httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
-            R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
-            log.info("【推送CK1】首次接收入库上架,推送上架SKU信息 {} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
-            HttpResponseVO dataAndException = R.getDataAndException(rmi);
-            //dataAndException.checkStatus();
-            return httpRequestDto;
-        }, ckThreadPool);
-        try {
-            HttpRequestDto httpRequestDto = httpRequestDtoCompletableFuture.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-
     }
 
     @Resource
