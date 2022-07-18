@@ -36,11 +36,13 @@
             <version>${swagger.fox.version}</version>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>swagger-bootstrap-ui</artifactId>
             <version>${swagger-bootstrap-ui.version}</version>
-        </dependency>
+            <scope>system</scope>
+            <systemPath>${project.parent.parent.parent.basedir}/lib/swagger-bootstrap-ui-1.9.6.jar</systemPath>
+        </dependency>-->
 
         <!-- Swagger -->
         <dependency>
@@ -54,4 +56,21 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <compilerArguments>
+                        <extdirs>${project.parent.parent.parent.basedir}/lib</extdirs>
+                    </compilerArguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
