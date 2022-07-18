@@ -4,15 +4,18 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.DelQueryServiceDto;
+import com.szmsd.delivery.dto.DelQueryServiceImport;
 import com.szmsd.delivery.enums.DelQueryServiceStateEnum;
 import com.szmsd.delivery.mapper.DelQueryServiceMapper;
 import com.szmsd.delivery.service.*;
@@ -132,7 +135,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             QueryWrapperUtil.filterDate(queryWrapper, "create_time", delQueryService.getCreateTimes());
 
 
-
+            where.orderByDesc(DelQueryService::getCreateTime);
             return baseMapper.selectList(where);
         }
 
@@ -226,16 +229,18 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
     @Override
     public DelQueryServiceDto getOrderInfo(String orderNo) {
-
+        if(StringUtils.isEmpty(orderNo)){
+            throw new CommonException("400", "空订单号");
+        }
         DelOutboundVO delOutbound = delOutboundService.selectDelOutboundByOrderNo(orderNo);
-
         if(delOutbound == null){
-            return new DelQueryServiceDto();
+            throw new CommonException("400", "单据不存在");
         }
         DelQueryServiceDto dto = new DelQueryServiceDto();
         BeanUtils.copyProperties(delOutbound, dto);
         dto.setTraceId(delOutbound.getTrackingNo());
         dto.setShipmentService(dto.getShipmentRule());
+
         if(delOutbound.getAddress() != null){
             dto.setCountry(delOutbound.getAddress().getCountry());
             dto.setCountryCode(delOutbound.getAddress().getCountryCode());
@@ -247,7 +252,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             BasSellerInfoVO userInfo = R.getDataAndException(info);
 
             dto.setServiceStaff(userInfo.getServiceStaff());
-            dto.setServiceStaffNickName(userInfo.getServiceStaffName());
+            dto.setServiceStaffName(userInfo.getServiceStaffName());
             dto.setServiceStaffNickName(userInfo.getServiceStaffNickName());
 
             dto.setServiceManagerName(userInfo.getServiceManagerName());
@@ -259,6 +264,20 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
 
         return dto;
+    }
+
+    @Override
+    public R importData(List<DelQueryServiceImport> list) {
+        if (list.isEmpty()) {
+            throw new CommonException("400", "空Excel数据");
+        }
+        List<DelQueryService> dataList = BeanMapperUtil.mapList(list, DelQueryService.class);
+        for (DelQueryService delQueryService: dataList){
+            DelQueryServiceDto dto = getOrderInfo(delQueryService.getOrderNo());
+            BeanUtils.copyProperties(dto, delQueryService);
+        }
+        this.saveBatch(dataList);
+        return R.ok();
     }
 
 

@@ -1,6 +1,9 @@
 package com.szmsd.delivery.controller;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.dto.DelQueryServiceDto;
+import com.szmsd.delivery.dto.DelQueryServiceImport;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.system.api.domain.SysUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
@@ -19,6 +22,7 @@ import java.io.IOException;
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
 import com.szmsd.common.core.web.controller.BaseController;
+import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -52,6 +56,23 @@ public class DelQueryServiceController extends BaseController{
             List<DelQueryService> list = delQueryServiceService.selectDelQueryServiceList(delQueryService);
             return getDataTable(list);
       }
+
+
+    @PostMapping("/importTemplate")
+    @ApiOperation(httpMethod = "POST", value = "导入模板")
+    public void importTemplate(HttpServletResponse response) throws IOException {
+        ExcelUtil<DelQueryServiceImport> util = new ExcelUtil<DelQueryServiceImport>(DelQueryServiceImport.class);
+        util.importTemplateExcel(response, "DelQueryService");
+    }
+
+    @PostMapping("/importData")
+    @ApiOperation(httpMethod = "POST", value = "导入查件服务数据")
+    public R importData(MultipartFile file) throws Exception {
+        ExcelUtil<DelQueryServiceImport> util = new ExcelUtil<DelQueryServiceImport>(DelQueryServiceImport.class);
+        List<DelQueryServiceImport> list = util.importExcel(file.getInputStream());
+
+        return delQueryServiceService.importData(list);
+    }
 
     /**
     * 导出查件服务模块列表
