@@ -1,8 +1,10 @@
 package com.szmsd.delivery.service;
 
+import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.domain.DelQueryService;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.dto.DelQueryServiceDto;
+import com.szmsd.delivery.dto.DelQueryServiceImport;
 
 import java.util.List;
 
@@ -65,5 +67,7 @@ public interface IDelQueryServiceService extends IService<DelQueryService> {
         int deleteDelQueryServiceById(String id);
 
         DelQueryServiceDto getOrderInfo(String orderNo);
+
+        R importData(List<DelQueryServiceImport> list);
 }
 
