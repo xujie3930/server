@@ -44,10 +44,4 @@ public class PricedSheetInfoVO {
     private PackageLimitVO limit;
 
 
-    @ApiModelProperty(value = "等级编码")
-    private String gradeCode;
-
-    @ApiModelProperty(value = "等级名称")
-    private String gradeName;
-
 }

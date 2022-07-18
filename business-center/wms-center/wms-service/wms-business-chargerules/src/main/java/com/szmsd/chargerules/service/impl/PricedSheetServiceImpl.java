@@ -4,6 +4,7 @@ import com.szmsd.chargerules.dto.PricedSheetDTO;
 import com.szmsd.chargerules.dto.ProductSheetGradeDTO;
 import com.szmsd.chargerules.service.IPricedSheetService;
 import com.szmsd.chargerules.vo.*;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
@@ -67,7 +68,6 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
             return null;
         }
         PricedSheetInfoVO result = BeanMapperUtil.map(data, PricedSheetInfoVO.class);
-        result.setGradeCode(data.getGrade());
         List<PricedVolumeWeightVO> volumeWeights = data.getVolumeWeights() == null ? null : data.getVolumeWeights().stream().map(item -> {
             PricedVolumeWeightVO vo = new PricedVolumeWeightVO();
             vo.setVolumeWeightType(item.getVolumeWeightType());
@@ -115,11 +115,6 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         refactor(pricedSheetDTO, create);
         R<ResponseVO> responseVOR = htpPricedSheetFeignService.create(create);
         ResponseVO.resultAssert(responseVOR, "创建报价产品报价表详情信息");
-        if(StringUtils.isNotEmpty(pricedSheetDTO.getGradeCode())){
-            UpdatePricedGradeDto dto = new UpdatePricedGradeDto().setGrade(pricedSheetDTO.getGradeCode()).
-                    setProductCode(pricedSheetDTO.getProductCode()).setSheetCode(pricedSheetDTO.getCode());
-            htpPricedSheetFeignService.updateGrade(dto);
-        }
     }
 
     /**
@@ -134,10 +129,15 @@ public class PricedSheetServiceImpl implements IPricedSheetService {
         R<ResponseVO> responseVOR = htpPricedSheetFeignService.update(update);
         ResponseVO.resultAssert(responseVOR, "修改报价产品报价表详情信息");
 
-        if(StringUtils.isNotEmpty(pricedSheetDTO.getGradeCode())){
-            UpdatePricedGradeDto dto = new UpdatePricedGradeDto().setGrade(pricedSheetDTO.getGradeCode()).
-                    setProductCode(pricedSheetDTO.getProductCode()).setSheetCode(pricedSheetDTO.getCode());
-            htpPricedSheetFeignService.updateGrade(dto);
+        if(StringUtils.isNotEmpty(pricedSheetDTO.getGrade())){
+            ChangeSheetGradeCommand changeSheetGradeCommand = new ChangeSheetGradeCommand();
+            changeSheetGradeCommand.setGrade(pricedSheetDTO.getGrade());
+            changeSheetGradeCommand.setSheetCode(pricedSheetDTO.getCode());
+            changeSheetGradeCommand.setProductCode(pricedSheetDTO.getProductCode());
+            changeSheetGradeCommand.setEffectiveStartTime(pricedSheetDTO.getEffectiveStartTime());
+            changeSheetGradeCommand.setEffectiveEndTime(pricedSheetDTO.getEffectiveEndTime());
+            responseVOR = htpPricedProductFeignService.grade(changeSheetGradeCommand);
+            ResponseVO.resultAssert(responseVOR, "修改报价表等级");
         }
 
     }
