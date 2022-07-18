@@ -155,34 +155,34 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryService.getCountryCode());
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
             List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
-            if(dataDelQuerySettingsList.size() > 0){
+            if(dataDelQuerySettingsList.size() == 0) {
+                throw new CommonException("400", "此查件申请没有相关的匹配规则");
 
-                DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0) ;
-                DelOutbound delOutbound = delOutboundService.getByOrderNo(delQueryService.getOrderNo());
-                if(delOutbound == null){
-                    throw new CommonException("400", "无效订单");
-                }
+            }
 
-                boolean bool = false;
-
-                if(StringUtils.equals(delOutbound.getState(), delQuerySettings.getState())){
+            DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0) ;
+            DelOutbound delOutbound = delOutboundService.getByOrderNo(delQueryService.getOrderNo());
+            if(delOutbound == null){
+                throw new CommonException("400", "无效订单");
+            }
+            boolean bool = false;
+            if(StringUtils.equals(delOutbound.getState(), delQuerySettings.getState())){
+                bool = true;
+            }else if(delOutbound.getShipmentsTime() != null && DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(),  true) <= delQuerySettings.getShipmentDays()){
+                bool = true;
+            }else{
+                LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+                delTrackLambdaQueryWrapper.eq(DelTrack::getOrderNo, delQueryService.getOrderNo());
+                delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
+                delTrackLambdaQueryWrapper.last("LIMIT 1");
+                DelTrack dataDelTrack = delTrackService.getOne(delTrackLambdaQueryWrapper);
+                if(dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(),  true) <= delQuerySettings.getTrackStayDays()){
                     bool = true;
-                }else if(delOutbound.getShipmentsTime() != null && DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(),  true) <= delQuerySettings.getShipmentDays()){
-                    bool = true;
-                }else{
-                    LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
-                    delTrackLambdaQueryWrapper.eq(DelTrack::getOrderNo, delQueryService.getOrderNo());
-                    delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
-                    delTrackLambdaQueryWrapper.last("LIMIT 1");
-                    DelTrack dataDelTrack = delTrackService.getOne(delTrackLambdaQueryWrapper);
-                    if(dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(),  true) <= delQuerySettings.getTrackStayDays()){
-                        bool = true;
-                    }
                 }
-                if(!bool){
-                    throw new CommonException("400", "此查件申请不满足查件条件");
+            }
+            if(!bool){
+                throw new CommonException("400", "此查件申请不满足查件条件");
 
-                }
             }
 
             delQueryService.setState(DelQueryServiceStateEnum.SUBMITTED.getCode());
@@ -275,8 +275,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         for (DelQueryService delQueryService: dataList){
             DelQueryServiceDto dto = getOrderInfo(delQueryService.getOrderNo());
             BeanUtils.copyProperties(dto, delQueryService);
+            this.insertDelQueryService(delQueryService);
         }
-        this.saveBatch(dataList);
         return R.ok();
     }
 
