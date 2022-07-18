@@ -5,7 +5,6 @@ import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.CreatePricedSheetCommand;
 import com.szmsd.http.dto.PricedSheetCodeCriteria;
-import com.szmsd.http.dto.UpdatePricedGradeDto;
 import com.szmsd.http.dto.UpdatePricedSheetCommand;
 import com.szmsd.http.service.IPricedSheetService;
 import com.szmsd.http.vo.PricedSheet;
@@ -43,13 +42,6 @@ public class PricedSheetController extends BaseController {
     @ApiOperation(value = "修改报价产品报价表详情信息")
     public R<ResponseVO> update(@RequestBody UpdatePricedSheetCommand updatePricedSheetCommand) {
         ResponseVO create = iPricedSheetService.update(updatePricedSheetCommand);
-        return R.ok(create);
-    }
-
-    @PostMapping("/updateGrade")
-    @ApiOperation(value = "修改报价等级和生效时间")
-    public R<ResponseVO> updateGrade(@RequestBody UpdatePricedGradeDto dto) {
-        ResponseVO create = iPricedSheetService.updateGrade(dto);
         return R.ok(create);
     }
 
