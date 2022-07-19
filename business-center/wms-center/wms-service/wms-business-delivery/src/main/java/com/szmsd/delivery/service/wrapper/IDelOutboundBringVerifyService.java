@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.wrapper;
 
+import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
@@ -72,6 +73,9 @@ public interface IDelOutboundBringVerifyService {
      * @return boolean，true获取成功，false获取失败
      */
     String getShipmentLabel(DelOutbound delOutbound);
+
+    String saveShipmentLabel(FileStream fileStream, DelOutbound delOutbound);
+
 
     /**
      * 传输标签文件给WMS

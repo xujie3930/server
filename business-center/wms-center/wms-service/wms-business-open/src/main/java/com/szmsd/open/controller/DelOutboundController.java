@@ -3,6 +3,7 @@ package com.szmsd.open.controller;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
+import com.szmsd.delivery.dto.DelOutboundReceiveLabelDto;
 import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.dto.ShipmentRequestDto;
@@ -75,6 +76,15 @@ public class DelOutboundController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "ShipmentContainersRequestDto", dataType = "ShipmentContainersRequestDto")
     public ResponseVO shipmentContainers(@RequestBody @Validated ShipmentContainersRequestDto dto) {
         delOutboundClientService.shipmentContainers(dto);
+        return ResponseVO.ok();
+    }
+
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/shipment/receiveLabel")
+    @ApiOperation(value = "出库管理 - #D23 接收供应商系统传回的标签", position = 300)
+    @ApiImplicitParam(name = "dto", value = "DelOutboundReceiveLabelDto", dataType = "DelOutboundReceiveLabelDto")
+    public ResponseVO receiveLabel(@RequestBody @Validated DelOutboundReceiveLabelDto dto) {
+        delOutboundClientService.receiveLabel(dto);
         return ResponseVO.ok();
     }
 
