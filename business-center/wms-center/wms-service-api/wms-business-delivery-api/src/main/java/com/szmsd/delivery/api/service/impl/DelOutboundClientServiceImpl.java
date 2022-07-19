@@ -151,4 +151,10 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     public int updateWeightDelOutbound(UpdateWeightDelOutboundDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.updateWeightDelOutbound(dto));
     }
+
+    @Override
+    public int receiveLabel(DelOutboundReceiveLabelDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.receiveLabel(dto));
+
+    }
 }

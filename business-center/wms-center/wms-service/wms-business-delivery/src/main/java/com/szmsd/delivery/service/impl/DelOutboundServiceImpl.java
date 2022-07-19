@@ -36,28 +36,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
-import com.szmsd.delivery.dto.ContainerInfoDto;
-import com.szmsd.delivery.dto.DelOutboundAddressDto;
-import com.szmsd.delivery.dto.DelOutboundAgainTrackingNoDto;
-import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
-import com.szmsd.delivery.dto.DelOutboundBoxLabelDto;
-import com.szmsd.delivery.dto.DelOutboundCanceledDto;
-import com.szmsd.delivery.dto.DelOutboundDetailDto;
-import com.szmsd.delivery.dto.DelOutboundDetailImportDto;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.dto.DelOutboundExportListDto;
-import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
-import com.szmsd.delivery.dto.DelOutboundHandlerDto;
-import com.szmsd.delivery.dto.DelOutboundLabelDto;
-import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
-import com.szmsd.delivery.dto.DelOutboundPackingDto;
-import com.szmsd.delivery.dto.DelOutboundReassignExportListDto;
-import com.szmsd.delivery.dto.DelOutboundToPrintDto;
-import com.szmsd.delivery.dto.DelOutboundUploadBoxLabelDto;
-import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
-import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
-import com.szmsd.delivery.dto.ShipmentRequestDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
@@ -76,6 +55,7 @@ import com.szmsd.delivery.service.IDelOutboundPackingService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
+import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundExceptionService;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
@@ -114,6 +94,7 @@ import org.apache.ibatis.executor.BatchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -194,7 +175,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private BasSubClientService basSubClientService;
-
+    @Autowired
+    @Lazy
+    private IDelOutboundBringVerifyService delOutboundBringVerifyService;
     /**
      * 查询出库单模块
      *
@@ -2263,6 +2246,31 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         });
         this.delOutboundAddressService.updateReassignImportedData(delOutboundAddressList);
         return results.get();
+    }
+
+    @Override
+    public int receiveLabel(DelOutboundReceiveLabelDto dto) {
+
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        if(StringUtils.isNotEmpty(dto.getOrderNo())){
+            queryWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
+
+        }else if(StringUtils.isNotEmpty(dto.getOrderNo())){
+            queryWrapper.eq(DelOutbound::getRefNo, dto.getRefNo());
+
+        }else if(StringUtils.isNotEmpty(dto.getOrderNo())){
+            queryWrapper.eq(DelOutbound::getTrackingNo, dto.getTrackingNo());
+        }
+        DelOutbound data = this.getOne(queryWrapper);
+        if(data == null){
+            throw new CommonException("400", "附件不能为空！");
+        }
+        data.setTraceId(dto.getTraceId());
+        data.setRemark(dto.getRemark());
+
+        data.setShipmentOrderLabelUrl(delOutboundBringVerifyService.saveShipmentLabel(dto.getFileStream(), data));
+        this.updateById(data);
+        return 1;
     }
 }
 

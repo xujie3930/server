@@ -246,4 +246,9 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - 修改重量数据", position = 400)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "UpdateWeightDelOutboundDto")
     R<Integer> updateWeightDelOutbound(@RequestBody UpdateWeightDelOutboundDto dto);
+
+    @PostMapping("/api/outbound/receiveLabel")
+    @ApiOperation(value = "出库管理 - 接收供应商系统传回的标签", position = 400)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "receiveLabel")
+    R<Integer> receiveLabel(DelOutboundReceiveLabelDto dto);
 }
