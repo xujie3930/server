@@ -1,5 +1,6 @@
 package com.szmsd.returnex.dto;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.validator.annotation.StringLength;
@@ -28,7 +29,14 @@ public class ReturnExpressClientImportSkuDTO {
     @ApiModelProperty(value = "预报单号 系统生成", required = true)
     private String expectedNo;
 
-    @ExcelProperty(value = "原出库单号", index = 1)
+    @ExcelIgnore
+    @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "068002", required = true)
+    private String processType;
+    @ExcelProperty(value = "申请处理方式", index = 1)
+    @ApiModelProperty(value = "申请处理方式 ", allowableValues = "-", notes = " 销毁 包裹上架 拆包检查", example = "销毁", required = true)
+    private String processTypeStr;
+
+    @ExcelProperty(value = "原出库单号", index = 2)
     @NotBlank(message = "原处理单号不能为空")
     @StringLength(maxLength = 50, message = "原出库单号错误")
     @ApiModelProperty(value = "退件原始单号 原出库单号 原处理号", example = "SF123456")
@@ -36,24 +44,24 @@ public class ReturnExpressClientImportSkuDTO {
 
     @NotBlank(message = "sku不能为空")
     @ApiModelProperty(value = "SKU")
-    @ExcelProperty(value = "SKU", index = 2)
+    @ExcelProperty(value = "SKU", index = 3)
     private String sku;
 
     @NotBlank(message = "新上架的SKU编码不能为空")
     @ApiModelProperty(value = "新上架SKU编码")
-    @ExcelProperty(value = "新上架SKU编码", index = 3)
+    @ExcelProperty(value = "新上架SKU编码", index = 4)
     private String putawaySku;
 
     @Min(value = 0, message = "上架数量最少为0")
     @NotNull(message = "上架数量不能为空")
     @ApiModelProperty(value = "上架数量")
-    @ExcelProperty(value = "上架数量", index = 4)
+    @ExcelProperty(value = "上架数量", index = 5)
     private Integer putawayQty;
 
     /**
      * SKU处理备注 0-500
      */
-    @ExcelProperty(value = "客户备注",index = 5)
+    @ExcelProperty(value = "客户备注",index = 6)
     @ApiModelProperty(value = "客户备注")
     private String remark;
 

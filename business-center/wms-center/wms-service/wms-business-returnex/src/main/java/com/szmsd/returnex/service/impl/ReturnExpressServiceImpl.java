@@ -884,35 +884,23 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             log.info("【退件导入】:1 解析---");
             StopWatch importWatch = new StopWatch("导入解析");
             importWatch.start("解析");
-            CompletableFuture<List<ReturnExpressClientImportBaseDTO>> baseInfoListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream, ReturnExpressClientImportBaseDTO.class, new SyncReadListener()).headRowNumber(2).sheet(0).doReadSync());
-//            CompletableFuture<List<ReturnExpressClientImportSkuDTO>> skuListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream1, ReturnExpressClientImportSkuDTO.class, new SyncReadListener()).sheet(1).doReadSync());
-            CompletableFuture<List<ReturnExpressClientImportDelOutboundDto>> reassignListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream2, ReturnExpressClientImportDelOutboundDto.class, new SyncReadListener()).headRowNumber(2).sheet(1).doReadSync());
-            CompletableFuture.allOf(reassignListFuture,/* skuListFuture,*/ baseInfoListFuture).get();
+            CompletableFuture<List<ReturnExpressClientImportDelOutboundDto>> reassignListFuture = CompletableFuture.supplyAsync(() -> EasyExcel.read(inputStream2, ReturnExpressClientImportDelOutboundDto.class, new SyncReadListener()).headRowNumber(2).sheet(0).doReadSync());
             importWatch.stop();
-            log.info("【退件导入】:2 获取转换map---");
-            importWatch.start("获取转换map");
-            List<ReturnExpressClientImportBaseDTO> baseInfoList = baseInfoListFuture.get();
-            Map<String, ReturnExpressClientImportBaseDTO> baseInfoListMap = baseInfoList.parallelStream().collect(Collectors.toMap(ReturnExpressClientImportBaseDTO::getExpectedNo, x -> x, (x1, x2) -> x1));
-            baseInfoList.clear();
-
-            List<ReturnExpressClientImportSkuDTO> skuList =/* skuListFuture.get()*/new ArrayList<>();
-            Map<String, List<ReturnExpressClientImportSkuDTO>> skuListMap = skuList.parallelStream().collect(Collectors.groupingBy(ReturnExpressClientImportSkuDTO::getExpectedNo));
-            skuList.clear();
-
             List<ReturnExpressClientImportDelOutboundDto> reassignList = reassignListFuture.get();
             Map<String, ReturnExpressClientImportDelOutboundDto> reassignListMap = reassignList.stream().collect(Collectors.toMap(ReturnExpressClientImportDelOutboundDto::getExpectedNo, x -> x, (x1, x2) -> x1));
             reassignList.clear();
-            importWatch.stop();
             log.info("【退件导入】:3 组装参数---");
             importWatch.start("组装参数");
             // 组装参数
-            List<ReturnExpressClientImportBO> importBOList = new ArrayList<>(skuList.size());
-            baseInfoListMap.forEach((expectedNo, baseInfo) -> {
+            List<ReturnExpressClientImportBO> importBOList = new ArrayList<>(reassignListMap.size());
+            reassignListMap.forEach((expectedNo, ressignInfo) -> {
                 ReturnExpressClientImportBO returnExpressClientImportBO = new ReturnExpressClientImportBO();
                 returnExpressClientImportBO.setExpectedNo(expectedNo);
-                returnExpressClientImportBO.setBaseDTO(baseInfo);
-                returnExpressClientImportBO.setSkuDTO(Optional.ofNullable(skuListMap.get(expectedNo)).orElse(new ArrayList<>()));
-                returnExpressClientImportBO.setReassignDTO(reassignListMap.get(expectedNo));
+                ReturnExpressClientImportBaseDTO returnExpressClientImportBaseDTO = new ReturnExpressClientImportBaseDTO();
+                returnExpressClientImportBaseDTO.setExpectedNo(expectedNo);
+                returnExpressClientImportBaseDTO.setProcessTypeStr("销毁");
+                returnExpressClientImportBO.setBaseDTO(returnExpressClientImportBaseDTO);
+                returnExpressClientImportBO.setReassignDTO(ressignInfo);
                 importBOList.add(returnExpressClientImportBO);
             });
             importWatch.stop();
