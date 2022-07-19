@@ -7,8 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -22,7 +21,7 @@ import java.util.List;
 @ApiModel(value = "UpdateWeightDelOutboundDto", description = "UpdateWeightDelOutboundDto对象")
 public class UpdateWeightDelOutboundDto implements Serializable {
 
-    @NotNull(message = "orderNo不能为空", groups = ValidationUpdateGroup.class)
+    @NotBlank(message = "orderNo不能为空")
     @ApiModelProperty(value = "orderNo")
     private String orderNo;
 
@@ -33,18 +32,23 @@ public class UpdateWeightDelOutboundDto implements Serializable {
     private String packageConfirm;
 
     @ApiModelProperty(value = "包裹重量误差")
+    @Min(value = 0, message = "包裹重量误差不能少于0")
     private Integer packageWeightDeviation;
 
     @ApiModelProperty(value = "长 CM")
+    @DecimalMin(value = "0.01", message = "长 CM不能少于或者等于0")
     private Double length;
 
     @ApiModelProperty(value = "宽 CM")
+    @DecimalMin(value = "0.01", message = "宽 CM不能少于或者等于0")
     private Double width;
 
     @ApiModelProperty(value = "高 CM")
+    @DecimalMin(value = "0.01", message = "长高 CM不能少于或者等于0")
     private Double height;
 
     @ApiModelProperty(value = "重量 g")
+    @DecimalMin(value = "0.01", message = "重量 g不能少于或者等于0")
     private Double weight;
 
 
