@@ -407,7 +407,13 @@ public final class DelOutboundServiceImplUtil {
                 pdfPCell.addElement(new Phrase(delOutboundAddress.getStreet1()));
                 pdfPCell.addElement(new Phrase(delOutboundAddress.getStreet2()));
                 pdfPCell.addElement(new Phrase(delOutboundAddress.getCity() + " " + delOutboundAddress.getStateOrProvince() + " " + delOutboundAddress.getPostCode()));
-                Paragraph country = new Paragraph(delOutboundAddress.getCountry(), font);
+                // 国家二字码
+                String text = delOutboundAddress.getCountryCode();
+                if (StringUtils.isEmpty(text)) {
+                    // 二字码是空的就取国家名称
+                    text = delOutboundAddress.getCountry();
+                }
+                Paragraph country = new Paragraph(text, font);
                 country.setAlignment(Element.ALIGN_RIGHT);
                 country.setSpacingBefore(0f);
                 country.setSpacingAfter(0f);
