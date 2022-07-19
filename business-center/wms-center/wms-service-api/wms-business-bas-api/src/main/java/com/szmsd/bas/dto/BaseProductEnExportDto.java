@@ -57,6 +57,16 @@ public class BaseProductEnExportDto {
     private String productNameChinese;
 
 
+
+    @ApiModelProperty(value = "产品说明")
+    @Excel(name = "Product description" ,width = 30)
+    private String productDescription;
+
+
+    @ApiModelProperty(value = "海关编码")
+    @Excel(name = "HS CODE")
+    private String hsCode;
+
     @ApiModelProperty(value = "备注")
     @Excel(name = "Remarks" ,width = 30)
     private String remark;

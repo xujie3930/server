@@ -743,7 +743,43 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         Object[] params = new Object[]{delOutbound, logMessage};
         DelOutboundOperationLogEnum.BRV_SHIPMENT_RULE.listener(params);
     }
+    @Override
+    public String saveShipmentLabel(FileStream fileStream, DelOutbound delOutbound) {
+        String orderNumber = delOutbound.getShipmentOrderNumber();
+        String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound);
+        File file = new File(pathname);
+        if (!file.exists()) {
+            try {
+                FileUtils.forceMkdir(file);
+            } catch (IOException e) {
+                // 内部异常，不再重试，直接抛出去
+                throw new CommonException("500", "创建文件夹[" + file.getPath() + "]失败，Error：" + e.getMessage());
+            }
+        }
+        byte[] inputStream;
+        if (null != fileStream && null != (inputStream = fileStream.getInputStream())) {
+            String path  = file.getPath() + "/" + orderNumber + ".pdf";
+            File labelFile = new File(file.getPath() + "/" + orderNumber + ".pdf");
+            if (labelFile.exists()) {
+                File destFile = new File(file.getPath() + "/" + orderNumber + "_" + DateFormatUtils.format(new Date(), "yyyyMMdd_HHmmss") + ".pdf");
+                try {
+                    FileUtils.copyFile(labelFile, destFile);
+                } catch (IOException e) {
+                    logger.error("复制文件失败，" + e.getMessage(), e);
+                }
+            }
+            try {
+                FileUtils.writeByteArrayToFile(labelFile, inputStream, false);
+                return path;
+            } catch (IOException e) {
+                // 内部异常，不再重试，直接抛出去
+                throw new CommonException("500", "保存标签文件失败，Error：" + e.getMessage());
+            }
+        }
+        logger.error("保存标签文件流失败");
+        throw new CommonException("500", "获取标签文件流失败");
 
+    }
     @Override
     public String getShipmentLabel(DelOutbound delOutbound) {
         if (null == delOutbound) {

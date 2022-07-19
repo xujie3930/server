@@ -5,11 +5,18 @@ import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.Size;
+
 @Data
 public class BaseProductExportDto {
     @ApiModelProperty(value = "序号")
     @Excel(name = "序号")
     private Integer no;
+
+
+    @ApiModelProperty(value = "客户（卖家）编码")
+    @Excel(name = "客户代码")
+    private String sellerCode;
 
     @ApiModelProperty(value = "英文申报品名")
     @Excel(name = "英文申报品名")
@@ -54,15 +61,22 @@ public class BaseProductExportDto {
     @Excel(name = "中文申报品名")
     private String productNameChinese;
 
-    @ApiModelProperty(value = "客户（卖家）编码")
-    @Excel(name = "客户代码")
-    private String sellerCode;
+
+    @ApiModelProperty(value = "产品说明")
+    @Excel(name = "产品说明" ,width = 30)
+    private String productDescription;
+
+
+    @ApiModelProperty(value = "海关编码")
+    @Excel(name = "海关编码")
+    private String hsCode;
+/*
+    @ApiModelProperty(value = "是否一票多件")
+    @Excel(name = "是否一票多件" ,readConverterExp = "0=否,1=是")
+    private Integer multipleTicketFlag;*/
 
     @ApiModelProperty(value = "备注")
     @Excel(name = "备注" ,width = 30)
     private String remark;
 
-    @ApiModelProperty(value = "是否一票多件")
-    @Excel(name = "是否一票多件" ,readConverterExp = "0=否,1=是")
-    private Integer multipleTicketFlag;
 }

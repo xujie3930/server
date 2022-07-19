@@ -104,11 +104,15 @@ public class BaseProductImportDto {
 
     @ApiModelProperty(value = "价格区间")
     private String priceRange;
-    @ExcelProperty(index = 15)
-    @ApiModelProperty(value = "是否一票多件)")
-    private String multipleTicketFlagStr;
 
-    public void setMultipleTicketFlagStr(String multipleTicketFlagStr) {
+
+    @ExcelProperty(index = 15)
+//    @ApiModelProperty(value = "是否一票多件)")
+//    private String multipleTicketFlagStr;
+    @ApiModelProperty(value = "海关编码")
+    private String hsCode;
+
+    /*public void setMultipleTicketFlagStr(String multipleTicketFlagStr) {
         this.multipleTicketFlagStr = multipleTicketFlagStr;
         if (StringUtils.isNotBlank(multipleTicketFlagStr) && "是".equals(multipleTicketFlagStr)) {
             this.multipleTicketFlag = 1;
@@ -118,6 +122,10 @@ public class BaseProductImportDto {
     }
 
     @ApiModelProperty(value = "是否一票多件)")
-    private Integer multipleTicketFlag;
+    private Integer multipleTicketFlag;*/
+
+    @ExcelProperty(index = 16)
+    @ApiModelProperty(value = "备注)")
+    private String remark;
 
 }

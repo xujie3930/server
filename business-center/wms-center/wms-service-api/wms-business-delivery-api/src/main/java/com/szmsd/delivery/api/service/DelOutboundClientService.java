@@ -189,4 +189,6 @@ public interface DelOutboundClientService {
     DelTrackMainCommonDto commonTrackList(List<String> orderNos) ;
 
     int updateWeightDelOutbound(UpdateWeightDelOutboundDto dto);
+
+    int receiveLabel(DelOutboundReceiveLabelDto dto);
 }

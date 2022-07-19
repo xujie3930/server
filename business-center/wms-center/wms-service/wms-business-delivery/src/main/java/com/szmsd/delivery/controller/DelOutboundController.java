@@ -33,24 +33,7 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.dto.DelOutboundAgainTrackingNoDto;
-import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
-import com.szmsd.delivery.dto.DelOutboundBoxLabelDto;
-import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
-import com.szmsd.delivery.dto.DelOutboundCanceledDto;
-import com.szmsd.delivery.dto.DelOutboundDetailEnImportDto2;
-import com.szmsd.delivery.dto.DelOutboundDetailImportDto;
-import com.szmsd.delivery.dto.DelOutboundDetailImportDto2;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.dto.DelOutboundEnImportDto;
-import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
-import com.szmsd.delivery.dto.DelOutboundHandlerDto;
-import com.szmsd.delivery.dto.DelOutboundImportDto;
-import com.szmsd.delivery.dto.DelOutboundLabelDto;
-import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.dto.DelOutboundToPrintDto;
-import com.szmsd.delivery.dto.DelOutboundUploadBoxLabelDto;
-import com.szmsd.delivery.dto.UpdateWeightDelOutboundDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
@@ -898,4 +881,13 @@ public class DelOutboundController extends BaseController {
         this.delOutboundService.update(null, lambdaUpdateWrapper);
         return R.ok(true);
     }
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:receiveLabel')")
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/receiveLabel")
+    @ApiOperation(value = "出库管理 - 接收供应商系统传回的标签", position = 400)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
+    public R<Integer> receiveLabel(@RequestBody @Validated(ValidationUpdateGroup.class) DelOutboundReceiveLabelDto dto) {
+        return R.ok(delOutboundService.receiveLabel(dto));
+    }
+
 }
