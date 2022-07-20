@@ -98,6 +98,8 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
         if (CollectionUtils.isEmpty(charges)) {
             return;
         }
+        DelOutboundCharge delOutboundCharge = charges.get(0);
+        this.clearCharges(delOutboundCharge.getOrderNo());
         this.saveBatch(charges);
     }
 
