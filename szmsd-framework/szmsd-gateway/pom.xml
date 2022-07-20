@@ -72,13 +72,13 @@
             <artifactId>springfox-swagger2</artifactId>
             <version>${swagger.fox.version}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>swagger-bootstrap-ui</artifactId>
             <version>${swagger-bootstrap-ui.version}</version>
             <scope>system</scope>
-            <systemPath>${project.parent.parent.basedir}/lib/swagger-bootstrap-ui-1.9.6.jar</systemPath>
-        </dependency>-->
+            <systemPath>${project.basedir}/src/main/resources/lib/swagger-bootstrap-ui-1.9.6.jar</systemPath>
+        </dependency>
         <!-- szmsd Common Core-->
         <dependency>
             <groupId>com.szmsd</groupId>
@@ -97,6 +97,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <includeSystemScope>true</includeSystemScope>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
