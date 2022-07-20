@@ -300,7 +300,7 @@
                     <target>${java.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <compilerArguments>
-                        <extdirs>${project.basedir}/lib</extdirs>
+                        <extdirs>${project.parent.basedir}/lib</extdirs>
                     </compilerArguments>
                 </configuration>
             </plugin>
