@@ -420,9 +420,11 @@ public final class DelOutboundServiceImplUtil {
                 pdfPCell.addElement(country);
                 pdfPCell.addElement(new Phrase("TEL:" + delOutboundAddress.getPhoneNo()));
             } else {
-                pdfPCell.setFixedHeight(40f);
+                pdfPCell.setFixedHeight(36f);
                 font.setSize(12f);
-                pdfPCell.addElement(new Phrase("Custom:" + delOutbound.getRemark(), font));
+                Phrase element = new Phrase("Custom:" + delOutbound.getRemark(), font);
+                element.setMultipliedLeading(1f);
+                pdfPCell.addElement(element);
             }
             pdfPTable.addCell(pdfPCell);
         }
@@ -440,11 +442,12 @@ public final class DelOutboundServiceImplUtil {
         // 计算缩放比例
         // 渲染在画布上的宽度只有200，以200作为基础比例
         float scalePercent = 200f / image.getWidth();
-        image1.scalePercent(scalePercent * 100f);
+        image1.scalePercent(55f);
         // image1.setSpacingBefore(-10f);
         // image1.setAbsolutePosition(10f, 25f);
         document.add(image1);
         if (StringUtils.isNotEmpty(skuLabel)) {
+            skuLabel = "ABC-xxx-000-a*2,EFG-fff-111-b*1,XFY-qqq-222-q*1,EER-aaa-ff-d*3,ABC-xxx-000-a*2,EFG-fff-111-b*1,XFY-qqq-222-q*1,EER-aaa-ff-d*3";
             font.setSize(10f);
             Paragraph paragraph_label = new Paragraph(skuLabel, font);
             paragraph_label.setAlignment(Element.ALIGN_LEFT);
