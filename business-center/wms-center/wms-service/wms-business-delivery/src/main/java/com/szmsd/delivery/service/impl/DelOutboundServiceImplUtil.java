@@ -400,7 +400,7 @@ public final class DelOutboundServiceImplUtil {
             pdfPCell.setBorder(15);
             pdfPCell.setBorderWidth(1.5f);
             if (i == 0) {
-                pdfPCell.setFixedHeight(140f);
+                pdfPCell.setFixedHeight(135f);
                 Phrase element = new Phrase("To:");
                 pdfPCell.addElement(element);
                 pdfPCell.addElement(new Phrase(delOutboundAddress.getConsignee()));
@@ -415,7 +415,7 @@ public final class DelOutboundServiceImplUtil {
                 }
                 Paragraph country = new Paragraph(text, font);
                 country.setAlignment(Element.ALIGN_RIGHT);
-                country.setSpacingBefore(0f);
+                country.setSpacingBefore(-5f);
                 country.setSpacingAfter(0f);
                 pdfPCell.addElement(country);
                 pdfPCell.addElement(new Phrase("TEL:" + delOutboundAddress.getPhoneNo()));
@@ -430,7 +430,7 @@ public final class DelOutboundServiceImplUtil {
         Paragraph country = new Paragraph(delOutbound.getWeight() + " g");
         country.setAlignment(Element.ALIGN_RIGHT);
         country.setSpacingBefore(-5f);
-        country.setSpacingAfter(0f);
+        country.setSpacingAfter(-18f);
         country.setPaddingTop(0f);
         document.add(country);
         String content = delOutbound.getOrderNo();
@@ -441,15 +441,17 @@ public final class DelOutboundServiceImplUtil {
         // 渲染在画布上的宽度只有200，以200作为基础比例
         float scalePercent = 200f / image.getWidth();
         image1.scalePercent(scalePercent * 100f);
-        image1.setSpacingBefore(-10f);
-        image1.setAbsolutePosition(10f, 25f);
+        // image1.setSpacingBefore(-10f);
+        // image1.setAbsolutePosition(10f, 25f);
         document.add(image1);
         if (StringUtils.isNotEmpty(skuLabel)) {
+            font.setSize(10f);
             Paragraph paragraph_label = new Paragraph(skuLabel, font);
             paragraph_label.setAlignment(Element.ALIGN_LEFT);
-            paragraph_label.setSpacingBefore(30f);
+            paragraph_label.setSpacingBefore(00f);
             paragraph_label.setSpacingAfter(0f);
             paragraph_label.setPaddingTop(0f);
+            paragraph_label.setMultipliedLeading(1f);
             document.add(paragraph_label);
         }
         document.close();
