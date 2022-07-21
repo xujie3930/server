@@ -133,7 +133,7 @@ public class BaseProductController extends BaseController {
 
         for (int x=0;x<userList.size();x++) {
             if (userList.get(x).getCode().getBytes().length != userList.get(x).getCode().length()) {
-                throw new BaseException("第"+(x+1)+"行的sku存在中文");
+                throw new BaseException("第"+(x+2)+"行的sku存在中文");
 
             }
         }
