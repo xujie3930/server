@@ -182,7 +182,7 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
             delTrackService.addData(new DelTrack()
                     .setOrderNo(delOutbound.getOrderNo())
                     .setTrackingNo(delOutbound.getTrackingNo())
-                    .setTrackingStatus("Pending")
+                    .setTrackingStatus("Todo")
                     .setDescription("DMF, Parcel Infomation Received"));
             logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
