@@ -1,5 +1,7 @@
 package com.szmsd.chargerules.controller;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
@@ -7,6 +9,7 @@ import com.szmsd.chargerules.service.ICustomPricesService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
@@ -153,6 +156,10 @@ public class CustomPricesController extends BaseController{
         try {
             List<GradeDetailImportDto> dtoList = new ExcelUtil<>(GradeDetailImportDto.class).importExcel(file.getInputStream());
             list = BeanMapperUtil.mapList(dtoList, GradeDetailDto.class);
+            for(int i = 0; i < list.size(); i++){
+                list.get(i).setBeginTime(DateUtil.formatDateTime(dtoList.get(i).getBeginTimeDate()));
+                list.get(i).setEndTime(DateUtil.formatDateTime(dtoList.get(i).getEndTimeDate()));
+            }
             if (CollectionUtils.isEmpty(dtoList)) {
                 return R.failed("导入数据不能为空");
             }
@@ -187,7 +194,10 @@ public class CustomPricesController extends BaseController{
         try {
             List<DiscountDetailImportDto> dtoList = new ExcelUtil<>(DiscountDetailImportDto.class).importExcel(file.getInputStream());
             list = BeanMapperUtil.mapList(dtoList, DiscountDetailDto.class);
-
+            for(int i = 0; i < list.size(); i++){
+                list.get(i).setBeginTime(DateUtil.formatDateTime(dtoList.get(i).getBeginTimeDate()));
+                list.get(i).setEndTime(DateUtil.formatDateTime(dtoList.get(i).getEndTimeDate()));
+            }
             for(int i = 0; i < dtoList.size(); i++){
 
                 DiscountDetailDto data = list.get(i);
