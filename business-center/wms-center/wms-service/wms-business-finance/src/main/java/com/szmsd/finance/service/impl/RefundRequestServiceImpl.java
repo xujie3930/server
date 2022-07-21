@@ -411,13 +411,13 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         accountSerialBillDTO.setChargeType(x.getFeeTypeName());
         accountSerialBillDTO.setPayMethod(BillEnum.PayMethod.REFUND);
         accountSerialBillDTO.setBusinessCategory(BillEnum.CostCategoryEnum.REFUND.getName());
-        accountSerialBillDTO.setChargeCategory(x.getTreatmentProperties());
+        accountSerialBillDTO.setChargeCategory(x.getFeeCategoryName());
         accountSerialBillDTO.setAmount(x.getAmount());
         accountSerialBillDTO.setCusCode(x.getCusCode());
         accountSerialBillDTO.setCusName(x.getCusName());
         accountSerialBillDTO.setCurrencyCode(x.getCurrencyCode());
         accountSerialBillDTO.setCurrencyName(x.getCurrencyName());
-        accountSerialBillDTO.setRemark(remark);
+        accountSerialBillDTO.setRemark(x.getRemark());
         accountSerialBillList.add(accountSerialBillDTO);
         custPayDTO.setSerialBillInfoList(accountSerialBillList);
         return custPayDTO;
