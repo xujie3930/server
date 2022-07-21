@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @Accessors(chain = true)
@@ -23,7 +24,6 @@ public class DiscountDetailImportDto {
 
     @Excel(name = "处理点")
     private String warehourse;
-
 
     @Excel(name = "低于最小边长范围")
     private String minPackingLimitStr;
@@ -96,10 +96,10 @@ public class DiscountDetailImportDto {
     private BigDecimal percentage;
 
     @Excel(name = "生效时间")
-    private String beginTime;
+    private Date beginTimeDate;
 
     @Excel(name = "截止时间")
-    private String endTime;
+    private Date endTimeDate;
 
     @Excel(name = "销售价格级别")
     private String null1;

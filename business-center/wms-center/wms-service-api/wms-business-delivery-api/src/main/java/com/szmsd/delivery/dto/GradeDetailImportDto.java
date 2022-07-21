@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -29,11 +30,11 @@ public class GradeDetailImportDto {
 
     @Excel(name = "生效时间")
     @ExcelProperty(index = 3)
-    private String beginTime;
+    private Date beginTimeDate;
 
     @Excel(name = "截止时间")
     @ExcelProperty(index = 4)
-    private String endTime;
+    private Date endTimeDate;
 
 
 
