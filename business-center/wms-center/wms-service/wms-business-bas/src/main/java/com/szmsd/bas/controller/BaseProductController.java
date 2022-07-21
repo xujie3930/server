@@ -130,9 +130,18 @@ public class BaseProductController extends BaseController {
         if (CollectionUtils.isEmpty(userList)) {
             throw new BaseException("导入内容为空");
         }
+
+        for (int x=0;x<userList.size();x++) {
+            if (userList.get(x).getCode().getBytes().length != userList.get(x).getCode().length()) {
+                throw new BaseException("第"+(x+1)+"行的sku存在中文");
+
+            }
+        }
+
         baseProductService.importBaseProduct(userList);
         return R.ok();
     }
+
 
     /**
      * 导出模块列表
