@@ -960,7 +960,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 try {
                     errorMsg = executeReal(x);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                     errorMsgList.add(e.getMessage());
                 }
                 if (StringUtils.isNotBlank(errorMsg))
@@ -1013,18 +1013,21 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         ReturnExpressServiceAddDTO returnExpressAddDTO = new ReturnExpressServiceAddDTO();
         BeanUtils.copyProperties(infoByNo, returnExpressAddDTO);
         List<ReturnExpressClientImportSkuDTO> skuDTO = returnExpressClientImportBO.getSkuDTO();
-        Map<String, ReturnExpressClientImportSkuDTO> skuDTOMap = skuDTO.stream().filter(x -> StringUtils.isNotBlank(x.getSku())).collect(Collectors.toMap(ReturnExpressClientImportSkuDTO::getSku, x -> x));
-        List<ReturnExpressGoodAddDTO> goodList = returnExpressAddDTO.getGoodList();
-        goodList.forEach(x -> {
-            String sku = x.getSku();
-            ReturnExpressClientImportSkuDTO importSkuDTO = skuDTOMap.get(sku);
-            if (importSkuDTO != null) {
-                x.setProcessRemark(importSkuDTO.getRemark());
-                x.setPutawaySku(importSkuDTO.getPutawaySku());
-                x.setPutawayQty(importSkuDTO.getPutawayQty());
-            }
-        });
-        return updateThis(returnExpressAddDTO);
+        if (CollectionUtils.isNotEmpty(skuDTO)) {
+            Map<String, ReturnExpressClientImportSkuDTO> skuDTOMap = skuDTO.stream().filter(x -> StringUtils.isNotBlank(x.getSku())).collect(Collectors.toMap(ReturnExpressClientImportSkuDTO::getSku, x -> x));
+            List<ReturnExpressGoodAddDTO> goodList = returnExpressAddDTO.getGoodList();
+            goodList.forEach(x -> {
+                String sku = x.getSku();
+                ReturnExpressClientImportSkuDTO importSkuDTO = skuDTOMap.get(sku);
+                if (importSkuDTO != null) {
+                    x.setProcessRemark(importSkuDTO.getRemark());
+                    x.setPutawaySku(importSkuDTO.getPutawaySku());
+                    x.setPutawayQty(importSkuDTO.getPutawayQty());
+                }
+            });
+            return updateThis(returnExpressAddDTO);
+        }
+        return "";
     }
 
     /**
