@@ -1,6 +1,7 @@
 
 package com.szmsd.chargerules.controller;
 
+import cn.hutool.core.date.DateUtil;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
 import com.szmsd.chargerules.export.*;
 import com.szmsd.chargerules.service.IDiscountService;
@@ -145,7 +146,10 @@ public class DiscountController extends BaseController{
         try {
             List<DiscountDetailImportDto> dtoList = new ExcelUtil<>(DiscountDetailImportDto.class).importExcel(file.getInputStream());
             list = BeanMapperUtil.mapList(dtoList, DiscountDetailDto.class);
-
+            for(int i = 0; i < list.size(); i++){
+                list.get(i).setBeginTime(DateUtil.formatDateTime(dtoList.get(i).getBeginTimeDate()));
+                list.get(i).setEndTime(DateUtil.formatDateTime(dtoList.get(i).getEndTimeDate()));
+            }
             for(int i = 0; i < dtoList.size(); i++){
 
                 DiscountDetailDto data = list.get(i);
@@ -191,6 +195,10 @@ public class DiscountController extends BaseController{
         try {
             List<DiscountCustomImportDto> dtoList = new ExcelUtil<>(DiscountCustomImportDto.class).importExcel(file.getInputStream());
             list = BeanMapperUtil.mapList(dtoList, AssociatedCustomersDto.class);
+            for(int i = 0; i < list.size(); i++){
+                list.get(i).setBeginTime(DateUtil.formatDateTime(dtoList.get(i).getBeginTimeDate()));
+                list.get(i).setEndTime(DateUtil.formatDateTime(dtoList.get(i).getEndTimeDate()));
+            }
             if (CollectionUtils.isEmpty(dtoList)) {
                 return R.failed("导入数据不能为空");
             }

@@ -9,6 +9,7 @@ import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.OperationRecordDto;
+import com.szmsd.http.dto.Packing;
 import com.szmsd.http.dto.discount.*;
 import com.szmsd.http.dto.discount.*;
 import com.szmsd.http.dto.grade.GradeMainDto;
@@ -28,14 +29,51 @@ public class DiscountServiceImpl extends SaaSPricedRequest implements IHttpDisco
 
     @Override
     public R<DiscountMainDto> detailResult(String id) {
-        return HttpResponseVOUtils.transformation(httpGetBody("", "discount.detailResult", null, id), DiscountMainDto.class);
+        R<DiscountMainDto> r = HttpResponseVOUtils.transformation(httpGetBody("", "discount.detailResult", null, id), DiscountMainDto.class);
+        if(r.getCode() == 200 && r.getData() != null && r.getData().getPricingDiscountRules() != null){
+            for(DiscountDetailDto dto: r.getData().getPricingDiscountRules()){
+                if(dto.getPackageLimit() != null) {
+                    if (dto.getPackageLimit().getMinPackingLimit() != null) {
+                        CommonPackingLimit minPackingLimit = dto.getPackageLimit().getMinPackingLimit();
+                        dto.getPackageLimit().setMinPackingLimitStr(minPackingLimit.getLength() + "*" + minPackingLimit.getWidth() + "*" + minPackingLimit.getHeight());
+                    }
+                    if (dto.getPackageLimit().getPackingLimit() != null) {
+                        CommonPackingLimit packingLimit = dto.getPackageLimit().getPackingLimit();
+                        dto.getPackageLimit().setPackingLimitStr(packingLimit.getLength() + "*" + packingLimit.getWidth() + "*" + packingLimit.getHeight());
+                    }
+                }
+            }
+
+        }
+
+
+        return r;
     }
 
     @Override
     public R<PageVO> page(DiscountPageRequest pageDTO) {
         HttpResponseBody hrb = httpPostBody("", "discount.page", pageDTO);
         if (HttpStatus.SC_OK == hrb.getStatus()) {
-            return  R.ok(JSON.parseObject(HttpResponseVOUtils.newBody(hrb.getBody()), new TypeReference<PageVO<DiscountMainDto>>(){}));
+            PageVO<DiscountMainDto> pageVO = JSON.parseObject(HttpResponseVOUtils.newBody(hrb.getBody()), new TypeReference<PageVO<DiscountMainDto>>(){});
+            for(DiscountMainDto main: pageVO.getData()){
+                if(main.getPricingDiscountRules() != null){
+                    for(DiscountDetailDto dto: main.getPricingDiscountRules()){
+                        if(dto.getPackageLimit() != null){
+                            if(dto.getPackageLimit().getMinPackingLimit() != null){
+                                CommonPackingLimit minPackingLimit = dto.getPackageLimit().getMinPackingLimit();
+                                dto.getPackageLimit().setMinPackingLimitStr(minPackingLimit.getLength() + "*" + minPackingLimit.getWidth() + "*" + minPackingLimit.getHeight());
+                            }
+                            if (dto.getPackageLimit().getPackingLimit() != null) {
+                                CommonPackingLimit packingLimit = dto.getPackageLimit().getPackingLimit();
+                                dto.getPackageLimit().setPackingLimitStr(packingLimit.getLength() + "*" + packingLimit.getWidth() + "*" + packingLimit.getHeight());
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            return R.ok(pageVO);
         }else{
             return R.failed(HttpResponseVOUtils.getErrorMsg(hrb));
 

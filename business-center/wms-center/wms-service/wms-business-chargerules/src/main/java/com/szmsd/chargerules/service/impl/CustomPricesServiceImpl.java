@@ -11,6 +11,7 @@ import com.szmsd.http.api.feign.HtpGradeFeignService;
 import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.UserIdentity;
 import com.szmsd.http.dto.custom.*;
+import com.szmsd.http.dto.discount.DiscountDetailDto;
 import com.szmsd.http.vo.Operation;
 import com.szmsd.http.vo.Operator;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,17 @@ public class CustomPricesServiceImpl implements ICustomPricesService {
 
     @Override
     public R updateDiscountDetail(CustomDiscountMainDto dto) {
+
+        if(dto.getPricingDiscountRules() != null){
+            for(DiscountDetailDto data: dto.getPricingDiscountRules()){
+                if(data.getPackageLimit() == null){
+                    continue;
+                }
+                DiscountServiceImpl.savePackageLimit(data.getPackageLimit());
+            }
+        }
+
+
         LoginUser loginUser = SecurityUtils.getLoginUser();
         Operation userIdentity = new Operation();
         userIdentity.setTime(DateUtil.formatTime(new Date()));
