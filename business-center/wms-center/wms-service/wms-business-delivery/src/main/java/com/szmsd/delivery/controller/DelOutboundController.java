@@ -303,13 +303,13 @@ public class DelOutboundController extends BaseController {
         if(data == null){
             throw new CommonException("400", "该客户下订单不存在");
         }
-        if (!(
-                DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(data.getState())
-                || DelOutboundStateEnum.REVIEWED.getCode().equals(data.getState())
-                || DelOutboundStateEnum.DELIVERED.getCode().equals(data.getState())
-                || DelOutboundStateEnum.REVIEWED_DOING.getCode().equals(data.getState())
-
-        )) {
+        if (
+                DelOutboundStateEnum.PROCESSING.getCode().equals(data.getState())
+                || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(data.getState())
+                || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(data.getState())
+                || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(data.getState())
+                || DelOutboundStateEnum.COMPLETED.getCode().equals(data.getState())
+        ) {
             throw new CommonException("400", "单据不能修改");
         }
         BeanUtils.copyProperties(dto, data);
