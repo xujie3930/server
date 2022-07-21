@@ -501,8 +501,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     delTrackService.addData(new DelTrack()
                             .setOrderNo(delOutbound.getOrderNo())
                             .setTrackingNo(delOutbound.getTrackingNo())
-                            .setTrackingStatus("InTransit")
-                            .setDescription("DMF, Parcel is being processed at the "+delOutbound.getWarehouseCode()));
+                            .setTrackingStatus("WarehouseShipped")
+                            .setDescription("DMF, Departure Scan"));
 
                 }
             }

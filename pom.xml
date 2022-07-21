@@ -42,9 +42,6 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <compilerArguments>
-                    <extdirs>${project.basedir}/lib</extdirs>
-                    </compilerArguments>
                 </configuration>
             </plugin>
             <plugin>
