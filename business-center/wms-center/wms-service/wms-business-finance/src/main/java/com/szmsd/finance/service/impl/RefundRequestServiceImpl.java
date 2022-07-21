@@ -370,7 +370,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     list.forEach(x -> {
                         String remark = String.format("退费单%s,余额调增", x.getProcessNo());
                         CustPayDTO custPayDTO = getCustPayDTO(x, remark);
-                        custPayDTO.setRemark(remark);
+                        //custPayDTO.setRemark(remark);
                         R r = accountBalanceService.refund(custPayDTO);
                         AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg());
                         log.info("ADD--{}--{}", list, JSONObject.toJSONString(r));
@@ -382,7 +382,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                         String remark = String.format("退费单%s,余额调减", x.getProcessNo());
                         CustPayDTO custPayDTO = getCustPayDTO(x, remark);
                         custPayDTO.setAmount(x.getAmount().multiply(new BigDecimal("-1")));
-                        custPayDTO.setRemark(remark);
+                        //custPayDTO.setRemark(remark);
                         R r = accountBalanceService.refund(custPayDTO);
                         AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, r.getMsg() + "请检查该币别账户余额是否充足");
                         log.info("SUBTRACT--{}--{}", list, JSONObject.toJSONString(r));
@@ -410,8 +410,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
         accountSerialBillDTO.setChargeType(x.getFeeTypeName());
         accountSerialBillDTO.setPayMethod(BillEnum.PayMethod.REFUND);
-        accountSerialBillDTO.setBusinessCategory(BillEnum.CostCategoryEnum.REFUND.getName());
-        accountSerialBillDTO.setChargeCategory(x.getFeeCategoryName());
+//        accountSerialBillDTO.setBusinessCategory(BillEnum.CostCategoryEnum.REFUND.getName());
+        accountSerialBillDTO.setBusinessCategory(x.getTreatmentProperties());
+        accountSerialBillDTO.setChargeCategory(x.getFeeCategoryCode());
         accountSerialBillDTO.setAmount(x.getAmount());
         accountSerialBillDTO.setCusCode(x.getCusCode());
         accountSerialBillDTO.setCusName(x.getCusName());
@@ -420,6 +421,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         accountSerialBillDTO.setRemark(x.getRemark());
         accountSerialBillList.add(accountSerialBillDTO);
         custPayDTO.setSerialBillInfoList(accountSerialBillList);
+        custPayDTO.setRemark(x.getRemark());
         return custPayDTO;
     }
 
