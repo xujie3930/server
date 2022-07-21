@@ -284,7 +284,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             delTrackService.addData(new DelTrack()
                     .setOrderNo(delOutbound.getOrderNo())
                     .setTrackingNo(delOutbound.getTrackingNo())
-                    .setTrackingStatus("InTransit")
+                    .setTrackingStatus("Hub")
                     .setDescription("DMF, Parcel is being processed at the "+delOutbound.getWarehouseCode()));
             return 1;
         } catch (Exception e) {
