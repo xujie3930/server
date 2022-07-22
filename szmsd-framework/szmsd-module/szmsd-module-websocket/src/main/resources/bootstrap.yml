@@ -8,7 +8,7 @@ spring:
     name: szmsd-websocket
   profiles:
     # 环境配置
-    active: local
+    active: test
   cloud:
     nacos:
       discovery:
