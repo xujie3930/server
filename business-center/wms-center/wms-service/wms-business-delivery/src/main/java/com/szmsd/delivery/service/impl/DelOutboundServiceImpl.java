@@ -2260,13 +2260,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         }else if(StringUtils.isNotEmpty(dto.getOrderNo())){
             queryWrapper.eq(DelOutbound::getTrackingNo, dto.getTrackingNo());
+        }else{
+            throw new CommonException("400", "唯一标识必须有值");
         }
         DelOutbound data = this.getOne(queryWrapper);
         if(data == null){
-            throw new CommonException("400", "附件不能为空！");
+            throw new CommonException("400", "出库单未匹配");
         }
-        data.setTraceId(dto.getTraceId());
-        data.setRemark(dto.getRemark());
+        if(StringUtils.isNotEmpty(dto.getTraceId())){
+            data.setTraceId(dto.getTraceId());
+        }
+        if(StringUtils.isNotEmpty(dto.getRemark())){
+            data.setRemark(dto.getRemark());
+
+        }
 
         data.setShipmentOrderLabelUrl(delOutboundBringVerifyService.saveShipmentLabel(dto.getFileStream(), data));
         this.updateById(data);
