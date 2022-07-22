@@ -62,4 +62,11 @@ public class WarehouseOperationDetails extends BaseEntity {
     @ExcelProperty(value = "折扣率", index = 4)
     private BigDecimal discountRate;
 
+    @ApiModelProperty(value = "折扣方式(0表示库存折扣，1表示库位折扣)")
+    private Integer computeType;
+
+    @ApiModelProperty(value = "库位名字")
+    @Excel(name = "库位名字")
+    private String locationName;
+
 }

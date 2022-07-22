@@ -73,8 +73,13 @@ public class WarehouseOperationDTO implements Serializable {
     private LocalDateTime expirationTime;
 
     @ExcelIgnore
-    @ApiModelProperty(value = "详情")
+    @ApiModelProperty(value = "库存折扣详情")
     private List<WarehouseOperationDetails> details;
+
+
+    @ExcelIgnore
+    @ApiModelProperty(value = "库位折扣详情")
+    private List<WarehouseOperationDetails> locationDetails;
 
 
 }
