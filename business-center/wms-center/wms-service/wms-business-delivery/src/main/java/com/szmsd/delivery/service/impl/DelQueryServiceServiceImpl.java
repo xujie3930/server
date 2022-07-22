@@ -146,7 +146,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             }
 
             if(StringUtils.isNotEmpty(delQueryService.getIds())){
-                where.eq(DelQueryService::getId, delQueryService.getIds());
+                where.in(DelQueryService::getId, delQueryService.getIds());
             }
 
             if(delQueryService.getFeedbacks() != null && delQueryService.getFeedbacks().length > 1){
