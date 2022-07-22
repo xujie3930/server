@@ -266,7 +266,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                     // 校验路由信息存不存在
                     Integer trackCount = this.count(new LambdaQueryWrapper<DelTrack>().eq(DelTrack::getOrderNo, trackingYeeTraceDto.getOrderNo())
                             .eq(DelTrack::getTrackingNo, trackingYeeTraceDto.getTrackingNo())
-                            .eq(DelTrack::getTrackingTime, trackingTime));
+//                            .eq(DelTrack::getTrackingTime, trackingTime)
+                                    .eq(DelTrack::getNo,item.getNo())
+                    );
                     if (trackCount == 0) {
                         DelTrack delTrack = new DelTrack();
                         delTrack.setTrackingNo(trackingYeeTraceDto.getTrackingNo());
