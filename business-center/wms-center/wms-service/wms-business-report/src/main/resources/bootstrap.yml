@@ -9,7 +9,7 @@ spring:
     name: wms-business-report
   profiles:
     # 环境配置
-    active: test
+    active: local
   cloud:
     nacos:
       discovery:
