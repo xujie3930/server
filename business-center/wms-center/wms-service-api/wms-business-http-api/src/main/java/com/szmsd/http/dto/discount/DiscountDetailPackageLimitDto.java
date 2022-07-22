@@ -27,7 +27,13 @@ public class DiscountDetailPackageLimitDto {
     @ApiModelProperty("最大重量(物理重)")
     private BigDecimal minPhysicalWeight;
     
-    @ApiModelProperty("packingLimit")
+    @ApiModelProperty("超出最小边长范围, 0.1*0.1*0.1")
+    private String packingLimitStr;
+
+    @ApiModelProperty("低于最小边长范围, 0.1*0.1*0.1")
+    private String minPackingLimitStr;
+
+    @ApiModelProperty("minPackingLimit")
     private CommonPackingLimit packingLimit;
 
     @ApiModelProperty("minPackingLimit")

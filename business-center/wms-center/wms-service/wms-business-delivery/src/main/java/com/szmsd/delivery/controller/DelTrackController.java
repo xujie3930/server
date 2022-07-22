@@ -7,6 +7,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.api.feign.BasCarrierKeywordFeignService;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -85,6 +86,8 @@ public class DelTrackController extends BaseController {
     @Autowired
     private IDelOutboundAddressService delOutboundAddressService;
 
+    @Autowired
+    private BasCarrierKeywordFeignService basCarrierKeywordFeignService;
     /**
      * 查询模块列表
      */
@@ -107,6 +110,28 @@ public class DelTrackController extends BaseController {
         Map<String, BasSubWrapperVO> delTrackStateTypeMap
                 = delTrackStateTypeList.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue, Function.identity()));
         List<DelTrack> list = delTrackService.commonTrackList(orderNos);
+        Map<String, Boolean> cacheMap = new HashMap<String, Boolean>();
+        for (int i = 0; i < list.size(); i++) {
+            DelTrack track = list.get(i);
+            if(StringUtils.isEmpty(track.getCarrierCode())){
+                continue;
+            }
+            boolean ignore = true;
+            String key = track.getCarrierCode()+":"+track.getDescription();
+            if(!cacheMap.containsKey(key)){
+                R<Boolean> booleanR = this.basCarrierKeywordFeignService.checkExistKeyword(track.getCarrierCode(), track.getDescription());
+                if(null != booleanR && booleanR.getData() != null){
+                    ignore = booleanR.getData();
+                }
+                cacheMap.put(key, ignore);
+            }else{
+                ignore = cacheMap.get(key);
+            }
+            if (ignore) {
+                list.remove(i);
+                i--;
+            }
+        }
         List<DelTrackCommonDto> newList = BeanMapperUtil.mapList(list, DelTrackCommonDto.class);
         for (DelTrackCommonDto dto: newList){
             BasSubWrapperVO vo  = delTrackStateTypeMap.get(dto.getTrackingStatus());
@@ -114,6 +139,8 @@ public class DelTrackController extends BaseController {
                 dto.setTrackingStatusName(vo.getSubName());
             }
         }
+
+
 
         Set<String> threeSet = new TreeSet<String>();
         for(DelTrack delTrack: list){
