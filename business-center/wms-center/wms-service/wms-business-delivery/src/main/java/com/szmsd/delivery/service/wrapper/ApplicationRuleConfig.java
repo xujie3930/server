@@ -33,6 +33,7 @@ public final class ApplicationRuleConfig {
         // 提审配置 - 【销毁出库】
         Set<String> bringVerifyDestroySet = new HashSet<>();
         bringVerifyDestroySet.add(BringVerifyEnum.BEGIN.name());
+        bringVerifyDestroySet.add(BringVerifyEnum.SHIPMENT_RULE.name());
         bringVerifyDestroySet.add(BringVerifyEnum.SHIPMENT_CREATE.name());
         bringVerifyDestroySet.add(BringVerifyEnum.FREEZE_INVENTORY.name());
         bringVerifyDestroySet.add(BringVerifyEnum.FREEZE_OPERATION.name());
