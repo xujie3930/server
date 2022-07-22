@@ -694,6 +694,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (StringUtils.isEmpty(shipmentRule)) {
             shipmentRule = delOutbound.getShipmentRule();
         }
+        // 销毁出库单的发货规则默认XiaoHui
+        if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(shipmentRule)) {
+            shipmentRule = "XiaoHui";
+        }
         out:
         if (StringUtils.isEmpty(shipmentRule)) {
             logMessage = "发货规则为空";
