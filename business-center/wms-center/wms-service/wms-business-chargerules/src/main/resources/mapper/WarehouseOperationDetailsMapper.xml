@@ -5,5 +5,10 @@
     <select id="selectWarehouseOperationDetails" resultType="com.szmsd.chargerules.domain.WarehouseOperationDetails" parameterType="Integer">
         SELECT charge_days,price,unit,remark,discount_rate FROM `cha_warehouse_operation_details` WHERE warehouse_operation_id = #{id}
     </select>
+    <select id="selectWarehouseOperationDetailsrs"
+            resultType="com.szmsd.chargerules.domain.WarehouseOperationDetails">
+        SELECT charge_days,price,unit,remark,discount_rate,compute_type,location_name FROM `cha_warehouse_operation_details` WHERE warehouse_operation_id = #{id} and compute_type=#{computeType}
+
+    </select>
 
 </mapper>

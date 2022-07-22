@@ -72,6 +72,9 @@ public class WarehouseOperationVo {
     @ApiModelProperty(value = "详情")
     private List<WarehouseOperationDetails> details;
 
+    @ApiModelProperty(value = "详情")
+    private List<WarehouseOperationDetails> locationDetails;
+
     public String getWarehouseName() {
         return warehouseCode;
     }
