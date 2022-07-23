@@ -60,7 +60,11 @@ public class DelOutboundBatchImportValidation implements ImportValidation<DelOut
     }
 
     public String getCountryCode(String country) {
-        return this.importContext.countryCache.get(country);
+        String v = this.importContext.countryCache.get(country);
+        if(v == null){
+            v = this.importContext.countryCodeCache.get(country);
+        }
+        return v;
     }
 
 }

@@ -26,4 +26,15 @@ public class DelOutboundExportItemListDto implements Serializable {
     @ApiModelProperty(value = "数量")
     private Long qty;
 
+
+    @ApiModelProperty(value = "产品名称")
+    private String productName;
+
+    @ApiModelProperty(value = "中文申报品名")
+    private String productNameChinese;
+
+
+    @ApiModelProperty(value = "产品属性编号")
+    private String productAttribute;
+
 }

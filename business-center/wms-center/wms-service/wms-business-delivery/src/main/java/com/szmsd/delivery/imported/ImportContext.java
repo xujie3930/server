@@ -69,4 +69,34 @@ public class ImportContext<T> extends CacheContext.MapCacheContext<String, Objec
     public List<ImportMessage> getMessageList() {
         return messageList;
     }
+
+
+    public String getCountryNameCache(String value, CacheContext<String, String> countryCodeCache, CacheContext<String, String> countryNameCache){
+        if (countryNameCache.containsKey(value)) {
+            return value;
+        }else{
+            return countryCodeCache.get(value);
+
+        }
+    }
+
+    public String getCountryCodeCache(String value, CacheContext<String, String> countryCodeCache, CacheContext<String, String> countryNameCache){
+        if (countryNameCache.containsKey(value)) {
+            return countryNameCache.get(value);
+        }else{
+            return value;
+        }
+    }
+
+    public static String stringNumber(String value){
+        if(StringUtils.isNotEmpty(value) && value.contains(".")){
+            try {
+                return value.substring(0, value.indexOf("."));
+            }catch (Exception e){
+                System.out.println("转换异常"+ e.getMessage());
+                return value;
+            }
+        }
+        return value;
+    }
 }

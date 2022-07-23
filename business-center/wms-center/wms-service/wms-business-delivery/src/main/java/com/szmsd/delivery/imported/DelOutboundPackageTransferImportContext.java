@@ -14,6 +14,8 @@ import java.util.List;
 public class DelOutboundPackageTransferImportContext extends ImportContext<DelOutboundPackageTransferImportDto> {
 
     protected CacheContext<String, String> countryCache;
+    protected CacheContext<String, String> countryCodeCache;
+
     protected CacheContext<String, String> packageConfirmCache;
 
     public DelOutboundPackageTransferImportContext(List<DelOutboundPackageTransferImportDto> dataList,
@@ -25,6 +27,8 @@ public class DelOutboundPackageTransferImportContext extends ImportContext<DelOu
         if (CollectionUtils.isNotEmpty(countryList)) {
             for (BasRegionSelectListVO country : countryList) {
                 this.countryCache.put(country.getName(), country.getAddressCode());
+                this.countryCodeCache.put(country.getAddressCode(), country.getName());
+
             }
         }
         if (CollectionUtils.isNotEmpty(packageConfirmList)) {
