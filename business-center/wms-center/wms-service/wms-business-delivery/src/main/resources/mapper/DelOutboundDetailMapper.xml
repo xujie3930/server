@@ -7,7 +7,10 @@
             o.order_no,
             o.tracking_no,
             d.sku,
-            d.qty
+            d.qty,
+            d.productName,
+            d.productNameChinese,
+            d.productAttribute
         FROM del_outbound_detail d
         LEFT JOIN del_outbound o ON d.order_no = o.order_no
         ${ew.customSqlSegment}
