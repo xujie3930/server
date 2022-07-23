@@ -22,7 +22,9 @@ public class DelOutboundPackageTransferImportContext extends ImportContext<DelOu
                                                    List<BasRegionSelectListVO> countryList,
                                                    List<BasSubWrapperVO> packageConfirmList) {
         super(dataList);
-        this.countryCache = new MapCacheContext<>();
+         this.countryCache = new MapCacheContext<>();
+        this.countryCodeCache = new MapCacheContext<>();
+
         this.packageConfirmCache = new MapCacheContext<>();
         if (CollectionUtils.isNotEmpty(countryList)) {
             for (BasRegionSelectListVO country : countryList) {

@@ -35,7 +35,7 @@ public class DelOutboundExportItemQueryPage implements QueryPage<DelOutboundExpo
     private final BaseProductClientService baseProductClientService;
     private final CacheContext<String, String> productAttributeCacheContext;
 
-    public DelOutboundExportItemQueryPage(DelOutboundListQueryDto delOutboundListQueryDto, QueryDto queryDto, IDelOutboundDetailService delOutboundDetailService, BaseProductClientService baseProductClientService, List<BasSubWrapperVO> productAttributeCacheContext) {
+    public DelOutboundExportItemQueryPage(DelOutboundListQueryDto delOutboundListQueryDto, QueryDto queryDto, IDelOutboundDetailService delOutboundDetailService, BaseProductClientService baseProductClientService, List<BasSubWrapperVO> productAttributeCacheContext, String len) {
         this.delOutboundListQueryDto = delOutboundListQueryDto;
         this.queryDto = queryDto;
         this.baseProductClientService = baseProductClientService;
@@ -43,9 +43,16 @@ public class DelOutboundExportItemQueryPage implements QueryPage<DelOutboundExpo
         this.delOutboundDetailService = delOutboundDetailService;
         this.productAttributeCacheContext = new CacheContext.MapCacheContext<>();
 
-        for (BasSubWrapperVO vo : productAttributeCacheContext) {
-            this.productAttributeCacheContext.put(vo.getSubValue(), vo.getSubNameEn());
+        if("en".equals(len)){
+            for (BasSubWrapperVO vo : productAttributeCacheContext) {
+                this.productAttributeCacheContext.put(vo.getSubValue(), vo.getSubNameEn());
+            }
+        }else{
+            for (BasSubWrapperVO vo : productAttributeCacheContext) {
+                this.productAttributeCacheContext.put(vo.getSubValue(), vo.getSubName());
+            }
         }
+
     }
 
     @Override

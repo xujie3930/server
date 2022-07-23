@@ -180,7 +180,15 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
             List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
             if(dataDelQuerySettingsList.size() == 0) {
-                throw new CommonException("400", "此查件申请没有相关的匹配规则");
+                delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
+                delQuerySettingsQueryWrapper.and(wrapper -> {
+                    wrapper.isNull(DelQuerySettings::getCountryCode).or().eq(DelQuerySettings::getCountryCode, "");
+                });
+                delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
+                dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
+                if(dataDelQuerySettingsList.size() == 0) {
+                    throw new CommonException("400", "此查件申请没有相关的匹配规则");
+                }
             }
 
             DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0) ;
