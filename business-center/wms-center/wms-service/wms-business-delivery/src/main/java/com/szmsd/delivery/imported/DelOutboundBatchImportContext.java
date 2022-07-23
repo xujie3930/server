@@ -22,7 +22,8 @@ public class DelOutboundBatchImportContext extends ImportContext<DelOutboundBatc
                                          List<BasRegionSelectListVO> countryList,
                                          List<BasSubWrapperVO> shipmentChannelList) {
         super(dataList);
-        this.countryCache = new MapCacheContext<>();
+         this.countryCache = new MapCacheContext<>();
+        this.countryCodeCache = new MapCacheContext<>();
         this.shipmentChannelCache = new MapCacheContext<>();
         this.confirmCache = new MapCacheContext<>();
         if (CollectionUtils.isNotEmpty(countryList)) {
