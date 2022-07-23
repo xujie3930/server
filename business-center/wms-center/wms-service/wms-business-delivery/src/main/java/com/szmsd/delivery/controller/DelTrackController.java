@@ -119,7 +119,7 @@ public class DelTrackController extends BaseController {
             boolean ignore = true;
             String key = track.getCarrierCode()+":"+track.getDescription();
             if(!cacheMap.containsKey(key)){
-                R<Boolean> booleanR = this.basCarrierKeywordFeignService.checkExistKeyword(track.getCarrierCode(), track.getDescription());
+                R<Boolean> booleanR = this.basCarrierKeywordFeignService.checkExistKeyword(track.getCarrierCode(), track.getDisplay());
                 if(null != booleanR && booleanR.getData() != null){
                     ignore = booleanR.getData();
                 }

@@ -165,7 +165,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                 for (int i = 0; i < selectList.size(); i++) {
                     DelTrack track = selectList.get(i);
                     // check
-                    R<Boolean> booleanR = this.basCarrierKeywordFeignService.checkExistKeyword(carrierCode, track.getDescription());
+                    R<Boolean> booleanR = this.basCarrierKeywordFeignService.checkExistKeyword(carrierCode, track.getDisplay());
                     boolean ignore;
                     if (null != booleanR) {
                         Boolean data = booleanR.getData();

@@ -1,5 +1,7 @@
 package com.szmsd.delivery.imported;
 
+import com.szmsd.common.core.utils.NumberUtil;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.dto.DelOutboundCollectionImportDto;
 
 /**
@@ -65,7 +67,12 @@ public class DelOutboundCollectionImportValidation implements ImportValidation<D
     }
 
     public String getCountryCode(String country) {
-        return this.importContext.countryCache.get(country);
+        String v = this.importContext.countryCache.get(country);
+        if(v == null){
+            v = this.importContext.countryCodeCache.get(country);
+        }
+
+        return v;
     }
 
 }

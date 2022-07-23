@@ -5,7 +5,9 @@ import com.github.pagehelper.PageHelper;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.utils.QueryPage;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.delivery.dto.DelOutboundExportItemListDto;
@@ -31,13 +33,19 @@ public class DelOutboundExportItemQueryPage implements QueryPage<DelOutboundExpo
     private final CacheContext<String, BaseProduct> productCacheContext;
     private final IDelOutboundDetailService delOutboundDetailService;
     private final BaseProductClientService baseProductClientService;
+    private final CacheContext<String, String> productAttributeCacheContext;
 
-    public DelOutboundExportItemQueryPage(DelOutboundListQueryDto delOutboundListQueryDto, QueryDto queryDto, IDelOutboundDetailService delOutboundDetailService, BaseProductClientService baseProductClientService) {
+    public DelOutboundExportItemQueryPage(DelOutboundListQueryDto delOutboundListQueryDto, QueryDto queryDto, IDelOutboundDetailService delOutboundDetailService, BaseProductClientService baseProductClientService, List<BasSubWrapperVO> productAttributeCacheContext) {
         this.delOutboundListQueryDto = delOutboundListQueryDto;
         this.queryDto = queryDto;
         this.baseProductClientService = baseProductClientService;
         this.productCacheContext = new CacheContext.MapCacheContext<>();
         this.delOutboundDetailService = delOutboundDetailService;
+        this.productAttributeCacheContext = new CacheContext.MapCacheContext<>();
+
+        for (BasSubWrapperVO vo : productAttributeCacheContext) {
+            this.productAttributeCacheContext.put(vo.getSubValue(), vo.getSubNameEn());
+        }
     }
 
     @Override
@@ -69,10 +77,20 @@ public class DelOutboundExportItemQueryPage implements QueryPage<DelOutboundExpo
             for (DelOutboundExportItemListDto dto : exportPage) {
                 DelOutboundExportItemListVO vo = BeanMapperUtil.map(dto, DelOutboundExportItemListVO.class);
                 BaseProduct product = this.productCacheContext.get(dto.getSku());
-                if (null != product) {
+
+                if(StringUtils.isEmpty(dto.getProductName())) {
                     vo.setDeclaredNameEn(product.getProductName());
-                    vo.setProductAttributeName(product.getProductAttributeName());
+                }else{
+                    vo.setDeclaredNameEn(dto.getProductName());
+
                 }
+                if(StringUtils.isEmpty(dto.getProductAttribute())){
+                    vo.setProductAttributeName(product.getProductAttributeName());
+
+                }else{
+                    vo.setProductAttributeName(this.productAttributeCacheContext.get(dto.getProductAttribute()));
+                }
+
                 page.add(vo);
             }
         }

@@ -66,14 +66,14 @@ public class DelOutboundPackageTransferImportContainer extends DelOutboundPackag
     public DelOutboundAddressDto buildAddress(DelOutboundPackageTransferImportDto dto) {
         DelOutboundAddressDto address = new DelOutboundAddressDto();
         address.setConsignee(dto.getConsignee());
-        address.setCountryCode(super.countryCache.get(dto.getCountry()));
-        address.setCountry(dto.getCountry());
+        address.setCountryCode(super.getCountryCodeCache(dto.getCountry(), this.countryCodeCache, this.countryCache));
+        address.setCountry(super.getCountryNameCache(dto.getCountry(), this.countryCodeCache, this.countryCache));
         address.setStateOrProvince(dto.getStateOrProvince());
         address.setCity(dto.getCity());
         address.setStreet1(dto.getStreet1());
         address.setStreet2(dto.getStreet2());
-        address.setPostCode(dto.getPostCode());
-        address.setPhoneNo(dto.getPhoneNo());
+        address.setPostCode(super.stringNumber(dto.getPostCode()));
+        address.setPhoneNo(super.stringNumber(dto.getPhoneNo()));
         return address;
     }
 
