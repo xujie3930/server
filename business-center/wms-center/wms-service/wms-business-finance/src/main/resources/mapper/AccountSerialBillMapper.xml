@@ -61,12 +61,10 @@
         <if test="createTimeEnd != null  and createTimeEnd!=''">
             and date_format(a.create_time,'%y%m%d') &lt;= date_format(#{createTimeEnd},'%y%m%d')
         </if>
-        <if test="ids != null  and ids.size()>0">
-            and a.id IN
-            <foreach collection="ids" item="item" index="i" open="(" close=")" separator=",">
-                #{item}
-            </foreach>
+        <if test="ids != null  and ids!=''">
+            and FIND_IN_SET(a.id,#{ids})
         </if>
+
 
         </where>
         GROUP BY a.id
