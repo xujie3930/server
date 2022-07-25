@@ -683,7 +683,7 @@ public class DeliveryController {
 
     @PostMapping(value = "/commonTrackList")
     @ApiOperation(value = "#21 轨迹管理 - 第三方轨迹查看专用接口", position = 902)
-    public R<DelTrackMainCommonDto> commonTrackList(@RequestBody @Validated DelTrackRequest request) {
+    public R<DelTrackMainDocCommonDto> commonTrackList(@RequestBody @Validated DelTrackRequest request) {
         return R.ok(delOutboundClientService.commonTrackList(request.getOrderNos()));
     }
 
