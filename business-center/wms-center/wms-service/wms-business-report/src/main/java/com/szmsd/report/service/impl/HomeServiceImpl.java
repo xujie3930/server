@@ -184,7 +184,11 @@ public class HomeServiceImpl implements HomeService {
         List<DelOutboundReportListVO> submited = remoteComponent.outboundReportCount(outQueryDto);
 
         // 已入库订单（状态：已完成）：Order Completed
-        InboundReceiptQueryDTO inQueryDTO = new InboundReceiptQueryDTO().setCusCode(cusCode).setStartTime(startTime).setEndTime(endTime).setTimeType(InboundReceiptQueryDTO.TimeType.CR);
+        InboundReceiptQueryDTO inQueryDTO = new InboundReceiptQueryDTO();
+        inQueryDTO.setCusCode(cusCode);
+        inQueryDTO.setStartTime(startTime);
+        inQueryDTO.setEndTime(endTime);
+        inQueryDTO.setTimeType(InboundReceiptQueryDTO.TimeType.CR);
         List<InboundCountVO> completed = remoteComponent.inboundCount(inQueryDTO.setStatus(LocalLanguageEnum.INBOUND_RECEIPT_STATUS_5.getKey()));
 
         // 已出库订单（状态为已完成）：Order Shipped
