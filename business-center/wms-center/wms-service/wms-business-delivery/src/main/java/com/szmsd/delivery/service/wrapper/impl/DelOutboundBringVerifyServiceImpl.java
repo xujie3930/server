@@ -1123,6 +1123,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
             shipmentRule = "Spl";
         }
+        // 销毁出库
+        else if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())) {
+            shipmentRule = "XiaoHui";
+        }
         createShipmentRequestDto.setShipmentRule(shipmentRule);
         createShipmentRequestDto.setPackingRule(delOutbound.getPackingRule());
         boolean isBatchSelfPick = false;
