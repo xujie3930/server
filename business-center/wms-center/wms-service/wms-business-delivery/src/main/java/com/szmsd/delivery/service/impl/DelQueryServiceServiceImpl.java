@@ -129,7 +129,9 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             if(StringUtils.isNotEmpty(delQueryService.getCountry())){
                 where.eq(DelQueryService::getCountry, delQueryService.getCountry());
             }
-
+            if(StringUtils.isNotEmpty(delQueryService.getCountryCode())){
+                where.eq(DelQueryService::getCountryCode, delQueryService.getCountryCode());
+            }
 
             if(StringUtils.isNotEmpty(delQueryService.getCreateBy())){
                 where.eq(DelQueryService::getCreateBy, delQueryService.getCreateBy());
