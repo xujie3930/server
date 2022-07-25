@@ -149,6 +149,14 @@ public class SysUser extends BaseEntity {
     @TableField(exist = false)
     private List<String> permissions;
 
+    @ApiModelProperty(value = "子母单")
+    @TableField(exist = false)
+    private String childParentCode;
+
+    @ApiModelProperty(value = "子母单List")
+    @TableField(exist = false)
+    private List<String> childParentCodeList;
+
     public SysUser() {
 
     }

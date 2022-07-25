@@ -12,6 +12,7 @@ import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.inventory.component.RemoteComponent;
@@ -110,8 +111,12 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
     @Override
     public List<PurchaseInfoListVO> selectPurchaseListClient(PurchaseQueryDTO purchaseQueryDTO) {
-        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
-        purchaseQueryDTO.setCustomCode(loginUserInfo.getSellerCode());
+//        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
+//        purchaseQueryDTO.setCustomCode(loginUserInfo.getSellerCode());
+        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        if(com.szmsd.common.core.utils.StringUtils.isEmpty(purchaseQueryDTO.getCustomCode())){
+            purchaseQueryDTO.setCustomCode(cusCode);
+        }
         return selectPurchaseList(purchaseQueryDTO);
     }
 

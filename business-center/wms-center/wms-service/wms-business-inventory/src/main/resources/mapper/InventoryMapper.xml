@@ -75,9 +75,15 @@
                     #{sku}
                 </foreach>
             </if>
-            <if test="cusCode != null and cusCode != ''">
-                AND t.cus_code = #{cusCode}
+            <if test="cusCodeList != null and cusCodeList.size() > 0">
+                AND t.cus_code IN
+                <foreach collection="cusCodeList" item="cusCode" open="(" separator="," close=")">
+                    #{cusCode}
+                </foreach>
             </if>
+<!--            <if test="cusCode != null and cusCode != ''">-->
+<!--                AND t.cus_code = #{cusCode}-->
+<!--            </if>-->
             <if test="skuPropertyCode != null and skuPropertyCode != ''">
                 AND sku.product_attribute = #{skuPropertyCode}
             </if>

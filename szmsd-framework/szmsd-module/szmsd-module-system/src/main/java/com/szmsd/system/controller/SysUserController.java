@@ -1,6 +1,7 @@
 package com.szmsd.system.controller;
 
 
+import com.szmsd.bas.api.feign.BasChildParentChildFeignService;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.enums.ExceptionMessageEnum;
@@ -33,10 +34,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 用户信息
@@ -59,8 +58,8 @@ public class SysUserController extends BaseController {
     @Resource
     private ISysPermissionService permissionService;
 
-
-
+    @Resource
+    private BasChildParentChildFeignService basChildParentChildFeignService;
 
 
     /**
@@ -182,9 +181,9 @@ public class SysUserController extends BaseController {
         SysUser sysUser = new SysUser();
         sysUser.setNickName(sysUserByTypeAndUserType.getNickName());
         List<SysUser> list = userService.selectUserList(sysUser);
-        if (CollectionUtils.isNotEmpty(list)&&list.size()==1) {
+        if (CollectionUtils.isNotEmpty(list) && list.size() == 1) {
             return R.ok(list.get(0));
-        }else{
+        } else {
             return R.failed("没有查询到结果");
         }
     }
@@ -196,9 +195,9 @@ public class SysUserController extends BaseController {
     @ApiOperation(httpMethod = "POST", value = "获取当前用户信息")
     public R<SysUser> getNameByUserName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType) {
         SysUser sysUser = userService.selectUserByUserName(sysUserByTypeAndUserType.getUsername(), sysUserByTypeAndUserType.getUserType());
-        if (sysUser!=null) {
+        if (sysUser != null) {
             return R.ok(sysUser);
-        }else{
+        } else {
             return R.failed("没有查询到结果");
         }
     }
@@ -211,8 +210,8 @@ public class SysUserController extends BaseController {
     @GetMapping("getInfo")
     @ApiOperation(httpMethod = "GET", value = "获取用户信息")
     public R getInfo(@ApiParam("权限类型：1-PC，2-APP,3-VIP") @RequestParam(defaultValue = "1") @PathVariable("type") Integer type) {
-        log.info("用户ID"+SecurityUtils.getLoginUser().getUserId().toString());
-        log.info("用户"+SecurityUtils.getLoginUser().toString());
+        log.info("用户ID" + SecurityUtils.getLoginUser().getUserId().toString());
+        log.info("用户" + SecurityUtils.getLoginUser().toString());
         Long userId = SecurityUtils.getLoginUser().getUserId();
         // 角色集合
         Set<String> roles = permissionService.getRolePermission(userId, type);
@@ -224,13 +223,25 @@ public class SysUserController extends BaseController {
 
         SysUser sysUser = userService.selectUserById(userId);
         String sellerCode = sysUser.getSellerCode();
-        if(StringUtils.isNotEmpty(sellerCode)){
-
+        sysUser.setChildParentCode(sellerCode);
+        List<String> sellerCodeList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(sellerCode)) {
+            sellerCodeList.add(sellerCode);
+            // 查询是否有子单数据
+            R<List<String>> rChildCodeList = basChildParentChildFeignService.getChildCodeList(sellerCode);
+            if (rChildCodeList.getCode() == 200) {
+                List<String> childCodeList = rChildCodeList.getData();
+                if (CollectionUtils.isNotEmpty(childCodeList)) {
+                    sellerCodeList.addAll(childCodeList);
+                    sysUser.setChildParentCode(sellerCodeList.stream().collect(Collectors.joining(",")));
+                }
+            }
         }
-        map.put("user", userService.selectUserById(userId));
+        // 为前端提供子母单的下拉数据
+        sysUser.setChildParentCodeList(sellerCodeList);
+        map.put("user", sysUser);
         map.put("roles", roles);
         map.put("permissions", permissions);
-
         return R.ok(map);
     }
 
@@ -258,7 +269,7 @@ public class SysUserController extends BaseController {
 //        map.put("posts", postService.selectPostAll());
         if (StringUtils.isNotNull(userId)) {
             SysUser sysUser = userService.selectUserById(userId);
-            map.put("user",sysUser);
+            map.put("user", sysUser);
 //           map.put("postIds", postService.selectPostListByUserId(userId));
             map.put("roleIds", roleService.selectRoleListByUserId(userId));
         }
@@ -316,7 +327,7 @@ public class SysUserController extends BaseController {
             return R.failed("新增用户'" + user.getUserName() + "'失败，登录账号已存在");
         } /*else if (UserConstants.NOT_UNIQUE.equals(userService.checkPhoneUnique(user))) {
             return R.failed("新增用户'" + user.getUserName() + "'失败，手机号码已存在");
-        } */else if (UserConstants.NOT_UNIQUE.equals(userService.checkEmailUnique(user))) {
+        } */ else if (UserConstants.NOT_UNIQUE.equals(userService.checkEmailUnique(user))) {
             return R.failed("新增用户'" + user.getUserName() + "'失败，邮箱账号已存在");
         }
 
@@ -353,7 +364,7 @@ public class SysUserController extends BaseController {
     @PutMapping("baseCopyUserEdit")
     @ApiOperation(httpMethod = "PUT", value = "员工资料同步修改用户")
     public R baseCopyUserEdit(@Validated @RequestBody SysUserDto userDto) {
-        if(userDto.getUserId()==null){
+        if (userDto.getUserId() == null) {
             return R.failed("baseCopyUserEdit userId is null");
         }
         SysUser user = new SysUser();
@@ -370,9 +381,6 @@ public class SysUserController extends BaseController {
 //        user.setSpearPassword(SecurityUtils.encryptPassword(user.getSpearPassword()));
         return toOk(userService.baseCopyUserEdit(user));
     }
-
-
-
 
 
     /**
@@ -416,7 +424,6 @@ public class SysUserController extends BaseController {
         user.setUpdateByName(SecurityUtils.getUsername());
         return toOk(userService.updateUserApp(user));
     }
-
 
 
     /**
@@ -474,7 +481,7 @@ public class SysUserController extends BaseController {
     @ApiOperation(httpMethod = "PUT", value = "重置密码")
     public R<Integer> resetPwdBySeller(@RequestBody SysUserDto userDto) {
         if (StringUtils.isEmpty(userDto.getSellerCode())
-            || StringUtils.isEmpty(userDto.getPassword())) {
+                || StringUtils.isEmpty(userDto.getPassword())) {
             return R.failed("非法操作");
         }
         SysUser user = new SysUser();

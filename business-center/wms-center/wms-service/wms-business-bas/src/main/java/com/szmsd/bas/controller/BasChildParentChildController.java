@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 
 /**
@@ -113,17 +114,17 @@ public class BasChildParentChildController extends BaseController {
     }
 
 
-    /** 
+    /**
      * 通过主单查询子单
-     * 
-     * @param sellerCode 
-     * @return: R 
-     * @author: taoJie 
-     * @since: 2022-07-14 
+     *
+     * @param sellerCode
+     * @return: R
+     * @author: taoJie
+     * @since: 2022-07-14
      */
-    @GetMapping("/getChildCodeList")
+    @PostMapping("/getChildCodeList")
     @ApiOperation(value = "处理操作", notes = "处理操作")
-    public R getChildCodeList(@RequestParam String sellerCode) {
+    public R<List<String>> getChildCodeList(@RequestBody String sellerCode) {
         return R.ok(basChildParentChildService.getChildCodeList(sellerCode));
     }
 

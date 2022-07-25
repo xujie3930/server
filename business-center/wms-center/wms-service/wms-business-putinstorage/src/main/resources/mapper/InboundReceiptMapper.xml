@@ -192,7 +192,13 @@
         </if>
         <if test="warehouseCode != null and warehouseCode != ''">AND t.warehouse_code = #{warehouseCode}</if>
         <if test="orderType != null and orderType != ''">AND t.order_type = #{orderType}</if>
-        <if test="cusCode != null and cusCode != ''">AND t.cus_code = #{cusCode}</if>
+        <if test="cusCodeList != null and cusCodeList.size() > 0">
+            AND t.cus_code IN
+            <foreach collection="cusCodeList" open="(" separator="," close=")" item="cusCode">
+                #{cusCode}
+            </foreach>
+        </if>
+<!--        <if test="cusCode != null and cusCode != ''">AND t.cus_code = #{cusCode}</if>-->
         <if test="status != null and status != ''">AND t.status = #{status}</if>
         <if test="statusList != null and statusList.size() > 0">
             AND t.status IN

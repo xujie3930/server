@@ -9,8 +9,14 @@
             <if test="no != null and no != ''">
                 AND order_no = #{no}
             </if>
-            <if test="customCode != null and customCode != ''">
-                AND custom_code = #{customCode}
+<!--            <if test="customCode != null and customCode != ''">-->
+<!--                AND custom_code = #{customCode}-->
+<!--            </if>-->
+            <if test="customCodeList != null and customCodeList.size() > 0">
+                AND custom_code IN
+                <foreach collection="customCodeList" open="(" separator="," close=")" item="customCode">
+                    #{customCode}
+                </foreach>
             </if>
             <if test="payMethod != null and payMethod != ''">
                 AND pay_method = #{payMethod}
