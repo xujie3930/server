@@ -193,7 +193,7 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             }
 
             @Override
-            public R<DelTrackMainCommonDto> commonTrackList(List<String> orders) {
+            public R<DelTrackMainDocCommonDto> commonTrackList(List<String> orders) {
                 return R.convertResultJson(throwable);
             }
 
