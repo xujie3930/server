@@ -310,8 +310,12 @@ public final class DelOutboundServiceImplUtil {
                 queryWrapper.eq("o.order_type", orderType);
             }
         }
-
-        QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
+        List<String> customCodeList = queryDto.getCustomCodeList();
+        if(CollectionUtils.isNotEmpty(customCodeList)) {
+            queryWrapper.in("o.seller_code", customCodeList);
+            queryWrapper.in("o.custom_code", customCodeList);
+        }
+//        QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
         QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
         // 重派订单
         String reassignType = queryDto.getReassignType();

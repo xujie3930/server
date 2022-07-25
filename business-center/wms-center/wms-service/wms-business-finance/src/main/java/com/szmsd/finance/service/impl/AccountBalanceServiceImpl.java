@@ -101,14 +101,18 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
         LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
-        if (StringUtils.isNotEmpty(dto.getCusCode())) {
-            queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
+//        if (StringUtils.isNotEmpty(dto.getCusCode())) {
+//            queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
+//        }
+
+        if (CollectionUtils.isNotEmpty(dto.getCusCodeList())) {
+            queryWrapper.in(AccountBalance::getCusCode, dto.getCusCodeList());
+            dto.setCusCode("");
         }
         if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
             queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
         }
         List<AccountBalance> accountBalances = accountBalanceMapper.listPage(queryWrapper);
-
         Map<String, CreditUseInfo> creditUseInfoMap = iDeductionRecordService.queryTimeCreditUse(dto.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
         Map<String, CreditUseInfo> needRepayCreditUseInfoMap = iDeductionRecordService.queryTimeCreditUse(dto.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.CHECKED));
         accountBalances.forEach(x -> {

@@ -165,7 +165,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
     @Override
     public List<ReturnExpressListVO> selectClientReturnOrderList(ReturnExpressListQueryDTO queryDto) {
-        queryDto.setSellerCode(getSellCode());
+//        queryDto.setSellerCode(getSellCode());
         return selectReturnOrderList(queryDto);
     }
 

@@ -1,11 +1,14 @@
 package com.szmsd.delivery.dto;
 
+import com.google.common.collect.Lists;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -70,4 +73,14 @@ public class DelOutboundListQueryDto extends QueryDto {
 
     @ApiModelProperty(value = "国家代码")
     private String countryCode;
+
+
+    @ApiModelProperty(value = "客户编码list")
+    private List<String> customCodeList;
+
+    public void setCustomCode(String customCode) {
+        this.customCode = customCode;
+        this.customCodeList = StringUtils.isNotEmpty(customCode) ? Arrays.asList(customCode.split(",")) : Lists.newArrayList();
+    }
+
 }

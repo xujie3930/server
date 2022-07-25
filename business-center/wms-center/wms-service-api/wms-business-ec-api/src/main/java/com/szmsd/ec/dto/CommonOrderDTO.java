@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.google.common.collect.Lists;
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -198,5 +201,11 @@ public class CommonOrderDTO {
     @Excel(name = "发货仓库名称")
     private String shippingWarehouseName;
 
+    @ApiModelProperty(value = "客户编码list")
+    private List<String> cusCodeList;
 
+    public void setCusCode(String cusCode) {
+        this.cusCode = cusCode;
+        this.cusCodeList = StringUtils.isNotEmpty(cusCode) ? Arrays.asList(cusCode.split(",")) : Lists.newArrayList();
+    }
 }

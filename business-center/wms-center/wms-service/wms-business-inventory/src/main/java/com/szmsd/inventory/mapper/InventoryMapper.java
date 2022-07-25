@@ -18,7 +18,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 public interface InventoryMapper extends BaseMapper<Inventory> {
-    @DataScope("t.cus_code")
+//    @DataScope("t.cus_code")
     List<InventorySkuVO> selectListVO(InventorySkuQueryDTO inventorySkuQueryDTO);
 
     /**

@@ -1,5 +1,7 @@
 package com.szmsd.pack.dto;
 
+import com.google.common.collect.Lists;
+import com.szmsd.common.core.utils.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import jodd.util.StringUtil;
@@ -77,4 +79,14 @@ public class PackageMangQueryDTO{
     @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
     private Integer exportType;
 
+    @ApiModelProperty(value = "客户代码")
+    private String customCode;
+
+    @ApiModelProperty(value = "客户编码list")
+    private List<String> customCodeList;
+
+    public void setCustomCode(String customCode) {
+        this.customCode = customCode;
+        this.customCodeList = StringUtils.isNotEmpty(customCode) ? Arrays.asList(customCode.split(",")) : Lists.newArrayList();
+    }
 }

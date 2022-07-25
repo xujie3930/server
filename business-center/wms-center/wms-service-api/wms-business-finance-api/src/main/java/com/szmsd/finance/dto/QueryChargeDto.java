@@ -1,10 +1,14 @@
 package com.szmsd.finance.dto;
 
+import com.google.common.collect.Lists;
+import com.szmsd.common.core.utils.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 @Data
 @ApiModel(value = "DelOutboundChargeQueryDto", description = "DelOutboundChargeQueryDto对象")
@@ -36,5 +40,13 @@ public class QueryChargeDto implements Serializable {
 
     @ApiModelProperty(value = "下单时间结束")
     private String orderTimeEnd;
+
+    @ApiModelProperty(value = "客户编码list")
+    private List<String> customCodeList;
+
+    public void setCustomCode(String customCode) {
+        this.customCode = customCode;
+        this.customCodeList = StringUtils.isNotEmpty(customCode) ? Arrays.asList(customCode.split(",")) : Lists.newArrayList();
+    }
 
 }
