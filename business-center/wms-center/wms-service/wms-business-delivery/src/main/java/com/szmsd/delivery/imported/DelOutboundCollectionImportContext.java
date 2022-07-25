@@ -14,13 +14,19 @@ public class DelOutboundCollectionImportContext extends ImportContext<DelOutboun
 
     protected CacheContext<String, String> countryCache;
 
+    protected CacheContext<String, String> countryCodeCache;
+
+
     public DelOutboundCollectionImportContext(List<DelOutboundCollectionImportDto> dataList,
                                               List<BasRegionSelectListVO> countryList) {
         super(dataList);
-        this.countryCache = new MapCacheContext<>();
+         this.countryCache = new MapCacheContext<>();
+        this.countryCodeCache = new MapCacheContext<>();
         if (CollectionUtils.isNotEmpty(countryList)) {
             for (BasRegionSelectListVO country : countryList) {
                 this.countryCache.put(country.getName(), country.getAddressCode());
+                this.countryCodeCache.put(country.getAddressCode(), country.getName());
+
             }
         }
     }

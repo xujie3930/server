@@ -13,6 +13,8 @@ import java.util.List;
 public class DelOutboundBatchImportContext extends ImportContext<DelOutboundBatchImportDto> {
 
     protected CacheContext<String, String> countryCache;
+    protected CacheContext<String, String> countryCodeCache;
+
     protected CacheContext<String, String> shipmentChannelCache;
     protected CacheContext<String, Boolean> confirmCache;
 
@@ -20,12 +22,15 @@ public class DelOutboundBatchImportContext extends ImportContext<DelOutboundBatc
                                          List<BasRegionSelectListVO> countryList,
                                          List<BasSubWrapperVO> shipmentChannelList) {
         super(dataList);
-        this.countryCache = new MapCacheContext<>();
+         this.countryCache = new MapCacheContext<>();
+        this.countryCodeCache = new MapCacheContext<>();
         this.shipmentChannelCache = new MapCacheContext<>();
         this.confirmCache = new MapCacheContext<>();
         if (CollectionUtils.isNotEmpty(countryList)) {
             for (BasRegionSelectListVO country : countryList) {
                 this.countryCache.put(country.getName(), country.getAddressCode());
+                this.countryCodeCache.put(country.getAddressCode(), country.getName());
+
             }
         }
         if (CollectionUtils.isNotEmpty(shipmentChannelList)) {
@@ -36,4 +41,6 @@ public class DelOutboundBatchImportContext extends ImportContext<DelOutboundBatc
         this.confirmCache.put("是", true);
         this.confirmCache.put("否", false);
     }
+
+
 }

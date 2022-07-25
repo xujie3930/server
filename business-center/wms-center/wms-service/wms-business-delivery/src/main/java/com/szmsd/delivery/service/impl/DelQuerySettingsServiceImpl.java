@@ -61,12 +61,25 @@ public class DelQuerySettingsServiceImpl extends ServiceImpl<DelQuerySettingsMap
         public int insertDelQuerySettings(DelQuerySettings delQuerySettings)
         {
 
-            QueryWrapper<DelQuerySettings> where = new QueryWrapper<DelQuerySettings>();
-            where.eq("country_code", delQuerySettings.getCountryCode());
-            where.eq("shipment_rule", delQuerySettings.getShipmentRule());
-            if(baseMapper.selectList(where).size() > 0){
-                throw new CommonException("400", "一个国家下不能存在相同的物流服务");
+            if(StringUtils.isEmpty(delQuerySettings.getCountryCode())){
+                QueryWrapper<DelQuerySettings> where = new QueryWrapper<DelQuerySettings>();
+                where.and(wrapper -> {
+                    wrapper.isNull("country_code").or().eq("country_code", "");
+                });
+                where.eq("shipment_rule", delQuerySettings.getShipmentRule());
+                if(baseMapper.selectList(where).size() > 0){
+                    throw new CommonException("400", "国家为空情况下，不能存在相同的物流服务");
+                }
+            }else{
+                QueryWrapper<DelQuerySettings> where = new QueryWrapper<DelQuerySettings>();
+                where.eq("country_code", delQuerySettings.getCountryCode());
+                where.eq("shipment_rule", delQuerySettings.getShipmentRule());
+                if(baseMapper.selectList(where).size() > 0){
+                    throw new CommonException("400", "一个国家下不能存在相同的物流服务");
+                }
+
             }
+
 
         return baseMapper.insert(delQuerySettings);
         }
@@ -80,13 +93,26 @@ public class DelQuerySettingsServiceImpl extends ServiceImpl<DelQuerySettingsMap
         @Override
         public int updateDelQuerySettings(DelQuerySettings delQuerySettings)
         {
-            QueryWrapper<DelQuerySettings> where = new QueryWrapper<DelQuerySettings>();
-            where.ne("id", delQuerySettings.getId());
-            where.eq("country_code", delQuerySettings.getCountryCode());
-            where.eq("shipment_rule", delQuerySettings.getShipmentRule());
-            if(baseMapper.selectList(where).size() > 0){
-            }
+            if(StringUtils.isEmpty(delQuerySettings.getCountryCode())){
+                QueryWrapper<DelQuerySettings> where = new QueryWrapper<DelQuerySettings>();
+                where.ne("id", delQuerySettings.getId());
+                where.and(wrapper -> {
+                    wrapper.isNull("country_code").or().eq("country_code", "");
+                });
+                where.eq("shipment_rule", delQuerySettings.getShipmentRule());
+                if(baseMapper.selectList(where).size() > 0){
+                    throw new CommonException("400", "国家为空情况下，不能存在相同的物流服务");
+                }
+            }else{
+                QueryWrapper<DelQuerySettings> where = new QueryWrapper<DelQuerySettings>();
+                where.ne("id", delQuerySettings.getId());
+                where.eq("country_code", delQuerySettings.getCountryCode());
+                where.eq("shipment_rule", delQuerySettings.getShipmentRule());
+                if(baseMapper.selectList(where).size() > 0){
+                    throw new CommonException("400", "一个国家下不能存在相同的物流服务");
+                }
 
+            }
         return baseMapper.updateById(delQuerySettings);
         }
 

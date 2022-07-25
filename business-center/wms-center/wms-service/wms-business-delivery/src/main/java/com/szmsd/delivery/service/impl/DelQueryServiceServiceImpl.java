@@ -113,9 +113,17 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 where.like(DelQueryService::getServiceManager, delQueryService.getServiceManager());
             }
 
+            if(StringUtils.isNotEmpty(delQueryService.getServiceStaffNickName())){
+                where.like(DelQueryService::getServiceStaffNickName, delQueryService.getServiceStaffNickName());
+            }
+
 
             if(StringUtils.isNotEmpty(delQueryService.getShipmentRule())){
                 where.eq(DelQueryService::getShipmentRule, delQueryService.getShipmentRule());
+            }
+
+            if(StringUtils.isNotEmpty(delQueryService.getShipmentService())){
+                where.eq(DelQueryService::getShipmentService, delQueryService.getShipmentService());
             }
 
             if(StringUtils.isNotEmpty(delQueryService.getCountry())){
@@ -127,10 +135,23 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 where.eq(DelQueryService::getCreateBy, delQueryService.getCreateBy());
             }
 
+            if(StringUtils.isNotEmpty(delQueryService.getCreateByName())){
+                where.eq(DelQueryService::getCreateByName, delQueryService.getCreateByName());
+            }
+
 
 
             if(StringUtils.isNotEmpty(delQueryService.getState())){
                 where.eq(DelQueryService::getState, delQueryService.getState());
+            }
+
+            if(StringUtils.isNotEmpty(delQueryService.getIds())){
+                where.in(DelQueryService::getId, delQueryService.getIds());
+            }
+
+            if(delQueryService.getFeedbacks() != null && delQueryService.getFeedbacks().length > 1){
+                where.apply("id in(SELECT main_id FROM del_query_service_feedback where create_time BETWEEN {0} and {1})",
+                        delQueryService.getFeedbacks()[0], delQueryService.getFeedbacks()[1]);
             }
             QueryWrapperUtil.filterDate(queryWrapper, "create_time", delQueryService.getCreateTimes());
 
@@ -151,13 +172,23 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         {
 
 
+            if(StringUtils.isEmpty(delQueryService.getReason())){
+                throw new CommonException("400", "查件原因不能为空");
+            }
             LambdaQueryWrapper<DelQuerySettings> delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryService.getCountryCode());
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
             List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
             if(dataDelQuerySettingsList.size() == 0) {
-                throw new CommonException("400", "此查件申请没有相关的匹配规则");
-
+                delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
+                delQuerySettingsQueryWrapper.and(wrapper -> {
+                    wrapper.isNull(DelQuerySettings::getCountryCode).or().eq(DelQuerySettings::getCountryCode, "");
+                });
+                delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
+                dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
+                if(dataDelQuerySettingsList.size() == 0) {
+                    throw new CommonException("400", "此查件申请没有相关的匹配规则");
+                }
             }
 
             DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0) ;
@@ -273,8 +304,11 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         }
         List<DelQueryService> dataList = BeanMapperUtil.mapList(list, DelQueryService.class);
         for (DelQueryService delQueryService: dataList){
+
+            String reason = delQueryService.getReason();
             DelQueryServiceDto dto = getOrderInfo(delQueryService.getOrderNo());
             BeanUtils.copyProperties(dto, delQueryService);
+            delQueryService.setReason(reason);
             this.insertDelQueryService(delQueryService);
         }
         return R.ok();

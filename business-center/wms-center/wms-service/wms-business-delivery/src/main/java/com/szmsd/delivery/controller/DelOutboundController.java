@@ -693,7 +693,7 @@ public class DelOutboundController extends BaseController {
             String len = getLen();
 
             // 查询出库类型数据
-            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099");
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099,059");
             DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
             exportContext.setStateCacheAdapter(listMap.get("065"));
             exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
@@ -707,7 +707,7 @@ public class DelOutboundController extends BaseController {
             QueryDto queryDto2 = new QueryDto();
             queryDto2.setPageNum(1);
             queryDto2.setPageSize(500);
-            QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService);
+            QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
 
 
             ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("en".equals(len) ? "Outbound_order" : "出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {

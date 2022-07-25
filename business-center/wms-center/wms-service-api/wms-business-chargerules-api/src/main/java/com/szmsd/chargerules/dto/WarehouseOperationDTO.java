@@ -8,10 +8,9 @@ import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -64,13 +63,13 @@ public class WarehouseOperationDTO implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "生效时间")
     @Excel(name = "生效时间")
-    private LocalDateTime effectiveTime;
+    private Date effectiveTime;
 
     @ExcelProperty(value = "失效时间", index = 6)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "失效时间")
     @Excel(name = "失效时间")
-    private LocalDateTime expirationTime;
+    private Date expirationTime;
 
     @ExcelIgnore
     @ApiModelProperty(value = "库存折扣详情")

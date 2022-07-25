@@ -898,7 +898,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 returnExpressClientImportBO.setExpectedNo(expectedNo);
                 ReturnExpressClientImportBaseDTO returnExpressClientImportBaseDTO = new ReturnExpressClientImportBaseDTO();
                 returnExpressClientImportBaseDTO.setExpectedNo(expectedNo);
-                returnExpressClientImportBaseDTO.setProcessTypeStr("销毁");
+                returnExpressClientImportBaseDTO.setProcessTypeStr(ressignInfo.getProcessTypeStr());
                 returnExpressClientImportBO.setBaseDTO(returnExpressClientImportBaseDTO);
                 returnExpressClientImportBO.setReassignDTO(ressignInfo);
                 importBOList.add(returnExpressClientImportBO);

@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 
 @Data
@@ -64,11 +64,11 @@ public class WarehouseOperation extends BaseEntity {
 
     @ApiModelProperty(value = "生效时间")
     @Excel(name = "生效时间")
-    private LocalDateTime effectiveTime;
+    private Date effectiveTime;
 
     @ApiModelProperty(value = "失效时间")
     @Excel(name = "失效时间")
-    private LocalDateTime expirationTime;
+    private Date expirationTime;
 
     public String getWarehouseName() {
         return warehouseCode;
