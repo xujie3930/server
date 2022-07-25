@@ -77,8 +77,11 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
                 warehouseOperationDetailsService.saveBatch(dto.getDetails());
             }
             if (dto.getLocationDetails()!=null) {
-                dto.getLocationDetails().stream().peek(value -> value.setWarehouseOperationId(domain.getId()));
+                //dto.getLocationDetails().stream().peek(value -> value.setWarehouseOperationId(domain.getId()));
                 AssertUtil.notEmpty(dto.getLocationDetails(), "详情必填");
+                dto.getLocationDetails().forEach(x->{
+                    x.setWarehouseOperationId(domain.getId());
+                });
                 warehouseOperationDetailsService.saveBatch(dto.getLocationDetails());
             }
         }
