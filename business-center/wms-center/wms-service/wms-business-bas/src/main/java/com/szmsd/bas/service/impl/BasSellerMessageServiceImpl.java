@@ -2,6 +2,7 @@ package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
+import com.google.common.collect.Lists;
 import com.szmsd.bas.domain.BasMessage;
 import com.szmsd.bas.domain.BasSellerMessage;
 import com.szmsd.bas.dto.BasMessageDto;
@@ -13,6 +14,7 @@ import com.szmsd.bas.service.IBasMessageService;
 import com.szmsd.bas.service.IBasSellerMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,6 +25,7 @@ import com.szmsd.common.core.domain.R;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,7 +63,8 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         @Override
         public List<BasMessageDto> getBulletMessage(String sellerCode){
             QueryWrapper<BasSellerMessage> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("seller_code",sellerCode);
+            List<String> cusCodeList = StringUtils.isNotEmpty(sellerCode) ? Arrays.asList(sellerCode.split(",")) : Lists.newArrayList();
+            queryWrapper.in("seller_code",cusCodeList);
             queryWrapper.eq("bullet",true);
             queryWrapper.orderByDesc("create_time");
             List<BasSellerMessage> list = super.list(queryWrapper);

@@ -22,10 +22,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -57,7 +54,7 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
         detailVO.setChildParentStatus("2");
         detailVO.setParentSellerCode(sellerCode);
         List<BasChildParentChild> basChildParentChildren = baseMapper.pageList(detailVO);
-        if(CollectionUtils.isNotEmpty(basChildParentChildren)) {
+        if (CollectionUtils.isNotEmpty(basChildParentChildren)) {
             seller.setChildList(basChildParentChildren);
             seller.setApplyName(basChildParentChildren.get(0).getApplyName());
             seller.setApplyTime(basChildParentChildren.get(0).getApplyTime());
@@ -155,13 +152,13 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
 
 
         LambdaUpdateChainWrapper<BasChildParentChild> updateChainWrapper = lambdaUpdate().eq(BasChildParentChild::getSellerCode, sellerCode);
-        if (Objects.equals(state, ChildParentStateEnum.unbind.getKey())||Objects.equals(state, ChildParentStateEnum.remove.getKey())) {
+        if (Objects.equals(state, ChildParentStateEnum.unbind.getKey()) || Objects.equals(state, ChildParentStateEnum.remove.getKey())) {
             int count = lambdaQuery().eq(BasChildParentChild::getParentSellerCode, parentSellerCode).count();
             basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, sellerCode).set(BasSeller::getChildParentStatus, 0).update();
             result = updateChainWrapper.remove();
             if (Objects.equals(count, 1)) {
-                basChildParentLogService.lambdaUpdate().eq(BasChildParentLog::getParentSellerCode,parentSellerCode).remove();
-                result = basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode,parentSellerCode).set(BasSeller::getChildParentStatus, 0).update();
+                basChildParentLogService.lambdaUpdate().eq(BasChildParentLog::getParentSellerCode, parentSellerCode).remove();
+                result = basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, parentSellerCode).set(BasSeller::getChildParentStatus, 0).update();
             }
         } else {
             result = updateChainWrapper.set(BasChildParentChild::getState, state).set(BasChildParentChild::getDealTime, new Date()).update();
@@ -206,7 +203,12 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
 
     @Override
     public List<String> getChildCodeList(String sellerCode) {
-        return null;
+        List<BasChildParentChild> list = lambdaQuery().eq(BasChildParentChild::getParentSellerCode, sellerCode).list();
+        List<String> sellerCodeList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(list)) {
+            sellerCodeList = list.stream().map(BasChildParentChild::getSellerCode).collect(Collectors.toList());
+        }
+        return sellerCodeList;
     }
 }
 

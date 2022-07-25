@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface InventoryCheckMapper extends BaseMapper<InventoryCheck> {
 
-    @DataScope("a.custom_code")
+//    @DataScope("a.custom_code")
     List<InventoryCheckVo> findList(InventoryCheckQueryDTO inventoryCheckQueryDTO);
 
     InventoryCheckVo findDetails(int id);

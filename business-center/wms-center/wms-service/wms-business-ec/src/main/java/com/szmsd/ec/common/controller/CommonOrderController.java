@@ -228,9 +228,14 @@ public class CommonOrderController extends BaseController {
         if (StringUtils.isNotEmpty(queryDTO.getCreateDates()) && queryDTO.getCreateDates().length > 1) {
             queryWrapper.between(CommonOrder::getOrderDate, DateUtils.parseDate(queryDTO.getCreateDates()[0]), DateUtils.addDays(DateUtils.parseDate(queryDTO.getCreateDates()[1]), 1));
         }
-        String sellerCode = SecurityUtils.getLoginUser().getSellerCode();
-        // 根据客户过滤数据
-        queryWrapper.eq(StringUtils.isNotBlank(sellerCode), CommonOrder::getCusCode, sellerCode);
+//        String sellerCode = SecurityUtils.getLoginUser().getSellerCode();
+//         根据客户过滤数据
+//        queryWrapper.eq(StringUtils.isNotBlank(sellerCode), CommonOrder::getCusCode, sellerCode);
+        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        if(StringUtils.isEmpty(queryDTO.getCusCode())){
+            queryDTO.setCusCode(cusCode);
+        }
+        queryWrapper.in(CommonOrder::getCusCode, queryDTO.getCusCodeList());
         return queryWrapper;
     }
 }

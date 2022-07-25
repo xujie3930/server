@@ -113,7 +113,9 @@ public class InventoryJobService {
         try {
             if (lock.tryLock()) {
                 // OMS 库存
-                List<InventorySkuVO> inventoryListOms = iInventoryService.selectList(new InventorySkuQueryDTO().setCusCode(cusCode));
+                InventorySkuQueryDTO inventorySkuQueryDTO = new InventorySkuQueryDTO();
+                inventorySkuQueryDTO.setCusCode(cusCode);
+                List<InventorySkuVO> inventoryListOms = iInventoryService.selectList(inventorySkuQueryDTO);
 
                 if (CollectionUtils.isEmpty(inventoryListOms)) {
                     log.info("客户[{}]没有库存", cusCode);

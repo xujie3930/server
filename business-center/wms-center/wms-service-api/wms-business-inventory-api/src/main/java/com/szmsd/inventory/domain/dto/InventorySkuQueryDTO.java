@@ -1,10 +1,13 @@
 package com.szmsd.inventory.domain.dto;
 
+import com.google.common.collect.Lists;
+import com.szmsd.common.core.utils.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -36,4 +39,11 @@ public class InventorySkuQueryDTO {
     @ApiModelProperty(value = "客户代码")
     private String cusCode;
 
+    @ApiModelProperty(value = "客户编码list")
+    private List<String> cusCodeList;
+
+    public void setCusCode(String cusCode) {
+        this.cusCode = cusCode;
+        this.cusCodeList = StringUtils.isNotEmpty(cusCode) ? Arrays.asList(cusCode.split(",")) : Lists.newArrayList();
+    }
 }
