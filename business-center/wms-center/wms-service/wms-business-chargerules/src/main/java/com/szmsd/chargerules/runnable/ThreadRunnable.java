@@ -17,6 +17,7 @@ import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.domain.vo.SkuVolumeVO;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RLock;
@@ -113,11 +114,11 @@ public class ThreadRunnable {
      */
     private void getSkuDetails(String warehouseCode, List<SkuVolumeVO> skuVolumes) {
         for (SkuVolumeVO skuVolume : skuVolumes) {
-            LocalDateTime now = LocalDateTime.now();
+            //LocalDateTime now = LocalDateTime.now();
             WarehouseOperationDTO warehouseOperationDTO = new WarehouseOperationDTO();
             warehouseOperationDTO.setWarehouseCode(warehouseCode);
-            warehouseOperationDTO.setEffectiveTime(now);
-            warehouseOperationDTO.setExpirationTime(now);
+            warehouseOperationDTO.setEffectiveTime(new Date());
+            warehouseOperationDTO.setExpirationTime(new Date());
             warehouseOperationDTO.setCusCodeList(skuVolume.getCusCode());
             List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService
                     .selectOperationByRule(warehouseOperationDTO);
