@@ -941,11 +941,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
                 File mergeFile = new File(mergeFilePath);
+                logger.info(mergeFilePath + "," + pathname + "," + uploadBoxLabel);
                 try {
                     if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel)) {
                         pathname = mergeFilePath;
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
                     logger.error(e.getMessage(), e);
                     throw new CommonException("500", "合并箱标文件，标签文件失败");
                 }
@@ -1120,6 +1122,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             shipmentRule = "Com";
         } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
             shipmentRule = "Spl";
+        }
+        // 销毁出库
+        else if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())) {
+            shipmentRule = "XiaoHui";
         }
         createShipmentRequestDto.setShipmentRule(shipmentRule);
         createShipmentRequestDto.setPackingRule(delOutbound.getPackingRule());

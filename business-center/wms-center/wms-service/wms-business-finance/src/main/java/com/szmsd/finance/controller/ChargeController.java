@@ -2,9 +2,11 @@ package com.szmsd.finance.controller;
 
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
@@ -32,6 +34,12 @@ public class ChargeController extends BaseController {
     @GetMapping("/query/page")
     public TableDataInfo<QueryChargeVO> queryPage(QueryChargeDto queryChargeDto) {
         startPage();
+        // 子母单的查询 如果没有传值就只能才自己的
+        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        if(StringUtils.isEmpty(queryChargeDto.getCustomCode())){
+            queryChargeDto.setCustomCode(cusCode);
+        }
+
         if(queryChargeDto.getQueryType() == 1) {
             R<TableDataInfo<QueryChargeVO>> result = chargeFeignService.selectPage(queryChargeDto);
             if(result.getCode() != 200) {

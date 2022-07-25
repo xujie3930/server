@@ -19,6 +19,6 @@ import java.util.List;
  */
 public interface PackageAddressMapper extends BaseMapper<PackageAddress> {
 
-    @DataScope("seller_code")
+//    @DataScope("seller_code")
     List<PackageAddressVO> selectPackageAddressList(@Param(value = "cm") PackageMangQueryDTO packageAddress);
 }

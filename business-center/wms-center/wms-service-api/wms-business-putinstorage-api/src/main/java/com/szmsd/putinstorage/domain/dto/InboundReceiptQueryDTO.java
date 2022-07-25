@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.domain.dto;
 
+import com.google.common.collect.Lists;
 import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.QueryDto;
@@ -12,6 +13,7 @@ import lombok.experimental.Accessors;
 import org.ehcache.xml.model.TimeType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,5 +95,13 @@ public class InboundReceiptQueryDTO extends QueryDto {
 
     @ApiModelProperty(value = "导出id")
     private Long exportIdIndex;
+
+    @ApiModelProperty(value = "客户编码list")
+    private List<String> cusCodeList;
+
+    public void setCusCode(String cusCode) {
+        this.cusCode = cusCode;
+        this.cusCodeList = StringUtils.isNotEmpty(cusCode) ? Arrays.asList(cusCode.split(",")) : Lists.newArrayList();
+    }
 
 }

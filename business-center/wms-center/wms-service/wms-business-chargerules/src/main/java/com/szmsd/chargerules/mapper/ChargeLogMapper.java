@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface ChargeLogMapper extends BaseMapper<ChargeLog> {
 
-    @DataScope("custom_code")
+//    @DataScope("custom_code")
     List<QueryChargeVO> selectChargeLogList(QueryChargeDto queryDto);
 }

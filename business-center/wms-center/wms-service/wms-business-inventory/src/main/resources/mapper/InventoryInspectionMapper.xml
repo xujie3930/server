@@ -53,9 +53,15 @@
             <if test="status != null">
                 AND a.status = #{status}
             </if>
-            <if test="customCode != null and customCode != ''">
-                AND a.custom_code = #{customCode}
+            <if test="customCodeList != null and customCodeList.size() > 0">
+                AND a.custom_code IN
+                <foreach collection="customCodeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
             </if>
+<!--            <if test="customCode != null and customCode != ''">-->
+<!--                AND a.custom_code = #{customCode}-->
+<!--            </if>-->
             <if test="warehouseCode != null and warehouseCode != ''">
                 AND a.warehouse_code = #{warehouseCode}
             </if>
