@@ -110,7 +110,11 @@ public class HomeServiceImpl implements HomeService {
         documents.add(new DocumentVO().setCusCode(cusCode).setDocumentType(LocalLanguageEnum.HOME_DOCUMENT_TYPE_1.getKey()).setCount(count1.toString()));
 
         // 当天到仓量 （当天收货的数量：汇总数量）
-        InboundReceiptQueryDTO queryDTO = new InboundReceiptQueryDTO().setCusCode(cusCode).setStartTime(startTime).setEndTime(endTime).setTimeType(InboundReceiptQueryDTO.TimeType.CR);
+        InboundReceiptQueryDTO queryDTO = new InboundReceiptQueryDTO();
+        queryDTO.setCusCode(cusCode);
+        queryDTO.setStartTime(startTime);
+        queryDTO.setEndTime(endTime);
+        queryDTO.setTimeType(InboundReceiptQueryDTO.TimeType.CR);
         List<InboundCountVO> data2 = remoteComponent.inboundCount(queryDTO);
         Integer count2 = data2.stream().map(InboundCountVO::getCount2).reduce(Integer::sum).orElse(0);
         documents.add(new DocumentVO().setCusCode(cusCode).setDocumentType(LocalLanguageEnum.HOME_DOCUMENT_TYPE_2.getKey()).setCount(count2.toString()));
