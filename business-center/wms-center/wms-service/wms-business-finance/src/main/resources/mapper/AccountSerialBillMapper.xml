@@ -2,15 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.finance.mapper.AccountSerialBillMapper">
 
-    <select id="selectPageList" resultType="com.szmsd.finance.domain.AccountSerialBill">
-        SELECT
-        a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,a.amount,
-        a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
-        a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
-        a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
-        a.calc_weight,a.specifications
-        from
-        (
+    <select id="selectPageList" resultType="com.szmsd.finance.domain.AccountSerialBill" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
+
         SELECT
         a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,a.amount,
         a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
@@ -20,9 +13,60 @@
 
         FROM
         `fss_account_serial_bill` a LEFT JOIN del_outbound b on a.no=b.order_no
-        ) a
+
         <where>
-            ${ew.sqlSegment}
+        a.cus_code=#{cusCode}
+        <if test="noList != null  and noList.size()>0">
+            and a.no IN
+            <foreach collection="noList" item="item" index="i" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="cusCodeList != null  and cusCodeList.size()>0">
+          and a.cus_code IN
+         <foreach collection="cusCodeList" item="item" index="i" open="(" close=")" separator=",">
+                    #{item}
+           </foreach>
+        </if>
+       <if test="productCodeList != null  and productCodeList.size()>0">
+                and a.product_code IN
+          <foreach collection="productCodeList" item="item" index="i" open="(" close=")" separator=",">
+                    #{item}
+           </foreach>
+       </if>
+
+       <if test="chargeType != null  and chargeType!=''">
+                and a.charge_type =#{chargeType}
+        </if>
+        <if test="warehouseCode != null  and warehouseCode!=''">
+                and a.warehouse_code =#{warehouseCode}
+          </if>
+
+         <if test="currencyCode != null  and currencyCode!=''">
+                and a.currency_code =#{currencyCode}
+         </if>
+        <if test="businessCategory != null  and businessCategory!=''">
+            and a.business_category =#{businessCategory}
+        </if>
+        <if test="productCategory != null  and productCategory!=''">
+            and a.product_category =#{productCategory}
+        </if>
+        <if test="chargeCategory != null  and chargeCategory!=''">
+            and a.charge_category =#{chargeCategory}
+        </if>
+        <if test="createTimeStart != null  and createTimeStart!=''">
+            and a.create_time &gt;=#{createTimeStart}
+        </if>
+        <if test="createTimeEnd != null  and createTimeEnd!=''">
+            and a.create_time &lt;=#{createTimeEnd}
+        </if>
+        <if test="ids != null  and ids.size()>0">
+            and a.id IN
+            <foreach collection="ids" item="item" index="i" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+
         </where>
         GROUP BY a.id
         ORDER BY a.payment_time DESC
