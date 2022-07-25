@@ -6,6 +6,7 @@ import com.google.zxing.common.HybridBinarizer;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.multipdf.Splitter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -21,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class PdfUtil {
@@ -34,32 +36,37 @@ public class PdfUtil {
     public static List<java.util.Map> toMonyFile(MultipartFile file){
         List<java.util.Map> list = new ArrayList<java.util.Map>();
         try {
-            PDDocument doc = PDDocument.load(file.getInputStream());
-            PDFRenderer renderer = new PDFRenderer(doc);
-            int pageCount = doc.getNumberOfPages();
+            PDDocument document = PDDocument.load(file.getInputStream());
+            Splitter splitter = new Splitter();
 
-            for (int i = 0; i < pageCount; i++){
-                BufferedImage image = renderer.renderImage(i, 2.0f);
-                ByteArrayOutputStream bs = new ByteArrayOutputStream();
-                ImageOutputStream imOut = ImageIO.createImageOutputStream(bs);
-                ImageIO.write(image, "jpg", imOut);
-                InputStream input = new ByteArrayInputStream(bs.toByteArray());
+            // split the pages of a PDF document
+            List<PDDocument> Pages = splitter.split(document);
 
+            /* Creating an iterator */
+            Iterator<PDDocument> iterator = Pages.listIterator();
 
-
+            // saving splits as pdf
+            int i = 0;
+            while(iterator.hasNext()) {
+                PDDocument doc = iterator.next();
+                PDFRenderer renderer = new PDFRenderer(doc);
+                BufferedImage image = renderer.renderImage(0, 2.0f);
                 String result = extractImages(image);
 
+
+                ByteArrayOutputStream pdfOps = new ByteArrayOutputStream();
+                doc.save(pdfOps);
                 int lastIndex = file.getOriginalFilename().lastIndexOf(".");
 
                 String preName = file.getOriginalFilename().substring(0, lastIndex) + "-" + i;
                 String lastName = file.getOriginalFilename().substring(lastIndex);
 
-                MultipartFile multipartFile =new MockMultipartFile("file", preName + lastName, "text/plain", IOUtils.toByteArray(input));
-
+                MultipartFile multipartFile =new MockMultipartFile("file", preName + lastName, "pdf", pdfOps.toByteArray());
                 java.util.Map<String, Object> map = new HashMap<String, Object>();
                 map.put("barCode", result);
                 map.put("multipartFile", multipartFile);
                 list.add(map);
+                i++;
             }
         } catch (IOException e) {
             e.printStackTrace();
