@@ -69,7 +69,9 @@ public class RemoteComponent {
     public List<AccountBalance> accountList(String cusCode) {
         R<List<AccountBalance>> accountBalanceR = null;
         try {
-            accountBalanceR = rechargesFeignService.accountList(new AccountBalanceDTO().setCusCode(cusCode));
+            AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
+            accountBalanceDTO.setCusCode(cusCode);
+            accountBalanceR = rechargesFeignService.accountList(accountBalanceDTO);
         } catch (Exception e) {
             e.printStackTrace();
         }

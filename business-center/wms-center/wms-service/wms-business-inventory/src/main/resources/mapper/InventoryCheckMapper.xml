@@ -32,8 +32,14 @@
         from
         inventory_check a
         <where>
-            <if test="customCode != null and customCode != ''">
-                AND a.custom_code = #{customCode}
+<!--            <if test="customCode != null and customCode != ''">-->
+<!--                AND a.custom_code = #{customCode}-->
+<!--            </if>-->
+            <if test="customCodeList != null and customCodeList.size() > 0">
+                AND a.custom_code IN
+                <foreach collection="customCodeList" item="customCode" open="(" separator="," close=")">
+                    #{customCode}
+                </foreach>
             </if>
             <if test="warehouseCode != null and warehouseCode != ''">
                 AND a.warehouse_code = #{warehouseCode}

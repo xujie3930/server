@@ -7,7 +7,9 @@ import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.AddSkuInspectionRequest;
 import com.szmsd.http.vo.ResponseVO;
@@ -91,6 +93,10 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
 
     @Override
     public List<InventoryInspectionVo> findList(InventoryInspectionQueryDTO dto) {
+        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        if(StringUtils.isEmpty(dto.getCustomCode())){
+            dto.setCustomCode(cusCode);
+        }
         return iInventoryInspectionMapper.selectListPage(dto);
     }
 

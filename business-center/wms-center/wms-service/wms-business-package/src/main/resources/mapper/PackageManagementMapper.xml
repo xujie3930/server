@@ -71,9 +71,15 @@
                     #{item}
                 </foreach>
             </if>
-            <if test="cm.sellerCode != null and cm.sellerCode != '' ">
-                and seller_code = #{cm.sellerCode}
+            <if test="cm.customCodeList != null and cm.customCodeList.size() > 0">
+                AND seller_code IN
+                <foreach collection="cm.customCodeList" open="(" separator="," close=")" item="customCode">
+                    #{customCode}
+                </foreach>
             </if>
+<!--            <if test="cm.sellerCode != null and cm.sellerCode != '' ">-->
+<!--                and seller_code = #{cm.sellerCode}-->
+<!--            </if>-->
             <if test="cm.submitTimeStart != null and cm.submitTimeEnd != null ">
                 and submit_time between CONCAT(#{cm.submitTimeStart},' 00:00:00') and CONCAT(#{cm.submitTimeEnd},' 23:59:59')
             </if>

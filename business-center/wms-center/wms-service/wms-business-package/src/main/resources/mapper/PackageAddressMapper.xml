@@ -49,9 +49,15 @@
         from package_address
         <where>
             del_flag = 0
-            <if test="cm.sellerCode != null and cm.sellerCode != ''">
-                and seller_code = #{cm.sellerCode}
+            <if test="cm.customCodeList != null and cm.customCodeList.size() > 0">
+                AND seller_code IN
+                <foreach collection="cm.customCodeList" open="(" separator="," close=")" item="customCode">
+                    #{customCode}
+                </foreach>
             </if>
+<!--            <if test="cm.sellerCode != null and cm.sellerCode != ''">-->
+<!--                and seller_code = #{cm.sellerCode}-->
+<!--            </if>-->
             <if test="cm.linkUserName != null and cm.linkUserName != ''">
                 and link_user_name = #{cm.linkUserName}
             </if>

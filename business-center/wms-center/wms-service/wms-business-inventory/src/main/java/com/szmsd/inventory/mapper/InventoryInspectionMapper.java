@@ -17,7 +17,7 @@ public interface InventoryInspectionMapper extends BaseMapper<InventoryInspectio
      * @param dto dto
      * @return result
      */
-    @DataScope("a.custom_code")
+//    @DataScope("a.custom_code")
     List<InventoryInspectionVo> selectListPage(InventoryInspectionQueryDTO dto);
 
     /**

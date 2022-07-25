@@ -1,9 +1,12 @@
 package com.szmsd.inventory.domain.dto;
 
+import com.google.common.collect.Lists;
+import com.szmsd.common.core.utils.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -29,5 +32,12 @@ public class InventoryInspectionQueryDTO {
     private String createTimeEnd;
 
 
+    @ApiModelProperty(value = "客户编码list")
+    private List<String> customCodeList;
+
+    public void setCustomCode(String customCode) {
+        this.customCode = customCode;
+        this.customCodeList = StringUtils.isNotEmpty(customCode) ? Arrays.asList(customCode.split(",")) : Lists.newArrayList();
+    }
 
 }

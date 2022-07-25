@@ -207,6 +207,10 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             List<String> skuList = ListUtils.emptyIfNull(inventorySkuQueryDTO.getSkuList());
             inventorySkuQueryDTO.setSkuList(Stream.of(skuSplit, skuList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
         }
+        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        if(StringUtils.isEmpty(inventorySkuQueryDTO.getCusCode())){
+            inventorySkuQueryDTO.setCusCode(cusCode);
+        }
         return baseMapper.selectListVO(inventorySkuQueryDTO);
     }
 

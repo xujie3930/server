@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpInventoryCheckFeignService;
 import com.szmsd.http.dto.CountingRequest;
 import com.szmsd.http.vo.ResponseVO;
@@ -74,6 +76,10 @@ public class IInventoryCheckServiceImpl extends ServiceImpl<InventoryCheckMapper
 
     @Override
     public List<InventoryCheckVo> findList(InventoryCheckQueryDTO inventoryCheckQueryDTO) {
+        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        if(StringUtils.isEmpty(inventoryCheckQueryDTO.getCustomCode())){
+            inventoryCheckQueryDTO.setCustomCode(cusCode);
+        }
         return inventoryCheckMapper.findList(inventoryCheckQueryDTO);
     }
 

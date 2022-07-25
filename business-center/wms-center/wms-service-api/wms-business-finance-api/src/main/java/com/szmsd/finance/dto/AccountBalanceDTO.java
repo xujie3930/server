@@ -2,18 +2,21 @@ package com.szmsd.finance.dto;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.google.common.collect.Lists;
+import com.szmsd.common.core.utils.StringUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author liulei
  */
 @Data
-@Accessors(chain = true)
 public class AccountBalanceDTO implements Serializable {
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
@@ -45,4 +48,11 @@ public class AccountBalanceDTO implements Serializable {
 
     private String remark;
 
+    @ApiModelProperty(value = "客户编码list")
+    private List<String> cusCodeList;
+
+    public void setCusCode(String cusCode) {
+        this.cusCode = cusCode;
+        this.cusCodeList = StringUtils.isNotEmpty(cusCode) ? Arrays.asList(cusCode.split(",")) : Lists.newArrayList();
+    }
 }

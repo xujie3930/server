@@ -37,7 +37,7 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
      * @param queryWrapper queryWrapper
      * @return DelOutboundListVO
      */
-    @DataScope("o.seller_code")
+//    @DataScope("o.seller_code")
     List<DelOutboundListVO> pageList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
 
     /**
@@ -54,7 +54,7 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
      * @param query query
      * @return list
      */
-    @DataScope("t.custom_code")
+//    @DataScope("t.custom_code")
     List<QueryChargeVO> selectDelOutboundList(QueryChargeDto query);
 
     /**
