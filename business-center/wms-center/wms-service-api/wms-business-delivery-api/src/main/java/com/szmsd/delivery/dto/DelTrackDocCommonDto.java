@@ -13,7 +13,6 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
-import java.util.List;
 
 
 /**
@@ -28,7 +27,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value = "", description = "DelTrackCommonDto对象")
-public class DelTrackDetailDocDto extends BaseEntity {
+public class DelTrackDocCommonDto extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,6 +35,15 @@ public class DelTrackDetailDocDto extends BaseEntity {
     @Excel(name = "运输包裹的物流跟踪号")
     private String trackingNo;
 
+    /*@ApiModelProperty(value = "运输包裹的运输商编码")
+    @Excel(name = "运输包裹的运输商编码")
+    private String carrierCode;*/
+
+    @ApiModelProperty(value = "运输包裹 Id，代表唯一的一个运输包裹信息")
+    @Excel(name = "运输包裹 Id，代表唯一的一个运输包裹信息")
+    private String shipmentId;
+
+    @ApiModelProperty(value = "运输包裹的订单号，可以是电商平台的订单号，也可以是用 于自己做唯一标示的号。")
     @Excel(name = "运输包裹的订单号，可以是电商平台的订单号，也可以是用 于自己做唯一标示的号。")
     private String orderNo;
 
@@ -107,10 +115,8 @@ public class DelTrackDetailDocDto extends BaseEntity {
     @Excel(name = "街道3")
     private String street3;
 
-    @ApiModelProperty(value = "轨迹数据集合")
-    private List<DelTrackDocCommonDto> trackingList;
+    @ApiModelProperty(value = "来源 1 自动拉取 2 手动添加")
+    @Excel(name = "来源 1 自动拉取 2 手动添加")
+    private String source;
 
-
-    @ApiModelProperty(value = "轨迹天数")
-    private Long trackDays;
 }

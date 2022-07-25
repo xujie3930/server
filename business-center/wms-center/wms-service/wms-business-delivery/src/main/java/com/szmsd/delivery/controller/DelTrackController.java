@@ -22,6 +22,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelTrack;
 import com.szmsd.delivery.dto.*;
@@ -31,6 +32,7 @@ import com.szmsd.delivery.imported.EasyExcelFactoryUtil;
 import com.szmsd.delivery.imported.ImportMessage;
 import com.szmsd.delivery.imported.ImportResult;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
+import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.IDelTrackService;
 import com.szmsd.delivery.util.SHA256Util;
 import io.swagger.annotations.Api;
@@ -88,6 +90,9 @@ public class DelTrackController extends BaseController {
 
     @Autowired
     private BasCarrierKeywordFeignService basCarrierKeywordFeignService;
+
+    @Autowired
+    private IDelOutboundService delOutboundService;
     /**
      * 查询模块列表
      */
@@ -288,6 +293,19 @@ public class DelTrackController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("addOrUpdate")
     public R addOrUpdate(@RequestBody DelTrack delTrack){
+
+        if(StringUtils.isEmpty(delTrack.getOrderNo()) || StringUtils.isEmpty(delTrack.getTrackingNo())){
+            throw new CommonException("400", "订单号和跟踪号不能为空");
+        }
+
+        DelOutbound dataDelOutbound = delOutboundService.getByOrderNo(delTrack.getOrderNo());
+        if(dataDelOutbound == null){
+            throw new CommonException("400", "订单号不存在系统");
+        }else if(!StringUtils.equals(dataDelOutbound.getTrackingNo(), delTrack.getTrackingNo())){
+            throw new CommonException("400", "订单所对应的跟踪号与系统不符");
+
+        }
+
         delTrack.setSource("2"); // 手动新增
         delTrack.setTrackingTime(new Date());
         delTrackService.saveOrUpdate(delTrack);

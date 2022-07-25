@@ -1,6 +1,7 @@
 package com.szmsd.finance.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -44,38 +45,42 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     @Override
     @DataScope("cus_code")
     public List<AccountSerialBill> listPage(AccountSerialBillDTO dto) {
-        LambdaQueryWrapper<AccountSerialBill> query = Wrappers.lambdaQuery();
-        query.in(CollectionUtils.isNotEmpty(dto.getNoList()), AccountSerialBill::getNo, dto.getNoList());
-        query.in(CollectionUtils.isNotEmpty(dto.getCusCodeList()), AccountSerialBill::getCusCode, dto.getCusCodeList());
-        query.in(CollectionUtils.isNotEmpty(dto.getProductCodeList()), AccountSerialBill::getProductCode, dto.getProductCodeList());
-        if (StringUtils.isNotBlank(dto.getChargeType())) {
-            query.eq(AccountSerialBill::getChargeType, dto.getChargeType());
-        }
-        if (StringUtils.isNotBlank(dto.getWarehouseCode())) {
-            query.eq(AccountSerialBill::getWarehouseCode, dto.getWarehouseCode());
-        }
-        if (StringUtils.isNotBlank(dto.getCurrencyCode())) {
-            query.eq(AccountSerialBill::getCurrencyCode, dto.getCurrencyCode());
-        }
-        if (StringUtils.isNotBlank(dto.getBusinessCategory())) {
-            query.eq(AccountSerialBill::getBusinessCategory, dto.getBusinessCategory());
-        }
-        if (StringUtils.isNotBlank(dto.getProductCategory())) {
-            query.eq(AccountSerialBill::getProductCategory, dto.getProductCategory());
-        }
-        if (StringUtils.isNotBlank(dto.getChargeCategory())) {
-            query.eq(AccountSerialBill::getChargeCategory, dto.getChargeCategory());
-        }
-        if (StringUtils.isNotBlank(dto.getCreateTimeStart())) {
-            query.ge(AccountSerialBill::getCreateTime, dto.getCreateTimeStart());
-        }
-        if (StringUtils.isNotBlank(dto.getCreateTimeEnd())) {
-            query.le(AccountSerialBill::getCreateTime, dto.getCreateTimeEnd());
-        }
-        if (StringUtils.isNotBlank(dto.getIds())) {
-            query.in(AccountSerialBill::getId, (Object[]) dto.getIds().split(","));
-        }
-        List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectPageList(query);
+//        QueryWrapper<Object> query1 = Wrappers.query();
+//        query1.eq("a.cretea",);
+//        LambdaQueryWrapper<AccountSerialBill> query = Wrappers.lambdaQuery();
+//        query.in(CollectionUtils.isNotEmpty(dto.getNoList()), AccountSerialBill::getNo, dto.getNoList());
+//        query.in(CollectionUtils.isNotEmpty(dto.getCusCodeList()), AccountSerialBill::getCusCode, dto.getCusCodeList());
+//        query.in(CollectionUtils.isNotEmpty(dto.getProductCodeList()), AccountSerialBill::getProductCode, dto.getProductCodeList());
+//
+//
+//        if (StringUtils.isNotBlank(dto.getChargeType())) {
+//            query.eq(AccountSerialBill::getChargeType, dto.getChargeType());
+//        }
+//        if (StringUtils.isNotBlank(dto.getWarehouseCode())) {
+//            query.eq(AccountSerialBill::getWarehouseCode, dto.getWarehouseCode());
+//        }
+//        if (StringUtils.isNotBlank(dto.getCurrencyCode())) {
+//            query.eq(AccountSerialBill::getCurrencyCode, dto.getCurrencyCode());
+//        }
+//        if (StringUtils.isNotBlank(dto.getBusinessCategory())) {
+//            query.eq(AccountSerialBill::getBusinessCategory, dto.getBusinessCategory());
+//        }
+//        if (StringUtils.isNotBlank(dto.getProductCategory())) {
+//            query.eq(AccountSerialBill::getProductCategory, dto.getProductCategory());
+//        }
+//        if (StringUtils.isNotBlank(dto.getChargeCategory())) {
+//            query.eq(AccountSerialBill::getChargeCategory, dto.getChargeCategory());
+//        }
+//        if (StringUtils.isNotBlank(dto.getCreateTimeStart())) {
+//            query.ge(AccountSerialBill::getCreateTime, dto.getCreateTimeStart());
+//        }
+//        if (StringUtils.isNotBlank(dto.getCreateTimeEnd())) {
+//            query.le(AccountSerialBill::getCreateTime, dto.getCreateTimeEnd());
+//        }
+//        if (StringUtils.isNotBlank(dto.getIds())) {
+//            query.in(AccountSerialBill::getId, (Object[]) dto.getIds().split(","));
+//        }
+        List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectPageList(dto);
         // 修改下单时间等信息
         showProcess(accountSerialBills);
         return accountSerialBills;
