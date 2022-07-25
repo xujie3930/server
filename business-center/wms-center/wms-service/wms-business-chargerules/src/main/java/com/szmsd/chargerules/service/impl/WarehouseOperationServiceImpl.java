@@ -68,6 +68,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
             }
             List<WarehouseOperationVo> warehouseOperationDb = this.listPage(dto);
             if ( dto.getDetails()!=null) {
+
                 if (isIntersection(dto.getDetails(), warehouseOperationDb.get(0).getDetails()))
                     throw new CommonException("999", "仓库+区间存在重合");
             }
@@ -76,6 +77,7 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
                 warehouseOperationDetailsService.saveBatch(dto.getDetails());
             }
             if (dto.getLocationDetails()!=null) {
+                dto.getLocationDetails().stream().peek(value -> value.setWarehouseOperationId(domain.getId()));
                 AssertUtil.notEmpty(dto.getLocationDetails(), "详情必填");
                 warehouseOperationDetailsService.saveBatch(dto.getLocationDetails());
             }
