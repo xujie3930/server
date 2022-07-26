@@ -1870,6 +1870,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             }else{
 
+                if (!(DelOutboundStateEnum.DELIVERED.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.PROCESSING.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.COMPLETED.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(outbound.getState())
+                )) {
+                    throw new CommonException("400", "订单当前状态不允许获取");
+                }
+
                 pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(outbound) + "/" + orderNo + ".pdf";
                 File labelFile = new File(pathname);
 
