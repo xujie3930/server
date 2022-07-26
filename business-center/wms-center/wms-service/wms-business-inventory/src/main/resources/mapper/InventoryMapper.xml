@@ -24,6 +24,7 @@
         <result column="remark" property="remark"/>
         <result column="cus_code" property="cusCode"/>
         <result column="last_inbound_time" property="lastInboundTime"/>
+        <result column="relevance_number" property="relevanceNumber"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -48,7 +49,8 @@
         sku.product_name_chinese sku_declared_name,
         t.remark,
         t.cus_code,
-        t.last_inbound_time
+        t.last_inbound_time,
+        t.relevance_number
     </sql>
 
     <select id="selectListVO" parameterType="com.szmsd.inventory.domain.dto.InventorySkuQueryDTO"

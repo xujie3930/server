@@ -50,9 +50,14 @@ public class Inventory extends BaseEntity {
     @ApiModelProperty(value = "客户代码")
     private String cusCode;
 
+    @ApiModelProperty(value = "关联单号")
+    private String relevanceNumber;
+
     @ApiModelProperty(value = "创建ID", hidden = true)
     @TableField(fill = FieldFill.INSERT)
     private String createBy;
+
+
 
     @ApiModelProperty(value = "修改者ID", hidden = true)
     @TableField(fill = FieldFill.UPDATE)

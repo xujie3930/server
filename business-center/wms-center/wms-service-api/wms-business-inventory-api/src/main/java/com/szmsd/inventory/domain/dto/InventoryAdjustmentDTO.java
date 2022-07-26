@@ -33,4 +33,10 @@ public class InventoryAdjustmentDTO {
     @ApiModelProperty(value = "退件来源-单号",hidden = true)
     private String receiptNo;
 
+    @ApiModelProperty(value = "关联单号")
+    private String relevanceNumber;
+
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
 }

@@ -10,7 +10,7 @@ import java.util.Date;
 
 @Data
 @ApiModel(value = "BasSpecialOperationDTO", description = "特殊操作")
-public class BasSpecialOperationRequestDTO {
+public class  BasSpecialOperationRequestDTO {
 
     @ApiModelProperty(value = "操作人姓名")
     private String operator;
@@ -43,6 +43,11 @@ public class BasSpecialOperationRequestDTO {
     @NotBlank(message = "操作类型不能为空")
     @ApiModelProperty(value = "操作类型")
     private String operationType;
+
+    @ApiModelProperty(value = "id")
+    private Integer id;
+    @ApiModelProperty(value = "审批状态，状态（审核结果）通过：1 驳回：2 待审批：3")
+    private Integer status;
 
     @Min(1)
     @ApiModelProperty(value = "数量")
