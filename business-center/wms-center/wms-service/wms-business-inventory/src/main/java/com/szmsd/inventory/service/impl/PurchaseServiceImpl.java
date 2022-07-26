@@ -113,7 +113,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     public List<PurchaseInfoListVO> selectPurchaseListClient(PurchaseQueryDTO purchaseQueryDTO) {
 //        SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
 //        purchaseQueryDTO.setCustomCode(loginUserInfo.getSellerCode());
-        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
         if(com.szmsd.common.core.utils.StringUtils.isEmpty(purchaseQueryDTO.getCustomCode())){
             purchaseQueryDTO.setCustomCode(cusCode);
         }
