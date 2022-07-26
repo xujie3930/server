@@ -92,6 +92,9 @@ public class InventorySkuVO {
     @ApiModelProperty(value = "备注")
     private String remark;
 
+    @ApiModelProperty(value = "关联单号")
+    private String relevanceNumber;
+
     @ApiModelProperty(value = "客户代码")
     @Excel(name = "客户代码")
     private String cusCode;
