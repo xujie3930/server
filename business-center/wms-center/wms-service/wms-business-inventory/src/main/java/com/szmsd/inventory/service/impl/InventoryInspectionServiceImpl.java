@@ -28,6 +28,7 @@ import com.szmsd.inventory.service.IInventoryInspectionDetailsService;
 import com.szmsd.inventory.service.IInventoryInspectionService;
 import com.szmsd.inventory.service.IInventoryService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,7 +94,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
 
     @Override
     public List<InventoryInspectionVo> findList(InventoryInspectionQueryDTO dto) {
-        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
         if(StringUtils.isEmpty(dto.getCustomCode())){
             dto.setCustomCode(cusCode);
         }

@@ -23,6 +23,7 @@ import com.szmsd.inventory.mapper.InventoryCheckMapper;
 import com.szmsd.inventory.service.IInventoryCheckDetailsService;
 import com.szmsd.inventory.service.IInventoryCheckService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +77,7 @@ public class IInventoryCheckServiceImpl extends ServiceImpl<InventoryCheckMapper
 
     @Override
     public List<InventoryCheckVo> findList(InventoryCheckQueryDTO inventoryCheckQueryDTO) {
-        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
         if(StringUtils.isEmpty(inventoryCheckQueryDTO.getCustomCode())){
             inventoryCheckQueryDTO.setCustomCode(cusCode);
         }
