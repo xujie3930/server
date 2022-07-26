@@ -78,7 +78,7 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     public List<PackageAddressVO> selectPackageAddressList(PackageMangQueryDTO packageAddress) {
 //        packageAddress.setSellerCode(getSellCode());
         // 子母单的查询 如果没有传值就只能才自己的
-        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
         if(StringUtils.isEmpty(packageAddress.getCustomCode())){
             packageAddress.setCustomCode(cusCode);
         }
@@ -205,7 +205,7 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
      */
     @Override
     public List<PackageMangVO> selectPackageManagementList(PackageMangQueryDTO packageMangQueryDTO) {
-        String cusCode = SecurityUtils.getLoginUser().getPermissions().get(0);
+        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
         if(StringUtils.isEmpty(packageMangQueryDTO.getCustomCode())){
             packageMangQueryDTO.setCustomCode(cusCode);
         }
