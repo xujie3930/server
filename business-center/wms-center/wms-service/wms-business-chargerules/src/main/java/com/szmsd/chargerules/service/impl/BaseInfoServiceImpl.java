@@ -21,6 +21,7 @@ import com.szmsd.chargerules.service.ISpecialOperationService;
 import com.szmsd.chargerules.vo.BasSpecialOperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.exception.com.BaseException;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -35,10 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -259,6 +258,42 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         BasSpecialOperationVo basSpecialOperationVo = baseInfoMapper.selectDetailsById(id);
         if (Objects.isNull(basSpecialOperationVo)) throw new CommonException("999", "未找到该操作类型对应的收费规则");
         return basSpecialOperationVo;
+    }
+
+    @Override
+    public R updateApprova(List<BasSpecialOperation> basSpecialOperations) {
+        try {
+            basSpecialOperations.forEach(x->{
+                if (x.getStatus()!=3){
+                    throw new CommonException("500", "存在已审核的数据");
+                }
+            });
+//            String ids = basSpecialOperations.stream().map(p -> String.valueOf(p.getId())).collect(Collectors.joining(","));
+//            List<String> id= Arrays.asList(ids);
+
+            basSpecialOperations.forEach(i->{
+                //改为审核通过
+                i.setStatus(1);
+
+                this.checkStatus(i);
+
+                String customCode = this.getCustomCode(i);
+
+                //修改数据
+                this.updateBasSpecialOperation(i);
+                i.setOmsRemark("批量审批");
+                //查询操作类型对应的收费配置
+                this.charge(i, customCode);
+            });
+
+            return R.ok("审核成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return R.failed(e.getMessage());
+        }
+
+
+
     }
 
 }

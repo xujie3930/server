@@ -42,6 +42,13 @@ public class BaseInfoController extends BaseController {
     }
 
 
+    @PostMapping("/specialOperation/Bsoapprova")
+    @ApiOperation(value = "批量审批功能")
+    public R Bsoapprova(@RequestBody List<BasSpecialOperation> basSpecialOperations) {
+       R r= baseInfoService.updateApprova(basSpecialOperations);
+        return r;
+    }
+
     /**
      * 调用接口修改收费系数、审核结果
      *
