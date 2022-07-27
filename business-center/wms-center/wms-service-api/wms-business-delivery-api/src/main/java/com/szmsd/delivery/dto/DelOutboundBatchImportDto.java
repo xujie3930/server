@@ -70,4 +70,8 @@ public class DelOutboundBatchImportDto implements Serializable {
     @ApiModelProperty(value = "备注")
     private String remark;
 
+
+    @ApiModelProperty(value = "电子邮箱")
+    private String email;
+
 }

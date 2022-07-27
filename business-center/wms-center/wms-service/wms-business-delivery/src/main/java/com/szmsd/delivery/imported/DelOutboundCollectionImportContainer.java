@@ -69,6 +69,7 @@ public class DelOutboundCollectionImportContainer extends DelOutboundCollectionI
         address.setStreet2(dto.getStreet2());
         address.setPostCode(super.stringNumber(dto.getPostCode()));
         address.setPhoneNo(super.stringNumber(dto.getPhoneNo()));
+        address.setEmail(dto.getEmail());
         return address;
     }
 
