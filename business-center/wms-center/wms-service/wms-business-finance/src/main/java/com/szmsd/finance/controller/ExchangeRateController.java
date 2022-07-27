@@ -109,16 +109,21 @@ public class ExchangeRateController extends FssBaseController {
             List<Map> mapList = ExcelFile.getExcelData(file,addList);
 
             for (int x=0;x<mapList.size();x++) {
+
                     if (String.valueOf(mapList.get(x).get("exchangeFrom")).equals("") || String.valueOf(mapList.get(x).get("exchangeTo")).equals("") || String.valueOf(mapList.get(x).get("rate")).equals("") || String.valueOf(mapList.get(x).get("expireTime")).equals("")) {
                         throw new BaseException("第" + (x + 2) + "行的导入数据需要填写必填项，必填项为（原币别，现币别，比率，失效时间）");
                     }
+                String expireTimes=String.valueOf(mapList.get(x).get("expireTime"));
+                String str = expireTimes.substring(0, 10);
+                String expireTime=str+" "+"23:59:59";
+                mapList.get(x).put("expireTime",expireTime);
                     for (int i = 0; i < baslist.size(); i++) {
                         //根据中英文匹配现有的货币code
                         if (String.valueOf(mapList.get(x).get("exchangeFrom")).equals(baslist.get(i).getSubName()) || String.valueOf(mapList.get(x).get("exchangeFrom")).equals(baslist.get(i).getSubNameEn())) {
-                            mapList.get(x).put("exchangeFromCode", baslist.get(i).getSubCode());
+                            mapList.get(x).put("exchangeFromCode", baslist.get(i).getSubValue());
                         }
                         if (String.valueOf(mapList.get(x).get("exchangeTo")).equals(baslist.get(i).getSubName()) || String.valueOf(mapList.get(x).get("exchangeTo")).equals(baslist.get(i).getSubNameEn())) {
-                            mapList.get(x).put("exchangeToCode", baslist.get(i).getSubCode());
+                            mapList.get(x).put("exchangeToCode", baslist.get(i).getSubValue());
                         }
                     }
 
@@ -135,6 +140,14 @@ public class ExchangeRateController extends FssBaseController {
             return R.failed(((BaseException) e).getDefaultMessage());
         }
 
+    }
+
+
+    public static void main(String[] args) {
+        String a="2022-06-04 12:00:00";
+        String str = a.substring(0, 10);
+        String b=str+" "+"23:59:59";
+        System.out.println(b);
     }
 
 }
