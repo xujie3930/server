@@ -17,10 +17,7 @@ import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.vo.DelOutboundExportItemListVO;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author zhangyuyuan
@@ -43,11 +40,11 @@ public class DelOutboundExportItemQueryPage implements QueryPage<DelOutboundExpo
         this.delOutboundDetailService = delOutboundDetailService;
         this.productAttributeCacheContext = new CacheContext.MapCacheContext<>();
 
-        if("en".equals(len)){
+        if ("en".equals(len)) {
             for (BasSubWrapperVO vo : productAttributeCacheContext) {
                 this.productAttributeCacheContext.put(vo.getSubValue(), vo.getSubNameEn());
             }
-        }else{
+        } else {
             for (BasSubWrapperVO vo : productAttributeCacheContext) {
                 this.productAttributeCacheContext.put(vo.getSubValue(), vo.getSubName());
             }
@@ -85,16 +82,14 @@ public class DelOutboundExportItemQueryPage implements QueryPage<DelOutboundExpo
                 DelOutboundExportItemListVO vo = BeanMapperUtil.map(dto, DelOutboundExportItemListVO.class);
                 BaseProduct product = this.productCacheContext.get(dto.getSku());
 
-                if(StringUtils.isEmpty(dto.getProductName())) {
-                    vo.setDeclaredNameEn(product.getProductName());
-                }else{
+                if (StringUtils.isEmpty(dto.getProductName())) {
+                    vo.setDeclaredNameEn(Objects.nonNull(product) ? product.getProductName() : "");
+                } else {
                     vo.setDeclaredNameEn(dto.getProductName());
-
                 }
-                if(StringUtils.isEmpty(dto.getProductAttribute())){
-                    vo.setProductAttributeName(product.getProductAttributeName());
-
-                }else{
+                if (StringUtils.isEmpty(dto.getProductAttribute())) {
+                    vo.setProductAttributeName(Objects.nonNull(product) ? product.getProductAttributeName() : "");
+                } else {
                     vo.setProductAttributeName(this.productAttributeCacheContext.get(dto.getProductAttribute()));
                 }
 

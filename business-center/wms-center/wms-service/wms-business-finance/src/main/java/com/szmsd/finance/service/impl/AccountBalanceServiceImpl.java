@@ -106,7 +106,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 //        }
 
         if (CollectionUtils.isNotEmpty(dto.getCusCodeList())) {
-            queryWrapper.in(AccountBalance::getCusCode, dto.getCusCodeList());
+            List<String> cusCodeList = dto.getCusCodeList();
+            queryWrapper.in(AccountBalance::getCusCode, cusCodeList);
             dto.setCusCode("");
         }
         if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
@@ -239,7 +240,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
      * @param dto
      * @return true : 已存在
      */
-    public boolean checkForDuplicateCharges(CustPayDTO dto){
+    public boolean checkForDuplicateCharges(CustPayDTO dto) {
         return accountSerialBillService.checkForDuplicateCharges(dto);
     }
 
