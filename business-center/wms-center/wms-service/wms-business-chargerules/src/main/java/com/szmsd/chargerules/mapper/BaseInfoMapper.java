@@ -15,4 +15,6 @@ public interface BaseInfoMapper extends BaseMapper<BasSpecialOperation> {
     BasSpecialOperationVo selectDetailsById(int id);
 
     List<BasSpecialOperationVo> selectPageList(@Param(Constants.WRAPPER) Wrapper<BasSpecialOperation> queryWrapper);
+
+    void  updateApprova(@Param("ids") List<String> ids);
 }

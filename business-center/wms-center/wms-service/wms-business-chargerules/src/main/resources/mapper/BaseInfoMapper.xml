@@ -29,6 +29,9 @@
             b.first_price,
             b.next_price
     </sql>
+    <update id="updateApprova">
+        
+    </update>
 
     <select id="selectDetailsById" resultType="com.szmsd.chargerules.vo.BasSpecialOperationVo">
         SELECT

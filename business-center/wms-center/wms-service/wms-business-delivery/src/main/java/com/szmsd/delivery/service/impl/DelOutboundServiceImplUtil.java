@@ -312,7 +312,7 @@ public final class DelOutboundServiceImplUtil {
         }
         List<String> customCodeList = queryDto.getCustomCodeList();
         if(CollectionUtils.isNotEmpty(customCodeList)) {
-            queryWrapper.in("o.seller_code", customCodeList);
+//            queryWrapper.in("o.seller_code", customCodeList);
             queryWrapper.in("o.custom_code", customCodeList);
         }
 //        QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
