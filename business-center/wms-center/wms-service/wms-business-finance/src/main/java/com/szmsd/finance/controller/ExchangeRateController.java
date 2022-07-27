@@ -142,12 +142,4 @@ public class ExchangeRateController extends FssBaseController {
 
     }
 
-
-    public static void main(String[] args) {
-        String a="2022-06-04 12:00:00";
-        String str = a.substring(0, 10);
-        String b=str+" "+"23:59:59";
-        System.out.println(b);
-    }
-
 }
