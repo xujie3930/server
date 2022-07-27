@@ -1750,18 +1750,22 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         int result = 0;
         for (Long id : ids) {
-            DelOutbound delOutbound = this.getById(id);
-            DelOutboundOperationLogEnum.HANDLER.listener(delOutbound);
-            if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getState())) {
-                // 仓库发货，调用完成的接口
-                this.delOutboundAsyncService.completed(delOutbound.getOrderNo());
-                result++;
-            } else if (DelOutboundStateEnum.WHSE_CANCELLED.getCode().equals(delOutbound.getState())) {
-                // 仓库取消，调用取消的接口
-                this.delOutboundAsyncService.cancelled(delOutbound.getOrderNo());
-                result++;
-            } else {
-                result = result + this.delOutboundAsyncService.shipmentPacking(id);
+            try {
+                DelOutbound delOutbound = this.getById(id);
+                DelOutboundOperationLogEnum.HANDLER.listener(delOutbound);
+                if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getState())) {
+                    // 仓库发货，调用完成的接口
+                    this.delOutboundAsyncService.completed(delOutbound.getOrderNo());
+                    result++;
+                } else if (DelOutboundStateEnum.WHSE_CANCELLED.getCode().equals(delOutbound.getState())) {
+                    // 仓库取消，调用取消的接口
+                    this.delOutboundAsyncService.cancelled(delOutbound.getOrderNo());
+                    result++;
+                } else {
+                    result = result + this.delOutboundAsyncService.shipmentPacking(id);
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
         }
         return result;
