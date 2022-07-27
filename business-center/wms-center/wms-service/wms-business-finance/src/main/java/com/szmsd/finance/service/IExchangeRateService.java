@@ -5,6 +5,7 @@ import com.szmsd.finance.domain.ExchangeRate;
 import com.szmsd.finance.dto.ExchangeRateDTO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author liulei
@@ -19,4 +20,9 @@ public interface IExchangeRateService {
     R delete(Long id);
 
     R selectRate(String currencyFromCode, String currencyToCode);
+
+
+    List<ExchangeRateDTO>  selectRates(Map map);
+
+    int insertExchangeRate(List<Map> mapList);
 }
