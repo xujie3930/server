@@ -204,9 +204,9 @@ public class CustomPricesController extends BaseController{
         List<BasSubWrapperVO> chargeRuleType = listMap.get("047");
 
         Map<String, String> chargeTypeMap =
-                chargeType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubCode));
+                chargeType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubValue));
         Map<String, String> chargeRuleTypeMap =
-                chargeRuleType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubCode));
+                chargeRuleType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubValue));
 
         List<DiscountDetailDto> list = null;
         try {
@@ -228,14 +228,14 @@ public class CustomPricesController extends BaseController{
 
                 if(StringUtils.isNotEmpty(data.getChargeType())){
                     if(!chargeTypeMap.containsKey(data.getChargeType())){
-                        return R.failed("费用类型不存在系统:"+data.getChargeType());
+//                        return R.failed("费用类型不存在系统:"+data.getChargeType());
                     }else{
                         data.setChargeType(chargeTypeMap.get(data.getChargeType()));
                     }
                 }
                 if(StringUtils.isNotEmpty(dto2.getChargeRuleType())){
                     if(!chargeRuleTypeMap.containsKey(dto2.getChargeRuleType())){
-                        return R.failed("计价类型不存在系统:"+dto2.getChargeRuleType());
+//                        return R.failed("计价类型不存在系统:"+dto2.getChargeRuleType());
                     }else{
                         dto2.setChargeRuleType(chargeRuleTypeMap.get(dto2.getChargeRuleType()));
                     }
