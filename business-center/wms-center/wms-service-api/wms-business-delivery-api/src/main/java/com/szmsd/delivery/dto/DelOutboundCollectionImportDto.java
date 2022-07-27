@@ -59,4 +59,7 @@ public class DelOutboundCollectionImportDto implements Serializable {
     @ApiModelProperty(value = "高 CM")
     private Double height;
 
+    @ApiModelProperty(value = "电子邮箱")
+    private String email;
+
 }
