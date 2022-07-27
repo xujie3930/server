@@ -109,7 +109,7 @@ public class ExchangeRateController extends FssBaseController {
             List<Map> mapList = ExcelFile.getExcelData(file,addList);
 
             for (int x=0;x<mapList.size();x++) {
-                    if (!String.valueOf(mapList.get(x).get("exchangeFrom")).equals("") || !String.valueOf(mapList.get(x).get("exchangeTo")).equals("") || !String.valueOf(mapList.get(x).get("rate")).equals("") || !String.valueOf(mapList.get(x).get("expireTime")).equals("")) {
+                    if (String.valueOf(mapList.get(x).get("exchangeFrom")).equals("") || String.valueOf(mapList.get(x).get("exchangeTo")).equals("") || String.valueOf(mapList.get(x).get("rate")).equals("") || String.valueOf(mapList.get(x).get("expireTime")).equals("")) {
                         throw new BaseException("第" + (x + 2) + "行的导入数据需要填写必填项，必填项为（原币别，现币别，比率，失效时间）");
                     }
                     for (int i = 0; i < baslist.size(); i++) {
