@@ -17,4 +17,7 @@
             and id <![CDATA[ <> ]]> #{dto.id}
         </if>
     </select>
+    <select id="selectRates" resultType="com.szmsd.finance.dto.ExchangeRateDTO">
+        select * from fss_exchange_rate where exchange_from=#{map.exchangeFrom} and exchange_to=#{map.exchangeTo} and expire_time=#{map.expireTime}
+    </select>
 </mapper>
