@@ -4,12 +4,15 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
+import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
 import com.szmsd.chargerules.service.ICustomPricesService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
@@ -29,6 +32,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +42,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -57,6 +63,9 @@ public class CustomPricesController extends BaseController{
 
      @Resource
      private ICustomPricesService customPricesService;
+
+    @Autowired
+    private BasSubClientService basSubClientService;
 
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:result')")
     @PostMapping("/result/{clientCode}")
@@ -190,6 +199,15 @@ public class CustomPricesController extends BaseController{
         if (!"xls".equals(suffix) && !"xlsx".equals(suffix)) {
             throw new CommonException("999", "只能上传xls,xlsx文件");
         }
+        Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("046,047");
+        List<BasSubWrapperVO> chargeType = listMap.get("046");
+        List<BasSubWrapperVO> chargeRuleType = listMap.get("047");
+
+        Map<String, String> chargeTypeMap =
+                chargeType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubValue));
+        Map<String, String> chargeRuleTypeMap =
+                chargeRuleType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubValue));
+
         List<DiscountDetailDto> list = null;
         try {
             List<DiscountDetailImportDto> dtoList = new ExcelUtil<>(DiscountDetailImportDto.class).importExcel(file.getInputStream());
@@ -207,6 +225,21 @@ public class CustomPricesController extends BaseController{
                 data.setFormula(dto2);
                 BeanUtils.copyProperties(dtoList.get(i), dto1);
                 BeanUtils.copyProperties(dtoList.get(i), dto2);
+
+                if(StringUtils.isNotEmpty(data.getChargeType())){
+                    if(!chargeTypeMap.containsKey(data.getChargeType())){
+//                        return R.failed("费用类型不存在系统:"+data.getChargeType());
+                    }else{
+                        data.setChargeType(chargeTypeMap.get(data.getChargeType()));
+                    }
+                }
+                if(StringUtils.isNotEmpty(dto2.getChargeRuleType())){
+                    if(!chargeRuleTypeMap.containsKey(dto2.getChargeRuleType())){
+//                        return R.failed("计价类型不存在系统:"+dto2.getChargeRuleType());
+                    }else{
+                        dto2.setChargeRuleType(chargeRuleTypeMap.get(dto2.getChargeRuleType()));
+                    }
+                }
 
             }
 
