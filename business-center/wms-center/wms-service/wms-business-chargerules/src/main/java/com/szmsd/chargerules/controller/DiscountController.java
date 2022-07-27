@@ -2,6 +2,8 @@
 package com.szmsd.chargerules.controller;
 
 import cn.hutool.core.date.DateUtil;
+import com.szmsd.bas.api.client.BasSubClientService;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
 import com.szmsd.chargerules.export.*;
 import com.szmsd.chargerules.service.IDiscountService;
@@ -10,6 +12,7 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.ExcelUtils;
 import com.szmsd.common.core.utils.QueryPage;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
@@ -26,6 +29,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -55,6 +61,8 @@ public class DiscountController extends BaseController{
 
     @Resource
     private IDiscountService DiscountService;
+    @Autowired
+    private BasSubClientService basSubClientService;
     @PostMapping("/page")
     @ApiOperation(value = "分页查询折扣方案")
     @PreAuthorize("@ss.hasPermi('Discount:Discount:page')")
@@ -142,6 +150,13 @@ public class DiscountController extends BaseController{
         if (!"xls".equals(suffix) && !"xlsx".equals(suffix)) {
             throw new CommonException("999", "只能上传xls,xlsx文件");
         }
+        Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("046,047");
+        List<BasSubWrapperVO> chargeType = listMap.get("046");
+        List<BasSubWrapperVO> chargeRuleType = listMap.get("047");
+        Map<String, String> chargeTypeMap =
+                chargeType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubCode));
+        Map<String, String> chargeRuleTypeMap =
+                chargeRuleType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubCode));
         List<DiscountDetailDto> list = null;
         try {
             List<DiscountDetailImportDto> dtoList = new ExcelUtil<>(DiscountDetailImportDto.class).importExcel(file.getInputStream());
@@ -159,6 +174,21 @@ public class DiscountController extends BaseController{
                 data.setFormula(dto2);
                 BeanUtils.copyProperties(dtoList.get(i), dto1);
                 BeanUtils.copyProperties(dtoList.get(i), dto2);
+
+                if(StringUtils.isNotEmpty(data.getChargeType())){
+                    if(!chargeTypeMap.containsKey(data.getChargeType())){
+                        return R.failed("费用类型不存在系统:"+data.getChargeType());
+                    }else{
+                        data.setChargeType(chargeTypeMap.get(data.getChargeType()));
+                    }
+                }
+                if(StringUtils.isNotEmpty(dto2.getChargeRuleType())){
+                    if(!chargeRuleTypeMap.containsKey(dto2.getChargeRuleType())){
+                        return R.failed("计价类型不存在系统:"+dto2.getChargeRuleType());
+                    }else{
+                        dto2.setChargeRuleType(chargeRuleTypeMap.get(dto2.getChargeRuleType()));
+                    }
+                }
 
             }
 
@@ -300,6 +330,16 @@ public class DiscountController extends BaseController{
 
             List<DiscountDetailExportListVO> gradeDetailDtoList = new ArrayList<>();
             List<CustomExportListVO> gradeCustomExportListVOList = new ArrayList<>();
+
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("046,047");
+            List<BasSubWrapperVO> chargeType = listMap.get("046");
+            List<BasSubWrapperVO> chargeRuleType = listMap.get("047");
+            Map<String, String> chargeTypeMap =
+                    chargeType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue, BasSubWrapperVO::getSubName));
+            Map<String, String> chargeRuleTypeMap =
+                    chargeRuleType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue, BasSubWrapperVO::getSubName));
+            
+            
             for(int i = 0; i < newList.size(); i++){
 
                 DiscountMainDto dto = mainList.getRows().get(i);
@@ -313,6 +353,20 @@ public class DiscountController extends BaseController{
                     newDetailExportListVOList.get(j).setName(dto.getName());
                     BeanUtils.copyProperties(dto.getPricingDiscountRules().get(j).getPackageLimit(), newDetailExportListVOList.get(j));
                     BeanUtils.copyProperties(dto.getPricingDiscountRules().get(j).getFormula(), newDetailExportListVOList.get(j));
+
+                    DiscountDetailExportListVO data = newDetailExportListVOList.get(j);
+                    if(StringUtils.isNotEmpty(data.getChargeType())){
+                        if(chargeTypeMap.containsKey(data.getChargeType())){
+                            data.setChargeType(chargeTypeMap.get(data.getChargeType()));
+                        }
+                    }
+                    if(StringUtils.isNotEmpty(data.getChargeRuleType())){
+                        if(chargeRuleTypeMap.containsKey(data.getChargeRuleType())){
+                            data.setChargeRuleType(chargeRuleTypeMap.get(data.getChargeRuleType()));
+                        }
+                    }
+
+
                 }
 
                 List<CustomExportListVO> newGradeCustomExportListVOList
