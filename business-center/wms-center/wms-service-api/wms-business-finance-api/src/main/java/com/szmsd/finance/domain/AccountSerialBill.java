@@ -41,7 +41,6 @@ public class AccountSerialBill extends FssBaseEntity {
     private String refNo;
 
     @ApiModelProperty(value = "物流服务名称")
-    @Excel(name = "物流服务名称")
     @TableField(exist = false)
     private String shipmentService;
 
