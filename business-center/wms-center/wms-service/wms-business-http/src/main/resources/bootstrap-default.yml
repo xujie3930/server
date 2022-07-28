@@ -8,9 +8,9 @@ com:
             headers:
               UserId: oms
               Password: 666
-            url: https://wms-open-api.dsloco.com
+            url: https://wms-open-api2.dsloco.com
           priced-product:
-            url: https://wms-open-api.dsloco.com
+            url: https://wms-open-api2.dsloco.com
           priced:
             url: https://pricedproduct-api.ck1info.com
           carrier-service:
@@ -27,9 +27,9 @@ com:
             headers:
               UserId: oms
               Password: 666
-            url: https://wms-open-api.dsloco.com
+            url: https://wms-open-api2.dsloco.com
           priced-product:
-            url: https://wms-open-api.dsloco.com
+            url: https://wms-open-api2.dsloco.com
           priced:
             url: https://pricedproduct-api.ck1info.com
           carrier-service:
@@ -81,6 +81,7 @@ com:
             label: /api/outbound/shipment/label
             shipping: /api/outbound/shipment/shipping
             multiboxrelation: /api/outbound/shipment/multiboxrelation
+            boxtransfer: /api/outbound/shipment/boxtransfer
           returned:
             expected: /api/return/expected
             processing: /api/return/processing
