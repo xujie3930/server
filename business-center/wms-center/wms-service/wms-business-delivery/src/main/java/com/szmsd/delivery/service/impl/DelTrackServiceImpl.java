@@ -79,6 +79,8 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     @Autowired
     private RedisTemplate redisTemplate;
 
+
+
     @Override
     public void addData(DelTrack track) {
         track.setSource("2");
@@ -270,6 +272,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                                     .eq(DelTrack::getNo,item.getNo())
                     );
                     if (trackCount == 0) {
+
+                        Map maps=new HashMap();
+                        maps.put("carrierCode",trackingYeeTraceDto.getCarrierCode());
                         DelTrack delTrack = new DelTrack();
                         delTrack.setTrackingNo(trackingYeeTraceDto.getTrackingNo());
                         delTrack.setCarrierCode(trackingYeeTraceDto.getCarrierCode());
@@ -277,13 +282,36 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         delTrack.setOrderNo(trackingYeeTraceDto.getOrderNo());
                         delTrack.setTrackingStatus(logisticsTracking.getStatus());
                         delTrack.setNo(item.getNo());
-                        delTrack.setDescription(item.getDescription());
+                        maps.put("carrierKeywordType","description");
+                        maps.put("originaKeywords",item.getDescription());
+                        Map CarrierKeywordMaps = basCarrierKeywordFeignService.selectCarrierKeyword(maps).getData();
+                        if (CarrierKeywordMaps==null){
+                            delTrack.setDescription(item.getDescription());
+                            delTrack.setDmDescription(item.getDescription());
+                        }
+                        if (CarrierKeywordMaps!=null){
+                            delTrack.setDescription(String.valueOf(CarrierKeywordMaps.get("nowKeywords")));
+                            delTrack.setDmDescription(item.getDescription());
+                        }
+
                         delTrack.setTrackingTime(trackingTime);
                         delTrack.setActionCode(item.getActionCode());
                         // 获取地址
                         TrackingYeeTraceDto.LocationDto itemLocation = item.getLocation();
                         if (itemLocation != null) {
-                            delTrack.setDisplay(itemLocation.getDisplay());
+                            maps.put("carrierKeywordType","display");
+                            maps.put("originaKeywords",itemLocation.getDisplay());
+
+                            Map CarrierKeywordMap = basCarrierKeywordFeignService.selectCarrierKeyword(maps).getData();
+                            if (CarrierKeywordMap==null){
+                                delTrack.setDisplay(itemLocation.getDisplay());
+                                delTrack.setDmDisplay(itemLocation.getDisplay());
+                            }
+                            if (CarrierKeywordMap!=null){
+                                delTrack.setDisplay(String.valueOf(CarrierKeywordMap.get("nowKeywords")));
+                                delTrack.setDmDisplay(itemLocation.getDisplay());
+                            }
+
                             TrackingYeeTraceDto.AddressDto address = itemLocation.getAddress();
                             if (address != null) {
                                 TrackingYeeTraceDto.CountryDto countryDto = address.getCountry();
@@ -335,6 +363,8 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             }
         }
     }
+
+
 
     @Override
     public List<TrackAnalysisDto> getTrackAnalysis(TrackAnalysisRequestDto requestDto) {

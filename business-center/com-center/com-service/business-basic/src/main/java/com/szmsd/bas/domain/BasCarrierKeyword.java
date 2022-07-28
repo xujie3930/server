@@ -1,6 +1,7 @@
 package com.szmsd.bas.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
@@ -11,6 +12,7 @@ import lombok.experimental.Accessors;
 import com.szmsd.common.core.annotation.Excel;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 
 /**
@@ -62,6 +64,11 @@ public class BasCarrierKeyword extends BaseEntity {
     @ApiModelProperty(value = "删除标志（0代表存在 2代表删除")
     @Excel(name = "删除标志（0代表存在 2代表删除")
     private String delFlag;
+
+    @ApiModelProperty(value = "关键词字表")
+    @TableField(exist = false)
+    private List<BasCarrierKeywordData> basCarrierKeywordDataList;
+
 
 
 }

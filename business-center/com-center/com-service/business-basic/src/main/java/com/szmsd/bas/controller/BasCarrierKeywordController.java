@@ -22,6 +22,7 @@ import io.swagger.annotations.Api;
 
 import java.util.List;
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
@@ -137,5 +138,11 @@ public class BasCarrierKeywordController extends BaseController {
     @ApiOperation(value = "检查关键词是否存在", notes = "检查关键词是否存在")
     public R checkExistKeyword(@RequestParam String carrierCode, @RequestParam String text) {
         return R.ok(basCarrierKeywordService.checkExistKeyword(carrierCode, text));
+    }
+
+    @PostMapping("selectCarrierKeyword")
+    @ApiOperation(value = "检查关键词是否字表存在", notes = "检查关键词是否字表存在")
+    public R<Map> selectCarrierKeyword(@RequestBody Map map) {
+        return R.ok(basCarrierKeywordService.selectCarrierKeyword(map));
     }
 }
