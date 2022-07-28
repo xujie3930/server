@@ -4,6 +4,7 @@ import com.szmsd.bas.domain.BasCarrierKeyword;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -62,5 +63,7 @@ public interface IBasCarrierKeywordService extends IService<BasCarrierKeyword> {
      * @return
      */
     Boolean checkExistKeyword(String carrierCode, String text);
+
+    Map  selectCarrierKeyword(Map map);
 }
 

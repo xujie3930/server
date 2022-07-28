@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.bas.dao.BasCarrierKeywordDataMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasCarrierKeywordData" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="carrier_keyword_id" property="carrierKeywordId" jdbcType="INTEGER" />
+    <result column="carrier_keyword_type" property="carrierKeywordType" jdbcType="VARCHAR" />
+    <result column="origina_keywords" property="originaKeywords" jdbcType="VARCHAR" />
+    <result column="now_keywords" property="nowKeywords" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, carrier_keyword_id, carrier_keyword_type, origina_keywords, now_keywords
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from bas_carrier_keyword_data
+    where carrier_keyword_id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from bas_carrier_keyword_data
+    where carrier_keyword_id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasCarrierKeywordData" >
+    insert into bas_carrier_keyword_data
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="carrierKeywordId != null" >
+        carrier_keyword_id,
+      </if>
+      <if test="carrierKeywordType != null" >
+        carrier_keyword_type,
+      </if>
+      <if test="originaKeywords != null" >
+        origina_keywords,
+      </if>
+      <if test="nowKeywords != null" >
+        now_keywords,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="carrierKeywordId != null" >
+        #{carrierKeywordId,jdbcType=INTEGER},
+      </if>
+      <if test="carrierKeywordType != null" >
+        #{carrierKeywordType,jdbcType=VARCHAR},
+      </if>
+      <if test="originaKeywords != null" >
+        #{originaKeywords,jdbcType=VARCHAR},
+      </if>
+      <if test="nowKeywords != null" >
+        #{nowKeywords,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.domain.BasCarrierKeywordData" >
+    update bas_carrier_keyword_data
+    <set >
+      <if test="carrierKeywordId != null" >
+        carrier_keyword_id = #{carrierKeywordId,jdbcType=INTEGER},
+      </if>
+      <if test="carrierKeywordType != null" >
+        carrier_keyword_type = #{carrierKeywordType,jdbcType=VARCHAR},
+      </if>
+      <if test="originaKeywords != null" >
+        origina_keywords = #{originaKeywords,jdbcType=VARCHAR},
+      </if>
+      <if test="nowKeywords != null" >
+        now_keywords = #{nowKeywords,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.domain.BasCarrierKeywordData" >
+    update bas_carrier_keyword_data
+    set carrier_keyword_id = #{carrierKeywordId,jdbcType=INTEGER},
+      carrier_keyword_type = #{carrierKeywordType,jdbcType=VARCHAR},
+      origina_keywords = #{originaKeywords,jdbcType=VARCHAR},
+      now_keywords = #{nowKeywords,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

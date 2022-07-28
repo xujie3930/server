@@ -5,6 +5,8 @@ import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 public class BasCarrierKeywordFeignServiceFallbackFactory implements FallbackFactory<BasCarrierKeywordFeignService> {
     @Override
@@ -13,6 +15,11 @@ public class BasCarrierKeywordFeignServiceFallbackFactory implements FallbackFac
             @Override
             public R<Boolean> checkExistKeyword(String carrierCode, String text) {
                 return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<Map> selectCarrierKeyword(Map map) {
+                return null;
             }
         };
     }
