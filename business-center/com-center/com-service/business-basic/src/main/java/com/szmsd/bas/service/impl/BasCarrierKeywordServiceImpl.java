@@ -2,8 +2,10 @@ package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.dao.BasCarrierKeywordDataMapper;
 import com.szmsd.bas.dao.BasCarrierKeywordMapper;
 import com.szmsd.bas.domain.BasCarrierKeyword;
+import com.szmsd.bas.domain.BasCarrierKeywordData;
 import com.szmsd.bas.event.KeywordSyncEvent;
 import com.szmsd.bas.keyword.KeywordsInit;
 import com.szmsd.bas.keyword.KeywordsUtil;
@@ -33,6 +35,9 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private BasCarrierKeywordDataMapper basCarrierKeywordDataMapper;
+
     /**
      * 查询模块
      *
@@ -55,7 +60,13 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
         LambdaQueryWrapper<BasCarrierKeyword> where = new LambdaQueryWrapper<BasCarrierKeyword>()
                 .eq(StringUtils.isNotEmpty(basCarrierKeyword.getCarrierCode()), BasCarrierKeyword::getCarrierCode, basCarrierKeyword.getCarrierCode())
                 .orderByDesc(BasCarrierKeyword::getId);
-        return baseMapper.selectList(where);
+        List<BasCarrierKeyword> list=baseMapper.selectList(where);
+        list.forEach(x->{
+          List<BasCarrierKeywordData>  list1=basCarrierKeywordDataMapper.selectByPrimaryKey(x.getId());
+          x.setBasCarrierKeywordDataList(list1);
+        });
+
+        return list;
     }
 
     /**
@@ -67,6 +78,15 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
     @Override
     public int insertBasCarrierKeyword(BasCarrierKeyword basCarrierKeyword) {
         int result = baseMapper.insert(basCarrierKeyword);
+        //增加字表数据
+        if ( basCarrierKeyword.getBasCarrierKeywordDataList().size()>0){
+            basCarrierKeyword.getBasCarrierKeywordDataList().forEach(x->{
+                x.setCarrierKeywordId(basCarrierKeyword.getId());
+                basCarrierKeywordDataMapper.insertSelective(x);
+            });
+
+        }
+
         applicationContext.publishEvent(new KeywordSyncEvent(basCarrierKeyword.getCarrierCode()));
         return result;
     }
@@ -80,6 +100,16 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
     @Override
     public int updateBasCarrierKeyword(BasCarrierKeyword basCarrierKeyword) {
         int result = baseMapper.updateById(basCarrierKeyword);
+
+        basCarrierKeywordDataMapper.deleteByPrimaryKey(basCarrierKeyword.getId());
+        //增加字表数据
+        if ( basCarrierKeyword.getBasCarrierKeywordDataList().size()>0){
+            basCarrierKeyword.getBasCarrierKeywordDataList().forEach(x->{
+                x.setCarrierKeywordId(basCarrierKeyword.getId());
+                basCarrierKeywordDataMapper.insertSelective(x);
+            });
+
+        }
         applicationContext.publishEvent(new KeywordSyncEvent(basCarrierKeyword.getCarrierCode()));
         return result;
     }
@@ -100,6 +130,12 @@ public class BasCarrierKeywordServiceImpl extends ServiceImpl<BasCarrierKeywordM
         Map keywordsMap = keywordsInit.initKeyWord(carrierCode);
         KeywordsUtil.keywordsMap = keywordsMap;
         return KeywordsUtil.isContaintKeywords(text);
+    }
+
+    @Override
+    public Map selectCarrierKeyword(Map map) {
+       Map map1= baseMapper.selectCarrierKeyword(map);
+        return map1;
     }
 }
 

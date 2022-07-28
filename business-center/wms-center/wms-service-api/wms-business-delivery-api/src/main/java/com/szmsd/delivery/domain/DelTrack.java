@@ -99,6 +99,15 @@ public class DelTrack extends BaseEntity {
     @Excel(name = "物流轨迹发生的位置显示描述")
     private String display;
 
+    @ApiModelProperty(value = "物流轨迹发生的位置显示描述(原始)")
+    @Excel(name = "物流轨迹发生的位置显示描述(原始)")
+    private String dmDisplay;
+
+    @ApiModelProperty(value = "轨迹信息描述(原始)")
+    @Excel(name = "轨迹信息描述(原始)")
+    private String dmDescription;
+
+
     @ApiModelProperty(value = "包裹所处的国家编码")
     @Excel(name = "包裹所处的国家编码")
     private String countryCode;

@@ -24,6 +24,22 @@
                 update_time,
             id, carrier_code, carrier_name, keywords, status, create_id, create_by, update_id, update_by, del_flag
         </sql>
+    <select id="selectCarrierKeyword" resultType="java.util.Map" parameterType="java.util.Map">
+        SELECT
+            b.carrier_keyword_type as carrierKeywordType,
+            b.origina_keywords as originaKeywords,
+            b.now_keywords as nowKeywords
+        FROM
+            bas_carrier_keyword a
+                INNER JOIN bas_carrier_keyword_data b ON a.id = b.carrier_keyword_id
+        WHERE
+            a.carrier_code = #{map.carrierCode}
+          AND a.STATUS = 0
+          AND carrier_keyword_type = #{map.carrierKeywordType}
+          AND origina_keywords = #{map.originaKeywords}
+            LIMIT 0,1
+
+    </select>
 
 
 </mapper>
