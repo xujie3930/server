@@ -250,6 +250,7 @@ public class WmsApiConfig implements ApiConfig {
         // D3 更新出库单一件多票的单据匹配关系
         private String multiboxrelation;
 
+        private String boxtransfer;
         public String getCreate() {
             return create;
         }
@@ -298,7 +299,13 @@ public class WmsApiConfig implements ApiConfig {
             this.multiboxrelation = multiboxrelation;
         }
 
+        public String getBoxtransfer() {
+            return boxtransfer;
+        }
 
+        public void setBoxtransfer(String boxtransfer) {
+            this.boxtransfer = boxtransfer;
+        }
     }
 
     static class Returned {
