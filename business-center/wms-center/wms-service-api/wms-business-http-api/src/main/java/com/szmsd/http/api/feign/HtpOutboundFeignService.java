@@ -6,6 +6,8 @@ import com.szmsd.http.api.feign.fallback.HtpOutboundFeignFallback;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import com.szmsd.http.vo.ResponseVO;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,4 +39,8 @@ public interface HtpOutboundFeignService {
 
     @PutMapping("/api/outbound/http/shipment/multiboxrelation")
     R<ResponseVO> shipmentMultiboxrelation(@RequestBody ShipmentMultiboxrelationRequestDto dto);
+
+    @PutMapping("/api/outbound/http/shipment/boxtransfer")
+    R<ResponseVO> shipmentBoxtransfer(@RequestBody BulkOrderRequestDto dto);
+
 }
