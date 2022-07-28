@@ -40,7 +40,7 @@ public interface HtpOutboundFeignService {
     @PutMapping("/api/outbound/http/shipment/multiboxrelation")
     R<ResponseVO> shipmentMultiboxrelation(@RequestBody ShipmentMultiboxrelationRequestDto dto);
 
-    @PutMapping("/api/outbound/http/shipment/boxtransfer")
-    R<ResponseVO> shipmentBoxtransfer(@RequestBody BulkOrderRequestDto dto);
+    @PostMapping("/api/outbound/http/shipment/boxtransfer")
+    R shipmentBoxtransfer(@RequestBody BulkOrderRequestDto dto);
 
 }

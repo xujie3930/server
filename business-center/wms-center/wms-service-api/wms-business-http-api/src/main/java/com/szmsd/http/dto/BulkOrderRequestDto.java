@@ -25,9 +25,6 @@ public class BulkOrderRequestDto implements Serializable {
     @ApiModelProperty(value = "客户代码")
     private String sellerCode;
 
-    @ApiModelProperty(value = "订单号")
-    private String orderNo;
-
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
 

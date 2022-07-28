@@ -1,5 +1,6 @@
 package com.szmsd.http.service;
 
+import com.szmsd.common.core.domain.R;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import com.szmsd.http.vo.ResponseVO;
@@ -52,5 +53,5 @@ public interface IOutboundService {
 
     ResponseVO shipmentMultiboxrelation(ShipmentMultiboxrelationRequestDto dto);
 
-    ResponseVO shipmentBoxtransfer(BulkOrderRequestDto dto);
+    R shipmentBoxtransfer(BulkOrderRequestDto dto);
 }
