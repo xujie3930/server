@@ -69,11 +69,11 @@ public class OutboundController extends BaseController {
         return R.ok(outboundService.shipmentMultiboxrelation(dto));
     }
 
-    @PutMapping("/shipment/boxtransfer")
+    @PostMapping("/shipment/boxtransfer")
     @ApiOperation(value = "出库管理 - HTTP - #C6 大货订单推送", position = 500)
     @ApiImplicitParam(name = "dto", value = "BulkOrderRequestDto", dataType = "BulkOrderRequestDto")
-    public R<ResponseVO> shipmentBoxtransfer(@RequestBody BulkOrderRequestDto dto) {
-        return R.ok(outboundService.shipmentBoxtransfer(dto));
+    public R shipmentBoxtransfer(@RequestBody BulkOrderRequestDto dto) {
+        return outboundService.shipmentBoxtransfer(dto);
     }
 
 }

@@ -3,6 +3,7 @@ package com.szmsd.delivery.timer;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
@@ -12,9 +13,7 @@ import com.szmsd.delivery.util.LockerUtil;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.http.api.feign.HtpOutboundFeignService;
-import com.szmsd.http.dto.BulkOrderAddressRequestDto;
-import com.szmsd.http.dto.BulkOrderBoxRequestDto;
-import com.szmsd.http.dto.BulkOrderRequestDto;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.feign.PurchaseFeignService;
 import org.redisson.api.RedissonClient;
@@ -98,11 +97,22 @@ public class BulkOrderDelOutboundTimer {
 
         List<BulkOrderBoxRequestDto> boxList = new ArrayList<>();
         BulkOrderAddressRequestDto address = new BulkOrderAddressRequestDto();
-
         bulkOrderRequestDto.setAddress(address);
         bulkOrderRequestDto.setBoxList(boxList);
+
+        BulkOrderTaskConfigDto taskConfigInfo = new BulkOrderTaskConfigDto();
+        taskConfigInfo.setReceiveShippingType("NotReceive");
+        taskConfigInfo.setIsPublishPackageMaterial(false);
+        taskConfigInfo.setIsPublishPackageWeight(false);
+        taskConfigInfo.setPrintShippingLabelType("NotPrint");
+
         BeanUtils.copyProperties(delOutboundDto, bulkOrderRequestDto);
         BeanUtils.copyProperties(delOutboundDto.getAddress(), address);
+
+
+        bulkOrderRequestDto.setRefOrderNo(delOutboundDto.getOrderNo());
+        bulkOrderRequestDto.setTaskConfig(taskConfigInfo);
+
         Set<String> boxSet =new TreeSet<String>();
         if(delOutboundDto.getDetails() != null){
             for(DelOutboundDetailVO detailVO : delOutboundDto.getDetails()){
@@ -116,8 +126,10 @@ public class BulkOrderDelOutboundTimer {
 
 
 
-        R<ResponseVO> responseVO = htpOutboundFeignService.shipmentBoxtransfer(bulkOrderRequestDto);
-        ResponseVO.resultAssert(responseVO, "同步大货订单");
+        R responseVO = htpOutboundFeignService.shipmentBoxtransfer(bulkOrderRequestDto);
+        if(!(responseVO.getCode() == 200)){
+            throw new CommonException("999", "同步大货订单失败"+ responseVO.getMsg());
+        }
     }
 
     private void doWorker(String key, LockerUtil.Worker worker) {
