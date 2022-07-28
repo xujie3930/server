@@ -289,4 +289,8 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "仓库选择")
     private String warehouseSelection;
+
+
+    @ApiModelProperty(value = "订单推送状态(大货) null 未推送 1.已推送wms 2.推送失败")
+    private String pushOrderState;
 }
