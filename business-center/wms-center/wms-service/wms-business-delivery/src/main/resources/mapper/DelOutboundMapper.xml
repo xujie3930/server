@@ -61,7 +61,8 @@
             o.cod_amount,
             o.ref_no,
             o.shipment_retry_label,
-            o.upload_box_label
+            o.upload_box_label,
+            o.shipments_time
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
