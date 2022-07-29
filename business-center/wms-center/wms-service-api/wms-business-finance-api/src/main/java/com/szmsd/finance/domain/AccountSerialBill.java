@@ -37,11 +37,11 @@ public class AccountSerialBill extends FssBaseEntity {
 
     @ApiModelProperty(value = "refNo")
     @Excel(name = "refNo")
-    @TableField(exist = false)
+//    @TableField(exist = false)
     private String refNo;
 
     @ApiModelProperty(value = "物流服务名称")
-    @TableField(exist = false)
+//    @TableField(exist = false)
     private String shipmentService;
 
     @ApiModelProperty(value = "客户编码")
@@ -60,19 +60,19 @@ public class AccountSerialBill extends FssBaseEntity {
     @AutoFieldI18n
     @ApiModelProperty(value = "实重")
     @Excel(name = "实重")
-    @TableField(exist = false)
-    private BigDecimal weight;
+//    @TableField(exist = false)
+    private Double weight;
 
     @AutoFieldI18n
     @ApiModelProperty(value = "计费重")
     @Excel(name = "计费重")
-    @TableField(exist = false)
+//    @TableField(exist = false)
     private BigDecimal calcWeight;
 
     @AutoFieldI18n
     @ApiModelProperty(value = "规格")
     @Excel(name = "规格")
-    @TableField(exist = false)
+//    @TableField(exist = false)
     private String specifications;
 
 

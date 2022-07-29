@@ -8,11 +8,11 @@
         a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,a.amount,
         a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
         a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
-        a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,b.ref_no,b.shipment_service,b.weight,
-        b.calc_weight,b.specifications
+        a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
+        a.calc_weight,a.specifications
 
         FROM
-        `fss_account_serial_bill` a left JOIN del_outbound b on a.no=b.order_no
+        `fss_account_serial_bill` a
 
         <where>
         1=1
@@ -69,6 +69,11 @@
         </if>
         </where>
         ORDER BY a.payment_time DESC
+    </select>
+    <select id="selectDelOutbound" resultType="com.szmsd.delivery.domain.DelOutbound"
+            parameterType="java.lang.String">
+        select * from del_outbound where order_no=#{no} LIMIT 0,1
+
     </select>
 
 </mapper>
