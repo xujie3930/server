@@ -2,18 +2,22 @@ package com.szmsd.finance.factory;
 
 import cn.hutool.core.date.StopWatch;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
+import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +42,8 @@ public class RefundPayFactory extends AbstractPayFactory {
     private IAccountSerialBillService accountSerialBillService;
     @Resource
     private IAccountBalanceService iAccountBalanceService;
+    @Autowired
+    private AccountSerialBillMapper accountSerialBillMapper;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -112,7 +118,18 @@ public class RefundPayFactory extends AbstractPayFactory {
             serialBill.setPaymentTime(new Date());
             AccountSerialBill accountSerialBill = new AccountSerialBill();
             BeanUtils.copyProperties(serialBill, accountSerialBill);
-            accountSerialBillService.save(accountSerialBill);
+            if (StringUtils.isNotBlank(dto.getNo())) {
+                DelOutbound delOutbound = accountSerialBillMapper.selectDelOutbound(dto.getNo());
+                if (delOutbound.getId() != null) {
+                    accountSerialBill.setRefNo(delOutbound.getRefNo());
+                    accountSerialBill.setShipmentService(delOutbound.getShipmentService());
+                    accountSerialBill.setWeight(delOutbound.getWeight());
+                    accountSerialBill.setCalcWeight(delOutbound.getCalcWeight());
+                    accountSerialBill.setSpecifications(delOutbound.getSpecifications());
+                }
+            }
+
+                accountSerialBillService.save(accountSerialBill);
             //accountSerialBillService.add(serialBill);
         });
     }
