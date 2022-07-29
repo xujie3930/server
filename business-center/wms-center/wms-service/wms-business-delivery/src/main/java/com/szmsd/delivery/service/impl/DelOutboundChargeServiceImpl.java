@@ -99,7 +99,9 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
             return;
         }
         DelOutboundCharge delOutboundCharge = charges.get(0);
+        // 先根据单号删除
         this.clearCharges(delOutboundCharge.getOrderNo());
+        // 再新增
         this.saveBatch(charges);
     }
 
@@ -115,7 +117,11 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
     public void clearCharges(String orderNo) {
         LambdaQueryWrapper<DelOutboundCharge> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(DelOutboundCharge::getOrderNo, orderNo);
-        this.remove(queryWrapper);
+        // 判断有没有数据
+        if (super.count(queryWrapper) > 0) {
+            // 有数据就删除
+            super.remove(queryWrapper);
+        }
     }
 }
 

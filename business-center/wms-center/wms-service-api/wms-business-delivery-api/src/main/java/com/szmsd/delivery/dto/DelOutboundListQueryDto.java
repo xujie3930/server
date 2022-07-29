@@ -74,7 +74,6 @@ public class DelOutboundListQueryDto extends QueryDto {
     @ApiModelProperty(value = "国家代码")
     private String countryCode;
 
-
     @ApiModelProperty(value = "客户编码list")
     private List<String> customCodeList;
 
@@ -82,5 +81,8 @@ public class DelOutboundListQueryDto extends QueryDto {
         this.customCode = customCode;
         this.customCodeList = StringUtils.isNotEmpty(customCode) ? Arrays.asList(customCode.split(",")) : Lists.newArrayList();
     }
+
+    @ApiModelProperty(value = "发货时间")
+    private String[] shipmentsTimes;
 
 }
