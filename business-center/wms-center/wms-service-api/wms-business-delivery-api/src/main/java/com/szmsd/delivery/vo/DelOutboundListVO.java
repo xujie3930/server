@@ -150,13 +150,16 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "COD")
     private BigDecimal codAmount;
+
     @ApiModelProperty(value = "RefNo")
     private String refNo;
-
 
     @ApiModelProperty(value = "转运出库标签图片")
     private String shipmentRetryLabel;
 
     @ApiModelProperty(value = "是否上传箱标")
     private String uploadBoxLabel;
+
+    @ApiModelProperty(value = "发货时间")
+    private Date shipmentsTime;
 }
