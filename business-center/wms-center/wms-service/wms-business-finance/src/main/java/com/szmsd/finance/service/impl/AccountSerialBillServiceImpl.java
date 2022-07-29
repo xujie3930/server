@@ -11,6 +11,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
@@ -203,6 +204,19 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         if (StringUtils.isBlank(accountSerialBill.getCurrencyName()))
             accountSerialBill.setCurrencyName(sysDictDataService.getCurrencyNameByCode(dto.getCurrencyCode()));
         accountSerialBill.setBusinessCategory(accountSerialBill.getChargeCategory());//性质列内容，同费用类别
+        //单号不为空的时候
+        if (StringUtils.isNotBlank(dto.getNo())){
+           DelOutbound delOutbound=accountSerialBillMapper.selectDelOutbound(dto.getNo());
+           if (delOutbound.getId()!=null){
+               accountSerialBill.setRefNo(delOutbound.getRefNo());
+               accountSerialBill.setShipmentService(delOutbound.getShipmentService());
+               accountSerialBill.setWeight(delOutbound.getWeight());
+               accountSerialBill.setCalcWeight(delOutbound.getCalcWeight());
+               accountSerialBill.setSpecifications(delOutbound.getSpecifications());
+           }
+
+
+        }
         return accountSerialBillMapper.insert(accountSerialBill);
     }
 
@@ -215,6 +229,17 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             if (StringUtils.isBlank(value.getCurrencyName()))
                 value.setCurrencyName(sysDictDataService.getCurrencyNameByCode(value.getCurrencyCode()));
             value.setBusinessCategory(value.getChargeCategory());//性质列内容，同费用类别
+            //单号不为空的时候
+            if (StringUtils.isNotBlank(value.getNo())){
+                DelOutbound delOutbound=accountSerialBillMapper.selectDelOutbound(value.getNo());
+                if (delOutbound.getId()!=null){
+                    value.setRefNo(delOutbound.getRefNo());
+                    value.setShipmentService(delOutbound.getShipmentService());
+                    value.setWeight(delOutbound.getWeight());
+                    value.setCalcWeight(delOutbound.getCalcWeight());
+                    value.setSpecifications(delOutbound.getSpecifications());
+                }
+            }
             return value;
         }).collect(Collectors.toList());
         boolean b = this.saveBatch(collect);
