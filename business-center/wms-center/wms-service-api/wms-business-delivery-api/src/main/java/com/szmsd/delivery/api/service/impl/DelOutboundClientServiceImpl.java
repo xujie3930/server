@@ -157,4 +157,9 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
         return R.getDataAndException(this.delOutboundFeignService.receiveLabel(dto));
 
     }
+
+    @Override
+    public int boxStatus(DelOutboundBoxStatusDto dto) {
+        return R.getDataAndException(this.delOutboundFeignService.boxStatus(dto));
+    }
 }

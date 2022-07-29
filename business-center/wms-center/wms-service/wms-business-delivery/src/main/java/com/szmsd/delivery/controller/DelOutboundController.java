@@ -890,4 +890,13 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.receiveLabel(dto));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:receiveLabel')")
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/box/status")
+    @ApiOperation(value = "出库管理 - 接收供应商系统传回的标签", position = 400)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
+    public R<Integer> boxStatus(@RequestBody DelOutboundBoxStatusDto dto) {
+        return R.ok(delOutboundService.boxStatus(dto));
+    }
+
 }

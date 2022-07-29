@@ -3,10 +3,7 @@ package com.szmsd.open.controller;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
-import com.szmsd.delivery.dto.DelOutboundReceiveLabelDto;
-import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
-import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
-import com.szmsd.delivery.dto.ShipmentRequestDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.open.vo.ResponseVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -85,6 +82,15 @@ public class DelOutboundController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "DelOutboundReceiveLabelDto", dataType = "DelOutboundReceiveLabelDto")
     public ResponseVO receiveLabel(@RequestBody @Validated DelOutboundReceiveLabelDto dto) {
         delOutboundClientService.receiveLabel(dto);
+        return ResponseVO.ok();
+    }
+
+    @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
+    @PostMapping("/shipment/box/status")
+    @ApiOperation(value = "出库管理 - #D4 更新箱子状态接口  (可以用作记录箱子的到仓时间)", position = 300)
+    @ApiImplicitParam(name = "dto", value = "DelOutboundReceiveLabelDto", dataType = "DelOutboundReceiveLabelDto")
+    public ResponseVO boxStatus(@RequestBody @Validated DelOutboundBoxStatusDto dto) {
+        delOutboundClientService.boxStatus(dto);
         return ResponseVO.ok();
     }
 

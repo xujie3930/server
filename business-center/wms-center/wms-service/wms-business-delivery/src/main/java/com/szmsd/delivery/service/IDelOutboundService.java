@@ -432,5 +432,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     int updateReassignImportedData(List<DelOutboundReassignExportListVO> list);
 
     int receiveLabel(DelOutboundReceiveLabelDto dto);
+
+    int boxStatus(DelOutboundBoxStatusDto dto);
 }
 
