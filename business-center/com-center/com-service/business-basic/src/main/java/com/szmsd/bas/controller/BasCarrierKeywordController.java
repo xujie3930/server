@@ -143,6 +143,7 @@ public class BasCarrierKeywordController extends BaseController {
     @PostMapping("selectCarrierKeyword")
     @ApiOperation(value = "检查关键词是否字表存在", notes = "检查关键词是否字表存在")
     public R<Map> selectCarrierKeyword(@RequestBody Map map) {
+        Map map1=basCarrierKeywordService.selectCarrierKeyword(map);
         return R.ok(basCarrierKeywordService.selectCarrierKeyword(map));
     }
 }
