@@ -316,7 +316,10 @@ public final class DelOutboundServiceImplUtil {
             queryWrapper.in("o.custom_code", customCodeList);
         }
 //        QueryWrapperUtil.filter(queryWrapper, SqlLike.DEFAULT, "o.custom_code", queryDto.getCustomCode());
+        // 创建时间
         QueryWrapperUtil.filterDate(queryWrapper, "o.create_time", queryDto.getCreateTimes());
+        // 发货时间
+        QueryWrapperUtil.filterDate(queryWrapper, "o.shipments_time", queryDto.getShipmentsTimes());
         // 重派订单
         String reassignType = queryDto.getReassignType();
         if (StringUtils.isEmpty(reassignType)) {
