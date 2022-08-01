@@ -24,7 +24,7 @@ public class GradeCustomImportDto {
     private Date endTimeDate;
 
     @Excel(name = "是否有效")
-    private Boolean isValid;
+    private String isValidStr;
 
 
 

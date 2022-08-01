@@ -23,8 +23,9 @@ public class DiscountCustomImportDto {
     @Excel(name = "截止时间")
     private Date endTimeDate;
 
+
     @Excel(name = "是否有效")
-    private Boolean isValid;
+    private String isValidStr;
 
 
 

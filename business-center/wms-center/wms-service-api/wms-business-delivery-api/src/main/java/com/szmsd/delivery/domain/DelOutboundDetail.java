@@ -110,5 +110,7 @@ public class DelOutboundDetail extends BaseEntity {
     private Double boxWeight;
 
 
+    @ApiModelProperty(value = "操作类型")
+    private String operationType;
 
 }
