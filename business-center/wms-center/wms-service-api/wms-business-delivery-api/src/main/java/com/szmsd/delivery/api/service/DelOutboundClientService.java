@@ -193,4 +193,6 @@ public interface DelOutboundClientService {
     int receiveLabel(DelOutboundReceiveLabelDto dto);
 
     int boxStatus(DelOutboundBoxStatusDto dto);
+
+    List<DelOutboundBringVerifyVO> bringVerifyByOrderNo(DelOutboundBringVerifyNoDto dto);
 }
