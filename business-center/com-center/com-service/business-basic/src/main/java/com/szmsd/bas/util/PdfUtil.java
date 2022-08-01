@@ -50,7 +50,7 @@ public class PdfUtil {
             while(iterator.hasNext()) {
                 PDDocument doc = iterator.next();
                 PDFRenderer renderer = new PDFRenderer(doc);
-                BufferedImage image = renderer.renderImage(0, 2.0f);
+                BufferedImage image = renderer.renderImage(0, 4.0f);
                 String result = extractImages(image);
 
 
