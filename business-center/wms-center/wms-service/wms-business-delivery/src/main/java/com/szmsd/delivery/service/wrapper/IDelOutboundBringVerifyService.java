@@ -3,6 +3,7 @@ package com.szmsd.delivery.service.wrapper;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
+import com.szmsd.delivery.dto.DelOutboundBringVerifyNoDto;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.http.dto.ChargeWrapper;
 import com.szmsd.http.dto.ProblemDetails;
@@ -124,4 +125,6 @@ public interface IDelOutboundBringVerifyService {
      * @return String
      */
     String shipmentCreate(DelOutboundWrapperContext delOutboundWrapperContext, String trackingNo);
+
+    List<DelOutboundBringVerifyVO> bringVerifyByOrderNo(DelOutboundBringVerifyNoDto dto);
 }

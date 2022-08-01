@@ -1,6 +1,8 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
 import cn.hutool.crypto.digest.MD5;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
@@ -23,6 +25,7 @@ import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
+import com.szmsd.delivery.dto.DelOutboundBringVerifyNoDto;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
@@ -191,14 +194,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         });
     }
 
-    @Override
-    public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
-        List<Long> ids = dto.getIds();
-        if (CollectionUtils.isEmpty(ids)) {
-            throw new CommonException("400", "请求参数不能为空");
-        }
-        // 根据id查询出库信息
-        List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
+    private List<DelOutboundBringVerifyVO> bringVerifyProcess(List<DelOutbound> delOutboundList){
         if (CollectionUtils.isEmpty(delOutboundList)) {
             throw new CommonException("400", "单据不存在");
         }
@@ -255,6 +251,16 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
         }
         return resultList;
+    }
+    @Override
+    public List<DelOutboundBringVerifyVO> bringVerify(DelOutboundBringVerifyDto dto) {
+        List<Long> ids = dto.getIds();
+        if (CollectionUtils.isEmpty(ids)) {
+            throw new CommonException("400", "请求参数不能为空");
+        }
+        // 根据id查询出库信息
+        List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
+        return this.bringVerifyProcess(delOutboundList);
     }
 
     @Override
@@ -1344,6 +1350,19 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         } else {
             throw new CommonException("400", "创建出库单失败");
         }
+    }
+
+    @Override
+    public List<DelOutboundBringVerifyVO> bringVerifyByOrderNo(DelOutboundBringVerifyNoDto dto) {
+        List<String> orderNos = dto.getOrderNos();
+        if (CollectionUtils.isEmpty(orderNos)) {
+            throw new CommonException("400", "请求参数不能为空");
+        }
+        LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(DelOutbound::getOrderNo, orderNos);
+        // 根据id查询出库信息
+        List<DelOutbound> delOutboundList = this.delOutboundService.list(queryWrapper);
+        return this.bringVerifyProcess(delOutboundList);
     }
 
 }
