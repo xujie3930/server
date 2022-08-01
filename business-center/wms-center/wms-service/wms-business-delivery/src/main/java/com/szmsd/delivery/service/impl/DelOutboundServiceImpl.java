@@ -2298,5 +2298,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.updateById(data);
         return 1;
     }
+
+    @Override
+    public int boxStatus(DelOutboundBoxStatusDto dto) {
+        LambdaQueryWrapper<DelOutboundDetail> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutboundDetail::getOrderNo, dto.getOrderNo());
+        queryWrapper.eq(DelOutboundDetail::getBoxMark, dto.getBoxNo());
+        List<DelOutboundDetail> dataDelOutboundDetailList = delOutboundDetailService.list(queryWrapper);
+        if(dataDelOutboundDetailList.size() == 0){
+            throw new CommonException("400", "没有匹配的箱号数据");
+        }
+        for (DelOutboundDetail detail: dataDelOutboundDetailList){
+            detail.setOperationType(dto.getOperationType());
+        }
+        delOutboundDetailService.updateBatchById(dataDelOutboundDetailList);
+        return 1;
+    }
 }
 
