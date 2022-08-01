@@ -1,6 +1,7 @@
 package com.szmsd.bas.api.service;
 
 import com.szmsd.bas.domain.BasePacking;
+import com.szmsd.bas.domain.SysLanres;
 import com.szmsd.bas.dto.BasePackingConditionQueryDto;
 import com.szmsd.bas.dto.BasePackingDto;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
@@ -31,4 +32,6 @@ public interface BasePackingClientService {
 
     List<BasePackingDto> listParent(BasePackingDto warehouseCode);
     List<BasePackingDto> listParent();
+
+    R selectSysLanresList(SysLanres sysLanres);
 }

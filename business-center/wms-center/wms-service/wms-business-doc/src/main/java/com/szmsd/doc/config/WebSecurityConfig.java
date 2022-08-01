@@ -29,6 +29,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 "/v2/**",
                 "/doc.html",
                 "/api/outbound/commonTrackList",
+                "/api/sku/lists",
                 "/swagger-ui.html",
                 "/api/test/token");
     }
