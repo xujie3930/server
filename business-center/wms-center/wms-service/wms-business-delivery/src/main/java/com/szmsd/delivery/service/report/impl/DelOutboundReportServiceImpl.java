@@ -67,6 +67,7 @@ public class DelOutboundReportServiceImpl extends ServiceImpl<DelOutboundMapper,
         queryWrapper.eq("o.seller_code", queryDto.getSellerCode());
         // 时间范围
         queryWrapper.between("o.bring_verify_time", beginDate, endDate);
+        queryWrapper.ne("o.del_flag", 2);
         // 按天分组
         queryWrapper.groupBy("DATE_FORMAT(o.bring_verify_time, '%Y-%m-%d')");
         List<DelOutboundReportListVO> list = this.reportMapper.queryBringVerifyData(queryWrapper);

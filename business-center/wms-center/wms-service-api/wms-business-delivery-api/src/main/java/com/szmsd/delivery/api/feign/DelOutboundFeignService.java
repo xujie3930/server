@@ -256,4 +256,10 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - 更新箱子状态接口  (可以用作记录箱子的到仓时间)", position = 400)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "boxStatus")
     R<Integer> boxStatus(DelOutboundBoxStatusDto dto);
+
+
+    @PostMapping("/api/outbound/bringVerifyByOrderNo")
+    @ApiOperation(value = "出库管理 - 提审", position = 600)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundBringVerifyNoDto")
+    R<List<DelOutboundBringVerifyVO>> bringVerifyByOrderNo(@RequestBody DelOutboundBringVerifyNoDto dto);
 }
