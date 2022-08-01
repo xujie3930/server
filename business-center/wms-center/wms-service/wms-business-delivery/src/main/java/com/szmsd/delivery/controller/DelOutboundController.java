@@ -332,6 +332,14 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundBringVerifyService.bringVerify(dto));
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:bringVerifyByOrderNo')")
+    @PostMapping("/bringVerifyByOrderNo")
+    @ApiOperation(value = "出库管理 - 提审", position = 600)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundBringVerifyNoDto")
+    public R<List<DelOutboundBringVerifyVO>> bringVerifyByOrderNo(@RequestBody @Validated DelOutboundBringVerifyNoDto dto) {
+        return R.ok(delOutboundBringVerifyService.bringVerifyByOrderNo(dto));
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:canceled')")
     @PostMapping("/canceled")
     @ApiOperation(value = "出库管理 - 取消", position = 700)
