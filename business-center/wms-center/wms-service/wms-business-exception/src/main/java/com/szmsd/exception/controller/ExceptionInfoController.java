@@ -118,7 +118,7 @@ public class ExceptionInfoController extends BaseController {
             }
             // 获取登录用户的客户编码
             String sellerCode = loginUser.getSellerCode();
-            dto.setSellerCode(sellerCode);
+            //dto.setSellerCode(sellerCode);
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("085");
             ExceptionInfoExportContext exportContext = new ExceptionInfoExportContext();
