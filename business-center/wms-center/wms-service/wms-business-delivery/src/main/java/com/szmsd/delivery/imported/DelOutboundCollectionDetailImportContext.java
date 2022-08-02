@@ -1,7 +1,7 @@
 package com.szmsd.delivery.imported;
 
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
-import com.szmsd.delivery.dto.DelOutboundDetailImportDto2;
+import com.szmsd.delivery.dto.DelOutboundCollectionDetailImportDto2;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
@@ -10,12 +10,16 @@ import java.util.List;
  * @author zhangyuyuan
  * @date 2021-04-09 20:07
  */
-public class DelOutboundDetailImportContext extends ImportContext<DelOutboundDetailImportDto2> {
+public class DelOutboundCollectionDetailImportContext extends ImportContext<DelOutboundCollectionDetailImportDto2> {
 
-    public DelOutboundDetailImportContext(List<DelOutboundDetailImportDto2> dataList,
-                                          List<BasSubWrapperVO> productAttributeList,
-                                          List<BasSubWrapperVO> electrifiedModeList,
-                                          List<BasSubWrapperVO> batteryPackagingList) {
+    protected CacheContext<String, String> productAttributeCache;
+    protected CacheContext<String, String> electrifiedModeCache;
+    protected CacheContext<String, String> batteryPackagingCache;
+
+    public DelOutboundCollectionDetailImportContext(List<DelOutboundCollectionDetailImportDto2> dataList,
+                                                    List<BasSubWrapperVO> productAttributeList,
+                                                    List<BasSubWrapperVO> electrifiedModeList,
+                                                    List<BasSubWrapperVO> batteryPackagingList) {
         super(dataList);
         this.productAttributeCache = new MapCacheContext<>();
         this.electrifiedModeCache = new MapCacheContext<>();
@@ -36,4 +40,5 @@ public class DelOutboundDetailImportContext extends ImportContext<DelOutboundDet
             }
         }
     }
+
 }
