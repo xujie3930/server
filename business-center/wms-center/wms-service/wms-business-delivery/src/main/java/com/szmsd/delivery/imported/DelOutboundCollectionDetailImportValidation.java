@@ -1,7 +1,8 @@
 package com.szmsd.delivery.imported;
 
-import com.szmsd.delivery.dto.DelOutboundDetailImportDto2;
+import com.szmsd.delivery.dto.DelOutboundCollectionDetailImportDto2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -11,12 +12,12 @@ import java.util.Set;
  * @author zhangyuyuan
  * @date 2021-04-09 19:39
  */
-public class DelOutboundCollectionDetailImportValidation implements ImportValidation<DelOutboundDetailImportDto2> {
+public class DelOutboundCollectionDetailImportValidation implements ImportValidation<DelOutboundCollectionDetailImportDto2> {
 
     private final DelOutboundOuterContext outerContext;
-    private final DelOutboundDetailImportContext importContext;
+    private final DelOutboundCollectionDetailImportContext importContext;
 
-    public DelOutboundCollectionDetailImportValidation(DelOutboundOuterContext outerContext, DelOutboundDetailImportContext importContext) {
+    public DelOutboundCollectionDetailImportValidation(DelOutboundOuterContext outerContext, DelOutboundCollectionDetailImportContext importContext) {
         this.outerContext = outerContext;
         this.importContext = importContext;
     }
@@ -24,8 +25,8 @@ public class DelOutboundCollectionDetailImportValidation implements ImportValida
     @Override
     public boolean before() {
         Set<Integer> detailKeySet = new HashSet<>();
-        List<DelOutboundDetailImportDto2> dataList = this.importContext.getDataList();
-        for (DelOutboundDetailImportDto2 dto2 : dataList) {
+        List<DelOutboundCollectionDetailImportDto2> dataList = this.importContext.getDataList();
+        for (DelOutboundCollectionDetailImportDto2 dto2 : dataList) {
             Integer sort = dto2.getSort();
             if (null == sort) {
                 continue;
@@ -53,17 +54,38 @@ public class DelOutboundCollectionDetailImportValidation implements ImportValida
     }
 
     @Override
-    public void valid(int rowIndex, DelOutboundDetailImportDto2 object) {
+    public void valid(int rowIndex, DelOutboundCollectionDetailImportDto2 object) {
         Integer sort = object.getSort();
         if (this.importContext.isNull(sort, rowIndex, 1, null, "订单顺序不能为空")) {
             return;
         }
-        String sku = object.getSku();
-        if (this.importContext.isEmpty(sku, rowIndex, 2, null, "产品编码不能为空")) {
+        this.importContext.isEmpty(object.getProductName(), rowIndex, 2, null, "英文申报品名不能为空");
+        this.importContext.isEmpty(object.getProductNameChinese(), rowIndex, 3, null, "中文申报品名不能为空");
+        this.importContext.isNull(object.getDeclaredValue(), rowIndex, 4, null, "申报价值不能为空");
+        this.importContext.isNull(object.getQty(), rowIndex, 5, null, "出库数量不能为空");
+        String productAttributeName = object.getProductAttributeName();
+        if (this.importContext.isEmpty(productAttributeName, rowIndex, 6, null, "产品属性不能为空")) {
             return;
+        } else {
+            String productAttribute = this.importContext.productAttributeCache.get(productAttributeName);
+            if (!this.importContext.isEmpty(productAttribute, rowIndex, 6, productAttributeName, "产品属性不存在")) {
+                object.setProductAttribute(productAttribute);
+            }
         }
-        Integer qty = object.getQty();
-        this.importContext.isNull(qty, rowIndex, 3, null, "数量不能为空");
+        String electrifiedModeName = object.getElectrifiedModeName();
+        if (StringUtils.isNotEmpty(electrifiedModeName)) {
+            String electrifiedMode = this.importContext.electrifiedModeCache.get(electrifiedModeName);
+            if (!this.importContext.isEmpty(electrifiedMode, rowIndex, 7, electrifiedModeName, "带电信息不存在")) {
+                object.setElectrifiedMode(electrifiedMode);
+            }
+        }
+        String batteryPackagingName = object.getBatteryPackagingName();
+        if (StringUtils.isNotEmpty(batteryPackagingName)) {
+            String batteryPackaging = this.importContext.batteryPackagingCache.get(batteryPackagingName);
+            if (!this.importContext.isEmpty(batteryPackaging, rowIndex, 8, batteryPackagingName, "电池包装不存在")) {
+                object.setBatteryPackaging(batteryPackaging);
+            }
+        }
     }
 
     @Override
