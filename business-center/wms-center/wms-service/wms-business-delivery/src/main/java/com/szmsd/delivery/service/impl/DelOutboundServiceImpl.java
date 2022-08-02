@@ -1799,32 +1799,63 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (null == delOutbound) {
             throw new CommonException("400", "单据不存在");
         }
-        if (StringUtils.isEmpty(delOutbound.getShipmentOrderNumber())) {
-            throw new CommonException("400", "未获取承运商标签");
+        if("1".equals(dto.getType())){
+
+            if(StringUtils.isEmpty(delOutbound.getShipmentRetryLabel())){
+                throw new CommonException("400", "标签文件不存在");
+
+            }
+            File labelFile = new File(delOutbound.getShipmentRetryLabel());
+            if (!labelFile.exists()) {
+                throw new CommonException("400", "标签文件不存在");
+            }
+            ServletOutputStream outputStream = null;
+            InputStream inputStream = null;
+            try {
+                outputStream = response.getOutputStream();
+                //response为HttpServletResponse对象
+                response.setContentType("application/pdf;charset=utf-8");
+                //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+                response.setHeader("Content-Disposition", "attachment;filename=" + delOutbound.getOrderNo() + ".pdf");
+                inputStream = new FileInputStream(labelFile);
+                IOUtils.copy(inputStream, outputStream);
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+                throw new CommonException("500", "读取标签文件失败");
+            } finally {
+                IoUtil.flush(outputStream);
+                IoUtil.close(outputStream);
+                IoUtil.close(inputStream);
+            }
+        }else{
+            if (StringUtils.isEmpty(delOutbound.getShipmentOrderNumber())) {
+                throw new CommonException("400", "未获取承运商标签");
+            }
+            String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
+            File labelFile = new File(pathname);
+            if (!labelFile.exists()) {
+                throw new CommonException("400", "标签文件不存在");
+            }
+            ServletOutputStream outputStream = null;
+            InputStream inputStream = null;
+            try {
+                outputStream = response.getOutputStream();
+                //response为HttpServletResponse对象
+                response.setContentType("application/pdf;charset=utf-8");
+                //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+                response.setHeader("Content-Disposition", "attachment;filename=" + delOutbound.getShipmentOrderNumber() + ".pdf");
+                inputStream = new FileInputStream(labelFile);
+                IOUtils.copy(inputStream, outputStream);
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+                throw new CommonException("500", "读取标签文件失败");
+            } finally {
+                IoUtil.flush(outputStream);
+                IoUtil.close(outputStream);
+                IoUtil.close(inputStream);
+            }
         }
-        String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
-        File labelFile = new File(pathname);
-        if (!labelFile.exists()) {
-            throw new CommonException("400", "标签文件不存在");
-        }
-        ServletOutputStream outputStream = null;
-        InputStream inputStream = null;
-        try {
-            outputStream = response.getOutputStream();
-            //response为HttpServletResponse对象
-            response.setContentType("application/pdf;charset=utf-8");
-            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
-            response.setHeader("Content-Disposition", "attachment;filename=" + delOutbound.getShipmentOrderNumber() + ".pdf");
-            inputStream = new FileInputStream(labelFile);
-            IOUtils.copy(inputStream, outputStream);
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            throw new CommonException("500", "读取标签文件失败");
-        } finally {
-            IoUtil.flush(outputStream);
-            IoUtil.close(outputStream);
-            IoUtil.close(inputStream);
-        }
+
     }
 
     @Override

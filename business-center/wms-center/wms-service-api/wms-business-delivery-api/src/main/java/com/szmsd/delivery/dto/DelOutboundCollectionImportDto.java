@@ -1,10 +1,12 @@
 package com.szmsd.delivery.dto;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author zhangyuyuan
@@ -47,6 +49,16 @@ public class DelOutboundCollectionImportDto implements Serializable {
     @ApiModelProperty(value = "联系方式")
     private String phoneNo;
 
+
+    @ApiModelProperty(value = "电子邮箱")
+    private String email;
+
+    @ApiModelProperty(value = "ioss")
+    private String ioss;
+
+    @ApiModelProperty(value = "COD")
+    private BigDecimal codAmount;
+
     @ApiModelProperty(value = "重量 g")
     private Double weight;
 
@@ -59,7 +71,12 @@ public class DelOutboundCollectionImportDto implements Serializable {
     @ApiModelProperty(value = "高 CM")
     private Double height;
 
-    @ApiModelProperty(value = "电子邮箱")
-    private String email;
+
+    @ApiModelProperty(value = "参考号")
+    private String refNo;
+
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
 
 }

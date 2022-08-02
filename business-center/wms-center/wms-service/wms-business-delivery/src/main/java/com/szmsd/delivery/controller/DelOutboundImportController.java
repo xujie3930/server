@@ -14,41 +14,8 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
-import com.szmsd.delivery.dto.DelOutboundBatchDetailImportDto;
-import com.szmsd.delivery.dto.DelOutboundBatchImportDto;
-import com.szmsd.delivery.dto.DelOutboundCollectionDetailImportDto;
-import com.szmsd.delivery.dto.DelOutboundCollectionImportDto;
-import com.szmsd.delivery.dto.DelOutboundDetailImportDto2;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.dto.DelOutboundPackageTransferDetailImportDto;
-import com.szmsd.delivery.dto.DelOutboundPackageTransferImportDto;
-import com.szmsd.delivery.imported.DefaultAnalysisEventListener;
-import com.szmsd.delivery.imported.DelOutboundBatchDetailImportContext;
-import com.szmsd.delivery.imported.DelOutboundBatchDetailImportValidation;
-import com.szmsd.delivery.imported.DelOutboundBatchImportContainer;
-import com.szmsd.delivery.imported.DelOutboundBatchImportContext;
-import com.szmsd.delivery.imported.DelOutboundBatchImportValidation;
-import com.szmsd.delivery.imported.DelOutboundCollectionDetailImportValidation;
-import com.szmsd.delivery.imported.DelOutboundCollectionImportContainer;
-import com.szmsd.delivery.imported.DelOutboundCollectionImportContext;
-import com.szmsd.delivery.imported.DelOutboundCollectionImportValidation;
-import com.szmsd.delivery.imported.DelOutboundCollectionSkuImportContext;
-import com.szmsd.delivery.imported.DelOutboundCollectionSkuImportValidation;
-import com.szmsd.delivery.imported.DelOutboundDetailImportContext;
-import com.szmsd.delivery.imported.DelOutboundDetailImportValidationData;
-import com.szmsd.delivery.imported.DelOutboundOuterContext;
-import com.szmsd.delivery.imported.DelOutboundPackageTransferDetailImportContext;
-import com.szmsd.delivery.imported.DelOutboundPackageTransferDetailImportValidation;
-import com.szmsd.delivery.imported.DelOutboundPackageTransferImportContainer;
-import com.szmsd.delivery.imported.DelOutboundPackageTransferImportContext;
-import com.szmsd.delivery.imported.DelOutboundPackageTransferImportValidation;
-import com.szmsd.delivery.imported.EasyExcelFactoryUtil;
-import com.szmsd.delivery.imported.ImportMessage;
-import com.szmsd.delivery.imported.ImportResult;
-import com.szmsd.delivery.imported.ImportResultData;
-import com.szmsd.delivery.imported.ImportValidation;
-import com.szmsd.delivery.imported.ImportValidationContainer;
-import com.szmsd.delivery.imported.PackageTransferDefaultAnalysisFormat;
+import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.imported.*;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -167,7 +134,7 @@ public class DelOutboundImportController extends BaseController {
     @GetMapping("/collectionImportTemplate")
     @ApiOperation(value = "出库管理 - 导入 - 集运出库导入模板", position = 300)
     public void collectionImportTemplate(HttpServletResponse response) {
-        String filePath = "/template/DM_collection.xls";
+        String filePath = "/template/DM-CentralizedTransportation.xls";
         String fileName = "集运出库模板";
         this.downloadTemplate(response, filePath, fileName);
     }
@@ -240,14 +207,22 @@ public class DelOutboundImportController extends BaseController {
                 return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
             }
             // 初始化读取第二个sheet页的数据
-            DefaultAnalysisEventListener<DelOutboundDetailImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDetailImportDto2.class, 1, 1);
+            DefaultAnalysisEventListener<DelOutboundCollectionDetailImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundCollectionDetailImportDto2.class, 1, 1);
             if (defaultAnalysisEventListener1.isError()) {
                 return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
             }
-            List<DelOutboundDetailImportDto2> detailList = defaultAnalysisEventListener1.getList();
+            List<DelOutboundCollectionDetailImportDto2> detailList = defaultAnalysisEventListener1.getList();
             if (CollectionUtils.isEmpty(detailList)) {
                 return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据明细不能为空")));
             }
+
+            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("059,060,061,076");
+            List<BasSubWrapperVO> productAttributeList = listMap.get("059");
+            List<BasSubWrapperVO> electrifiedModeList = listMap.get("060");
+            List<BasSubWrapperVO> batteryPackagingList = listMap.get("061");
+            List<BasSubWrapperVO> packageConfirmList = listMap.get("076");
+
+
             // 查询国家数据
             R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
             List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
@@ -261,16 +236,19 @@ public class DelOutboundImportController extends BaseController {
             if (!importResult.isStatus()) {
                 return R.ok(importResult);
             }
-            // 初始化SKU导入上下文
-            DelOutboundDetailImportContext importContext1 = new DelOutboundDetailImportContext(detailList);
             // 初始化SKU数据验证器
             DelOutboundDetailImportValidationData importValidationData = new DelOutboundDetailImportValidationData(sellerCode, inventoryFeignClientService);
+            // 初始化SKU导入上下文
+            DelOutboundCollectionDetailImportContext importContext1 = new DelOutboundCollectionDetailImportContext(detailList, productAttributeList, electrifiedModeList, batteryPackagingList);
             // 初始化SKU导入验证容器
             ImportResult importResult1 = new ImportValidationContainer<>(importContext1, ImportValidation.build(new DelOutboundCollectionDetailImportValidation(outerContext, importContext1))).valid();
             // 验证SKU导入验证结果
             if (!importResult1.isStatus()) {
                 return R.ok(importResult1);
             }
+
+
+
             // 获取导入的数据
             List<DelOutboundDto> dtoList = new DelOutboundCollectionImportContainer(dataList, countryList, detailList, importValidationData, sellerCode).get();
             // 批量新增
