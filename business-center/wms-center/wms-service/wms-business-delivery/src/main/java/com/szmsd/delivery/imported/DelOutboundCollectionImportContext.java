@@ -25,6 +25,7 @@ public class DelOutboundCollectionImportContext extends ImportContext<DelOutboun
         if (CollectionUtils.isNotEmpty(countryList)) {
             for (BasRegionSelectListVO country : countryList) {
                 this.countryCache.put(country.getName(), country.getAddressCode());
+                this.countryCache.put(country.getEnName(), country.getAddressCode());
                 this.countryCodeCache.put(country.getAddressCode(), country.getName());
 
             }

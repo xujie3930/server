@@ -2,6 +2,7 @@ package com.szmsd.returnex.timer;
 
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.returnex.config.ConfigStatus;
@@ -17,9 +18,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author zhangyuyuan
@@ -49,13 +48,19 @@ public class ReturnExpressTimer {
     public void processing() {
         String key = applicationName + ":ReturnExpressTimer:processing";
         this.doWorker(key, () -> {
+            //清空好要处理的数据
+            LambdaUpdateWrapper<ReturnExpressDetail> updateWrapper = Wrappers.lambdaUpdate();
+            updateWrapper.set(ReturnExpressDetail::getExpirationDuration, null);
+            updateWrapper.ne(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsFinish());
+            returnExpressService.update(updateWrapper);
+
             process();
         });
     }
     private void process(){
-
         LambdaQueryWrapper<ReturnExpressDetail> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.ne(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWmsFinish());
+        queryWrapper.isNull(ReturnExpressDetail::getExpirationDuration);
         queryWrapper.last("limit 500");
         List<ReturnExpressDetail> list = returnExpressService.list(queryWrapper);
         if(list.size() == 0){
