@@ -1,6 +1,7 @@
 package com.szmsd.inventory.domain.dto;
 
 import com.google.common.collect.Lists;
+import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,6 +10,7 @@ import lombok.experimental.Accessors;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @Accessors(chain = true)
@@ -30,6 +32,14 @@ public class InventorySkuQueryDTO {
     @ApiModelProperty(value = "sku多个用\",\"隔开")
     private String sku;
 
+    @ApiModelProperty(value = "多个sku的和之前的不冲突加的")
+    private String skus;
+
+    public void setSkus(String skus) {
+        this.skus = skus;
+        Optional.ofNullable(skus).filter(StringUtils::isNotBlank).ifPresent(x -> this.skuList = StringToolkit.getCodeByArray(x));
+    }
+
     @ApiModelProperty(value = "sku集合")
     private List<String> skuList;
 
@@ -41,6 +51,8 @@ public class InventorySkuQueryDTO {
 
     @ApiModelProperty(value = "客户编码list")
     private List<String> cusCodeList;
+
+
 
     public void setCusCode(String cusCode) {
         this.cusCode = cusCode;
