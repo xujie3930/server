@@ -354,7 +354,7 @@ public class DelOutboundController extends BaseController {
     public void exportTemplate(HttpServletResponse response) {
         String filePath = "/template/Del_sku_import.xlsx";
         String fileName = "出库单SKU导入";
-        this.downloadTemplate(response, filePath, fileName);
+        this.downloadTemplate(response, filePath, fileName, "xlsx");
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:importdetail')")
