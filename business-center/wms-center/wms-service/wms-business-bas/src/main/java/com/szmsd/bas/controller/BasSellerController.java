@@ -211,7 +211,7 @@ public class BasSellerController extends BaseController{
 
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:loginSellerSystem')")
     @GetMapping("/loginSellerSystem")
-    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    @ApiOperation(value = "登录客户后台",notes = "登录客户后台")
     public R<Object> loginSellerSystem(@RequestBody BasSellerSysDto dto)
     {
 
