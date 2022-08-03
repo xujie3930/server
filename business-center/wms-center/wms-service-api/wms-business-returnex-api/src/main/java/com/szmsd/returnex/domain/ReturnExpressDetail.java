@@ -170,6 +170,7 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
 
 
     @ApiModelProperty(value = "到期时长")
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Integer expirationDuration;
 
     @Override
