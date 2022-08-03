@@ -72,6 +72,10 @@ public class InboundReceiptDTO {
     @ApiModelProperty(value = "伙伴编码")
     private String partnerCode;
 
+    @ApiModelProperty(value = "批次号")
+    private String batchNumber;
+
+
     public InboundReceiptDTO setDeliveryNo(String deliveryNo) {
         this.deliveryNo = deliveryNo;
         this.deliveryNoList = Optional.ofNullable(StringToolkit.getCodeByArray(deliveryNo)).orElse(new ArrayList<>()).stream().distinct().collect(Collectors.toList());

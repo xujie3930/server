@@ -103,4 +103,7 @@ public class InboundReceipt extends BaseEntity {
 
     @ApiModelProperty(value = "伙伴编码")
     private String partnerCode;
+
+    @ApiModelProperty(value = "批次号")
+    private String batchNumber;
 }
