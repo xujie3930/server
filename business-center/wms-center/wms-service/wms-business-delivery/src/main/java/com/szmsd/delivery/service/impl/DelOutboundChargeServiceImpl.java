@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.impl;
 
+import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -8,10 +9,18 @@ import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.mapper.DelOutboundChargeMapper;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -23,7 +32,12 @@ import java.util.List;
  * @since 2021-04-01
  */
 @Service
-public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeMapper, DelOutboundCharge> implements IDelOutboundChargeService {
+public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeMapper, DelOutboundCharge> implements IDelOutboundChargeService, InitializingBean {
+    private final Logger logger = LoggerFactory.getLogger(DelOutboundChargeServiceImpl.class);
+
+    private Snowflake snowflake;
+    @Value(value = "${server.port:0}")
+    private int port;
 
     /**
      * 查询出库单费用明细模块
@@ -56,6 +70,7 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
      */
     @Override
     public int insertDelOutboundCharge(DelOutboundCharge delOutboundCharge) {
+        delOutboundCharge.setId(this.snowflake.nextId());
         return baseMapper.insert(delOutboundCharge);
     }
 
@@ -101,7 +116,9 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
         DelOutboundCharge delOutboundCharge = charges.get(0);
         // 先根据单号删除
         this.clearCharges(delOutboundCharge.getOrderNo());
-        // 再新增
+        // 设置ID
+        charges.forEach(value -> value.setId(this.snowflake.nextId()));
+        // 批量保存
         this.saveBatch(charges);
     }
 
@@ -121,6 +138,32 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
         if (super.count(queryWrapper) > 0) {
             // 有数据就删除
             super.remove(queryWrapper);
+        }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        int dataCenterId = 1;
+        if (this.port > 0) {
+            dataCenterId = this.port % 32;
+        }
+        this.snowflake = new Snowflake(getWorkId(), dataCenterId);
+    }
+
+    private Long getWorkId() {
+        try {
+            String hostAddress = Inet4Address.getLocalHost().getHostAddress();
+            this.logger.info("当前机器IP：{}，当前服务端口：{}", hostAddress, this.port);
+            int[] ints = StringUtils.toCodePoints(hostAddress);
+            int sums = 0;
+            for (int b : ints) {
+                sums += b;
+            }
+            return (long) (sums % 32);
+        } catch (UnknownHostException e) {
+            this.logger.error(e.getMessage(), e);
+            // 如果获取失败，则使用随机数备用
+            return RandomUtils.nextLong(0, 31);
         }
     }
 }
