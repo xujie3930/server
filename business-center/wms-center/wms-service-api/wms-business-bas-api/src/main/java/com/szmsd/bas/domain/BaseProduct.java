@@ -264,4 +264,7 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "伙伴编码")
     private String partnerCode;
 
+    @ApiModelProperty(value = "自定义sku编码")
+    private String customizeSkuCode;
+
 }
