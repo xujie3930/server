@@ -159,10 +159,9 @@ public class DeliveryController {
         return R.ok(this.delOutboundClientService.labelBase64(labelDto));
     }
 
-    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:bringVerifyByOrderNo')")
+    @PreAuthorize("hasAuthority('client')")
     @PostMapping("/bringVerifyByOrderNo")
-    @ApiOperation(value = "出库管理 - 提审", position = 600)
-    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundBringVerifyNoDto", required = true)
+    @ApiOperation(value = "#23 出库管理 - 提审", position = 600)
     public R<List<DelOutboundBringVerifyVO>> bringVerifyByOrderNo(@RequestBody @Validated DelOutboundBringVerifyNoDto dto) {
         return R.ok(this.delOutboundClientService.bringVerifyByOrderNo(dto));
     }
