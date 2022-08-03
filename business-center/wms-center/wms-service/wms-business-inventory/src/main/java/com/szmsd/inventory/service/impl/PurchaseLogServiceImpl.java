@@ -1,7 +1,10 @@
 package com.szmsd.inventory.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.inventory.component.RemoteComponent;
+import com.szmsd.inventory.component.RemoteRequest;
 import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.PurchaseLog;
 import com.szmsd.inventory.domain.PurchaseStorageDetails;
@@ -15,6 +18,7 @@ import com.szmsd.inventory.service.IPurchaseLogService;
 import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
