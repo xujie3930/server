@@ -5,17 +5,20 @@ import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.bas.vo.BasSellerWrapVO;
+import com.szmsd.common.core.constant.SecurityConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.system.api.feign.AuthClientService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -39,6 +42,10 @@ public class BasSellerController extends BaseController{
 
      @Autowired
      private IBasSellerService basSellerService;
+
+
+    @Resource
+    private AuthClientService authClient;
      /**
        * 查询模块列表
      */
@@ -200,5 +207,14 @@ public class BasSellerController extends BaseController{
     public R<String> updateUserInfoForMan() {
         this.basSellerService.updateUserInfoForMan();
         return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:loginSellerSystem')")
+    @PostMapping("/loginSellerSystem")
+    @ApiOperation(value = "登录客户后台",notes = "登录客户后台")
+    public R<Object> loginSellerSystem(@RequestBody BasSellerSysDto dto)
+    {
+
+        return R.ok(authClient.token(dto.getUserName(), "1", "01", "web", "password","123456", SecurityConstants.LOGIN_FREE));
     }
 }
