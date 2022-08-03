@@ -207,13 +207,16 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         //单号不为空的时候
         if (StringUtils.isNotBlank(dto.getNo())){
            DelOutbound delOutbound=accountSerialBillMapper.selectDelOutbound(dto.getNo());
-           if (delOutbound.getId()!=null){
-               accountSerialBill.setRefNo(delOutbound.getRefNo());
-               accountSerialBill.setShipmentService(delOutbound.getShipmentService());
-               accountSerialBill.setWeight(delOutbound.getWeight());
-               accountSerialBill.setCalcWeight(delOutbound.getCalcWeight());
-               accountSerialBill.setSpecifications(delOutbound.getSpecifications());
+           if (delOutbound!=null){
+               if (delOutbound.getId()!=null){
+                   accountSerialBill.setRefNo(delOutbound.getRefNo());
+                   accountSerialBill.setShipmentService(delOutbound.getShipmentService());
+                   accountSerialBill.setWeight(delOutbound.getWeight());
+                   accountSerialBill.setCalcWeight(delOutbound.getCalcWeight());
+                   accountSerialBill.setSpecifications(delOutbound.getSpecifications());
+               }
            }
+
 
 
         }
@@ -232,12 +235,14 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             //单号不为空的时候
             if (StringUtils.isNotBlank(value.getNo())){
                 DelOutbound delOutbound=accountSerialBillMapper.selectDelOutbound(value.getNo());
-                if (delOutbound.getId()!=null){
-                    value.setRefNo(delOutbound.getRefNo());
-                    value.setShipmentService(delOutbound.getShipmentService());
-                    value.setWeight(delOutbound.getWeight());
-                    value.setCalcWeight(delOutbound.getCalcWeight());
-                    value.setSpecifications(delOutbound.getSpecifications());
+                if (delOutbound!=null) {
+                    if (delOutbound.getId() != null) {
+                        value.setRefNo(delOutbound.getRefNo());
+                        value.setShipmentService(delOutbound.getShipmentService());
+                        value.setWeight(delOutbound.getWeight());
+                        value.setCalcWeight(delOutbound.getCalcWeight());
+                        value.setSpecifications(delOutbound.getSpecifications());
+                    }
                 }
             }
             return value;
