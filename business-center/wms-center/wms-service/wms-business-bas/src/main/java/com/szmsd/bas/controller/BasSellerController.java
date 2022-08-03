@@ -1,6 +1,5 @@
 package com.szmsd.bas.controller;
 
-import com.szmsd.system.api.feign.AuthClientService;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasSellerService;
@@ -12,6 +11,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.system.api.feign.AuthClientService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -210,7 +210,7 @@ public class BasSellerController extends BaseController{
     }
 
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:loginSellerSystem')")
-    @GetMapping("/loginSellerSystem")
+    @PostMapping("/loginSellerSystem")
     @ApiOperation(value = "登录客户后台",notes = "登录客户后台")
     public R<Object> loginSellerSystem(@RequestBody BasSellerSysDto dto)
     {
