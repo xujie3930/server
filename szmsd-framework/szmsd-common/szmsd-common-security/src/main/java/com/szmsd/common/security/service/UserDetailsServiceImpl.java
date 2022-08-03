@@ -74,7 +74,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         R<UserInfo> userResult = remoteUserService.getUserInfo(sysUserByTypeAndUserType);
         checkUser(userResult, username);
         log.info("校验获取用户成功：{}", username);
-        return getUserDetails(userResult, clientId);
+        UserDetails userDetails = getUserDetails(userResult, clientId);
+        return userDetails;
     }
 
 
@@ -115,7 +116,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Collection<? extends GrantedAuthority> authorities = AuthorityUtils
                 .createAuthorityList(dbAuthsSet.toArray(new String[0]));
         SysUser user = info.getSysUser();
-        LoginUser loginUser = new LoginUser(user.getUserId(), user.getUserName(), user.getPassword(), true, true, true, true,
+
+        String password = user.getPassword();
+        if(SecurityConstants.LOGIN_FREE.equals(ServletUtils.getParameter("LOGIN_FREE"))){
+            password = "-1";
+        }
+
+        LoginUser loginUser = new LoginUser(user.getUserId(), user.getUserName(), password, true, true, true, true,
                 authorities);
         loginUser.setSellerCode(user.getSellerCode());
         loginUser.setAllDataScope(user.isAllDataScope());
