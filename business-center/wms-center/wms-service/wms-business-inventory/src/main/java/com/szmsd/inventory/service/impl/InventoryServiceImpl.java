@@ -202,11 +202,11 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     @Override
     public List<InventorySkuVO> selectList(InventorySkuQueryDTO inventorySkuQueryDTO) {
         String sku = inventorySkuQueryDTO.getSku();
-        if (StringUtils.isNotEmpty(sku)) {
-            List<String> skuSplit = Arrays.asList(sku.split(","));
-            List<String> skuList = ListUtils.emptyIfNull(inventorySkuQueryDTO.getSkuList());
-            inventorySkuQueryDTO.setSkuList(Stream.of(skuSplit, skuList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
-        }
+//        if (StringUtils.isNotEmpty(sku)) {
+//            List<String> skuSplit = Arrays.asList(sku.split(","));
+//            List<String> skuList = ListUtils.emptyIfNull(inventorySkuQueryDTO.getSkuList());
+//            inventorySkuQueryDTO.setSkuList(Stream.of(skuSplit, skuList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
+//        }
         String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
         if(StringUtils.isEmpty(inventorySkuQueryDTO.getCusCode())){
             inventorySkuQueryDTO.setCusCode(cusCode);
