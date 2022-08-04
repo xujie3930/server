@@ -1,5 +1,7 @@
 package com.szmsd.common.core.constant;
 
+import com.szmsd.common.core.text.UUID;
+
 /**
  * 权限相关通用常量
  *
@@ -96,4 +98,10 @@ public class SecurityConstants {
      * 默认的查询语句
      */
     public static final String DEFAULT_FIND_STATEMENT = BASE_FIND_STATEMENT + " order by client_id";
+
+    /**
+     *密钥
+     */
+
+    public static final String LOGIN_FREE = SecurityConstants.class.toString();
 }
