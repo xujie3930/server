@@ -112,7 +112,10 @@ public class DelOutboundImportValidation implements ImportValidation<DelOutbound
         public String getCountryCode(String country) {
             String v = this.importContext.countryCache.get(country);
             if(v == null){
-                v = this.importContext.countryCodeCache.get(country);
+                v = this.importContext.countryEnCache.get(country);
+                if(v == null){
+                    v = this.importContext.countryCodeCache.get(country);
+                }
             }
             return v;
         }
