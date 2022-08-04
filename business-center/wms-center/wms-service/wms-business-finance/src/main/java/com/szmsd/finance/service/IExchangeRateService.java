@@ -25,4 +25,6 @@ public interface IExchangeRateService {
     List<ExchangeRateDTO>  selectRates(Map map);
 
     int insertExchangeRate(List<Map> mapList);
+
+    void  deleteExchangeRate(Map map);
 }

@@ -130,7 +130,8 @@ public class ExchangeRateController extends FssBaseController {
                 //验证数据库是否存在(需针对原币别+现币别+失败时间，进行唯一判断)
                 List<ExchangeRateDTO> list=exchangeRateService.selectRates(mapList.get(x));
                 if (list.size()>0){
-                    throw new BaseException("第" + (x + 2) + "行的导入数据已存在数据库");
+                    exchangeRateService.deleteExchangeRate(mapList.get(x));
+                    //throw new BaseException("第" + (x + 2) + "行的导入数据已存在数据库");
                 }
             }
             exchangeRateService.insertExchangeRate(mapList);

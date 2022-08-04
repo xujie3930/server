@@ -114,7 +114,7 @@ public class ExcelFile {
                     int firstCellNum = row.getFirstCellNum();
                     //获得当前行的列数
                     int lastCellNum = row.getLastCellNum();
-                    if (lastCellNum!=list1.size()+1) {
+                    if (lastCellNum!=list1.size()) {
                         return list;
                     }
                     if (lastCellNum > 0){
@@ -235,7 +235,7 @@ public class ExcelFile {
             String temp = style.getDataFormatString();
             // 单元格设置成常规
             if (temp.equals("General")) {
-                format.applyPattern("#");
+                format.applyPattern("#.########");
             }
             result = format.format(value);
         }
