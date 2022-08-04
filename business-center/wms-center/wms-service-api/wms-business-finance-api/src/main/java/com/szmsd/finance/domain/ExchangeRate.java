@@ -57,4 +57,16 @@ public class ExchangeRate extends FssBaseEntity {
         this.exchangeToCode = exchangeToCode;
         this.rate = rate;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        ExchangeRate s=(ExchangeRate)obj;
+        return exchangeFromCode.equals(s.exchangeFromCode)&&exchangeToCode.equals(s.exchangeToCode);
+    }
+
+    @Override
+    public int hashCode() {
+     String in=exchangeFromCode+exchangeToCode;
+        return in.hashCode();
+    }
 }
