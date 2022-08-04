@@ -16,9 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author liulei
@@ -123,11 +122,18 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
         JSONArray jsonArray = new JSONArray();
         jsonArray.addAll(mapList);
         List<ExchangeRate> list = jsonArray.toJavaList(ExchangeRate.class);
-        list.forEach(x->{
+        Set<ExchangeRate> set=new HashSet<ExchangeRate>();
+        set.addAll(list);
+        set.forEach(x->{
              exchangeRateMapper.insert(x);
 
         });
        return 0;
+    }
+
+    @Override
+    public void deleteExchangeRate(Map map) {
+       exchangeRateMapper.deleteExchangeRate(map);
     }
 
 }

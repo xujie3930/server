@@ -853,17 +853,17 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
         IPage<PackageCollection> iPage = new Page<>(dto.getPageNum(), dto.getPageSize());
         LambdaQueryWrapper<PackageCollection> queryWrapper = Wrappers.lambdaQuery();
         // 只查询自己的揽收单
-//        LoginUser loginUser = SecurityUtils.getLoginUser();
-//        if (null != loginUser) {
-//            String sellerCode = loginUser.getSellerCode();
-//            queryWrapper.eq(StringUtils.isNotEmpty(sellerCode), PackageCollection::getSellerCode, sellerCode);
-//        }
-        // 子母单的查询 如果没有传值就只能才自己的
-        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(StringUtils.isEmpty(dto.getCustomCode())){
-            dto.setCustomCode(cusCode);
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (null != loginUser) {
+            String sellerCode = loginUser.getSellerCode();
+            queryWrapper.eq(StringUtils.isNotEmpty(sellerCode), PackageCollection::getSellerCode, sellerCode);
         }
-        queryWrapper.in(PackageCollection::getSellerCode, dto.getCustomCodeList());
+        // 子母单的查询 如果没有传值就只能才自己的
+//        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+//        if(StringUtils.isEmpty(dto.getCustomCode())){
+//            dto.setCustomCode(cusCode);
+//        }
+//        queryWrapper.in(PackageCollection::getSellerCode, dto.getCustomCodeList());
 
         // 揽收单号
         this.autoSettingListCondition(queryWrapper, PackageCollection::getCollectionNo, this.getTextList(dto.getCollectionNo()));

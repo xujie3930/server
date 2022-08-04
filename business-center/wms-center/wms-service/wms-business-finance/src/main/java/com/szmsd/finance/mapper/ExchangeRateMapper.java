@@ -19,4 +19,6 @@ public interface ExchangeRateMapper extends BaseMapper<ExchangeRate> {
     List<ExchangeRate> checkExchangeRateIsExists(@Param("dto") ExchangeRateDTO dto);
 
     List<ExchangeRateDTO>   selectRates(@Param("map") Map map);
+
+    void deleteExchangeRate(@Param("map") Map map);
 }
