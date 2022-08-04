@@ -71,8 +71,10 @@ public class ImportContext<T> extends CacheContext.MapCacheContext<String, Objec
     }
 
 
-    public String getCountryNameCache(String value, CacheContext<String, String> countryCodeCache, CacheContext<String, String> countryNameCache){
-        if (countryNameCache.containsKey(value)) {
+    public String getCountryNameCache(String value, CacheContext<String, String> countryCodeCache, CacheContext<String, String> countryNameCache, CacheContext<String, String> countryNameEnCache){
+        if(countryNameEnCache.containsKey(value)){
+            return countryCodeCache.get(countryNameEnCache.get(value));
+        }else if (countryNameCache.containsKey(value)) {
             return value;
         }else{
             return countryCodeCache.get(value);
@@ -80,8 +82,10 @@ public class ImportContext<T> extends CacheContext.MapCacheContext<String, Objec
         }
     }
 
-    public String getCountryCodeCache(String value, CacheContext<String, String> countryCodeCache, CacheContext<String, String> countryNameCache){
-        if (countryNameCache.containsKey(value)) {
+    public String getCountryCodeCache(String value, CacheContext<String, String> countryNameCache, CacheContext<String, String> countryNameEnCache){
+        if (countryNameEnCache.containsKey(value)) {
+            return countryNameEnCache.get(value);
+        }else if (countryNameCache.containsKey(value)) {
             return countryNameCache.get(value);
         }else{
             return value;
