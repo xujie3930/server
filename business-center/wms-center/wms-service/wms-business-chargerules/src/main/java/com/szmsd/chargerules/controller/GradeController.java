@@ -3,10 +3,7 @@ package com.szmsd.chargerules.controller;
 
 import cn.hutool.core.date.DateUtil;
 import com.szmsd.chargerules.config.DownloadTemplateUtil;
-import com.szmsd.chargerules.export.CustomExportListVO;
-import com.szmsd.chargerules.export.GradeDetailExportListVO;
-import com.szmsd.chargerules.export.CommonExportListVO;
-import com.szmsd.chargerules.export.CommonExportQueryPage;
+import com.szmsd.chargerules.export.*;
 import com.szmsd.chargerules.service.IGradeService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -163,24 +160,21 @@ public class GradeController extends BaseController{
     @ApiOperation(value = "等级方案 - 导出产品")
     public void exportDetail(HttpServletResponse response, @RequestBody GradeMainDto dto) {
         try {
-            List<GradeDetailExportListVO> gradeDetailDtoList = BeanMapperUtil.mapList(dto.getPricingGradeTemplateRules()
-                    , GradeDetailExportListVO.class);
-            for(int j = 0; j < gradeDetailDtoList.size(); j++) {
-                gradeDetailDtoList.get(j).setName(dto.getName());
-            };
+            List<ExclusiveGradeDetailExportListVO> gradeDetailDtoList = BeanMapperUtil.mapList(dto.getPricingGradeTemplateRules()
+                    , ExclusiveGradeDetailExportListVO.class);
             QueryPage gradeDetailExportQueryPage = new CommonExportQueryPage(gradeDetailDtoList);
             ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("GradeDetailInfo", "zh",
-                    null, new ExcelUtils.ExportSheet<GradeDetailExportListVO>() {
+                    null, new ExcelUtils.ExportSheet<ExclusiveGradeDetailExportListVO>() {
                         @Override
                         public String sheetName() {
                             return "关联产品";
                         }
                         @Override
-                        public Class<GradeDetailExportListVO> classType() {
-                            return GradeDetailExportListVO.class;
+                        public Class<ExclusiveGradeDetailExportListVO> classType() {
+                            return ExclusiveGradeDetailExportListVO.class;
                         }
                         @Override
-                        public QueryPage<GradeDetailExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                        public QueryPage<ExclusiveGradeDetailExportListVO> query(ExcelUtils.ExportContext exportContext) {
                             return gradeDetailExportQueryPage;
                         }
             }));
