@@ -10,6 +10,7 @@ import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
@@ -45,7 +46,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     private ISysDictDataService sysDictDataService;
 
     @Override
-    @DataScope("cus_code")
+//    @DataScope("cus_code")
     public List<AccountSerialBill> listPage(AccountSerialBillDTO dto) {
 //        QueryWrapper<Object> query1 = Wrappers.query();
 //        query1.eq("a.cretea",);
@@ -82,6 +83,10 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 //        if (StringUtils.isNotBlank(dto.getIds())) {
 //            query.in(AccountSerialBill::getId, (Object[]) dto.getIds().split(","));
 //        }
+        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+        if(com.szmsd.common.core.utils.StringUtils.isEmpty(dto.getCusCode())){
+            dto.setCusCode(cusCode);
+        }
         List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectPageList(dto);
         // 修改下单时间等信息
         showProcess(accountSerialBills);

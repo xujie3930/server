@@ -28,6 +28,7 @@ import com.szmsd.ec.domain.CommonOrderItem;
 import com.szmsd.ec.dto.*;
 import com.szmsd.ec.enums.OrderSourceEnum;
 import com.szmsd.ec.shopify.task.ShopifyOrderTask;
+import com.szmsd.pack.domain.PackageCollection;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
@@ -235,7 +236,9 @@ public class CommonOrderController extends BaseController {
         if(StringUtils.isEmpty(queryDTO.getCusCode())){
             queryDTO.setCusCode(cusCode);
         }
-        queryWrapper.in(CommonOrder::getCusCode, queryDTO.getCusCodeList());
+        if (CollectionUtils.isNotEmpty(queryDTO.getCusCodeList())) {
+            queryWrapper.in(CommonOrder::getCusCode, queryDTO.getCusCodeList());
+        }
         return queryWrapper;
     }
 }

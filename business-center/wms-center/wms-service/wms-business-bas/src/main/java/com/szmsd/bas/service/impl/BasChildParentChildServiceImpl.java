@@ -203,7 +203,7 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
 
     @Override
     public List<String> getChildCodeList(String sellerCode) {
-        List<BasChildParentChild> list = lambdaQuery().eq(BasChildParentChild::getParentSellerCode, sellerCode).list();
+        List<BasChildParentChild> list = lambdaQuery().eq(BasChildParentChild::getParentSellerCode, sellerCode).eq(BasChildParentChild::getState,ChildParentStateEnum.confirm.getKey()).list();
         List<String> sellerCodeList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(list)) {
             sellerCodeList = list.stream().map(BasChildParentChild::getSellerCode).collect(Collectors.toList());
