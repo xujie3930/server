@@ -52,7 +52,20 @@ public class PricedProductServiceImpl extends SaaSPricedProductRequest implement
 
     @Override
     public ResponseVO update(UpdatePricedProductCommand updatePricedProductCommand) {
-        return JSON.parseObject(httpPut("", "pricedProduct.update", updatePricedProductCommand, updatePricedProductCommand.getCode()), ResponseVO.class);
+
+        HttpResponseBody responseBody = httpPutBody("", "pricedProduct.update",
+                updatePricedProductCommand, updatePricedProductCommand.getCode());
+
+
+        if (HttpStatus.SC_OK == responseBody.getStatus()) {
+            ResponseVO responseVO = new ResponseVO();
+            responseVO.setSuccess(true);
+            responseVO.setCode("200");
+            responseVO.setMessage(responseBody.getBody());
+            return responseVO;
+        } else {
+            return JSON.parseObject(responseBody.getBody(), ResponseVO.class);
+        }
     }
 
     @Override
