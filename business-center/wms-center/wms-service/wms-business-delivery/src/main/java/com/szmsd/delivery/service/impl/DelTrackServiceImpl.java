@@ -349,7 +349,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             } else {
                 DelOutbound delOutbound = delOutboundMapper.selectOne(new LambdaQueryWrapper<DelOutbound>().eq(DelOutbound::getOrderNo, trackingYeeTraceDto.getOrderNo()).last("limit 1"));
                 if (delOutbound != null) {
-                    List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getNo).reversed()).collect(Collectors.toList());
+                    List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getTrackingTime).reversed()).collect(Collectors.toList());
                     DelTrack delTrack = delTrackList.get(0);
                     DelOutbound updateDelOutbound = new DelOutbound();
                     updateDelOutbound.setId(delOutbound.getId());
