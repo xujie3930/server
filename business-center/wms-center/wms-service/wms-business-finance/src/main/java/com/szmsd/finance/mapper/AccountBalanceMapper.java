@@ -16,7 +16,7 @@ import java.util.List;
  */
 public interface AccountBalanceMapper extends BaseMapper<AccountBalance> {
 
-    @DataScope("cus_code")
+//    @DataScope("cus_code")
     List<AccountBalance> listPage(@Param(Constants.WRAPPER) LambdaQueryWrapper queryWrapper);
 
     /**
