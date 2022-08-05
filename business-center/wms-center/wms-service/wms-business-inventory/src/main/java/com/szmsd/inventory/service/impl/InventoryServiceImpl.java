@@ -725,7 +725,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 
             this.updateById(after);
             // 记录库存日志
-            iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, after, quantity, inventoryAdjustmentDTO.getReceiptNo());
+            iInventoryRecordService.saveLogs(localLanguageEnum.getKey(), before, after, quantity, inventoryAdjustmentDTO.getRelevanceNumber());
             adjustInventoryCK1(inventoryAdjustmentDTO);
         } finally {
             lock.unlock();
