@@ -1,11 +1,14 @@
 package com.szmsd.bas.dto;
 
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.utils.StringToolkit;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Optional;
 
 @Data
 public class BaseProductQueryDto extends QueryDto {
@@ -27,6 +30,15 @@ public class BaseProductQueryDto extends QueryDto {
     @ApiModelProperty(value = "产品编码")
     @Excel(name = "产品编码")
     private String codes;
+
+    public void setCodes(String codes) {
+        this.codes = codes;
+        Optional.ofNullable(codes).filter(StringUtils::isNotBlank).ifPresent(x -> this.codesList = StringToolkit.getCodeByArray(x));
+    }
+
+    @ApiModelProperty(value = "产品编码集合")
+    private List<String> codesList;
+
 
     @ApiModelProperty(value = "sku/包材")
     @Excel(name = "sku/包材")
