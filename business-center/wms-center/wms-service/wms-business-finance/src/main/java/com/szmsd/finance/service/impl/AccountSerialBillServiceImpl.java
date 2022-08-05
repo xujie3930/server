@@ -184,8 +184,8 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             }
             if (null == x.getAmount()) x.setAmount(BigDecimal.ZERO);
             // 负数
-            String chargeCategory = x.getChargeCategory();
-            if (StringUtils.isNotBlank(chargeCategory) && positiveNumber.contains(chargeCategory)) {
+            String businessCategory = x.getBusinessCategory();
+            if (StringUtils.isNotBlank(businessCategory) && positiveNumber.contains(businessCategory)) {
                 x.setAmount(x.getAmount().abs());
             } else {
                 Optional.ofNullable(x.getAmount()).ifPresent(amount -> x.setAmount(amount.abs().negate()));
