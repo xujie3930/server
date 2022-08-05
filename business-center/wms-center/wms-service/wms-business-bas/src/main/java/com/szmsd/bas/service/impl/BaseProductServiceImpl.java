@@ -134,12 +134,16 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     @Override
-    @DataScope("seller_code")
+//    @DataScope("seller_code")
     public List<BaseProduct> selectBaseProductPage(BaseProductQueryDto queryDto) {
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotEmpty(queryDto.getCodes())) {
             //String[] codes = queryDto.getCodes().split(",");
             queryWrapper.in("code", queryDto.getCodesList());
+        }
+        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+        if(com.szmsd.common.core.utils.StringUtils.isEmpty(queryDto.getSellerCodes())){
+            queryDto.setSellerCodes(cusCode);
         }
         if (StringUtils.isNotEmpty(queryDto.getSellerCodes())) {
             String[] sellerCodes = queryDto.getSellerCodes().split(",");
@@ -153,7 +157,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "code", queryDto.getCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name", queryDto.getProductName());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE, "product_name_chinese", queryDto.getProductNameChinese());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
+//        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "seller_code", queryDto.getSellerCode());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ, "product_attribute", queryDto.getProductAttribute());
        /* if (queryDto.getIsActive() != null) {
             queryWrapper.eq("is_active", queryDto.getIsActive());

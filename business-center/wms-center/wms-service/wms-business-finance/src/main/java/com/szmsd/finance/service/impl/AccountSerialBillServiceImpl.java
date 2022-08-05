@@ -10,6 +10,7 @@ import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
@@ -29,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -44,7 +46,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     private ISysDictDataService sysDictDataService;
 
     @Override
-    @DataScope("cus_code")
+//    @DataScope("cus_code")
     public List<AccountSerialBill> listPage(AccountSerialBillDTO dto) {
 //        QueryWrapper<Object> query1 = Wrappers.query();
 //        query1.eq("a.cretea",);
@@ -81,6 +83,10 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 //        if (StringUtils.isNotBlank(dto.getIds())) {
 //            query.in(AccountSerialBill::getId, (Object[]) dto.getIds().split(","));
 //        }
+        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+        if(com.szmsd.common.core.utils.StringUtils.isEmpty(dto.getCusCode())){
+            dto.setCusCode(cusCode);
+        }
         List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectPageList(dto);
         // 修改下单时间等信息
         showProcess(accountSerialBills);
@@ -109,7 +115,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     public void showProcess(List<AccountSerialBill> accountSerialBills) {
         ArrayList<AccountSerialBill> resultList = new ArrayList<>();
         List<AccountSerialBill> noList = accountSerialBills.stream().filter(x -> StringUtils.isNotBlank(x.getNo())).collect(Collectors.toList());
-
+        // 查询下单时间 结算时间，列表时间展示
         CompletableFuture<List<ListProcess>> listCompletableFuture = CompletableFuture.supplyAsync(() -> {
             List<AccountSerialBill> rk = noList.parallelStream().filter(x -> x.getNo().startsWith("RK")).distinct().collect(Collectors.toList());
             String rkNo = rk.stream().map(AccountSerialBill::getNo).distinct().collect(Collectors.joining(","));
@@ -171,28 +177,25 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         queryResult.addAll(listProcesses);
         queryResult.addAll(listProcesses1);
         Map<String, ListProcess> queryResultMap = queryResult.stream().collect(Collectors.toMap(ListProcess::getNo, x -> x, (x1, x2) -> x1));
-        List<String> positiveNumber = Arrays.asList("线下充值", "退费", "优惠");
-        // 退费下的 集合为负数
-        List<String> negativeNumber = Arrays.asList("补收", "增值消费");
-        long count = accountSerialBills.parallelStream().peek(x -> {
+        List<String> positiveNumber = Arrays.asList("线下充值", "退费", "优惠");// 正数
+
+        List<String> negativeNumber = Arrays.asList("补收", "增值消费"); //为负数
+        accountSerialBills.forEach(x -> {
             if (StringUtils.isNotBlank(x.getNo())) {
                 Optional.ofNullable(queryResultMap.get(x.getNo())).ifPresent(queryResultNo -> {
                     x.setWarehouseCode(queryResultNo.getWarehouseCode());
                     x.setOrderTime(queryResultNo.getOrderTime());
                 });
             }
+            if (null == x.getAmount()) x.setAmount(BigDecimal.ZERO);
             // 负数
-            String chargeCategory = x.getChargeCategory();
-            boolean b = StringUtils.isBlank(chargeCategory);
-            boolean b2 = ("退费".equals(chargeCategory) && negativeNumber.contains(x.getBusinessCategory()));
-            boolean b1 = !positiveNumber.contains(chargeCategory);
-
-            if (b || b1 || b2) {
-                Optional.ofNullable(x.getAmount()).ifPresent(amount -> x.setAmount(amount.abs().negate()));
-            } else {
+            String businessCategory = x.getBusinessCategory();
+            if (StringUtils.isNotBlank(businessCategory) && positiveNumber.contains(businessCategory)) {
                 x.setAmount(x.getAmount().abs());
+            } else {
+                Optional.ofNullable(x.getAmount()).ifPresent(amount -> x.setAmount(amount.abs().negate()));
             }
-        }).count();
+        });
 
     }
 
