@@ -13,6 +13,8 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.DelQueryServiceDto;
 import com.szmsd.delivery.dto.DelQueryServiceImport;
@@ -177,6 +179,19 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             if(StringUtils.isEmpty(delQueryService.getReason())){
                 throw new CommonException("400", "查件原因不能为空");
             }
+            DelOutbound delOutbound = delOutboundService.getByOrderNo(delQueryService.getOrderNo());
+            if(delOutbound == null){
+                throw new CommonException("400", "无效订单");
+            }
+
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            if(loginUser != null){
+                String sellerCode = loginUser.getSellerCode();
+                if(StringUtils.isNotEmpty(sellerCode) && !StringUtils.equals(sellerCode, delOutbound.getSellerCode())){
+                    throw new CommonException("400", "该订单无权限操作");
+                }
+            }
+
             LambdaQueryWrapper<DelQuerySettings> delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryService.getCountryCode());
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
@@ -192,12 +207,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                     throw new CommonException("400", "此查件申请没有相关的匹配规则");
                 }
             }
-
             DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0) ;
-            DelOutbound delOutbound = delOutboundService.getByOrderNo(delQueryService.getOrderNo());
-            if(delOutbound == null){
-                throw new CommonException("400", "无效订单");
-            }
+
             boolean bool = false;
             if(StringUtils.equals(delOutbound.getState(), delQuerySettings.getState())){
                 bool = true;
@@ -269,6 +280,15 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         if(delOutbound == null){
             throw new CommonException("400", "单据不存在");
         }
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if(loginUser != null){
+            String sellerCode = loginUser.getSellerCode();
+            if(StringUtils.isNotEmpty(sellerCode) && !StringUtils.equals(sellerCode, delOutbound.getSellerCode())){
+                throw new CommonException("400", "该订单无权限查看");
+            }
+        }
+
         DelQueryServiceDto dto = new DelQueryServiceDto();
         BeanUtils.copyProperties(delOutbound, dto);
         dto.setTraceId(delOutbound.getTrackingNo());
