@@ -182,10 +182,10 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         // check result is null, ignore
                         ignore = true;
                     }
-                    if (ignore) {
-                        selectList.remove(i);
-                        i--;
-                    }
+//                    if (ignore) {
+//                        selectList.remove(i);
+//                        i--;
+//                    }
                 }
             }
         }
