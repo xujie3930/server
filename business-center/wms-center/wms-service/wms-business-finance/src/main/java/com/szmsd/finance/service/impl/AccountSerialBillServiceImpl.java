@@ -177,7 +177,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         queryResult.addAll(listProcesses);
         queryResult.addAll(listProcesses1);
         Map<String, ListProcess> queryResultMap = queryResult.stream().collect(Collectors.toMap(ListProcess::getNo, x -> x, (x1, x2) -> x1));
-        List<String> positiveNumber = Arrays.asList("线下充值", "退费", "优惠");// 正数
+        List<String> positiveNumber = Arrays.asList("线下充值", "退费", "优惠","赔偿");// 正数
 
         List<String> negativeNumber = Arrays.asList("补收", "增值消费"); //为负数
         accountSerialBills.forEach(x -> {
