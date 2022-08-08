@@ -10,6 +10,7 @@ import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.finance.domain.AccountSerialBillEn;
 import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.vo.*;
@@ -130,6 +131,15 @@ public class InventoryController extends BaseController {
         return getDataTable(inventoryRecordVOS);
     }
 
+    //@PreAuthorize("@ss.hasPermi('inbound:receipt:export')")
+    @GetMapping("/record/export")
+    @ApiOperation(value = "库存日志导出", notes = "库存日志导出")
+    public void recordExport(InventoryRecordQueryDTO inventoryRecordQueryDTO,HttpServletResponse response) {
+        List<InventoryRecordVO> inventoryRecordVOS = iInventoryRecordService.selectList(inventoryRecordQueryDTO);
+        ExcelUtil<InventoryRecordVO> util = new ExcelUtil<InventoryRecordVO>(InventoryRecordVO.class);
+        util.exportExcel(response, inventoryRecordVOS, "库存日志_" + DateUtils.dateTimeNow());
+
+    }
     @PreAuthorize("@ss.hasPermi('inbound:skuvolume')")
     @PostMapping("/skuVolume")
     @ApiOperation(value = "获取库存SKU体积", notes = "获取库存SKU体积")
