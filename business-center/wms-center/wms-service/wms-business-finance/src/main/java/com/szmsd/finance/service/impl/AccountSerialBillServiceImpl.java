@@ -83,9 +83,11 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 //        if (StringUtils.isNotBlank(dto.getIds())) {
 //            query.in(AccountSerialBill::getId, (Object[]) dto.getIds().split(","));
 //        }
-        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(com.szmsd.common.core.utils.StringUtils.isEmpty(dto.getCusCode())){
-            dto.setCusCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            if (com.szmsd.common.core.utils.StringUtils.isEmpty(dto.getCusCode())) {
+                dto.setCusCode(cusCode);
+            }
         }
         List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectPageList(dto);
         // 修改下单时间等信息

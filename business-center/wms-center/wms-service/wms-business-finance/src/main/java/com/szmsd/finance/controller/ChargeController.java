@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Api(tags = {"费用"})
 @RestController
@@ -36,11 +37,12 @@ public class ChargeController extends BaseController {
     public TableDataInfo<QueryChargeVO> queryPage(QueryChargeDto queryChargeDto) {
         startPage();
         // 子母单的查询 如果没有传值就只能才自己的
-        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if (StringUtils.isEmpty(queryChargeDto.getCustomCode())) {
-            queryChargeDto.setCustomCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            if (StringUtils.isEmpty(queryChargeDto.getCustomCode())) {
+                queryChargeDto.setCustomCode(cusCode);
+            }
         }
-
         if (queryChargeDto.getQueryType() == 1) {
             R<TableDataInfo<QueryChargeVO>> result = chargeFeignService.selectPage(queryChargeDto);
             if (result.getCode() != 200) {
