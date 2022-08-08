@@ -155,4 +155,7 @@ public class DelTrack extends BaseEntity {
     @ApiModelProperty(value = "来源类型，DEL出库，PCK揽收")
     @TableField(exist = false)
     private String sourceType;
+
+    @TableField(exist = false)
+    private String queryNoOne;
 }

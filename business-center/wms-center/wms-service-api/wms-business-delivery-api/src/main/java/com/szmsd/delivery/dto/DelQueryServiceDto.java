@@ -127,5 +127,8 @@ public class DelQueryServiceDto extends BaseEntity {
     @ApiModelProperty(value = "查件反馈明细集合")
     private List<DelQueryServiceFeedback> delQueryServiceFeedbackList;
 
+    private String queryNoOne;
+
+
 
 }

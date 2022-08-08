@@ -869,6 +869,11 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             queryWrapper.in(PackageCollection::getSellerCode, dto.getCustomCodeList());
         }
 
+        String queryNo = dto.getQueryNoOne();
+        if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(queryNo)) {
+            List<String> queryNoList = splitToArray(queryNo, "[\n,]");
+            queryWrapper.in(PackageCollection::getOutboundNo,queryNoList).or().in(PackageCollection::getTrackingNo,queryNoList);
+        }
         // 揽收单号
         this.autoSettingListCondition(queryWrapper, PackageCollection::getCollectionNo, this.getTextList(dto.getCollectionNo()));
         // 跟踪号
@@ -898,6 +903,21 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             }
         }
         return page;
+    }
+
+    public static List<String> splitToArray(String text, String split) {
+        String[] arr = text.split(split);
+        if (arr.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = new ArrayList<>();
+        for (String s : arr) {
+            if (com.szmsd.common.core.utils.StringUtils.isEmpty(s)) {
+                continue;
+            }
+            list.add(s);
+        }
+        return list;
     }
 
     @Override

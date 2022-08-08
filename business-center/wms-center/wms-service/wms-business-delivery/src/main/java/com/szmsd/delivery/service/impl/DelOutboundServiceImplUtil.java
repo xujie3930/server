@@ -347,7 +347,7 @@ public final class DelOutboundServiceImplUtil {
         queryWrapper.orderByDesc("o.create_time");
     }
 
-    private static List<String> splitToArray(String text, String split) {
+    public static List<String> splitToArray(String text, String split) {
         String[] arr = text.split(split);
         if (arr.length == 0) {
             return Collections.emptyList();

@@ -30,6 +30,8 @@ import com.szmsd.common.core.domain.R;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 
@@ -84,12 +86,25 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         * @return 查件服务模块
         */
         @Override
-        public List<DelQueryService> selectDelQueryServiceList(DelQueryServiceDto delQueryService)
-        {
+        public List<DelQueryService> selectDelQueryServiceList(DelQueryServiceDto delQueryService){
 
             QueryWrapper<DelQueryService> queryWrapper = new QueryWrapper<DelQueryService>();
 
             LambdaQueryWrapper<DelQueryService> where = queryWrapper.lambda();
+
+            String queryNo = delQueryService.getQueryNoOne();
+
+            if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(queryNo)) {
+                try {
+                    queryNo = URLDecoder.decode(delQueryService.getQueryNoOne(),"UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+                List<String> queryNoList = DelOutboundServiceImplUtil.splitToArray(queryNo, "[\n,]");
+                where.in(DelQueryService::getOrderNo, queryNoList)
+                        .or().in(DelQueryService::getTraceId, queryNoList)
+                        .or().in(DelQueryService::getRefNo,queryNoList);
+            }
 
             if(StringUtils.isNotEmpty(delQueryService.getOrderNo())){
                 where.in(DelQueryService::getOrderNo, StringToolkit.getCodeByArray(delQueryService.getOrderNo()));
