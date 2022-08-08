@@ -63,8 +63,8 @@ public class AccountSerialBillController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('AccountSerialBill:export')")
     @ApiOperation(value = "流水账单 - 列表导出")
-    @GetMapping("/export")
-    public void export(HttpServletResponse response, AccountSerialBillDTO dto) {
+    @PostMapping ("/export")
+    public void export(HttpServletResponse response, @RequestBody AccountSerialBillDTO dto) {
         List<AccountSerialBill> list = accountSerialBillService.listPage(dto);
 
 
