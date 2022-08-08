@@ -8,8 +8,10 @@ import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.putinstorage.enums.InboundReceiptRecordEnum;
+import com.szmsd.putinstorage.mapper.InboundReceiptRecordMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,8 @@ public class InboundReceiptRecordAsyncService {
 
     @Resource
     private IInboundReceiptRecordService iInboundReceiptRecordService;
+    @Autowired
+    private InboundReceiptRecordMapper inboundReceiptRecordMapper;
 
     @Async
     public void saveRecord(InboundReceiptRecord inboundReceiptRecord) {
@@ -53,6 +57,21 @@ public class InboundReceiptRecordAsyncService {
             }
         }
         log.info("保存入库单日志: {}", inboundReceiptRecord);
+        inboundReceiptRecord.setPutawaySku(inboundReceiptRecord.getSku());
+        //拿到之前的sku(可能传来的是自定义code所以匹配一下)
+        String skus=inboundReceiptRecord.getSku();
+       String skuCode=inboundReceiptRecordMapper.seleBaseProductSku(skus);
+       if (skuCode!=null&&!skuCode.equals("")){
+           inboundReceiptRecord.setSku(skuCode);
+       }
+       //通过入库单号查询批次
+       String batchNumber=(inboundReceiptRecordMapper.selectinboundReBatchNum(inboundReceiptRecord.getWarehouseNo()));
+       if (batchNumber!=null&&!batchNumber.equals("")){
+           inboundReceiptRecord.setBatchNumber(batchNumber);
+       }else {
+           inboundReceiptRecord.setBatchNumber(inboundReceiptRecord.getWarehouseNo());
+       }
+
         iInboundReceiptRecordService.save(inboundReceiptRecord);
 
         if (inboundReceiptInfoVO == null) {

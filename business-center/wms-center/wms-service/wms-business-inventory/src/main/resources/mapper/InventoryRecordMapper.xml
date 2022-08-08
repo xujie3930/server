@@ -22,6 +22,8 @@
         <result column="operate_on" property="operateOn"/>
         <result column="operator" property="operator"/>
         <result column="logs" property="logs"/>
+        <result column="batch_number" property="batchNumber"/>
+        <result column="putaway_sku" property="putawaySku"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -43,11 +45,14 @@
         t.after_total_outbound,
         t.operator,
         t.operate_on,
-        t.remark `logs`
+        t.remark `logs`,
+        b.batch_number,
+        b.putaway_sku
     </sql>
     <select id="selectQueryList" parameterType="com.szmsd.inventory.domain.dto.InventoryRecordQueryDTO" resultMap="InventoryRecordVO">
         SELECT <include refid="Column_List_VO"/>
         FROM inventory_record t
+        LEFT JOIN inbound_receipt_record b on t.receipt_no=b.warehouse_no
         <where>
             <if test="receiptNo != null and receiptNo != ''">AND t.receipt_no = #{receiptNo}</if>
             <if test="type != null and type != ''">AND t.type = #{type}</if>
@@ -57,7 +62,8 @@
             <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
             <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>
         </where>
-        ORDER BY operate_on DESC
+        GROUP BY t.id
+        ORDER BY t.operate_on DESC
     </select>
 
 

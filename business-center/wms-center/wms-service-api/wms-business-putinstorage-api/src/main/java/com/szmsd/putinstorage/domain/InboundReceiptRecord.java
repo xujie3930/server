@@ -53,4 +53,10 @@ public class InboundReceiptRecord implements Serializable {
     @ApiModelProperty(value = "备注")
     private String remark;
 
+    @ApiModelProperty(value = "上架sku")
+    private String putawaySku;
+
+
+    @ApiModelProperty(value = "批次号")
+    private String batchNumber;
 }
