@@ -92,13 +92,14 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
             LambdaQueryWrapper<DelQueryService> where = queryWrapper.lambda();
 
-            String queryNo = null;
-            try {
-                queryNo = URLDecoder.decode(delQueryService.getQueryNoOne(),"UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
+            String queryNo = delQueryService.getQueryNoOne();
+
             if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(queryNo)) {
+                try {
+                    queryNo = URLDecoder.decode(delQueryService.getQueryNoOne(),"UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
                 List<String> queryNoList = DelOutboundServiceImplUtil.splitToArray(queryNo, "[\n,]");
                 where.in(DelQueryService::getOrderNo, queryNoList)
                         .or().in(DelQueryService::getTraceId, queryNoList)

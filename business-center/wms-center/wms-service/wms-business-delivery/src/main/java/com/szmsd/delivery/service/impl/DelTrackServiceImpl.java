@@ -129,13 +129,14 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     @Override
     public List<DelTrack> selectDelTrackList(DelTrack delTrack) {
         LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
-        String queryNo = null;
-        try {
-            queryNo = URLDecoder.decode(delTrack.getQueryNoOne(),"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        String queryNo = delTrack.getQueryNoOne();
+
         if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(queryNo)) {
+            try {
+                queryNo = URLDecoder.decode(delTrack.getQueryNoOne(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
             List<String> queryNoList = DelOutboundServiceImplUtil.splitToArray(queryNo, "[\n,]");
             delTrackLambdaQueryWrapper.in(DelTrack::getOrderNo, queryNoList)
                     .or().in(DelTrack::getTrackingNo, queryNoList);
