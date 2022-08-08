@@ -53,4 +53,6 @@ public class PackageCollectionQueryDto extends QueryDto {
         this.customCode = customCode;
         this.customCodeList = StringUtils.isNotEmpty(customCode) ? Arrays.asList(customCode.split(",")) : Lists.newArrayList();
     }
+    private String queryNoOne;
+
 }

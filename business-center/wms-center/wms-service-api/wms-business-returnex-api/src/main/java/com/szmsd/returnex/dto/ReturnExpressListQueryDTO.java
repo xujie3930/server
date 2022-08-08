@@ -124,6 +124,11 @@ public class ReturnExpressListQueryDTO extends QueryDto {
     @ApiModelProperty(value = "refNo")
     private String refNo;
 
+    private String queryNoOne;
+    private String queryNoTwo;
+    private List<String> queryNoOneList;
+    private List<String> queryNoTwoList;
+
     public void setRefNo(String refNo) {
         this.refNo = refNo;
         Optional.ofNullable(refNo).filter(StringUtil::isNotBlank)

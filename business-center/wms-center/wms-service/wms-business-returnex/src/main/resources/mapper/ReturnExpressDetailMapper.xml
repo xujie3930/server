@@ -121,6 +121,34 @@
                     #{no}
                 </foreach>
             </if>
+            <if test="cm.queryNoOneList != null and cm.queryNoOneList.size() >0 ">
+                and from_order_no in
+                <foreach collection="cm.queryNoOneList" open="(" close=")" separator="," item="no">
+                    #{no}
+                </foreach>
+                or scan_code in
+                <foreach collection="cm.queryNoOneList" open="(" close=")" separator="," item="no">
+                    #{no}
+                </foreach>
+                or ref_no in
+                <foreach collection="cm.queryNoOneList" open="(" close=")" separator="," item="no">
+                    #{no}
+                </foreach>
+            </if>
+            <if test="cm.queryNoTwoList != null and cm.queryNoTwoList.size() >0 ">
+                and from_order_no_new in
+                <foreach collection="cm.queryNoTwoList" open="(" close=")" separator="," item="no">
+                    #{no}
+                </foreach>
+                or scan_code_new in
+                <foreach collection="cm.queryNoTwoList" open="(" close=")" separator="," item="no">
+                    #{no}
+                </foreach>
+                or ref_no in
+                <foreach collection="cm.queryNoTwoList" open="(" close=")" separator="," item="no">
+                    #{no}
+                </foreach>
+            </if>
         </where>
         order by id DESC
     </select>

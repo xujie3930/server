@@ -41,6 +41,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -127,13 +129,25 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     @Override
     public List<DelTrack> selectDelTrackList(DelTrack delTrack) {
         LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+        String queryNo = null;
+        try {
+            queryNo = URLDecoder.decode(delTrack.getQueryNoOne(),"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(queryNo)) {
+            List<String> queryNoList = DelOutboundServiceImplUtil.splitToArray(queryNo, "[\n,]");
+            delTrackLambdaQueryWrapper.in(DelTrack::getOrderNo, queryNoList)
+                    .or().in(DelTrack::getTrackingNo, queryNoList);
+        }
+
         boolean orderNoNotEmpty = StringUtils.isNotEmpty(delTrack.getOrderNo());
-        delTrackLambdaQueryWrapper.eq(orderNoNotEmpty, DelTrack::getOrderNo, delTrack.getOrderNo());
+//        delTrackLambdaQueryWrapper.eq(orderNoNotEmpty, DelTrack::getOrderNo, delTrack.getOrderNo());
         delTrackLambdaQueryWrapper.eq(StringUtils.isNotBlank(delTrack.getSource()), DelTrack::getSource, delTrack.getSource());
         delTrackLambdaQueryWrapper
                 .ge(StringUtils.isNotBlank(delTrack.getBeginTime()), BaseEntity::getCreateTime, delTrack.getBeginTime())
                 .le(StringUtils.isNotBlank(delTrack.getEndTime()), BaseEntity::getCreateTime, delTrack.getEndTime())
-                .eq(StringUtils.isNotBlank(delTrack.getTrackingNo()), DelTrack::getTrackingNo, delTrack.getTrackingNo())
+//                .eq(StringUtils.isNotBlank(delTrack.getTrackingNo()), DelTrack::getTrackingNo, delTrack.getTrackingNo())
                 .eq(StringUtils.isNotBlank(delTrack.getCreateByName()), DelTrack::getCreateByName, delTrack.getCreateByName())
                 .orderByDesc(DelTrack::getTrackingTime)
         ;
@@ -191,6 +205,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         }
         return selectList;
     }
+
 
     /**
      * 新增模块
