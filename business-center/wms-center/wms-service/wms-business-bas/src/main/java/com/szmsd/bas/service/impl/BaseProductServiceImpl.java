@@ -141,9 +141,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             //String[] codes = queryDto.getCodes().split(",");
             queryWrapper.in("code", queryDto.getCodesList());
         }
-        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(com.szmsd.common.core.utils.StringUtils.isEmpty(queryDto.getSellerCodes())){
-            queryDto.setSellerCodes(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            if (com.szmsd.common.core.utils.StringUtils.isEmpty(queryDto.getSellerCodes())) {
+                queryDto.setSellerCodes(cusCode);
+            }
         }
         if (StringUtils.isNotEmpty(queryDto.getSellerCodes())) {
             String[] sellerCodes = queryDto.getSellerCodes().split(",");
