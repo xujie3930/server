@@ -38,7 +38,7 @@ public class ChargeController extends BaseController {
         startPage();
         // 子母单的查询 如果没有传值就只能才自己的
         if (Objects.nonNull(SecurityUtils.getLoginUser())) {
-            String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
             if (StringUtils.isEmpty(queryChargeDto.getCustomCode())) {
                 queryChargeDto.setCustomCode(cusCode);
             }

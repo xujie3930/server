@@ -84,7 +84,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 //            query.in(AccountSerialBill::getId, (Object[]) dto.getIds().split(","));
 //        }
         if (Objects.nonNull(SecurityUtils.getLoginUser())) {
-            String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
             if (com.szmsd.common.core.utils.StringUtils.isEmpty(dto.getCusCode())) {
                 dto.setCusCode(cusCode);
             }
