@@ -461,9 +461,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<DelOutboundListVO> selectDelOutboundList(DelOutboundListQueryDto queryDto) {
         QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
-        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(StringUtils.isEmpty(queryDto.getCustomCode())){
-            queryDto.setCustomCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            if (StringUtils.isEmpty(queryDto.getCustomCode())) {
+                queryDto.setCustomCode(cusCode);
+            }
         }
         DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
         return baseMapper.pageList(queryWrapper);

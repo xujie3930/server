@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -77,9 +78,11 @@ public class IInventoryCheckServiceImpl extends ServiceImpl<InventoryCheckMapper
 
     @Override
     public List<InventoryCheckVo> findList(InventoryCheckQueryDTO inventoryCheckQueryDTO) {
-        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(StringUtils.isEmpty(inventoryCheckQueryDTO.getCustomCode())){
-            inventoryCheckQueryDTO.setCustomCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            if (StringUtils.isEmpty(inventoryCheckQueryDTO.getCustomCode())) {
+                inventoryCheckQueryDTO.setCustomCode(cusCode);
+            }
         }
         return inventoryCheckMapper.findList(inventoryCheckQueryDTO);
     }

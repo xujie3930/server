@@ -861,9 +861,11 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             queryWrapper.eq(StringUtils.isNotEmpty(sellerCode), PackageCollection::getSellerCode, sellerCode);
         }
         // 子母单的查询 如果没有传值就只能才自己的
-        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if (StringUtils.isEmpty(dto.getCustomCode())) {
-            dto.setCustomCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            if (StringUtils.isEmpty(dto.getCustomCode())) {
+                dto.setCustomCode(cusCode);
+            }
         }
         if (CollectionUtils.isNotEmpty(dto.getCustomCodeList())) {
             queryWrapper.in(PackageCollection::getSellerCode, dto.getCustomCodeList());
