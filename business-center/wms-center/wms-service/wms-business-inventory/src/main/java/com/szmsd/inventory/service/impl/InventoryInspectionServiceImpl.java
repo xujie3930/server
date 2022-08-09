@@ -92,7 +92,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
     @Override
     public List<InventoryInspectionVo> findList(InventoryInspectionQueryDTO dto) {
         if (Objects.nonNull(SecurityUtils.getLoginUser())) {
-            String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
             if (StringUtils.isEmpty(dto.getCustomCode())) {
                 dto.setCustomCode(cusCode);
             }
