@@ -424,6 +424,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWmsWaitReceive());
             returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWmsWaitReceiveStr());
         }
+        if (returnExpressDetail.getScanCode()==null||returnExpressDetail.getScanCode().equals("")){
+            returnExpressDetail.setScanCode(returnExpressDetail.getFromOrderNo());
+        }
         return returnExpressMapper.insert(returnExpressDetail);
     }
 
