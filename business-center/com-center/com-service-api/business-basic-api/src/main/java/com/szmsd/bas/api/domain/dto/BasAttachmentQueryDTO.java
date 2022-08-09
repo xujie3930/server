@@ -43,4 +43,8 @@ public class BasAttachmentQueryDTO extends QueryDto {
     @ApiModelProperty(value = "urls")
     private List<String> attachmentUrl;
 
+
+    @ApiModelProperty(value = "businessCodeList")
+    private List<String> businessCodeList;
+
 }
