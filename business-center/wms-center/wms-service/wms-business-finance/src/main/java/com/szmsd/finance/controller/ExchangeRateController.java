@@ -106,7 +106,8 @@ public class ExchangeRateController extends FssBaseController {
             R<Map<String, List<BasSubWrapperVO>>> maps=basSubFeignPluginService.getSub("008");
             List<BasSubWrapperVO>  baslist=maps.getData().get("008");
 
-            List<Map> mapList = ExcelFile.getExcelData(file,addList);
+            //汇率专用
+            List<Map> mapList = ExcelFile.getExcelDataFinance(file,addList);
 
             for (int x=0;x<mapList.size();x++) {
 

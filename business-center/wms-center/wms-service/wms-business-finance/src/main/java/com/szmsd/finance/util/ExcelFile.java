@@ -28,10 +28,10 @@ public class ExcelFile {
      * @Author
      * @Description //:解析excel数据
      * @Date 2022/7/27 11:15
-     * @Param file ：上传的excel文件
+     * @Param file ：上传的excel文件 汇率解析专用
      * @return  * @param null
      */
-    public static List<Map> getExcelData(MultipartFile file,List<String> list1) throws IOException {
+    public static List<Map> getExcelDataFinance(MultipartFile file,List<String> list1) throws IOException {
         checkFile(file);
         //获得Workbook工作薄对象
         Workbook workbook = getWorkBook(file);
@@ -60,6 +60,10 @@ public class ExcelFile {
                     int firstCellNum = row.getFirstCellNum();
                     //获得当前行的列数
                     int lastCellNum = row.getLastCellNum();
+                    if (lastCellNum==4){
+                        lastCellNum=lastCellNum+1;
+                    }
+
                     if (lastCellNum!=list1.size()) {
                         return list;
                     }
@@ -104,7 +108,7 @@ public class ExcelFile {
                 int lastRowNum = sheet.getLastRowNum();
 
                 //循环除了所有行,如果要循环除第一行以外的就firstRowNum+1
-                for (int rowNum = firstRowNum + 2; rowNum <= lastRowNum; rowNum++) {
+                for (int rowNum = firstRowNum + 1; rowNum <= lastRowNum; rowNum++) {
                     //获得当前行
                     Row row = sheet.getRow(rowNum);
                     if (row == null){
