@@ -150,7 +150,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             queryDTO.setOrderNoList(Stream.of(orderNoSplit, orderNoList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
         }
         if (Objects.nonNull(SecurityUtils.getLoginUser())) {
-            String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
             if (StringUtils.isEmpty(queryDTO.getCusCode())) {
                 queryDTO.setCusCode(cusCode);
             }

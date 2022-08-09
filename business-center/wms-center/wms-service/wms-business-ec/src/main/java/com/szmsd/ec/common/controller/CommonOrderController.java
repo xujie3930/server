@@ -234,7 +234,7 @@ public class CommonOrderController extends BaseController {
 //         根据客户过滤数据
 //        queryWrapper.eq(StringUtils.isNotBlank(sellerCode), CommonOrder::getCusCode, sellerCode);
         if (Objects.nonNull(SecurityUtils.getLoginUser())) {
-            String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
             if (StringUtils.isEmpty(queryDTO.getCusCode())) {
                 queryDTO.setCusCode(cusCode);
             }
