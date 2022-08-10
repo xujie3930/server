@@ -114,4 +114,7 @@ public class InboundReceiptInfoVO {
     @ApiModelProperty(value = "揽收单号")
     private String collectionNo;
 
+    @ApiModelProperty(value = "批次号")
+    private String batchNumber;
+
 }

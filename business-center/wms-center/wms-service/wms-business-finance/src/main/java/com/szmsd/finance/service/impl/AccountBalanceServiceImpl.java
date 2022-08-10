@@ -12,6 +12,8 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
@@ -105,13 +107,23 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 //            queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
 //        }
 
-        if (CollectionUtils.isNotEmpty(dto.getCusCodeList())) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (null != loginUser && !loginUser.isAllDataScope()) {
+            String username = loginUser.getUsername();
+            List<String> sellerCodeList=accountBalanceMapper.selectsellerCode(username);
+            if (sellerCodeList.size()>0){
+                queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+            }
+            if (CollectionUtils.isNotEmpty(dto.getCusCodeList())) {
             List<String> cusCodeList = dto.getCusCodeList();
             queryWrapper.in(AccountBalance::getCusCode, cusCodeList);
             dto.setCusCode("");
         }
         if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
             queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
+        }
+        //where.in(CollectionUtils.isNotEmpty( basSeller.getSellerCodeList()),"o.seller_code", basSeller.getSellerCodeList());
+
         }
         List<AccountBalance> accountBalances = accountBalanceMapper.listPage(queryWrapper);
         Map<String, CreditUseInfo> creditUseInfoMap = iDeductionRecordService.queryTimeCreditUse(dto.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));

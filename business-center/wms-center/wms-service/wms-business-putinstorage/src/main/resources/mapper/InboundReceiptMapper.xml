@@ -38,6 +38,7 @@
         <result column="status" property="status"/>
         <result column="remark" property="remark"/>
         <result column="source_type" property="sourceType"/>
+        <result column="batch_number" property="batchNumber"/>
 
         <!-- 多语言字段 -->
         <result column="cus_name" property="cusName"/>
@@ -113,6 +114,7 @@
         t.status,
         t.remark,
         t.collection_no,
+        t.batch_number,
 
         -- 多语言字段
         t.cus_code cus_name,

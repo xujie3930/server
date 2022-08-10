@@ -88,7 +88,8 @@ public final class StringToolkit {
      */
     public static List<String> getCodeByArray(String code) {
         if(StringUtils.isNotEmpty(code)){
-            List<String> strings = series2List(code, "(\n|\r|\\s|，|;|,)+");
+            //库存管理因为客户sku名字有空格，增加两个空格转义(汪经理加的)
+            List<String> strings = series2List(code, "(\n|\r|\\s{2,}|，|;|,)+");
             return CollectionUtils.isEmpty(strings)?null:strings;
         }
         return null;

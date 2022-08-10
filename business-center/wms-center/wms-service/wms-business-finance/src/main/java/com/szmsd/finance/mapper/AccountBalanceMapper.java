@@ -31,4 +31,6 @@ public interface AccountBalanceMapper extends BaseMapper<AccountBalance> {
     List<AccountBalance> queryThePreTermBill();
 
     List<AccountBalance> queryTheCanUpdateCreditUserList(LocalDateTime endTime);
+
+    List<String>  selectsellerCode(@Param("username") String username);
 }
