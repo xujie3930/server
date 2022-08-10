@@ -132,4 +132,7 @@
         cus_code,
         fab.currency_code
     </select>
+    <select id="selectsellerCode" resultType="java.lang.String" parameterType="java.lang.String">
+        SELECT seller_code from bas_seller where service_manager_name=#{username} or service_staff_name=#{username}
+    </select>
 </mapper>
