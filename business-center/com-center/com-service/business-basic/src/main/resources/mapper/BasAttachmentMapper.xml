@@ -64,6 +64,10 @@
                 <foreach collection="attachmentUrl" open="(" separator="," close=")" item="item">
                     #{item}
                 </foreach></if>
+            <if test="businessCodeList != null and businessCodeList.size >0">AND t.business_code in
+                <foreach collection="businessCodeList" open="(" separator="," close=")" item="item">
+                    #{item}
+                </foreach></if>
         </where>
     </select>
 
