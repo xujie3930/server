@@ -54,10 +54,7 @@ import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundDocService;
 import com.szmsd.delivery.service.IDelOutboundPackingService;
 import com.szmsd.delivery.service.IDelOutboundService;
-import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
-import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
-import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
-import com.szmsd.delivery.service.wrapper.IDelOutboundExceptionService;
+import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
@@ -1801,13 +1798,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (null == delOutbound) {
             throw new CommonException("400", "单据不存在");
         }
-        if("1".equals(dto.getType())){
+        if("0".equals(dto.getType())){
 
             if(StringUtils.isEmpty(delOutbound.getShipmentRetryLabel())){
                 throw new CommonException("400", "标签文件不存在");
 
             }
-            File labelFile = new File(delOutbound.getShipmentRetryLabel());
+            String pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(delOutbound) + "/" + delOutbound.getOrderNo() + ".pdf";
+            File labelFile = new File(pathname);
             if (!labelFile.exists()) {
                 throw new CommonException("400", "标签文件不存在");
             }
@@ -2345,6 +2343,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             detail.setOperationType(dto.getOperationType());
         }
         delOutboundDetailService.updateBatchById(dataDelOutboundDetailList);
+
+        
         return 1;
     }
 }

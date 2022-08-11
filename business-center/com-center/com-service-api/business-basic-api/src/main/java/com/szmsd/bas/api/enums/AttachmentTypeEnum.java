@@ -37,6 +37,9 @@ public enum AttachmentTypeEnum {
     BULK_ORDER_BOX("BULK_ORDER_BOX","大货订单箱标","大货订单箱标","BulkOrderBox"),
     BULK_ORDER_DETAIL("BULK_ORDER_DETAIL","大货订单明细","大货订单明细","BulkOrderDetail"),
 
+    BULK_ORDER_BOX2("BULK_ORDER_BOX2","大货订单箱标2","大货订单箱标2","BulkOrderBox2"),
+
+
     CHILD_PARENT("CHILD_PARENT","子母单附件","子母单附件","childParent"),
 
     ;
