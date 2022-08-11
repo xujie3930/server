@@ -44,7 +44,7 @@ public class PackageTransferDelOutboundTimer {
      */
     @Async
     // 秒域 分域 时域 日域 月域 周域 年域
-    @Scheduled(cron = "0 0 12,19 * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     public void processing() {
         String key = applicationName + ":PackageTransferDelOutboundTimer:processing";
         this.doWorker(key, () -> {
@@ -58,7 +58,6 @@ public class PackageTransferDelOutboundTimer {
             queryWrapper.eq(DelOutbound::getOrderType, DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode());
             queryWrapper.eq(DelOutbound::getState, DelOutboundStateEnum.DELIVERED.getCode());
             queryWrapper.eq(DelOutbound::getInStock, false);
-            queryWrapper.eq(DelOutbound::getSellerCode, false);
             queryWrapper.apply("seller_code in(select seller_code from bas_seller where generate_inbound_receipt=1)");
 
             List<DelOutbound> delOutboundList = delOutboundService.list(queryWrapper);
