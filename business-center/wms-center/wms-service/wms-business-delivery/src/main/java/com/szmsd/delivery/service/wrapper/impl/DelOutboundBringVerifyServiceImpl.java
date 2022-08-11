@@ -111,7 +111,16 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -332,21 +341,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
         // 包裹信息
         List<PackageInfo> packageInfos = new ArrayList<>();
-        if(DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())){
-            BigDecimal declareValue = BigDecimal.ZERO;
-            for (DelOutboundDetail detail : detailList) {
-                BigDecimal productDeclaredValue;
-                if (null != detail.getDeclaredValue()) {
-                    productDeclaredValue = BigDecimal.valueOf(detail.getDeclaredValue());
-                } else {
-                    productDeclaredValue = BigDecimal.ZERO;
-                }
-                declareValue = declareValue.add(productDeclaredValue);
-            }
-            packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
-                    new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                    , 1, delOutbound.getOrderNo(), declareValue, ""));
-        }else if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
             if (PricingEnum.SKU.equals(pricingEnum)) {
                 BigDecimal declaredValue = BigDecimal.ZERO;
                 for (DelOutboundDetail detail : detailList) {
@@ -992,13 +987,20 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     private String getBoxLabel(DelOutbound delOutbound){
         BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
-
-
-        basAttachmentQueryDTO.setBusinessCodeList(Arrays.asList(AttachmentTypeEnum.ONE_PIECE_ISSUED_ON_BEHALF.getBusinessCode(),
-                AttachmentTypeEnum.TRANSSHIPMENT_OUTBOUND.getBusinessCode(), AttachmentTypeEnum.BULK_ORDER_BOX2.getBusinessCode()));
+        basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.ONE_PIECE_ISSUED_ON_BEHALF.getBusinessCode());
         basAttachmentQueryDTO.setRemark(delOutbound.getOrderNo());
         R<List<BasAttachment>> documentListR = remoteAttachmentService.list(basAttachmentQueryDTO);
         if (null != documentListR && null != documentListR.getData()) {
+            List<BasAttachment> documentList = documentListR.getData();
+            if (CollectionUtils.isNotEmpty(documentList)) {
+                BasAttachment basAttachment = documentList.get(0);
+                return basAttachment.getAttachmentPath() + "/" + basAttachment.getAttachmentName() + basAttachment.getAttachmentFormat();
+            }
+        }else{
+            basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+            basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.TRANSSHIPMENT_OUTBOUND.getBusinessCode());
+            basAttachmentQueryDTO.setRemark(delOutbound.getOrderNo());
+            documentListR = remoteAttachmentService.list(basAttachmentQueryDTO);
             List<BasAttachment> documentList = documentListR.getData();
             if (CollectionUtils.isNotEmpty(documentList)) {
                 BasAttachment basAttachment = documentList.get(0);
