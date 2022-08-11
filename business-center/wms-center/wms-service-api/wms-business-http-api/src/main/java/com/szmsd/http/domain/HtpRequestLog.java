@@ -106,4 +106,9 @@ public class HtpRequestLog extends BaseEntity {
     private String requestTimeEnd;
 
 
+    @ApiModelProperty(value = "响应时间(S)")
+    @Excel(name = "响应时间(S)")
+    private Long responseSeconds;
+
+
 }
