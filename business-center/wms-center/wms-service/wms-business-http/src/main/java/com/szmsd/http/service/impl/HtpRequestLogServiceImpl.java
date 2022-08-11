@@ -110,6 +110,14 @@ public class HtpRequestLogServiceImpl extends ServiceImpl<HtpRequestLogMapper, H
     public int add(HtpRequestLog log) {
         log.setRequestHeader(this.substring(log.getRequestHeader(), 0xff));
         log.setResponseHeader(this.substring(log.getResponseHeader(), 0xff));
+
+        if(log.getResponseTime() != null && log.getRequestTime() != null){
+            long interval = (log.getResponseTime().getTime() - log.getRequestTime().getTime())/1000;
+            log.setResponseSeconds(interval);
+        }else{
+            log.setResponseSeconds(0L);
+        }
+
         return this.baseMapper.insert(log);
     }
 
