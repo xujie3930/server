@@ -101,11 +101,7 @@ import org.springframework.util.Base64Utils;
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1807,7 +1803,41 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             String pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(delOutbound) + "/" + delOutbound.getOrderNo() + ".pdf";
             File labelFile = new File(pathname);
             if (!labelFile.exists()) {
-                throw new CommonException("400", "标签文件不存在");
+                String orderNo = delOutbound.getOrderNo();
+                // 查询地址信息
+                DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
+                try {
+                    // 查询SKU信息
+                    List<String> nos = new ArrayList<>();
+                    nos.add(orderNo);
+                    Map<String, String> skuLabelMap = this.delOutboundDetailService.queryDetailsLabelByNos(nos);
+                    String skuLabel = skuLabelMap.get(orderNo);
+                    ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(delOutbound, delOutboundAddress, skuLabel);
+                    byte[] fb = null;
+                    FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
+                    ServletOutputStream outputStream = null;
+                    InputStream inputStream = null;
+                    try {
+                        outputStream = response.getOutputStream();
+                        //response为HttpServletResponse对象
+                        response.setContentType("application/pdf;charset=utf-8");
+                        //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+                        response.setHeader("Content-Disposition", "attachment;filename=" + delOutbound.getOrderNo() + ".pdf");
+                        IOUtils.copy(new ByteArrayInputStream(fb), outputStream);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
+                        throw new CommonException("500", "读取标签文件失败");
+                    } finally {
+                        IoUtil.flush(outputStream);
+                        IoUtil.close(outputStream);
+                        IoUtil.close(inputStream);
+                    }
+                    return;
+
+                } catch (Exception e) {
+                    throw new CommonException("400", "标签文件不存在");
+                }
+
             }
             ServletOutputStream outputStream = null;
             InputStream inputStream = null;
@@ -2344,7 +2374,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         delOutboundDetailService.updateBatchById(dataDelOutboundDetailList);
 
-        
+
         return 1;
     }
 }
