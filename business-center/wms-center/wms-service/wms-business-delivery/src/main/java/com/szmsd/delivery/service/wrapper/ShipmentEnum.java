@@ -311,7 +311,13 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                 return;
             }
+            if(StringUtils.isEmpty(delOutbound.getOrderNo())){
+                System.out.println("停止更新挂号失败"+delOutbound.getOrderNo());
+                return;
+            }
             DelOutboundOperationLogEnum.SMT_SHIPMENT_TRACKING.listener(delOutbound);
+
+
             // 更新WMS挂号
             ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto = new ShipmentTrackingChangeRequestDto();
             shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
