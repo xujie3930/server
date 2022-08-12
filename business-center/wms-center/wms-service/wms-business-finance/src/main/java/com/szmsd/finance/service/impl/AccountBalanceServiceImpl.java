@@ -114,15 +114,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             if (sellerCodeList.size()>0){
                 queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
             }
-//            if (CollectionUtils.isNotEmpty(dto.getCusCodeList())) {
-//            List<String> cusCodeList = dto.getCusCodeList();
-//            queryWrapper.in(AccountBalance::getCusCode, cusCodeList);
-//            dto.setCusCode("");
-//        }
+
         if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
             queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
         }
-        //where.in(CollectionUtils.isNotEmpty( basSeller.getSellerCodeList()),"o.seller_code", basSeller.getSellerCodeList());
 
         }
         List<AccountBalance> accountBalances = accountBalanceMapper.listPage(queryWrapper);
