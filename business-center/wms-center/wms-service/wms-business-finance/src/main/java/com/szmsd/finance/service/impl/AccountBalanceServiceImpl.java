@@ -103,9 +103,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public List<AccountBalance> listPage(AccountBalanceDTO dto) {
         LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
-//        if (StringUtils.isNotEmpty(dto.getCusCode())) {
-//            queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
-//        }
+        if (StringUtils.isNotEmpty(dto.getCusCode())) {
+            queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
+        }
 
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (null != loginUser && !loginUser.isAllDataScope()) {
@@ -120,6 +120,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         }
 
         }
+
         List<AccountBalance> accountBalances = accountBalanceMapper.listPage(queryWrapper);
         Map<String, CreditUseInfo> creditUseInfoMap = iDeductionRecordService.queryTimeCreditUse(dto.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
         Map<String, CreditUseInfo> needRepayCreditUseInfoMap = iDeductionRecordService.queryTimeCreditUse(dto.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.CHECKED));
