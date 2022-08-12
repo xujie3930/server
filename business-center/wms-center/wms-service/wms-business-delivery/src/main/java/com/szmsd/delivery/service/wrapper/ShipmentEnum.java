@@ -312,6 +312,10 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 return;
             }
             DelOutboundOperationLogEnum.SMT_SHIPMENT_TRACKING.listener(delOutbound);
+
+            if(StringUtils.isEmpty(delOutbound.getOrderNo())){
+                return;
+            }
             // 更新WMS挂号
             ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto = new ShipmentTrackingChangeRequestDto();
             shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
