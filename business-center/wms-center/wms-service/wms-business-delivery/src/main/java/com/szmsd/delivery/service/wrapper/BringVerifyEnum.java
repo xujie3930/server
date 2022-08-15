@@ -604,6 +604,16 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
                 delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
                 delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+
+                IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+                DelOutbound updateDelOutbound = new DelOutbound();
+                updateDelOutbound.setId(delOutbound.getId());
+                updateDelOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
+                updateDelOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                updateDelOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+                delOutboundService.saveShipmentOrderNumber(updateDelOutbound);
+
+
                 DelOutboundOperationLogEnum.BRV_SHIPMENT_ORDER.listener(delOutbound);
             }
         }

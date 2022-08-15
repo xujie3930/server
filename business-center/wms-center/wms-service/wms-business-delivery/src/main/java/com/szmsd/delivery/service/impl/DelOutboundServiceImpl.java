@@ -1585,6 +1585,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.updateById(delOutbound);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void saveShipmentOrderNumber(DelOutbound delOutbound) {
+        this.updateById(delOutbound);
+    }
+
     @Override
     public DelOutbound getByOrderNo(String orderNo) {
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
