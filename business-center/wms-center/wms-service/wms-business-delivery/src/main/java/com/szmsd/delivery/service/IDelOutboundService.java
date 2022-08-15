@@ -228,6 +228,9 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      */
     void shipmentSuccess(DelOutbound delOutbound);
 
+    void saveShipmentOrderNumber(DelOutbound delOutbound);
+
+
     /**
      * 根据单号查询
      *
