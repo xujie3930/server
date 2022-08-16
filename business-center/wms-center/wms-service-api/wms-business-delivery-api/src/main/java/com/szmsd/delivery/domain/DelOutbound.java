@@ -302,4 +302,7 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "时间差")
     @Excel(name = "时间差  ")
     private Integer timeDifference;
+
+    @ApiModelProperty(value = "亚马逊物流服务id")
+    private String amazonLogisticsRouteId;
 }
