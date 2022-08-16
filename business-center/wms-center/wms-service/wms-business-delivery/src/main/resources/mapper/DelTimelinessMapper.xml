@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.delivery.mapper.DelTimelinessMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.delivery.domain.DelTimeliness" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="shipment_rule" property="shipmentRule" jdbcType="VARCHAR" />
+    <result column="country_code" property="countryCode" jdbcType="VARCHAR" />
+    <result column="country" property="country" jdbcType="VARCHAR" />
+    <result column="scope_one" property="scopeOne" jdbcType="VARCHAR" />
+    <result column="scope_two" property="scopeTwo" jdbcType="VARCHAR" />
+    <result column="scope_three" property="scopeThree" jdbcType="VARCHAR" />
+    <result column="scope_four" property="scopeFour" jdbcType="VARCHAR" />
+    <result column="scope_five" property="scopeFive" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, shipment_rule, country_code, country, scope_one, scope_two, scope_three, scope_four, 
+    scope_five, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from del_timeliness
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectDelOutboundes" resultType="java.util.Map" parameterType="java.util.Map">
+    SELECT
+    c.shipment_rule as shipmentRule,
+    d.country_code as countryCode,
+
+    d.country,
+    (
+    ROUND(
+    (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.shipment_rule != ''
+    AND b.country_code != ''
+    AND a.delivered_time &gt;= #{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    AND a.time_difference &lt;= #{map.scopeOne}
+    AND a.shipment_rule = c.shipment_rule
+    AND b.country_code = d.country_code
+    )/ (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.delivered_time &gt;= #{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    ) * 100
+    )
+    ) AS scopeOne,
+    (
+    ROUND(
+    (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.shipment_rule != ''
+    AND b.country_code != ''
+    AND a.delivered_time &gt;= #{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    AND a.time_difference &lt;=#{map.scopeTwo}
+    AND a.shipment_rule = c.shipment_rule
+    AND b.country_code = d.country_code
+    )/ (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.delivered_time  &gt;= #{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    ) * 100
+    )
+    ) AS scopeTwo,
+    (
+    ROUND(
+    (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.shipment_rule != ''
+    AND b.country_code != ''
+    AND a.delivered_time &gt;= #{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    AND a.time_difference &lt;=#{map.scopeThree}
+    AND a.shipment_rule = c.shipment_rule
+    AND b.country_code = d.country_code
+    )/ (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.delivered_time &gt;= #{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    ) * 100
+    )
+    ) AS scopeThree,
+    (
+    ROUND(
+    (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.shipment_rule != ''
+    AND b.country_code != ''
+    AND a.delivered_time &gt;= #{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    AND a.time_difference &lt;=#{map.scopeFour}
+    AND a.shipment_rule = c.shipment_rule
+    AND b.country_code = d.country_code
+    )/ (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.delivered_time &gt;=#{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    ) * 100
+    )
+    ) AS scopeFour,
+    (
+    ROUND(
+    (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.shipment_rule != ''
+    AND b.country_code != ''
+    AND a.delivered_time &gt;=#{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    AND a.time_difference &gt;#{map.scopeFive}
+    AND a.shipment_rule = c.shipment_rule
+    AND b.country_code = d.country_code
+    )/ (
+    SELECT
+    COUNT(*)
+    FROM
+    del_outbound a
+    LEFT JOIN del_outbound_address b ON a.order_no = b.order_no
+    WHERE
+    a.delivered_time &gt;=#{map.sectionBeginTime}
+    AND a.delivered_time &lt;=#{map.sectionEndTime}
+    ) * 100
+    )
+    ) AS scopeFive
+    FROM
+    del_outbound c
+    LEFT JOIN del_outbound_address d ON c.order_no = d.order_no
+    WHERE
+    c.shipment_rule != ''
+    AND d.country_code != ''
+    AND c.delivered_time &gt;=#{map.sectionBeginTime}
+    AND c.delivered_time &lt;=#{map.sectionEndTime}
+    GROUP BY
+    c.shipment_rule,
+    d.country_code;
+  </select>
+  <select id="selectDelTimeliness" resultType="com.szmsd.delivery.domain.DelTimeliness"
+          parameterType="com.szmsd.delivery.domain.DelTimeliness">
+    select * from del_timeliness
+    <where>
+        1=1
+      <if test="countryCode != null" >
+      and  country_code=#{countryCode}
+      </if>
+      <if test="shipmentRule != null" >
+        and shipment_rule=#{shipmentRule}
+      </if>
+    </where>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from del_timeliness
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.delivery.domain.DelTimeliness" >
+    insert into del_timeliness (id, shipment_rule, country_code, 
+      country, scope_one, scope_two, 
+      scope_three, scope_four, scope_five, 
+      create_time)
+    values (#{id,jdbcType=INTEGER}, #{shipmentRule,jdbcType=VARCHAR}, #{countryCode,jdbcType=VARCHAR}, 
+      #{country,jdbcType=VARCHAR}, #{scopeOne,jdbcType=VARCHAR}, #{scopeTwo,jdbcType=VARCHAR}, 
+      #{scopeThree,jdbcType=VARCHAR}, #{scopeFour,jdbcType=VARCHAR}, #{scopeFive,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.delivery.domain.DelTimeliness" >
+    insert into del_timeliness
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="shipmentRule != null" >
+        shipment_rule,
+      </if>
+      <if test="countryCode != null" >
+        country_code,
+      </if>
+      <if test="country != null" >
+        country,
+      </if>
+      <if test="scopeOne != null" >
+        scope_one,
+      </if>
+      <if test="scopeTwo != null" >
+        scope_two,
+      </if>
+      <if test="scopeThree != null" >
+        scope_three,
+      </if>
+      <if test="scopeFour != null" >
+        scope_four,
+      </if>
+      <if test="scopeFive != null" >
+        scope_five,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="shipmentRule != null" >
+        #{shipmentRule,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCode != null" >
+        #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="country != null" >
+        #{country,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeOne != null" >
+        #{scopeOne,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeTwo != null" >
+        #{scopeTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeThree != null" >
+        #{scopeThree,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeFour != null" >
+        #{scopeFour,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeFive != null" >
+        #{scopeFive,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.delivery.domain.DelTimeliness" >
+    update del_timeliness
+    <set >
+      <if test="shipmentRule != null" >
+        shipment_rule = #{shipmentRule,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCode != null" >
+        country_code = #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="country != null" >
+        country = #{country,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeOne != null" >
+        scope_one = #{scopeOne,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeTwo != null" >
+        scope_two = #{scopeTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeThree != null" >
+        scope_three = #{scopeThree,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeFour != null" >
+        scope_four = #{scopeFour,jdbcType=VARCHAR},
+      </if>
+      <if test="scopeFive != null" >
+        scope_five = #{scopeFive,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.delivery.domain.DelTimeliness" >
+    update del_timeliness
+    set shipment_rule = #{shipmentRule,jdbcType=VARCHAR},
+      country_code = #{countryCode,jdbcType=VARCHAR},
+      country = #{country,jdbcType=VARCHAR},
+      scope_one = #{scopeOne,jdbcType=VARCHAR},
+      scope_two = #{scopeTwo,jdbcType=VARCHAR},
+      scope_three = #{scopeThree,jdbcType=VARCHAR},
+      scope_four = #{scopeFour,jdbcType=VARCHAR},
+      scope_five = #{scopeFive,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
