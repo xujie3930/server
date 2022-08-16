@@ -143,6 +143,13 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
     }
 
     @Override
+    public Map<String, CreditUseInfo> queryTimeCreditUseUS(List<String> cusCodes, List<String> currencyCodeList, List<CreditConstant.CreditBillStatusEnum> statusList) {
+        List<Integer> statusValueList = statusList.stream().map(CreditConstant.CreditBillStatusEnum::getValue).collect(Collectors.toList());
+        List<CreditUseInfo> creditUseInfos = baseMapper.queryTimeCreditUseUs(cusCodes, statusValueList, currencyCodeList);
+        return creditUseInfos.stream().collect(Collectors.toMap(CreditUseInfo::getCurrencyCode, x -> x));
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void addForCreditBill(BigDecimal addMoney, String cusCode, String currencyCode) {
         StopWatch stopWatch = new StopWatch("还款销账");

@@ -81,6 +81,10 @@ public interface IDeductionRecordService extends IService<FssDeductionRecord> {
 
     Map<String, CreditUseInfo> queryTimeCreditUse(String cusCode, List<String> currencyCodeList, List<CreditConstant.CreditBillStatusEnum> statusList);
 
+
+    Map<String, CreditUseInfo> queryTimeCreditUseUS(List<String> cusCodes, List<String> currencyCodeList, List<CreditConstant.CreditBillStatusEnum> statusList);
+
+
     /**
      * 更新授信额度的账单（还款销账）
      *
