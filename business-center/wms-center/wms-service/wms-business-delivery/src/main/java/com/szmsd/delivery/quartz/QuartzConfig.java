@@ -22,12 +22,15 @@ public class QuartzConfig {
 
     @Bean
     public Trigger DelOutboundJobTrigger() {
-        //cron方式，每天0点刷
+        //cron方式，每周一凌晨1点刷0 0 1 ? * MON
+        //0/3 * * * * ? 3秒测试
         return TriggerBuilder.newTrigger().forJob(DelOutboundJob())
                 .withIdentity("DelOutboundJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 ? * MON"))
                 .build();
     }
+
+
 
 
 
