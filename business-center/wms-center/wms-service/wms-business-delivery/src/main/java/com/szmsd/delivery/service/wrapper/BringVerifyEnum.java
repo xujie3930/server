@@ -315,6 +315,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     // 发货规则，装箱规则
                     delOutbound.setProductShipmentRule(data.getShipmentRule());
                     delOutbound.setPackingRule(data.getPackingRule());
+
                     // 临时传值
                     delOutboundWrapperContext.setPrcProductCode(data.getProductCode());
                     logger.info("记录临时传值字段，prcProductCode：{}", data.getProductCode());
@@ -325,6 +326,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
                     delOutbound.setSupplierCalcType(data.getSupplierCalcType());
                     delOutbound.setSupplierCalcId(data.getSupplierCalcId());
+
+                    if(StringUtils.isNotEmpty(data.getAmazonLogisticsRouteId())){
+                        delOutbound.setAmazonLogisticsRouteId(data.getAmazonLogisticsRouteId());
+                    }
                     // 计费重信息
                     Weight calcWeight = packageInfo.getCalcWeight();
                     delOutbound.setCalcWeight(calcWeight.getValue());
@@ -393,6 +398,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setShipmentOrderLabelUrl("");
             // 推单WMS
             updateDelOutbound.setRefOrderNo("");
+
+            updateDelOutbound.setAmazonLogisticsRouteId((""));
+
             // 提审失败
             updateDelOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
             delOutboundService.updateById(updateDelOutbound);
@@ -890,6 +898,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
             // 推单WMS
             updateDelOutbound.setRefOrderNo(refOrderNo);
+
+            if(StringUtils.isNotEmpty(delOutbound.getAmazonLogisticsRouteId())){
+                updateDelOutbound.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
+            }
             delOutboundService.bringVerifySuccess(updateDelOutbound);
             // 处理发货条件
             TaskConfigInfo taskConfigInfo = delOutboundWrapperContext.getTaskConfigInfo();

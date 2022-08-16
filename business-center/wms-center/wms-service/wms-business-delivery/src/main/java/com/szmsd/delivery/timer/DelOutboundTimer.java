@@ -1,6 +1,9 @@
 package com.szmsd.delivery.timer;
 
+import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.delivery.domain.DelOutboundCompleted;
 import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
@@ -18,11 +21,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangyuyuan
@@ -173,15 +179,35 @@ public class DelOutboundTimer {
     @Async
     @Scheduled(cron = "0 * * * * ?")
     public void bringVerify() {
-        logger.debug("开始执行任务 - 提审");
         String key = applicationName + ":DelOutboundTimer:bringVerify";
+        final List<String> uuidList = new ArrayList<>();
+        uuidList.add(UUID.fastUUID().toString());
         this.doWorker(key, () -> {
-            // 查询初始化的任务执行
             LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
             queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
-            handleBringVerify(queryWrapper);
+            queryWrapper.last("LIMIT 200");
+            List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
+            if(delOutboundCompletedList.size() == 0){
+                uuidList.set(0, null);
+                return;
+            }
+            List<Long> ids = delOutboundCompletedList.stream().map( DelOutboundCompleted::getId).collect(Collectors.toList());
+            LambdaUpdateWrapper<DelOutboundCompleted> updateQueryWrapper = Wrappers.lambdaUpdate();
+            updateQueryWrapper.set(DelOutboundCompleted::getVersion, uuidList.get(0));
+            updateQueryWrapper.in(DelOutboundCompleted::getId, ids);
+            this.delOutboundCompletedService.update(updateQueryWrapper);
         });
+        if(uuidList.get(0) == null){
+            return;
+        }
+        logger.debug("开始执行任务 - 提审 版本"+uuidList.get(0));
+        // 查询初始化的任务执行
+        LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
+        queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
+        queryWrapper.eq(DelOutboundCompleted::getVersion, uuidList.get(0));
+        handleBringVerify(queryWrapper);
     }
 
     /**

@@ -3,6 +3,7 @@ package com.szmsd.delivery.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -293,4 +294,15 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "订单推送状态(大货) null 未推送 1.已推送wms 2.推送失败")
     private String pushOrderState;
+
+    @ApiModelProperty(value = "妥投时间")
+    @Excel(name = "妥投时间")
+    private Date deliveredDime;
+
+    @ApiModelProperty(value = "时间差")
+    @Excel(name = "时间差  ")
+    private Integer timeDifference;
+
+    @ApiModelProperty(value = "亚马逊物流服务id")
+    private String amazonLogisticsRouteId;
 }

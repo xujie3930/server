@@ -374,7 +374,20 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                     Date latestDate = trackList.stream().map(DelTrack::getTrackingTime).max((d1, d2) -> d1.compareTo(d2)).orElse(null);
                     updateDelOutbound.setTrackingTime(latestDate);
                     updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
+
+
+                   if (delTrack.getTrackingStatus().equals("Delivered")){
+                       Date deliveredDime = trackList.stream().map(DelTrack::getTrackingTime).max((d1, d2) -> d1.compareTo(d2)).orElse(null);
+                      Date shipmentsTime =delOutbound.getShipmentsTime();
+                      if (deliveredDime!=null&&shipmentsTime!=null){
+                          long timeDifference=(deliveredDime.getTime()-shipmentsTime.getTime())/(24*60*60*1000);
+                          updateDelOutbound.setDeliveredDime(deliveredDime);
+                          updateDelOutbound.setTimeDifference(Integer.parseInt(String.valueOf(timeDifference)));
+                      }
+                   }
                     delOutboundMapper.updateById(updateDelOutbound);
+
+
                 }
             }
         }

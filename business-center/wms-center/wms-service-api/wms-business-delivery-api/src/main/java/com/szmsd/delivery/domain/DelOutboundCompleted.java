@@ -71,4 +71,7 @@ public class DelOutboundCompleted extends BaseEntity {
 
     @ApiModelProperty(value = "下一次处理时间")
     private Date nextHandleTime;
+
+    @ApiModelProperty(value = "uuid")
+    private String uuid;
 }

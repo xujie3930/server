@@ -164,4 +164,8 @@ public class DelOutboundVO implements Serializable {
 
     @ApiModelProperty(value = "是否上传箱标")
     private String uploadBoxLabel;
+
+
+    @ApiModelProperty(value = "亚马逊物流服务id")
+    private String amazonLogisticsRouteId;
 }
