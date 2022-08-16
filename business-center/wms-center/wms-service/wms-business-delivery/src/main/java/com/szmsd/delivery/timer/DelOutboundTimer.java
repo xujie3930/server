@@ -194,7 +194,7 @@ public class DelOutboundTimer {
             }
             List<Long> ids = delOutboundCompletedList.stream().map( DelOutboundCompleted::getId).collect(Collectors.toList());
             LambdaUpdateWrapper<DelOutboundCompleted> updateQueryWrapper = Wrappers.lambdaUpdate();
-            updateQueryWrapper.set(DelOutboundCompleted::getVersion, uuidList.get(0));
+            updateQueryWrapper.set(DelOutboundCompleted::getUuid, uuidList.get(0));
             updateQueryWrapper.in(DelOutboundCompleted::getId, ids);
             this.delOutboundCompletedService.update(updateQueryWrapper);
         });
@@ -206,7 +206,7 @@ public class DelOutboundTimer {
         LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
         queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
-        queryWrapper.eq(DelOutboundCompleted::getVersion, uuidList.get(0));
+        queryWrapper.eq(DelOutboundCompleted::getUuid, uuidList.get(0));
         handleBringVerify(queryWrapper);
     }
 
