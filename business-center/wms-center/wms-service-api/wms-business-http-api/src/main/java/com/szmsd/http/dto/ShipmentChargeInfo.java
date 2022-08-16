@@ -73,4 +73,6 @@ public class ShipmentChargeInfo implements Serializable {
 
     @JSONField(name = "package")
     private PricingPackageInfo packageInfo;
+    //亚马逊物流服务id
+    private String amazonLogisticsRouteId;
 }
