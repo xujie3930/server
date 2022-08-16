@@ -30,6 +30,7 @@ public class AsyncConfig implements AsyncConfigurer {
         // 核心线程数量
         int corePoolSize = availableProcessors * 4;
         int maximumPoolSize = availableProcessors * 5;
+        executor.setAllowCoreThreadTimeOut(true);
         // 配置核心线程数
         executor.setCorePoolSize(corePoolSize);
         // 配置最大线程数
