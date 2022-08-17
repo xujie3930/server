@@ -132,7 +132,7 @@ public class DelOutboundCompletedServiceImpl extends ServiceImpl<DelOutboundComp
         // 修改状态为失败
         modifyDelOutboundCompleted.setState(DelOutboundCompletedStateEnum.FAIL.getCode());
         if (remark.length() > 500) {
-            remark = remark.substring(0, 500);
+            remark = remark.substring(0, 200);
         }
         modifyDelOutboundCompleted.setRemark(remark);
         // 处理次数累加，下一次处理时间 = 系统当前时间 + 5

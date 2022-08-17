@@ -184,6 +184,9 @@ public class HttpClientHelper {
     public static HttpResponseBody httpPost(String url, String requestBody, Map<String, String> headerMap) {
         return execute(new HttpPost(url), requestBody, headerMap);
     }
+    public static HttpResponseBody httpPost(String url, String requestBody, Map<String, String> headerMap, Integer timeout) {
+        return execute(new HttpPost(url), requestBody, headerMap, timeout);
+    }
 
     /**
      * 执行 http post 请求，这里支持表单的请求
@@ -309,8 +312,11 @@ public class HttpClientHelper {
         }
         return "";
     }
-
     public static HttpResponseBody execute(HttpEntityEnclosingRequestBase request, String requestBody, Map<String, String> headerMap) {
+        return execute(request, requestBody, headerMap, null);
+    }
+
+    public static HttpResponseBody execute(HttpEntityEnclosingRequestBase request, String requestBody, Map<String, String> headerMap, Integer timeout) {
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
         try {
@@ -318,6 +324,13 @@ public class HttpClientHelper {
             //添加http头信息
             setHeader(request, headerMap);
             setRaw(request, requestBody);
+            if(timeout != null){
+                RequestConfig requestConfig = RequestConfig.custom()
+                        .setConnectTimeout(timeout).setSocketTimeout(timeout).build();
+                request.setConfig(requestConfig);
+            }
+
+
             response = httpClient.execute(request);
             int status = response.getStatusLine().getStatusCode();
             if (status == HttpStatus.SC_OK) {
@@ -336,6 +349,9 @@ public class HttpClientHelper {
             }
             return new HttpResponseBody.HttpResponseBodyWrapper(status, result);
         } catch (Exception e) {
+            if(e instanceof  org.apache.http.conn.ConnectTimeoutException && timeout != null){
+                throw new RuntimeException(e);
+            }
             try {
                 if (null != response)
                     EntityUtils.consume(response.getEntity());
