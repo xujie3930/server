@@ -809,6 +809,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             response.setOrderNo(orderNo);
             return response;
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(e.getMessage(), e);
             // 返回异常错误信息
             response.setStatus(false);
