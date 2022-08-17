@@ -101,6 +101,7 @@ public abstract class AbstractDomainToken implements DomainToken {
         String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
         long refreshTokenExpiresIn = this.domainTokenValue.getRefreshTokenExpiresIn();
         this.redisTemplate.opsForValue().set(wrapRefreshTokenKey, tokenValue.getRefreshToken(), refreshTokenExpiresIn, TimeUnit.SECONDS);
+        logger.info("授权后获取token的信息：{}",tokenValue);
     }
 
     private String getAccessToken() {

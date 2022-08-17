@@ -291,6 +291,7 @@ public class HttpClientHelper {
                 url = url + paramsBuilder.toString();
             }
         }
+        log.error("获取token的地址,用于页面登录：{}",url);
         return execute(new HttpGet(url), requestBody, headerMap);
     }
 
