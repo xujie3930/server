@@ -42,6 +42,8 @@ public class RedirectUriController {
     })
     public R<String> redirectUri(@RequestParam(value = "state") String state,
                                  @RequestParam(value = "code") String code) {
+        logger.info("回调参数","state"+ state);
+        logger.info("回调参数","code"+ code);
         String wrapRedirectUriKey = RedirectUriUtil.wrapRedirectUriKey(state);
         // 设置到缓存中，有效期1小时
         this.redisTemplate.opsForValue().set(wrapRedirectUriKey, code, 1, TimeUnit.HOURS);
