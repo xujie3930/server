@@ -28,15 +28,15 @@ public class AsyncConfig implements AsyncConfigurer {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        int corePoolSize = availableProcessors * 4;
-        int maximumPoolSize = availableProcessors * 5;
+        int corePoolSize = availableProcessors * 6;
+        int maximumPoolSize = availableProcessors * 6;
         executor.setAllowCoreThreadTimeOut(true);
         // 配置核心线程数
         executor.setCorePoolSize(corePoolSize);
         // 配置最大线程数
         executor.setMaxPoolSize(maximumPoolSize);
         // 配置队列大小
-        executor.setQueueCapacity(2024);
+        executor.setQueueCapacity(Integer.MAX_VALUE);
         // 线程最大空闲时间
         executor.setKeepAliveSeconds(300);
         // 配置线程池中的线程的名称前缀
