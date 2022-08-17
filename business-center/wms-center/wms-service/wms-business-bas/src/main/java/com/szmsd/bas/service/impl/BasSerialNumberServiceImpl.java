@@ -129,7 +129,7 @@ public class BasSerialNumberServiceImpl extends ServiceImpl<BasSerialNumberMappe
         String key = applicationName + ":serialnumber:" + code;
         RLock lock = redissonClient.getLock(key);
         // time 5 seconds
-        long time = 5;
+        long time = 120;
         TimeUnit timeUnit = TimeUnit.SECONDS;
         BasSerialNumber serialNumber = null;
         try {
