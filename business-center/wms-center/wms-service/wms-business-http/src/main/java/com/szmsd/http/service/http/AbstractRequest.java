@@ -178,6 +178,10 @@ abstract class AbstractRequest extends BaseRequest {
     }
 
     HttpResponseBody httpResponseBodySingle(String warehouseCode, String urlGroupName, UrlConfig urlConfig, String api, Object object, HttpMethod httpMethod, Object... pathVariable) {
+        return httpResponseBodySingle(warehouseCode, urlGroupName, urlConfig, api, object, null, httpMethod, pathVariable);
+    }
+
+    HttpResponseBody httpResponseBodySingle(String warehouseCode, String urlGroupName, UrlConfig urlConfig, String api, Object object, Integer timeout, HttpMethod httpMethod, Object... pathVariable) {
         String url = urlConfig.getUrl() + this.getApi(urlConfig, api);
         if (url.contains("{")) {
             url = MessageFormat.format(url, pathVariable);
@@ -187,7 +191,7 @@ abstract class AbstractRequest extends BaseRequest {
         Date requestTime = new Date();
         HttpResponseBody responseBody;
         if (HttpMethod.POST.equals(httpMethod)) {
-            responseBody = HttpClientHelper.httpPost(url, requestBody, headerMap);
+            responseBody = HttpClientHelper.httpPost(url, requestBody, headerMap, timeout);
         } else if (HttpMethod.PUT.equals(httpMethod)) {
             responseBody = HttpClientHelper.httpPut(url, requestBody, headerMap);
         } else if (HttpMethod.DELETE.equals(httpMethod)) {
@@ -276,6 +280,9 @@ abstract class AbstractRequest extends BaseRequest {
     HttpResponseBody httpRequestBody(String warehouseCode, String api, Object object, HttpMethod httpMethod, Object... pathVariable) {
         return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> httpResponseBodySingle(warehouseCode, urlGroupName, urlConfig, api, object, httpMethod, pathVariable));
     }
+    HttpResponseBody httpRequestBody(String warehouseCode, String api, Object object, Integer timeout, HttpMethod httpMethod, Object... pathVariable) {
+        return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> httpResponseBodySingle(warehouseCode, urlGroupName, urlConfig, api, object, timeout, httpMethod, pathVariable));
+    }
 
     protected String httpRequest(String warehouseCode, String api, Object object, HttpMethod httpMethod, Object... pathVariable) {
         return this.httpRequestBody(warehouseCode, api, object, httpMethod, pathVariable).getBody();
@@ -307,6 +314,10 @@ abstract class AbstractRequest extends BaseRequest {
 
     protected HttpResponseBody httpPostBody(String warehouseCode, String api, Object object) {
         return this.httpRequestBody(warehouseCode, api, object, HttpMethod.POST);
+    }
+
+    protected HttpResponseBody httpPostBody(String warehouseCode, String api, Object object, Integer timeout) {
+        return this.httpRequestBody(warehouseCode, api, object, timeout, HttpMethod.POST);
     }
 
     protected HttpResponseBody httpGetBody(String warehouseCode, String api, Object object,  Object... pathVariable) {
