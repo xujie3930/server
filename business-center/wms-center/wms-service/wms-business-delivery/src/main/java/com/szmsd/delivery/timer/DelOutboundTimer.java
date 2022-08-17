@@ -56,7 +56,7 @@ public class DelOutboundTimer {
      */
     @Async
     // 秒域 分域 时域 日域 月域 周域 年域
-    @Scheduled(cron = "0 * * * * ?")
+    //@Scheduled(cron = "0 * * * * ?")
     public void processing() {
         String key = applicationName + ":DelOutboundTimer:processing";
         this.doWorker(key, () -> {
@@ -74,7 +74,7 @@ public class DelOutboundTimer {
      * 5分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 */5 * * * ?")
+    //@Scheduled(cron = "0 */5 * * * ?")
     public void processingFail() {
         String key = applicationName + ":DelOutboundTimer:processingFail";
         this.doWorker(key, () -> {
@@ -97,7 +97,7 @@ public class DelOutboundTimer {
      */
     @Async
     // 秒域 分域 时域 日域 月域 周域 年域
-    @Scheduled(cron = "0 * * * * ?")
+    //@Scheduled(cron = "0 * * * * ?")
     public void completed() {
         logger.debug("开始执行任务 - 处理完成的单据");
         String key = applicationName + ":DelOutboundTimer:completed";
@@ -116,7 +116,7 @@ public class DelOutboundTimer {
      * 3分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 */3 * * * ?")
+    //@Scheduled(cron = "0 */3 * * * ?")
     public void completedFail() {
         logger.debug("开始执行任务 - 处理完成失败的单据");
         String key = applicationName + ":DelOutboundTimer:completedFail";
@@ -139,7 +139,7 @@ public class DelOutboundTimer {
      * 每分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 * * * * ?")
+    //@Scheduled(cron = "0 * * * * ?")
     public void cancelled() {
         logger.debug("开始执行任务 - 处理取消的单据");
         String key = applicationName + ":DelOutboundTimer:cancelled";
@@ -158,7 +158,7 @@ public class DelOutboundTimer {
      * 5分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 */5 * * * ?")
+    //@Scheduled(cron = "0 */5 * * * ?")
     public void cancelledFail() {
         logger.debug("开始执行任务 - 处理取消失败的单据");
         String key = applicationName + ":DelOutboundTimer:cancelledFail";
@@ -177,7 +177,7 @@ public class DelOutboundTimer {
      * 每分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 * * * * ?")
+    //@Scheduled(cron = "0 * * * * ?")
     public void bringVerify() {
         String key = applicationName + ":DelOutboundTimer:bringVerify";
         final List<String> uuidList = new ArrayList<>();
@@ -214,7 +214,7 @@ public class DelOutboundTimer {
      * 5分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 */5 * * * ?")
+    //@Scheduled(cron = "0 */5 * * * ?")
     public void bringVerifyFail() {
         logger.debug("开始执行任务 - 提审");
         String key = applicationName + ":DelOutboundTimer:bringVerifyFail";
@@ -233,7 +233,7 @@ public class DelOutboundTimer {
      * 每分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 * * * * ?")
+    //@Scheduled(cron = "0 * * * * ?")
     public void shipmentPacking() {
         logger.debug("开始执行任务 - 核重");
         String key = applicationName + ":DelOutboundTimer:shipmentPacking";
@@ -250,7 +250,7 @@ public class DelOutboundTimer {
      * 5分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 */5 * * * ?")
+    //@Scheduled(cron = "0 */5 * * * ?")
     public void shipmentPackingFail() {
         logger.debug("开始执行任务 - 核重");
         String key = applicationName + ":DelOutboundTimer:shipmentPackingFail";
