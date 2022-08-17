@@ -69,6 +69,7 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
                 try {
                     delOutbound = this.delOutboundService.insertDelOutbound(dto);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     delOutbound = new DelOutboundAddResponse();
                     // 返回异常错误信息
                     delOutbound.setStatus(false);
