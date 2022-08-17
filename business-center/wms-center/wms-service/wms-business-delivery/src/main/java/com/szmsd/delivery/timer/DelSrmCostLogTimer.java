@@ -38,7 +38,7 @@ public class DelSrmCostLogTimer {
      */
     @Async
     // 秒域 分域 时域 日域 月域 周域 年域
-    //@Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void srmRequest() {
         // 外层锁，保证定时任务只有一个服务调用
         String key = applicationName + ":DelSrmCostLogTimer:srmRequest";

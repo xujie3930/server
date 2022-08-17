@@ -44,7 +44,7 @@ public class PackageTransferDelOutboundTimer {
      */
     @Async
     // 秒域 分域 时域 日域 月域 周域 年域
-    //@Scheduled(cron = "0 0 12,19 * * ?")
+    @Scheduled(cron = "0 0 12,19 * * ?")
     public void processing() {
         String key = applicationName + ":PackageTransferDelOutboundTimer:processing";
         this.doWorker(key, () -> {

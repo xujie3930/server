@@ -38,7 +38,7 @@ public class DelCk1RequestLogTimer {
      */
     @Async
     // 秒域 分域 时域 日域 月域 周域 年域
-    //@Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void ck1Request() {
         // 外层锁，保证定时任务只有一个服务调用
         String key = applicationName + ":DelCk1RequestLogTimer:ck1Request";
