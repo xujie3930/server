@@ -16,6 +16,7 @@ public class BusinessAsyncUncaughtExceptionHandler implements AsyncUncaughtExcep
 
     @Override
     public void handleUncaughtException(Throwable throwable, Method method, Object... params) {
+        throwable.printStackTrace();
         logger.error("TASK Exception message - " + throwable.getMessage());
         logger.error("Method name - " + method.getName());
         for (Object param : params) {
