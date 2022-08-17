@@ -38,10 +38,11 @@ public class RedirectUriController {
     @ApiOperation(value = "HTTP回调接收接口 - #1", position = 100)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "state", value = "回调状态"),
-            @ApiImplicitParam(name = "code", value = "授权校验码", required = true)
+            @ApiImplicitParam(name = "client_id", value = "授权校验码", required = true)
     })
     public R<String> redirectUri(@RequestParam(value = "state") String state,
                                  @RequestParam(value = "client_id") String code) {
+        System.out.println("进去。。。。。。。。。俊");
         String wrapRedirectUriKey = RedirectUriUtil.wrapRedirectUriKey(state);
         logger.info("测试回调是否进入：{}");
         // 设置到缓存中，有效期1小时
