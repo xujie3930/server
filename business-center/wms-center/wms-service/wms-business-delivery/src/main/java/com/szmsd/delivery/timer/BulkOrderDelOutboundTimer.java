@@ -53,7 +53,7 @@ public class BulkOrderDelOutboundTimer {
      */
     @Async
     // 秒域 分域 时域 日域 月域 周域 年域
-    //@Scheduled(cron = " 0 */1 * * * ?")
+    @Scheduled(cron = " 0 */1 * * * ?")
     public void processing() {
         String key = applicationName + ":BulkOrderDelOutboundTimer:processing";
         this.doWorker(key, () -> {
