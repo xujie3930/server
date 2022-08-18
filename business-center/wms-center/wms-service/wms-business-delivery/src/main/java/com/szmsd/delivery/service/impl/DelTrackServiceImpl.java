@@ -300,9 +300,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         delTrack.setNo(item.getNo());
                         maps.put("carrierKeywordType","description");
                         maps.put("originaKeywords",item.getDescription());
-                        log.info("DelTrackServiceImpl查询关键次传递参数：{}", JSON.toJSONString(maps));
+                        log.info("DelTrackServiceImpl查询关键次传递参数description：{}", JSON.toJSONString(maps));
                         Map CarrierKeywordMaps = basCarrierKeywordFeignService.selectCarrierKeyword(maps).getData();
-                        log.info("DelTrackServiceImpl关键词响应结果响应结果：{}", JSON.toJSONString(CarrierKeywordMaps));
+                        log.info("DelTrackServiceImpl关键词响应结果响应结果description：{}", JSON.toJSONString(CarrierKeywordMaps));
                         if (CarrierKeywordMaps==null){
                             delTrack.setDescription(item.getDescription());
                             delTrack.setDmDescription(item.getDescription());
@@ -319,8 +319,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         if (itemLocation != null) {
                             maps.put("carrierKeywordType","display");
                             maps.put("originaKeywords",itemLocation.getDisplay());
-
+                            log.info("DelTrackServiceImpl查询关键次传递参数display：{}", JSON.toJSONString(maps));
                             Map CarrierKeywordMap = basCarrierKeywordFeignService.selectCarrierKeyword(maps).getData();
+                            log.info("DelTrackServiceImpl关键词响应结果响应结果display：{}", JSON.toJSONString(CarrierKeywordMap));
                             if (CarrierKeywordMap==null){
                                 delTrack.setDisplay(itemLocation.getDisplay());
                                 delTrack.setDmDisplay(itemLocation.getDisplay());
