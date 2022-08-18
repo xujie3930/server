@@ -35,8 +35,8 @@
         WHERE
             a.carrier_code = #{map.carrierCode}
           AND a.STATUS = 0
-          AND carrier_keyword_type = #{map.carrierKeywordType}
-          AND origina_keywords = #{map.originaKeywords}
+          AND b.carrier_keyword_type = #{map.carrierKeywordType}
+          AND b.origina_keywords = #{map.originaKeywords}
             LIMIT 0,1
 
     </select>
