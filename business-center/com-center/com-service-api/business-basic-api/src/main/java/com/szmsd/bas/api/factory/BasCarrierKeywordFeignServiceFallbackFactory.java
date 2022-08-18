@@ -19,7 +19,7 @@ public class BasCarrierKeywordFeignServiceFallbackFactory implements FallbackFac
 
             @Override
             public R<Map> selectCarrierKeyword(Map map) {
-                return null;
+                return R.convertResultJson(throwable);
             }
         };
     }
