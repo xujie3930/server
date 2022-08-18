@@ -300,7 +300,9 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         delTrack.setNo(item.getNo());
                         maps.put("carrierKeywordType","description");
                         maps.put("originaKeywords",item.getDescription());
+                        log.info("DelTrackServiceImpl查询关键次传递参数：{}", JSON.toJSONString(maps));
                         Map CarrierKeywordMaps = basCarrierKeywordFeignService.selectCarrierKeyword(maps).getData();
+                        log.info("DelTrackServiceImpl关键词响应结果响应结果：{}", JSON.toJSONString(CarrierKeywordMaps));
                         if (CarrierKeywordMaps==null){
                             delTrack.setDescription(item.getDescription());
                             delTrack.setDmDescription(item.getDescription());
