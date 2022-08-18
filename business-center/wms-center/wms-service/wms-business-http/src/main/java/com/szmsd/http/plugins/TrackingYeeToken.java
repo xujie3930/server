@@ -45,9 +45,9 @@ public class TrackingYeeToken extends AbstractDomainToken {
         authorizeRequestParams.put("state", stateKey);
         String authorizeRequestBody = JSON.toJSONString(authorizeRequestParams);
         HttpResponseBody authorizeHttpResponseBody;
-        logger.info("请求入参authorizeRequestBody", authorizeRequestBody);
-        logger.info("请求入参authorizeUrl", authorizeUrl);
-        logger.info("请求入参authorizeRequestHeaders",domainTokenValue.getAuthorizeRequestHeaders());
+        logger.info("请求入参authorizeRequestBody：{}", authorizeRequestBody);
+        logger.info("请求入参authorizeUrl：{}", authorizeUrl);
+        logger.info("请求入参authorizeRequestHeaders：{}",domainTokenValue.getAuthorizeRequestHeaders());
         // https://auth.trackingyee.com/connect/authorize?response_type=code&client_id=YTdjNmJiZTQtMTU5MC00MjViLTg5MzEtZmNkNmQ1ZDlkNGJi&redirect_uri=http://183.3.221.136:22221/api/wms-http/api/redirect/uri&scope=basic&state=ok
         if (HttpMethod.GET.equals(authorizeHttpMethod)) {
             authorizeHttpResponseBody = HttpClientHelper.httpGet(authorizeUrl, authorizeRequestBody, domainTokenValue.getAuthorizeRequestHeaders());
@@ -78,7 +78,7 @@ public class TrackingYeeToken extends AbstractDomainToken {
                 this.redisTemplate.delete(wrapRedirectUriKey);
             }
             // 等待1分钟
-            if (delayState && (System.currentTimeMillis() - currentTimeMillis > 60000)) {
+            if (delayState && (System.currentTimeMillis() - currentTimeMillis > 180000)) {
                 // 超时中断
                 delayState = false;
             }
