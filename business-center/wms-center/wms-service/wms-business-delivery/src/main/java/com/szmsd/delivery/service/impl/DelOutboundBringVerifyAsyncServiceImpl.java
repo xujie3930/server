@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,6 +90,7 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
 
     @Override
     public void bringVerifyAsync(DelOutbound delOutbound, AsyncThreadObject asyncThreadObject) {
+        StopWatch stopWatch = new StopWatch();
         Thread thread = Thread.currentThread();
         // 开始时间
         long startTime = System.currentTimeMillis();
@@ -97,7 +99,11 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
         if (isAsyncThread) {
             asyncThreadObject.loadTid();
         }
+        stopWatch.start();
         DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
         BringVerifyEnum currentState;
         String bringVerifyState = delOutbound.getBringVerifyState();
         if (StringUtils.isEmpty(bringVerifyState)) {

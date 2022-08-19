@@ -24,9 +24,12 @@ import com.szmsd.http.dto.PricedProductInServiceCriteria;
 import com.szmsd.http.vo.PricedProduct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,6 +40,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
+    private Logger logger = LoggerFactory.getLogger(DelOutboundDocServiceImpl.class);
 
     @Autowired
     private IDelOutboundService delOutboundService;
@@ -85,6 +89,7 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
 
     @Override
     public List<DelOutboundAddResponse> add(List<DelOutboundDto> list) {
+        StopWatch stopWatch = new StopWatch();
 
         // 批量创建出库单
         // List<DelOutboundAddResponse> responses = this.delOutboundService.insertDelOutbounds(list);
@@ -98,8 +103,10 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
             // 批量提审出库单
             DelOutboundBringVerifyDto bringVerifyDto = new DelOutboundBringVerifyDto();
             bringVerifyDto.setIds(ids);
+            stopWatch.start();
             List<DelOutboundBringVerifyVO> bringVerifyVOList = this.delOutboundBringVerifyService.bringVerify(bringVerifyDto);
-
+            stopWatch.stop();
+            logger.info(">>>>>[创建出库单]this.delOutboundBringVerifyService.bringVerify(bringVerifyDto)"+stopWatch.getLastTaskTimeMillis());
             Map<String, DelOutboundBringVerifyVO> bringVerifyVOMap = new HashMap<>();
             for (DelOutboundBringVerifyVO bringVerifyVO : bringVerifyVOList) {
                 bringVerifyVOMap.put(bringVerifyVO.getOrderNo(), bringVerifyVO);
