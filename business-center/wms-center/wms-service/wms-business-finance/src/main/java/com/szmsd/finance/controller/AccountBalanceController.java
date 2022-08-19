@@ -32,7 +32,7 @@ public class AccountBalanceController extends FssBaseController {
     @GetMapping("/listPage")
     @AutoValue
     public TableDataInfo listPage(AccountBalanceDTO dto) {
-        startPage();
+        startPage(dto);
         List<AccountBalance> list = accountBalanceService.listPage(dto);
         return getDataTable(list);
     }
