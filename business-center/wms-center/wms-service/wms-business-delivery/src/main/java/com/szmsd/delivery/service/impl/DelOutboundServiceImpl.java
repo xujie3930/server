@@ -97,6 +97,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -626,6 +627,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     private DelOutboundAddResponse createDelOutbound(DelOutboundDto dto) {
+        StopWatch stopWatch = new StopWatch();
         logger.info(">>>>>[创建出库单]1.0 开始创建出库单");
         TimeInterval timer = DateUtil.timer();
         DelOutboundAddResponse response = new DelOutboundAddResponse();
@@ -671,42 +673,57 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(dto.getReassignType())) {
                 prefix = "RE" + prefix;
             }
+            long shettTime = System.currentTimeMillis();
+
             delOutbound.setOrderNo(orderNo = (prefix + sellerCode + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
+            logger.info(">>>>>[创建出库单]3.0创建出库单流水号时间，耗时{}", System.currentTimeMillis()-shettTime);
+
+
             // 默认状态
             delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
             // 默认异常状态
             delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
-            logger.info(">>>>>[创建出库单]3.1 出库单对象赋值，生成流水号，{}", timer.intervalRestart());
+            logger.info(">>>>>[创建出库单{}]3.1 出库单对象赋值，生成流水号，{}", delOutbound.getOrderNo(), timer.intervalRestart());
             // 计算发货类型
+            long shipmentTypeTime = System.currentTimeMillis();
+
             delOutbound.setShipmentType(this.buildShipmentType(dto));
-            logger.info(">>>>>[创建出库单]3.2 计算发货类型，{}", timer.intervalRestart());
+            logger.info(">>>>>[创建出库单{}]3.1.5sku属性获取时间，耗时{}", delOutbound.getOrderNo(), System.currentTimeMillis()-shipmentTypeTime);
+
+            logger.info(">>>>>[创建出库单{}]3.2 计算发货类型，{}", delOutbound.getOrderNo(), timer.intervalRestart());
             // 计算包裹大小
             this.countPackageSize(delOutbound, dto);
-            logger.info(">>>>>[创建出库单]3.3 计算包裹大小，{}", timer.intervalRestart());
+            logger.info(">>>>>[创建出库单{}]3.3 计算包裹大小，{}", delOutbound.getOrderNo(), timer.intervalRestart());
             // 保存出库单
             int insert = baseMapper.insert(delOutbound);
-            logger.info(">>>>>[创建出库单]3.4 保存出库单，{}", timer.intervalRestart());
+            logger.info(">>>>>[创建出库单{}]3.4 保存出库单，{}", delOutbound.getOrderNo(), timer.intervalRestart());
             if (insert == 0) {
                 throw new CommonException("400", "保存出库单失败！");
             }
             DelOutboundOperationLogEnum.CREATE.listener(delOutbound);
             // 保存地址
             this.saveAddress(dto, delOutbound.getOrderNo());
-            logger.info(">>>>>[创建出库单]3.5 保存地址信息，{}", timer.intervalRestart());
+            logger.info(">>>>>[创建出库单{}]3.5 保存地址信息，{}", delOutbound.getOrderNo(), timer.intervalRestart());
 
             if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
                 //如果明细中商标为空，系统自动生成
+                stopWatch.start();
 
                 for (DelOutboundDetailDto detailDto : dto.getDetails()) {
                     if (StringUtils.isEmpty(detailDto.getBoxMark())) {
                         detailDto.setBoxMark(this.serialNumberClientService.generateNumber(SerialNumberConstant.BOX_MARK));
                     }
                 }
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]3.55一票多件，{}, 耗时{}", delOutbound.getOrderNo(), timer.intervalRestart(), stopWatch.getLastTaskInfo().getTimeMillis());
+
             }
 
             // 保存明细
+            stopWatch.start();
             this.saveDetail(dto, delOutbound.getOrderNo());
-            logger.info(">>>>>[创建出库单]3.6 保存明细信息，{}", timer.intervalRestart());
+            stopWatch.stop();
+            logger.info(">>>>>[创建出库单{}]3.6 保存明细信息，{}, 耗时{}", delOutbound.getOrderNo(), timer.intervalRestart(), stopWatch.getLastTaskInfo().getTimeMillis());
 
 
             if(DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())){
@@ -873,6 +890,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 转运特殊处理
         List<DelOutboundDetailDto> details = dto.getDetails();
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+            logger.info(">>>>>[创建出库单]3.4.5  计算包裹大小，转运特殊处理");
+
             double length = Utils.defaultValue(dto.getLength());
             double width = Utils.defaultValue(dto.getWidth());
             double height = Utils.defaultValue(dto.getHeight());
@@ -912,6 +931,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutbound.setWeight(weight.doubleValue());
 
         }else {
+            logger.info(">>>>>[创建出库单]3.4.5  计算包裹大小，转运特殊处理else。。。。。");
+
             // 查询包材的信息
             Set<String> skus = new HashSet<>();
             for (DelOutboundDetailDto detail : details) {

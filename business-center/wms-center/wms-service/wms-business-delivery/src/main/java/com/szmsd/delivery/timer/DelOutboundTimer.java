@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -177,8 +178,10 @@ public class DelOutboundTimer {
      * 每分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0/5 * * * * ?")
     public void bringVerify() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         String key = applicationName + ":DelOutboundTimer:bringVerify";
         final List<String> uuidList = new ArrayList<>();
         uuidList.add(UUID.fastUUID().toString());
@@ -199,6 +202,9 @@ public class DelOutboundTimer {
             updateQueryWrapper.in(DelOutboundCompleted::getId, ids);
             this.delOutboundCompletedService.update(updateQueryWrapper);
         });
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单]bringVerify处理200条数据{}"+stopWatch.getLastTaskTimeMillis(), uuidList);
+
         if(uuidList.get(0) == null){
             return;
         }
@@ -283,7 +289,7 @@ public class DelOutboundTimer {
     }
 
     public void handleBringVerify(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTaskAdapter.asyncBringVerify(orderNo, id), 150);
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTaskAdapter.asyncBringVerify(orderNo, id), 200);
     }
 
     public void handleShipmentPacking(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
@@ -298,7 +304,11 @@ public class DelOutboundTimer {
     private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer, int limit, boolean needLock) {
         // 一次处理200
         queryWrapper.last("limit " + limit);
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单]第二次查询出库临时表"+stopWatch.getLastTaskTimeMillis());
         if (CollectionUtils.isNotEmpty(delOutboundCompletedList)) {
             for (DelOutboundCompleted delOutboundCompleted : delOutboundCompletedList) {
                 if (needLock) {

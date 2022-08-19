@@ -107,6 +107,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.io.File;
 import java.io.IOException;
@@ -195,6 +196,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     private List<DelOutboundBringVerifyVO> bringVerifyProcess(List<DelOutbound> delOutboundList){
+        StopWatch stopWatch = new StopWatch();
+
         if (CollectionUtils.isEmpty(delOutboundList)) {
             throw new CommonException("400", "单据不存在");
         }
@@ -204,12 +207,17 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
                 packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
                 packageDeliveryConditions.setProductCode(delOutbound.getShipmentRule());
+                stopWatch.start();
                 R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]判断发货条件是否有效this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions)"+stopWatch.getLastTaskTimeMillis(), delOutbound.getOrderNo());
+
                 if(packageDeliveryConditionsR != null && packageDeliveryConditionsR.getCode() == 200){
                     if(packageDeliveryConditionsR.getData() == null || !"1".equals(packageDeliveryConditionsR.getData().getStatus())){
                         throw new CommonException("400", delOutbound.getShipmentRule()+ "物流服务未生效");
                     }
                 }
+
             }
             try {
                 if (Objects.isNull(delOutbound)) {
@@ -237,9 +245,19 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 /*AsyncThreadObject asyncThreadObject = AsyncThreadObject.build();
                 this.delOutboundBringVerifyAsyncService.bringVerifyAsync(delOutbound, asyncThreadObject);*/
                 // 增加出库单已取消记录，异步处理，定时任务
+
+                stopWatch.start();
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]创建出库临时表:"+stopWatch.getLastTaskTimeMillis(), delOutbound.getOrderNo());
+
+                stopWatch.start();
+
+
                 // 修改状态为提交中
                 this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]修改出库表为提审中:"+stopWatch.getLastTaskTimeMillis(), delOutbound.getOrderNo());
                 resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), true, "处理成功"));
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -265,27 +283,48 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public DelOutboundWrapperContext initContext(DelOutbound delOutbound) {
+        StopWatch stopWatch = new StopWatch();
+
         String orderNo = delOutbound.getOrderNo();
         String warehouseCode = delOutbound.getWarehouseCode();
         // 查询地址信息
+        stopWatch.start();
         DelOutboundAddress address = this.delOutboundAddressService.getByOrderNo(orderNo);
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单{}查询地址] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
         if (null == address) {
             // 普通出口需要收货地址
             if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())) {
                 throw new CommonException("400", "收货地址信息不存在");
             }
         }
+        stopWatch.start();
         // 查询sku信息
         List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单{}查询sku信息] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
+        stopWatch.start();
+
         // 查询仓库信息
         BasWarehouse warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
+        stopWatch.stop();
+
+        logger.info(">>>>>[创建出库单{}查询仓库信息] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
         if (null == warehouse) {
             throw new CommonException("400", "仓库信息不存在");
         }
         // 查询国家信息，收货地址所在的国家
         BasRegionSelectListVO country = null;
         if (null != address) {
+            stopWatch.start();
             R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(address.getCountryCode());
+            stopWatch.stop();
+
+            logger.info(">>>>>[创建出库单{}查询国家信息，收货地址所在的国家] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
             country = R.getDataAndException(countryR);
             if (null == country) {
                 throw new CommonException("400", "国家信息不存在");
@@ -303,7 +342,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             conditionQueryDto.setSkus(skus);
             // 转运出库的不查询sku明细信息
             if (!DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+                stopWatch.start();
                 productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                stopWatch.stop();
+
+                logger.info(">>>>>[创建出库单{}转运出库的不查询sku明细信息] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
                 if (CollectionUtils.isEmpty(productList)) {
                     throw new CommonException("400", "查询SKU信息失败");
                 }
@@ -668,11 +712,15 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 throw new CommonException("400", builder.toString());
             }
             try {
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
                 TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
                 transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
                 transferCallbackDTO.setLogisticsRouteId(shipmentService);
                 transferCallbackDTO.setTransferNumber(shipmentOrderResult.getMainTrackingNumber());
                 commonOrderFeignService.transferCallback(transferCallbackDTO);
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]转仓库回调 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
