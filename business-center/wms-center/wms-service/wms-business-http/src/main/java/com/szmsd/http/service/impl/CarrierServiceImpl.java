@@ -27,7 +27,7 @@ public class CarrierServiceImpl extends SaaSCarrierServiceAdminRequest implement
     @Override
     public ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails> shipmentOrder(CreateShipmentOrderCommand command) {
         //承运商接口超时时间
-        HttpResponseBody responseBody = httpPostBody(command.getWarehouseCode(), "shipment-order.create", command, 20000);
+        HttpResponseBody responseBody = httpPostBody(command.getWarehouseCode(), "shipment-order.create", command, 100);
         ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails> responseObject = new ResponseObject.ResponseObjectWrapper<>();
         if (HttpStatus.SC_OK == responseBody.getStatus()) {
             responseObject.setSuccess(true);
