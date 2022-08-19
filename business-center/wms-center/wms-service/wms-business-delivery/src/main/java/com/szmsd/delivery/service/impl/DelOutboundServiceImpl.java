@@ -2381,7 +2381,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         delOutboundDetailService.updateBatchById(dataDelOutboundDetailList);
 
+        int i = 0;
+        for (DelOutboundDetail detail: dataDelOutboundDetailList){
+            if("Completed".equals(detail.getOperationType())){
+                i++;
+            }
+        }
+        if(i == dataDelOutboundDetailList.size()){
+            //该订单全部接收完成后，调用PRC
+            ApplicationContext context = delOutboundBringVerifyService.initContext(this.getByOrderNo(dto.getOrderNo()));
+            ApplicationContainer applicationContainer = new ApplicationContainer(context, BringVerifyEnum.PRC_PRICING, BringVerifyEnum.PRODUCT_INFO, BringVerifyEnum.PRC_PRICING);
+            applicationContainer.action();
 
+        }
         return 1;
     }
 }
