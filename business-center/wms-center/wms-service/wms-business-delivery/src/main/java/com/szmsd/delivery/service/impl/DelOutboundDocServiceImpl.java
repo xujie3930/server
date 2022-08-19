@@ -94,7 +94,11 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         // 批量创建出库单
         // List<DelOutboundAddResponse> responses = this.delOutboundService.insertDelOutbounds(list);
         // 处理异常信息，出现异常让事务回滚
+        stopWatch.start();
+
         List<DelOutboundAddResponse> responses = this.addResponseList(list);
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单{}]完成总耗时{}"+responses.get(0).getOrderNo(), stopWatch.getLastTaskTimeMillis());
 
         // 获取出库单ID
         List<Long> ids = responses.stream().map(DelOutboundAddResponse::getId).filter(Objects::nonNull).collect(Collectors.toList());
@@ -106,7 +110,7 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
             stopWatch.start();
             List<DelOutboundBringVerifyVO> bringVerifyVOList = this.delOutboundBringVerifyService.bringVerify(bringVerifyDto);
             stopWatch.stop();
-            logger.info(">>>>>[创建出库单]this.delOutboundBringVerifyService.bringVerify(bringVerifyDto)"+stopWatch.getLastTaskTimeMillis());
+            logger.info(">>>>>[创建出库单{}]this.delOutboundBringVerifyService.bringVerify(bringVerifyDto)耗时{}"+responses.get(0).getOrderNo(), stopWatch.getLastTaskTimeMillis());
             Map<String, DelOutboundBringVerifyVO> bringVerifyVOMap = new HashMap<>();
             for (DelOutboundBringVerifyVO bringVerifyVO : bringVerifyVOList) {
                 bringVerifyVOMap.put(bringVerifyVO.getOrderNo(), bringVerifyVO);

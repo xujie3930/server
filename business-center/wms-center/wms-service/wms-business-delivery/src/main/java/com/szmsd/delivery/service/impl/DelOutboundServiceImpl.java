@@ -676,14 +676,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             long shettTime = System.currentTimeMillis();
 
             delOutbound.setOrderNo(orderNo = (prefix + sellerCode + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
-            logger.info(">>>>>[创建出库单]3.0创建出库单流水号时间，耗时{}", System.currentTimeMillis()-shettTime);
+            logger.info(">>>>>[创建出库单{}]3.0创建出库单流水号时间，耗时{}", delOutbound.getOrderNo(), System.currentTimeMillis()-shettTime);
 
 
             // 默认状态
             delOutbound.setState(DelOutboundStateEnum.REVIEWED.getCode());
             // 默认异常状态
             delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
-            logger.info(">>>>>[创建出库单{}]3.1 出库单对象赋值，生成流水号，{}", delOutbound.getOrderNo(), timer.intervalRestart());
+//            logger.info(">>>>>[创建出库单{}]3.1 出库单对象赋值，生成流水号，{}", delOutbound.getOrderNo(), timer.intervalRestart());
             // 计算发货类型
             long shipmentTypeTime = System.currentTimeMillis();
 
