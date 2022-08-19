@@ -192,11 +192,14 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             if (null == x.getAmount()) x.setAmount(BigDecimal.ZERO);
             // 负数
             String businessCategory = x.getBusinessCategory();
+            //费用类型，费用类型为汇率转换的也不能去转换负数
+            String chargeType=x.getChargeType();
             if (StringUtils.isNotBlank(businessCategory) && positiveNumber.contains(businessCategory)) {
                 x.setAmount(x.getAmount().abs());
-            } else {
+            } else if (!chargeType.equals("汇率转换充值")){
                 Optional.ofNullable(x.getAmount()).ifPresent(amount -> x.setAmount(amount.abs().negate()));
             }
+
         });
 
     }
