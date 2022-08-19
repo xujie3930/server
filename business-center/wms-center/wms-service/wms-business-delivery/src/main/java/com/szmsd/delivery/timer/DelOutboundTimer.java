@@ -50,6 +50,9 @@ public class DelOutboundTimer {
     @Autowired
     private DelOutboundTimerAsyncTaskAdapter delOutboundTimerAsyncTaskAdapter;
 
+    @Value("${thread.trialLimit}")
+    private int trialLimit;
+
     /**
      * 单据状态处理中
      * <p/>
@@ -190,7 +193,7 @@ public class DelOutboundTimer {
             queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
             queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
             queryWrapper.isNull(DelOutboundCompleted::getUuid);
-            queryWrapper.last("LIMIT 200");
+            queryWrapper.last("LIMIT "+trialLimit);
             List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
             if(delOutboundCompletedList.size() == 0){
                 uuidList.set(0, null);
@@ -289,7 +292,7 @@ public class DelOutboundTimer {
     }
 
     public void handleBringVerify(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTaskAdapter.asyncBringVerify(orderNo, id), 200);
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTaskAdapter.asyncBringVerify(orderNo, id), trialLimit);
     }
 
     public void handleShipmentPacking(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
