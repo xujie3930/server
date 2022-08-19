@@ -3,6 +3,7 @@ package com.szmsd.delivery.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -20,6 +21,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class AsyncConfig implements AsyncConfigurer {
     private final Logger logger = LoggerFactory.getLogger(AsyncConfig.class);
 
+    @Value("${thread.asyncExecutor}")
+    private int asyncExecutor;
     // 基础业务异步线程池
     @Override
     public Executor getAsyncExecutor() {
@@ -28,8 +31,11 @@ public class AsyncConfig implements AsyncConfigurer {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        int corePoolSize = availableProcessors * 6;
-        int maximumPoolSize = availableProcessors * 6;
+
+        int corePoolSize = asyncExecutor;
+        int maximumPoolSize = asyncExecutor;
+        logger.info("线程getAsyncExecutor启动量{}", availableProcessors);
+
         executor.setAllowCoreThreadTimeOut(true);
         // 配置核心线程数
         executor.setCorePoolSize(corePoolSize);
