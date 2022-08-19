@@ -1,6 +1,7 @@
 package com.szmsd.delivery.config;
 
 import cn.hutool.core.thread.NamedThreadFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -93,12 +94,14 @@ public class ThreadPoolExecutorConfiguration {
      */
     public static final String THREADPOOLEXECUTOR_SRM_REQUEST = "ThreadPoolExecutor-Srm-Request";
 
+    @Value("${thread.threadpoolexecutor}")
+    private int threadpoolexecutor;
 
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundReviewed() {
         // 核心线程数量
-        int corePoolSize = availableProcessors * 4;
-        int maximumPoolSize = availableProcessors * 4;
+        int corePoolSize = threadpoolexecutor;
+        int maximumPoolSize = threadpoolexecutor;
         // 队列
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
         // 核心和最大一致

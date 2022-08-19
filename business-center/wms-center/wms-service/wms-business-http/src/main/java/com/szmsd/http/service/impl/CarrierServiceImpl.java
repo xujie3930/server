@@ -9,6 +9,7 @@ import com.szmsd.http.service.ICarrierService;
 import com.szmsd.http.service.http.SaaSCarrierServiceAdminRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -20,6 +21,9 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class CarrierServiceImpl extends SaaSCarrierServiceAdminRequest implements ICarrierService {
 
+    @Value("${thread.carrierTimes}")
+    private int carrierTimes;
+
     public CarrierServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);
     }
@@ -27,7 +31,7 @@ public class CarrierServiceImpl extends SaaSCarrierServiceAdminRequest implement
     @Override
     public ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails> shipmentOrder(CreateShipmentOrderCommand command) {
         //承运商接口超时时间
-        HttpResponseBody responseBody = httpPostBody(command.getWarehouseCode(), "shipment-order.create", command, 1);
+        HttpResponseBody responseBody = httpPostBody(command.getWarehouseCode(), "shipment-order.create", command, carrierTimes);
         ResponseObject.ResponseObjectWrapper<ShipmentOrderResult, ProblemDetails> responseObject = new ResponseObject.ResponseObjectWrapper<>();
         if (HttpStatus.SC_OK == responseBody.getStatus()) {
             responseObject.setSuccess(true);
