@@ -15,7 +15,7 @@ public class DelOutboundBatchImportContext extends ImportContext<DelOutboundBatc
     protected CacheContext<String, String> countryCache;
     protected CacheContext<String, String> countryCodeCache;
     protected CacheContext<String, String> countryEnCache;
-    protected CacheContext<String, String> shipmentChannelCache;
+    protected CacheContext<String, String>  shipmentChannelCache;
     protected CacheContext<String, Boolean> confirmCache;
 
     public DelOutboundBatchImportContext(List<DelOutboundBatchImportDto> dataList,
@@ -36,7 +36,7 @@ public class DelOutboundBatchImportContext extends ImportContext<DelOutboundBatc
         }
         if (CollectionUtils.isNotEmpty(shipmentChannelList)) {
             for (BasSubWrapperVO vo : shipmentChannelList) {
-                this.shipmentChannelCache.put(vo.getSubName(), vo.getSubCode());
+                this.shipmentChannelCache.put(vo.getSubName(), vo.getSubValue());
             }
         }
         this.confirmCache.put("是", true);
