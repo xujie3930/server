@@ -78,7 +78,7 @@ public class TrackingYeeToken extends AbstractDomainToken {
                 this.redisTemplate.delete(wrapRedirectUriKey);
             }
             // 等待1分钟
-            if (delayState && (System.currentTimeMillis() - currentTimeMillis > 180000)) {
+            if (delayState && (System.currentTimeMillis() - currentTimeMillis > 60000)) {
                 // 超时中断
                 delayState = false;
             }
