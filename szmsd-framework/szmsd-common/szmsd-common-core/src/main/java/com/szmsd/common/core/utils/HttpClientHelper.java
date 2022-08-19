@@ -350,7 +350,9 @@ public class HttpClientHelper {
             }
             return new HttpResponseBody.HttpResponseBodyWrapper(status, result);
         } catch (Exception e) {
+            log.error("http异常"+e+":"+e.getMessage());
             if(e instanceof  org.apache.http.conn.ConnectTimeoutException && timeout != null){
+
                 throw new RuntimeException(e);
             }
             try {
