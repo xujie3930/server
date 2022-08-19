@@ -1,5 +1,6 @@
 package com.szmsd.finance.service;
 
+import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.finance.domain.AccountBalance;
@@ -14,7 +15,9 @@ import java.util.List;
  * @author liulei
  */
 public interface IAccountBalanceService {
-    List<AccountBalance> listPage(AccountBalanceDTO dto);
+    R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto);
+
+    List<AccountBalance> listPages(AccountBalanceDTO dto);
 
     List<AccountBalanceChange> recordListPage(AccountBalanceChangeDTO dto);
 

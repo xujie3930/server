@@ -1,5 +1,9 @@
 package com.szmsd.finance.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.plugin.annotation.AutoValue;
@@ -16,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author liulei
@@ -31,17 +36,16 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "分页查询账户余额信息")
     @GetMapping("/listPage")
     @AutoValue
-    public TableDataInfo listPage(AccountBalanceDTO dto) {
-        startPage(dto);
-        List<AccountBalance> list = accountBalanceService.listPage(dto);
-        return getDataTable(list);
+    public R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto) {
+
+        return accountBalanceService.listPage(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:list')")
     @ApiOperation(value = "查询账户余额信息")
     @PostMapping("/list")
     public R<List<AccountBalance>> list(@RequestBody AccountBalanceDTO dto) {
-        return R.ok(accountBalanceService.listPage(dto));
+        return R.ok(accountBalanceService.listPages(dto));
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:recordListPage')")

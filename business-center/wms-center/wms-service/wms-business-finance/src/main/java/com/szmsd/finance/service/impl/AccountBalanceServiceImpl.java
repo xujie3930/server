@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.google.common.base.Strings;
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.domain.ChargeLog;
@@ -101,7 +103,67 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     private InboundReceiptFeignService inboundReceiptFeignService;
 
     @Override
-    public List<AccountBalance> listPage(AccountBalanceDTO dto) {
+    public R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto) {
+        try {
+            LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
+            if (StringUtils.isNotEmpty(dto.getCusCode())) {
+                queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
+            }
+
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            List<String> sellerCodeList=null;
+            if (null != loginUser && !loginUser.getUsername().equals("admin")) {
+                String username = loginUser.getUsername();
+                sellerCodeList=accountBalanceMapper.selectsellerCode(username);
+
+                if (sellerCodeList.size()>0){
+                    queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+
+                }
+                if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
+                    queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
+                }
+
+            }
+            if (null != loginUser && loginUser.getUsername().equals("admin")){
+                sellerCodeList=accountBalanceMapper.selectsellerCodes();
+
+            }
+            //设置分页参数
+            PageHelper.startPage(dto.getPageNum(),dto.getPageSize());
+
+            List<AccountBalance> accountBalances = accountBalanceMapper.listPage(queryWrapper);
+
+
+
+
+            accountBalances.forEach(x -> {
+                Map<String, CreditUseInfo> creditUseInfoMap = iDeductionRecordService.queryTimeCreditUse( x.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+                Map<String, CreditUseInfo> needRepayCreditUseInfoMap = iDeductionRecordService.queryTimeCreditUse( x.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.CHECKED));
+                String currencyCode = x.getCurrencyCode();
+                BigDecimal creditUseAmount = Optional.ofNullable(creditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+                x.setCreditUseAmount(creditUseAmount);
+                BigDecimal needRepayCreditUseAmount = Optional.ofNullable(needRepayCreditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+                x.setNeedRepayCreditUseAmount(needRepayCreditUseAmount);
+            });
+            accountBalances.forEach(AccountBalance::showCredit);
+
+
+            //获取分页信息
+            PageInfo<AccountBalance> pageInfo=new PageInfo<>(accountBalances);
+            return R.ok(pageInfo);
+        }catch (Exception e){
+            e.printStackTrace();
+           return R.failed("查询失败");
+        }
+
+
+    }
+
+
+
+    @Override
+    public List<AccountBalance> listPages(AccountBalanceDTO dto) {
         LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
         if (StringUtils.isNotEmpty(dto.getCusCode())) {
             queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
@@ -109,31 +171,22 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
         LoginUser loginUser = SecurityUtils.getLoginUser();
         List<String> sellerCodeList=null;
-        List<String> cusCodes=new ArrayList<>();
         if (null != loginUser && !loginUser.getUsername().equals("admin")) {
             String username = loginUser.getUsername();
             sellerCodeList=accountBalanceMapper.selectsellerCode(username);
-            if (dto.getCusCode()==null||dto.getCusCode().equals("")){
-                cusCodes=sellerCodeList;
-            }else {
-                cusCodes.add(dto.getCusCode());
-            }
+
             if (sellerCodeList.size()>0){
                 queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
 
             }
-        if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
-            queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
-        }
+            if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
+                queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
+            }
 
         }
         if (null != loginUser && loginUser.getUsername().equals("admin")){
             sellerCodeList=accountBalanceMapper.selectsellerCodes();
-            if (dto.getCusCode()==null||dto.getCusCode().equals("")){
-                cusCodes=sellerCodeList;
-            }else {
-                cusCodes.add(dto.getCusCode());
-            }
+
         }
 
         List<AccountBalance> accountBalances = accountBalanceMapper.listPage(queryWrapper);
