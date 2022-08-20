@@ -127,6 +127,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             }
             if (null != loginUser && loginUser.getUsername().equals("admin")){
                 sellerCodeList=accountBalanceMapper.selectsellerCodes();
+                queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
 
             }
             //设置分页参数
