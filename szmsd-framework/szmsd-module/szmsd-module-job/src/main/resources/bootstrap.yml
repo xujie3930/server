@@ -9,19 +9,19 @@ spring:
     name: szmsd-job
   profiles:
     # 环境配置
-    active: test
-  cloud:
-    nacos:
-      discovery:
-        # 服务注册地址
-        server-addr: 127.0.0.1:8848
-        namespace: fd945789-2eb6-4ab5-8e25-8f1e34bef906
-      config:
-        # 配置中心地址
-        server-addr: 127.0.0.1:8848
-        # 配置文件格式
-        file-extension: yml
-        # 共享配置
-        shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-        namespace: fd945789-2eb6-4ab5-8e25-8f1e34bef906
-        group: DEFAULT_GROUP
+    active: uat1
+#  cloud:
+#    nacos:
+#      discovery:
+#        # 服务注册地址
+#        server-addr: 127.0.0.1:8848
+#        namespace: fd945789-2eb6-4ab5-8e25-8f1e34bef906
+#      config:
+#        # 配置中心地址
+#        server-addr: 127.0.0.1:8848
+#        # 配置文件格式
+#        file-extension: yml
+#        # 共享配置
+#        shared-dataids: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+#        namespace: fd945789-2eb6-4ab5-8e25-8f1e34bef906
+#        group: DEFAULT_GROUP
