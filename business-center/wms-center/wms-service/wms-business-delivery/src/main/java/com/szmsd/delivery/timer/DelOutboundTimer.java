@@ -5,6 +5,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.DelOutboundCompleted;
 import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
@@ -22,10 +23,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
@@ -180,6 +183,8 @@ public class DelOutboundTimer {
         });
     }
 
+    @Resource(name = ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
+    private ThreadPoolExecutor bringVerifyThreadExecutor;
     /**
      * 每分钟执行一次
      */
@@ -187,6 +192,11 @@ public class DelOutboundTimer {
 //    @Scheduled(cron = "0/5 * * * * ?")
     public void bringVerify() {
         logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 开始执行", port, Thread.currentThread().getId());
+        try {
+            logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 线程池队列数:{},任务数:{},总线程数:{}", port, Thread.currentThread().getId(), bringVerifyThreadExecutor.getQueue().size(), bringVerifyThreadExecutor.getTaskCount(), bringVerifyThreadExecutor.getCorePoolSize());
+        } catch (Exception e) {
+            logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 打印线程池队列数出现异常", port, Thread.currentThread().getId(),e);
+        }
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         String key = applicationName + ":DelOutboundTimer:bringVerify";
