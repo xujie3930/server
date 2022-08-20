@@ -20,11 +20,11 @@
 
     <!-- 系统日志输出 -->
 	<appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
-	    <file>${log.path}/${springAppName}-info-${port}.log</file>
+	    <file>${log.path}/${springAppName}-info-${port}-${hostname}.log</file>
         <!-- 循环政策：基于时间创建日志文件 -->
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志归档 -->
-            <fileNamePattern>${log.path}/${springAppName}-info-%d{yyyy-MM-dd}-${port}.%i.gz</fileNamePattern>
+            <fileNamePattern>${log.path}/${springAppName}-info-%d{yyyy-MM-dd}-${port}-${hostname}.%i.gz</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>${log.maxFileSize}</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -47,11 +47,11 @@
 	</appender>
 
     <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
-	    <file>${log.path}/${springAppName}-error-${port}.log</file>
+	    <file>${log.path}/${springAppName}-error-${port}-${hostname}.log</file>
         <!-- 循环政策：基于时间创建日志文件 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志归档 -->
-            <fileNamePattern>${log.path}/${springAppName}-error-%d{yyyy-MM-dd}-${port}.%i.gz</fileNamePattern>
+            <fileNamePattern>${log.path}/${springAppName}-error-%d{yyyy-MM-dd}-${port}-${hostname}.%i.gz</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>${log.maxFileSize}</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
