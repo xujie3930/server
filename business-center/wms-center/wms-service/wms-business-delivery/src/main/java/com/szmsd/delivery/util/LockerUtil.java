@@ -57,12 +57,15 @@ public class LockerUtil<E> {
     }
 
     public void tryLock(String key, Worker worker) {
-        logger.debug("================thread id: {}, do begin", Thread.currentThread().getId());
+        logger.info("================thread id: {}, do begin", Thread.currentThread().getId());
         // key
         RLock lock = redissonClient.getLock(key);
         try {
             if (lock.tryLock()) {
+                logger.info("================thread id: {}, 获取到了锁", Thread.currentThread().getId());
                 worker.execute();
+            }else{
+                logger.info("================thread id: {}, 获取锁失败", Thread.currentThread().getId());
             }
         } finally {
             lock.unlock();

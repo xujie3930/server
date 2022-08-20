@@ -6,7 +6,7 @@
     <!-- 日志存放路径 -->
     <property name="log.path" value="/u01/logs/ck1/${springProfilesActive}/${springAppName}" />
     <!-- 日志输出格式 -->
-    <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%X{TID}] [%thread] %-5level %logger{20} - [%method,%line] - %msg%n" />:ss} %-5level ${springAppName:-} %thread %logger %msg%n"/>
+    <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{TID}] [%thread] %-5level %logger{20} - [%method,%line] - %msg%n" />:ss} %-5level ${springAppName:-} %thread %logger %msg%n"/>
     <!-- 日志文件最大内容 -->
     <property name="log.maxFileSize" value="100MB"/>
     <springProperty scope="context" name="port" source="server.port"/>
