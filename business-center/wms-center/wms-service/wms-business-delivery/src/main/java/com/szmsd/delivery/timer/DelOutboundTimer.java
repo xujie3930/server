@@ -193,7 +193,7 @@ public class DelOutboundTimer {
     public void bringVerify() {
         logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 开始执行", port, Thread.currentThread().getId());
         try {
-            logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 线程池队列数:{},任务数:{},总线程数:{}", port, Thread.currentThread().getId(), bringVerifyThreadExecutor.getQueue().size(), bringVerifyThreadExecutor.getTaskCount(), bringVerifyThreadExecutor.getCorePoolSize());
+            logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 线程池队列数:{},任务数:{},总任务数:{},总线程数:{}", port, Thread.currentThread().getId(), bringVerifyThreadExecutor.getQueue().size(), bringVerifyThreadExecutor.getActiveCount(), bringVerifyThreadExecutor.getTaskCount(), bringVerifyThreadExecutor.getCorePoolSize());
         } catch (Exception e) {
             logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 打印线程池队列数出现异常", port, Thread.currentThread().getId(),e);
         }
