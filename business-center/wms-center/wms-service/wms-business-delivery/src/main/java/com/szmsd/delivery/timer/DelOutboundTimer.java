@@ -53,6 +53,9 @@ public class DelOutboundTimer {
     @Value("${thread.trialLimit}")
     private int trialLimit;
 
+    @Value(value = "${server.port:0}")
+    private int port;
+
     /**
      * 单据状态处理中
      * <p/>
@@ -181,8 +184,9 @@ public class DelOutboundTimer {
      * 每分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0/5 * * * * ?")
+//    @Scheduled(cron = "0/5 * * * * ?")
     public void bringVerify() {
+        logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 开始执行", port, Thread.currentThread().getId());
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         String key = applicationName + ":DelOutboundTimer:bringVerify";
