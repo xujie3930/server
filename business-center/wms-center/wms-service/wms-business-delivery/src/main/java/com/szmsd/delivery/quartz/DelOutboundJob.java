@@ -8,6 +8,8 @@ import com.szmsd.delivery.mapper.DelTimelinessConfigMapper;
 import com.szmsd.delivery.mapper.DelTimelinessMapper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
@@ -18,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 public class DelOutboundJob extends QuartzJobBean {
+    private final Logger logger = LoggerFactory.getLogger(DelOutboundJob.class);
+
     @Autowired
      private DelTimelinessMapper delTimelinessMapper;
     @Autowired
@@ -33,9 +37,10 @@ public class DelOutboundJob extends QuartzJobBean {
          map.put("scopeThree",list.get(2).getSectionSky());
          map.put("scopeFour",list.get(3).getSectionSky());
          map.put("scopeFive",list.get(4).getSectionSky());
-
+        logger.info("DelOutboundJob时效查询条件: {}",JSON.toJSONString(map));
 
         List<Map> list2 =delTimelinessMapper.selectDelOutboundes(map);
+        logger.info("DelOutboundJob统计的报表结果: {}",list2);
         list2.forEach(x->{
             DelTimeliness delTimeliness= JSON.parseObject(JSON.toJSONString(x),DelTimeliness.class);
             delTimeliness.setCreateTime(new Date());
