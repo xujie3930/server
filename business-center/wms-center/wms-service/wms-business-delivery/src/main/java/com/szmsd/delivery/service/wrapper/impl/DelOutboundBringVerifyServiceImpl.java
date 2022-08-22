@@ -744,7 +744,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     public ShipmentOrderResult shipmentAmazonOrder(DelOutboundWrapperContext delOutboundWrapperContext) {
         DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
         String orderNo = delOutbound.getOrderNo();
-        String shipmentService = delOutbound.getShipmentService();
+        String shipmentService = delOutbound.getAmazonLogisticsRouteId();
         if (StringUtils.isEmpty(shipmentService)) {
             throw new CommonException("400", "发货服务名称为空");
         }
@@ -758,7 +758,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
         // 创建承运商物流订单
         CreateShipmentOrderCommand createShipmentOrderCommand = new CreateShipmentOrderCommand();
-        createShipmentOrderCommand.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
+//        createShipmentOrderCommand.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
         createShipmentOrderCommand.setWarehouseCode(delOutbound.getWarehouseCode());
         // 改成uuid
         createShipmentOrderCommand.setReferenceNumber(UUID.randomUUID().toString().replaceAll("-", "").toUpperCase());
