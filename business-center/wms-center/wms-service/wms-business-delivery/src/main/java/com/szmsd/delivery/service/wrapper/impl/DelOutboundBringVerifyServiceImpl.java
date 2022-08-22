@@ -741,6 +741,174 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     @Override
+    public ShipmentOrderResult shipmentAmazonOrder(DelOutboundWrapperContext delOutboundWrapperContext) {
+        DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+        String orderNo = delOutbound.getOrderNo();
+        String shipmentService = delOutbound.getShipmentService();
+        if (StringUtils.isEmpty(shipmentService)) {
+            throw new CommonException("400", "发货服务名称为空");
+        }
+        // 查询地址信息
+        DelOutboundAddress address = delOutboundWrapperContext.getAddress();
+        // 查询sku信息
+        List<DelOutboundDetail> detailList = delOutboundWrapperContext.getDetailList();
+        // 查询仓库信息
+        BasWarehouse warehouse = delOutboundWrapperContext.getWarehouse();
+        // 查询国家信息，收货地址所在的国家
+        BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
+        // 创建承运商物流订单
+        CreateShipmentOrderCommand createShipmentOrderCommand = new CreateShipmentOrderCommand();
+        createShipmentOrderCommand.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
+        createShipmentOrderCommand.setWarehouseCode(delOutbound.getWarehouseCode());
+        // 改成uuid
+        createShipmentOrderCommand.setReferenceNumber(UUID.randomUUID().toString().replaceAll("-", "").toUpperCase());
+        // 订单号传refno
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            createShipmentOrderCommand.setOrderNumber(delOutbound.getRefNo());
+        } else {
+            createShipmentOrderCommand.setOrderNumber(orderNo);
+        }
+        createShipmentOrderCommand.setClientNumber(delOutbound.getSellerCode());
+        createShipmentOrderCommand.setReceiverAddress(new AddressCommand(address.getConsignee(),
+                address.getPhoneNo(),
+                address.getEmail(),
+                address.getStreet1(),
+                address.getStreet2(),
+                address.getStreet3(),
+                address.getCity(),
+                address.getStateOrProvince(),
+                address.getPostCode(),
+                country.getEnName()));
+        createShipmentOrderCommand.setReturnAddress(new AddressCommand(warehouse.getContact(),
+                warehouse.getTelephone(),
+                null,
+                warehouse.getStreet1(),
+                warehouse.getStreet2(),
+                null,
+                warehouse.getCity(),
+                warehouse.getProvince(),
+                warehouse.getPostcode(),
+                warehouse.getCountryName()));
+        // 税号信息
+        String ioss = delOutbound.getIoss();
+        if (StringUtils.isNotEmpty(ioss)) {
+            List<Taxation> taxations = new ArrayList<>();
+            taxations.add(new Taxation("IOSS", ioss));
+            createShipmentOrderCommand.setTaxations(taxations);
+        }
+        createShipmentOrderCommand.setCodAmount(delOutbound.getCodAmount());
+        // 包裹信息
+        List<Package> packages = new ArrayList<>();
+        List<PackageItem> packageItems = new ArrayList<>();
+        int weightInGram = 0;
+        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+            /*
+            packageItems.add(new PackageItem(delOutbound.getOrderNo(), delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), weightInGram = Utils.valueOfDouble(delOutbound.getWeight()),
+                    new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
+                    1, "", String.valueOf(delOutbound.getId()), delOutbound.getOrderNo()));
+
+             */
+            for (DelOutboundDetail detail : detailList) {
+                Double declaredValue;
+                if (null != detail.getDeclaredValue()) {
+                    declaredValue = detail.getDeclaredValue();
+                } else {
+                    declaredValue = 0D;
+                }
+                packageItems.add(new PackageItem(detail.getProductName(), detail.getProductNameChinese(), declaredValue, 10,
+                        new Size(1D, 1D, 1D),
+                        Utils.valueOfLong(detail.getQty()), detail.getHsCode(), String.valueOf(detail.getId()), detail.getSku()));
+            }
+        } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+            List<String> skus = new ArrayList<>();
+            skus.add(delOutbound.getNewSku());
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            conditionQueryDto.setSkus(skus);
+            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            if (CollectionUtils.isEmpty(productList)) {
+                throw new CommonException("400", "查询SKU[" + delOutbound.getNewSku() + "]信息失败");
+            }
+            BaseProduct product = productList.get(0);
+            packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), weightInGram = Utils.valueOfDouble(product.getWeight()),
+                    new Size(product.getLength(), product.getWidth(), product.getHeight()),
+                    Utils.valueOfLong(delOutbound.getBoxNumber()), product.getHsCode(), String.valueOf(delOutbound.getId()), delOutbound.getNewSku()));
+        } else {
+            // 查询sku信息
+            List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
+            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            for (DelOutboundDetail detail : detailList) {
+                String sku = detail.getSku();
+                BaseProduct product = productMap.get(sku);
+                if (null == product) {
+                    throw new CommonException("400", "查询SKU[" + sku + "]信息失败");
+                }
+                int productWeight = Utils.valueOfDouble(product.getWeight());
+                weightInGram += productWeight;
+                packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), productWeight,
+                        new Size(product.getLength(), product.getWidth(), product.getHeight()),
+                        Utils.valueOfLong(detail.getQty()), product.getHsCode(), String.valueOf(detail.getId()), sku));
+            }
+        }
+        if (null != delOutbound.getWeight() && delOutbound.getWeight() > 0) {
+            weightInGram = Utils.valueOfDouble(delOutbound.getWeight());
+        }
+        if (weightInGram <= 0) {
+            throw new CommonException("400", "包裹重量为0或者小于0，不能创建承运商物流订单");
+        }
+        String packageNumber;
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            packageNumber = delOutbound.getRefNo();
+        } else {
+            packageNumber = orderNo;
+        }
+        packages.add(new Package(packageNumber, delOutbound.getRemark() + "|" + orderNo,
+                new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
+                weightInGram, packageItems));
+        createShipmentOrderCommand.setPackages(packages);
+        createShipmentOrderCommand.setCarrier(new Carrier(shipmentService));
+        ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
+        if (null == responseObjectWrapper) {
+            throw new CommonException("400", "创建亚马逊承运商物流订单失败，调用承运商系统无响应");
+        }
+        if (!responseObjectWrapper.isSuccess()) {
+            String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
+            throw new CommonException("400", exceptionMessage);
+        }
+        // 保存挂号
+        // 判断结果集是不是正确的
+        ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
+        if (null == shipmentOrderResult) {
+            throw new CommonException("400", "创建承运商物流订单失败，调用承运商系统返回数据为空");
+        }
+        if (null == shipmentOrderResult.getSuccess() || !shipmentOrderResult.getSuccess()) {
+            // 判断有没有错误信息
+            ErrorDto error = shipmentOrderResult.getError();
+            StringBuilder builder = new StringBuilder();
+            if (null != error && StringUtils.isNotEmpty(error.getMessage())) {
+                if (StringUtils.isNotEmpty(error.getErrorCode())) {
+                    builder.append("[")
+                            .append(error.getErrorCode())
+                            .append("]");
+                }
+                builder.append(error.getMessage());
+            } else {
+                builder.append("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空");
+            }
+            try {
+                TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
+                transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
+                transferCallbackDTO.setLogisticsRouteId(shipmentService);
+                transferCallbackDTO.setTransferErrorMsg(builder.toString());
+                commonOrderFeignService.transferCallback(transferCallbackDTO);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+            throw new CommonException("400", builder.toString());
+        }
+        return shipmentOrderResult;
+    }
+
+    @Override
     public void shipmentRule(DelOutbound delOutbound) {
         String logMessage;
         // 判断PRC算费返回的发货规则是否为空，如果是空就那承运商物流编码赋值

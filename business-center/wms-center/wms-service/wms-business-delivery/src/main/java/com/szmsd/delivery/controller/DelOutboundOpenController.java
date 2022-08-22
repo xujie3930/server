@@ -9,6 +9,7 @@ import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.dto.ShipmentRequestDto;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundOpenService;
+import com.szmsd.delivery.timer.DelOutboundThirdPartyTimer;
 import com.szmsd.delivery.timer.DelOutboundTimer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -42,6 +43,9 @@ public class DelOutboundOpenController extends BaseController {
 
     @Resource
     private DelOutboundTimer delOutboundTimer;
+
+    @Resource
+    private DelOutboundThirdPartyTimer delOutboundThirdPartyTimer;
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
     @PostMapping("/shipment")
@@ -87,5 +91,11 @@ public class DelOutboundOpenController extends BaseController {
     public R<String> notifyBringVerify() {
         delOutboundTimer.bringVerify();
         return R.ok("通知完成");
+    }
+
+    @PostMapping(value = "/notifyAmazonLogisticsRouteIdy")
+    public R<String> notifyAmazonLogisticsRouteIdy() {
+        delOutboundThirdPartyTimer.notifyAmazonLogisticsRouteIdy();
+        return R.ok("通知获取亚马逊挂号定时任务执行任务完成");
     }
 }

@@ -36,4 +36,12 @@ public class DeliveryBringVerifyTask {
         log.info("[szmsd-module-job]-[DeliveryBringVerifyTask]-[notifyBringVerify] 通知提审 通知结果:{}", JSON.toJSONString(notifyBringVerify));
         log.info("[szmsd-module-job]-[DeliveryBringVerifyTask]-[notifyBringVerify] 通知提审 定时任务 结束");
     }
+
+    public void notifyAmazonLogisticsRouteId()
+    {
+        log.info("[szmsd-module-job]-[DeliveryBringVerifyTask]-[notifyBringVerify] 通知获取亚马逊挂号定时任务执行任务 定时任务 开始");
+        R<String> notifyBringVerify = feignService.notifyAmazonLogisticsRouteId();
+        log.info("[szmsd-module-job]-[DeliveryBringVerifyTask]-[notifyBringVerify] 通知获取亚马逊挂号定时任务执行任务 通知结果:{}", JSON.toJSONString(notifyBringVerify));
+        log.info("[szmsd-module-job]-[DeliveryBringVerifyTask]-[notifyBringVerify] 通知获取亚马逊挂号定时任务执行任务 定时任务 结束");
+    }
 }

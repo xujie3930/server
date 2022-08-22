@@ -269,4 +269,11 @@ public interface DelOutboundFeignService {
      */
     @PostMapping(value = "/api/outbound/open/notifyBringVerify")
     R<String> notifyBringVerify();
+
+    /**
+     * 通知获取亚马逊挂号定时任务执行任务
+     * @return
+     */
+    @PostMapping(value = "/api/outbound/open/notifyAmazonLogisticsRouteIdy")
+    R<String> notifyAmazonLogisticsRouteId();
 }
