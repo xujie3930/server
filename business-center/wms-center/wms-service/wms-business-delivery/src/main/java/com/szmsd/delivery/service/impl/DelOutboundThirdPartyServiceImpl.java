@@ -58,14 +58,14 @@ public class DelOutboundThirdPartyServiceImpl extends ServiceImpl<DelOutboundThi
         stopWatch.start();
         DelOutbound dataDelOutbound = delOutboundService.getByOrderNo(orderNo);
         dataDelOutbound.setAmazonLogisticsRouteId(amazonLogisticsRouteId);
-        DelOutboundWrapperContext delOutboundWrapperContext = this.delOutboundBringVerifyService.initContext(delOutboundService.getByOrderNo(orderNo));
+        DelOutboundWrapperContext delOutboundWrapperContext = this.delOutboundBringVerifyService.initContext(dataDelOutbound);
         try {
             delOutboundBringVerifyService.shipmentAmazonOrder(delOutboundWrapperContext);
             stopWatch.stop();
-            logger.info("创建亚马逊承运商物流订单成功{},耗时{}", dataDelOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+            logger.info("创建亚马逊承运商[{}]物流订单成功{},耗时{}", dataDelOutbound.getAmazonLogisticsRouteId(), dataDelOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
         }catch (Exception e){
             stopWatch.stop();
-            logger.info("创建亚马逊承运商物流订单失败{},耗时{}", dataDelOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+            logger.info("创建亚马逊承运商[{}]物流订单失败{},耗时{}", dataDelOutbound.getAmazonLogisticsRouteId(), dataDelOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
             throw new RuntimeException(e);
         }
         IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
