@@ -50,7 +50,7 @@ public class CreateShipmentOrderCommand implements Serializable {
 
     @ApiModelProperty(value = "承运商标签路径")
     private String shipmentOrderLabelUrl;
-
+/*
     @ApiModelProperty(value = "亚马逊挂号服务")
-    private String amazonLogisticsRouteId;
+    private String amazonLogisticsRouteId;*/
 }
