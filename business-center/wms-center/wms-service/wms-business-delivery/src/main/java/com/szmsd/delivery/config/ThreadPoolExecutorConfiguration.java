@@ -39,6 +39,10 @@ public class ThreadPoolExecutorConfiguration {
      * 重新获取标签文件
      */
     public static final String THREADPOOLEXECUTOR_SHIPMENTENUMLABEL = "ThreadPoolExecutor-ShipmentEnumLabel";
+    /**
+     * 亚马逊挂号服务
+     */
+    public static final String THREADPOOLEXECUTOR_THIRDPARTY = "ThreadPoolExecutor-ThirdParty";
 
     /**
      * 出库单状态修改
@@ -165,6 +169,23 @@ public class ThreadPoolExecutorConfiguration {
         return threadPoolExecutor;
     }
 
+    @Bean(THREADPOOLEXECUTOR_SHIPMENTENUMLABEL)
+    public ThreadPoolExecutor threadPoolExecutorThirdParty() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 4;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("ShipmentEnumLabel", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_PROCESSING)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundProcessing() {
         // 核心线程数量
@@ -181,6 +202,23 @@ public class ThreadPoolExecutorConfiguration {
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
+    @Bean(THREADPOOLEXECUTOR_THIRDPARTY)
+    public ThreadPoolExecutor threadPoolExecutorTHIRDPARTY() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 4;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-THIRDPARTY", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
 
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_SHIPPED)
     public ThreadPoolExecutor threadPoolExecutorDelOutboundShipped() {

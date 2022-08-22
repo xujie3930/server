@@ -226,6 +226,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<String> notifyBringVerify() {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<String> notifyAmazonLogisticsRouteId() {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }
