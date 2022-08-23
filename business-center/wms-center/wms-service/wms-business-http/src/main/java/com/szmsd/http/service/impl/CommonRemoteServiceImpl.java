@@ -107,6 +107,9 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
         httpRequestDto.setHeaders(hashMap);
         httpRequestDto.setBody(JSONObject.parseObject(oneTask.getRequestParams()));
         httpRequestDto.setBinary(false);
+        if (oneTask.getCreateByName()!=null&&!oneTask.getCreateByName().equals("")){
+           httpRequestDto.setUserName(oneTask.getCreateByName());
+        }
 
         try {
             if ("CK1".equals(scanEnumByType.getTypeName())) {
