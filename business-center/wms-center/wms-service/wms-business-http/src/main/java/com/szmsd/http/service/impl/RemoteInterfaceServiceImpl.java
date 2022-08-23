@@ -148,7 +148,9 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             }
 
             //出口易特殊处理
-            if (domain.equals("http://openapi.ck1info.com")){
+            //测试环境http://openapi.ck1info.com"
+            //生产环境http://openapi.chukou1.cn
+            if (domain.equals("http://openapi.chukou1.cn")){
                 String userName=dto.getUserName();
                 String authorizationCode=htpConfigMapper.selectAuthorizationCode(userName);
                 if (StringUtils.isNotEmpty(authorizationCode)) {

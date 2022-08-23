@@ -739,6 +739,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
      * 调整库存 推送CK1
      */
     private void adjustInventoryCK1(InventoryAdjustmentDTO inventoryAdjustmentDTO) {
+        LoginUser loginUser=SecurityUtils.getLoginUser();
         CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.POST);
@@ -747,6 +748,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inventoryAdjustmentDTO.getSellerCode()));
             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getAdjustInventoryUrl()));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.ADJUST_INVENTORY);
+            httpRequestDto.setUserName(loginUser.getUsername());
             R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
             log.info("【推送CK1】调整库存{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
             HttpResponseVO dataAndException = R.getDataAndException(rmi);
