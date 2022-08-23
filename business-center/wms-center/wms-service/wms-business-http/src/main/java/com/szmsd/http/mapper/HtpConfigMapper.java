@@ -51,4 +51,7 @@ public interface HtpConfigMapper extends BaseMapper {
     void deleteHtpWarehouseGroup(String groupId);
 
     void deleteHtpUrl(@Param("groupId") String groupId, @Param("serviceId") String serviceId);
+
+    //读取授权码
+    String selectAuthorizationCode(@Param("userName")String userName);
 }

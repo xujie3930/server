@@ -42,6 +42,12 @@ public class HttpRequestDto implements Serializable {
      */
     private Boolean binary;
 
+
+    /**
+     * 登录人
+     */
+    private String userName;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
