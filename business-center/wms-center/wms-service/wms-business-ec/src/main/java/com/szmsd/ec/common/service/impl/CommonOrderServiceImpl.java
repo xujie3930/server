@@ -145,6 +145,10 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             DelOutboundDto dto = new DelOutboundDto();
             dto.setCustomCode(order.getCusCode());
             dto.setWarehouseCode(order.getWarehouseCode());
+            dto.setLength(1.0);
+            dto.setWidth(1.0);
+            dto.setHeight(1.0);
+            dto.setWeight(1.0);
 
             dto.setSellerCode(SecurityUtils.getLoginUser().getSellerCode());
             dto.setOrderType(order.getShippingMethodCode());
