@@ -40,6 +40,7 @@ import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
+import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.api.feign.HtpRmiFeignService;
@@ -460,6 +461,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     public Tuple2<List<BaseProduct>, String> syncToWms(List<Tuple2<BaseProduct, ProductRequest>> requestTupleList) {
+        LoginUser loginUser=SecurityUtils.getLoginUser();
         List<CompletableFuture<BaseProduct>> futures = new ArrayList<>();
 
         requestTupleList.forEach(tuple -> {
@@ -489,6 +491,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 httpRequestDto.setBinary(false);
                 httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}/v1/merchantSkus");
                 httpRequestDto.setBody(ckSkuCreateDTO);
+                httpRequestDto.setUserName(loginUser.getUsername());
                 R<HttpResponseVO> httpResponseVOR = htpRmiFeignService.rmiSync(httpRequestDto);
                 R.getDataAndException(httpResponseVOR);
                /* R<HttpResponseVO> rmiR = htpRmiFeignService.rmi(httpRequestDto);

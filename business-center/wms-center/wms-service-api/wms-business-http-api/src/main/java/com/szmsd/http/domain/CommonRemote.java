@@ -101,6 +101,10 @@ public class CommonRemote extends BaseEntity {
     @Excel(name = "重试次数")
     private Integer retryTimes;
 
+    @ApiModelProperty(value = "用户名")
+    @Excel(name = "用户名")
+    private String userName;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
