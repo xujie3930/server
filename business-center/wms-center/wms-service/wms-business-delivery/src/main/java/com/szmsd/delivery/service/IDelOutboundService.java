@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
@@ -437,5 +438,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     int receiveLabel(DelOutboundReceiveLabelDto dto);
 
     int boxStatus(DelOutboundBoxStatusDto dto);
+
+    void manualTrackingYee(List<String> list);
 }
 

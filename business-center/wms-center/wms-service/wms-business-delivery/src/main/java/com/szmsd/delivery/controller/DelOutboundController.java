@@ -163,6 +163,15 @@ public class DelOutboundController extends BaseController {
         return getDataTable(this.delOutboundService.selectDelOutboundList(queryDto));
     }
 
+
+    @PostMapping("/manualTrackingYee")
+    @ApiOperation(value = "手动推TY", position = 100)
+    public R ManualTrackingYee(@RequestBody List<String> list) {
+        delOutboundService.manualTrackingYee(list);
+        return R.ok();
+    }
+
+
     @PreAuthorize("@ss.hasPermi('inventory:queryFinishList')")
     @PostMapping("/queryFinishList")
     @ApiOperation(value = "查询已完成的单号", notes = "查询已完成的单号")

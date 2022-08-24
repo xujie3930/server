@@ -183,6 +183,7 @@
             a.consignee,
             a.street1,
             a.street2,
+            a.street3,
             a.state_or_province,
             a.city,
             a.post_code,
@@ -236,5 +237,53 @@
         <if test="cusCode !=null and cusCode != ''">
             AND seller_code = #{cusCode,jdbcType=VARCHAR}
         </if>
+    </select>
+    <select id="pageLists" resultType="com.szmsd.delivery.dto.DelOutboundListQueryDto">
+        SELECT
+            o.id,
+            o.order_no,
+            o.purchase_no,
+            o.order_type,
+            o.state,
+            o.warehouse_code,
+            o.shipment_rule,
+            o.tracking_no,
+            o.specifications,
+            o.weight,
+            o.calc_weight,
+            o.calc_weight_unit,
+            o.amount,
+            o.currency_code,
+            o.exception_message,
+            o.custom_code,
+            o.create_by_name,
+            o.create_time,
+            o.remark,
+            a.consignee,
+            a.phone_no,
+            a.email,
+            a.street1,
+            a.street2,
+            a.street3,
+            a.city,
+            a.state_or_province,
+            a.country_code,
+            a.country,
+            a.post_code,
+            o.is_print,
+            o.is_label_box,
+            o.tracking_status,
+            o.tracking_description,
+            o.cod_amount,
+            o.ref_no,
+            o.shipment_retry_label,
+            o.upload_box_label,
+            o.shipments_time,
+            o.amazon_logistics_route_id,
+            o.logistics_provider_code
+
+        FROM del_outbound o
+        LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
+        where o.order_no=#{orderNo}
     </select>
 </mapper>
