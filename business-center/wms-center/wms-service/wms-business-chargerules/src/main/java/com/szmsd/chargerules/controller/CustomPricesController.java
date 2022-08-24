@@ -183,10 +183,6 @@ public class CustomPricesController extends BaseController{
         return customPricesService.updateGradeDetail(dto);
     }
 
-    public static void main(String[] args) {
-        DiscountDetailPackageLimitDto dto = new DiscountDetailPackageLimitDto();
-        System.out.println("{}".equals(JSONUtil.toJsonStr(dto)));
-    }
 
 
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:importDiscountDetailTemplate')")
