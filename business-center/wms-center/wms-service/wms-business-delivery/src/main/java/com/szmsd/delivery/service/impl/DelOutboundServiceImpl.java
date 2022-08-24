@@ -2441,6 +2441,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public void TraYee(DelOutboundListQueryDto delOutboundListQueryDto){
         boolean success = false;
         String responseBody;
+        logger.info("手动推送TY{}");
         try {
             Map<String, Object> requestBodyMap = new HashMap<>();
             List<Map<String, Object>> shipments = new ArrayList<>();
