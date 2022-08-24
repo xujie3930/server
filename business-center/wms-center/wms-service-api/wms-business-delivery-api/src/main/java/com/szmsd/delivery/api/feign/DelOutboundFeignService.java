@@ -276,4 +276,7 @@ public interface DelOutboundFeignService {
      */
     @PostMapping(value = "/api/outbound/open/notifyAmazonLogisticsRouteIdy")
     R<String> notifyAmazonLogisticsRouteId();
+
+    @PostMapping(value = "/api/outbound/open/notifyWMS")
+    R<String> notifyWMS();
 }

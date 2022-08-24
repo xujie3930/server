@@ -44,6 +44,9 @@ public class ThreadPoolExecutorConfiguration {
      */
     public static final String THREADPOOLEXECUTOR_THIRDPARTY = "ThreadPoolExecutor-ThirdParty";
 
+    public static final String THREADPOOLEXECUTOR_WMS = "ThreadPoolExecutor-WMS";
+
+
     /**
      * 出库单状态修改
      * WMS推送出库单状态为处理中。OMS这边修改状态为：仓库处理中
@@ -213,6 +216,22 @@ public class ThreadPoolExecutorConfiguration {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
         // 线程池工厂
         NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-THIRDPARTY", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+    @Bean(THREADPOOLEXECUTOR_WMS)
+    public ThreadPoolExecutor threadPoolExecutorWMS() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 4;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-WMS", false);
         threadPoolExecutor.setThreadFactory(threadFactory);
         // 丢弃任务并抛出RejectedExecutionException异常
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());

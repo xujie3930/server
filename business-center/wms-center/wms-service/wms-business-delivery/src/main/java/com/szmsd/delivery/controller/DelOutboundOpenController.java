@@ -98,4 +98,9 @@ public class DelOutboundOpenController extends BaseController {
         delOutboundThirdPartyTimer.notifyAmazonLogisticsRouteIdy();
         return R.ok("通知获取亚马逊挂号定时任务执行任务完成");
     }
+    @PostMapping(value = "/notifyWMS")
+    public R<String> notifyWMS() {
+        delOutboundThirdPartyTimer.notifyWMS();
+        return R.ok("通知订单执行WMS任务完成");
+    }
 }

@@ -1,12 +1,10 @@
 package com.szmsd.delivery.timer;
 
-import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.DelOutboundThirdParty;
 import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
+import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundThirdPartyService;
 import com.szmsd.delivery.util.LockerUtil;
@@ -18,19 +16,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
-import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 /**
  * @author zhangyuyuan
@@ -70,6 +63,7 @@ public class DelOutboundThirdPartyTimer {
             // 查询初始化的任务执行
             // 处理失败的单据
             LambdaQueryWrapper<DelOutboundThirdParty> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.ne(DelOutboundThirdParty::getOperationType, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_THIRD_PARTY);
             queryWrapper.ne(DelOutboundThirdParty::getState, DelOutboundCompletedStateEnum.SUCCESS.getCode());
             queryWrapper.lt(DelOutboundThirdParty::getHandleSize, 5);
             // 处理时间小于等于当前时间的
@@ -77,7 +71,21 @@ public class DelOutboundThirdPartyTimer {
             handleThirdParty(queryWrapper);
         });
     }
-
+    @Async
+    public void notifyWMS() {
+        String key = applicationName + ":DelOutboundThirdPartyTimer:WMS";
+        this.doWorker(key, () -> {
+            // 查询初始化的任务执行
+            // 处理失败的单据
+            LambdaQueryWrapper<DelOutboundThirdParty> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.ne(DelOutboundThirdParty::getOperationType, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_WMS);
+            queryWrapper.ne(DelOutboundThirdParty::getState, DelOutboundCompletedStateEnum.SUCCESS.getCode());
+            queryWrapper.lt(DelOutboundThirdParty::getHandleSize, 5);
+            // 处理时间小于等于当前时间的
+            queryWrapper.le(DelOutboundThirdParty::getNextHandleTime, new Date());
+            handleWMS(queryWrapper);
+        });
+    }
 
 
 
@@ -86,10 +94,12 @@ public class DelOutboundThirdPartyTimer {
     }
 
     private void handleThirdParty(LambdaQueryWrapper<DelOutboundThirdParty> queryWrapper) {
-        this.handle(queryWrapper, (delOutboundThirdParty, blank) -> this.delOutboundThirdPartyAsyncTask.asyncThirdParty(delOutboundThirdParty), 200, true);
+        this.handle(queryWrapper, (delOutboundThirdParty, blank) -> this.delOutboundThirdPartyAsyncTask.asyncThirdParty(delOutboundThirdParty), 200, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_THIRD_PARTY);
     }
 
-
+    private void handleWMS(LambdaQueryWrapper<DelOutboundThirdParty> queryWrapper) {
+        this.handle(queryWrapper, (delOutboundThirdParty, blank) -> this.delOutboundThirdPartyAsyncTask.asyncWMS(delOutboundThirdParty), 200, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_WMS);
+    }
     private void fail(Exception e, DelOutboundThirdParty delOutboundThirdParty){
         logger.error(e.getMessage(), e);
         // 处理失败
@@ -102,7 +112,7 @@ public class DelOutboundThirdPartyTimer {
         this.delOutboundThirdPartyService.fail(delOutboundThirdParty.getId(),
                 e.getMessage());
     }
-    private void handle(LambdaQueryWrapper<DelOutboundThirdParty> queryWrapper, BiConsumer<DelOutboundThirdParty, Long> consumer, int limit, boolean needLock) {
+    private void handle(LambdaQueryWrapper<DelOutboundThirdParty> queryWrapper, BiConsumer<DelOutboundThirdParty, Long> consumer, int limit, String type) {
         // 一次处理200
         queryWrapper.last("limit " + limit);
         StopWatch stopWatch = new StopWatch();
@@ -112,7 +122,7 @@ public class DelOutboundThirdPartyTimer {
         if (CollectionUtils.isNotEmpty(DelOutboundThirdPartyList)) {
             for (DelOutboundThirdParty delOutboundThirdParty : DelOutboundThirdPartyList) {
                 // 增加守护锁，同一条记录如果被多次扫描到，只允许有一个在执行，其它的忽略掉
-                String key = applicationName + ":DelOutboundThirdPartyTimer:ThirdParty:" + delOutboundThirdParty.getId();
+                String key = applicationName + ":DelOutboundThirdPartyTimer:"+type+":" + delOutboundThirdParty.getId();
                 RLock lock = redissonClient.getLock(key);
                 try {
                     if (lock.tryLock(0, TimeUnit.SECONDS)) {

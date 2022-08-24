@@ -49,4 +49,8 @@ public class DelOutboundConstant {
 
     public static final String SUPPLIER_CALC_TYPE_ROUTE_ID = "LogisticsRoute";
 
+    public static final String DELOUTBOUND_OPERATION_TYPE_THIRD_PARTY = "ThirdParty";
+
+    public static final String DELOUTBOUND_OPERATION_TYPE_WMS = "WMS";
+
 }
