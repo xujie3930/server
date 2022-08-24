@@ -36,6 +36,7 @@
             a.carrier_code = #{map.carrierCode}
           AND a.STATUS = 0
           AND b.carrier_keyword_type = #{map.carrierKeywordType}
+          and #{map.originaKeywords}!=REPLACE(#{map.originaKeywords},origina_keywords,now_keywords)
             LIMIT 0,1
 
     </select>
