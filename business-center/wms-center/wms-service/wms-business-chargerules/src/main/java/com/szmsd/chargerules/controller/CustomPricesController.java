@@ -2,6 +2,8 @@ package com.szmsd.chargerules.controller;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.szmsd.bas.api.client.BasSubClientService;
@@ -181,6 +183,11 @@ public class CustomPricesController extends BaseController{
         return customPricesService.updateGradeDetail(dto);
     }
 
+    public static void main(String[] args) {
+        DiscountDetailPackageLimitDto dto = new DiscountDetailPackageLimitDto();
+        System.out.println("{}".equals(JSONUtil.toJsonStr(dto)));
+    }
+
 
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:importDiscountDetailTemplate')")
     @PostMapping("/importDiscountDetailTemplate")
@@ -212,6 +219,8 @@ public class CustomPricesController extends BaseController{
         try {
             List<DiscountDetailImportDto> dtoList = new ExcelUtil<>(DiscountDetailImportDto.class).importExcel(file.getInputStream());
             list = BeanMapperUtil.mapList(dtoList, DiscountDetailDto.class);
+
+
             for(int i = 0; i < list.size(); i++){
                 list.get(i).setBeginTime(DateUtil.formatDateTime(dtoList.get(i).getBeginTimeDate()));
                 list.get(i).setEndTime(DateUtil.formatDateTime(dtoList.get(i).getEndTimeDate()));
@@ -242,10 +251,21 @@ public class CustomPricesController extends BaseController{
                 }
 
             }
-
             if (CollectionUtils.isEmpty(dtoList)) {
                 return R.failed("导入数据不能为空");
             }
+            if(list.size() > 0){
+                try{
+                    if("{}".equals(JSONUtil.toJsonStr(list.get(0).getPackageLimit()))){
+                        return R.failed("请检查导入的模板是否有误");
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+
+                }
+            }
+
+
         } catch (Exception e) {
             return R.failed("文件解析异常");
         }
