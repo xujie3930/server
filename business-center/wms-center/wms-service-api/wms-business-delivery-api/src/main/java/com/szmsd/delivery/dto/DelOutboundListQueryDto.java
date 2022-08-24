@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,6 +46,10 @@ public class DelOutboundListQueryDto extends QueryDto {
     private String orderType;
 
     @ApiModelProperty(value = "创建时间")
+    private Date createTime;
+
+
+    @ApiModelProperty(value = "创建时间")
     private String[] createTimes;
 
     @ApiModelProperty(value = "修改时间")
@@ -73,6 +78,38 @@ public class DelOutboundListQueryDto extends QueryDto {
 
     @ApiModelProperty(value = "国家代码")
     private String countryCode;
+
+    @ApiModelProperty(value = "国家")
+    private String country;
+
+    @ApiModelProperty(value = "州/省")
+    private String stateOrProvince;
+
+    @ApiModelProperty(value = "城市")
+    private String city;
+
+    @ApiModelProperty(value = "邮编")
+    private String postCode;
+
+    @ApiModelProperty(value = "街道一")
+    private String street1;
+
+    @ApiModelProperty(value = "街道二")
+    private String street2;
+
+    @ApiModelProperty(value = "街道三")
+    private String street3;
+
+    @ApiModelProperty(value = "收件人")
+    private String consignee;
+
+    @ApiModelProperty(value = "电话")
+    private String phoneNo;
+
+
+    @ApiModelProperty(value = "物流服务")
+    private String logisticsProviderCode;
+
 
     @ApiModelProperty(value = "客户编码list")
     private List<String> customCodeList;

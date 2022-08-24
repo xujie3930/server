@@ -80,4 +80,6 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     List<DelOutboundListExceptionMessageExportVO> exceptionMessageExportList(@Param("orderNos") List<String> orderNos);
 
     List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
+
+    DelOutboundListQueryDto pageLists(@Param("orderNo") String orderNo);
 }

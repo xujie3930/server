@@ -3,6 +3,8 @@ package com.szmsd.delivery.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TimeInterval;
 import cn.hutool.core.io.IoUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -73,7 +75,11 @@ import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
+import com.szmsd.http.api.service.IHtpRmiClientService;
+import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.ShipmentCancelRequestDto;
+import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
@@ -87,12 +93,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.executor.BatchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -173,6 +181,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Autowired
     @Lazy
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
+
+    @Autowired
+    private IHtpRmiClientService htpRmiClientService;
     /**
      * 查询出库单模块
      *
@@ -2416,6 +2427,125 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         }
         return 1;
+    }
+
+    @Override
+    public void manualTrackingYee(List<String> list) {
+        list.forEach(x->{
+            DelOutboundListQueryDto delOutboundListQueryDto=baseMapper.pageLists(x);
+            TraYee(delOutboundListQueryDto);
+        });
+
+    }
+
+    public void TraYee(DelOutboundListQueryDto delOutboundListQueryDto){
+        boolean success = false;
+        String responseBody;
+        try {
+            Map<String, Object> requestBodyMap = new HashMap<>();
+            List<Map<String, Object>> shipments = new ArrayList<>();
+            Map<String, Object> shipment = new HashMap<>();
+            shipment.put("trackingNo", delOutboundListQueryDto.getTrackingNo());
+            shipment.put("carrierCode", delOutboundListQueryDto.getLogisticsProviderCode());
+            shipment.put("logisticsServiceProvider", delOutboundListQueryDto.getLogisticsProviderCode());
+            shipment.put("logisticsServiceName", delOutboundListQueryDto.getLogisticsProviderCode());
+            shipment.put("platformCode", "DM");
+            shipment.put("shopName", "");
+            Date createTime = delOutboundListQueryDto.getCreateTime();
+            if (null != createTime) {
+                shipment.put("OrdersOn", DateFormatUtils.format(createTime, "yyyy-MM-dd'T'HH:mm:ss.SS'Z'"));
+            }
+            shipment.put("paymentTime", "");
+            shipment.put("shippingOn", "");
+            List<String> searchTags = new ArrayList<>();
+            searchTags.add("");
+            searchTags.add("");
+            shipment.put("searchTags", searchTags);
+            shipment.put("orderNo", delOutboundListQueryDto.getOrderNo());
+            Map<String, Object> senderAddress = new HashMap<>();
+            senderAddress.put("country", delOutboundListQueryDto.getCountry());
+            senderAddress.put("province", delOutboundListQueryDto.getStateOrProvince());
+            senderAddress.put("city", delOutboundListQueryDto.getCity());
+            senderAddress.put("postcode", delOutboundListQueryDto.getPostCode());
+            senderAddress.put("street1", delOutboundListQueryDto.getStreet1());
+            senderAddress.put("street2", delOutboundListQueryDto.getStreet2());
+            senderAddress.put("street3", delOutboundListQueryDto.getStreet3());
+            shipment.put("senderAddress", senderAddress);
+            Map<String, Object> destinationAddress = new HashMap<>();
+            destinationAddress.put("country", delOutboundListQueryDto.getCountry());
+            destinationAddress.put("province", delOutboundListQueryDto.getStateOrProvince());
+            destinationAddress.put("city", delOutboundListQueryDto.getCity());
+            destinationAddress.put("postcode", delOutboundListQueryDto.getPostCode());
+            destinationAddress.put("street1", delOutboundListQueryDto.getStreet1());
+            destinationAddress.put("street2",delOutboundListQueryDto.getStreet2());
+            destinationAddress.put("street3", delOutboundListQueryDto.getStreet3());
+            shipment.put("destinationAddress", destinationAddress);
+            Map<String, Object> recipientInfo = new HashMap<>();
+            recipientInfo.put("recipient", delOutboundListQueryDto.getConsignee());
+            recipientInfo.put("phoneNumber", delOutboundListQueryDto.getPhoneNo());
+            recipientInfo.put("email", "");
+            shipment.put("recipientInfo", recipientInfo);
+            Map<String, Object> customFieldInfo = new HashMap<>();
+            customFieldInfo.put("fieldOne", delOutboundListQueryDto.getOrderNo());
+            customFieldInfo.put("fieldTwo", "");
+            customFieldInfo.put("fieldThree", "");
+            shipment.put("customFieldInfo", customFieldInfo);
+            shipments.add(shipment);
+            requestBodyMap.put("shipments", shipments);
+            HttpRequestDto httpRequestDto = new HttpRequestDto();
+            httpRequestDto.setMethod(HttpMethod.POST);
+            String url = DomainEnum.TrackingYeeDomain.wrapper("/tracking/v1/shipments");
+            httpRequestDto.setUri(url);
+            httpRequestDto.setBody(requestBodyMap);
+            HttpResponseVO httpResponseVO = htpRmiClientService.rmi(httpRequestDto);
+            if (200 == httpResponseVO.getStatus() ||
+                    201 == httpResponseVO.getStatus()) {
+                success = true;
+            }
+            responseBody = (String) httpResponseVO.getBody();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            responseBody = e.getMessage();
+            if (null == responseBody) {
+                responseBody = "请求失败";
+            }
+        }
+        // 请求成功，解析响应报文
+        if (success) {
+            try {
+                // 解析响应报文，获取响应参数信息
+                JSONObject jsonObject = JSON.parseObject(responseBody);
+                // 判断状态是否为OK
+                if ("OK".equals(jsonObject.getString("status"))) {
+                    // 判断结果明细是不是成功的
+                    JSONObject data = jsonObject.getJSONObject("data");
+                    if (1 != data.getIntValue("successNumber")) {
+                        // 返回的成功数量不是1，判定为异常
+                        success = false;
+                        // 获取异常信息
+                        int failNumber = data.getIntValue("failNumber");
+                        if (failNumber > 0) {
+                            JSONArray failImportRowResults = data.getJSONArray("failImportRowResults");
+                            JSONObject failImportRowResult = failImportRowResults.getJSONObject(0);
+                            JSONObject errorInfo = failImportRowResult.getJSONObject("errorInfo");
+                            String errorCode = errorInfo.getString("errorCode");
+                            String errorMessage = errorInfo.getString("errorMessage");
+                            throw new CommonException("500", "[" + errorCode + "]" + errorMessage);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                if (e instanceof CommonException) {
+                    throw e;
+                }
+                // 解析失败，判定为异常
+                success = false;
+            }
+        }
+        if (!success) {
+            throw new CommonException("500", "创建TrackingYee失败");
+        }
     }
 }
 
