@@ -877,7 +877,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             DelOutboundServiceImplUtil.freezeOperationThrowErrorMessage(r);
 
-            if(delOutboundWrapperContext.getSaveFlag() != null && delOutboundWrapperContext.getSaveFlag()){
                 IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
 
                 DelOutbound updateDelOutbound = new DelOutbound();
@@ -919,7 +918,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 delOutboundThirdPartyService.save(delOutboundThirdParty);
                 stopWatch.stop();
                 logger.info(">>>>>[创建出库单{}]提交一个WMS订单任务,耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
-            }
 
 
         }
@@ -988,6 +986,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 delOutbound.setRefOrderNo(refOrderNo);
                 DelOutboundOperationLogEnum.BRV_SHIPMENT_CREATE.listener(delOutbound);
             }
+
             // 保存信息
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();

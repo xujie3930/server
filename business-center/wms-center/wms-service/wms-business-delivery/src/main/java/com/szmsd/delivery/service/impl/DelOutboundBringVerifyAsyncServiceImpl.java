@@ -79,6 +79,7 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(e.getMessage(), e);
             throw new CommonException("500", "提审操作失败，" + e.getMessage());
         } finally {
