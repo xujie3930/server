@@ -491,7 +491,9 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 httpRequestDto.setBinary(false);
                 httpRequestDto.setUri("${" + DomainEnum.Ck1OpenAPIDomain.name() + "}/v1/merchantSkus");
                 httpRequestDto.setBody(ckSkuCreateDTO);
-                httpRequestDto.setUserName(loginUser.getUsername());
+                if (loginUser!=null){
+                    httpRequestDto.setUserName(loginUser.getUsername());
+                }
                 R<HttpResponseVO> httpResponseVOR = htpRmiFeignService.rmiSync(httpRequestDto);
                 R.getDataAndException(httpResponseVOR);
                /* R<HttpResponseVO> rmiR = htpRmiFeignService.rmi(httpRequestDto);
