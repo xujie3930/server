@@ -74,4 +74,8 @@ public class DelOutboundThirdParty extends BaseEntity {
 
     @ApiModelProperty(value = "uuid")
     private String uuid;
+
+
+    @ApiModelProperty(value = "关键信息")
+    private String keyInfo;
 }

@@ -878,7 +878,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 判断结果集是不是正确的
         ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
         if (null == shipmentOrderResult) {
-            throw new CommonException("400", "创建承运商物流订单失败，调用承运商系统返回数据为空");
+            throw new CommonException("400", "创建亚马逊承运商物流订单失败，调用承运商系统返回数据为空");
         }
         if (null == shipmentOrderResult.getSuccess() || !shipmentOrderResult.getSuccess()) {
             // 判断有没有错误信息
@@ -892,16 +892,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 builder.append(error.getMessage());
             } else {
-                builder.append("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空");
-            }
-            try {
-                TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
-                transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
-                transferCallbackDTO.setLogisticsRouteId(shipmentService);
-                transferCallbackDTO.setTransferErrorMsg(builder.toString());
-                commonOrderFeignService.transferCallback(transferCallbackDTO);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+                builder.append("创建亚马逊承运商物流订单失败，调用承运商系统失败，返回错误信息为空");
             }
             throw new CommonException("400", builder.toString());
         }
