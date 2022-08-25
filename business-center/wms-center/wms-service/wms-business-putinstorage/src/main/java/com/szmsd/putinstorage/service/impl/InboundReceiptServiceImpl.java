@@ -494,7 +494,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                                 HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
                                 httpRequestDto.setMethod(HttpMethod.GET);
                                 httpRequestDto.setBinary(false);
-                                httpRequestDto.setUserName(loginUser.getUsername());
+                                if (loginUser!=null){
+                                    httpRequestDto.setUserName(loginUser.getUsername());
+                                }
                                 httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
                                 httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getGenSkuCustomStorageNo()));
                                 httpRequestDto.setBody(CkGenCustomSkuNoDTO.createGenCustomSkuNoDTO(inboundReceiptInfoDetailVO, inboundReceiptDetail));
