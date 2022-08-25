@@ -22,6 +22,8 @@ public interface IDelOutboundThirdPartyService extends IService<DelOutboundThird
         */
         void thirdParty(String orderNo, String amazonLogisticsRouteId);
 
+    void thirdWMS(String orderNo);
+
     void success(Long id);
 
         void fail(Long id, String message);

@@ -14,8 +14,7 @@ import com.szmsd.delivery.mapper.DelOutboundThirdPartyMapper;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.IDelOutboundThirdPartyService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
-import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
+import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.http.dto.ShipmentOrderResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +78,15 @@ public class DelOutboundThirdPartyServiceImpl extends ServiceImpl<DelOutboundThi
 
 
     }
+
+    @Override
+    public void thirdWMS(String orderNo) {
+//该订单全部接收完成后，调用PRC
+        ApplicationContext context = delOutboundBringVerifyService.initContext(delOutboundService.getByOrderNo(orderNo));
+        ApplicationContainer applicationContainer = new ApplicationContainer(context, BringVerifyEnum.SHIPMENT_ORDER, BringVerifyEnum.END, BringVerifyEnum.SHIPMENT_ORDER);
+        applicationContainer.action();
+    }
+
     @Transactional
     @Override
     public void fail(Long id, String remark) {
