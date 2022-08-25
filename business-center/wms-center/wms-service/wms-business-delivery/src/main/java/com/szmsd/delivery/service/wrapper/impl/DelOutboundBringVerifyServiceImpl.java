@@ -260,7 +260,20 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 logger.info(">>>>>[创建出库单{}]修改出库表为提审中:"+stopWatch.getLastTaskTimeMillis(), delOutbound.getOrderNo());
                 resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), true, "处理成功"));
             } catch (Exception e) {
+                e.printStackTrace();
                 logger.error(e.getMessage(), e);
+
+                DelOutbound updateDelOutbound = new DelOutbound();
+                updateDelOutbound.setId(delOutbound.getId());
+
+                String remark = e.getMessage();
+                if (remark != null && remark.length() > 200) {
+                    remark = remark.substring(0, 200);
+                }
+                updateDelOutbound.setExceptionMessage(remark);
+                if(remark != null){
+                    this.delOutboundService.updateByIdTransactional(updateDelOutbound);
+                }
                 if (null != delOutbound) {
                     resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), false, e.getMessage()));
                 } else {
