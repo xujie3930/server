@@ -24,7 +24,7 @@ public class DelOutboundThirdPartyAsyncTask {
 
     @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_THIRDPARTY)
     public void asyncThirdParty(DelOutboundThirdParty delOutboundThirdParty) {
-        this.handle(s -> delOutboundThirdPartyService.thirdParty(delOutboundThirdParty.getOrderNo(), delOutboundThirdParty.getRemark()), delOutboundThirdParty.getId());
+        this.handle(s -> delOutboundThirdPartyService.thirdParty(delOutboundThirdParty.getOrderNo(), delOutboundThirdParty.getKeyInfo()), delOutboundThirdParty.getId());
     }
 
     @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_WMS)

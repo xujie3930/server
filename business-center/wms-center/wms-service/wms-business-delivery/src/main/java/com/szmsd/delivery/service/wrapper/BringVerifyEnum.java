@@ -328,7 +328,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     delOutbound.setSupplierCalcType(data.getSupplierCalcType());
                     delOutbound.setSupplierCalcId(data.getSupplierCalcId());
 
-                    if(StringUtils.isNotEmpty(data.getAmazonLogisticsRouteId())){
+                    if(StringUtils.isNotBlank(data.getAmazonLogisticsRouteId())){
                         delOutbound.setAmazonLogisticsRouteId(data.getAmazonLogisticsRouteId());
                     }
                     // 计费重信息
@@ -652,7 +652,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             delOutboundWrapperContext.setSaveFlag(true);
 
 
-            if(StringUtils.isNotEmpty(delOutbound.getAmazonLogisticsRouteId())){
+            if(StringUtils.isNotBlank(delOutbound.getAmazonLogisticsRouteId())){
 
                 // 提交一个亚马逊获取标签的任务
                 stopWatch.start();
@@ -660,8 +660,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 DelOutboundThirdParty delOutboundThirdParty = new DelOutboundThirdParty();
                 delOutboundThirdParty.setOrderNo(delOutbound.getOrderNo());
                 delOutboundThirdParty.setState(DelOutboundCompletedStateEnum.INIT.getCode());
-                delOutboundThirdParty.setOperationType("ThirdParty");
-                delOutboundThirdParty.setRemark(delOutbound.getAmazonLogisticsRouteId());
+                delOutboundThirdParty.setOperationType(DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_THIRD_PARTY);
+                delOutboundThirdParty.setKeyInfo(delOutbound.getAmazonLogisticsRouteId());
                 delOutboundThirdPartyService.save(delOutboundThirdParty);
                 stopWatch.stop();
                 logger.info(">>>>>[创建出库单{}]提交一个第三方承运商订单任务,耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
@@ -907,7 +907,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
                 updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
                 updateDelOutbound.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
-                delOutboundService.saveShipmentOrderNumber(updateDelOutbound);
+                delOutboundService.bringVerifySuccess(updateDelOutbound);
 
                 // 提交一个WMS任务
                 stopWatch.start();
@@ -991,12 +991,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             // 保存信息
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
-
+            updateDelOutbound.setId(delOutbound.getId());
             // 推单WMS
             updateDelOutbound.setRefOrderNo(refOrderNo);
+            delOutboundService.updateByIdTransactional(updateDelOutbound);
 
-
-            delOutboundService.bringVerifySuccess(updateDelOutbound);
             // 处理发货条件
             TaskConfigInfo taskConfigInfo = delOutboundWrapperContext.getTaskConfigInfo();
             if (null != taskConfigInfo) {
