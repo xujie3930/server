@@ -143,14 +143,43 @@ public class BasDeliveryServiceMatchingServiceImpl extends ServiceImpl<BasDelive
 
     @Override
     public List<BasDeliveryServiceMatching> getList(BasDeliveryServiceMatchingDto dto) {
+
+            if(StringUtils.isEmpty(dto.getCountryCode())){
+                return blankCountry(dto);
+            }
         LambdaQueryWrapper<BasDeliveryServiceMatching> queryWrapper = new LambdaQueryWrapper<BasDeliveryServiceMatching>();
         queryWrapper.eq(BasDeliveryServiceMatching::getSellerCode, dto.getSellerCode());
-        queryWrapper.in(BasDeliveryServiceMatching::getSku, dto.getSkuList());
         queryWrapper.eq(BasDeliveryServiceMatching::getDelFlag, "0");
+        queryWrapper.eq(BasDeliveryServiceMatching::getCountryCode, dto.getCountryCode());
+        queryWrapper.in(BasDeliveryServiceMatching::getSku, dto.getSkuList());
         List<BasDeliveryServiceMatching> list = baseMapper.selectList(queryWrapper);
+        if(list.isEmpty()){
+            return blankCountry(dto);
+        }
         return list;
     }
 
+    private  List<BasDeliveryServiceMatching> blankCountry(BasDeliveryServiceMatchingDto dto){
+        LambdaQueryWrapper<BasDeliveryServiceMatching> queryWrapper = new LambdaQueryWrapper<BasDeliveryServiceMatching>();
+        queryWrapper.eq(BasDeliveryServiceMatching::getSellerCode, dto.getSellerCode());
+        queryWrapper.eq(BasDeliveryServiceMatching::getDelFlag, "0");
+        queryWrapper.and(x -> x.isNull(BasDeliveryServiceMatching::getCountryCode).or().eq(BasDeliveryServiceMatching::getCountryCode, ""));
+        queryWrapper.in(BasDeliveryServiceMatching::getSku, dto.getSkuList());
+        List<BasDeliveryServiceMatching> list = baseMapper.selectList(queryWrapper);
+        if(list.isEmpty()){
+            return blankSku(dto);
+        }
+        return list;
+    }
+    private  List<BasDeliveryServiceMatching> blankSku(BasDeliveryServiceMatchingDto dto){
+        LambdaQueryWrapper<BasDeliveryServiceMatching> queryWrapper = new LambdaQueryWrapper<BasDeliveryServiceMatching>();
+        queryWrapper.eq(BasDeliveryServiceMatching::getSellerCode, dto.getSellerCode());
+        queryWrapper.eq(BasDeliveryServiceMatching::getDelFlag, "0");
+        queryWrapper.and(x -> x.isNull(BasDeliveryServiceMatching::getCountryCode).or().eq(BasDeliveryServiceMatching::getCountryCode, ""));
+        queryWrapper.and(x -> x.isNull(BasDeliveryServiceMatching::getSku).or().eq(BasDeliveryServiceMatching::getSku, ""));
+        List<BasDeliveryServiceMatching> list = baseMapper.selectList(queryWrapper);
+        return list;
+    }
 
 }
 
