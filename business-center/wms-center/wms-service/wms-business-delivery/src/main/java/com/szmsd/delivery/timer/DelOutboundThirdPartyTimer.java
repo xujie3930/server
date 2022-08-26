@@ -63,7 +63,7 @@ public class DelOutboundThirdPartyTimer {
             // 查询初始化的任务执行
             // 处理失败的单据
             LambdaQueryWrapper<DelOutboundThirdParty> queryWrapper = Wrappers.lambdaQuery();
-            queryWrapper.ne(DelOutboundThirdParty::getOperationType, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_THIRD_PARTY);
+            queryWrapper.eq(DelOutboundThirdParty::getOperationType, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_THIRD_PARTY);
             queryWrapper.ne(DelOutboundThirdParty::getState, DelOutboundCompletedStateEnum.SUCCESS.getCode());
             queryWrapper.lt(DelOutboundThirdParty::getHandleSize, 5);
             // 处理时间小于等于当前时间的
@@ -78,7 +78,7 @@ public class DelOutboundThirdPartyTimer {
             // 查询初始化的任务执行
             // 处理失败的单据
             LambdaQueryWrapper<DelOutboundThirdParty> queryWrapper = Wrappers.lambdaQuery();
-            queryWrapper.ne(DelOutboundThirdParty::getOperationType, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_WMS);
+            queryWrapper.eq(DelOutboundThirdParty::getOperationType, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_WMS);
             queryWrapper.ne(DelOutboundThirdParty::getState, DelOutboundCompletedStateEnum.SUCCESS.getCode());
             queryWrapper.lt(DelOutboundThirdParty::getHandleSize, 5);
             // 处理时间小于等于当前时间的
