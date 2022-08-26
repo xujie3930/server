@@ -13,6 +13,7 @@
             d.product_attribute
         FROM del_outbound_detail d
         LEFT JOIN del_outbound o ON d.order_no = o.order_no
+        LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
     </select>
 
