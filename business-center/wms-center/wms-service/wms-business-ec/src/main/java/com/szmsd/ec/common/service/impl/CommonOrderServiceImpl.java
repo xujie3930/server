@@ -256,6 +256,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             if (CollectionUtils.isNotEmpty(orderItemList)) {
                 List<String> skuList = orderItemList.stream().map(CommonOrderItem::getPlatformSku).collect(Collectors.toList());
                 BasDeliveryServiceMatchingDto matchingDto = new BasDeliveryServiceMatchingDto();
+                matchingDto.setCountryCode(commonOrder.getReceiverCountryCode());
                 matchingDto.setSkuList(skuList);
                 matchingDto.setSellerCode(commonOrder.getCusCode());
                 log.info("查询发货服务匹配请求参数：{}", JSON.toJSONString(matchingDto));

@@ -149,7 +149,6 @@ public class BaseProductRequest {
     @Size(max = 100)
     private String bindCodeName;
 
-    @NotBlank(message = "物流包装要求不能为空")
     @ApiModelProperty(value = "物流包装要求 /api/sku/list params:{category：包材,sellerCode: CNYWO7}", example = "编织袋", required = true)
     @Excel(name = "物流包装要求")
     @Size(max = 50, message = "物流包装要求仅支持50字符")

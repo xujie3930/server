@@ -649,7 +649,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
                 DelOutboundOperationLogEnum.BRV_SHIPMENT_ORDER.listener(delOutbound);
             }
-            delOutboundWrapperContext.setSaveFlag(true);
 
 
             if(StringUtils.isNotBlank(delOutbound.getAmazonLogisticsRouteId())){

@@ -134,6 +134,11 @@
                 <foreach collection="cm.queryNoOneList" open="(" close=")" separator="," item="no">
                     #{no}
                 </foreach>
+                or from_order_no in(select order_no from del_outbound where amazon_logistics_route_id in
+                <foreach collection="cm.queryNoOneList" open="(" close=")" separator="," item="no">
+                    #{no}
+                </foreach>)
+
             </if>
             <if test="cm.queryNoTwoList != null and cm.queryNoTwoList.size() >0 ">
                 and from_order_no_new in

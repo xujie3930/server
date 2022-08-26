@@ -258,7 +258,9 @@ public final class DelOutboundServiceImplUtil {
                     // tracking_no in (xxx) or ref_no in (xxx)
                     if (CollectionUtils.isNotEmpty(otherQueryNoList)) {
                         wrapper.in("o.tracking_no", otherQueryNoList)
-                                .or().in("o.ref_no", otherQueryNoList);
+                                .or().in("o.ref_no", otherQueryNoList)
+                                .or().in("o.amazon_logistics_route_id", otherQueryNoList);
+
                     }
                     // [or] order_no in (xxx)
                     if (CollectionUtils.isNotEmpty(delOutboundNoList)) {
@@ -342,6 +344,7 @@ public final class DelOutboundServiceImplUtil {
 
         // 国家查询
         queryWrapper.eq(StringUtils.isNotEmpty(queryDto.getCountryCode()), "a.country_code", queryDto.getCountryCode());
+
 
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
