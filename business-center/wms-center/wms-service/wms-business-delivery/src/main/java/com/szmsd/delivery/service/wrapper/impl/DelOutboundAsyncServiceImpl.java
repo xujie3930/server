@@ -528,6 +528,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     }
 
     private void pushSrmCost(DelOutbound delOutbound) {
+
+        if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
+                || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+            //自提和销毁出库类型不进行srm算费
+            return;
+        }
         // 请求体的内容异步填充
         DelSrmCostLog delSrmCostLog = new DelSrmCostLog();
         delSrmCostLog.setOrderNo(delOutbound.getOrderNo());
