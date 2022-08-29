@@ -140,6 +140,13 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "异常描述")
     private String exceptionMessage;
 
+
+    @ApiModelProperty(value = "异常状态WMS")
+    private String exceptionStateWms;
+
+    @ApiModelProperty(value = "异常描述WMS")
+    private String exceptionMessageWms;
+
     @ApiModelProperty(value = "发货类型")
     private String shipmentType;
 

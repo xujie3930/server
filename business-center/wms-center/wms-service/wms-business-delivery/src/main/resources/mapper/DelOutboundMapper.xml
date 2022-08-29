@@ -39,6 +39,8 @@
             o.amount,
             o.currency_code,
             o.exception_message,
+            o.exception_state_wms,
+            o.exception_message_wms,
             o.custom_code,
             o.create_by_name,
             o.create_time,

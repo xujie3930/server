@@ -198,14 +198,33 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+
+
+
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
-            updateDelOutbound.setBringVerifyState(currentState.name());
             // 提审失败
             String exceptionMessage = Utils.defaultValue(throwable.getMessage(), "提审操作失败");
+
+            if(BringVerifyEnum.SHIPMENT_CREATE.equals(currentState) || BringVerifyEnum.SHIPMENT_LABEL.equals(currentState)){
+                // 推单WMS
+                if(delOutbound.getRefOrderNo() == null){
+                    delOutbound.setRefOrderNo("");
+                }
+                updateDelOutbound.setExceptionStateWms(DelOutboundExceptionStateEnum.ABNORMAL.getCode());
+                updateDelOutbound.setExceptionMessageWms(exceptionMessage);
+                updateDelOutbound.setRefOrderNo(delOutbound.getRefOrderNo());
+                delOutboundService.updateByIdTransactional(updateDelOutbound);
+                return;
+            }
+
+
+
+            updateDelOutbound.setBringVerifyState(currentState.name());
+
             updateDelOutbound.setExceptionMessage(exceptionMessage);
             // PRC计费
             updateDelOutbound.setLength(delOutbound.getLength());
@@ -229,8 +248,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
             updateDelOutbound.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
-            // 推单WMS
-            updateDelOutbound.setRefOrderNo(delOutbound.getRefOrderNo());
+
+
+
             delOutboundService.bringVerifyFail(updateDelOutbound);
         }
     }
