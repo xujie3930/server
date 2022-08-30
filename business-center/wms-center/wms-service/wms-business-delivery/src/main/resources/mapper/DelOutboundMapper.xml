@@ -65,7 +65,8 @@
             o.shipment_retry_label,
             o.upload_box_label,
             o.shipments_time,
-            o.amazon_logistics_route_id
+            o.amazon_logistics_route_id,
+            o.house_no
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}

@@ -47,6 +47,10 @@ public class DelOutboundDestroyRequest implements Serializable {
     @ApiModelProperty(value = "伙伴编码")
     private String partnerCode;
 
+
+    @ApiModelProperty(value = "houseNo")
+    private String houseNo;
+
     @Valid
     @NotNull(message = "明细信息不能为空", groups = {DelOutboundGroup.Default.class})
     @ApiModelProperty(value = "明细信息", dataType = "DelOutboundSkuDetailNoLabelRequest", position = 5)
