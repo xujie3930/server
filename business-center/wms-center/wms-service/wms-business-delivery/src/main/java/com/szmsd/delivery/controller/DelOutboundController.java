@@ -664,6 +664,14 @@ public class DelOutboundController extends BaseController {
         this.delOutboundService.label(response, dto);
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:SelfPick')")
+    @PostMapping("/labelSelfPick")
+    @ApiOperation(value = "出库管理 - 获取自提标签", position = 1300)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundLabelDto")
+    public void labelSelfPick(HttpServletResponse response, @RequestBody @Validated DelOutboundLabelDto dto) {
+        this.delOutboundService.labelSelfPick(response, dto);
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:labelBase64')")
     @PostMapping("/labelBase64")
     @ApiOperation(value = "出库管理 - 获取标签（根据订单号批量查询，DOC支持）", position = 1301)
