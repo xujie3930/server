@@ -403,7 +403,7 @@ public final class DelOutboundServiceImplUtil {
         //3. 添加段落,并设置字体
         // 文本块(Chunk)、短语(Phrase)和段落(paragraph)处理文本
         font.setSize(18f);
-        Paragraph paragraph = new Paragraph(delOutbound.getShipmentRule(), font);
+        Paragraph paragraph = new Paragraph(delOutbound.getDeliveryAgent(), font);
         paragraph.setAlignment(Element.ALIGN_RIGHT);
         paragraph.setSpacingBefore(-26f);
         paragraph.setSpacingAfter(0f);
