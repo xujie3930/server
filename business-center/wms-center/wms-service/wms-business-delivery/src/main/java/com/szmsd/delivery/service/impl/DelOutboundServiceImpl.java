@@ -1928,6 +1928,72 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
+    public void labelSelfPick(HttpServletResponse response, DelOutboundLabelDto dto) {
+        DelOutbound delOutbound = this.getById(dto.getId());
+        if (null == delOutbound) {
+            throw new CommonException("400", "单据不存在");
+        }
+        String pathname = DelOutboundServiceImplUtil.getSelfPickLabelFilePath(delOutbound) + "/" + delOutbound.getOrderNo() + ".pdf";
+        File labelFile = new File(pathname);
+        if (!labelFile.exists()) {
+            String orderNo = delOutbound.getOrderNo();
+            // 查询地址信息
+            List<DelOutboundDetail> delOutboundDetailList = this.delOutboundDetailService.listByOrderNo(delOutbound.getOrderNo());
+            try {
+                ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderSelfPick(delOutbound, delOutboundDetailList, null);
+                byte[] fb = null;
+                FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
+                ServletOutputStream outputStream = null;
+                InputStream inputStream = null;
+                try {
+                    outputStream = response.getOutputStream();
+                    //response为HttpServletResponse对象
+                    response.setContentType("application/pdf;charset=utf-8");
+                    //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+                    response.setHeader("Content-Disposition", "attachment;filename=" + delOutbound.getOrderNo() + ".pdf");
+                    IOUtils.copy(new ByteArrayInputStream(fb), outputStream);
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                    throw new CommonException("500", "读取自提标签文件失败");
+                } finally {
+                    IoUtil.flush(outputStream);
+                    IoUtil.close(outputStream);
+                    IoUtil.close(inputStream);
+                }
+                return;
+
+            } catch (Exception e) {
+                throw new CommonException("400", "自提标签文件不存在");
+            }
+
+        }
+
+        if(response == null){
+            return;
+        }
+        ServletOutputStream outputStream = null;
+        InputStream inputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            //response为HttpServletResponse对象
+            response.setContentType("application/pdf;charset=utf-8");
+            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition", "attachment;filename=" + delOutbound.getOrderNo() + ".pdf");
+            inputStream = new FileInputStream(labelFile);
+            IOUtils.copy(inputStream, outputStream);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new CommonException("500", "读取自提标签文件失败");
+        } finally {
+            IoUtil.flush(outputStream);
+            IoUtil.close(outputStream);
+            IoUtil.close(inputStream);
+        }
+
+
+    }
+
+    @Override
     public List<DelOutboundLabelResponse> labelBase64(DelOutboundLabelDto dto) {
         List<String> orderNos = dto.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {

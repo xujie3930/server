@@ -312,4 +312,10 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "亚马逊物流服务id")
     private String amazonLogisticsRouteId;
+
+
+
+
+    @ApiModelProperty(value = "houseNo")
+    private String houseNo;
 }

@@ -439,5 +439,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     int boxStatus(DelOutboundBoxStatusDto dto);
 
     void manualTrackingYee(List<String> list);
+
+    void labelSelfPick(HttpServletResponse response, DelOutboundLabelDto dto);
 }
 

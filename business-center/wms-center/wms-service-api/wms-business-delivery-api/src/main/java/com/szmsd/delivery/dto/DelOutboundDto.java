@@ -184,4 +184,8 @@ public class DelOutboundDto implements Serializable {
     private String amazonLogisticsRouteId;
 
 
+    @ApiModelProperty(value = "houseNo")
+    private String houseNo;
+
+
 }

@@ -26,6 +26,7 @@ import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyNoDto;
+import com.szmsd.delivery.dto.DelOutboundLabelDto;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
@@ -1080,6 +1081,19 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             return;
         }
         DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
+
+
+        String selfPickLabelFilePath = null;
+        if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+            DelOutboundLabelDto dto = new DelOutboundLabelDto();
+            dto.setId(delOutbound.getId());
+            //生成下自提标签文件，如果有就不生成
+            delOutboundService.labelSelfPick(null, dto);
+            selfPickLabelFilePath = DelOutboundServiceImplUtil.getSelfPickLabelFilePath(delOutbound) + "/" + delOutbound.getOrderNo() + ".pdf";
+        }
+
+
+
         String pathname = null;
         // 如果是批量出库，将批量出库上传的文件和标签文件合并在一起传过去
         if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
@@ -1141,7 +1155,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 // 合并文件
                 try {
-                    if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath, uploadBoxLabel)) {
+                    if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath, uploadBoxLabel, selfPickLabelFilePath)) {
                         pathname = mergeFilePath;
                     }
                 } catch (IOException e) {
@@ -1169,7 +1183,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 File mergeFile = new File(mergeFilePath);
                 logger.info(mergeFilePath + "," + pathname + "," + uploadBoxLabel);
                 try {
-                    if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel)) {
+                    if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel, selfPickLabelFilePath)) {
                         pathname = mergeFilePath;
                     }
                 } catch (IOException e) {
