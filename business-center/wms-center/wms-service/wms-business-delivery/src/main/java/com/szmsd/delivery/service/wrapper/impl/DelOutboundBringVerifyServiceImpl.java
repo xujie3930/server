@@ -750,6 +750,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
+            if("[408]请求超时".equals(exceptionMessage)){
+                throw new CommonException("408", exceptionMessage);
+            }
             throw new CommonException("400", exceptionMessage);
         }
     }
@@ -886,6 +889,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
         if (!responseObjectWrapper.isSuccess()) {
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
+            if("[408]请求超时".equals(exceptionMessage)){
+                throw new CommonException("408", exceptionMessage);
+            }
             throw new CommonException("400", exceptionMessage);
         }
         // 保存挂号
