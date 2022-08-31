@@ -100,7 +100,16 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
         return R.ok(basMeteringConfig);
     }
 
+    public static void main(String[] args) {
+        BigDecimal a= BigDecimal.valueOf(2);
+        BigDecimal b= BigDecimal.valueOf(3);
+       BigDecimal c=(a.divide(b,2,BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
+       int d=c.compareTo(BigDecimal.valueOf(67));
 
+        System.out.println(d);
+
+
+    }
 
     @Override
     public R intercept(BasMeteringConfigDto basMeteringConfigDto) {
@@ -113,7 +122,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
           List<BasMeteringConfigData> list=basMeteringConfigMapper.selectjblj(basMeteringConfigDto);
             list.forEach(x->{
                 //0表示重量差，1表示百分比
-             if (x.getWeightTypeNameOne().equals("计费重")&&x.getWeightTypeNameOne().equals("体积重")){
+             if (x.getWeightTypeNameOne().equals("计费重")&&x.getWeightTypeNameTwo().equals("体积重")){
                  if (x.getDifferenceType()==0){
                      BigDecimal bigDecimal= (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                      BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
@@ -122,23 +131,153 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                          throw new CommonException("超出设置的范围，拦截");
                      }
                  }else if (x.getDifferenceType()==1){
-
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     BigDecimal c[]={basMeteringConfigDto.getVolume(),basMeteringConfigDto.getCalcWeight()};
+                     BigDecimal max=c[0],min=c[0];
+                     for (int i=0;i<c.length;i++){
+                         if (c[i].compareTo(min)==(1)){
+                             max=c[i];
+                         }
+                     }
+                     //减出来的重量差 除以最大值 算出来百分比
+                     BigDecimal d=(bigDecimal.divide(max,2,BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
+                     int a=d.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
                  }
-             }
-             if (x.getWeightTypeNameOne().equals("体积重")&&x.getWeightTypeNameOne().equals("计费重")){
 
+             }
+             if (x.getWeightTypeNameOne().equals("体积重")&&x.getWeightTypeNameTwo().equals("计费重")){
+                 if (x.getDifferenceType()==0){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     int a=bigDecimal.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }else if (x.getDifferenceType()==1){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     BigDecimal c[]={basMeteringConfigDto.getVolume(),basMeteringConfigDto.getCalcWeight()};
+                     BigDecimal max=c[0],min=c[0];
+                     for (int i=0;i<c.length;i++){
+                         if (c[i].compareTo(min)==(1)){
+                             max=c[i];
+                         }
+                     }
+                     //减出来的重量差 除以最大值 算出来百分比
+                     BigDecimal d=(bigDecimal.divide(max,2,BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
+                     int a=d.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }
                 }
              if (x.getWeightTypeNameOne().equals("计费重")&&x.getWeightTypeNameOne().equals("下单重量")){
-
+                 if (x.getDifferenceType()==0){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     int a=bigDecimal.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }else if (x.getDifferenceType()==1){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     BigDecimal c[]={basMeteringConfigDto.getWeight(),basMeteringConfigDto.getCalcWeight()};
+                     BigDecimal max=c[0],min=c[0];
+                     for (int i=0;i<c.length;i++){
+                         if (c[i].compareTo(min)==(1)){
+                             max=c[i];
+                         }
+                     }
+                     //减出来的重量差 除以最大值 算出来百分比
+                     BigDecimal d=(bigDecimal.divide(max,2,BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
+                     int a=d.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }
                 }
-             if (x.getWeightTypeNameOne().equals("下单重量")&&x.getWeightTypeNameOne().equals("计费重")){
-
+             if (x.getWeightTypeNameOne().equals("下单重量")&&x.getWeightTypeNameTwo().equals("计费重")){
+                 if (x.getDifferenceType()==0){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     int a=bigDecimal.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }else if (x.getDifferenceType()==1){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     BigDecimal c[]={basMeteringConfigDto.getWeight(),basMeteringConfigDto.getCalcWeight()};
+                     BigDecimal max=c[0],min=c[0];
+                     for (int i=0;i<c.length;i++){
+                         if (c[i].compareTo(min)==(1)){
+                             max=c[i];
+                         }
+                     }
+                     //减出来的重量差 除以最大值 算出来百分比
+                     BigDecimal d=(bigDecimal.divide(max,2,BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
+                     int a=d.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }
              }
-             if (x.getWeightTypeNameOne().equals("下单重量")&&x.getWeightTypeNameOne().equals("体积重")){
-
+             if (x.getWeightTypeNameOne().equals("下单重量")&&x.getWeightTypeNameTwo().equals("体积重")){
+                 if (x.getDifferenceType()==0){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     int a=bigDecimal.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }else if (x.getDifferenceType()==1){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     BigDecimal c[]={basMeteringConfigDto.getWeight(),basMeteringConfigDto.getVolume()};
+                     BigDecimal max=c[0],min=c[0];
+                     for (int i=0;i<c.length;i++){
+                         if (c[i].compareTo(min)==(1)){
+                             max=c[i];
+                         }
+                     }
+                     //减出来的重量差 除以最大值 算出来百分比
+                     BigDecimal d=(bigDecimal.divide(max,2,BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
+                     int a=d.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }
              }
-             if (x.getWeightTypeNameOne().equals("体积重")&&x.getWeightTypeNameOne().equals("下单重量")){
-
+             if (x.getWeightTypeNameOne().equals("体积重")&&x.getWeightTypeNameTwo().equals("下单重量")){
+                 if (x.getDifferenceType()==0){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     int a=bigDecimal.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }else if (x.getDifferenceType()==1){
+                     BigDecimal bigDecimal= (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
+                     BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
+                     BigDecimal c[]={basMeteringConfigDto.getWeight(),basMeteringConfigDto.getVolume()};
+                     BigDecimal max=c[0],min=c[0];
+                     for (int i=0;i<c.length;i++){
+                         if (c[i].compareTo(min)==(1)){
+                             max=c[i];
+                         }
+                     }
+                     //减出来的重量差 除以最大值 算出来百分比
+                     BigDecimal d=(bigDecimal.divide(max,2,BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
+                     int a=d.compareTo(bigDecimal1);
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
+                     }
+                 }
              }
             });
             return R.ok();
