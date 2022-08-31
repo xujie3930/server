@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.bas.mapper.BasMeteringConfigDataMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasMeteringConfigData" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="metering_id" property="meteringId" jdbcType="INTEGER" />
+    <result column="weight_type_name_one" property="weightTypeNameOne" jdbcType="VARCHAR" />
+    <result column="weight_type_name_two" property="weightTypeNameTwo" jdbcType="VARCHAR" />
+    <result column="difference_scope" property="differenceScope" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, metering_id, weight_type_name_one, weight_type_name_two, difference_scope
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from bas_metering_config_data
+    where metering_id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from bas_metering_config_data
+    where metering_id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.bas.domain.BasMeteringConfigData" >
+    insert into bas_metering_config_data (id, metering_id, weight_type_name_one, 
+      weight_type_name_two, difference_scope)
+    values (#{id,jdbcType=INTEGER}, #{meteringId,jdbcType=INTEGER}, #{weightTypeNameOne,jdbcType=VARCHAR}, 
+      #{weightTypeNameTwo,jdbcType=VARCHAR}, #{differenceScope,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasMeteringConfigData" >
+    insert into bas_metering_config_data
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="meteringId != null" >
+        metering_id,
+      </if>
+      <if test="weightTypeNameOne != null" >
+        weight_type_name_one,
+      </if>
+      <if test="weightTypeNameTwo != null" >
+        weight_type_name_two,
+      </if>
+      <if test="differenceScope != null" >
+        difference_scope,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="meteringId != null" >
+        #{meteringId,jdbcType=INTEGER},
+      </if>
+      <if test="weightTypeNameOne != null" >
+        #{weightTypeNameOne,jdbcType=VARCHAR},
+      </if>
+      <if test="weightTypeNameTwo != null" >
+        #{weightTypeNameTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="differenceScope != null" >
+        #{differenceScope,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.domain.BasMeteringConfigData" >
+    update bas_metering_config_data
+    <set >
+      <if test="meteringId != null" >
+        metering_id = #{meteringId,jdbcType=INTEGER},
+      </if>
+      <if test="weightTypeNameOne != null" >
+        weight_type_name_one = #{weightTypeNameOne,jdbcType=VARCHAR},
+      </if>
+      <if test="weightTypeNameTwo != null" >
+        weight_type_name_two = #{weightTypeNameTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="differenceScope != null" >
+        difference_scope = #{differenceScope,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.domain.BasMeteringConfigData" >
+    update bas_metering_config_data
+    set metering_id = #{meteringId,jdbcType=INTEGER},
+      weight_type_name_one = #{weightTypeNameOne,jdbcType=VARCHAR},
+      weight_type_name_two = #{weightTypeNameTwo,jdbcType=VARCHAR},
+      difference_scope = #{differenceScope,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
