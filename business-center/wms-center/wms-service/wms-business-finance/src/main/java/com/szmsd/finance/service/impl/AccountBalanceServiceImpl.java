@@ -112,6 +112,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
             LoginUser loginUser = SecurityUtils.getLoginUser();
             List<String> sellerCodeList=null;
+            List<String> sellerCodeList1=null;
             if (null != loginUser && !loginUser.getUsername().equals("admin")) {
                 String username = loginUser.getUsername();
                 sellerCodeList=accountBalanceMapper.selectsellerCode(username);
@@ -120,8 +121,12 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                     queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
 
                 } else if (sellerCodeList.size()==0){
-                    sellerCodeList=accountBalanceMapper.selectsellerCodeus(username);
-                    queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+                    sellerCodeList1=accountBalanceMapper.selectsellerCodeus(username);
+                    if (sellerCodeList1.size()>0){
+                        queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+                    }else {
+                        queryWrapper.in(AccountBalance::getCusCode, "");
+                    }
                 }
                 if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
                     queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
