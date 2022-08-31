@@ -35,4 +35,6 @@ public interface AccountBalanceMapper extends BaseMapper<AccountBalance> {
     List<String>  selectsellerCode(@Param("username") String username);
 
     List<String> selectsellerCodes();
+
+    List<String>  selectsellerCodeus(@Param("username")String username);
 }
