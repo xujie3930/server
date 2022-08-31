@@ -123,7 +123,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 } else if (sellerCodeList.size()==0){
                     sellerCodeList1=accountBalanceMapper.selectsellerCodeus(username);
                     if (sellerCodeList1.size()>0){
-                        queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+                        queryWrapper.in(AccountBalance::getCusCode, sellerCodeList1);
                     }else {
                         queryWrapper.in(AccountBalance::getCusCode, "");
                     }
