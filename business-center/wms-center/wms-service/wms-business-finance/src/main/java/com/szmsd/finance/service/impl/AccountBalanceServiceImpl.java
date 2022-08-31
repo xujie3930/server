@@ -120,7 +120,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                     queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
 
                 } else if (sellerCodeList.size()==0){
-                    queryWrapper.in(AccountBalance::getCusCode, "");
+                    sellerCodeList=accountBalanceMapper.selectsellerCodeus(username);
+                    queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
                 }
                 if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
                     queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
