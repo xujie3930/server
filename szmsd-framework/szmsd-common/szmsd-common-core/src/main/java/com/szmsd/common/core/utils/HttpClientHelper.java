@@ -352,8 +352,7 @@ public class HttpClientHelper {
         } catch (Exception e) {
             log.error("http异常"+e+":"+e.getMessage());
             if(e instanceof  org.apache.http.conn.ConnectTimeoutException && timeout != null){
-
-                throw new RuntimeException(e);
+                return new HttpResponseBody.HttpResponseBodyWrapper(408, "{\"status\":408,\"Errors\":[{\"Code\":408,\"Message\":\"请求超时\"}]}");
             }
             try {
                 if (null != response)
