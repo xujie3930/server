@@ -227,6 +227,9 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 }
             }
             logger.info("(5)出库单提审失败，判断是否删除出库单。partnerCode: {}, partnerDeleteOrderFlag: {}", partnerCode, partnerDeleteOrderFlag);
+            if("408".equals(e.getCode()) || "[408]请求超时".equals(e.getMessage())){
+                throw new RuntimeException(e);
+            }
         } finally {
             if (isAsyncThread) {
                 asyncThreadObject.unloadTid();

@@ -238,7 +238,7 @@ public class DelOutboundTimer {
      * 5分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void bringVerifyFail() {
         logger.debug("开始执行任务 - 提审");
         String key = applicationName + ":DelOutboundTimer:bringVerifyFail";
