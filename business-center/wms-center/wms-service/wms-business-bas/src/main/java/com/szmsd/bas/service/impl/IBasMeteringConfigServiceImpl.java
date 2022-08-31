@@ -118,9 +118,11 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                      BigDecimal bigDecimal= (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                      BigDecimal bigDecimal1=BigDecimal.valueOf(x.getDifferenceScope());
                      int a=bigDecimal.compareTo(bigDecimal1);
-                     if (a==0){
-
+                     if (a==1){
+                         throw new CommonException("超出设置的范围，拦截");
                      }
+                 }else if (x.getDifferenceType()==1){
+
                  }
              }
              if (x.getWeightTypeNameOne().equals("体积重")&&x.getWeightTypeNameOne().equals("计费重")){
