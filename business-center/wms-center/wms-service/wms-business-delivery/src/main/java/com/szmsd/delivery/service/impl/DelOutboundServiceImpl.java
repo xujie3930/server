@@ -112,17 +112,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -205,6 +197,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
+    public DelOutboundVO selectDelOutboundByOrderNous(String orderNo) {
+        LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.isNotNull(DelOutbound::getShipmentsTime);
+        queryWrapper.isNotNull(DelOutbound::getTrackingTime);
+        queryWrapper.and((wrapper)->{
+            queryWrapper.eq(DelOutbound::getOrderNo, orderNo).or().eq(DelOutbound::getRefNo,orderNo).or().eq(DelOutbound::getTrackingNo,orderNo);
+        });
+
+        queryWrapper.last("LIMIT 1");
+        DelOutbound delOutbound = super.getOne(queryWrapper);
+        return this.selectDelOutboundVO(delOutbound);
+    }
+
+    @Override
     public DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo) {
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(DelOutbound::getSellerCode, vo.getSellerCode());
@@ -223,11 +229,47 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return delOutboundThirdPartyVO;
     }
 
+
     private DelOutboundVO selectDelOutboundVO(DelOutbound delOutbound) {
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("400", "单据不存在");
         }
+        //判断时间不为空的情况
+
         DelOutboundVO delOutboundVO = BeanMapperUtil.map(delOutbound, DelOutboundVO.class);
+
+        if (Optional.ofNullable(delOutbound.getShipmentsTime()).isPresent()&&Optional.ofNullable(delOutbound.getTrackingTime()).isPresent()){
+            Date a=new Date(System.currentTimeMillis());
+            long s=(a.getTime()-delOutbound.getShipmentsTime().getTime());
+            TimeUnit time=TimeUnit.DAYS;
+            long day1=time.convert(s,TimeUnit.MILLISECONDS);
+
+            long q=(a.getTime()-delOutbound.getTrackingTime().getTime());
+
+            long day2=time.convert(q,TimeUnit.MILLISECONDS);
+            delOutboundVO.setDelDays(day1);
+            delOutboundVO.setTrackingDays(day2);
+
+            //根据物流服务查询 配置列表的两个天数
+            if (Optional.ofNullable(delOutbound.getShipmentRule()).isPresent()){
+                Map  mapSettings=baseMapper.selectQuerySettings(delOutbound.getShipmentRule());
+                //配置表的发货天数
+                Long queryseShipmentDays=Long.valueOf(mapSettings.get("shipmentDays").toString());
+                //配置表的轨迹天数
+                Long querysetrackStayDays=Long.valueOf(mapSettings.get("trackStayDays").toString());
+                delOutboundVO.setQueryseShipmentDays(queryseShipmentDays);
+                delOutboundVO.setQuerysetrackStayDays(querysetrackStayDays);
+                if (delOutboundVO.getDelDays()>queryseShipmentDays||delOutboundVO.getTrackingDays()>querysetrackStayDays){
+                   delOutboundVO.setCheckFlag(0L);
+                }else {
+                    delOutboundVO.setCheckFlag(1L);
+                }
+
+            }
+
+
+
+        }
         String orderNo = delOutbound.getOrderNo();
         DelOutboundAddress delOutboundAddress = delOutboundAddressService.getByOrderNo(orderNo);
         if (Objects.nonNull(delOutboundAddress)) {
