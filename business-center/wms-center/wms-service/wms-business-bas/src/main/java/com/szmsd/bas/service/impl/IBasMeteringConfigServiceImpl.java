@@ -11,9 +11,14 @@ import com.szmsd.common.core.exception.com.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -32,6 +37,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
         return basMeteringConfigMapper.selectList(basMeteringConfigDto);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, readOnly = false)
     @Override
     public R insertBasMeteringConfig(BasMeteringConfig basMeteringConfig) {
         try {
@@ -40,13 +46,14 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
             list.forEach(s->{
                 //新增时查询是否有此规则（三个条件，客户代码，产品code，国家code）
                 basMeteringConfig.setLogisticsErvicesCode(s);
+                basMeteringConfig.setCreateTime(new Date());
                 BasMeteringConfig basMeteringConfig1=basMeteringConfigMapper.selectPrimary(basMeteringConfig);
                 if (basMeteringConfig1!=null){
                     throw new CommonException("产品code,国家code,客户代码三个条件查出有此规则");
                 }
                 basMeteringConfig.setLogisticsErvicesCode(s);
                 basMeteringConfigMapper.insertSelective(basMeteringConfig);
-
+                basMeteringConfig.setId(null);
                 basMeteringConfig.getBasMeteringConfigDataList().forEach(x->{
                     x.setMeteringId(basMeteringConfig.getId());
                     basMeteringConfigDataMapper.insertSelective(x);
@@ -56,14 +63,17 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
 
             return R.ok("新增成功");
         }catch (Exception e){
+
         e.printStackTrace();
-            return R.failed("修改失败");
+        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        return R.failed( ((CommonException) e).getCode());
         }
 
     }
 
 //
 
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, readOnly = false)
     @Override
     public R UpdateBasMeteringConfig(BasMeteringConfig basMeteringConfig) {
         try {
@@ -75,6 +85,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                 if (basMeteringConfig1!=null){
                     throw new CommonException("产品code,国家code,客户代码三个条件查出有此规则");
                 }
+                basMeteringConfig.setUpdateTime(new Date());
                 basMeteringConfigMapper.updateByPrimaryKeySelective(basMeteringConfig);
                 //删除子表数据 从新做添加
                 basMeteringConfigDataMapper.deleteByPrimaryKey(basMeteringConfig.getId());
@@ -83,10 +94,11 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                     basMeteringConfigDataMapper.insertSelective(x);
                 });
             });
-            return R.ok("新增成功");
+            return R.ok("修改成功");
         }catch (Exception e){
             e.printStackTrace();
-            return R.failed("修改失败");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return R.failed(((CommonException) e).getCode());
         }
     }
 
@@ -100,16 +112,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
         return R.ok(basMeteringConfig);
     }
 
-    public static void main(String[] args) {
-        BigDecimal a= BigDecimal.valueOf(2);
-        BigDecimal b= BigDecimal.valueOf(3);
-       BigDecimal c=(a.divide(b,2,BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
-       int d=c.compareTo(BigDecimal.valueOf(67));
 
-        System.out.println(d);
-
-
-    }
 
     @Override
     public R intercept(BasMeteringConfigDto basMeteringConfigDto) {
