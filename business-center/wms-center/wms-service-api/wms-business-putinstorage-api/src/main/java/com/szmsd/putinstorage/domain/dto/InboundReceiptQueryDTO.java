@@ -25,6 +25,8 @@ public class InboundReceiptQueryDTO extends QueryDto {
     @ApiModelProperty(value = "入库单号")
     private String warehouseNo;
 
+    @ApiModelProperty(value = "转运出库单 界面查询条件")
+    private String deliveryNousD;
     @ApiModelProperty(value = "送货单号")
     private String deliveryNo;
 
@@ -78,6 +80,8 @@ public class InboundReceiptQueryDTO extends QueryDto {
 
     @ApiModelProperty(value = "结束时间 - 由接口调用方定义")
     private String endTime;
+
+
 
     @ApiModelProperty(value = "入库方式编码")
     private String warehouseMethodCode;

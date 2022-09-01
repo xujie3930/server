@@ -129,6 +129,21 @@ public class DelQueryServiceDto extends BaseEntity {
 
     private String queryNoOne;
 
+    @ApiModelProperty(value = "发货天数")
+    private Long delDays;
+
+    @ApiModelProperty(value = "轨迹停留天数")
+    private Long trackingDays;
+
+    @ApiModelProperty(value = "查件标识(0是红色,1是绿色)")
+    private Long checkFlag;
+
+    @ApiModelProperty(value = "允查发货天数")
+    private Long queryseShipmentDays;
+
+    @ApiModelProperty(value = "允查轨迹停留天数")
+    private Long querysetrackStayDays;
+
 
 
 }

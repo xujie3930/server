@@ -155,6 +155,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 queryDTO.setCusCode(cusCode);
             }
         }
+        if (StringUtils.isNoneEmpty(queryDTO.getDeliveryNousD())){
+            queryDTO.setDeliveryNousD(new StringBuilder("%").append(queryDTO.getDeliveryNousD()).append("%").toString());
+        }
         return baseMapper.selectListByCondiction(queryDTO);
     }
 

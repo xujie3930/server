@@ -289,4 +289,8 @@
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         where o.order_no=#{orderNo}
     </select>
+    <select id="selectQuerySettings" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT shipment_rule as shipmentRule,shipment_days as shipmentDays,track_stay_days as trackStayDays from del_query_settings where shipment_rule=#{shipmentRule} LIMIT 0,1
+
+    </select>
 </mapper>
