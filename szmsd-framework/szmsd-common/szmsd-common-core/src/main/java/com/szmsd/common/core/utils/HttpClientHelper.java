@@ -351,7 +351,7 @@ public class HttpClientHelper {
             return new HttpResponseBody.HttpResponseBodyWrapper(status, result);
         } catch (Exception e) {
             log.error("http异常"+e+":"+e.getMessage());
-            if(e instanceof  org.apache.http.conn.ConnectTimeoutException && timeout != null){
+            if((e.toString().equals("java.net.SocketTimeoutException") || e instanceof  org.apache.http.conn.ConnectTimeoutException) && timeout != null){
                 return new HttpResponseBody.HttpResponseBodyWrapper(408, "{\"status\":408,\"Errors\":[{\"Code\":408,\"Message\":\"请求超时\"}]}");
             }
             try {
@@ -363,6 +363,10 @@ public class HttpClientHelper {
             log.error(e.getMessage(), e);
         }
         return new HttpResponseBody.HttpResponseBodyEmpty();
+    }
+
+    public static void main(String[] args) {
+        System.out.println((java.net.SocketTimeoutException instanceof org.apache.http.conn.ConnectTimeoutException)? );
     }
 
     public static HttpResponseBody executeOnByteArray(HttpEntityEnclosingRequestBase request, String requestBody, Map<String, String> headerMap) {
