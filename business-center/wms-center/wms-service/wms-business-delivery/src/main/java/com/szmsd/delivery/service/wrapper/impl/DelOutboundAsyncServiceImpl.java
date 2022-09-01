@@ -151,7 +151,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
                     return 0;
                 }*/
-                if (!DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())){
+                if (DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())){
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
                     return 0;
                 }
