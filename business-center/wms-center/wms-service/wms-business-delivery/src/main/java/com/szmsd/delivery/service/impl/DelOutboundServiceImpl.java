@@ -252,15 +252,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             //根据物流服务查询 配置列表的两个天数
             if (Optional.ofNullable(delOutbound.getShipmentRule()).isPresent()){
+
                 Map  mapSettings=baseMapper.selectQuerySettings(delOutbound.getShipmentRule());
-                //配置表的发货天数
-                Long queryseShipmentDays=Long.valueOf(mapSettings.get("shipmentDays").toString());
-                //配置表的轨迹天数
-                Long querysetrackStayDays=Long.valueOf(mapSettings.get("trackStayDays").toString());
-                delOutboundVO.setQueryseShipmentDays(queryseShipmentDays);
-                delOutboundVO.setQuerysetrackStayDays(querysetrackStayDays);
-                if (delOutboundVO.getDelDays()>queryseShipmentDays||delOutboundVO.getTrackingDays()>querysetrackStayDays){
-                   delOutboundVO.setCheckFlag(0L);
+                if (mapSettings!=null) {
+                    //配置表的发货天数
+                    Long queryseShipmentDays = Long.valueOf(mapSettings.get("shipmentDays").toString());
+                    //配置表的轨迹天数
+                    Long querysetrackStayDays = Long.valueOf(mapSettings.get("trackStayDays").toString());
+                    delOutboundVO.setQueryseShipmentDays(queryseShipmentDays);
+                    delOutboundVO.setQuerysetrackStayDays(querysetrackStayDays);
+                    if (delOutboundVO.getDelDays() > queryseShipmentDays || delOutboundVO.getTrackingDays() > querysetrackStayDays) {
+                        delOutboundVO.setCheckFlag(0L);
+                    } else {
+                        delOutboundVO.setCheckFlag(1L);
+                    }
                 }else {
                     delOutboundVO.setCheckFlag(1L);
                 }
