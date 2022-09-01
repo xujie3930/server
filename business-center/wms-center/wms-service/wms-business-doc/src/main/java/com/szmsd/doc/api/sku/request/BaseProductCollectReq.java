@@ -143,7 +143,7 @@ public class BaseProductCollectReq {
     @Size(max = 50, message = "物流包装要求仅支持50字符")
     private String suggestPackingMaterial;
 
-    @ApiModelProperty(value = "物流包装要求编码 packing/listPacking -#{packageMaterialCode}", example = "B001", hidden = true)
+    @ApiModelProperty(value = "物流包装要求编码 packing/listPacking -#{packageMaterialCode}", example = "B001")
     @Size(max = 100, message = "物流包装要求仅支持100字符")
     private String suggestPackingMaterialCode;
 
