@@ -144,13 +144,18 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 TimeInterval timer = DateUtil.timer();
                 logger.info("(1)查询到单据信息，delOutbound:{}, timer:{}", JSON.toJSONString(delOutbound), timer.intervalRestart());
                 // 只处理状态为【WHSE_PROCESSING,PROCESSING】的记录
-                if (!(DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(delOutbound.getState())
+                /*if (!(DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(delOutbound.getState())
                         || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(delOutbound.getState())
                         || DelOutboundStateEnum.PROCESSING.getCode().equals(delOutbound.getState())
                         || DelOutboundStateEnum.DELIVERED.getCode().equals(delOutbound.getState()))) {
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
                     return 0;
+                }*/
+                if (!DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())){
+                    logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
+                    return 0;
                 }
+
                 // 不是重派订单
                 if (!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                     logger.info("(1.1.1)开始获取发货计划相关信息，单号：{}", delOutbound.getOrderNo());
