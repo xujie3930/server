@@ -25,7 +25,7 @@ public class BasMeteringConfigDto  extends QueryDto {
     @ApiModelProperty(value = "国家名称")
     private String countryName;
 
-    @ApiModelProperty(value = "客户名称")
+    @ApiModelProperty(value = "客户code")
     private String customerCode;
 
     @ApiModelProperty(value = "计费重")
