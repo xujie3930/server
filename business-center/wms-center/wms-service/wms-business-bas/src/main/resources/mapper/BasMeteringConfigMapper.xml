@@ -35,11 +35,11 @@
     from bas_metering_config
     <where>
         1=1
-      <if test="logisticsErvicesCode != null" >
+      <if test="logisticsErvicesCode != null and logisticsErvicesCode!=''" >
       and
         FIND_IN_SET(logistics_ervices_code,#{logisticsErvicesCode})
       </if>
-      <if test="countryCode != null" >
+      <if test="countryCode != null and countryCode!=''" >
         and
         FIND_IN_SET(country_code,#{countryCode})
       </if>
@@ -114,7 +114,7 @@
       #{createTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{updateByName,jdbcType=VARCHAR}, 
       #{updateTime,jdbcType=TIMESTAMP}, #{delFlag,jdbcType=CHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasMeteringConfig" useGeneratedKeys="true" keyProperty="id">
+  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasMeteringConfig" useGeneratedKeys="true" keyProperty="delId">
     insert into bas_metering_config
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >

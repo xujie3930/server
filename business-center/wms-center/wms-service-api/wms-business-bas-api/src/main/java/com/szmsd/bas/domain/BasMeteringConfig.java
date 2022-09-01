@@ -54,6 +54,10 @@ public class BasMeteringConfig extends BaseEntity {
     @ApiModelProperty(value = "逻辑删除标识；2-已删除，0-未删除")
     private String delFlag;
 
+    @ApiModelProperty(value = "标识id防止和主id一直")
+    @TableField(exist = false)
+    private String delId;
+
     @ApiModelProperty(value = "规则明细数据字表")
     @TableField(exist = false)
     private List<BasMeteringConfigData> basMeteringConfigDataList;
