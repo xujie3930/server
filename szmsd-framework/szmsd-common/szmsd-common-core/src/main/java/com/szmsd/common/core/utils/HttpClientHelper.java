@@ -365,10 +365,6 @@ public class HttpClientHelper {
         return new HttpResponseBody.HttpResponseBodyEmpty();
     }
 
-    public static void main(String[] args) {
-        System.out.println((java.net.SocketTimeoutException instanceof org.apache.http.conn.ConnectTimeoutException)? );
-    }
-
     public static HttpResponseBody executeOnByteArray(HttpEntityEnclosingRequestBase request, String requestBody, Map<String, String> headerMap) {
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
