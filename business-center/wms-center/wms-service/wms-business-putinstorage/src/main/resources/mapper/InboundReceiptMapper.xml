@@ -149,7 +149,7 @@
     </sql>
     <select id="selectListByCondiction" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultType="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
         SELECT <include refid="Column_List_VO"/>
-        FROM inbound_receipt t
+        FROM inbound_receipt t left join  inbound_receipt_detail a on t.warehouse_no=a.warehouse_no
         <where><include refid="selectListWhere"/></where>
         ORDER BY t.create_time DESC
     </select>
@@ -212,6 +212,8 @@
         <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
         <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>
         <if test="warehouseMethodCode != null and warehouseMethodCode != ''">AND t.warehouse_method_code = #{warehouseMethodCode}</if>
+        <if test="deliveryNousD != null and deliveryNousD != ''">AND a.delivery_no like #{deliveryNousD}</if>
+
     </sql>
 
 </mapper>
