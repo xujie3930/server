@@ -159,6 +159,12 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                 }
             }
 
+            //国外接口地址
+            if (domain.equals("https://ws-pf.qeops.eu:8445")){
+                    Authorization = "Bearer " + "qps_auth_u96vL6IVHm2NwseYO0oHGk5Y2wYWQYn6adad70";
+                    requestHeaders.put("Authorization", Authorization);
+            }
+
             // 二进制
             Boolean binary = dto.getBinary();
             if (null == binary) {
