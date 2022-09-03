@@ -148,7 +148,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             }
 
             //出口易特殊处理
-            //测试环境http://openapi.ck1info.com"
+
             //生产环境http://openapi.chukou1.cn
             if (domain.equals("http://openapi.chukou1.cn")){
                 String userName=dto.getUserName();
@@ -157,6 +157,21 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                     Authorization = "Bearer " + authorizationCode;
                     requestHeaders.put("Authorization", Authorization);
                 }
+            }
+             //测试环境http://openapi.ck1info.com"
+            if (domain.equals("http://openapi.ck1info.com")){
+                String userName=dto.getUserName();
+                String authorizationCode=htpConfigMapper.selectAuthorizationCode(userName);
+                if (StringUtils.isNotEmpty(authorizationCode)) {
+                    Authorization = "Bearer " + authorizationCode;
+                    requestHeaders.put("Authorization", Authorization);
+                }
+            }
+
+            //国外接口地址
+            if (domain.equals("https://ws-pf.qeops.eu:8445")){
+                    Authorization = "Bearer " + "qps_auth_u96vL6IVHm2NwseYO0oHGk5Y2wYWQYn6adad70";
+                    requestHeaders.put("Authorization", Authorization);
             }
 
             // 二进制
