@@ -26,6 +26,7 @@ import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyNoDto;
+import com.szmsd.delivery.dto.DelOutboundLabelDto;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
@@ -107,6 +108,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.io.File;
 import java.io.IOException;
@@ -195,6 +197,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
     }
 
     private List<DelOutboundBringVerifyVO> bringVerifyProcess(List<DelOutbound> delOutboundList){
+        StopWatch stopWatch = new StopWatch();
+
         if (CollectionUtils.isEmpty(delOutboundList)) {
             throw new CommonException("400", "单据不存在");
         }
@@ -204,12 +208,17 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
                 packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
                 packageDeliveryConditions.setProductCode(delOutbound.getShipmentRule());
+                stopWatch.start();
                 R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]判断发货条件是否有效this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions)"+stopWatch.getLastTaskTimeMillis(), delOutbound.getOrderNo());
+
                 if(packageDeliveryConditionsR != null && packageDeliveryConditionsR.getCode() == 200){
                     if(packageDeliveryConditionsR.getData() == null || !"1".equals(packageDeliveryConditionsR.getData().getStatus())){
                         throw new CommonException("400", delOutbound.getShipmentRule()+ "物流服务未生效");
                     }
                 }
+
             }
             try {
                 if (Objects.isNull(delOutbound)) {
@@ -237,12 +246,35 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 /*AsyncThreadObject asyncThreadObject = AsyncThreadObject.build();
                 this.delOutboundBringVerifyAsyncService.bringVerifyAsync(delOutbound, asyncThreadObject);*/
                 // 增加出库单已取消记录，异步处理，定时任务
+
+                stopWatch.start();
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]创建出库临时表:"+stopWatch.getLastTaskTimeMillis(), delOutbound.getOrderNo());
+
+                stopWatch.start();
+
+
                 // 修改状态为提交中
                 this.delOutboundService.updateState(delOutbound.getId(), DelOutboundStateEnum.REVIEWED_DOING);
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]修改出库表为提审中:"+stopWatch.getLastTaskTimeMillis(), delOutbound.getOrderNo());
                 resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), true, "处理成功"));
             } catch (Exception e) {
+                e.printStackTrace();
                 logger.error(e.getMessage(), e);
+
+                DelOutbound updateDelOutbound = new DelOutbound();
+                updateDelOutbound.setId(delOutbound.getId());
+
+                String remark = e.getMessage();
+                if (remark != null && remark.length() > 200) {
+                    remark = remark.substring(0, 200);
+                }
+                updateDelOutbound.setExceptionMessage(remark);
+                if(remark != null){
+                    this.delOutboundService.updateByIdTransactional(updateDelOutbound);
+                }
                 if (null != delOutbound) {
                     resultList.add(new DelOutboundBringVerifyVO(delOutbound.getOrderNo(), false, e.getMessage()));
                 } else {
@@ -265,27 +297,48 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public DelOutboundWrapperContext initContext(DelOutbound delOutbound) {
+        StopWatch stopWatch = new StopWatch();
+
         String orderNo = delOutbound.getOrderNo();
         String warehouseCode = delOutbound.getWarehouseCode();
         // 查询地址信息
+        stopWatch.start();
         DelOutboundAddress address = this.delOutboundAddressService.getByOrderNo(orderNo);
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单{}查询地址] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
         if (null == address) {
             // 普通出口需要收货地址
             if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())) {
                 throw new CommonException("400", "收货地址信息不存在");
             }
         }
+        stopWatch.start();
         // 查询sku信息
         List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单{}查询sku信息] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
+        stopWatch.start();
+
         // 查询仓库信息
         BasWarehouse warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
+        stopWatch.stop();
+
+        logger.info(">>>>>[创建出库单{}查询仓库信息] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
         if (null == warehouse) {
             throw new CommonException("400", "仓库信息不存在");
         }
         // 查询国家信息，收货地址所在的国家
         BasRegionSelectListVO country = null;
         if (null != address) {
+            stopWatch.start();
             R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(address.getCountryCode());
+            stopWatch.stop();
+
+            logger.info(">>>>>[创建出库单{}查询国家信息，收货地址所在的国家] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
             country = R.getDataAndException(countryR);
             if (null == country) {
                 throw new CommonException("400", "国家信息不存在");
@@ -303,7 +356,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             conditionQueryDto.setSkus(skus);
             // 转运出库的不查询sku明细信息
             if (!DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+                stopWatch.start();
                 productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                stopWatch.stop();
+
+                logger.info(">>>>>[创建出库单{}转运出库的不查询sku明细信息] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
                 if (CollectionUtils.isEmpty(productList)) {
                     throw new CommonException("400", "查询SKU信息失败");
                 }
@@ -668,11 +726,15 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 throw new CommonException("400", builder.toString());
             }
             try {
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
                 TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
                 transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
                 transferCallbackDTO.setLogisticsRouteId(shipmentService);
                 transferCallbackDTO.setTransferNumber(shipmentOrderResult.getMainTrackingNumber());
                 commonOrderFeignService.transferCallback(transferCallbackDTO);
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]转仓库回调 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
@@ -688,8 +750,173 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
+            if("[408]请求超时".equals(exceptionMessage)){
+                throw new CommonException("408", exceptionMessage);
+            }
             throw new CommonException("400", exceptionMessage);
         }
+    }
+
+    @Override
+    public ShipmentOrderResult shipmentAmazonOrder(DelOutboundWrapperContext delOutboundWrapperContext) {
+        DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+        String orderNo = delOutbound.getOrderNo();
+        String shipmentService = delOutbound.getAmazonLogisticsRouteId();
+        if (StringUtils.isEmpty(shipmentService)) {
+            throw new CommonException("400", "发货服务名称为空");
+        }
+        // 查询地址信息
+        DelOutboundAddress address = delOutboundWrapperContext.getAddress();
+        // 查询sku信息
+        List<DelOutboundDetail> detailList = delOutboundWrapperContext.getDetailList();
+        // 查询仓库信息
+        BasWarehouse warehouse = delOutboundWrapperContext.getWarehouse();
+        // 查询国家信息，收货地址所在的国家
+        BasRegionSelectListVO country = delOutboundWrapperContext.getCountry();
+        // 创建承运商物流订单
+        CreateShipmentOrderCommand createShipmentOrderCommand = new CreateShipmentOrderCommand();
+//        createShipmentOrderCommand.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
+        createShipmentOrderCommand.setWarehouseCode(delOutbound.getWarehouseCode());
+        // 改成uuid
+        createShipmentOrderCommand.setReferenceNumber(UUID.randomUUID().toString().replaceAll("-", "").toUpperCase());
+        // 订单号传refno
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            createShipmentOrderCommand.setOrderNumber(delOutbound.getRefNo());
+        } else {
+            createShipmentOrderCommand.setOrderNumber(orderNo);
+        }
+        createShipmentOrderCommand.setClientNumber(delOutbound.getSellerCode());
+        createShipmentOrderCommand.setReceiverAddress(new AddressCommand(address.getConsignee(),
+                address.getPhoneNo(),
+                address.getEmail(),
+                address.getStreet1(),
+                address.getStreet2(),
+                address.getStreet3(),
+                address.getCity(),
+                address.getStateOrProvince(),
+                address.getPostCode(),
+                country.getEnName()));
+        createShipmentOrderCommand.setReturnAddress(new AddressCommand(warehouse.getContact(),
+                warehouse.getTelephone(),
+                null,
+                warehouse.getStreet1(),
+                warehouse.getStreet2(),
+                null,
+                warehouse.getCity(),
+                warehouse.getProvince(),
+                warehouse.getPostcode(),
+                warehouse.getCountryName()));
+        // 税号信息
+        String ioss = delOutbound.getIoss();
+        if (StringUtils.isNotEmpty(ioss)) {
+            List<Taxation> taxations = new ArrayList<>();
+            taxations.add(new Taxation("IOSS", ioss));
+            createShipmentOrderCommand.setTaxations(taxations);
+        }
+        createShipmentOrderCommand.setCodAmount(delOutbound.getCodAmount());
+        // 包裹信息
+        List<Package> packages = new ArrayList<>();
+        List<PackageItem> packageItems = new ArrayList<>();
+        int weightInGram = 0;
+        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+            /*
+            packageItems.add(new PackageItem(delOutbound.getOrderNo(), delOutbound.getOrderNo(), Utils.valueOf(delOutbound.getAmount()), weightInGram = Utils.valueOfDouble(delOutbound.getWeight()),
+                    new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
+                    1, "", String.valueOf(delOutbound.getId()), delOutbound.getOrderNo()));
+
+             */
+            for (DelOutboundDetail detail : detailList) {
+                Double declaredValue;
+                if (null != detail.getDeclaredValue()) {
+                    declaredValue = detail.getDeclaredValue();
+                } else {
+                    declaredValue = 0D;
+                }
+                packageItems.add(new PackageItem(detail.getProductName(), detail.getProductNameChinese(), declaredValue, 10,
+                        new Size(1D, 1D, 1D),
+                        Utils.valueOfLong(detail.getQty()), detail.getHsCode(), String.valueOf(detail.getId()), detail.getSku()));
+            }
+        } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(delOutbound.getOrderType())) {
+            List<String> skus = new ArrayList<>();
+            skus.add(delOutbound.getNewSku());
+            BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+            conditionQueryDto.setSkus(skus);
+            List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            if (CollectionUtils.isEmpty(productList)) {
+                throw new CommonException("400", "查询SKU[" + delOutbound.getNewSku() + "]信息失败");
+            }
+            BaseProduct product = productList.get(0);
+            packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), weightInGram = Utils.valueOfDouble(product.getWeight()),
+                    new Size(product.getLength(), product.getWidth(), product.getHeight()),
+                    Utils.valueOfLong(delOutbound.getBoxNumber()), product.getHsCode(), String.valueOf(delOutbound.getId()), delOutbound.getNewSku()));
+        } else {
+            // 查询sku信息
+            List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
+            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            for (DelOutboundDetail detail : detailList) {
+                String sku = detail.getSku();
+                BaseProduct product = productMap.get(sku);
+                if (null == product) {
+                    throw new CommonException("400", "查询SKU[" + sku + "]信息失败");
+                }
+                int productWeight = Utils.valueOfDouble(product.getWeight());
+                weightInGram += productWeight;
+                packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), productWeight,
+                        new Size(product.getLength(), product.getWidth(), product.getHeight()),
+                        Utils.valueOfLong(detail.getQty()), product.getHsCode(), String.valueOf(detail.getId()), sku));
+            }
+        }
+        if (null != delOutbound.getWeight() && delOutbound.getWeight() > 0) {
+            weightInGram = Utils.valueOfDouble(delOutbound.getWeight());
+        }
+        if (weightInGram <= 0) {
+            throw new CommonException("400", "包裹重量为0或者小于0，不能创建承运商物流订单");
+        }
+        String packageNumber;
+        if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+            packageNumber = delOutbound.getRefNo();
+        } else {
+            packageNumber = orderNo;
+        }
+        packages.add(new Package(packageNumber, delOutbound.getRemark() + "|" + orderNo,
+                new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
+                weightInGram, packageItems));
+        createShipmentOrderCommand.setPackages(packages);
+        createShipmentOrderCommand.setCarrier(new Carrier(shipmentService));
+        ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
+        if (null == responseObjectWrapper) {
+            throw new CommonException("400", "创建亚马逊承运商物流订单失败，调用承运商系统无响应");
+        }
+        if (!responseObjectWrapper.isSuccess()) {
+            String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
+            if("[408]请求超时".equals(exceptionMessage)){
+                throw new CommonException("408", exceptionMessage);
+            }
+            throw new CommonException("400", exceptionMessage);
+        }
+        // 保存挂号
+        // 判断结果集是不是正确的
+        ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
+        if (null == shipmentOrderResult) {
+            throw new CommonException("400", "创建亚马逊承运商物流订单失败，调用承运商系统返回数据为空");
+        }
+        if (null == shipmentOrderResult.getSuccess() || !shipmentOrderResult.getSuccess()) {
+            // 判断有没有错误信息
+            ErrorDto error = shipmentOrderResult.getError();
+            StringBuilder builder = new StringBuilder();
+            if (null != error && StringUtils.isNotEmpty(error.getMessage())) {
+                if (StringUtils.isNotEmpty(error.getErrorCode())) {
+                    builder.append("[")
+                            .append(error.getErrorCode())
+                            .append("]");
+                }
+                builder.append(error.getMessage());
+            } else {
+                builder.append("创建亚马逊承运商物流订单失败，调用承运商系统失败，返回错误信息为空");
+            }
+            throw new CommonException("400", builder.toString());
+        }
+        return shipmentOrderResult;
     }
 
     @Override
@@ -860,6 +1087,19 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             return;
         }
         DelOutboundOperationLogEnum.SMT_SHIPMENT_LABEL.listener(delOutbound);
+
+
+        String selfPickLabelFilePath = null;
+        if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+            DelOutboundLabelDto dto = new DelOutboundLabelDto();
+            dto.setId(delOutbound.getId());
+            //生成下自提标签文件，如果有就不生成
+            delOutboundService.labelSelfPick(null, dto);
+            selfPickLabelFilePath = DelOutboundServiceImplUtil.getSelfPickLabelFilePath(delOutbound) + "/" + delOutbound.getOrderNo() + ".pdf";
+        }
+
+
+
         String pathname = null;
         // 如果是批量出库，将批量出库上传的文件和标签文件合并在一起传过去
         if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
@@ -921,7 +1161,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 // 合并文件
                 try {
-                    if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath, uploadBoxLabel)) {
+                    if (PdfUtil.merge(mergeFilePath, boxFilePath, labelFilePath, uploadBoxLabel, selfPickLabelFilePath)) {
                         pathname = mergeFilePath;
                     }
                 } catch (IOException e) {
@@ -949,7 +1189,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 File mergeFile = new File(mergeFilePath);
                 logger.info(mergeFilePath + "," + pathname + "," + uploadBoxLabel);
                 try {
-                    if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel)) {
+                    if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel, selfPickLabelFilePath)) {
                         pathname = mergeFilePath;
                     }
                 } catch (IOException e) {

@@ -262,4 +262,21 @@ public interface DelOutboundFeignService {
     @ApiOperation(value = "出库管理 - 提审", position = 600)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundBringVerifyNoDto")
     R<List<DelOutboundBringVerifyVO>> bringVerifyByOrderNo(@RequestBody DelOutboundBringVerifyNoDto dto);
+
+    /**
+     * 通知提审定时任务执行任务
+     * @return
+     */
+    @PostMapping(value = "/api/outbound/open/notifyBringVerify")
+    R<String> notifyBringVerify();
+
+    /**
+     * 通知获取亚马逊挂号定时任务执行任务
+     * @return
+     */
+    @PostMapping(value = "/api/outbound/open/notifyAmazonLogisticsRouteIdy")
+    R<String> notifyAmazonLogisticsRouteId();
+
+    @PostMapping(value = "/api/outbound/open/notifyWMS")
+    R<String> notifyWMS();
 }

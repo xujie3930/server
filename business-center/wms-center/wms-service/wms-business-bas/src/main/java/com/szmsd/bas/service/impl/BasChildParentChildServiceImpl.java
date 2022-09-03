@@ -92,6 +92,9 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
         selectVO.setSellerCode(basChildParentChild.getSellerCode());
         selectVO.setId(basChildParentChild.getId());
         selectVO.setParentSellerCode(basChildParentChild.getParentSellerCode());
+        if (basChildParentChild.getApplyCode().equals(basChildParentChild.getSellerCode())){
+            throw new BaseException("主账号和子账号不能一样");
+        }
         BasSeller basSeller = sellerAdd(selectVO);
         basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getSellerCode()).set(BasSeller::getChildParentStatus, "2").update();
         basSellerService.lambdaUpdate().eq(BasSeller::getSellerCode, basChildParentChild.getParentSellerCode()).set(BasSeller::getChildParentStatus, "1").update();
@@ -132,6 +135,7 @@ public class BasChildParentChildServiceImpl extends ServiceImpl<BasChildParentCh
         if (Objects.isNull(seller)) {
             throw new BaseException("该客户代码不存在");
         }
+
         return seller;
     }
 

@@ -402,7 +402,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         String fromOrderNo = returnExpressAddDTO.getFromOrderNo();
         Integer integer = returnExpressMapper.selectCount(Wrappers.<ReturnExpressDetail>lambdaQuery()
                 //唯一 必填
-                .eq(ReturnExpressDetail::getScanCode, returnExpressAddDTO.getScanCode())
+                .eq(StringUtils.isNotBlank(returnExpressAddDTO.getScanCode()),ReturnExpressDetail::getScanCode, returnExpressAddDTO.getScanCode())
                 .or().eq(StringUtils.isNotBlank(fromOrderNo), ReturnExpressDetail::getFromOrderNo, fromOrderNo)
                 .select(ReturnExpressDetail::getId));
         AssertUtil.isTrue(integer == 0, "退件可扫描编码/原出库单号不能重复");
@@ -423,6 +423,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         } else {
             returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWmsWaitReceive());
             returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWmsWaitReceiveStr());
+        }
+        if (returnExpressDetail.getScanCode()==null||returnExpressDetail.getScanCode().equals("")){
+            returnExpressDetail.setScanCode(returnExpressDetail.getFromOrderNo());
         }
         return returnExpressMapper.insert(returnExpressDetail);
     }

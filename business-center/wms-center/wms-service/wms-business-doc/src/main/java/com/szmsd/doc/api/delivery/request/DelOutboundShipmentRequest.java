@@ -60,6 +60,10 @@ public class DelOutboundShipmentRequest implements Serializable {
     @ApiModelProperty(value = "伙伴编码")
     private String partnerCode;
 
+
+    @ApiModelProperty(value = "houseNo")
+    private String houseNo;
+
     @Valid
     @NotNull(message = "地址信息不能为空", groups = {DelOutboundGroup.Normal.class})
     @ApiModelProperty(value = "地址信息", dataType = "DelOutboundAddressRequest", position = 7)

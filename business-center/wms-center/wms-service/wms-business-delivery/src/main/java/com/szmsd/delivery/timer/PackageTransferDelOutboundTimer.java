@@ -58,6 +58,8 @@ public class PackageTransferDelOutboundTimer {
             queryWrapper.eq(DelOutbound::getOrderType, DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode());
             queryWrapper.eq(DelOutbound::getState, DelOutboundStateEnum.DELIVERED.getCode());
             queryWrapper.eq(DelOutbound::getInStock, false);
+            queryWrapper.apply("seller_code in(select seller_code from bas_seller where generate_inbound_receipt=1)");
+
             List<DelOutbound> delOutboundList = delOutboundService.list(queryWrapper);
             List<Long> updateInStockList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(delOutboundList)) {

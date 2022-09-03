@@ -38,6 +38,7 @@
         <result column="status" property="status"/>
         <result column="remark" property="remark"/>
         <result column="source_type" property="sourceType"/>
+        <result column="batch_number" property="batchNumber"/>
 
         <!-- 多语言字段 -->
         <result column="cus_name" property="cusName"/>
@@ -113,6 +114,7 @@
         t.status,
         t.remark,
         t.collection_no,
+        t.batch_number,
 
         -- 多语言字段
         t.cus_code cus_name,
@@ -147,7 +149,7 @@
     </sql>
     <select id="selectListByCondiction" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultType="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
         SELECT <include refid="Column_List_VO"/>
-        FROM inbound_receipt t
+        FROM inbound_receipt t left join  inbound_receipt_detail a on t.warehouse_no=a.warehouse_no
         <where><include refid="selectListWhere"/></where>
         ORDER BY t.create_time DESC
     </select>
@@ -210,6 +212,8 @@
         <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
         <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>
         <if test="warehouseMethodCode != null and warehouseMethodCode != ''">AND t.warehouse_method_code = #{warehouseMethodCode}</if>
+        <if test="deliveryNousD != null and deliveryNousD != ''">AND a.delivery_no like #{deliveryNousD}</if>
+
     </sql>
 
 </mapper>

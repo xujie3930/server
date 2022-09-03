@@ -4,12 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.config.*;
 import com.szmsd.http.domain.HtpRequestLog;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.event.EventUtil;
 import com.szmsd.http.event.RequestLogEvent;
+import com.szmsd.http.mapper.HtpConfigMapper;
 import com.szmsd.http.plugins.*;
 import com.szmsd.http.service.ICommonRemoteService;
 import com.szmsd.http.service.RemoteInterfaceService;
@@ -49,6 +52,9 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
     private DomainPluginConfig domainPluginConfig;
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private HtpConfigMapper htpConfigMapper;
 
     @Override
     public HttpResponseVO rmi(HttpRequestDto dto) {
@@ -98,6 +104,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                     requestHeaders.put(tokenName, tokenValue);
                 }
             }
+
             // 处理拦截器逻辑
             List<String> interceptors = this.domainInterceptorConfig.getInterceptors(domain);
             if (CollectionUtils.isNotEmpty(interceptors)) {
@@ -139,6 +146,28 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                 }
                 requestHeaders.put("Authorization", Authorization);
             }
+
+            //出口易特殊处理
+
+            //生产环境http://openapi.chukou1.cn
+            if (domain.equals("http://openapi.chukou1.cn")){
+                String userName=dto.getUserName();
+                String authorizationCode=htpConfigMapper.selectAuthorizationCode(userName);
+                if (StringUtils.isNotEmpty(authorizationCode)) {
+                    Authorization = "Bearer " + authorizationCode;
+                    requestHeaders.put("Authorization", Authorization);
+                }
+            }
+             //测试环境http://openapi.ck1info.com"
+            if (domain.equals("http://openapi.ck1info.com")){
+                String userName=dto.getUserName();
+                String authorizationCode=htpConfigMapper.selectAuthorizationCode(userName);
+                if (StringUtils.isNotEmpty(authorizationCode)) {
+                    Authorization = "Bearer " + authorizationCode;
+                    requestHeaders.put("Authorization", Authorization);
+                }
+            }
+
             // 二进制
             Boolean binary = dto.getBinary();
             if (null == binary) {

@@ -6,9 +6,10 @@
     <!-- 日志存放路径 -->
     <property name="log.path" value="/u01/logs/ck1/${springProfilesActive}/${springAppName}" />
     <!-- 日志输出格式 -->
-    <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%X{TID}] [%thread] %-5level %logger{20} - [%method,%line] - %msg%n" />:ss} %-5level ${springAppName:-} %thread %logger %msg%n"/>
+    <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{TID}] [%thread] %-5level %logger{20} - [%method,%line] - %msg%n" />:ss} %-5level ${springAppName:-} %thread %logger %msg%n"/>
     <!-- 日志文件最大内容 -->
     <property name="log.maxFileSize" value="100MB"/>
+    <springProperty scope="context" name="port" source="server.port"/>
 
     <!-- 控制台输出 -->
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
@@ -19,11 +20,11 @@
 
     <!-- 系统日志输出 -->
 	<appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
-	    <file>${log.path}/${springAppName}-info.log</file>
+	    <file>${log.path}/${springAppName}-info-${port}-${hostname}.log</file>
         <!-- 循环政策：基于时间创建日志文件 -->
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志归档 -->
-            <fileNamePattern>${log.path}/${springAppName}-info-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <fileNamePattern>${log.path}/${springAppName}-info-%d{yyyy-MM-dd}-${port}-${hostname}.%i.gz</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>${log.maxFileSize}</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -46,11 +47,11 @@
 	</appender>
 
     <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
-	    <file>${log.path}/${springAppName}-error.log</file>
+	    <file>${log.path}/${springAppName}-error-${port}-${hostname}.log</file>
         <!-- 循环政策：基于时间创建日志文件 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志归档 -->
-            <fileNamePattern>${log.path}/${springAppName}-error-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <fileNamePattern>${log.path}/${springAppName}-error-%d{yyyy-MM-dd}-${port}-${hostname}.%i.gz</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>${log.maxFileSize}</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>

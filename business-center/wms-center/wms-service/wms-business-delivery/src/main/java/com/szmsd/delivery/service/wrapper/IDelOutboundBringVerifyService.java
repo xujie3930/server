@@ -61,6 +61,14 @@ public interface IDelOutboundBringVerifyService {
     ShipmentOrderResult shipmentOrder(DelOutboundWrapperContext delOutboundWrapperContext);
 
     /**
+     * 创建亚马逊承运商物流订单（客户端）
+     *
+     * @param delOutboundWrapperContext delOutboundWrapperContext
+     * @return ShipmentOrderResult
+     */
+    ShipmentOrderResult shipmentAmazonOrder(DelOutboundWrapperContext delOutboundWrapperContext);
+
+    /**
      * 更新发货规则
      *
      * @param delOutbound delOutbound

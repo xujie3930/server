@@ -192,4 +192,8 @@
     <select id="selectLastDeployLog" resultMap="HtpDeployLog">
         SELECT * FROM htp_deploy_log ORDER BY create_time DESC LIMIT 1
     </select>
+    <select id="selectAuthorizationCode" resultType="java.lang.String" parameterType="java.lang.String">
+        SELECT authorization_code from bas_seller where user_name=#{userName} LIMIT 0,1
+
+    </select>
 </mapper>

@@ -83,9 +83,11 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 //        if (StringUtils.isNotBlank(dto.getIds())) {
 //            query.in(AccountSerialBill::getId, (Object[]) dto.getIds().split(","));
 //        }
-        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(com.szmsd.common.core.utils.StringUtils.isEmpty(dto.getCusCode())){
-            dto.setCusCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+            if (com.szmsd.common.core.utils.StringUtils.isEmpty(dto.getCusCode())) {
+                dto.setCusCode(cusCode);
+            }
         }
         List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectPageList(dto);
         // 修改下单时间等信息
@@ -190,11 +192,14 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             if (null == x.getAmount()) x.setAmount(BigDecimal.ZERO);
             // 负数
             String businessCategory = x.getBusinessCategory();
+            //费用类型，费用类型为汇率转换的也不能去转换负数
+            String chargeType=x.getChargeType();
             if (StringUtils.isNotBlank(businessCategory) && positiveNumber.contains(businessCategory)) {
                 x.setAmount(x.getAmount().abs());
-            } else {
+            } else if (!chargeType.equals("汇率转换充值")){
                 Optional.ofNullable(x.getAmount()).ifPresent(amount -> x.setAmount(amount.abs().negate()));
             }
+
         });
 
     }

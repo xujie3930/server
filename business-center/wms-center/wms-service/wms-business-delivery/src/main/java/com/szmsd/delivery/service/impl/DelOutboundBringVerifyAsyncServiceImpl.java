@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,6 +79,7 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(e.getMessage(), e);
             throw new CommonException("500", "提审操作失败，" + e.getMessage());
         } finally {
@@ -89,6 +91,7 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
 
     @Override
     public void bringVerifyAsync(DelOutbound delOutbound, AsyncThreadObject asyncThreadObject) {
+        StopWatch stopWatch = new StopWatch();
         Thread thread = Thread.currentThread();
         // 开始时间
         long startTime = System.currentTimeMillis();
@@ -97,7 +100,11 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
         if (isAsyncThread) {
             asyncThreadObject.loadTid();
         }
+        stopWatch.start();
         DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
         BringVerifyEnum currentState;
         String bringVerifyState = delOutbound.getBringVerifyState();
         if (StringUtils.isEmpty(bringVerifyState)) {
@@ -220,6 +227,9 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 }
             }
             logger.info("(5)出库单提审失败，判断是否删除出库单。partnerCode: {}, partnerDeleteOrderFlag: {}", partnerCode, partnerDeleteOrderFlag);
+            if("408".equals(e.getCode()) || "[408]请求超时".equals(e.getMessage())){
+                throw new RuntimeException(e);
+            }
         } finally {
             if (isAsyncThread) {
                 asyncThreadObject.unloadTid();

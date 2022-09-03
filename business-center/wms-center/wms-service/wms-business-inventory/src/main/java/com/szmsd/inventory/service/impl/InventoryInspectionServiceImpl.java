@@ -33,10 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -94,9 +91,11 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
 
     @Override
     public List<InventoryInspectionVo> findList(InventoryInspectionQueryDTO dto) {
-        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(StringUtils.isEmpty(dto.getCustomCode())){
-            dto.setCustomCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+            if (StringUtils.isEmpty(dto.getCustomCode())) {
+                dto.setCustomCode(cusCode);
+            }
         }
         return iInventoryInspectionMapper.selectListPage(dto);
     }

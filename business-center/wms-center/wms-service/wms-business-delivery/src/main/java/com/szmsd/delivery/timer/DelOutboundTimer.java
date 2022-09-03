@@ -1,7 +1,11 @@
 package com.szmsd.delivery.timer;
 
+import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.DelOutboundCompleted;
 import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
@@ -17,12 +21,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangyuyuan
@@ -42,6 +52,12 @@ public class DelOutboundTimer {
     private DelOutboundTimerAsyncTask delOutboundTimerAsyncTask;
     @Autowired
     private DelOutboundTimerAsyncTaskAdapter delOutboundTimerAsyncTaskAdapter;
+
+    @Value("${thread.trialLimit}")
+    private int trialLimit;
+
+    @Value(value = "${server.port:0}")
+    private int port;
 
     /**
      * 单据状态处理中
@@ -167,28 +183,62 @@ public class DelOutboundTimer {
         });
     }
 
+    @Resource(name = ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
+    private ThreadPoolExecutor bringVerifyThreadExecutor;
     /**
      * 每分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 * * * * ?")
+//    @Scheduled(cron = "0/5 * * * * ?")
     public void bringVerify() {
-        logger.debug("开始执行任务 - 提审");
+        logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 开始执行", port, Thread.currentThread().getId());
+        try {
+            logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 线程池队列数:{},任务数:{},总任务数:{},总线程数:{}", port, Thread.currentThread().getId(), bringVerifyThreadExecutor.getQueue().size(), bringVerifyThreadExecutor.getActiveCount(), bringVerifyThreadExecutor.getTaskCount(), bringVerifyThreadExecutor.getCorePoolSize());
+        } catch (Exception e) {
+            logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 打印线程池队列数出现异常", port, Thread.currentThread().getId(),e);
+        }
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         String key = applicationName + ":DelOutboundTimer:bringVerify";
+        final List<String> uuidList = new ArrayList<>();
+        uuidList.add(UUID.fastUUID().toString());
         this.doWorker(key, () -> {
-            // 查询初始化的任务执行
             LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
             queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
-            handleBringVerify(queryWrapper);
+            queryWrapper.isNull(DelOutboundCompleted::getUuid);
+            queryWrapper.last("LIMIT "+trialLimit);
+            List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
+            if(delOutboundCompletedList.size() == 0){
+                uuidList.set(0, null);
+                return;
+            }
+            List<Long> ids = delOutboundCompletedList.stream().map( DelOutboundCompleted::getId).collect(Collectors.toList());
+            LambdaUpdateWrapper<DelOutboundCompleted> updateQueryWrapper = Wrappers.lambdaUpdate();
+            updateQueryWrapper.set(DelOutboundCompleted::getUuid, uuidList.get(0));
+            updateQueryWrapper.in(DelOutboundCompleted::getId, ids);
+            this.delOutboundCompletedService.update(updateQueryWrapper);
         });
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单]bringVerify处理200条数据{}"+stopWatch.getLastTaskTimeMillis(), uuidList);
+
+        if(uuidList.get(0) == null){
+            return;
+        }
+        logger.debug("开始执行任务 - 提审 版本"+uuidList.get(0));
+        // 查询初始化的任务执行
+        LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
+        queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
+        queryWrapper.eq(DelOutboundCompleted::getUuid, uuidList.get(0));
+        handleBringVerify(queryWrapper);
     }
 
     /**
      * 5分钟执行一次
      */
     @Async
-    @Scheduled(cron = "0 */5 * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void bringVerifyFail() {
         logger.debug("开始执行任务 - 提审");
         String key = applicationName + ":DelOutboundTimer:bringVerifyFail";
@@ -256,7 +306,7 @@ public class DelOutboundTimer {
     }
 
     public void handleBringVerify(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
-        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTaskAdapter.asyncBringVerify(orderNo, id), 150);
+        this.handle(queryWrapper, (orderNo, id) -> this.delOutboundTimerAsyncTaskAdapter.asyncBringVerify(orderNo, id), trialLimit);
     }
 
     public void handleShipmentPacking(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper) {
@@ -271,7 +321,11 @@ public class DelOutboundTimer {
     private void handle(LambdaQueryWrapper<DelOutboundCompleted> queryWrapper, BiConsumer<String, Long> consumer, int limit, boolean needLock) {
         // 一次处理200
         queryWrapper.last("limit " + limit);
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
+        stopWatch.stop();
+        logger.info(">>>>>[创建出库单]第二次查询出库临时表"+stopWatch.getLastTaskTimeMillis());
         if (CollectionUtils.isNotEmpty(delOutboundCompletedList)) {
             for (DelOutboundCompleted delOutboundCompleted : delOutboundCompletedList) {
                 if (needLock) {

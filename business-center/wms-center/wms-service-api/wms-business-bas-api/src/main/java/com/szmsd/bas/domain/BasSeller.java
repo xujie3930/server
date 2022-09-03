@@ -207,4 +207,7 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "申请人编码")
     @TableField(exist = false)
     private String applyCode;
+
+    @ApiModelProperty(value = "是否自动生成入库单 0或null:不生成 1:生成")
+    private String generateInboundReceipt;
 }

@@ -149,9 +149,14 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             List<String> orderNoList = ListUtils.emptyIfNull(queryDTO.getOrderNoList());
             queryDTO.setOrderNoList(Stream.of(orderNoSplit, orderNoList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
         }
-        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(StringUtils.isEmpty(queryDTO.getCusCode())){
-            queryDTO.setCusCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+            if (StringUtils.isEmpty(queryDTO.getCusCode())) {
+                queryDTO.setCusCode(cusCode);
+            }
+        }
+        if (StringUtils.isNoneEmpty(queryDTO.getDeliveryNousD())){
+            queryDTO.setDeliveryNousD(new StringBuilder("%").append(queryDTO.getDeliveryNousD()).append("%").toString());
         }
         return baseMapper.selectListByCondiction(queryDTO);
     }
@@ -443,6 +448,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public void receiving(ReceivingRequest receivingRequest) {
+        LoginUser loginUser= SecurityUtils.getLoginUser();
         InboundReceiptDetailQueryDTO inboundReceiptDetailQueryDTO=new InboundReceiptDetailQueryDTO();
         inboundReceiptDetailQueryDTO.setWarehouseNo(receivingRequest.getOrderNo());
         inboundReceiptDetailQueryDTO.setSku(receivingRequest.getSku());
@@ -491,6 +497,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                                 HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
                                 httpRequestDto.setMethod(HttpMethod.GET);
                                 httpRequestDto.setBinary(false);
+                                if (loginUser!=null){
+                                    httpRequestDto.setUserName(loginUser.getUsername());
+                                }
                                 httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
                                 httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getGenSkuCustomStorageNo()));
                                 httpRequestDto.setBody(CkGenCustomSkuNoDTO.createGenCustomSkuNoDTO(inboundReceiptInfoDetailVO, inboundReceiptDetail));
@@ -505,6 +514,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
                             httpRequestDto.setMethod(HttpMethod.POST);
                             httpRequestDto.setBinary(false);
+                            if (loginUser!=null){
+                                httpRequestDto.setUserName(loginUser.getUsername());
+                            }
                             httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoDetailVO.getCusCode()));
                             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getCreatePutawayOrderUrl()));
                             httpRequestDto.setBody(CkCreateIncomingOrderDTO.createIncomingOrderDTO(inboundReceiptInfoDetailVO));
@@ -538,6 +550,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 httpRequestDto.setMethod(HttpMethod.POST);
                 httpRequestDto.setBinary(false);
                 httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(cusCode));
+                if (loginUser!=null){
+                    httpRequestDto.setUserName(loginUser.getUsername());
+                }
                 httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getPutawayUrl()));
                 httpRequestDto.setBody(CkPutawayDTO.createCkPutawayDTO(receivingRequest, cusCode));
                 httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.SKU_ON_SELL);
@@ -567,6 +582,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      */
     @Override
     public void completed(ReceivingCompletedRequest receivingCompletedRequest) {
+
+        LoginUser loginUser=SecurityUtils.getLoginUser();
         log.info("#B3 接收完成入库：{}", receivingCompletedRequest);
         String orderNo = receivingCompletedRequest.getOrderNo();
         updateStatus(orderNo, InboundReceiptEnum.InboundReceiptStatus.COMPLETED);
@@ -577,6 +594,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.PUT);
             httpRequestDto.setBinary(false);
+            if (loginUser!=null){
+                httpRequestDto.setUserName(loginUser.getUsername());
+            }
             httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inboundReceiptInfoVO.getCusCode()));
             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getIncomingOrderCompletedUrl(orderNo)));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.WAREHOUSE_ORDER_COMPLETED);

@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -78,9 +79,11 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     public List<PackageAddressVO> selectPackageAddressList(PackageMangQueryDTO packageAddress) {
 //        packageAddress.setSellerCode(getSellCode());
         // 子母单的查询 如果没有传值就只能才自己的
-        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(StringUtils.isEmpty(packageAddress.getCustomCode())){
-            packageAddress.setCustomCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+            if (StringUtils.isEmpty(packageAddress.getCustomCode())) {
+                packageAddress.setCustomCode(cusCode);
+            }
         }
         List<PackageAddressVO> packageAddressVoList = baseMapper.selectPackageAddressList(packageAddress);
         packageAddressVoList.forEach(PackageAddressVO::setShowAddr);
@@ -205,9 +208,11 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
      */
     @Override
     public List<PackageMangVO> selectPackageManagementList(PackageMangQueryDTO packageMangQueryDTO) {
-        String cusCode = org.apache.commons.collections4.CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(StringUtils.isEmpty(packageMangQueryDTO.getCustomCode())){
-            packageMangQueryDTO.setCustomCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+            if (StringUtils.isEmpty(packageMangQueryDTO.getCustomCode())) {
+                packageMangQueryDTO.setCustomCode(cusCode);
+            }
         }
         return packageManagementService.selectPackageManagementList(packageMangQueryDTO);
     }

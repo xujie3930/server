@@ -20,6 +20,7 @@ import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -80,4 +81,8 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     List<DelOutboundListExceptionMessageExportVO> exceptionMessageExportList(@Param("orderNos") List<String> orderNos);
 
     List<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
+
+    DelOutboundListQueryDto pageLists(@Param("orderNo") String orderNo);
+
+    Map  selectQuerySettings(@Param("shipmentRule") String shipmentRule);
 }

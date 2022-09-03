@@ -35,6 +35,11 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
     DelOutboundVO selectDelOutboundByOrderNo(String orderNo);
 
+
+    //做查件的接口，因为和出库详情有冲突
+    DelOutboundVO selectDelOutboundByOrderNous(String orderNo);
+
+
     DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo);
 
 
@@ -227,6 +232,9 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param delOutbound delOutbound
      */
     void shipmentSuccess(DelOutbound delOutbound);
+
+    void updateByIdTransactional(DelOutbound delOutbound);
+
 
     /**
      * 根据单号查询
@@ -434,5 +442,9 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     int receiveLabel(DelOutboundReceiveLabelDto dto);
 
     int boxStatus(DelOutboundBoxStatusDto dto);
+
+    void manualTrackingYee(List<String> list);
+
+    void labelSelfPick(HttpServletResponse response, DelOutboundLabelDto dto);
 }
 

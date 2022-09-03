@@ -96,11 +96,14 @@ public abstract class AbstractDomainToken implements DomainToken {
         expiresIn -= 1800L;
         String accessTokenKey = this.accessTokenKey();
         String wrapAccessTokenKey = RedirectUriUtil.wrapAccessTokenKey(accessTokenKey);
+        logger.info("有没有插入到redis授权后获取AccessToken的信息：{}",tokenValue.getAccessToken());
         this.redisTemplate.opsForValue().set(wrapAccessTokenKey, tokenValue.getAccessToken(), expiresIn, TimeUnit.SECONDS);
+        logger.info("插入成功");
         String refreshTokenKey = this.refreshTokenKey();
         String wrapRefreshTokenKey = RedirectUriUtil.wrapRefreshTokenKey(refreshTokenKey);
         long refreshTokenExpiresIn = this.domainTokenValue.getRefreshTokenExpiresIn();
         this.redisTemplate.opsForValue().set(wrapRefreshTokenKey, tokenValue.getRefreshToken(), refreshTokenExpiresIn, TimeUnit.SECONDS);
+        logger.info("授权后获取token的信息：{}",tokenValue);
     }
 
     private String getAccessToken() {

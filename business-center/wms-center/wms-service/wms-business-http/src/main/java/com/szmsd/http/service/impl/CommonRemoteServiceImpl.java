@@ -107,6 +107,7 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
         httpRequestDto.setHeaders(hashMap);
         httpRequestDto.setBody(JSONObject.parseObject(oneTask.getRequestParams()));
         httpRequestDto.setBinary(false);
+        httpRequestDto.setUserName(oneTask.getUserName());
 
         try {
             if ("CK1".equals(scanEnumByType.getTypeName())) {
@@ -208,6 +209,7 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
         commonRemote.setRequestUri(dto.getUri());
         commonRemote.setRequestParams(JSONObject.toJSONString(dto.getBody()));
         commonRemote.setRequestStatus(RemoteStatusEnum.WAIT.getStatus());
+        commonRemote.setUserName(dto.getUserName());
         log.info("【RMI-SYNC】插入数据库：{}", commonRemote);
         baseMapper.insert(commonRemote);
     }

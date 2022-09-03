@@ -34,6 +34,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
 * <p>
@@ -58,6 +59,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
     private BasSellerFeignService basSellerFeignService;
     @Resource
     private IDelTrackService delTrackService;
+    @Autowired
+    private IDelOutboundService iDelOutboundService;
 
     /**
         * 查询查件服务模块
@@ -190,7 +193,13 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         public int insertDelQueryService(DelQueryService delQueryService)
         {
 
+            DelOutboundVO delOutboundVO=iDelOutboundService.selectDelOutboundByOrderNous(delQueryService.getOrderNo());
 
+            if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()){
+                if (delQueryService.getCheckFlag()==0){
+                    throw new CommonException("400", "发货天数或者轨迹停留天数大于对应的查件配置天数！！！");
+                }
+            }
             if(StringUtils.isEmpty(delQueryService.getReason())){
                 throw new CommonException("400", "查件原因不能为空");
             }
@@ -291,7 +300,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         if(StringUtils.isEmpty(orderNo)){
             throw new CommonException("400", "空订单号");
         }
-        DelOutboundVO delOutbound = delOutboundService.selectDelOutboundByOrderNo(orderNo);
+        DelOutboundVO delOutbound = delOutboundService.selectDelOutboundByOrderNous(orderNo);
         if(delOutbound == null){
             throw new CommonException("400", "单据不存在");
         }

@@ -233,6 +233,7 @@ public class SysUserController extends BaseController {
                 List<String> childCodeList = rChildCodeList.getData();
                 if (CollectionUtils.isNotEmpty(childCodeList)) {
                     sellerCodeList.addAll(childCodeList);
+                    sellerCodeList = sellerCodeList.stream().distinct().collect(Collectors.toList());
                     sysUser.setChildParentCode(sellerCodeList.stream().collect(Collectors.joining(",")));
                 }
             }

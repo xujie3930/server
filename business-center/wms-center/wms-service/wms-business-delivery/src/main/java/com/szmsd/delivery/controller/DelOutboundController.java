@@ -32,6 +32,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
@@ -119,6 +120,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 出库管理
@@ -162,6 +164,15 @@ public class DelOutboundController extends BaseController {
         startPage(queryDto);
         return getDataTable(this.delOutboundService.selectDelOutboundList(queryDto));
     }
+
+
+    @PostMapping("/manualTrackingYee")
+    @ApiOperation(value = "手动推TY", position = 100)
+    public R ManualTrackingYee(@RequestBody List<String> list) {
+        delOutboundService.manualTrackingYee(list);
+        return R.ok();
+    }
+
 
     @PreAuthorize("@ss.hasPermi('inventory:queryFinishList')")
     @PostMapping("/queryFinishList")
@@ -653,6 +664,14 @@ public class DelOutboundController extends BaseController {
         this.delOutboundService.label(response, dto);
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:SelfPick')")
+    @PostMapping("/labelSelfPick")
+    @ApiOperation(value = "出库管理 - 获取自提标签", position = 1300)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundLabelDto")
+    public void labelSelfPick(HttpServletResponse response, @RequestBody @Validated DelOutboundLabelDto dto) {
+        this.delOutboundService.labelSelfPick(response, dto);
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:labelBase64')")
     @PostMapping("/labelBase64")
     @ApiOperation(value = "出库管理 - 获取标签（根据订单号批量查询，DOC支持）", position = 1301)
@@ -699,6 +718,13 @@ public class DelOutboundController extends BaseController {
         try {
 
             String len = getLen();
+
+            if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+                String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+                if (StringUtils.isEmpty(queryDto.getCustomCode())) {
+                    queryDto.setCustomCode(cusCode);
+                }
+            }
 
             // 查询出库类型数据
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099,059");

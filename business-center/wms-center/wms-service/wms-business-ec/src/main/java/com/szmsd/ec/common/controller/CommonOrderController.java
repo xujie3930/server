@@ -40,6 +40,7 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -232,9 +233,11 @@ public class CommonOrderController extends BaseController {
 //        String sellerCode = SecurityUtils.getLoginUser().getSellerCode();
 //         根据客户过滤数据
 //        queryWrapper.eq(StringUtils.isNotBlank(sellerCode), CommonOrder::getCusCode, sellerCode);
-        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(StringUtils.isEmpty(queryDTO.getCusCode())){
-            queryDTO.setCusCode(cusCode);
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+            if (StringUtils.isEmpty(queryDTO.getCusCode())) {
+                queryDTO.setCusCode(cusCode);
+            }
         }
         if (CollectionUtils.isNotEmpty(queryDTO.getCusCodeList())) {
             queryWrapper.in(CommonOrder::getCusCode, queryDTO.getCusCodeList());

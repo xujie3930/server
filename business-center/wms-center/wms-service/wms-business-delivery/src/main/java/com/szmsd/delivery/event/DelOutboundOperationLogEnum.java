@@ -200,6 +200,21 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
             return format.format(arguments);
         }
     },
+    BRV_SHIPMENT_AMAZON_ORDER {
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},创建亚马逊承运商返回结果,亚马逊挂号:{2},承运商订单号:{3}");
+
+        @Override
+        public String getType() {
+            return "提交-创建亚马逊承运商物流订单";
+        }
+
+        @Override
+        public String format(DelOutbound delOutbound) {
+            Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
+                    delOutbound.getAmazonLogisticsRouteId(), delOutbound.getShipmentOrderNumber()};
+            return format.format(arguments);
+        }
+    },
     BRV_FREEZE_INVENTORY {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},库存:{2}");
 

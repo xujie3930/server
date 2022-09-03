@@ -145,6 +145,11 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             DelOutboundDto dto = new DelOutboundDto();
             dto.setCustomCode(order.getCusCode());
             dto.setWarehouseCode(order.getWarehouseCode());
+            dto.setLength(1.0);
+            dto.setWidth(1.0);
+            dto.setHeight(1.0);
+            dto.setWeight(1.0);
+            dto.setPackageConfirm("076001");
 
             dto.setSellerCode(SecurityUtils.getLoginUser().getSellerCode());
             dto.setOrderType(order.getShippingMethodCode());
@@ -251,6 +256,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             if (CollectionUtils.isNotEmpty(orderItemList)) {
                 List<String> skuList = orderItemList.stream().map(CommonOrderItem::getPlatformSku).collect(Collectors.toList());
                 BasDeliveryServiceMatchingDto matchingDto = new BasDeliveryServiceMatchingDto();
+                matchingDto.setCountryCode(commonOrder.getReceiverCountryCode());
                 matchingDto.setSkuList(skuList);
                 matchingDto.setSellerCode(commonOrder.getCusCode());
                 log.info("查询发货服务匹配请求参数：{}", JSON.toJSONString(matchingDto));
@@ -263,8 +269,8 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
                         BasDeliveryServiceMatching serviceMatching = matchingList.get(0);
                         commonOrder.setWarehouseCode(serviceMatching.getWarehouseCode());
                         commonOrder.setWarehouseName(serviceMatching.getWarehouseName());
-                        commonOrder.setShippingService(serviceMatching.getShipmentRule());
-                        commonOrder.setShippingServiceCode(serviceMatching.getShipmentService());
+                        commonOrder.setShippingService(serviceMatching.getShipmentService());
+                        commonOrder.setShippingServiceCode(serviceMatching.getShipmentRule());
                     }
                 }
             }

@@ -117,6 +117,12 @@ public final class DelOutboundServiceImplUtil {
         return basedir + "/simple/label/" + labelBizPath;
     }
 
+    public static String getSelfPickLabelFilePath(DelOutbound delOutbound) {
+        String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
+        String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
+        return basedir + "/selfPick/label/" + labelBizPath;
+    }
+
     /**
      * 获取到合并之后的文件路径
      *
@@ -258,7 +264,9 @@ public final class DelOutboundServiceImplUtil {
                     // tracking_no in (xxx) or ref_no in (xxx)
                     if (CollectionUtils.isNotEmpty(otherQueryNoList)) {
                         wrapper.in("o.tracking_no", otherQueryNoList)
-                                .or().in("o.ref_no", otherQueryNoList);
+                                .or().in("o.ref_no", otherQueryNoList)
+                                .or().in("o.amazon_logistics_route_id", otherQueryNoList);
+
                     }
                     // [or] order_no in (xxx)
                     if (CollectionUtils.isNotEmpty(delOutboundNoList)) {
@@ -343,6 +351,7 @@ public final class DelOutboundServiceImplUtil {
         // 国家查询
         queryWrapper.eq(StringUtils.isNotEmpty(queryDto.getCountryCode()), "a.country_code", queryDto.getCountryCode());
 
+
         // 按照创建时间倒序
         queryWrapper.orderByDesc("o.create_time");
     }
@@ -360,6 +369,103 @@ public final class DelOutboundServiceImplUtil {
             list.add(s);
         }
         return list;
+    }
+
+    public static ByteArrayOutputStream renderSelfPick(DelOutbound delOutbound, List<DelOutboundDetail> detailList, String skuLabel) throws Exception {
+        Document document = new Document();
+        document.top(0f);
+        document.left(0f);
+        document.right(0f);
+        document.bottom(0f);
+        document.setMargins(10f, 10f, 0f, 0f);
+        // 页面大小
+        int width = 100;
+        int height = 100;
+        float dpi = 72f;
+        Rectangle rec = new Rectangle(ITextPdfUtil.mm2px(width, dpi), ITextPdfUtil.mm2px(height, dpi));
+        rec.rotate();
+        document.setPageSize(rec);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        // 为该Document创建应该Writer实例
+        PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
+        document.open();
+        byte[] fontBytes = ITextPdfFontUtil.getFont("fonts/ARIALUNI.TTF");
+        BaseFont bf = BaseFont.createFont("ARIALUNI.TTF", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, BaseFont.NOT_CACHED, fontBytes, fontBytes);
+        //3. 注册字体
+        Font font = new Font(bf, 18);
+//        font.setSize(12f);
+        /*Paragraph weight = new Paragraph(delOutbound.getWeight() + " g", font);
+        weight.setAlignment(Element.ALIGN_LEFT);
+        weight.setSpacingBefore(0f);
+        weight.setSpacingAfter(0f);
+        weight.setPaddingTop(0f);
+        document.add(weight);*/
+        //3. 添加段落,并设置字体
+        // 文本块(Chunk)、短语(Phrase)和段落(paragraph)处理文本
+        font.setSize(18f);
+        Paragraph paragraph = new Paragraph(delOutbound.getDeliveryAgent(), font);
+        paragraph.setAlignment(Element.ALIGN_RIGHT);
+        paragraph.setSpacingBefore(-26f);
+        paragraph.setSpacingAfter(0f);
+        paragraph.setPaddingTop(5f);
+        document.add(paragraph);
+        //3.添加pdf tables 3表示列数，
+        PdfPTable pdfPTable = new PdfPTable(1);
+        pdfPTable.setWidthPercentage(100f);
+        pdfPTable.setSpacingBefore(5f);
+        pdfPTable.setSpacingAfter(-9f);
+        pdfPTable.setWidths(new float[]{1f});
+        pdfPTable.setPaddingTop(0f);
+
+        PdfPCell pdfPCell = new PdfPCell();
+        pdfPCell.setPadding(0f);
+        pdfPCell.setPaddingLeft(5f);
+        pdfPCell.setPaddingRight(5f);
+        pdfPCell.setBorder(15);
+        pdfPCell.setBorderWidth(1.5f);
+        pdfPCell.setFixedHeight(135f);
+
+        Phrase element = new Phrase();
+        pdfPCell.addElement(element);
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < detailList.size(); i++) {
+            DelOutboundDetail detail = detailList.get(i);
+            buf.append(","+detail.getSku() + "*" + detail.getQty());
+        }
+        if(buf.length() == 0){
+            pdfPCell.addElement(new Phrase(""));
+
+        }else{
+            pdfPCell.addElement(new Phrase(buf.substring(1)));
+
+        }
+        pdfPTable.addCell(pdfPCell);
+
+        document.add(pdfPTable);
+        // 条形码
+        String content = delOutbound.getOrderNo();
+        BufferedImage bufferedImage = ITextPdfUtil.getBarCode(content);
+        BufferedImage image = ITextPdfUtil.insertWords(bufferedImage, content);
+        Image image1 = Image.getInstance(image, null);
+        // 计算缩放比例
+        // 渲染在画布上的宽度只有200，以200作为基础比例
+        image1.scalePercent(55f);
+        // image1.setSpacingBefore(-10f);
+        // image1.setAbsolutePosition(10f, 25f);
+        document.add(image1);
+        if (StringUtils.isNotEmpty(skuLabel)) {
+            font.setSize(10f);
+            Paragraph paragraph_label = new Paragraph(skuLabel, font);
+            paragraph_label.setAlignment(Element.ALIGN_LEFT);
+            paragraph_label.setSpacingBefore(1f);
+            paragraph_label.setSpacingAfter(0f);
+            paragraph_label.setPaddingTop(0f);
+            paragraph_label.setMultipliedLeading(1f);
+            document.add(paragraph_label);
+        }
+        document.close();
+        writer.close();
+        return byteArrayOutputStream;
     }
 
     public static ByteArrayOutputStream renderPackageTransfer(DelOutbound delOutbound, DelOutboundAddress delOutboundAddress, String skuLabel) throws Exception {

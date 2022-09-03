@@ -180,4 +180,12 @@ public class DelOutboundDto implements Serializable {
     private List<DelOutboundCombinationDto> combinations;
 
 
+    @ApiModelProperty(value = "亚马逊物流服务id")
+    private String amazonLogisticsRouteId;
+
+
+    @ApiModelProperty(value = "houseNo")
+    private String houseNo;
+
+
 }

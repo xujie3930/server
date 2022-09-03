@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.bas.mapper.BasMeteringConfigMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasMeteringConfig" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="logistics_ervices_code" property="logisticsErvicesCode" jdbcType="VARCHAR" />
+    <result column="logistics_ervices_name" property="logisticsErvicesName" jdbcType="VARCHAR" />
+    <result column="country_code" property="countryCode" jdbcType="VARCHAR" />
+    <result column="country_name" property="countryName" jdbcType="VARCHAR" />
+    <result column="customer_code" property="customerCode" jdbcType="VARCHAR" />
+    <result column="difference_type" property="differenceType" jdbcType="INTEGER" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_by_name" property="createByName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+    <result column="update_by_name" property="updateByName" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="del_flag" property="delFlag" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, logistics_ervices_code, logistics_ervices_name, country_code, country_name, customer_code, 
+    difference_type, create_by, create_by_name, create_time, update_by, update_by_name, 
+    update_time, del_flag
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from bas_metering_config
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectList" resultType="com.szmsd.bas.domain.BasMeteringConfig"
+          parameterType="com.szmsd.bas.dto.BasMeteringConfigDto">
+    select
+    <include refid="Base_Column_List" />
+    from bas_metering_config
+    <where>
+        1=1
+      <if test="logisticsErvicesCode != null and logisticsErvicesCode!=''" >
+      and
+        FIND_IN_SET(logistics_ervices_code,#{logisticsErvicesCode})
+      </if>
+      <if test="countryCode != null and countryCode!=''" >
+        and
+        FIND_IN_SET(country_code,#{countryCode})
+      </if>
+      <if test="customerCode != null" >
+        and
+        customer_code like #{customerCode}
+      </if>
+    </where>
+
+  </select>
+  <select id="selectPrimary" resultType="com.szmsd.bas.domain.BasMeteringConfig"
+          parameterType="com.szmsd.bas.domain.BasMeteringConfig">
+    select
+    <include refid="Base_Column_List" />
+    from bas_metering_config
+    <where>
+      logistics_ervices_code=#{logisticsErvicesCode}
+         and
+      country_code=#{countryCode}
+       and
+        customer_code = #{customerCode}
+
+    </where>
+
+  </select>
+    <select id="selectUptePrimary" resultType="com.szmsd.bas.domain.BasMeteringConfig"
+          parameterType="com.szmsd.bas.domain.BasMeteringConfig">
+    select
+    <include refid="Base_Column_List" />
+    from bas_metering_config
+    <where>
+      logistics_ervices_code=#{logisticsErvicesCode}
+    and
+      country_code=#{countryCode}
+    and
+
+    customer_code = #{customerCode}
+   and
+   id!=#{id}
+    </where>
+  </select>
+  <select id="selectById" resultType="com.szmsd.bas.domain.BasMeteringConfig"
+          parameterType="java.lang.Integer">
+    select
+    <include refid="Base_Column_List" />
+    from bas_metering_config
+    <where>
+    and
+    id=#{id}
+    </where>
+  </select>
+  <select id="selectjblj" resultType="com.szmsd.bas.domain.BasMeteringConfigData"
+          parameterType="com.szmsd.bas.dto.BasMeteringConfigDto">
+    SELECT b.*,a.difference_type from bas_metering_config a
+                      LEFT JOIN bas_metering_config_data b on a.id=b.metering_id
+    where  a.logistics_ervices_code=#{logisticsErvicesCode} AND a.country_code=#{countryCode} AND a.customer_code=#{customerCode}
+    GROUP BY b.id
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from bas_metering_config
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertus" parameterType="com.szmsd.bas.domain.BasMeteringConfig" >
+    insert into bas_metering_config (id, logistics_ervices_code, logistics_ervices_name, 
+      country_code, country_name, customer_code, 
+      difference_type, create_by, create_by_name, 
+      create_time, update_by, update_by_name, 
+      update_time, del_flag)
+    values (#{id,jdbcType=INTEGER}, #{logisticsErvicesCode,jdbcType=VARCHAR}, #{logisticsErvicesName,jdbcType=VARCHAR}, 
+      #{countryCode,jdbcType=VARCHAR}, #{countryName,jdbcType=VARCHAR}, #{customerCode,jdbcType=VARCHAR}, 
+      #{differenceType,jdbcType=INTEGER}, #{createBy,jdbcType=VARCHAR}, #{createByName,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{updateByName,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{delFlag,jdbcType=CHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasMeteringConfig" useGeneratedKeys="true" keyProperty="delId">
+    insert into bas_metering_config
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="logisticsErvicesCode != null" >
+        logistics_ervices_code,
+      </if>
+      <if test="logisticsErvicesName != null" >
+        logistics_ervices_name,
+      </if>
+      <if test="countryCode != null" >
+        country_code,
+      </if>
+      <if test="countryName != null" >
+        country_name,
+      </if>
+      <if test="customerCode != null" >
+        customer_code,
+      </if>
+      <if test="differenceType != null" >
+        difference_type,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createByName != null" >
+        create_by_name,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="updateByName != null" >
+        update_by_name,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="delFlag != null" >
+        del_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="logisticsErvicesCode != null" >
+        #{logisticsErvicesCode,jdbcType=VARCHAR},
+      </if>
+      <if test="logisticsErvicesName != null" >
+        #{logisticsErvicesName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCode != null" >
+        #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="countryName != null" >
+        #{countryName,jdbcType=VARCHAR},
+      </if>
+      <if test="customerCode != null" >
+        #{customerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="differenceType != null" >
+        #{differenceType,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createByName != null" >
+        #{createByName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateByName != null" >
+        #{updateByName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null" >
+        #{delFlag,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.domain.BasMeteringConfig" >
+    update bas_metering_config
+    <set >
+      <if test="logisticsErvicesCode != null" >
+        logistics_ervices_code = #{logisticsErvicesCode,jdbcType=VARCHAR},
+      </if>
+      <if test="logisticsErvicesName != null" >
+        logistics_ervices_name = #{logisticsErvicesName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCode != null" >
+        country_code = #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="countryName != null" >
+        country_name = #{countryName,jdbcType=VARCHAR},
+      </if>
+      <if test="customerCode != null" >
+        customer_code = #{customerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="differenceType != null" >
+        difference_type = #{differenceType,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createByName != null" >
+        create_by_name = #{createByName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateByName != null" >
+        update_by_name = #{updateByName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null" >
+        del_flag = #{delFlag,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.domain.BasMeteringConfig" >
+    update bas_metering_config
+    set logistics_ervices_code = #{logisticsErvicesCode,jdbcType=VARCHAR},
+      logistics_ervices_name = #{logisticsErvicesName,jdbcType=VARCHAR},
+      country_code = #{countryCode,jdbcType=VARCHAR},
+      country_name = #{countryName,jdbcType=VARCHAR},
+      customer_code = #{customerCode,jdbcType=VARCHAR},
+      difference_type = #{differenceType,jdbcType=INTEGER},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_by_name = #{createByName,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=VARCHAR},
+      update_by_name = #{updateByName,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      del_flag = #{delFlag,jdbcType=CHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

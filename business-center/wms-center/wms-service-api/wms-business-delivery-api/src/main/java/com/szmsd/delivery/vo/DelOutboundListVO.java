@@ -86,6 +86,12 @@ public class DelOutboundListVO implements Serializable {
     @ApiModelProperty(value = "异常描述")
     private String exceptionMessage;
 
+    @ApiModelProperty(value = "异常状态WMS")
+    private String exceptionStateWms;
+
+    @ApiModelProperty(value = "异常描述WMS")
+    private String exceptionMessageWms;
+
     @ApiModelProperty(value = "客户代码")
     private String customCode;
 
@@ -162,4 +168,8 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "发货时间")
     private Date shipmentsTime;
+
+
+    @ApiModelProperty(value = "亚马逊挂号服务")
+    private String amazonLogisticsRouteId;
 }

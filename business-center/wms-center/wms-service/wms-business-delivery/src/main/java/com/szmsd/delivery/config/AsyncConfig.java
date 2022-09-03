@@ -3,6 +3,7 @@ package com.szmsd.delivery.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -20,6 +21,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class AsyncConfig implements AsyncConfigurer {
     private final Logger logger = LoggerFactory.getLogger(AsyncConfig.class);
 
+    @Value("${thread.asyncExecutor}")
+    private int asyncExecutor;
     // 基础业务异步线程池
     @Override
     public Executor getAsyncExecutor() {
@@ -28,16 +31,20 @@ public class AsyncConfig implements AsyncConfigurer {
         // 获取机器核数
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         // 核心线程数量
-        int corePoolSize = availableProcessors * 2;
-        int maximumPoolSize = availableProcessors * 4;
+
+        int corePoolSize = asyncExecutor;
+        int maximumPoolSize = asyncExecutor;
+        logger.info("线程getAsyncExecutor启动量{}", availableProcessors);
+
+        executor.setAllowCoreThreadTimeOut(true);
         // 配置核心线程数
         executor.setCorePoolSize(corePoolSize);
         // 配置最大线程数
         executor.setMaxPoolSize(maximumPoolSize);
         // 配置队列大小
-        executor.setQueueCapacity(1024);
+        executor.setQueueCapacity(Integer.MAX_VALUE);
         // 线程最大空闲时间
-        executor.setKeepAliveSeconds(30);
+        executor.setKeepAliveSeconds(300);
         // 配置线程池中的线程的名称前缀
         executor.setThreadNamePrefix("async-service-");
         // 设置拒绝策略：当pool已经达到max size的时候，如何处理新任务

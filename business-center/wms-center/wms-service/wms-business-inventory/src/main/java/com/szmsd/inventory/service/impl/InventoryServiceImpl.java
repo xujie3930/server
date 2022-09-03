@@ -207,10 +207,13 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
 //            List<String> skuList = ListUtils.emptyIfNull(inventorySkuQueryDTO.getSkuList());
 //            inventorySkuQueryDTO.setSkuList(Stream.of(skuSplit, skuList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
 //        }
-        String cusCode = CollectionUtils.isNotEmpty(SecurityUtils.getLoginUser().getPermissions()) ? SecurityUtils.getLoginUser().getPermissions().get(0) : "";
-        if(StringUtils.isEmpty(inventorySkuQueryDTO.getCusCode())){
-            inventorySkuQueryDTO.setCusCode(cusCode);
-        }
+        //屏蔽字母账号，在发uat
+//        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+//            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+//            if (StringUtils.isEmpty(inventorySkuQueryDTO.getCusCode())) {
+//                inventorySkuQueryDTO.setCusCode(cusCode);
+//            }
+//        }
         return baseMapper.selectListVO(inventorySkuQueryDTO);
     }
 
@@ -736,6 +739,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
      * 调整库存 推送CK1
      */
     private void adjustInventoryCK1(InventoryAdjustmentDTO inventoryAdjustmentDTO) {
+        LoginUser loginUser=SecurityUtils.getLoginUser();
         CompletableFuture<HttpRequestDto> httpRequestDtoCompletableFuture = CompletableFuture.supplyAsync(() -> {
             HttpRequestSyncDTO httpRequestDto = new HttpRequestSyncDTO();
             httpRequestDto.setMethod(HttpMethod.POST);
@@ -744,6 +748,10 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             httpRequestDto.setHeaders(DomainInterceptorUtil.genSellerCodeHead(inventoryAdjustmentDTO.getSellerCode()));
             httpRequestDto.setUri(DomainEnum.Ck1OpenAPIDomain.wrapper(ckConfig.getAdjustInventoryUrl()));
             httpRequestDto.setRemoteTypeEnum(RemoteConstant.RemoteTypeEnum.ADJUST_INVENTORY);
+            if (loginUser!=null){
+                httpRequestDto.setUserName(loginUser.getUsername());
+
+            }
             R<HttpResponseVO> rmi = htpRmiFeignService.rmiSync(httpRequestDto);
             log.info("【推送CK1】调整库存{} 返回 {}", httpRequestDto, JSONObject.toJSONString(rmi));
             HttpResponseVO dataAndException = R.getDataAndException(rmi);
