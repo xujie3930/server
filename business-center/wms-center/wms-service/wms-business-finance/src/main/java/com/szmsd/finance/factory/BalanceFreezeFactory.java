@@ -150,7 +150,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                     setHasFreeze(dto);
                     return true;
                 }
-                throw new CommonException("999", "解冻金额不足 单号: " + dto.getNo() + " 金额：" + amountChange);
+                //throw new CommonException("999", "解冻金额不足 单号: " + dto.getNo() + " 金额：" + amountChange);
             }
         }
         return null;
