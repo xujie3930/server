@@ -51,13 +51,12 @@ public class RemoteInterfaceController extends BaseController {
     //测试第三方调用
     @PostMapping("testRmi")
     @ApiOperation(value = "HTTP调用接口第三方白名单 - #1", position = 100)
-    @ApiImplicitParam(name = "dto", value = "dto", dataType = "HttpRequestDto")
-    public R<HttpResponseVO> testRmi() {
-        TpieceDto tpieceDto=new TpieceDto();
+    @ApiImplicitParam(name = "dto", value = "dto", dataType = "TpieceDto")
+    public R<HttpResponseVO> testRmi(@RequestBody TpieceDto tpieceDto) {
         HttpRequestDto httpRequestDto = new HttpRequestDto();
         //tpieceDto.setLimit(100);
         //tpieceDto.setOffset(50);
-        tpieceDto.setHash(false);
+        //tpieceDto.setHash(false);
         //获取当前天的开始时间
         Calendar cal = new GregorianCalendar();
         cal.set(Calendar.HOUR_OF_DAY, 0);
