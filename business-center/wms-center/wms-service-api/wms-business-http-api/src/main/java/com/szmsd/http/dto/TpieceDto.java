@@ -17,10 +17,10 @@ import java.util.Date;
 public class TpieceDto {
 
     @ApiModelProperty(value = "开始日期")
-    private Date startDate;
+    private Date from;
 
     @ApiModelProperty(value = "结束日期")
-    private Date endDate;
+    private Date to;
 
     @ApiModelProperty(value = "大小")
     private Integer limit;
