@@ -57,7 +57,7 @@ public class RemoteInterfaceController extends BaseController {
         HttpRequestDto httpRequestDto = new HttpRequestDto();
         //tpieceDto.setLimit(100);
         //tpieceDto.setOffset(50);
-        tpieceDto.setHash(true);
+        tpieceDto.setHash(false);
         //获取当前天的开始时间
         Calendar cal = new GregorianCalendar();
         cal.set(Calendar.HOUR_OF_DAY, 0);
