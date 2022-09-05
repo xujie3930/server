@@ -216,7 +216,9 @@ public class ExceptionInfoController extends BaseController {
     @GetMapping("/importAgainTrackingNoTemplate")
     @ApiOperation(value = "导入重新获取挂号导入模板")
     public void importAgainTrackingNoTemplate(HttpServletResponse response) {
-        String filePath = "/temp/exception_export_template.xlsx";
+        //String filePath = "/temp/exception_export_template.xlsx";
+        String filePath = "/temp/exception_export_templatesa.xls";
+
         String fileName = "异常通知中心_异常导出";
         this.downloadTemplate(response, filePath, fileName);
     }
@@ -229,7 +231,8 @@ public class ExceptionInfoController extends BaseController {
      * @param fileName 文件名称
      */
     private void downloadTemplate(HttpServletResponse response, String filePath, String fileName) {
-        this.downloadTemplate(response, filePath, fileName, "xlsx");
+        //this.downloadTemplate(response, filePath, fileName, "xlsx");
+        this.downloadTemplate(response, filePath, fileName, "xls");
     }
 
     /**
