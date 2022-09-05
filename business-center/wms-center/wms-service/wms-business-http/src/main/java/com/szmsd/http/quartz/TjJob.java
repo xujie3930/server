@@ -42,9 +42,9 @@ public class TjJob extends QuartzJobBean {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        tpieceDto.setStartDate(cal.getTime());
+        tpieceDto.setFrom(cal.getTime());
         //结束时间 就是定时任务刷的当前时间
-        tpieceDto.setEndDate(new Date());
+        tpieceDto.setTo(new Date());
         httpRequestDto.setMethod(HttpMethod.GET);
         String url = DomainEnum.TJAPIDomain.wrapper("/api/reception/finished/events");
         httpRequestDto.setUri(url);
