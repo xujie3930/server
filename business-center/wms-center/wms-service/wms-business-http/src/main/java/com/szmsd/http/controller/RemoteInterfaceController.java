@@ -51,7 +51,7 @@ public class RemoteInterfaceController extends BaseController {
     @PostMapping("testRmi")
     @ApiOperation(value = "HTTP调用接口第三方白名单 - #1", position = 100)
     @ApiImplicitParam(name = "dto", value = "dto", dataType = "HttpRequestDto")
-    public R<HttpResponseVO> testRmi(@RequestBody @Validated HttpRequestDto dto) {
+    public R<HttpResponseVO> testRmi() {
         TpieceDto tpieceDto=new TpieceDto();
         HttpRequestDto httpRequestDto = new HttpRequestDto();
         tpieceDto.setLimit(100);
@@ -70,7 +70,7 @@ public class RemoteInterfaceController extends BaseController {
         String url = DomainEnum.TJAPIDomain.wrapper("/api/reception/finished/events");
         httpRequestDto.setUri(url);
         httpRequestDto.setBody(tpieceDto);
-        return R.ok(remoteInterfaceService.rmi(dto));
+        return R.ok(remoteInterfaceService.rmi(httpRequestDto));
     }
 
     @PostMapping(value = "sync")
