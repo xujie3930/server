@@ -112,5 +112,10 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
      * @return int
      */
     int ignore(ExceptionInfoDto exceptionInfo);
+
+    //查询出库单
+    List<ExceptionInfoDetailExportDto>  selectExceptionInfoDetailExport(String orderNo);
+
+    void updateDelOutboundDetail(String orderNo, List<ExceptionInfoDetailExportDto> exceptionInfoDetailExportDtoList);
 }
 

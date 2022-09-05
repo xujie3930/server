@@ -1,9 +1,10 @@
 package com.szmsd.exception.controller;
 
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.ExcelImportUtil;
+import cn.afterturn.easypoi.excel.entity.ExportParams;
+import cn.afterturn.easypoi.excel.entity.ImportParams;
 import cn.hutool.core.io.IoUtil;
-import com.alibaba.excel.EasyExcelFactory;
-import com.alibaba.excel.read.builder.ExcelReaderBuilder;
-import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
@@ -37,6 +38,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -152,6 +154,64 @@ public class ExceptionInfoController extends BaseController {
         }
     }
 
+    /**
+     * 导出模块列表(导入一对多合并单元格)
+     */
+    //@PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:export')")
+    @Log(title = "模块", businessType = BusinessType.EXPORT)
+    @GetMapping("/exportus")
+    @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
+    public void exportus(HttpServletResponse response, ExceptionInfoQueryDto dto) throws IOException {
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (null == loginUser) {
+            throw new CommonException("500", "非法的操作");
+        }
+        // 获取登录用户的客户编码
+        String sellerCode = loginUser.getSellerCode();
+        //dto.setSellerCode(sellerCode);
+        // 查询出库类型数据
+        Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("085");
+        ExceptionInfoExportContext exportContext = new ExceptionInfoExportContext();
+        exportContext.setStateCacheAdapter(listMap.get("085"));
+        QueryDto queryDto1 = new QueryDto();
+        queryDto1.setPageNum(1);
+        queryDto1.setPageSize(300);
+        QueryPage<ExceptionInfoExportDto> queryPage = new ExceptionInfoExportQueryPage(dto, queryDto1, exportContext, this.exceptionInfoService);
+        List<ExceptionInfoExportDto> list=queryPage.getPage();
+        list.forEach(x->{
+           if (x.getOrderTypeName().equals("出库单")){
+             x.setExceptionInfoDetailExportDtoList(exceptionInfoService.selectExceptionInfoDetailExport(x.getOrderNo()));
+           }
+        });
+        ExportParams params = new ExportParams();
+//        params.setTitle("异常通知中心_异常导出");
+        Workbook workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportDto.class, list);
+
+        try {
+            String fileName="异常通知中心_异常导出"+System.currentTimeMillis();
+            URLEncoder.encode(fileName, "UTF-8");
+            //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+            response.setContentType("application/vnd.ms-excel");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+            response.addHeader("Pargam", "no-cache");
+            response.addHeader("Cache-Control", "no-cache");
+
+            ServletOutputStream outStream = null;
+            try {
+                outStream = response.getOutputStream();
+                workbook.write(outStream);
+                outStream.flush();
+            } finally {
+                outStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:importAgainTrackingNoTemplate')")
     @GetMapping("/importAgainTrackingNoTemplate")
     @ApiOperation(value = "导入重新获取挂号导入模板")
@@ -222,17 +282,24 @@ public class ExceptionInfoController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
-    public R<Map<String, Object>> importAgainTrackingNo(HttpServletRequest request) {
-        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
-        MultipartFile file = multipartHttpServletRequest.getFile("file");
+    public R<Map<String, Object>> importAgainTrackingNo(@RequestPart("file") MultipartFile file) {
+//        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
+//        MultipartFile file = multipartHttpServletRequest.getFile("file");
         AssertUtil.notNull(file, "上传文件不存在");
         try {
-            DefaultSyncReadListener<ExceptionInfoExportDto> syncReadListener = new DefaultSyncReadListener<>();
-            ExcelReaderBuilder excelReaderBuilder = EasyExcelFactory.read(file.getInputStream(), ExceptionInfoExportDto.class, syncReadListener);
-            ExcelReaderSheetBuilder excelReaderSheetBuilder = excelReaderBuilder.sheet(0);
-            excelReaderSheetBuilder.build().setHeadRowNumber(1);
-            excelReaderSheetBuilder.doRead();
-            List<ExceptionInfoExportDto> list = syncReadListener.getList();
+//            DefaultSyncReadListener<ExceptionInfoExportDto> syncReadListener = new DefaultSyncReadListener<>();
+//            ExcelReaderBuilder excelReaderBuilder = EasyExcelFactory.read(file.getInputStream(), ExceptionInfoExportDto.class, syncReadListener);
+//            ExcelReaderSheetBuilder excelReaderSheetBuilder = excelReaderBuilder.sheet(0);
+//            excelReaderSheetBuilder.build().setHeadRowNumber(1);
+//            excelReaderSheetBuilder.doRead();
+//            List<ExceptionInfoExportDto> list = syncReadListener.getList();
+
+            //导入新的解析方法
+            ImportParams params = new ImportParams();
+            params.setTitleRows(0);
+            params.setHeadRows(2);
+            List<ExceptionInfoExportDto> list = ExcelImportUtil.importExcel(file.getInputStream(),ExceptionInfoExportDto.class,params);
+
             Map<String, Object> map = new HashMap<>();
             if (CollectionUtils.isNotEmpty(list)) {
                 int size = list.size();
@@ -321,10 +388,18 @@ public class ExceptionInfoController extends BaseController {
                         try {
                             if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
                                 successSize.incrementAndGet();
+                                if(dto.getOrderTypeName().equals("出库单")){
+                                    if (dto.getExceptionInfoDetailExportDtoList().size()>0){
+                                        exceptionInfoService.updateDelOutboundDetail(dto.getOrderNo(),dto.getExceptionInfoDetailExportDtoList());
+
+                                    }
+
+                                }
                             } else {
                                 errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "操作失败，不符合条件");
                                 failSize.incrementAndGet();
                             }
+
                         } catch (Exception e) {
                             log.error(e.getMessage(), e);
                             errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "操作失败，" + e.getMessage());
@@ -346,6 +421,7 @@ public class ExceptionInfoController extends BaseController {
             return R.failed(e.getMessage());
         }
     }
+
 
     private String getCountryCode(String country) {
         R<BasRegionSelectListVO> listVOR = this.basRegionFeignService.queryByCountryName(country);

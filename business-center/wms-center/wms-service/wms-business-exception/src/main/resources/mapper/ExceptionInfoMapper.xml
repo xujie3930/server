@@ -40,10 +40,39 @@
                 remark,
             id, create_by, update_by, del_flag, version, warehouse_code, operator, operate_on, order_no, exception_no, order_type, order_type_name, exception_type, exception_type_name, is_auto_created, process_remark, process_type, process_type_name, solve_remark, state
         </sql>
+    <update id="updateDelOutboundDetail" parameterType="com.szmsd.exception.dto.ExceptionInfoDetailExportDto">
+        UPDATE del_outbound_detail
+            <set>
+                <if test="productNameChinese != null" >
+                    product_name_chinese=#{productNameChinese},
+                </if>
+                <if test="productName != null" >
+                    product_name=#{productName},
+                </if>
+                <if test="declaredValue != null" >
+                    declared_value=#{declaredValue}
+                </if>
+            </set>
+
+        <where>
+        1=1
+        <if test="orderNo !=null and orderNo!=''">
+            and   order_no=#{orderNo}
+        </if>
+        <if test="delDetailId !=null and delDetailId!=''">
+                and    id=#{delDetailId}
+        </if>
+
+        </where>
+    </update>
 
     <select id="exportList" resultType="com.szmsd.exception.dto.ExceptionInfoExportDto">
-        select exception_no, state, exception_type_name, order_type_name, remark, order_no from exception_info
+        select exception_no, state, exception_type_name, order_type_name, remark, order_no,order_type from exception_info
         ${ew.customSqlSegment}
+    </select>
+    <select id="selectExceptionInfoDetailExport"
+            resultType="com.szmsd.exception.dto.ExceptionInfoDetailExportDto">
+        SELECT id as delDetailId,product_name_chinese,product_name,declared_value from del_outbound_detail where order_no=#{orderNo}
     </select>
 
 </mapper>

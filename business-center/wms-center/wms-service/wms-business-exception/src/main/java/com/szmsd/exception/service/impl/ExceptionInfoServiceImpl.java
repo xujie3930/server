@@ -358,6 +358,19 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         return 0;
     }
 
+    @Override
+    public List<ExceptionInfoDetailExportDto> selectExceptionInfoDetailExport(String orderNo) {
+        return baseMapper.selectExceptionInfoDetailExport(orderNo);
+    }
+
+    @Override
+    public void updateDelOutboundDetail(String orderNo, List<ExceptionInfoDetailExportDto> exceptionInfoDetailExportDtoList) {
+        exceptionInfoDetailExportDtoList.forEach(x->{
+            baseMapper.updateDelOutboundDetail(x);
+        });
+
+    }
+
     private Date dealUTZTime(String time) {
         Date date = new Date();
         try {
