@@ -82,22 +82,22 @@ public class RemoteInterfaceController extends BaseController {
         return R.ok();
     }
 
-    public static void main(String[] args) {
-        HttpRequestDto httpRequestDto = new HttpRequestDto();
-
-        Map map2=new HashMap();
-
-        Map map=new HashMap();
-        map.put("partner_code","TST2");
-        map.put("hash","00000000");
-        map.put("job","sdls_jb_CtRDu40Qli9PG6Lg1cOoXdfkovb4");
-        map2.put("result",map);
-        httpRequestDto.setBody(map2);
-        Map map1= (Map) ((HashMap) httpRequestDto.getBody()).get("result");
-        TpieceVO tpieceVO= JSON.parseObject(JSON.toJSONString(((HashMap) httpRequestDto.getBody()).get("result")),TpieceVO.class);
-                System.out.println(tpieceVO);
-
-    }
+//    public static void main(String[] args) {
+//        HttpRequestDto httpRequestDto = new HttpRequestDto();
+//
+//        Map map2=new HashMap();
+//
+//        Map map=new HashMap();
+//        map.put("partner_code","TST2");
+//        map.put("hash","00000000");
+//        map.put("job","sdls_jb_CtRDu40Qli9PG6Lg1cOoXdfkovb4");
+//        map2.put("result",map);
+//        httpRequestDto.setBody(map2);
+//        Map map1= (Map) ((HashMap) httpRequestDto.getBody()).get("result");
+//        TpieceVO tpieceVO= JSON.parseObject(JSON.toJSONString(((HashMap) httpRequestDto.getBody()).get("result")),TpieceVO.class);
+//                System.out.println(tpieceVO);
+//
+//    }
 
 
     @PreAuthorize("@ss.hasPermi('CommonScan:CommonScan:executeTask')")
