@@ -18,6 +18,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiSort;
+import org.apache.commons.beanutils.BeanMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.lang.reflect.Field;
 import java.util.*;
 
 @Api(tags = {"HTTP调用接口"})
@@ -52,7 +54,7 @@ public class RemoteInterfaceController extends BaseController {
     @PostMapping("testRmi")
     @ApiOperation(value = "HTTP调用接口第三方白名单 - #1", position = 100)
     @ApiImplicitParam(name = "dto", value = "dto", dataType = "TpieceDto")
-    public R<Map> testRmi(@RequestBody TpieceDto tpieceDto) {
+    public R<Map> testRmi(@RequestBody TpieceDto tpieceDto) throws IllegalAccessException {
         HttpRequestDto httpRequestDto = new HttpRequestDto();
         //tpieceDto.setLimit(100);
         //tpieceDto.setOffset(50);
@@ -72,7 +74,8 @@ public class RemoteInterfaceController extends BaseController {
         httpRequestDto.setBody(tpieceDto);
         HttpResponseVO httpResponseVO=remoteInterfaceService.rmi(httpRequestDto);
         Object o=httpResponseVO.getBody();
-        Map map3 = JSONObject.toJavaObject(JSONObject.parseObject(JSONObject.toJSONString(httpResponseVO.getBody())), Map.class);
+
+        Map map3 = objectToMap(o);
          Map map=new HashMap();
          map.put("boby",map3);
          String result=String.valueOf(map3.get("result"));
@@ -85,26 +88,43 @@ public class RemoteInterfaceController extends BaseController {
         return R.ok(map);
     }
 
+    public  Map objectToMap(Object obj) throws IllegalAccessException {
+        Map map = new HashMap<>();
+        Class<?> clazz = obj.getClass();
+        System.out.println(clazz);
+        for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            String fieldName = field.getName();
+            Object value = field.get(obj);
+            map.put(fieldName, value);
+        }
+        return map;
+    }
 
 
-//    public static void main(String[] args) {
-//        HttpRequestDto httpRequestDto = new HttpRequestDto();
-//
-//        Map map2=new HashMap();
-//
-//        Map map=new HashMap();
-//        map.put("partner_code","TST2");
-//        map.put("hash","00000000");
-//        map.put("job","sdls_jb_CtRDu40Qli9PG6Lg1cOoXdfkovb4");
-//        map2.put("result",map);
-//        httpRequestDto.setBody(map2);
-//        Map map1= (Map) ((HashMap) httpRequestDto.getBody()).get("result");
-//        TpieceVO tpieceVO= JSON.parseObject(JSON.toJSONString(((HashMap) httpRequestDto.getBody()).get("result")),TpieceVO.class);
-//        Map map3 = JSONObject.toJavaObject(JSONObject.parseObject(JSONObject.toJSONString(httpRequestDto.getBody())), Map.class);
-//
-//        System.out.println(map3);
-//
-//    }
+
+
+    public static void main(String[] args) {
+        HttpRequestDto httpRequestDto = new HttpRequestDto();
+
+        Map map2=new HashMap();
+
+        Map map=new HashMap();
+        map.put("partner_code","TST2");
+        map.put("hash","00000000");
+        map.put("job","sdls_jb_CtRDu40Qli9PG6Lg1cOoXdfkovb4");
+        List<Map> list=new ArrayList<>();
+        list.add(map);
+        map.put("ss",list);
+        map2.put("result",map);
+        httpRequestDto.setBody(map2);
+        Map map1= (Map) ((HashMap) httpRequestDto.getBody()).get("result");
+        TpieceVO tpieceVO= JSON.parseObject(JSON.toJSONString(((HashMap) httpRequestDto.getBody()).get("result")),TpieceVO.class);
+        Map map3 = JSONObject.toJavaObject(JSONObject.parseObject(JSONObject.toJSONString(httpRequestDto.getBody())), Map.class);
+
+        System.out.println(map3);
+
+    }
     @PostMapping(value = "sync")
     @ApiOperation(value = "HTTP调用接口 - #1", position = 100)
     @ApiImplicitParam(name = "dto", value = "dto", dataType = "HttpRequestDto")
