@@ -104,27 +104,27 @@ public class RemoteInterfaceController extends BaseController {
 
 
 
-    public static void main(String[] args) {
-        HttpRequestDto httpRequestDto = new HttpRequestDto();
-
-        Map map2=new HashMap();
-
-        Map map=new HashMap();
-        map.put("partner_code","TST2");
-        map.put("hash","00000000");
-        map.put("job","sdls_jb_CtRDu40Qli9PG6Lg1cOoXdfkovb4");
-        List<Map> list=new ArrayList<>();
-        list.add(map);
-        map.put("ss",list);
-        map2.put("result",map);
-        httpRequestDto.setBody(map2);
-        Map map1= (Map) ((HashMap) httpRequestDto.getBody()).get("result");
-        TpieceVO tpieceVO= JSON.parseObject(JSON.toJSONString(((HashMap) httpRequestDto.getBody()).get("result")),TpieceVO.class);
-        Map map3 = JSONObject.toJavaObject(JSONObject.parseObject(JSONObject.toJSONString(httpRequestDto.getBody())), Map.class);
-
-        System.out.println(map3);
-
-    }
+//    public static void main(String[] args) {
+//        HttpRequestDto httpRequestDto = new HttpRequestDto();
+//
+//        Map map2=new HashMap();
+//
+//        Map map=new HashMap();
+//        map.put("partner_code","TST2");
+//        map.put("hash","00000000");
+//        map.put("job","sdls_jb_CtRDu40Qli9PG6Lg1cOoXdfkovb4");
+//        List<Map> list=new ArrayList<>();
+//        list.add(map);
+//        map.put("ss",list);
+//        map2.put("result",map);
+//        httpRequestDto.setBody(map2);
+//        Map map1= (Map) ((HashMap) httpRequestDto.getBody()).get("result");
+//        TpieceVO tpieceVO= JSON.parseObject(JSON.toJSONString(((HashMap) httpRequestDto.getBody()).get("result")),TpieceVO.class);
+//        Map map3 = JSONObject.toJavaObject(JSONObject.parseObject(JSONObject.toJSONString(httpRequestDto.getBody())), Map.class);
+//
+//        System.out.println(map3);
+//
+//    }
     @PostMapping(value = "sync")
     @ApiOperation(value = "HTTP调用接口 - #1", position = 100)
     @ApiImplicitParam(name = "dto", value = "dto", dataType = "HttpRequestDto")
