@@ -1,5 +1,7 @@
 package com.szmsd.delivery.service.wrapper;
 
+import com.szmsd.bas.api.feign.BasMeteringConfigFeignService;
+import com.szmsd.bas.dto.BasMeteringConfigDto;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -630,6 +632,31 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                         delOutboundCharges.add(delOutboundCharge);
                         totalAmount = totalAmount.add(amount);
                     }
+
+                    //判断计泡拦截
+                    BasMeteringConfigFeignService basMeteringConfigFeignService = SpringUtils.getBean(BasMeteringConfigFeignService.class);
+
+                    BasMeteringConfigDto dto = new BasMeteringConfigDto()
+                            .setCustomerCode(delOutbound.getSellerCode())
+                            .setLogisticsErvicesCode(chargeWrapper.getData().getProductCode())
+                            .setLogisticsErvicesCode(chargeWrapper.getData().getProductName())
+                            .setCustomerCode(delOutbound.getSellerCode())
+                            .setWeight(packageInfo.getWeight().getValue())
+                            .setCalcWeight(packageInfo.getCalcWeight().getValue())
+                            .setVolume(packageInfo.getVolumeWeight().getValue());
+
+                    if(delOutboundWrapperContext.getAddress() != null){
+                        dto.setCountryCode(delOutboundWrapperContext.getAddress().getCountryCode())
+                                .setCountryName(delOutboundWrapperContext.getAddress().getCountry());
+                    }
+                    R r = basMeteringConfigFeignService.intercept(dto);
+                    if(r.getCode() != 200){
+                        logger.error("计泡拦截异常："+delOutboundWrapperContext.isShipmentShipping());
+                        delOutboundWrapperContext.setShipmentShipping(true);
+                        throw new CommonException("400", "计泡拦截异常："+r.getMsg());
+                    }
+
+
                     IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
                     try {
                         logger.info("开始保存出库单费用明细，数据条数：{}", delOutboundCharges.size());
