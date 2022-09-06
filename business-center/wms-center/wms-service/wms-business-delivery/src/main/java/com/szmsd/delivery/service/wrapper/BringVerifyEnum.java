@@ -1012,6 +1012,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setId(delOutbound.getId());
             // 推单WMS
             updateDelOutbound.setRefOrderNo(refOrderNo);
+            updateDelOutbound.setExceptionStateWms(DelOutboundExceptionStateEnum.NORMAL.getCode());
+            updateDelOutbound.setExceptionMessageWms("");
             delOutboundService.updateByIdTransactional(updateDelOutbound);
 
             // 处理发货条件
