@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class ExceptionInfoDetailExportDto {
 
-    @Excel(name="sku明细id",width = 30,needMerge=true)
+    @Excel(name="sku明细id",width = 12,needMerge=true)
     private String delDetailId;
 
     @Excel(name="英文申报品名",width = 30,needMerge=true)
@@ -17,7 +17,7 @@ public class ExceptionInfoDetailExportDto {
     private String productNameChinese;
 
 
-    @Excel(name="申报价值",width = 30,needMerge=true)
+    @Excel(name="申报价值",width = 10,needMerge=true)
     private String declaredValue;
 
     private String orderNo;
