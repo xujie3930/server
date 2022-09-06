@@ -201,9 +201,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.isNotNull(DelOutbound::getShipmentsTime);
         queryWrapper.isNotNull(DelOutbound::getTrackingTime);
-        queryWrapper.and((wrapper)->{
-            queryWrapper.eq(DelOutbound::getOrderNo, orderNo).or().eq(DelOutbound::getRefNo,orderNo).or().eq(DelOutbound::getTrackingNo,orderNo);
-        });
+        queryWrapper.eq(DelOutbound::getOrderNo, orderNo).or().eq(DelOutbound::getRefNo,orderNo).or().eq(DelOutbound::getTrackingNo,orderNo);
+//        queryWrapper.and((wrapper)->{
+//
+//
+//
+//        });
 
         queryWrapper.last("LIMIT 1");
         DelOutbound delOutbound = super.getOne(queryWrapper);
