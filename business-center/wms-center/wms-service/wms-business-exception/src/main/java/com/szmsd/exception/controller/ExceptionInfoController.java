@@ -35,10 +35,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -186,7 +190,64 @@ public class ExceptionInfoController extends BaseController {
         });
         ExportParams params = new ExportParams();
 //        params.setTitle("异常通知中心_异常导出");
-        Workbook workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportDto.class, list);
+
+
+
+
+         Workbook workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportDto.class, list);
+
+
+        Sheet sheet= workbook.getSheet("sheet0");
+
+      //获取第一行数据
+        Row row2 =sheet.getRow(0);
+
+        for (int i=0;i<18;i++){
+            Cell deliveryTimeCell = row2.getCell(i);
+
+            CellStyle styleMain = workbook.createCellStyle();
+            if (i==17){
+                styleMain.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
+            }else {
+                styleMain.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+
+            }
+            Font font = workbook.createFont();
+       //true为加粗，默认为不加粗
+            font.setBold(true);
+     //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font.setColor(IndexedColors.WHITE.getIndex());
+      //将字体样式设置到单元格样式中
+            styleMain.setFont(font);
+
+            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain.setAlignment(HorizontalAlignment.CENTER);
+            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+//        CellStyle style =  workbook.createCellStyle();
+//        style.setFillPattern(HSSFColor.HSSFColorPredefined.valueOf(""));
+//        style.setFillForegroundColor(IndexedColors.RED.getIndex());
+            deliveryTimeCell.setCellStyle(styleMain);
+        }
+
+        //获取第二行数据
+        Row row3 =sheet.getRow(1);
+        for (int x=17;x<21;x++) {
+            Cell deliveryTimeCell1 = row3.getCell(x);
+            CellStyle styleMain1 = workbook.createCellStyle();
+            styleMain1.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+            Font font1 = workbook.createFont();
+            //true为加粗，默认为不加粗
+            font1.setBold(true);
+            //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font1.setColor(IndexedColors.WHITE.getIndex());
+            //将字体样式设置到单元格样式中
+            styleMain1.setFont(font1);
+
+            styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain1.setAlignment(HorizontalAlignment.CENTER);
+            styleMain1.setVerticalAlignment(VerticalAlignment.CENTER);
+            deliveryTimeCell1.setCellStyle(styleMain1);
+        }
 
         try {
             String fileName="异常通知中心_异常导出"+System.currentTimeMillis();

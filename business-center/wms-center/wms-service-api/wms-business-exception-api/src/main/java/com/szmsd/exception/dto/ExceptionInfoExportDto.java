@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 public class ExceptionInfoExportDto {
 
-    @Excel(name="异常号",width = 30,needMerge = true)
+    @Excel(name="异常号",width = 20,needMerge = true)
     @ApiModelProperty(value = "异常号")
     private String exceptionNo;
 
