@@ -288,7 +288,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
             return R.ok();
         }catch (Exception e){
             e.printStackTrace();
-            return R.failed();
+            return R.failed(e.getMessage());
         }
 
     }

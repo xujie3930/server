@@ -85,6 +85,13 @@ public class RemoteInterfaceController extends BaseController {
         map.put("events",events);
         map.put("products",products);
 
+        Map map4 = JSONObject.parseObject(String.valueOf(o), Map.class);
+
+        Object value = JSONObject.toJSON(map4.get("result"));
+
+        Map map5 = JSONObject.parseObject(value.toString(), Map.class);
+        map.put("map5",map5);
+        map.put("boby2",httpResponseVO.getBody());
         return R.ok(map);
     }
 
@@ -121,8 +128,13 @@ public class RemoteInterfaceController extends BaseController {
 //        Map map1= (Map) ((HashMap) httpRequestDto.getBody()).get("result");
 //        TpieceVO tpieceVO= JSON.parseObject(JSON.toJSONString(((HashMap) httpRequestDto.getBody()).get("result")),TpieceVO.class);
 //        Map map3 = JSONObject.toJavaObject(JSONObject.parseObject(JSONObject.toJSONString(httpRequestDto.getBody())), Map.class);
+//         String a="{\"result\":{\"partner_code\":\"TST2\",\"events\":[{\"reception_service\":\"SUPPLIER\",\"reception_wms_id\":57455,\"date_finished\":\"2021-10-12T10:52:41.403Z\",\"products\":{\"125751\":{\"code\":\"10001\",\"um\":\"Buc\",\"ua\":\"\",\"qty_received\":5}}}]},\"job\":\"sdls_jb_87Njq1ouf0v9wglKpiDaMa7MhPK5\",\"success\":true,\"status_code\":200}";
+//        Map map4 = JSONObject.parseObject(a, Map.class);
 //
-//        System.out.println(map3);
+//        Object value = JSONObject.toJSON(map4.get("result"));
+//
+//        Map map5 = JSONObject.parseObject(value.toString(), Map.class);
+//        System.out.println(map5);
 //
 //    }
     @PostMapping(value = "sync")

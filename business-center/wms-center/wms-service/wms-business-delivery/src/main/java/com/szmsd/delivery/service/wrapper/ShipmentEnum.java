@@ -639,7 +639,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     BasMeteringConfigDto dto = new BasMeteringConfigDto()
                             .setCustomerCode(delOutbound.getSellerCode())
                             .setLogisticsErvicesCode(chargeWrapper.getData().getProductCode())
-                            .setLogisticsErvicesCode(chargeWrapper.getData().getProductName())
+                            .setLogisticsErvicesName(chargeWrapper.getData().getProductName())
                             .setCustomerCode(delOutbound.getSellerCode())
                             .setWeight(packageInfo.getWeight().getValue())
                             .setCalcWeight(packageInfo.getCalcWeight().getValue())
