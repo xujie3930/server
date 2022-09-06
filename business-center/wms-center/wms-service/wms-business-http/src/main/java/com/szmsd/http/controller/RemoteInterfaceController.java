@@ -1,5 +1,7 @@
 package com.szmsd.http.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.log.annotation.Log;
@@ -7,6 +9,7 @@ import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.dto.TpieceDto;
+import com.szmsd.http.dto.TpieceVO;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.service.IRemoteExecutorTask;
 import com.szmsd.http.service.RemoteInterfaceService;
@@ -25,9 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.*;
 
 @Api(tags = {"HTTP调用接口"})
 @ApiSort(10000)
@@ -50,22 +51,21 @@ public class RemoteInterfaceController extends BaseController {
     //测试第三方调用
     @PostMapping("testRmi")
     @ApiOperation(value = "HTTP调用接口第三方白名单 - #1", position = 100)
-    @ApiImplicitParam(name = "dto", value = "dto", dataType = "HttpRequestDto")
-    public R<HttpResponseVO> testRmi() {
-        TpieceDto tpieceDto=new TpieceDto();
+    @ApiImplicitParam(name = "dto", value = "dto", dataType = "TpieceDto")
+    public R<HttpResponseVO> testRmi(@RequestBody TpieceDto tpieceDto) {
         HttpRequestDto httpRequestDto = new HttpRequestDto();
-        tpieceDto.setLimit(100);
-        tpieceDto.setOffset(50);
-        tpieceDto.setHash(true);
+        //tpieceDto.setLimit(100);
+        //tpieceDto.setOffset(50);
+        //tpieceDto.setHash(false);
         //获取当前天的开始时间
         Calendar cal = new GregorianCalendar();
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        tpieceDto.setStartDate(cal.getTime());
+        //tpieceDto.setFrom(cal.getTime());
         //结束时间 就是定时任务刷的当前时间
-        tpieceDto.setEndDate(new Date());
+        //tpieceDto.setTo(new Date());
         httpRequestDto.setMethod(HttpMethod.GET);
         String url = DomainEnum.TJAPIDomain.wrapper("/api/reception/finished/events");
         httpRequestDto.setUri(url);
@@ -80,6 +80,23 @@ public class RemoteInterfaceController extends BaseController {
         remoteInterfaceService.rmiSync(dto);
         return R.ok();
     }
+
+//    public static void main(String[] args) {
+//        HttpRequestDto httpRequestDto = new HttpRequestDto();
+//
+//        Map map2=new HashMap();
+//
+//        Map map=new HashMap();
+//        map.put("partner_code","TST2");
+//        map.put("hash","00000000");
+//        map.put("job","sdls_jb_CtRDu40Qli9PG6Lg1cOoXdfkovb4");
+//        map2.put("result",map);
+//        httpRequestDto.setBody(map2);
+//        Map map1= (Map) ((HashMap) httpRequestDto.getBody()).get("result");
+//        TpieceVO tpieceVO= JSON.parseObject(JSON.toJSONString(((HashMap) httpRequestDto.getBody()).get("result")),TpieceVO.class);
+//                System.out.println(tpieceVO);
+//
+//    }
 
 
     @PreAuthorize("@ss.hasPermi('CommonScan:CommonScan:executeTask')")
