@@ -72,7 +72,7 @@ public class RemoteInterfaceController extends BaseController {
         httpRequestDto.setBody(tpieceDto);
         HttpResponseVO httpResponseVO=remoteInterfaceService.rmi(httpRequestDto);
         Object o=httpResponseVO.getBody();
-        Map map3 = JSONObject.toJavaObject(JSONObject.parseObject(JSONObject.toJSONString(httpRequestDto.getBody())), Map.class);
+        Map map3 = JSONObject.toJavaObject(JSONObject.parseObject(JSONObject.toJSONString(httpResponseVO.getBody())), Map.class);
          Map map=new HashMap();
          map.put("boby",map3);
          String result=String.valueOf(map3.get("result"));
