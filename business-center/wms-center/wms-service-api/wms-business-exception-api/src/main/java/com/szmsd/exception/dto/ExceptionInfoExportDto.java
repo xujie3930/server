@@ -17,11 +17,11 @@ public class ExceptionInfoExportDto {
     private String exceptionNo;
 
     //@ExcelIgnore
-    //@Excel(name="状态",width = 30)
+    //@Excel(name="状态",width = 15)
     @ApiModelProperty(value = "状态")
     private String state;
 
-    @Excel(name="状态",width = 30,needMerge = true)
+    @Excel(name="状态",width = 15,needMerge = true)
     @ApiModelProperty(value = "状态名称")
     private String stateName;
 
@@ -29,7 +29,7 @@ public class ExceptionInfoExportDto {
     @ApiModelProperty(value = "异常类型名称")
     private String exceptionTypeName;
 
-    @Excel(name="订单类型名称",width = 30,needMerge = true)
+    @Excel(name="订单类型名称",width = 15,needMerge = true)
     @ApiModelProperty(value = "订单类型名称")
     private String orderTypeName;
 
@@ -45,7 +45,7 @@ public class ExceptionInfoExportDto {
     @ApiModelProperty(value = "异常描述")
     private String exceptionMessage;
 
-    @Excel(name="物流服务",width = 30,needMerge = true)
+    @Excel(name="物流服务",width = 15,needMerge = true)
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
 
@@ -53,7 +53,7 @@ public class ExceptionInfoExportDto {
     @ApiModelProperty(value = "收件人")
     private String consignee;
 
-    @Excel(name="地址1",width = 30,needMerge = true)
+    @Excel(name="地址1",width = 40,needMerge = true)
     @ApiModelProperty(value = "街道1")
     private String street1;
 
@@ -61,23 +61,23 @@ public class ExceptionInfoExportDto {
     @ApiModelProperty(value = "街道2")
     private String street2;
 
-    @Excel(name="城市",width = 30,needMerge = true)
+    @Excel(name="城市",width = 20,needMerge = true)
     @ApiModelProperty(value = "城市")
     private String city;
 
-    @Excel(name="省份/州",width = 30,needMerge = true)
+    @Excel(name="省份/州",width = 20,needMerge = true)
     @ApiModelProperty(value = "省份/州")
     private String stateOrProvince;
 
-    @Excel(name="国家",width = 30,needMerge = true)
+    @Excel(name="国家",width = 20,needMerge = true)
     @ApiModelProperty(value = "国家名称")
     private String country;
 
-    @Excel(name="邮编",width = 30,needMerge = true)
+    @Excel(name="邮编",width = 18,needMerge = true)
     @ApiModelProperty(value = "邮编")
     private String postCode;
 
-    @Excel(name="联系方式",width = 30,needMerge = true)
+    @Excel(name="联系方式",width = 20,needMerge = true)
     @ApiModelProperty(value = "电话号码")
     private String phoneNo;
 
