@@ -1,13 +1,10 @@
 package com.szmsd.bas.api.factory;
 
-import com.szmsd.bas.api.feign.BasChildParentChildFeignService;
 import com.szmsd.bas.api.feign.BasMeteringConfigFeignService;
 import com.szmsd.bas.dto.BasMeteringConfigDto;
 import com.szmsd.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class BasMeteringConfigFeignFallback implements FallbackFactory<BasMeteringConfigFeignService> {
