@@ -345,6 +345,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
             SysUser loginUserInfo = remoteComponent.getLoginUserInfo();
             String sellerCode = loginUserInfo.getSellerCode();
+            log.info("保存出库单sellerCode:"+ sellerCode+",customCode:"+transportWarehousingAddDTO.getCustomCode());
             sellerCode = Optional.ofNullable(sellerCode).orElse(transportWarehousingAddDTO.getCustomCode());
             //获取sku信息
 //            List<DelOutboundDetailVO> transshipmentProductData = new ArrayList<>();
