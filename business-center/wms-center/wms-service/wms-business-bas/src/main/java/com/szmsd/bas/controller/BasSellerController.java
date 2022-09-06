@@ -1,12 +1,16 @@
 package com.szmsd.bas.controller;
 
+import cn.hutool.json.JSONUtil;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.domain.BasSysOperationLog;
 import com.szmsd.bas.dto.*;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.service.IBasSysOperationLogService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.bas.vo.BasSellerWrapVO;
 import com.szmsd.common.core.constant.SecurityConstants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
@@ -22,6 +26,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.List;
 
 
@@ -46,6 +53,8 @@ public class BasSellerController extends BaseController{
 
     @Resource
     private AuthClientService authClient;
+    @Resource
+    private IBasSysOperationLogService basSysOperationLogService;
      /**
        * 查询模块列表
      */
@@ -212,9 +221,73 @@ public class BasSellerController extends BaseController{
     @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:loginSellerSystem')")
     @PostMapping("/loginSellerSystem")
     @ApiOperation(value = "登录客户后台",notes = "登录客户后台")
-    public R<Object> loginSellerSystem(@RequestBody BasSellerSysDto dto)
+    public R<Object> loginSellerSystem(@RequestBody BasSellerSysDto dto, HttpServletRequest request)
     {
 
-        return R.ok(authClient.token(dto.getUserName(), "1", "01", "web", "password","123456", SecurityConstants.LOGIN_FREE));
+
+
+        Object data = authClient.token(dto.getUserName(), "1", "01", "web", "password","123456", SecurityConstants.LOGIN_FREE);
+        String ip = getRealIpAddress(request);
+        BasSysOperationLog opnRequestLog = new BasSysOperationLog();
+        opnRequestLog.setRequestUri("/bas/seller/loginSellerSystem");
+        opnRequestLog.setRequestMethod("POST");
+        opnRequestLog.setRequestHeader(ip);
+        opnRequestLog.setRequestBody(JSONUtil.toJsonStr(dto));
+        opnRequestLog.setRequestTime(new Date());
+        opnRequestLog.setResponseBody(JSONUtil.toJsonStr(data));
+        opnRequestLog.setResponseTime(new Date());
+        basSysOperationLogService.insertBasSysOperationLog(opnRequestLog);
+
+        return R.ok(data);
+    }
+    public static final String LOCAL_IP = "127.0.0.1";//本地ip地址
+    public static final String DEFAULT_IP = "0:0:0:0:0:0:0:1";//默认ip地址
+    public static final int DEFAULT_IP_LENGTH = 15;//默认ip地址长度
+    /**
+     * 获取真实ip地址，避免获取代理ip
+     * @param request
+     * @return
+     */
+    public static String getRealIpAddress(HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");//squid 服务代理
+        if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");//apache服务代理
+        }
+        if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");//weblogic 代理
+        }
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");//有些代理
+        }
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP"); //nginx代理
+        }
+
+        /*
+         * 如果此时还是获取不到ip地址，那么最后就使用request.getRemoteAddr()来获取
+         * */
+        if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+            if(StringUtils.equals(ip,LOCAL_IP) || StringUtils.equals(ip,DEFAULT_IP)){
+                //根据网卡取本机配置的IP
+                InetAddress iNet = null;
+                try {
+                    iNet = InetAddress.getLocalHost();
+                } catch (UnknownHostException e) {
+                    log.error("InetAddress getLocalHost error In HttpUtils getRealIpAddress: " ,e);
+                }
+                ip= iNet.getHostAddress();
+            }
+        }
+        //对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
+        //"***.***.***.***".length() = 15
+        if(!StringUtils.isEmpty(ip) && ip.length()> DEFAULT_IP_LENGTH){
+            if(ip.indexOf(",") > 0){
+                ip = ip.substring(0,ip.indexOf(","));
+            }
+        }
+        return ip;
     }
 }
