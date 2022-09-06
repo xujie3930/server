@@ -71,11 +71,14 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         @Override
         public DelQueryServiceDto selectDelQueryServiceById(String id)
         {
+            LoginUser loginUser=SecurityUtils.getLoginUser();
             DelQueryService data =  baseMapper.selectById(id);
             DelQueryServiceDto dto = new DelQueryServiceDto();
             BeanUtils.copyProperties(data, dto);
             DelQueryServiceFeedback delQueryServiceFeedback = new DelQueryServiceFeedback();
             delQueryServiceFeedback.setMainId(Integer.parseInt(id));
+            dto.setCreateByName(loginUser.getUsername());
+            dto.setCreateTime(new Date());
 
             dto.setDelQueryServiceFeedbackList(
                     delQueryServiceFeedbackService.selectDelQueryServiceFeedbackList(delQueryServiceFeedback));
