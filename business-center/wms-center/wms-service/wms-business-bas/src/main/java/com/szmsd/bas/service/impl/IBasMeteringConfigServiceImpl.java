@@ -53,7 +53,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                 }
                 basMeteringConfig.setLogisticsErvicesCode(s);
                 basMeteringConfigMapper.insertSelective(basMeteringConfig);
-                //basMeteringConfig.setId(null);
+                basMeteringConfig.setId(null);
                 basMeteringConfig.getBasMeteringConfigDataList().forEach(x->{
                     x.setMeteringId(basMeteringConfig.getDelId());
                     basMeteringConfigDataMapper.insertSelective(x);
