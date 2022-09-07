@@ -37,6 +37,11 @@ public class BasSubFeignServiceFallbackFactory implements FallbackFactory<BasSub
             }
 
             @Override
+            public R<List<BasSub>> getSub(BasSub basSub) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R<Map<String,String>> getSubList(@RequestParam("code") String code){
                 return R.convertResultJson(throwable);
             }
