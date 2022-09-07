@@ -56,7 +56,7 @@ public class BasMeteringConfig extends BaseEntity {
 
     @ApiModelProperty(value = "标识id防止和主id一直")
     @TableField(exist = false)
-    private String delId;
+    private Integer delId;
 
     @ApiModelProperty(value = "规则明细数据字表")
     @TableField(exist = false)
