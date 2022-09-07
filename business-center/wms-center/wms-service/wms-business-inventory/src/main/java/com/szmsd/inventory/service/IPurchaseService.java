@@ -5,11 +5,13 @@ import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
 import com.szmsd.inventory.domain.dto.TransportWarehousingAddDTO;
+import com.szmsd.inventory.domain.excel.PurchaseInfoDetailExcle;
 import com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -55,5 +57,9 @@ public interface IPurchaseService extends IService<Purchase> {
 
 
     int transportWarehousingSubmit(TransportWarehousingAddDTO transportWarehousingAddDTO);
+
+    List<PurchaseInfoDetailExcle>  selectPurchaseInfoDetailEx(Integer id);
+
+    Map  importPurchaseInfoDetailExcle(List<PurchaseInfoDetailExcle> list,String associationId,String purchaseNo);
 }
 

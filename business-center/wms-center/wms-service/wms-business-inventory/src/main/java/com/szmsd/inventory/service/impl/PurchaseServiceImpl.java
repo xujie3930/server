@@ -22,10 +22,15 @@ import com.szmsd.inventory.domain.Purchase;
 import com.szmsd.inventory.domain.PurchaseDetails;
 import com.szmsd.inventory.domain.PurchaseStorageDetails;
 import com.szmsd.inventory.domain.dto.*;
+import com.szmsd.inventory.domain.excel.PurchaseInfoDetailExcle;
+import com.szmsd.inventory.domain.excel.PurchaseStorageDetailsExcle;
 import com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
+import com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO;
+import com.szmsd.inventory.mapper.PurchaseDetailsMapper;
 import com.szmsd.inventory.mapper.PurchaseMapper;
+import com.szmsd.inventory.mapper.PurchaseStorageDetailsMapper;
 import com.szmsd.inventory.service.IPurchaseDetailsService;
 import com.szmsd.inventory.service.IPurchaseLogService;
 import com.szmsd.inventory.service.IPurchaseService;
@@ -39,6 +44,7 @@ import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -77,6 +83,10 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
     private RemoteRequest remoteRequest;
     @Autowired
     private RemoteAttachmentService remoteAttachmentService;
+    @Autowired
+    private PurchaseDetailsMapper purchaseDetailsMapper;
+    @Autowired
+    private PurchaseStorageDetailsMapper purchaseStorageDetailsMapper;
 
     @Override
     public PurchaseInfoVO selectPurchaseByPurchaseNo(String purchaseNo) {
@@ -416,6 +426,64 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
         });
         return 0;
+    }
+
+    @Override
+    public List<PurchaseInfoDetailExcle> selectPurchaseInfoDetailEx(Integer id) {
+        List<PurchaseInfoDetailExcle> list=purchaseDetailsMapper.selectPurchaseInfoDetailExcleListByAssId(id);
+        list.forEach(x->{
+            List<PurchaseStorageDetailsExcle> list1= purchaseStorageDetailsMapper.selectPurchaseStorageDetailsExcleListByAssId(x.getSku(),id);
+            x.setPurchaseStorageDetailsExcles(list1);
+        });
+        return list;
+    }
+
+    @Override
+    public Map importPurchaseInfoDetailExcle(List<PurchaseInfoDetailExcle> list,String associationId,String purchaseNo) {
+        List<PurchaseStorageDetailsExcle> purchaseStorageDetailsExcleList=new ArrayList<>();
+        for (int i=0;i<list.size();i++){
+            String sku=list.get(i).getSku();
+            list.get(i).getPurchaseStorageDetailsExcles().forEach(x->{
+                x.setSku(sku);
+                x.setAssociationId(associationId);
+                purchaseStorageDetailsExcleList.add(x);
+            });
+        }
+        PurchaseInfoVO purchaseInfoVO = baseMapper.selectPurchaseByPurchaseNo(purchaseNo);
+        List<PurchaseStorageDetailsVO> purchaseStorageDetailsList1=purchaseInfoVO.getPurchaseStorageDetailsAddList();
+        //针对真正导入的数据做处理
+        for (int x=0;x<purchaseStorageDetailsExcleList.size();x++){
+            List<PurchaseStorageDetailsVO> purchaseStorageDetailsVOs= purchaseStorageDetailsMapper.selectPurchaseStorageDetailsVO(purchaseStorageDetailsExcleList.get(x));
+            PurchaseStorageDetailsVO purchaseStorageDetailsVO=new PurchaseStorageDetailsVO();
+            PurchaseStorageDetails purchaseStorageDetails=new PurchaseStorageDetails();
+            BeanUtils.copyProperties(purchaseStorageDetailsExcleList.get(x), purchaseStorageDetails);
+            BeanUtils.copyProperties(purchaseStorageDetailsExcleList.get(x), purchaseStorageDetailsVO);
+
+            if (purchaseStorageDetailsVOs.size()>0){
+               purchaseStorageDetails.setImportFlag("0");
+               purchaseStorageDetails.setAssociationId(Integer.parseInt(associationId));
+               purchaseStorageDetails.setImportRemark("快递单号重复:"+purchaseStorageDetailsExcleList.get(x).getDeliveryNo());
+               purchaseStorageDetailsMapper.insertSelectiveus(purchaseStorageDetails);
+
+           }
+           if (purchaseStorageDetailsVOs.size()==0){
+               purchaseStorageDetailsList1.add(purchaseStorageDetailsVO);
+
+           }
+
+
+        }
+
+        purchaseInfoVO.setPurchaseStorageDetailsAddList(purchaseStorageDetailsList1);
+        PurchaseAddDTO  purchaseAddDTO=new PurchaseAddDTO();
+        BeanUtils.copyProperties(purchaseInfoVO, purchaseAddDTO);
+        this.insertPurchaseBatch(purchaseAddDTO);
+
+        Map map=new HashMap();
+        return  map;
+
+
+
     }
 }
 
