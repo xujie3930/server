@@ -5,6 +5,7 @@ import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.service.wrapper.ShipmentEnum;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
@@ -148,7 +149,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param orderType orderType
      * @return int
      */
-    int shipmentPacking(ShipmentPackingMaterialRequestDto dto, String orderType);
+    int shipmentPacking(ShipmentPackingMaterialRequestDto dto, String orderType, ShipmentEnum shipmentState);
 
     /**
      * 出库管理 - Open - 接收批量出库单类型装箱信息

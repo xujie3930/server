@@ -1525,7 +1525,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Transactional
     @Override
-    public int shipmentPacking(ShipmentPackingMaterialRequestDto dto, String orderType) {
+    public int shipmentPacking(ShipmentPackingMaterialRequestDto dto, String orderType,ShipmentEnum shipmentState) {
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         if (StringUtils.isNotEmpty(dto.getWarehouseCode())) {
             updateWrapper.eq(DelOutbound::getWarehouseCode, dto.getWarehouseCode());
@@ -1547,6 +1547,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         updateWrapper.set(DelOutbound::getSpecifications, length + "*" + width + "*" + height);
         // 修改状态为处理中
         updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.PROCESSING.getCode());
+
+        if (shipmentState != null) {
+            updateWrapper.set(DelOutbound::getShipmentState, shipmentState);
+        }
         return this.baseMapper.update(null, updateWrapper);
     }
 
