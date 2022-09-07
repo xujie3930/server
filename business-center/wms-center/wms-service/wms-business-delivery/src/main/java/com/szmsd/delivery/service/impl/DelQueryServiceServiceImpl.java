@@ -4,8 +4,10 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasSellerFeignService;
+import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringToolkit;
@@ -61,6 +63,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
     private IDelTrackService delTrackService;
     @Autowired
     private IDelOutboundService iDelOutboundService;
+    @Autowired
+    private BasSubFeignService basSubFeignService;
 
     /**
         * 查询查件服务模块
@@ -351,10 +355,18 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         if (list.isEmpty()) {
             throw new CommonException("400", "空Excel数据");
         }
+
         List<DelQueryService> dataList = BeanMapperUtil.mapList(list, DelQueryService.class);
         for (DelQueryService delQueryService: dataList){
 
             String reason = delQueryService.getReason();
+            BasSub basSub=new BasSub();
+            basSub.setSubName(reason);
+            R<List<BasSub>> r=basSubFeignService.getSub(basSub);
+            List<BasSub> list1=r.getData();
+            if (list1.size()==0){
+                throw new CommonException("400", "查件原因和数据字典不匹配");
+            }
             DelQueryServiceDto dto = getOrderInfo(delQueryService.getOrderNo());
             BeanUtils.copyProperties(dto, delQueryService);
             delQueryService.setReason(reason);
