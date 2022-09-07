@@ -337,21 +337,29 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Override
     public InboundReceipt saveOrUpdate(InboundReceiptDTO inboundReceiptDTO) {
         log.info("保存入库单：{}", inboundReceiptDTO);
+        InboundReceipt inboundReceipt = null;
 
-        InboundReceipt inboundReceipt = BeanMapperUtil.map(inboundReceiptDTO, InboundReceipt.class);
-        // 获取入库单号
-        String warehouseNo = inboundReceipt.getWarehouseNo();
-        if (StringUtils.isEmpty(warehouseNo)) {
-            warehouseNo = remoteComponent.getWarehouseNo(inboundReceiptDTO.getCusCode());
+        try{
+            inboundReceipt = BeanMapperUtil.map(inboundReceiptDTO, InboundReceipt.class);
+            // 获取入库单号
+            String warehouseNo = inboundReceipt.getWarehouseNo();
+            if (StringUtils.isEmpty(warehouseNo)) {
+                warehouseNo = remoteComponent.getWarehouseNo(inboundReceiptDTO.getCusCode());
+            }
+            inboundReceipt.setWarehouseNo(warehouseNo);
+            inboundReceiptDTO.setOrderNo(warehouseNo);
+            this.saveOrUpdate(inboundReceipt);
+
+            // 保存附件
+            asyncAttachment(warehouseNo, inboundReceiptDTO);
+
+            log.info("保存入库单：操作完成");
+        }catch (Exception e){
+            log.info("保存入库单失败："+e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        inboundReceipt.setWarehouseNo(warehouseNo);
-        inboundReceiptDTO.setOrderNo(warehouseNo);
-        this.saveOrUpdate(inboundReceipt);
 
-        // 保存附件
-        asyncAttachment(warehouseNo, inboundReceiptDTO);
-
-        log.info("保存入库单：操作完成");
         return inboundReceipt;
     }
 
