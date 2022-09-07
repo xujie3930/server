@@ -27,6 +27,12 @@
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-putinstorage-api</artifactId>
         </dependency>
+        <!--  解析一对多的excle依赖需要      -->
+        <dependency>
+            <groupId>cn.afterturn</groupId>
+            <artifactId>easypoi-spring-boot-starter</artifactId>
+            <version>4.1.3</version>
+        </dependency>
         <dependency>
             <groupId>com.szmsd</groupId>
             <artifactId>szmsd-common-plugin-api</artifactId>

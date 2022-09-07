@@ -40,4 +40,12 @@
         FROM purchase_details
         WHERE association_id = #{assId}
     </select>
+    <select id="selectPurchaseInfoDetailExcleListByAssId"
+            resultType="com.szmsd.inventory.domain.excel.PurchaseInfoDetailExcle"
+            parameterType="java.lang.Integer">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM purchase_details
+        WHERE association_id = #{assId}
+    </select>
 </mapper>
