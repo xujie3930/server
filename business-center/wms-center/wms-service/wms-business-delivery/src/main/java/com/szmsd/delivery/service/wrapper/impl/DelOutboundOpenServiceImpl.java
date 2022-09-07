@@ -23,6 +23,7 @@ import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.IDelTrackService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundOpenService;
+import com.szmsd.delivery.service.wrapper.ShipmentEnum;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.ShipmentUpdateRequestDto;
@@ -130,7 +131,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                     }
                 }
                 // 更新包裹信息
-                result = this.delOutboundService.shipmentPacking(dto, orderType);
+                result = this.delOutboundService.shipmentPacking(dto, orderType, null);
                 // 处理结果大于0才认定为执行成功
                 if (result > 0 && !overBreak) {
                     // 执行异步任务
@@ -274,7 +275,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             }
             DelOutboundOperationLogEnum.OPN_CONTAINERS.listener(delOutbound);
             // 更新包裹信息
-            this.delOutboundService.shipmentPacking(dto, null);
+            this.delOutboundService.shipmentPacking(dto, null, !overBreak? ShipmentEnum.BEGIN: null);
             // 执行异步任务
             if (!overBreak) {
                 // 增加出库单已取消记录，异步处理，定时任务
