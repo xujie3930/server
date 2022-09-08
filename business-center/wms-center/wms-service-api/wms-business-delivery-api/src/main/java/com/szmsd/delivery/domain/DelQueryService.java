@@ -123,6 +123,11 @@ public class DelQueryService extends BaseEntity {
     @ApiModelProperty(value = "允查轨迹停留天数")
     private Long querysetrackStayDays;
 
+    @ApiModelProperty(value = "反馈类容描述")
+    @TableField(exist = false)
+    private String feedReason;
+
+
 //    @ApiModelProperty(value = "查件标识(0是红色,1是绿色)")
 //    //@TableField(exist = false)
 //    private Long checkFlag;

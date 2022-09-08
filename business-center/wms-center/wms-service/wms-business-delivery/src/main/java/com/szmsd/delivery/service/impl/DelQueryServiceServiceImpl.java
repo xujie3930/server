@@ -66,6 +66,9 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
     @Autowired
     private BasSubFeignService basSubFeignService;
 
+    @Autowired
+    private IDelQueryServiceFeedbackService iDelQueryServiceFeedbackService;
+
     /**
         * 查询查件服务模块
         *
@@ -262,7 +265,21 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
             delQueryService.setState(DelQueryServiceStateEnum.SUBMITTED.getCode());
             delQueryService.setStateName(DelQueryServiceStateEnum.SUBMITTED.getName());
-            return baseMapper.insert(delQueryService);
+            DelQueryServiceFeedback delQueryServiceFeedback=new DelQueryServiceFeedback();
+           int a= baseMapper.insert(delQueryService);
+            delQueryServiceFeedback.setMainId(delQueryService.getId());
+            if (delQueryService.getReason()!=null&&!delQueryService.getReason().equals("")&&delQueryService.getReason().equals("其他")){
+                delQueryServiceFeedback.setReason(delQueryService.getRemark());
+            }
+            if (delQueryService.getReason()!=null&&!delQueryService.getReason().equals("")&&!delQueryService.getReason().equals("其他")){
+                delQueryServiceFeedback.setReason(delQueryService.getReason());
+            }
+
+             if (delQueryService.getFeedReason()!=null&&!delQueryService.getFeedReason().equals("")){
+                 delQueryServiceFeedback.setReason(delQueryService.getFeedReason());
+             }
+            iDelQueryServiceFeedbackService.insertDelQueryServiceFeedbacksu(delQueryServiceFeedback);
+            return a;
         }
 
 
