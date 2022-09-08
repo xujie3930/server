@@ -22,4 +22,5 @@ public interface PurchaseDetailsMapper extends BaseMapper<PurchaseDetails> {
 
     List<PurchaseInfoDetailExcle> selectPurchaseInfoDetailExcleListByAssId(@Param("assId") Integer assId);
 
+
 }
