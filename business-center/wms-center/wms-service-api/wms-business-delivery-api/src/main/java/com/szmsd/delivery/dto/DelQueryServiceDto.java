@@ -144,6 +144,10 @@ public class DelQueryServiceDto extends BaseEntity {
     @ApiModelProperty(value = "允查轨迹停留天数")
     private Long querysetrackStayDays;
 
+    @ApiModelProperty(value = "客户端的code")
+    @TableField(exist = false)
+   private String currencyCode;
+
 
 
 }
