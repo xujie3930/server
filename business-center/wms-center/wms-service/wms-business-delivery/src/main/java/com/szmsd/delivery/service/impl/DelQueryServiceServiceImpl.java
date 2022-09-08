@@ -25,6 +25,7 @@ import com.szmsd.delivery.mapper.DelQueryServiceMapper;
 import com.szmsd.delivery.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.finance.domain.AccountBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -68,6 +69,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
     @Autowired
     private IDelQueryServiceFeedbackService iDelQueryServiceFeedbackService;
+
+
 
     /**
         * 查询查件服务模块
@@ -129,6 +132,27 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             }
             if(StringUtils.isNotEmpty(delQueryService.getRefNo())){
                 where.in(DelQueryService::getRefNo, StringToolkit.getCodeByArray(delQueryService.getRefNo()));
+            }
+
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+
+            List<String> sellerCodeList=null;
+            if (null != loginUser && !loginUser.getUsername().equals("admin")) {
+                String username = loginUser.getUsername();
+                sellerCodeList=baseMapper.selectsellerCode(username);
+
+                if (sellerCodeList.size()>0){
+                    where.in(DelQueryService::getSellerCode, sellerCodeList);
+
+                }
+                if (StringUtils.isNotEmpty(delQueryService.getCurrencyCode())) {
+                    where.eq(DelQueryService::getSellerCode, delQueryService.getCurrencyCode());
+                }
+
+            }
+            if (null != loginUser && loginUser.getUsername().equals("admin")){
+                sellerCodeList=baseMapper.selectsellerCodes();
+
             }
 
 
@@ -207,7 +231,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
             if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()){
                 if (delQueryService.getCheckFlag()==0){
-                    throw new CommonException("400", "发货天数或者轨迹停留天数大于对应的查件配置天数！！！");
+                    throw new CommonException("400", "发货天数或者轨迹停留天数小于对应的查件配置天数！！！");
                 }
             }
             if(StringUtils.isEmpty(delQueryService.getReason())){
