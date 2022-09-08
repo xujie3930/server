@@ -2,11 +2,15 @@ package com.szmsd.delivery.service.impl;
 
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.delivery.domain.DelQueryService;
 import com.szmsd.delivery.domain.DelQueryServiceFeedback;
 import com.szmsd.delivery.enums.DelQueryServiceFeedbackEnum;
+import com.szmsd.delivery.enums.DelQueryServiceStateEnum;
 import com.szmsd.delivery.mapper.DelQueryServiceFeedbackMapper;
+import com.szmsd.delivery.mapper.DelQueryServiceMapper;
 import com.szmsd.delivery.service.IDelQueryServiceFeedbackService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.common.core.domain.R;
@@ -22,7 +26,8 @@ import java.util.List;
 */
 @Service
 public class DelQueryServiceFeedbackServiceImpl extends ServiceImpl<DelQueryServiceFeedbackMapper, DelQueryServiceFeedback> implements IDelQueryServiceFeedbackService {
-
+   @Autowired
+   private DelQueryServiceMapper delQueryServiceMapper;
 
         /**
         * 查询查件服务反馈模块
@@ -78,10 +83,31 @@ public class DelQueryServiceFeedbackServiceImpl extends ServiceImpl<DelQueryServ
                 delQueryServiceFeedback.setType(DelQueryServiceFeedbackEnum.FEEDBACK.getName());
 
             }
-             return baseMapper.insert(delQueryServiceFeedback);
+
+            int a =baseMapper.insert(delQueryServiceFeedback);
+            if (delQueryServiceFeedback.getType().equals("反馈")){
+                DelQueryService delQueryService=new DelQueryService();
+                delQueryService.setId(delQueryServiceFeedback.getMainId());
+                delQueryService.setState(DelQueryServiceStateEnum.COMPLETED.getCode());
+                delQueryService.setStateName(DelQueryServiceStateEnum.COMPLETED.getName());
+                delQueryServiceMapper.updateById(delQueryService);
+            }
+             return a;
         }
 
-        /**
+    @Override
+    public int insertDelQueryServiceFeedbacksu(DelQueryServiceFeedback delQueryServiceFeedback) {
+
+
+        if(delQueryServiceFeedback.getMainId() == null){
+            throw new CommonException("400", "mainId不能为空");
+
+        }
+        delQueryServiceFeedback.setType(DelQueryServiceFeedbackEnum.CREATE.getName());
+        return baseMapper.insert(delQueryServiceFeedback);
+    }
+
+    /**
         * 修改查件服务反馈模块
         *
         * @param delQueryServiceFeedback 查件服务反馈模块
