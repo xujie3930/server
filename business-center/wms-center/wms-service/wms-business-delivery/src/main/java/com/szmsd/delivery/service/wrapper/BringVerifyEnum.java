@@ -16,10 +16,12 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.*;
+import com.szmsd.delivery.dto.DelOutboundLabelDto;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
+import com.szmsd.delivery.util.PdfUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
@@ -1064,10 +1066,56 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             }
             BasAttachment attachment = attachmentList.get(0);
             String filePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
+
             File labelFile = new File(filePath);
             if (!labelFile.exists()) {
-                throw new CommonException("500", "标签文件不存在");
+                throw new CommonException("500", "出库单文件不存在");
             }
+
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+
+            String selfPickLabelFilePath = null;
+            if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                DelOutboundLabelDto dto = new DelOutboundLabelDto();
+                dto.setId(delOutbound.getId());
+
+                //生成下自提标签文件，如果有就不生成
+                delOutboundService.labelSelfPick(null, dto);
+                selfPickLabelFilePath = DelOutboundServiceImplUtil.getSelfPickLabelFilePath(delOutbound) + "/" + delOutbound.getOrderNo() + ".pdf";
+            }
+            String uploadBoxLabel = null;
+            if("Y".equals(delOutbound.getUploadBoxLabel())) {
+                IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+
+                uploadBoxLabel = delOutboundBringVerifyService.getBoxLabel(delOutbound);
+
+
+            }
+            logger.info("更新出库单{}标签,文件{},箱标{},自提标签{}",delOutbound.getOrderNo(), filePath, selfPickLabelFilePath, uploadBoxLabel);
+            if(selfPickLabelFilePath != null || uploadBoxLabel != null){
+                String mergeFileDirPath = DelOutboundServiceImplUtil.getLabelMergeFilePath(delOutbound);
+                File mergeFileDir = new File(mergeFileDirPath);
+                if (!mergeFileDir.exists()) {
+                    try {
+                        FileUtils.forceMkdir(mergeFileDir);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
+                        throw new CommonException("500", "创建文件夹失败，" + e.getMessage());
+                    }
+                }
+                String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
+                try {
+                    if (PdfUtil.merge(mergeFilePath, filePath, uploadBoxLabel, selfPickLabelFilePath)) {
+                        labelFile = new File(mergeFilePath);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    logger.error(e.getMessage(), e);
+                    throw new CommonException("500", "出库单合并文件失败");
+                }
+            }
+
+
             try {
                 byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
                 String encode = Base64.encode(byteArray);

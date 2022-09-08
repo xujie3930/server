@@ -2,7 +2,6 @@ package com.szmsd.delivery.service.wrapper.impl;
 
 import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
@@ -1251,7 +1250,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
     }
 
-    private String getBoxLabel(DelOutbound delOutbound){
+    @Override
+    public String getBoxLabel(DelOutbound delOutbound){
         BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
         basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.ONE_PIECE_ISSUED_ON_BEHALF.getBusinessCode());
         basAttachmentQueryDTO.setRemark(delOutbound.getOrderNo());
