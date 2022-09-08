@@ -287,8 +287,9 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
             }
             return R.ok();
         }catch (Exception e){
+            String message=((CommonException) e).getCode();
             e.printStackTrace();
-            return R.failed(e.getMessage());
+            return R.failed(message);
         }
 
     }
