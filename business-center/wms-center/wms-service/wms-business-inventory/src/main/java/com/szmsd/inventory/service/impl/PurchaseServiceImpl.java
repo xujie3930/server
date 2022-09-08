@@ -44,6 +44,7 @@ import com.szmsd.system.api.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
@@ -438,6 +439,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         return list;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Map importPurchaseInfoDetailExcle(List<PurchaseInfoDetailExcle> list,String associationId,String purchaseNo) {
         List<PurchaseStorageDetailsExcle> purchaseStorageDetailsExcleList=new ArrayList<>();
@@ -451,6 +453,10 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         }
         PurchaseInfoVO purchaseInfoVO = baseMapper.selectPurchaseByPurchaseNo(purchaseNo);
         List<PurchaseStorageDetailsVO> purchaseStorageDetailsList1=purchaseInfoVO.getPurchaseStorageDetailsAddList();
+        //总行数
+        int totalNumber=purchaseStorageDetailsExcleList.size();
+        int successNumber=0;
+        int failNumber=0;
         //针对真正导入的数据做处理
         for (int x=0;x<purchaseStorageDetailsExcleList.size();x++){
             List<PurchaseStorageDetailsVO> purchaseStorageDetailsVOs= purchaseStorageDetailsMapper.selectPurchaseStorageDetailsVO(purchaseStorageDetailsExcleList.get(x));
@@ -464,10 +470,14 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
                purchaseStorageDetails.setAssociationId(Integer.parseInt(associationId));
                purchaseStorageDetails.setImportRemark("快递单号重复:"+purchaseStorageDetailsExcleList.get(x).getDeliveryNo());
                purchaseStorageDetailsMapper.insertSelectiveus(purchaseStorageDetails);
-
+               failNumber=failNumber+1;
            }
            if (purchaseStorageDetailsVOs.size()==0){
-               purchaseStorageDetailsList1.add(purchaseStorageDetailsVO);
+               if (purchaseStorageDetailsVO.getDeliveryNo()!=null&&purchaseStorageDetailsVO.getDeclareQty()!=null){
+                   purchaseStorageDetailsList1.add(purchaseStorageDetailsVO);
+                   successNumber=successNumber+1;
+               }
+
 
            }
 
@@ -475,15 +485,55 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
         }
 
         purchaseInfoVO.setPurchaseStorageDetailsAddList(purchaseStorageDetailsList1);
+
         PurchaseAddDTO  purchaseAddDTO=new PurchaseAddDTO();
+
         BeanUtils.copyProperties(purchaseInfoVO, purchaseAddDTO);
+
+        List<PurchaseDetailsAddDTO> purchaseDetailsAddDTOS=new ArrayList<>();
+        List<PurchaseStorageDetailsAddDTO> purchaseStorageDetailsAddDTOS=new ArrayList<>();
+        purchaseInfoVO.getPurchaseDetailsAddList().forEach(x->{
+            PurchaseDetailsAddDTO purchaseDetailsAddDTO=new PurchaseDetailsAddDTO();
+            BeanUtils.copyProperties(x, purchaseDetailsAddDTO);
+            purchaseDetailsAddDTOS.add(purchaseDetailsAddDTO);
+        });
+        purchaseAddDTO.setPurchaseDetailsAddList(purchaseDetailsAddDTOS);
+        purchaseInfoVO.getPurchaseStorageDetailsAddList().forEach(x->{
+            PurchaseStorageDetailsAddDTO purchaseStorageDetailsAddDTO=new PurchaseStorageDetailsAddDTO();
+            BeanUtils.copyProperties(x, purchaseStorageDetailsAddDTO);
+            purchaseStorageDetailsAddDTOS.add(purchaseStorageDetailsAddDTO);
+        });
+        purchaseAddDTO.setPurchaseStorageDetailsAddList(purchaseStorageDetailsAddDTOS);
+        String orderNo=purchaseInfoVO.getOrderNo();
+        orderNo = StringEscapeUtils.unescapeHtml4(orderNo);
+        orderNo = orderNo.substring(1,orderNo .length()-1);
+        orderNo = orderNo .replaceAll("\"", "");
+        String[] orderNos = orderNo .split(",");
+        List<String> orderNolist = Arrays.asList(orderNos);
+        purchaseAddDTO.setOrderNo(orderNolist);
         this.insertPurchaseBatch(purchaseAddDTO);
 
         Map map=new HashMap();
+        map.put("totalNumber",totalNumber);
+        map.put("successNumber",successNumber);
+        map.put("failNumber",failNumber);
         return  map;
+    }
 
 
+    @Override
+    public List<PurchaseInfoDetailExcle> exportusAbnormal(Integer id) {
+        List<PurchaseInfoDetailExcle> list=purchaseDetailsMapper.selectPurchaseInfoDetailExcleListByAssId(id);
+        list.forEach(x->{
+            List<PurchaseStorageDetailsExcle> list1= purchaseStorageDetailsMapper.selectPurchaseStorageDetailsExcleListByAssIds(x.getSku(),id);
+            x.setPurchaseStorageDetailsExcles(list1);
+        });
+        return list;
+    }
 
+    @Override
+    public void deletePurchaseStorageDetails(Integer id) {
+        purchaseStorageDetailsMapper.deletePurchaseStorageDetails(id);
     }
 }
 

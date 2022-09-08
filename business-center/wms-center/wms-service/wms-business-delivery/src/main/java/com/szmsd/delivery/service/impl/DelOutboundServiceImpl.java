@@ -269,7 +269,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     Long querysetrackStayDays = Long.valueOf(mapSettings.get("trackStayDays").toString());
                     delOutboundVO.setQueryseShipmentDays(queryseShipmentDays);
                     delOutboundVO.setQuerysetrackStayDays(querysetrackStayDays);
-                    if (delOutboundVO.getDelDays() > queryseShipmentDays || delOutboundVO.getTrackingDays() > querysetrackStayDays) {
+                    if ( queryseShipmentDays>delOutboundVO.getDelDays() && querysetrackStayDays>delOutboundVO.getTrackingDays() ) {
                         delOutboundVO.setCheckFlag(0L);
                     } else {
                         delOutboundVO.setCheckFlag(1L);

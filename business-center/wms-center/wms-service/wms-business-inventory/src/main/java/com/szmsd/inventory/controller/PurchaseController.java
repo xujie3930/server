@@ -229,12 +229,122 @@ public class PurchaseController extends BaseController {
             params.setHeadRows(2);
             List<PurchaseInfoDetailExcle> list = ExcelImportUtil.importExcel(file.getInputStream(),PurchaseInfoDetailExcle.class,params);
            Map map= purchaseService.importPurchaseInfoDetailExcle(list,associationId,purchaseNo);
-
-            return R.ok();
+            return R.ok(map);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return R.failed(e.getMessage());
         }
+    }
+
+
+
+    /**
+     * 导出采购单异常数据(导出一对多合并单元格)
+     */
+    @GetMapping("/exportusAbnormal")
+    @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
+    public void exportusAbnormal(HttpServletResponse response, Integer id) throws IOException {
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (null == loginUser) {
+            throw new CommonException("500", "非法的操作");
+        }
+
+        //导出的异常数据
+        List<PurchaseInfoDetailExcle> list=purchaseService.exportusAbnormal(id);
+
+
+
+        //拿到值之后做删除异常数据操作
+        purchaseService.deletePurchaseStorageDetails(id);
+
+
+        ExportParams params = new ExportParams();
+//        params.setTitle("异常通知中心_异常导出");
+
+
+       if (list.size()>0){
+
+
+
+        Workbook workbook = ExcelExportUtil.exportExcel(params, PurchaseInfoDetailExcle.class, list);
+
+
+        Sheet sheet= workbook.getSheet("sheet0");
+
+        //获取第一行数据
+        Row row2 =sheet.getRow(0);
+
+        for (int i=0;i<5;i++){
+            Cell deliveryTimeCell = row2.getCell(i);
+
+            CellStyle styleMain = workbook.createCellStyle();
+            if (i==4){
+                styleMain.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
+            }else {
+                styleMain.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
+
+            }
+            Font font = workbook.createFont();
+            //true为加粗，默认为不加粗
+            font.setBold(true);
+            //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font.setColor(IndexedColors.WHITE.getIndex());
+            //将字体样式设置到单元格样式中
+            styleMain.setFont(font);
+
+            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain.setAlignment(HorizontalAlignment.CENTER);
+            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+//        CellStyle style =  workbook.createCellStyle();
+//        style.setFillPattern(HSSFColor.HSSFColorPredefined.valueOf(""));
+//        style.setFillForegroundColor(IndexedColors.RED.getIndex());
+            deliveryTimeCell.setCellStyle(styleMain);
+        }
+
+        //获取第二行数据
+        Row row3 =sheet.getRow(1);
+        for (int x=4;x<6;x++) {
+            Cell deliveryTimeCell1 = row3.getCell(x);
+            CellStyle styleMain1 = workbook.createCellStyle();
+            styleMain1.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+            Font font1 = workbook.createFont();
+            //true为加粗，默认为不加粗
+            font1.setBold(true);
+            //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font1.setColor(IndexedColors.WHITE.getIndex());
+            //将字体样式设置到单元格样式中
+            styleMain1.setFont(font1);
+
+            styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain1.setAlignment(HorizontalAlignment.CENTER);
+            styleMain1.setVerticalAlignment(VerticalAlignment.CENTER);
+            deliveryTimeCell1.setCellStyle(styleMain1);
+        }
+
+        try {
+            String fileName="采购单异常数据"+System.currentTimeMillis();
+            URLEncoder.encode(fileName, "UTF-8");
+            //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+            response.setContentType("application/vnd.ms-excel");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+            response.addHeader("Pargam", "no-cache");
+            response.addHeader("Cache-Control", "no-cache");
+
+            ServletOutputStream outStream = null;
+            try {
+                outStream = response.getOutputStream();
+                workbook.write(outStream);
+                outStream.flush();
+            } finally {
+                outStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+       }
+
     }
 
 
