@@ -2,6 +2,9 @@ package com.szmsd.delivery.mapper;
 
 import com.szmsd.delivery.domain.DelQueryService;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface DelQueryServiceMapper extends BaseMapper<DelQueryService> {
 
+    List<String> selectsellerCode(@Param("username") String username);
+
+    List<String> selectsellerCodes();
+
+    List<String>  selectsellerCodeus(@Param("username")String username);
 }
