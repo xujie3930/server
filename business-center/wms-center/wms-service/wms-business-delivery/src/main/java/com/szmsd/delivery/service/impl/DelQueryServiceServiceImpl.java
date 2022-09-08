@@ -246,7 +246,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             boolean bool = false;
             if(StringUtils.equals(delOutbound.getState(), delQuerySettings.getState())){
                 bool = true;
-            }else if(delOutbound.getShipmentsTime() != null && DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(),  true) <= delQuerySettings.getShipmentDays()){
+            }else if(delOutbound.getShipmentsTime() != null && (DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(),  true) >= delQuerySettings.getShipmentDays()||DateUtil.betweenDay(delOutbound.getTrackingTime(), new Date(),  true) >= delQuerySettings.getTrackStayDays())){
                 bool = true;
             }else{
                 LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();

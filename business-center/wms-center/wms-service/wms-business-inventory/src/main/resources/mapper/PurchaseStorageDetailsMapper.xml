@@ -29,6 +29,10 @@
                 remark,
             id, association_id, warehousing_no, create_by, update_by, version, del_flag, delivery_no, sku, declare_qty
     </sql>
+    <delete id="deletePurchaseStorageDetails" parameterType="java.lang.Integer">
+
+        DELETE from purchase_storage_details where association_id=#{id} and  import_flag='0'
+    </delete>
 
     <select id="selectPurchaseStorageDetailsListByAssId"
             resultType="com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO">
@@ -46,6 +50,12 @@
             parameterType="com.szmsd.inventory.domain.excel.PurchaseStorageDetailsExcle">
         SELECT * from purchase_storage_details WHERE association_id=#{associationId} AND sku=#{sku} AND delivery_no=#{deliveryNo}
 
+    </select>
+    <select id="selectPurchaseStorageDetailsExcleListByAssIds"
+            resultType="com.szmsd.inventory.domain.excel.PurchaseStorageDetailsExcle">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM purchase_storage_details WHERE association_id = #{assId} AND del_flag = 0 and sku=#{productName} and import_flag='0'
     </select>
 
     <insert id="insertSelectiveus" parameterType="com.szmsd.inventory.domain.PurchaseStorageDetails">
