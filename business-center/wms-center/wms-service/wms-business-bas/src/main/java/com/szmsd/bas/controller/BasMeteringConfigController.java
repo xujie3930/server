@@ -25,7 +25,7 @@ public class BasMeteringConfigController extends BaseController {
     @PostMapping("/page")
     @ApiOperation(value = "查询", notes = "计泡查询 - 分页查询")
     public TableDataInfo<BasMeteringConfig> page(@RequestBody BasMeteringConfigDto basMeteringConfigDto) {
-        startPage();
+        startPage(basMeteringConfigDto);
         List<BasMeteringConfig> list = iBasMeteringConfigService.selectList(basMeteringConfigDto);
         return getDataTable(list);
     }
