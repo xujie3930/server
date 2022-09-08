@@ -1187,7 +1187,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
                 File mergeFile = new File(mergeFilePath);
-                logger.info(mergeFilePath + "," + pathname + "," + uploadBoxLabel);
+                logger.info(mergeFilePath + "," + pathname + "," + uploadBoxLabel + ","+selfPickLabelFilePath);
                 try {
                     if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel, selfPickLabelFilePath)) {
                         pathname = mergeFilePath;
@@ -1197,6 +1197,32 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     logger.error(e.getMessage(), e);
                     throw new CommonException("500", "合并箱标文件，标签文件失败");
                 }
+            }else{
+
+                if(selfPickLabelFilePath != null){
+                    String mergeFileDirPath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
+                    File mergeFileDir = new File(mergeFileDirPath);
+                    if (!mergeFileDir.exists()) {
+                        try {
+                            FileUtils.forceMkdir(mergeFileDir);
+                        } catch (IOException e) {
+                            logger.error(e.getMessage(), e);
+                            throw new CommonException("500", "创建文件夹失败，" + e.getMessage());
+                        }
+                    }
+                    String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
+                    logger.info(mergeFilePath + "," + pathname + "," + selfPickLabelFilePath);
+                    try {
+                        if (PdfUtil.merge(mergeFilePath, pathname, selfPickLabelFilePath)) {
+                            pathname = mergeFilePath;
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
+                        throw new CommonException("500", "合并箱标文件，标签文件失败");
+                    }
+                }
+
             }
 
         }
