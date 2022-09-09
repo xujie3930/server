@@ -202,11 +202,11 @@ public class ExceptionInfoController extends BaseController {
       //获取第一行数据
         Row row2 =sheet.getRow(0);
 
-        for (int i=0;i<18;i++){
+        for (int i=0;i<19;i++){
             Cell deliveryTimeCell = row2.getCell(i);
 
             CellStyle styleMain = workbook.createCellStyle();
-            if (i==17){
+            if (i==18){
                 styleMain.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
             }else {
                 styleMain.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
@@ -231,7 +231,7 @@ public class ExceptionInfoController extends BaseController {
 
         //获取第二行数据
         Row row3 =sheet.getRow(1);
-        for (int x=17;x<21;x++) {
+        for (int x=18;x<22;x++) {
             Cell deliveryTimeCell1 = row3.getCell(x);
             CellStyle styleMain1 = workbook.createCellStyle();
             styleMain1.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());

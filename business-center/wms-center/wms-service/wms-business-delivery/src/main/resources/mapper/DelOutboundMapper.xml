@@ -219,7 +219,7 @@
 
     <select id="exceptionMessageExportList" resultType="com.szmsd.delivery.vo.DelOutboundListExceptionMessageExportVO">
         SELECT
-            o.id, o.order_no, o.exception_message, o.shipment_rule,
+            o.id, o.order_no, o.exception_message, o.shipment_rule,o.ioss,
             a.consignee, a.street1, a.street2, a.city, a.state_or_province, a.country, a.post_code, a.phone_no, a.email
         FROM del_outbound o
         INNER JOIN del_outbound_address a ON a.order_no = o.order_no
@@ -292,5 +292,9 @@
     <select id="selectQuerySettings" resultType="java.util.Map" parameterType="java.lang.String">
         SELECT shipment_rule as shipmentRule,shipment_days as shipmentDays,track_stay_days as trackStayDays from del_query_settings where shipment_rule=#{shipmentRule} LIMIT 0,1
 
+    </select>
+    <select id="selectTrackingNo" resultType="com.szmsd.delivery.domain.DelOutbound"
+            parameterType="java.lang.String">
+        select order_no,tracking_no,warehouse_code from del_outbound where order_no='CKCNID7322090500000001' AND del_flag='0' LIMIT 0,1
     </select>
 </mapper>

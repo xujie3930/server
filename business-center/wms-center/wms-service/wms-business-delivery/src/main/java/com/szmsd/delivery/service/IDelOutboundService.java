@@ -3,6 +3,7 @@ package com.szmsd.delivery.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundTarckOn;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.wrapper.ShipmentEnum;
@@ -447,5 +448,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     void manualTrackingYee(List<String> list);
 
     void labelSelfPick(HttpServletResponse response, DelOutboundLabelDto dto);
+
+    List<DelOutboundTarckOn> selectDelOutboundTarckList(DelOutboundTarckOn delOutboundTarckOn);
 }
 

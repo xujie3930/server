@@ -35,10 +35,7 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.domain.DelOutboundAddress;
-import com.szmsd.delivery.domain.DelOutboundCharge;
-import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
@@ -48,6 +45,7 @@ import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
+import com.szmsd.delivery.mapper.DelOutboundTarckOnMapper;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundCombinationService;
@@ -74,10 +72,12 @@ import com.szmsd.delivery.vo.DelOutboundThirdPartyVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
+import com.szmsd.http.api.feign.HtpOutboundFeignService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.ShipmentCancelRequestDto;
+import com.szmsd.http.dto.ShipmentTrackingChangeRequestDto;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.ResponseVO;
@@ -176,6 +176,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private IHtpRmiClientService htpRmiClientService;
+
+    @Autowired
+    private DelOutboundTarckOnMapper delOutboundTarckOnMapper;
+
+    @Autowired
+    private HtpOutboundFeignService htpOutboundFeignService;
     /**
      * 查询出库单模块
      *
@@ -1342,7 +1348,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 resultList.add(result);
                 continue;
             }
+            //导入挂号记录表
+            DelOutbound delOutbound=baseMapper.selectTrackingNo(updateTrackingNoDto.getOrderNo());
+            DelOutboundTarckOn delOutboundTarckOn=new DelOutboundTarckOn();
+            delOutboundTarckOn.setOrderNo(delOutbound.getOrderNo());
+            delOutboundTarckOn.setTrackingNo(delOutbound.getTrackingNo());
+            delOutboundTarckOn.setUpdateTime(new Date());
+            delOutboundTarckOn.setTrackingNoNew(updateTrackingNoDto.getTrackingNo());
             int u = super.baseMapper.updateTrackingNo(updateTrackingNoDto);
+            delOutboundTarckOnMapper.insertSelective(delOutboundTarckOn);
+            ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto=new ShipmentTrackingChangeRequestDto();
+            shipmentTrackingChangeRequestDto.setTrackingNo(updateTrackingNoDto.getTrackingNo());
+            shipmentTrackingChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
+            shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+            R<ResponseVO> r= htpOutboundFeignService.shipmentTracking(shipmentTrackingChangeRequestDto);
+
             if (u < 1) {
                 Map<String, Object> result = new HashMap<>();
                 result.put("msg", "第 " + (i + 1) + " 行，出库单号不存在。");
@@ -2050,6 +2070,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
 
 
+    }
+
+    @Override
+    public List<DelOutboundTarckOn> selectDelOutboundTarckList(DelOutboundTarckOn delOutboundTarckOn) {
+
+        return delOutboundTarckOnMapper.selectByPrimaryKey(delOutboundTarckOn);
     }
 
     @Override
