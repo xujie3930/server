@@ -85,6 +85,13 @@ public class ExceptionInfoExportDto {
     @ApiModelProperty(value = "邮箱")
     private String email;
 
+
+
+    @Excel(name="增值税号",width = 30,needMerge = true)
+    @ApiModelProperty(value = "增值税号")
+    private String ioss;
+
+
     @ApiModelProperty(value = "单类类型")
     private String orderType;
 

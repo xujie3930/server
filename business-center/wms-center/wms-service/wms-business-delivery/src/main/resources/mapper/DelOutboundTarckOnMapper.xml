@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.delivery.mapper.DelOutboundTarckOnMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.delivery.domain.DelOutboundTarckOn" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+    <result column="tracking_no" property="trackingNo" jdbcType="VARCHAR" />
+    <result column="tracking_no_new" property="trackingNoNew" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, order_no, tracking_no, tracking_no_new, update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.szmsd.delivery.domain.DelOutboundTarckOn" >
+    select 
+    <include refid="Base_Column_List" />
+    from del_outbound_tarck_on
+    where
+        1=1
+    <if test="oddNumbers != null and oddNumbers !=''" >
+      and
+      (order_no=#{oddNumbers} or tracking_no=#{oddNumbers} or tracking_no_new=#{oddNumbers})
+      </if>
+    <if test="startTime != null and startTime != ''"><!-- 开始时间检索 -->
+      and date_format(update_time,'%y%m%d') &gt;= date_format(#{startTime},'%y%m%d')
+    </if>
+    <if test="endTime != null and endTime != ''"><!-- 结束时间检索 -->
+      and date_format(update_time,'%y%m%d') &lt;= date_format(#{endTime},'%y%m%d')
+    </if>
+
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from del_outbound_tarck_on
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.delivery.domain.DelOutboundTarckOn" >
+    insert into del_outbound_tarck_on (id, order_no, tracking_no, 
+      tracking_no_new, update_time)
+    values (#{id,jdbcType=INTEGER}, #{orderNo,jdbcType=VARCHAR}, #{trackingNo,jdbcType=VARCHAR}, 
+      #{trackingNoNew,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.delivery.domain.DelOutboundTarckOn" >
+    insert into del_outbound_tarck_on
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="orderNo != null" >
+        order_no,
+      </if>
+      <if test="trackingNo != null" >
+        tracking_no,
+      </if>
+      <if test="trackingNoNew != null" >
+        tracking_no_new,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="orderNo != null" >
+        #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="trackingNo != null" >
+        #{trackingNo,jdbcType=VARCHAR},
+      </if>
+      <if test="trackingNoNew != null" >
+        #{trackingNoNew,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.delivery.domain.DelOutboundTarckOn" >
+    update del_outbound_tarck_on
+    <set >
+      <if test="orderNo != null" >
+        order_no = #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="trackingNo != null" >
+        tracking_no = #{trackingNo,jdbcType=VARCHAR},
+      </if>
+      <if test="trackingNoNew != null" >
+        tracking_no_new = #{trackingNoNew,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.delivery.domain.DelOutboundTarckOn" >
+    update del_outbound_tarck_on
+    set order_no = #{orderNo,jdbcType=VARCHAR},
+      tracking_no = #{trackingNo,jdbcType=VARCHAR},
+      tracking_no_new = #{trackingNoNew,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

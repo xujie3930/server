@@ -34,6 +34,7 @@ import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundTarckOn;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
@@ -76,6 +77,7 @@ import com.szmsd.delivery.vo.DelOutboundThirdPartyVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
+import com.szmsd.http.api.feign.HtpOutboundFeignService;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
 import com.szmsd.inventory.domain.vo.QueryFinishListVO;
@@ -156,6 +158,7 @@ public class DelOutboundController extends BaseController {
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
 
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
     @PostMapping("/page")
     @ApiOperation(value = "出库管理 - 分页", position = 100)
@@ -163,6 +166,15 @@ public class DelOutboundController extends BaseController {
     public TableDataInfo<DelOutboundListVO> page(@RequestBody DelOutboundListQueryDto queryDto) {
         startPage(queryDto);
         return getDataTable(this.delOutboundService.selectDelOutboundList(queryDto));
+    }
+
+    //@PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
+    @PostMapping("/pageDelTarck")
+    @ApiOperation(value = "出库挂号更新日志 - 分页", position = 100)
+    @AutoValue
+    public TableDataInfo<DelOutboundTarckOn> pageDelTarck(@RequestBody DelOutboundTarckOn delOutboundTarckOn) {
+        startPage(delOutboundTarckOn);
+        return getDataTable(this.delOutboundService.selectDelOutboundTarckList(delOutboundTarckOn));
     }
 
 
