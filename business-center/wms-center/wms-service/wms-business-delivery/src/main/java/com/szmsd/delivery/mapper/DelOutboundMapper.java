@@ -85,4 +85,6 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     DelOutboundListQueryDto pageLists(@Param("orderNo") String orderNo);
 
     Map  selectQuerySettings(@Param("shipmentRule") String shipmentRule);
+
+    DelOutbound  selectTrackingNo(@Param("orderNo") String orderNo);
 }
