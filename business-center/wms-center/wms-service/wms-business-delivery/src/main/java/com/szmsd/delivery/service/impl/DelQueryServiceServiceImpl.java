@@ -117,9 +117,15 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                     throw new RuntimeException(e);
                 }
                 List<String> queryNoList = DelOutboundServiceImplUtil.splitToArray(queryNo, "[\n,]");
-                where.in(DelQueryService::getOrderNo, queryNoList)
-                        .or().in(DelQueryService::getTraceId, queryNoList)
-                        .or().in(DelQueryService::getRefNo,queryNoList);
+
+                where.and(wrapper ->
+                        wrapper.in(DelQueryService::getOrderNo, queryNoList)
+                                .or().in(DelQueryService::getTraceId, queryNoList)
+                                .or().in(DelQueryService::getRefNo,queryNoList)
+                );
+//                where.in(DelQueryService::getOrderNo, queryNoList)
+//                        .or().in(DelQueryService::getTraceId, queryNoList)
+//                        .or().in(DelQueryService::getRefNo,queryNoList);
             }
 
             if(StringUtils.isNotEmpty(delQueryService.getOrderNo())){
@@ -157,9 +163,6 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
 
 
-            if(StringUtils.isNotEmpty(delQueryService.getSellerCode())){
-                where.eq(DelQueryService::getSellerCode, delQueryService.getSellerCode());
-            }
             if(StringUtils.isNotEmpty(delQueryService.getServiceStaff())){
                 where.like(DelQueryService::getServiceStaff, delQueryService.getServiceStaff());
             }
