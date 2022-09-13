@@ -1091,7 +1091,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
 
             }
-            logger.info("更新出库单{}标签,文件{},箱标{},自提标签{}",delOutbound.getOrderNo(), filePath, selfPickLabelFilePath, uploadBoxLabel);
+            logger.info("更新出库单{}标签,文件{},自提标签{},箱标{}",delOutbound.getOrderNo(), filePath, selfPickLabelFilePath, uploadBoxLabel);
             if(selfPickLabelFilePath != null || uploadBoxLabel != null){
                 String mergeFileDirPath = DelOutboundServiceImplUtil.getLabelMergeFilePath(delOutbound);
                 File mergeFileDir = new File(mergeFileDirPath);
