@@ -294,4 +294,23 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
 
     }
 
+
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, readOnly = false)
+    @Override
+    public R deleteBasMeteringConfig(List<Integer> ids) {
+        try {
+           ids.forEach(x->{
+               basMeteringConfigMapper.deleteByPrimaryKey(x);
+               basMeteringConfigDataMapper.deleteByPrimaryKey(x);
+           });
+
+            return R.ok("删除失败");
+        }catch (Exception e){
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return R.failed("删除失败");
+        }
+
+    }
+
 }
