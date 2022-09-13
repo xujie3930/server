@@ -1096,12 +1096,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.BRV_SHIPMENT_LABEL.listener(delOutbound);
+
             // 查询上传文件信息
             RemoteAttachmentService remoteAttachmentService = SpringUtils.getBean(RemoteAttachmentService.class);
             BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
             basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
             basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
             R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+            logger.info("更新出库单{}标签,文件数量{}",delOutbound.getOrderNo(), listR.getData());
 
             String filePath = null;
             if (listR != null && listR.getData() != null && CollectionUtils.isNotEmpty(listR.getData())) {
