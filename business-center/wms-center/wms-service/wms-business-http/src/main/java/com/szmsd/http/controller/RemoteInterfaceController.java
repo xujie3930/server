@@ -12,6 +12,7 @@ import com.szmsd.http.dto.TpieceDto;
 import com.szmsd.http.dto.TpieceVO;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.service.IRemoteExecutorTask;
+import com.szmsd.http.service.IRetreatPieceService;
 import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.vo.HttpResponseVO;
 import io.swagger.annotations.Api;
@@ -42,6 +43,9 @@ public class RemoteInterfaceController extends BaseController {
     private RemoteInterfaceService remoteInterfaceService;
     @Resource
     private IRemoteExecutorTask iRemoteExecutorTask;
+
+    @Autowired
+    private IRetreatPieceService iRetreatPieceService;
 
     @PostMapping
     @ApiOperation(value = "HTTP调用接口 - #1", position = 100)
@@ -91,6 +95,7 @@ public class RemoteInterfaceController extends BaseController {
 
         Map map5 = JSONObject.parseObject(value.toString(), Map.class);
         map.put("map5",map5);
+       int a= iRetreatPieceService.insetRetreatPiece(map5);
         map.put("boby2",httpResponseVO.getBody());
         return R.ok(map);
     }
