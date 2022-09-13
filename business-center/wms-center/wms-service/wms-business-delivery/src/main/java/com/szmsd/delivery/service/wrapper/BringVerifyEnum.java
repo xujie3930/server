@@ -1057,23 +1057,22 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
             basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
             R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
-            if (null == listR || null == listR.getData()) {
-                return;
-            }
-            List<BasAttachment> attachmentList = listR.getData();
-            if (CollectionUtils.isEmpty(attachmentList)) {
-                return;
-            }
-            BasAttachment attachment = attachmentList.get(0);
-            String filePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
 
-            File labelFile = new File(filePath);
-            if (!labelFile.exists()) {
-                throw new CommonException("500", "出库单文件不存在");
-            }
+            String filePath = null;
+            if (listR != null && listR.getData() != null) {
+                List<BasAttachment> attachmentList = listR.getData();
+                if (CollectionUtils.isEmpty(attachmentList)) {
+                    return;
+                }
+                BasAttachment attachment = attachmentList.get(0);
+                filePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
 
+                File labelFile = new File(filePath);
+                if (!labelFile.exists()) {
+                    throw new CommonException("500", "出库单文件不存在");
+                }
+            }
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
-
             String selfPickLabelFilePath = null;
             if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
                 DelOutboundLabelDto dto = new DelOutboundLabelDto();
@@ -1092,9 +1091,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             }
             logger.info("更新出库单{}标签,文件{},自提标签{},箱标{}",delOutbound.getOrderNo(), filePath, selfPickLabelFilePath, uploadBoxLabel);
-            if(selfPickLabelFilePath != null || uploadBoxLabel != null){
+            if(selfPickLabelFilePath != null || uploadBoxLabel != null || filePath != null){
                 String mergeFileDirPath = DelOutboundServiceImplUtil.getLabelMergeFilePath(delOutbound);
                 File mergeFileDir = new File(mergeFileDirPath);
+
+                File labelFile = null;
                 if (!mergeFileDir.exists()) {
                     try {
                         FileUtils.forceMkdir(mergeFileDir);
@@ -1113,29 +1114,36 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     logger.error(e.getMessage(), e);
                     throw new CommonException("500", "出库单合并文件失败");
                 }
+
+                if(labelFile == null){
+                    return;
+                }
+
+                try {
+                    byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
+                    String encode = Base64.encode(byteArray);
+                    ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
+                    shipmentLabelChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                    shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
+                    shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+                    shipmentLabelChangeRequestDto.setLabel(encode);
+                    IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+                    ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
+                    if (null == responseVO || null == responseVO.getSuccess()) {
+                        throw new CommonException("500", "更新标签失败");
+                    }
+                    if (!responseVO.getSuccess()) {
+                        throw new CommonException("500", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
+                    }
+                } catch (IOException e) {
+                    logger.error("读取标签文件失败, {}", e.getMessage(), e);
+                    throw new CommonException("500", "读取标签文件失败");
+                }
+
             }
 
 
-            try {
-                byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
-                String encode = Base64.encode(byteArray);
-                ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
-                shipmentLabelChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
-                shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
-                shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
-                shipmentLabelChangeRequestDto.setLabel(encode);
-                IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
-                ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
-                if (null == responseVO || null == responseVO.getSuccess()) {
-                    throw new CommonException("500", "更新标签失败");
-                }
-                if (!responseVO.getSuccess()) {
-                    throw new CommonException("500", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
-                }
-            } catch (IOException e) {
-                logger.error("读取标签文件失败, {}", e.getMessage(), e);
-                throw new CommonException("500", "读取标签文件失败");
-            }
+
         }
 
         @Override
