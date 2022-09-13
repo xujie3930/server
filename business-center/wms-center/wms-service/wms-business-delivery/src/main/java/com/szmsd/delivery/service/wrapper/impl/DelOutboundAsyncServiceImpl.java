@@ -639,6 +639,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
 
     @Override
     public void cancelled(String orderNo) {
+        //蒋俊看财务解冻问题
         // 处理阶段
         // 1.取消冻结库存                                 UN_FREEZE
         // 2.1取消冻结费用                                UN_FEE

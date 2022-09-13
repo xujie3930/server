@@ -41,6 +41,10 @@ public class DelQueryServiceImport {
     @Excel(name = "查件原因", type = Type.ALL)
     private String reason;
 
+    @ApiModelProperty(value = "操作类型(0表示管理端,1表示客户端)")
+    @TableField(exist = false)
+    private int operationType=0;
+
 
 
 }

@@ -27,7 +27,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value="查件服务", description="DelQueryService对象")
-public class DelQueryServiceDto extends BaseEntity {
+public class DelQueryServiceDto extends BaseEntity{
 
     private static final long serialVersionUID = 1L;
 
@@ -147,6 +147,17 @@ public class DelQueryServiceDto extends BaseEntity {
     @ApiModelProperty(value = "客户端的code")
     @TableField(exist = false)
    private String currencyCode;
+
+    @ApiModelProperty(value = "分页数")
+    @TableField(exist = false)
+    private int pageNum = 1;
+
+    @ApiModelProperty(value = "每页大小")
+    @TableField(exist = false)
+    private int pageSize = 10;
+
+
+
 
 
 

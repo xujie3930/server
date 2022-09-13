@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service;
 
+import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.domain.DelQueryService;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -35,6 +36,9 @@ public interface IDelQueryServiceService extends IService<DelQueryService> {
         */
         List<DelQueryService> selectDelQueryServiceList(DelQueryServiceDto delQueryService);
 
+        R<PageInfo<DelQueryService>> selectDelQueryServiceListrs(DelQueryServiceDto delQueryService);
+
+
         /**
         * 新增查件服务模块
         *
@@ -67,7 +71,7 @@ public interface IDelQueryServiceService extends IService<DelQueryService> {
         */
         int deleteDelQueryServiceById(String id);
 
-        DelQueryServiceDto getOrderInfo(String orderNo);
+        DelQueryServiceDto getOrderInfo(String orderNo,Integer operationType);
 
         R importData(List<DelQueryServiceImport> list);
 }
