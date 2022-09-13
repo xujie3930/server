@@ -25,4 +25,6 @@ public interface ExceptionInfoMapper extends BaseMapper<ExceptionInfo> {
     List<ExceptionInfoDetailExportDto>  selectExceptionInfoDetailExport(@Param("orderNo") String orderNo);
 
     void updateDelOutboundDetail(ExceptionInfoDetailExportDto x);
+
+    void updateDelOutboundEx(ExceptionInfoExportDto dto);
 }
