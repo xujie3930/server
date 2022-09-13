@@ -45,7 +45,8 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
     @Transactional
     @Override
-    public Boolean updateBalance(CustPayDTO dto) {
+    public Boolean
+    updateBalance(CustPayDTO dto) {
         log.info(LogUtil.format(dto, "冻结/解冻"));
         String key = "cky-fss-freeze-balance-all:" + dto.getCusId();
         RLock lock = redissonClient.getLock(key);
@@ -54,6 +55,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 log.info("【updateBalance】 1");
                 BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 log.info("【updateBalance】 2");
+                //蒋俊看财务
                 Boolean checkFlag = checkAndSetBalance(balance, dto);
                 log.info("【updateBalance】 3");
                 if (checkFlag == null) return null;
@@ -155,6 +157,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         }
         return null;
     }
+
 
     private List<AccountBalanceChange> getRecordList(CustPayDTO dto) {
         log.info("getRecordList：{}", JSONObject.toJSONString(dto));

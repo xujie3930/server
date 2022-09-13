@@ -127,6 +127,10 @@ public class DelQueryService extends BaseEntity {
     @TableField(exist = false)
     private String feedReason;
 
+    @ApiModelProperty(value = "操作类型(0表示管理端,1表示客户端)")
+    @TableField(exist = false)
+    private int operationType=0;
+
 
 //    @ApiModelProperty(value = "查件标识(0是红色,1是绿色)")
 //    //@TableField(exist = false)
