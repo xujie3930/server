@@ -304,7 +304,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                basMeteringConfigDataMapper.deleteByPrimaryKey(x);
            });
 
-            return R.ok("删除失败");
+            return R.ok("删除成功");
         }catch (Exception e){
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
