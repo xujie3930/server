@@ -372,6 +372,11 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
 
     }
 
+    @Override
+    public void updateDelOutboundIoss(ExceptionInfoExportDto dto) {
+        baseMapper.updateDelOutboundEx(dto);
+    }
+
     private Date dealUTZTime(String time) {
         Date date = new Date();
         try {

@@ -65,6 +65,22 @@
 
         </where>
     </update>
+    <update id="updateDelOutboundEx" parameterType="com.szmsd.exception.dto.ExceptionInfoExportDto">
+        UPDATE del_outbound
+        <set>
+            <if test="ioss != null" >
+                ioss=#{ioss}
+            </if>
+        </set>
+
+        <where>
+            1=1
+            <if test="orderNo !=null and orderNo!=''">
+                and   order_no=#{orderNo}
+            </if>
+
+        </where>
+    </update>
 
     <select id="exportList" resultType="com.szmsd.exception.dto.ExceptionInfoExportDto">
         select exception_no, state, exception_type_name, order_type_name, remark, order_no,order_type from exception_info
