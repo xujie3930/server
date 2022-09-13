@@ -39,7 +39,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
 
     //做查件的接口，因为和出库详情有冲突
-    DelOutboundVO selectDelOutboundByOrderNous(String orderNo);
+    DelOutboundVO selectDelOutboundByOrderNous(String orderNo,int operationType);
 
 
     DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo);
