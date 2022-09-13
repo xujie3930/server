@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.http.mapper.BasRetreatPieceMapper">
+  <resultMap id="BaseResultMap" type="com.szmsd.http.domain.BasRetreatPiece">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="partner_code" jdbcType="VARCHAR" property="partnerCode" />
+    <result column="reception_wms_id" jdbcType="INTEGER" property="receptionWmsId" />
+    <result column="date_finished" jdbcType="TIMESTAMP" property="dateFinished" />
+    <result column="reception_service" jdbcType="VARCHAR" property="receptionService" />
+    <result column="code_key" jdbcType="VARCHAR" property="codeKey" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="um" jdbcType="VARCHAR" property="um" />
+    <result column="qty_received" jdbcType="INTEGER" property="qtyReceived" />
+    <result column="sn" jdbcType="VARCHAR" property="sn" />
+    <result column="ua" jdbcType="VARCHAR" property="ua" />
+    <result column="state" jdbcType="INTEGER" property="state" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, partner_code, reception_wms_id, date_finished, reception_service, code_key, code, 
+    um, qty_received, sn, ua, state
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from bas_retreat_piece
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from bas_retreat_piece
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.http.domain.BasRetreatPiece">
+    insert into bas_retreat_piece (id, partner_code, reception_wms_id,
+                                   date_finished, reception_service, code_key,
+                                   code, um, qty_received,
+                                   sn, ua, state)
+    values (#{id,jdbcType=INTEGER}, #{partnerCode,jdbcType=VARCHAR}, #{receptionWmsId,jdbcType=INTEGER},
+            #{dateFinished,jdbcType=TIMESTAMP}, #{receptionService,jdbcType=VARCHAR}, #{codeKey,jdbcType=VARCHAR},
+            #{code,jdbcType=VARCHAR}, #{um,jdbcType=VARCHAR}, #{qtyReceived,jdbcType=INTEGER},
+            #{sn,jdbcType=VARCHAR}, #{ua,jdbcType=VARCHAR}, #{state,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="java.util.Map">
+    insert into bas_retreat_piece
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="map.id != null">
+        id,
+      </if>
+      <if test="map.partner_code != null">
+        partner_code,
+      </if>
+      <if test="map.reception_wms_id != null">
+        reception_wms_id,
+      </if>
+      <if test="map.date_finished != null">
+        date_finished,
+      </if>
+      <if test="map.reception_service != null">
+        reception_service,
+      </if>
+      <if test="map.code_key != null">
+        code_key,
+      </if>
+      <if test="map.code  != null">
+        code,
+      </if>
+      <if test="map.um != null">
+        um,
+      </if>
+      <if test="map.qty_received != null">
+        qty_received,
+      </if>
+      <if test="map.sn != null">
+        sn,
+      </if>
+      <if test="map.ua != null">
+        ua,
+      </if>
+      <if test="map.state  != null">
+        state,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="map.id != null">
+        #{map.id,jdbcType=INTEGER},
+      </if>
+      <if test="map.partner_code != null">
+        #{map.partner_code,jdbcType=VARCHAR},
+      </if>
+      <if test="map.reception_wms_id != null">
+        #{map.reception_wms_id ,jdbcType=INTEGER},
+      </if>
+      <if test="map.date_finished != null">
+        #{map.date_finished,jdbcType=TIMESTAMP},
+      </if>
+      <if test="map.reception_service != null">
+        #{map.reception_service,jdbcType=VARCHAR},
+      </if>
+      <if test="map.code_key != null">
+        #{map.code_key,jdbcType=VARCHAR},
+      </if>
+      <if test="map.code != null">
+        #{map.code ,jdbcType=VARCHAR},
+      </if>
+      <if test="map.um != null">
+        #{map.um,jdbcType=VARCHAR},
+      </if>
+      <if test="map.qty_received != null">
+        #{map.qty_received,jdbcType=INTEGER},
+      </if>
+      <if test="map.sn != null">
+        #{map.sn,jdbcType=VARCHAR},
+      </if>
+      <if test="map.ua != null">
+        #{map.ua,jdbcType=VARCHAR},
+      </if>
+      <if test="map.state != null">
+        #{map.state,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.http.domain.BasRetreatPiece">
+    update bas_retreat_piece
+    <set>
+      <if test="partnerCode != null">
+        partner_code = #{partnerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="receptionWmsId != null">
+        reception_wms_id = #{receptionWmsId,jdbcType=INTEGER},
+      </if>
+      <if test="dateFinished != null">
+        date_finished = #{dateFinished,jdbcType=TIMESTAMP},
+      </if>
+      <if test="receptionService != null">
+        reception_service = #{receptionService,jdbcType=VARCHAR},
+      </if>
+      <if test="codeKey != null">
+        code_key = #{codeKey,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null">
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="um != null">
+        um = #{um,jdbcType=VARCHAR},
+      </if>
+      <if test="qtyReceived != null">
+        qty_received = #{qtyReceived,jdbcType=INTEGER},
+      </if>
+      <if test="sn != null">
+        sn = #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="ua != null">
+        ua = #{ua,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.http.domain.BasRetreatPiece">
+    update bas_retreat_piece
+    set partner_code = #{partnerCode,jdbcType=VARCHAR},
+        reception_wms_id = #{receptionWmsId,jdbcType=INTEGER},
+        date_finished = #{dateFinished,jdbcType=TIMESTAMP},
+        reception_service = #{receptionService,jdbcType=VARCHAR},
+        code_key = #{codeKey,jdbcType=VARCHAR},
+        code = #{code,jdbcType=VARCHAR},
+        um = #{um,jdbcType=VARCHAR},
+        qty_received = #{qtyReceived,jdbcType=INTEGER},
+        sn = #{sn,jdbcType=VARCHAR},
+        ua = #{ua,jdbcType=VARCHAR},
+        state = #{state,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+</mapper>
