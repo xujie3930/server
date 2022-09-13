@@ -61,4 +61,12 @@ public class BasMeteringConfigController extends BaseController {
     }
 
 
+    @PostMapping ("/deleteBasMeteringConfig")
+    @ApiOperation(value = "计泡删除接口", notes = "计泡删除接口")
+    public R deleteBasMeteringConfig(@RequestBody List<Integer> ids) {
+        R r= iBasMeteringConfigService.deleteBasMeteringConfig(ids);
+        return r;
+    }
+
+
 }
