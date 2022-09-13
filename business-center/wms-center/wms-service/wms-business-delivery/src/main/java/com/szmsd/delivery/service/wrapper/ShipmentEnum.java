@@ -180,6 +180,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setHeight(delOutbound.getHeight());
             updateDelOutbound.setSupplierCalcType(delOutbound.getSupplierCalcType());
             updateDelOutbound.setSupplierCalcId(delOutbound.getSupplierCalcId());
+
+            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+
             // 规格，长*宽*高
             updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
             updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
@@ -627,6 +630,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
                     delOutbound.setSupplierCalcType(data.getSupplierCalcType());
                     delOutbound.setSupplierCalcId(data.getSupplierCalcId());
+
+                    delOutbound.setShipmentService(data.getLogisticsRouteId());
+
                     // 费用信息
                     Weight calcWeight = packageInfo.getCalcWeight();
                     delOutbound.setCalcWeight(calcWeight.getValue());
@@ -913,6 +919,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
+            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+
             delOutboundService.shipmentSuccess(updateDelOutbound);
             // 提交一个获取标签的任务
             IDelOutboundRetryLabelService delOutboundRetryLabelService = SpringUtils.getBean(IDelOutboundRetryLabelService.class);
