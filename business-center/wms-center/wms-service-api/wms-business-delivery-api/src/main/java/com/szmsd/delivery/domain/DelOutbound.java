@@ -318,4 +318,8 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "houseNo")
     private String houseNo;
+
+
+    @ApiModelProperty(value = "计泡重量")
+    private Double forecastWeight;
 }

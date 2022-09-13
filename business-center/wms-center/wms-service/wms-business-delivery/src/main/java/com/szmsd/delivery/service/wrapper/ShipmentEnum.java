@@ -641,7 +641,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                             .setLogisticsErvicesCode(chargeWrapper.getData().getProductCode())
                             .setLogisticsErvicesName(chargeWrapper.getData().getProductName())
                             .setCustomerCode(delOutbound.getSellerCode())
-                            .setWeight(packageInfo.getWeight().getValue())
+                            .setWeight(delOutbound.getForecastWeight() != null ? new BigDecimal(delOutbound.getForecastWeight()) : BigDecimal.ZERO)
                             .setCalcWeight(packageInfo.getCalcWeight().getValue())
                             .setVolume(packageInfo.getVolumeWeight().getValue());
 

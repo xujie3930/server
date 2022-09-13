@@ -766,6 +766,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 计算包裹大小
             this.countPackageSize(delOutbound, dto);
             logger.info(">>>>>[创建出库单{}]3.3 计算包裹大小，{}", delOutbound.getOrderNo(), timer.intervalRestart());
+
+            //同步更新计泡拦截重量
+            delOutbound.setForecastWeight(delOutbound.getWeight());
+            
             // 保存出库单
             int insert = baseMapper.insert(delOutbound);
             logger.info(">>>>>[创建出库单{}]3.4 保存出库单，{}", delOutbound.getOrderNo(), timer.intervalRestart());
@@ -1252,6 +1256,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 }
             }
+            //同步更新计泡拦截重量
+            inputDelOutbound.setForecastWeight(inputDelOutbound.getWeight());
 
             // 更新
             int i = baseMapper.updateById(inputDelOutbound);
