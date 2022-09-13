@@ -2,7 +2,6 @@ package com.szmsd.delivery.service.wrapper.impl;
 
 import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
@@ -1187,7 +1186,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
                 File mergeFile = new File(mergeFilePath);
-                logger.info(mergeFilePath + "," + pathname + "," + uploadBoxLabel);
+                logger.info(mergeFilePath + "," + pathname + "," + uploadBoxLabel + ","+selfPickLabelFilePath);
                 try {
                     if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel, selfPickLabelFilePath)) {
                         pathname = mergeFilePath;
@@ -1197,6 +1196,32 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     logger.error(e.getMessage(), e);
                     throw new CommonException("500", "合并箱标文件，标签文件失败");
                 }
+            }else{
+
+                if(selfPickLabelFilePath != null){
+                    String mergeFileDirPath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
+                    File mergeFileDir = new File(mergeFileDirPath);
+                    if (!mergeFileDir.exists()) {
+                        try {
+                            FileUtils.forceMkdir(mergeFileDir);
+                        } catch (IOException e) {
+                            logger.error(e.getMessage(), e);
+                            throw new CommonException("500", "创建文件夹失败，" + e.getMessage());
+                        }
+                    }
+                    String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
+                    logger.info(mergeFilePath + "," + pathname + "," + selfPickLabelFilePath);
+                    try {
+                        if (PdfUtil.merge(mergeFilePath, pathname, selfPickLabelFilePath)) {
+                            pathname = mergeFilePath;
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
+                        throw new CommonException("500", "合并箱标文件，标签文件失败");
+                    }
+                }
+
             }
 
         }
@@ -1225,7 +1250,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         }
     }
 
-    private String getBoxLabel(DelOutbound delOutbound){
+    @Override
+    public String getBoxLabel(DelOutbound delOutbound){
         BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
         basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.ONE_PIECE_ISSUED_ON_BEHALF.getBusinessCode());
         basAttachmentQueryDTO.setRemark(delOutbound.getOrderNo());

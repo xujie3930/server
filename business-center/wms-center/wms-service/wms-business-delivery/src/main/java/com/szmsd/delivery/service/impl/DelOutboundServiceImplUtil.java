@@ -135,6 +135,12 @@ public final class DelOutboundServiceImplUtil {
         return basedir + "/shipment/merge/" + labelBizPath;
     }
 
+    public static String getLabelMergeFilePath(DelOutbound delOutbound) {
+        String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery/tmp");
+        String labelBizPath = DelOutboundServiceImplUtil.getLabelBizPath(delOutbound);
+        return basedir + "/shipment/merge/label/" + labelBizPath;
+    }
+
     /**
      * 不需要操作库存
      *
