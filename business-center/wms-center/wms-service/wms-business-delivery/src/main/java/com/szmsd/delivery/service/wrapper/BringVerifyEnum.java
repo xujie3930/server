@@ -462,32 +462,60 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             StopWatch stopWatch = new StopWatch();
 
+
+
+
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            logger.info("{}-冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
+            logger.info("{}-开始冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             DelOutboundOperationLogEnum.BRV_FREEZE_BALANCE.listener(delOutbound);
-            CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
-            cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
-            cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
-            cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
-            cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
-            cusFreezeBalanceDTO.setOrderType("Freight");
-            // 调用冻结费用接口
+
+            /**
+            *  获取要冻结的费用数据，并按货币分组冻结
+            */
+            IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
-            stopWatch.start();
-            R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
-            stopWatch.stop();
-            logger.info(">>>>>[创建出库单{}]冻结费用 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
-            if (null != freezeBalanceR) {
-                if (Constants.SUCCESS != freezeBalanceR.getCode()) {
-                    // 异常信息
-                    String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "冻结费用信息失败2");
-                    throw new CommonException("400", msg);
-                }
-            } else {
-                // 异常信息
-                throw new CommonException("400", "冻结费用信息失败");
+            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+            if(delOutboundChargeList.isEmpty()){
+                throw new CommonException("400", "冻结费用信息失败，没有要冻结的费用明细");
             }
+            Map<String, List<DelOutboundCharge>> groupByCharge =
+                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+            for (String currencyCode: groupByCharge.keySet()){
+                BigDecimal bigDecimal = new BigDecimal(0);
+                for (DelOutboundCharge c:groupByCharge.get(currencyCode)) {
+                    if(c.getAmount() != null){
+                        bigDecimal = bigDecimal.add(c.getAmount());
+                    }
+                }
+                // 调用冻结费用接口
+                CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                cusFreezeBalanceDTO.setAmount(bigDecimal);
+                cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                cusFreezeBalanceDTO.setOrderType("Freight");
+
+                stopWatch.start();
+                R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]冻结费用, 数据:{} ,耗时{}",
+                        delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO), stopWatch.getLastTaskInfo().getTimeMillis());
+                if (null != freezeBalanceR) {
+                    if (Constants.SUCCESS != freezeBalanceR.getCode()) {
+                        // 异常信息
+                        String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "冻结费用信息失败2");
+                        throw new CommonException("400", msg);
+                    }
+                } else {
+                    // 异常信息
+                    throw new CommonException("400", "冻结费用信息失败");
+                }
+
+            }
+
+
+
         }
 
         @Override
@@ -495,20 +523,37 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.RK_BRV_FREEZE_BALANCE.listener(delOutbound);
-            CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
-            cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
-            cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
-            cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
-            cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
-            cusFreezeBalanceDTO.setOrderType("Freight");
+
+
+            IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
-            R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
-            if (null == thawBalanceR) {
-                throw new CommonException("400", "取消冻结费用失败");
+            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+            Map<String, List<DelOutboundCharge>> groupByCharge =
+                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+            for (String currencyCode: groupByCharge.keySet()) {
+                BigDecimal bigDecimal = new BigDecimal(0);
+                for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                    if (c.getAmount() != null) {
+                        bigDecimal = bigDecimal.add(c.getAmount());
+                    }
+                }
+                CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                cusFreezeBalanceDTO.setAmount(bigDecimal);
+                cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                cusFreezeBalanceDTO.setOrderType("Freight");
+                R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                logger.info(">>>>>[创建出库单{}]取消冻结费用, 数据:{}",
+                        delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO));
+                if (null == thawBalanceR) {
+                    throw new CommonException("400", "取消冻结费用失败");
+                }
+                if (Constants.SUCCESS != thawBalanceR.getCode()) {
+                    throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
+                }
             }
-            if (Constants.SUCCESS != thawBalanceR.getCode()) {
-                throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
-            }
+
             super.rollback(context);
         }
 
@@ -1059,12 +1104,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
 
             String filePath = null;
-            if (listR != null && listR.getData() != null) {
-                List<BasAttachment> attachmentList = listR.getData();
-                if (CollectionUtils.isEmpty(attachmentList)) {
-                    return;
-                }
-                BasAttachment attachment = attachmentList.get(0);
+            if (listR != null && listR.getData() != null && CollectionUtils.isNotEmpty(listR.getData())) {
+                BasAttachment attachment = listR.getData().get(0);
                 filePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
 
                 File labelFile = new File(filePath);

@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.wrapper;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.feign.BasMeteringConfigFeignService;
 import com.szmsd.bas.dto.BasMeteringConfigDto;
 import com.szmsd.common.core.constant.Constants;
@@ -32,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 出库发货步骤
@@ -531,29 +533,48 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.SMT_THAW_BALANCE.listener(delOutbound);
-            // 取消冻结费用
-            CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
-            cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
-            cusFreezeBalanceDTO.setCurrencyCode(delOutbound.getCurrencyCode());
-            cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
-            cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
-            cusFreezeBalanceDTO.setOrderType("Freight");
-            // 调用冻结费用接口
-            RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
-            R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
-            if (null == thawBalanceR) {
-                throw new CommonException("400", "取消冻结费用失败");
-            }
-            if (Constants.SUCCESS != thawBalanceR.getCode()) {
-                // 异常信息
-                String msg = thawBalanceR.getMsg();
-                if (StringUtils.isEmpty(msg)) {
-                    msg = "取消冻结费用失败";
-                }
-                throw new CommonException("400", msg);
-            }
-            // 清除费用信息
+
+
+
             IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
+            RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
+            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+            Map<String, List<DelOutboundCharge>> groupByCharge =
+                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+            for (String currencyCode: groupByCharge.keySet()) {
+                BigDecimal bigDecimal = new BigDecimal(0);
+                for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                    if (c.getAmount() != null) {
+                        bigDecimal = bigDecimal.add(c.getAmount());
+                    }
+                }
+
+                // 取消冻结费用
+                CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                cusFreezeBalanceDTO.setAmount(bigDecimal);
+                cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                cusFreezeBalanceDTO.setOrderType("Freight");
+                // 调用冻结费用接口
+                R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                if (null == thawBalanceR) {
+                    throw new CommonException("400", "取消冻结费用失败");
+                }
+                if (Constants.SUCCESS != thawBalanceR.getCode()) {
+                    // 异常信息
+                    String msg = thawBalanceR.getMsg();
+                    if (StringUtils.isEmpty(msg)) {
+                        msg = "取消冻结费用失败";
+                    }
+                    throw new CommonException("400", msg);
+                }
+
+            }
+
+
+
+            // 清除费用信息
             delOutboundChargeService.clearCharges(delOutbound.getOrderNo());
         }
 
@@ -706,25 +727,54 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.SMT_FREEZE_BALANCE.listener(delOutbound);
-            // 冻结费用
-            CusFreezeBalanceDTO cusFreezeBalanceDTO2 = new CusFreezeBalanceDTO();
-            cusFreezeBalanceDTO2.setAmount(delOutbound.getAmount());
-            cusFreezeBalanceDTO2.setCurrencyCode(delOutbound.getCurrencyCode());
-            cusFreezeBalanceDTO2.setCusCode(delOutbound.getSellerCode());
-            cusFreezeBalanceDTO2.setNo(delOutbound.getOrderNo());
-            cusFreezeBalanceDTO2.setOrderType("Freight");
+
+
+
+            /**
+             *  获取要冻结的费用数据，并按货币分组冻结
+             */
+            IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
-            R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO2);
-            if (null != freezeBalanceR) {
-                if (Constants.SUCCESS != freezeBalanceR.getCode()) {
-                    // 异常信息
-                    String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "");
-                    throw new CommonException("400", "冻结费用失败，" + msg);
-                }
-            } else {
-                // 异常信息
-                throw new CommonException("400", "冻结费用失败，请求无响应");
+            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+            if(delOutboundChargeList.isEmpty()){
+                throw new CommonException("400", "冻结费用信息失败，没有要冻结的费用明细");
             }
+            Map<String, List<DelOutboundCharge>> groupByCharge =
+                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+            for (String currencyCode: groupByCharge.keySet()) {
+                BigDecimal bigDecimal = new BigDecimal(0);
+                for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                    if (c.getAmount() != null) {
+                        bigDecimal = bigDecimal.add(c.getAmount());
+                    }
+                }
+                // 冻结费用
+                CusFreezeBalanceDTO cusFreezeBalanceDTO2 = new CusFreezeBalanceDTO();
+                cusFreezeBalanceDTO2.setAmount(bigDecimal);
+                cusFreezeBalanceDTO2.setCurrencyCode(currencyCode);
+                cusFreezeBalanceDTO2.setCusCode(delOutbound.getSellerCode());
+                cusFreezeBalanceDTO2.setNo(delOutbound.getOrderNo());
+                cusFreezeBalanceDTO2.setOrderType("Freight");
+                R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO2);
+
+                logger.info(">>>>>[发货后出库单{}]冻结费用, 数据:{}",
+                        delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO2));
+
+
+                if (null != freezeBalanceR) {
+                    if (Constants.SUCCESS != freezeBalanceR.getCode()) {
+                        // 异常信息
+                        String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "");
+                        throw new CommonException("400", "冻结费用失败，" + msg);
+                    }
+                } else {
+                    // 异常信息
+                    throw new CommonException("400", "冻结费用失败，请求无响应");
+                }
+
+            }
+
+
         }
 
         @Override
