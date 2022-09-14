@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.szmsd.bas.api.factory.BasFeignServiceFallbackFactory;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
@@ -8,6 +9,8 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCompleted;
 import com.szmsd.delivery.domain.DelOutboundThirdParty;
 import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
+import com.szmsd.delivery.enums.DelOutboundConstant;
+import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.mapper.DelOutboundThirdPartyMapper;
@@ -45,6 +48,22 @@ public class DelOutboundThirdPartyServiceImpl extends ServiceImpl<DelOutboundThi
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
     @Autowired
     private IDelOutboundService delOutboundService;
+
+    @Override
+    public List<DelOutboundThirdParty> selectDelOutboundThirdPartyList(DelOutboundThirdParty delOutboundThirdParty) {
+
+        LambdaQueryWrapper<DelOutboundThirdParty> where = new LambdaQueryWrapper<DelOutboundThirdParty>();
+        where.eq(DelOutboundThirdParty::getOperationType, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_WMS);
+        if(StringUtils.isNotEmpty(delOutboundThirdParty.getOrderNo())){
+            where.eq(DelOutboundThirdParty::getOrderNo, delOutboundThirdParty.getOrderNo());
+        }
+        if(StringUtils.isNotEmpty(delOutboundThirdParty.getState())){
+            where.eq(DelOutboundThirdParty::getState, delOutboundThirdParty.getState());
+        }
+        where.orderByDesc(DelOutboundThirdParty::getCreateTime);
+        return baseMapper.selectList(where);
+    }
+
     @Override
     public void thirdParty(String orderNo, String amazonLogisticsRouteId) {
 
