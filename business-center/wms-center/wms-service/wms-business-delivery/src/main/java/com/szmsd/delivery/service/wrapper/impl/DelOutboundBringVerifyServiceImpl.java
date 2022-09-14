@@ -739,7 +739,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
             return shipmentOrderResult;
         } else {
-            String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
+            String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError(), true), "创建承运商物流订单失败，调用承运商系统失败");
             try {
                 TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
                 transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
@@ -887,7 +887,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             throw new CommonException("400", "创建亚马逊承运商物流订单失败，调用承运商系统无响应");
         }
         if (!responseObjectWrapper.isSuccess()) {
-            String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError()), "创建承运商物流订单失败，调用承运商系统失败");
+            String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError(), true), "创建承运商物流订单失败，调用承运商系统失败");
             if("[408]请求超时".equals(exceptionMessage)){
                 throw new CommonException("408", exceptionMessage);
             }

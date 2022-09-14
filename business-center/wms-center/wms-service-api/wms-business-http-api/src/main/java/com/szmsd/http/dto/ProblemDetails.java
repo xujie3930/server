@@ -37,6 +37,21 @@ public class ProblemDetails implements Serializable {
         return null;
     }
 
+
+    public static String getErrorMessageOrNull(ProblemDetails problemDetails, boolean removeEscape) {
+        if (null != problemDetails) {
+            String str = problemDetails.getErrorMessage();
+
+            if(str != null && removeEscape){
+
+                str = str.replaceAll("\\\\","").replaceAll("\\{","").replaceAll("\\}","").replaceAll("\"","");
+
+            }
+            return str;
+        }
+        return null;
+    }
+
     /**
      * 获取message
      *
