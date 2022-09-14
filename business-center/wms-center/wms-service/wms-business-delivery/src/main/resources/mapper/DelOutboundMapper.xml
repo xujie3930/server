@@ -295,6 +295,6 @@
     </select>
     <select id="selectTrackingNo" resultType="com.szmsd.delivery.domain.DelOutbound"
             parameterType="java.lang.String">
-        select order_no,tracking_no,warehouse_code from del_outbound where order_no='CKCNID7322090500000001' AND del_flag='0' LIMIT 0,1
+        select order_no,tracking_no,warehouse_code from del_outbound where order_no=#{orderNo} AND del_flag='0' LIMIT 0,1
     </select>
 </mapper>
