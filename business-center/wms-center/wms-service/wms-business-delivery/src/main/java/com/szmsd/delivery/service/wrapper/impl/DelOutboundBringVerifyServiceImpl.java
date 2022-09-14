@@ -1256,12 +1256,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.ONE_PIECE_ISSUED_ON_BEHALF.getBusinessCode());
         basAttachmentQueryDTO.setRemark(delOutbound.getOrderNo());
         R<List<BasAttachment>> documentListR = remoteAttachmentService.list(basAttachmentQueryDTO);
-        if (null != documentListR && null != documentListR.getData()) {
+        if (null != documentListR && null != documentListR.getData() && CollectionUtils.isNotEmpty(documentListR.getData())) {
             List<BasAttachment> documentList = documentListR.getData();
-            if (CollectionUtils.isNotEmpty(documentList)) {
-                BasAttachment basAttachment = documentList.get(0);
-                return basAttachment.getAttachmentPath() + "/" + basAttachment.getAttachmentName() + basAttachment.getAttachmentFormat();
-            }
+            BasAttachment basAttachment = documentList.get(0);
+            return basAttachment.getAttachmentPath() + "/" + basAttachment.getAttachmentName() + basAttachment.getAttachmentFormat();
         }else{
             basAttachmentQueryDTO = new BasAttachmentQueryDTO();
             basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.TRANSSHIPMENT_OUTBOUND.getBusinessCode());
