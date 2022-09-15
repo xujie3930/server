@@ -540,7 +540,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.SMT_THAW_BALANCE.listener(delOutbound);
 
-
+            logger.info("出库单{}-开始取消冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
 
             IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
