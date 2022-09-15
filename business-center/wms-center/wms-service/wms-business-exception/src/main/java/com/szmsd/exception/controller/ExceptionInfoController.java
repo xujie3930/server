@@ -458,6 +458,10 @@ public class ExceptionInfoController extends BaseController {
 
                                     }
 
+                                    if (dto.getIoss()!=null&&!dto.getIoss().equals("")){
+                                        exceptionInfoService.updateDelOutboundIoss(dto);
+                                    }
+
                                 }
                             } else {
                                 errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "操作失败，不符合条件");

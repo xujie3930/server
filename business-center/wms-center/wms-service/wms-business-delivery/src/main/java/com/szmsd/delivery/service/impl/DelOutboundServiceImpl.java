@@ -1923,10 +1923,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         if("0".equals(dto.getType())){
 
-            if(StringUtils.isEmpty(delOutbound.getShipmentRetryLabel())){
-                throw new CommonException("400", "标签文件不存在");
-
-            }
             String pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(delOutbound) + "/" + delOutbound.getOrderNo() + ".pdf";
             File labelFile = new File(pathname);
             if (!labelFile.exists()) {
@@ -1953,7 +1949,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         IOUtils.copy(new ByteArrayInputStream(fb), outputStream);
                     } catch (IOException e) {
                         logger.error(e.getMessage(), e);
-                        throw new CommonException("500", "读取标签文件失败");
+                        throw new CommonException("200", "读取标签文件失败");
                     } finally {
                         IoUtil.flush(outputStream);
                         IoUtil.close(outputStream);
@@ -1962,7 +1958,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     return;
 
                 } catch (Exception e) {
-                    throw new CommonException("400", "标签文件不存在");
+                    throw new CommonException("200", "标签文件不存在");
                 }
 
             }
@@ -1978,7 +1974,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 IOUtils.copy(inputStream, outputStream);
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
-                throw new CommonException("500", "读取标签文件失败");
+                throw new CommonException("200", "读取标签文件失败");
             } finally {
                 IoUtil.flush(outputStream);
                 IoUtil.close(outputStream);
@@ -1986,12 +1982,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
         }else{
             if (StringUtils.isEmpty(delOutbound.getShipmentOrderNumber())) {
-                throw new CommonException("400", "未获取承运商标签");
+                throw new CommonException("200", "未获取承运商标签");
             }
             String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
             File labelFile = new File(pathname);
             if (!labelFile.exists()) {
-                throw new CommonException("400", "标签文件不存在");
+                throw new CommonException("200", "标签文件不存在");
             }
             ServletOutputStream outputStream = null;
             InputStream inputStream = null;
@@ -2005,7 +2001,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 IOUtils.copy(inputStream, outputStream);
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
-                throw new CommonException("500", "读取标签文件失败");
+                throw new CommonException("200", "读取标签文件失败");
             } finally {
                 IoUtil.flush(outputStream);
                 IoUtil.close(outputStream);

@@ -361,7 +361,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                 packageCollection.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
                 packageCollection.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
             } else {
-                String exceptionMessage = ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError());
+                String exceptionMessage = ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError(), true);
                 if (StringUtils.isEmpty(exceptionMessage)) {
                     exceptionMessage = "创建承运商物流订单失败，调用承运商系统失败";
                 }
