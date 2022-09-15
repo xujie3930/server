@@ -73,9 +73,9 @@ public class ImportContext<T> extends CacheContext.MapCacheContext<String, Objec
 
     public String getCountryNameCache(String value, CacheContext<String, String> countryCodeCache, CacheContext<String, String> countryNameCache, CacheContext<String, String> countryNameEnCache){
         if(countryNameEnCache.containsKey(value)){
-            return countryCodeCache.get(countryNameEnCache.get(value));
-        }else if (countryNameCache.containsKey(value)) {
             return value;
+        }else if (countryNameCache.containsKey(value)) {
+            return countryCodeCache.get(countryNameCache.get(value));
         }else{
             return countryCodeCache.get(value);
 
