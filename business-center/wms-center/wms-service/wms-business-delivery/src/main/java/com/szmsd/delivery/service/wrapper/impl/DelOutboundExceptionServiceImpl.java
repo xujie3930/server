@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.MessageUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
@@ -73,7 +74,7 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
         PricedProductInfo pricedProductInfo = htpPricedProductClientService.infoAndSubProducts(productCode);
         if (null == pricedProductInfo) {
             // 异常信息
-            throw new CommonException("400", "查询产品[" + productCode + "]信息失败");
+            throw new CommonException("400", MessageUtil.to("查询产品[" + productCode + "]信息失败","Failed to query product ["+productCode+"] information" ));
         }
 
         DelOutboundWrapperContext delOutboundWrapperContext = this.delOutboundBringVerifyService.initContext(delOutbound);
