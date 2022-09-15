@@ -4,6 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.szmsd.bas.plugin.BasSubCommonPlugin;
+import com.szmsd.bas.plugin.BasSubValueCommonParameter;
+import com.szmsd.common.plugin.annotation.AutoFieldI18n;
+import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -41,9 +45,11 @@ public class PreRecharge extends FssBaseEntity {
     @ApiModelProperty(value = "汇款方式 0电汇 1转账 2支票")
     private String remittanceMethod;
 
+
     @ApiModelProperty(value = "币种编码")
     private String currencyCode;
 
+    @AutoFieldI18n
     @ApiModelProperty(value = "币种名")
     private String currencyName;
 
@@ -60,9 +66,11 @@ public class PreRecharge extends FssBaseEntity {
     @ApiModelProperty(value = "汇款凭证")
     private String paymentVoucher;
 
+    @AutoFieldI18n
     @ApiModelProperty(value = "审核状态(默认0=未审核，1=审核，2=审核未通过)")
     private String verifyStatus;
 
+    @AutoFieldI18n
     @ApiModelProperty(value = "审核备注")
     private String verifyRemark;
 

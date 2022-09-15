@@ -225,7 +225,6 @@ public class BaseProductController extends BaseController {
         ClassPathResource classPathResource = new ClassPathResource(getFileName(fileName));
         try (InputStream inputStream = classPathResource.getInputStream();
              ServletOutputStream outputStream = response.getOutputStream()) {
-
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             response.setCharacterEncoding("UTF-8");
             String excelName = URLEncoder.encode(fileName, "UTF-8");
