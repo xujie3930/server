@@ -1,7 +1,5 @@
 package com.szmsd.finance.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -9,7 +7,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -235,10 +232,12 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     public boolean saveBatch(List<AccountSerialBillDTO> dto) {
         List<AccountSerialBill> accountSerialBill = BeanMapperUtil.mapList(dto, AccountSerialBill.class);
         List<AccountSerialBill> collect = accountSerialBill.stream().map(value -> {
-            if (StringUtils.isBlank(value.getWarehouseName()))
+            if (StringUtils.isBlank(value.getWarehouseName())) {
                 value.setWarehouseName(sysDictDataService.getWarehouseNameByCode(value.getWarehouseCode()));
-            if (StringUtils.isBlank(value.getCurrencyName()))
+            }
+            if (StringUtils.isBlank(value.getCurrencyName())) {
                 value.setCurrencyName(sysDictDataService.getCurrencyNameByCode(value.getCurrencyCode()));
+            }
             value.setBusinessCategory(value.getChargeCategory());//性质列内容，同费用类别
             //单号不为空的时候
             if (StringUtils.isNotBlank(value.getNo())){
@@ -256,7 +255,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             return value;
         }).collect(Collectors.toList());
         boolean b = this.saveBatch(collect);
-        if (!b) log.error("saveBatch() insert failed. {}", accountSerialBill);
+        if (!b){
+            log.error("saveBatch() insert failed. {}", accountSerialBill);
+        }
         return b;
     }
 
@@ -269,12 +270,19 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     @Override
     public boolean checkForDuplicateCharges(CustPayDTO dto) {
         List<AccountSerialBillDTO> serialBillInfoList = dto.getSerialBillInfoList();
-        if (CollectionUtils.isEmpty(serialBillInfoList)) return false;
+        if (CollectionUtils.isEmpty(serialBillInfoList)){
+            return false;
+        }
         AccountSerialBillDTO accountSerialBillDTO = serialBillInfoList.get(0);
-        return baseMapper.selectCount(Wrappers.<AccountSerialBill>lambdaQuery()
+
+        Integer count = baseMapper.selectCount(Wrappers.<AccountSerialBill>lambdaQuery()
                 .eq(AccountSerialBill::getNo, dto.getNo())
                 .eq(AccountSerialBill::getAmount, accountSerialBillDTO.getAmount())
                 .eq(AccountSerialBill::getChargeCategory, accountSerialBillDTO.getChargeCategory())
-        ) != 0;
+        );
+
+        boolean flag = !count.equals(0);
+
+        return flag;
     }
 }
