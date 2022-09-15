@@ -1,11 +1,13 @@
 package com.szmsd.delivery.service.wrapper;
 
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.feign.BasMeteringConfigFeignService;
 import com.szmsd.bas.dto.BasMeteringConfigDto;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.MessageUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
@@ -115,7 +117,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOrderTypeEnum orderTypeEnum = DelOutboundOrderTypeEnum.get(delOutbound.getOrderType());
             if (null == orderTypeEnum) {
-                throw new CommonException("400", "不存在的类型[" + delOutbound.getOrderType() + "]");
+                throw new CommonException("400", MessageUtil.to("不存在的类型[" + delOutbound.getOrderType() + "]", "Non-existent type ["+delOutbound. getOrderType()+"]"));
             }
             // 先判断规则
             boolean condition = ApplicationRuleConfig.shipmentCondition(orderTypeEnum, currentState.name());
@@ -167,7 +169,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setId(delOutbound.getId());
             updateDelOutbound.setShipmentState(currentState.name());
             // 出库失败
-            String exceptionMessage = Utils.defaultValue(throwable.getMessage(), "出库操作失败");
+            String exceptionMessage = Utils.defaultValue(throwable.getMessage(), MessageUtil.to("出库操作失败", "Failed to issue"));
             exceptionMessage = StringUtils.substring(exceptionMessage, 0, 255);
             updateDelOutbound.setExceptionMessage(exceptionMessage);
             // 创建承运商物流订单
@@ -332,10 +334,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
             ResponseVO responseVO = htpOutboundClientService.shipmentTracking(shipmentTrackingChangeRequestDto);
             if (null == responseVO || null == responseVO.getSuccess()) {
-                throw new CommonException("400", "更新挂号失败，请求无响应");
+                throw new CommonException("400", MessageUtil.to("更新挂号失败，请求无响应", "Failed to update registration, no response to the request"));
             }
             if (!responseVO.getSuccess()) {
-                throw new CommonException("400", "更新挂号失败，" + Utils.defaultValue(responseVO.getMessage(), ""));
+                throw new CommonException("400", MessageUtil.to("更新挂号失败，", "Failed to update registration,")
+                        + Utils.defaultValue(responseVO.getMessage(), ""));
             }
         }
 
@@ -562,13 +565,13 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 // 调用冻结费用接口
                 R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
                 if (null == thawBalanceR) {
-                    throw new CommonException("400", "取消冻结费用失败");
+                    throw new CommonException("400", MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses"));
                 }
                 if (Constants.SUCCESS != thawBalanceR.getCode()) {
                     // 异常信息
                     String msg = thawBalanceR.getMsg();
                     if (StringUtils.isEmpty(msg)) {
-                        msg = "取消冻结费用失败";
+                        msg = MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses");
                     }
                     throw new CommonException("400", msg);
                 }
@@ -614,7 +617,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.PACKAGE);
             if (null == responseObject) {
                 // 返回值是空的
-                throw new CommonException("400", "计算包裹费用失败");
+                throw new CommonException("400", MessageUtil.to("计算包裹费用失败", "Failed to calculate the package fee"));
             } else {
                 // 判断返回值
                 if (responseObject.isSuccess()) {
@@ -676,11 +679,13 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                         dto.setCountryCode(delOutboundWrapperContext.getAddress().getCountryCode())
                                 .setCountryName(delOutboundWrapperContext.getAddress().getCountry());
                     }
+                    logger.info("出库单{}计泡拦截参数{}", delOutbound.getOrderNo(), JSONUtil.toJsonStr(dto));
                     R r = basMeteringConfigFeignService.intercept(dto);
+
                     if(r.getCode() != 200){
                         logger.error("计泡拦截异常："+delOutboundWrapperContext.isShipmentShipping());
                         delOutboundWrapperContext.setShipmentShipping(true);
-                        throw new CommonException("400", "计泡拦截异常："+r.getMsg());
+                        throw new CommonException("400", MessageUtil.to("计泡拦截异常", "Abnormal bubble counting interception")+"："+r.getMsg());
                     }
 
 
@@ -743,7 +748,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
             List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
             if(delOutboundChargeList.isEmpty()){
-                throw new CommonException("400", "冻结费用信息失败，没有要冻结的费用明细");
+                throw new CommonException("400", MessageUtil.to("冻结费用信息失败，没有要冻结的费用明细", "Failed to freeze expense information. No expense details to be frozen"));
             }
             Map<String, List<DelOutboundCharge>> groupByCharge =
                     delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
@@ -771,7 +776,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     if (Constants.SUCCESS != freezeBalanceR.getCode()) {
                         // 异常信息
                         String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "");
-                        throw new CommonException("400", "冻结费用失败，" + msg);
+                        throw new CommonException("400", MessageUtil.to("冻结费用失败，", "Failed to freeze expenses,") + msg);
                     }
                 } else {
                     // 异常信息
@@ -841,7 +846,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 throw e;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                throw new CommonException("400", "冻结库存操作失败，" + e.getMessage());
+                throw new CommonException("400", MessageUtil.to("冻结库存操作失败，" + e.getMessage(), "Failed to freeze the inventory,"+e.getMessage()));
             }
         }
 

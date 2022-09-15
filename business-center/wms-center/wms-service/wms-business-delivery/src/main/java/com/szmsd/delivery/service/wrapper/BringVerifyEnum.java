@@ -13,6 +13,7 @@ import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.MessageUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.*;
@@ -157,7 +158,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOrderTypeEnum orderTypeEnum = DelOutboundOrderTypeEnum.get(delOutbound.getOrderType());
             if (null == orderTypeEnum) {
-                throw new CommonException("400", "不存在的类型[" + delOutbound.getOrderType() + "]");
+                throw new CommonException("400", MessageUtil.to("不存在的类型[" + delOutbound.getOrderType() + "]", "Non-existent type ["+delOutbound. getOrderType()+"]"));
             }
             boolean condition = ApplicationRuleConfig.bringVerifyCondition(orderTypeEnum, currentState.name());
             if (condition) {
@@ -209,7 +210,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
             // 提审失败
-            String exceptionMessage = Utils.defaultValue(throwable.getMessage(), "提审操作失败");
+            String exceptionMessage = Utils.defaultValue(throwable.getMessage(), MessageUtil.to("提审操作失败", "Review operation failed"));
 
             if(BringVerifyEnum.SHIPMENT_CREATE.equals(currentState) || BringVerifyEnum.SHIPMENT_LABEL.equals(currentState)){
                 // 推单WMS
@@ -323,7 +324,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     JSONObject.toJSONString(responseObject));
             if (null == responseObject) {
                 // 返回值是空的
-                throw new CommonException("400", "计算包裹费用失败");
+                throw new CommonException("400", MessageUtil.to("计算包裹费用失败", "Failed to calculate the package fee"));
             } else {
                 // 判断返回值
                 if (responseObject.isSuccess()) {
@@ -391,7 +392,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);
                 } else {
                     // 计算失败
-                    String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "计算包裹费用失败2");
+                    String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), MessageUtil.to("计算包裹费用失败", "Failed to calculate the package fee")+ "2");
                     throw new CommonException("400", exceptionMessage);
                 }
             }
@@ -477,7 +478,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
             List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
             if(delOutboundChargeList.isEmpty()){
-                throw new CommonException("400", "冻结费用信息失败，没有要冻结的费用明细");
+                throw new CommonException("400", MessageUtil.to("冻结费用信息失败，没有要冻结的费用明细", "Failed to freeze expense information. No expense details to be frozen"));
             }
             Map<String, List<DelOutboundCharge>> groupByCharge =
                     delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
@@ -504,12 +505,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 if (null != freezeBalanceR) {
                     if (Constants.SUCCESS != freezeBalanceR.getCode()) {
                         // 异常信息
-                        String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "冻结费用信息失败2");
+                        String msg = Utils.defaultValue(freezeBalanceR.getMsg(), MessageUtil.to("冻结费用信息失败", "Failed to freeze expense information")+ "2");
                         throw new CommonException("400", msg);
                     }
                 } else {
                     // 异常信息
-                    throw new CommonException("400", "冻结费用信息失败");
+                    throw new CommonException("400", MessageUtil.to("冻结费用信息失败", "Failed to freeze expense information"));
                 }
 
             }
@@ -547,10 +548,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 logger.info(">>>>>[创建出库单{}]取消冻结费用, 数据:{}",
                         delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO));
                 if (null == thawBalanceR) {
-                    throw new CommonException("400", "取消冻结费用失败");
+                    throw new CommonException("400", MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses"));
                 }
                 if (Constants.SUCCESS != thawBalanceR.getCode()) {
-                    throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
+                    throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses")+ "2"));
                 }
             }
 
@@ -613,7 +614,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
             } else {
                 // 异常信息
-                throw new CommonException("400", "查询产品[" + productCode + "]信息失败");
+                throw new CommonException("400", MessageUtil.to("查询产品[" + productCode + "]信息失败","Failed to query product ["+productCode+"] information" ));
             }
         }
 
@@ -827,7 +828,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 throw e;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                throw new CommonException("400", "冻结库存操作失败，" + e.getMessage());
+                throw new CommonException("400", MessageUtil.to("冻结库存操作失败，" + e.getMessage(), "Failed to freeze the inventory,"+e.getMessage()));
             }
         }
 
@@ -902,14 +903,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 }
                 // 没有查询到SKU信息
                 if (null == productMap) {
-                    throw new CommonException("400", "查询SKU信息失败");
+                    throw new CommonException("400", MessageUtil.to("查询SKU信息失败", "Failed to query SKU information"));
                 }
                 // 处理操作费用参数
                 for (DelOutboundDetail detail : details) {
                     String sku = detail.getSku();
                     BaseProduct product = productMap.get(sku);
                     if (null == product) {
-                        throw new CommonException("400", "SKU[" + sku + "]信息不存在");
+                        throw new CommonException("400", MessageUtil.to("SKU[" + sku + "]信息不存在", "SKU ["+sku+"] information does not exist"));
                     }
                     // 操作费对象
                     DelOutboundOperationDetailVO detailVO = new DelOutboundOperationDetailVO();
@@ -1120,7 +1121,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
                 File labelFile = new File(filePath);
                 if (!labelFile.exists()) {
-                    throw new CommonException("500", "出库单文件不存在");
+                    throw new CommonException("500", MessageUtil.to("出库单文件不存在", "The delivery order file does not exist"));
                 }
             }
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
@@ -1152,7 +1153,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                         FileUtils.forceMkdir(mergeFileDir);
                     } catch (IOException e) {
                         logger.error(e.getMessage(), e);
-                        throw new CommonException("500", "创建文件夹失败，" + e.getMessage());
+                        throw new CommonException("500", MessageUtil.to("创建文件夹失败，", "Failed to create folder,") + e.getMessage());
                     }
                 }
                 String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
@@ -1163,7 +1164,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 } catch (IOException e) {
                     e.printStackTrace();
                     logger.error(e.getMessage(), e);
-                    throw new CommonException("500", "出库单合并文件失败");
+                    throw new CommonException("500", MessageUtil.to("出库单合并文件失败", "Failed to merge the delivery order file"));
                 }
 
                 if(labelFile == null){
@@ -1181,14 +1182,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
                     ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
                     if (null == responseVO || null == responseVO.getSuccess()) {
-                        throw new CommonException("500", "更新标签失败");
+                        throw new CommonException("500", MessageUtil.to("更新标签失败", "Failed to update label"));
                     }
                     if (!responseVO.getSuccess()) {
-                        throw new CommonException("500", Utils.defaultValue(responseVO.getMessage(), "更新标签失败2"));
+                        throw new CommonException("500", Utils.defaultValue(responseVO.getMessage(), MessageUtil.to("更新标签失败", "Failed to update label")+"2"));
                     }
                 } catch (IOException e) {
                     logger.error("读取标签文件失败, {}", e.getMessage(), e);
-                    throw new CommonException("500", "读取标签文件失败");
+                    throw new CommonException("500", MessageUtil.to("读取标签文件失败", "Failed to read label file"));
                 }
 
             }
