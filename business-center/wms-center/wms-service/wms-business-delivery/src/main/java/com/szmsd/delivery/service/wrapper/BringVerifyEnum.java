@@ -15,11 +15,17 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.delivery.domain.*;
+import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.domain.DelOutboundThirdParty;
 import com.szmsd.delivery.dto.DelOutboundLabelDto;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
-import com.szmsd.delivery.service.*;
+import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.service.IDelOutboundCompletedService;
+import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.IDelOutboundThirdPartyService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.util.PdfUtil;
 import com.szmsd.delivery.util.Utils;
@@ -29,19 +35,7 @@ import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
-import com.szmsd.http.dto.ChargeCategory;
-import com.szmsd.http.dto.ChargeItem;
-import com.szmsd.http.dto.ChargeWrapper;
-import com.szmsd.http.dto.Money;
-import com.szmsd.http.dto.Packing;
-import com.szmsd.http.dto.PricingPackageInfo;
-import com.szmsd.http.dto.ProblemDetails;
-import com.szmsd.http.dto.ResponseObject;
-import com.szmsd.http.dto.ShipmentChargeInfo;
-import com.szmsd.http.dto.ShipmentLabelChangeRequestDto;
-import com.szmsd.http.dto.ShipmentOrderResult;
-import com.szmsd.http.dto.TaskConfigInfo;
-import com.szmsd.http.dto.Weight;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.PricedProductInfo;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -54,13 +48,7 @@ import org.springframework.util.StopWatch;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -464,7 +452,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            logger.info("{}-冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
+            logger.info("出库单{}-开始第一次冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             DelOutboundOperationLogEnum.BRV_FREEZE_BALANCE.listener(delOutbound);
             CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
             cusFreezeBalanceDTO.setAmount(delOutbound.getAmount());
@@ -477,7 +465,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             stopWatch.start();
             R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
             stopWatch.stop();
-            logger.info(">>>>>[创建出库单{}]冻结费用 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+            logger.info(">>>>>[创建出库单{}]冻结费用第一次结束 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
             if (null != freezeBalanceR) {
                 if (Constants.SUCCESS != freezeBalanceR.getCode()) {
                     // 异常信息

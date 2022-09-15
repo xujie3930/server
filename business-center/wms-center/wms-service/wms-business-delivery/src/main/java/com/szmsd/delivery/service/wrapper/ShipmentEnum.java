@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.wrapper;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.feign.BasMeteringConfigFeignService;
 import com.szmsd.bas.dto.BasMeteringConfigDto;
 import com.szmsd.common.core.constant.Constants;
@@ -538,12 +539,14 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
             cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
             cusFreezeBalanceDTO.setOrderType("Freight");
+            logger.info("出库单{}-取消冻结费用开始：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             // 调用冻结费用接口
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
             R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
             if (null == thawBalanceR) {
                 throw new CommonException("400", "取消冻结费用失败");
             }
+
             if (Constants.SUCCESS != thawBalanceR.getCode()) {
                 // 异常信息
                 String msg = thawBalanceR.getMsg();
@@ -552,6 +555,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 }
                 throw new CommonException("400", msg);
             }
+            logger.info("出库单{}-取消冻结费用结束：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             // 清除费用信息
             IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
             delOutboundChargeService.clearCharges(delOutbound.getOrderNo());
@@ -713,6 +717,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             cusFreezeBalanceDTO2.setCusCode(delOutbound.getSellerCode());
             cusFreezeBalanceDTO2.setNo(delOutbound.getOrderNo());
             cusFreezeBalanceDTO2.setOrderType("Freight");
+            logger.info("出库单{}-开始第二次冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
             R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO2);
             if (null != freezeBalanceR) {
