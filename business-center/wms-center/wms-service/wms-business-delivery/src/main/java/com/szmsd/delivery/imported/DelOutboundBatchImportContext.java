@@ -30,7 +30,7 @@ public class DelOutboundBatchImportContext extends ImportContext<DelOutboundBatc
             for (BasRegionSelectListVO country : countryList) {
                 this.countryCache.put(country.getName(), country.getAddressCode());
                 this.countryEnCache.put(country.getEnName(), country.getAddressCode());
-                this.countryCodeCache.put(country.getAddressCode(), country.getName());
+                this.countryCodeCache.put(country.getAddressCode(), country.getEnName());
 
             }
         }
