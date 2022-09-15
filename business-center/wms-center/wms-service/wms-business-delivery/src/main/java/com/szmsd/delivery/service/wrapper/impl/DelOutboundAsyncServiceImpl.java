@@ -196,6 +196,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 logger.info("(2)初始化上下文信息，timer:{}", timer.intervalRestart());
                 if (context != null) {
                     context.setShipmentShipping(shipmentShipping);
+                    context.setExecShipmentShipping(true);
                 }
                 ShipmentEnum currentState;
                 String shipmentState = delOutbound.getShipmentState();
