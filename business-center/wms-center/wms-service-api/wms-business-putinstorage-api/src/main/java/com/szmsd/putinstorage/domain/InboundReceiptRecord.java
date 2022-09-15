@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.language.annotation.FieldJsonI18n;
 import com.szmsd.common.core.language.constant.RedisLanguageTable;
+import com.szmsd.common.core.language.enums.LocalLanguageTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -34,6 +35,7 @@ public class InboundReceiptRecord implements Serializable {
     private Date createTime;
 
     @ApiModelProperty(value = "创建，提审，取消，审核，上架，完成")
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_log_STATUS)
     private String type;
 
     @ApiModelProperty(value = "仓库")
@@ -51,6 +53,7 @@ public class InboundReceiptRecord implements Serializable {
     private String sku;
 
     @ApiModelProperty(value = "备注")
+    @FieldJsonI18n(localLanguageType = LocalLanguageTypeEnum.INBOUND_RECEIPT_log_REMARK)
     private String remark;
 
     @ApiModelProperty(value = "上架sku")
