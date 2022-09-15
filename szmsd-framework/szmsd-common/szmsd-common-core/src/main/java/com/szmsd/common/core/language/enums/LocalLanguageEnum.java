@@ -30,6 +30,43 @@ public enum LocalLanguageEnum {
     /** 状态：已完成 **/
     INBOUND_RECEIPT_STATUS_5(INBOUND_RECEIPT_STATUS, "5", "已完成", "Completed"),
 
+
+
+    /** 状态：创建 **/
+    INBOUND_RECEIPT_log_STATUS_0(INBOUND_RECEIPT_log_STATUS,"创建", "创建", "Creation"),
+    /** 状态：提审 **/
+    INBOUND_RECEIPT_log_STATUS_1(INBOUND_RECEIPT_log_STATUS,"提审", "提审", "Submit for Approval"),
+    /** 状态：取消 **/
+    INBOUND_RECEIPT_log_STATUS_2(INBOUND_RECEIPT_log_STATUS,"取消", "取消", "Cancel"),
+    /** 状态：审核 **/
+    INBOUND_RECEIPT_log_STATUS_3(INBOUND_RECEIPT_log_STATUS,"审核", "审核", "Audit"),
+    /** 状态：上架 **/
+    INBOUND_RECEIPT_log_STATUS_3_(INBOUND_RECEIPT_log_STATUS, "上架", "上架", "Putaway"),
+    /** 状态：完成 **/
+    INBOUND_RECEIPT_log_STATUS_4(INBOUND_RECEIPT_log_STATUS, "完成", "完成", "Finish"),
+
+
+    /** 状态：创建 **/
+    INBOUND_RECEIPT_log_REMARK_0(INBOUND_RECEIPT_log_REMARK,"创建", "创建", "Creation"),
+    /** 状态：提审 **/
+    INBOUND_RECEIPT_log_REMARK1(INBOUND_RECEIPT_log_REMARK,"提审", "提审", "Submit for Approval"),
+    /** 状态：取消 **/
+    INBOUND_RECEIPT_log_REMARK2(INBOUND_RECEIPT_log_REMARK,"取消", "取消", "Cancel"),
+
+    /** 状态：审核 **/
+    INBOUND_RECEIPT_log_REMARK_3(INBOUND_RECEIPT_log_REMARK,"审核", "审核", "Audit"),
+
+    INBOUND_RECEIPT_log_REMARK3_2(INBOUND_RECEIPT_log_REMARK,"仓库自动审核", "仓库自动审核", "Warehouse Automatic Check"),
+
+    /** 状态：上架 **/
+    INBOUND_RECEIPT_log_REMARK_3_(INBOUND_RECEIPT_log_REMARK, "上架", "上架", "Putaway"),
+    /** 状态：完成 **/
+    INBOUND_RECEIPT_log_REMARK_4(INBOUND_RECEIPT_log_REMARK, "完成", "完成", "Finish"),
+
+
+
+
+
     INVENTORY_RECORD_TYPE_1(INVENTORY_RECORD_TYPE, "1", "入库", "Inbound inventory"),
     INVENTORY_RECORD_TYPE_2(INVENTORY_RECORD_TYPE, "2", "出库", "Outbound inventory"),
     INVENTORY_RECORD_TYPE_3(INVENTORY_RECORD_TYPE, "3", "冻结", "Freeze inventory"),

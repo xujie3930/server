@@ -34,6 +34,15 @@ public class DelOutboundCollectionDetailImportDto implements Serializable {
     @ApiModelProperty(value = "产品属性")
     private String productAttributeName;
 
+    @ApiModelProperty(value = "产品说明")
+    private String productDescription;
+
+    @ApiModelProperty(value = "材质")
+    private String materialQuality;
+
+    @ApiModelProperty(value = "用途")
+    private String purpose;
+
     @ApiModelProperty(value = "带电信息编号")
     @ExcelIgnore
     private String electrifiedMode;
@@ -51,7 +60,6 @@ public class DelOutboundCollectionDetailImportDto implements Serializable {
     @ApiModelProperty(value = "海关编码")
     private String hsCode;
 
-    @ApiModelProperty(value = "产品描述")
-    private String productDescription;
+
 
 }

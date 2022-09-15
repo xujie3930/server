@@ -179,7 +179,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                     }
-                    if (x.getWeightTypeNameOne().equals("计费重量") && x.getWeightTypeNameOne().equals("下单重量")) {
+                    if (x.getWeightTypeNameOne().equals("计费重量") && x.getWeightTypeNameTwo().equals("下单重量")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());

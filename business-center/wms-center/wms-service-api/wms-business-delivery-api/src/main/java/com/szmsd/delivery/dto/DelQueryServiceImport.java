@@ -35,10 +35,10 @@ public class DelQueryServiceImport {
     private static final long serialVersionUID = 1L;
 
 
-    @Excel(name = "订单号", type = Type.ALL)
+    @Excel(name = "订单号" ,width = 30, type = Type.ALL)
     private String orderNo;
 
-    @Excel(name = "查件原因", type = Type.ALL)
+    @Excel(name = "查件原因",width = 30, type = Type.ALL)
     private String reason;
 
     @ApiModelProperty(value = "操作类型(0表示管理端,1表示客户端)")
