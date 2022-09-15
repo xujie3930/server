@@ -463,12 +463,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             StopWatch stopWatch = new StopWatch();
 
-
-
-
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            logger.info("{}-开始冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
+            logger.info("出库单{}-开始冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             DelOutboundOperationLogEnum.BRV_FREEZE_BALANCE.listener(delOutbound);
 
             /**
@@ -500,7 +497,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 stopWatch.start();
                 R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
                 stopWatch.stop();
-                logger.info(">>>>>[创建出库单{}]冻结费用, 数据:{} ,耗时{}",
+                logger.info(">>>>>[创建出库单{}]结束冻结费用, 数据:{} ,耗时{}",
                         delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO), stopWatch.getLastTaskInfo().getTimeMillis());
                 if (null != freezeBalanceR) {
                     if (Constants.SUCCESS != freezeBalanceR.getCode()) {
