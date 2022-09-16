@@ -680,9 +680,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     .setLogisticsErvicesCode(chargeWrapper.getData().getProductCode())
                     .setLogisticsErvicesName(chargeWrapper.getData().getProductName())
                     .setCustomerCode(delOutbound.getSellerCode())
+                    //下单重量
                     .setWeight(delOutbound.getForecastWeight() != null ? new BigDecimal(delOutbound.getForecastWeight()) : BigDecimal.ZERO)
+                    //PRC返回的计费重
                     .setCalcWeight(packageInfo.getCalcWeight().getValue())
-                    .setVolume(packageInfo.getVolumeWeight().getValue());
+                    //仓库返回的实重
+                    .setVolume(delOutbound.getWeight() != null ? new BigDecimal(delOutbound.getWeight()): null);
 
             if(delOutboundWrapperContext.getAddress() != null){
                 dto.setCountryCode(delOutboundWrapperContext.getAddress().getCountryCode())
